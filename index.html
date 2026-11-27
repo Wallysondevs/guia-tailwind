@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guia Tailwind — do primeiro cartão ao site no ar | Guia Tailwind</title>
+<meta name="description" content="Curso de Tailwind CSS para quem nunca programou: 144 aulas em português, com o seu HTML compilado pelo Tailwind de verdade dentro da página.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Guia <span class="hl">Tailwind</span></h1>
+
+<p class="intro">A Ana tem uma padaria, um site de três páginas e um problema: tudo o que ela escreve
+no HTML sai na tela sem graça nenhuma, um bloco de texto atrás do outro, colado na borda. Este guia
+ensina o Tailwind do começo — o que é uma classe, o que <code>p-4</code> faz, como ficar lado a lado,
+como mudar no celular e no escuro — até o dia em que a página dela parece desenhada por alguém.
+Escrito em português, <strong>para quem nunca programou</strong>.</p>
+
+<div class="note">
+<strong>Como este guia funciona</strong>
+<ul>
+  <li><strong>144 aulas</strong>, uma ideia por aula, na ordem em que se aprende de verdade.</li>
+  <li>Toda caixa "Experimente" <strong>compila o seu HTML com o Tailwind v4 de verdade</strong> e mostra o CSS que o navegador aplicou — não é uma imagem do resultado.</li>
+  <li>O CSS do painel é lido do navegador: se o valor mudou, o número que aparece é o valor real.</li>
+  <li>Não precisa instalar nada para começar: as caixas já trazem o compilador.</li>
+</ul>
+</div>
+
+<h2>1. Para quem é</h2>
+
+<p>Para quem nunca escreveu uma linha de código e quer que a página fique bonita. O guia não supõe que
+você saiba HTML ou CSS: cada peça aparece quando é necessária, explicada na hora, com a analogia antes
+do nome técnico. Se você já é programador, o Nível 1 vai parecer devagar — é de propósito. A leitora
+que este guia atende é a Ana, e a Ana ainda confunde margem com respiro.</p>
+
+<p>Se você já escreveu CSS na vida, comece pela aula <em>Tailwind x CSS</em>, na Referência: ela mostra
+a mesma caixa nas duas linguagens, lado a lado, e aponta o que muda de verdade — não existe arquivo de
+estilos para sincronizar, e o nome da classe já diz o que ela faz.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Nível</th><th>O que você aprende</th><th>Aulas</th></tr>
+<tr><td>1 · Fundamentos</td><td>classe, espaçamento, cor, tipografia, flex, grid, estados e responsivo</td><td>44</td></tr>
+<tr><td>2 · Componentes e Efeitos</td><td>bordas e sombras, botões, cards, formulários, layouts prontos, tema escuro, animações</td><td>48</td></tr>
+<tr><td>3 · Tailwind de Verdade</td><td>npm, a CLI, o CSS gerado, <code>@theme</code>, integração e produção</td><td>30</td></tr>
+<tr><td>Projetos</td><td>dez páginas inteiras, do cartão de visita à loja</td><td>10</td></tr>
+<tr><td>Referência</td><td>escalas, paleta, estados, erros comuns e folha de bolso</td><td>12</td></tr>
+</table>
+</div>
+
+<h2>2. As primeiras classes, agora</h2>
+
+<p>Este é o mesmo cartão que a primeira aula monta. Leia o HTML, clique em Rodar e veja o que o
+navegador respondeu. O Tailwind que compila esta caixa é o mesmo que você vai usar no seu projeto —
+a build oficial, rodando aqui dentro.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=24px;;css:#alvo|border-radius=12px">
+<p class="try-task"><strong>Missão:</strong> o cartão da padaria está sem respiro e com canto reto.
+Deixe <strong>24 px</strong> de respiro interno e cantos de <strong>12 px</strong> (as classes
+<code>p-6</code> e <code>rounded-xl</code>).</p>
+<pre class="html">&lt;div id="alvo" class="bg-amber-100 text-amber-900"&gt;
+  &lt;strong&gt;Pão quentinho&lt;/strong&gt;
+  &lt;p&gt;Sai do forno às 6h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+<pre class="out">
+background-color: oklch(0.962 0.059 95.617)
+color: oklch(0.414 0.112 45.904)
+</pre>
+<pre class="solucao">&lt;div id="alvo" class="bg-amber-100 text-amber-900 p-6 rounded-xl"&gt;
+  &lt;strong&gt;Pão quentinho&lt;/strong&gt;
+  &lt;p&gt;Sai do forno às 6h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra só o que as classes mudaram. <code>padding: 24px</code> é o respiro que você pediu;
+<code>border-radius: 12px</code> é o canto arredondado. Nenhum desses números foi escrito à mão: eles
+saem do CSS que o Tailwind gerou e o navegador aplicou.</p>
+
+<h2>3. O que você vai construir</h2>
+
+<p>No fim do Nível 1, a Ana tem a página da padaria com cartão de preço, lista de pães e um aviso que
+só aparece no celular. No Nível 2, a página ganha cara de produto: botão com estado de foco, card com
+sombra, formulário de encomenda, tabela de horários, menu que abre, tema escuro que respeita a
+preferência do sistema e uma animação discreta quando o mouse passa.</p>
+
+<p>No Nível 3, o assunto deixa de ser "fazer bonito" e vira "fazer durar": instalar com npm, entender o
+arquivo de CSS que o Tailwind gera, criar as suas cores com <code>@theme</code>, publicar só o CSS que
+a página usa e descobrir por que uma classe "não pega" quando o nome é montado por código.</p>
+
+<h2>4. Como estudar</h2>
+
+<p>Uma aula por vez, na ordem, com o editor aberto. Ler sobre classe não ensina classe: editar a caixa
+e ver o painel mudar, sim. Depois de cada aula, refaça o exercício no seu próprio arquivo — o
+<code>index.html</code> da sua pasta de estudos serve — e confira no navegador com o botão direito →
+<em>Inspecionar</em>. É o mesmo olhar que o painel do guia treina.</p>
+
+<div class="tip">
+<strong>Não adivinhe: leia o CSS computado</strong>
+<p>Quem começa tenta descobrir o resultado olhando o código. O caminho certo é o contrário: mudar,
+rodar e ler o valor final. A aba <em>Computed</em> do navegador e o painel das caixas mostram o mesmo
+número — e é ele que decide como a página aparece.</p>
+</div>
+
+<h2>5. O que este guia não é</h2>
+
+<p>Não é a documentação oficial: para a lista completa de utilidades existe o site do Tailwind, e a
+Referência aponta o caminho. Não é um curso de design: as aulas ensinam a executar uma decisão, não a
+tomar todas elas. E não é um curso de JavaScript: o guia usa HTML e as classes; quando um componente
+precisa de clique de verdade, a aula diz isso com todas as letras e mostra o mínimo necessário.</p>
+
+<h2>6. Resumo</h2>
+
+<ul>
+<li>144 aulas em cinco níveis, da primeira classe ao CSS publicado em produção.</li>
+<li>Toda caixa compila o HTML com o Tailwind v4 de verdade e mostra o CSS computado.</li>
+<li>O caminho é sempre: escrever a classe, rodar, ler o painel, ajustar.</li>
+<li>Nada de instalar para começar: as caixas já trazem o compilador.</li>
+<li>Um projeto por nível, com a página da padaria crescendo junto com você.</li>
+</ul>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
