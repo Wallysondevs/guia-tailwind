@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anatomia de uma Classe | Guia Tailwind</title>
+<meta name="description" content="Anatomia de uma classe do Tailwind: prefixo de condição, família, valor, sinal negativo, colchetes de valor livre e barra de fração, lidos da esquerda para a direita.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Anatomia de uma <span class="hl">Classe</span></h1>
+<p class="intro">A Ana olhou uma classe do Tailwind e achou que estivesse vendo uma senha:
+<code>hover:bg-amber-200</code>, <code>-mt-4</code>, <code>p-[18px]</code>. Tinha dois-pontos, sinal de
+menos, colchetes — tudo o que ela não sabia que podia existir dentro de um atributo. Nesta aula ela
+aprende a fatiar o nome em pedaços e a ler cada pedaço em voz alta, como quem lê um endereço: rua,
+número, complemento. No fim, as classes esquisitas viram frases comuns, e ela consegue prever o que
+cada uma faz antes de rodar.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>As partes de uma classe: condição, família, valor e sinais.</li>
+  <li>O que vem antes dos dois-pontos e por que ele não muda a propriedade.</li>
+  <li>Como ler <code>bg-amber-100</code> sem decorar o catálogo.</li>
+  <li>O sinal de menos na frente e o que ele faz com a margem.</li>
+  <li>Os colchetes: como pedir um valor que não está na escala.</li>
+  <li>A barra no meio do valor: fração de um lado, transparência do outro.</li>
+  <li>Os erros de leitura mais comuns e como não cair neles.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a classe que parece senha</h2>
+
+<p>A Ana já sabe que <code>bg-amber-100</code> pinta o fundo e que <code>p-4</code> dá respiro. Aí ela
+copiou um trecho de exemplo de um site e apareceu isto:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="hover:bg-amber-200 -mt-4 p-[18px]"&gt;Pão quentinho&lt;/div&gt;</pre>
+
+<p>Três classes, três formatos diferentes. A primeira tem dois-pontos, a segunda começa com um sinal de
+menos, a terceira tem colchetes. Nada disso é erro de digitação, e nada disso é exclusivo do Tailwind:
+são convenções de escrita que existem para caber muita informação em pouco espaço. A boa notícia é que
+são poucas regras, sempre as mesmas, e elas se combinam como peças.</p>
+
+<p>Vale a pena aprender a fatiar antes de decorar nomes, porque a anatomia explica o catálogo inteiro.
+Quando você entende que uma classe é "condição + assunto + valor + sinal", deixa de decorar
+<code>bg-amber-100</code> e passa a deduzir <code>border-emerald-200</code>, <code>text-sky-700</code>,
+<code>p-8</code>. A ferramenta fica previsível, e previsível é o que permite trabalhar rápido sem
+consultar nada.</p>
+
+<h2>2. A receita de leitura</h2>
+
+<p>Leia sempre da esquerda para a direita, nesta ordem: o que precisa acontecer para a classe valer
+(a condição), qual propriedade ela mexe (a família), qual valor ela aplica (o degrau) e, às vezes, um
+sinal que muda o sentido do valor. Uma classe simples tem só a família e o valor; uma classe completa
+pode ter os quatro pedaços.</p>
+
+<dl class="anatomy">
+<dt>condição</dt>
+<dd>O pedaço antes dos dois-pontos: <code>hover:</code>, <code>focus:</code>, <code>md:</code>,
+<code>dark:</code>. Ela não muda a propriedade, muda <em>quando</em> ela vale.</dd>
+<dt>família</dt>
+<dd>O assunto da classe: <code>p</code> é espaço por dentro, <code>bg</code> é fundo,
+<code>rounded</code> é canto, <code>text</code> é texto.</dd>
+<dt>valor</dt>
+<dd>O degrau aplicado: <code>4</code>, <code>amber-100</code>, <code>lg</code>, <code>full</code>.
+Quase sempre é uma posição numa escala, não um número livre.</dd>
+<dt>sinal de menos</dt>
+<dd>Um <code>-</code> na frente do nome inverte o valor: <code>-mt-4</code> é margem de menos 16 px,
+ou seja, puxa para cima em vez de empurrar.</dd>
+<dt>colchetes</dt>
+<dd><code>p-[18px]</code>: valor escrito à mão, fora da escala. É a válvula de escape do catálogo.</dd>
+<dt>barra</dt>
+<dd><code>w-1/2</code> é fração; <code>bg-amber-100/50</code> é transparência. O mesmo sinal, dois
+assuntos — o valor antes da barra diz qual é.</dd>
+</dl>
+
+<p>Com essa ficha, volte ao exemplo do começo. <code>hover:bg-amber-200</code>: condição "mouse em
+cima", família "fundo", valor "âmbar 200". <code>-mt-4</code>: sinal negativo, família "margem no
+topo", valor "degrau 4". <code>p-[18px]</code>: família "respiro", valor "18 px escritos à mão". Nada
+de senha.</p>
+
+<h2>3. O prefixo: a condição antes dos dois-pontos</h2>
+
+<p>O pedaço antes dos dois-pontos é o mais mal compreendido. Ele não é parte do nome da propriedade e
+não precisa ser "instalado": é uma condição. A classe inteira só vale quando a condição acontece.
+<code>bg-amber-200</code> pinta o fundo sempre; <code>hover:bg-amber-200</code> pinta o fundo quando o
+mouse está em cima; quando o mouse sai, a cor volta ao que era.</p>
+
+<p>Existem três famílias de condição, e todas usam a mesma sintaxe. As de estado falam do momento:
+<code>hover:</code>, <code>focus:</code>, <code>active:</code>, <code>disabled:</code>. As de tamanho
+de tela falam do espaço: <code>sm:</code>, <code>md:</code>, <code>lg:</code>, <code>xl:</code>. E as
+de contexto falam do ambiente: <code>dark:</code> para o tema escuro, <code>group-hover:</code> para
+reagir ao mouse em um elemento pai. Cada uma dessas tem aula própria mais adiante; aqui o que importa
+é reconhecer o formato.</p>
+
+<p>No CSS gerado, a condição aparece como parte do seletor: <code>.hover\:bg-amber-200:hover</code>
+vira uma regra que só casa quando o ponteiro está em cima. Ou seja, o prefixo não inventa uma
+propriedade nova nem cria um segundo CSS: ele muda a condição do seletor. É por isso que a mesma
+família e o mesmo valor funcionam com e sem prefixo, e por isso que a condição pode ser combinada com
+qualquer utilitária do catálogo.</p>
+
+<p>Duas coisas práticas sobre prefixos. Primeiro, a condição não substitui a classe base: se você
+escreve só <code>md:p-8</code>, o respiro de 32 px vale em telas grandes e o padrão do navegador vale
+nas pequenas — o normal é ter <code>p-4 md:p-8</code>, uma base e uma exceção. Segundo, quando há mais
+de uma condição, elas se empilham na frente, da maior para a menor:
+<code>md:hover:bg-amber-200</code> quer dizer "em tela média ou maior <em>e</em> com o mouse em cima".
+A ordem importa: o Tailwind aplica primeiro a condição mais à direita, e inverter muda o resultado
+gerado.</p>
+
+<h2>4. O núcleo: família e valor</h2>
+
+<p>Toda classe tem um núcleo de dois pedaços separados por hífen. O primeiro hífen separa a família do
+valor; os hífens seguintes fazem parte do valor. Em <code>bg-amber-100</code>, a família é
+<code>bg</code> e o valor é <code>amber-100</code> — um nome composto, com cor e tom. Em
+<code>rounded-lg</code>, a família é <code>rounded</code> e o valor é <code>lg</code>. Saber onde está
+o primeiro hífen é o que permite ler qualquer classe nova.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Os pedaços</th><th>O que ela faz</th></tr>
+<tr><td><code>p-4</code></td><td>família <code>p</code> + valor <code>4</code></td><td>16 px de respiro por dentro</td></tr>
+<tr><td><code>bg-amber-100</code></td><td>família <code>bg</code> + valor <code>amber-100</code></td><td>fundo âmbar claro</td></tr>
+<tr><td><code>text-sm</code></td><td>família <code>text</code> + valor <code>sm</code></td><td>letra pequena</td></tr>
+<tr><td><code>rounded-lg</code></td><td>família <code>rounded</code> + valor <code>lg</code></td><td>canto arredondado de 8 px</td></tr>
+<tr><td><code>mt-2</code></td><td>família <code>mt</code> + valor <code>2</code></td><td>8 px de margem no topo</td></tr>
+<tr><td><code>w-full</code></td><td>família <code>w</code> + valor <code>full</code></td><td>largura inteira do espaço disponível</td></tr>
+</table>
+</div>
+
+<p>Repare que o valor nem sempre é número. Pode ser um nome (<code>full</code>, <code>auto</code>,
+<code>none</code>), um tamanho (<code>sm</code>, <code>lg</code>, <code>xl</code>) ou uma combinação de
+cor e tom. O que não muda é a lógica: o valor é uma posição escolhida pelo Tailwind, e você escolhe
+entre as posições que existem. Quando nenhuma serve, aí entram os colchetes.</p>
+
+<p>Existe um terceiro tipo de nome, que não tem valor nenhum: <code>flex</code>, <code>border</code>,
+<code>hidden</code>, <code>underline</code>. São famílias que já dizem tudo o que precisam dizer — o
+assunto é a propriedade e o valor é "ligado". Você reconhece pelo formato: sem hífen, sem número, uma
+palavra só. Quando aparecer uma classe assim, não procure o valor que falta; ele não existe. Isso
+também explica por que <code>border</code> e <code>border-amber-200</code> trabalham em dupla: uma liga
+a linha, a outra diz a cor.</p>
+
+<p>Uma confusão comum: o número não é pixel. <code>p-4</code> não dá 4 px, dá 16; <code>mt-2</code> não
+dá 2 px, dá 8. O número é a posição na escala de espaço, que anda de 4 em 4 px até 16 e depois em
+passos maiores. Quem lê <code>p-6</code> como "seis" acerta o desenho e erra a conta. Leia como
+"degrau seis".</p>
+
+<h2>5. O sinal de menos: valores negativos</h2>
+
+<p>Algumas propriedades aceitam valor negativo, e o CSS usa isso o tempo todo: margem negativa puxa o
+elemento para o lado oposto, em vez de afastá-lo. No Tailwind, o sinal vai na frente do nome inteiro,
+antes da família:</p>
+
+<pre class="term" data-title="CSS gerado">.-mt-4 {
+  margin-top: calc(var(--spacing) * -4);
+}
+.mt-4 {
+  margin-top: calc(var(--spacing) * 4);
+}</pre>
+
+<p>É a mesma classe com e sem o sinal, e a diferença é o sentido. <code>mt-4</code> empurra o elemento
+16 px para baixo; <code>-mt-4</code> puxa 16 px para cima, fazendo-o invadir o espaço de quem está
+acima. Serve para sobrepor uma etiqueta na borda do cartão, para encostar um selo no canto, para
+corrigir o alinhamento de um ícone.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|margin-top=-16px;;css:#alvo|padding=16px">
+  <p class="try-task">A etiqueta está empurrando o cartão para baixo. Inverta o sentido: puxe-a 16 px
+  para cima, sem mexer no respiro interno.</p>
+  <pre class="html">&lt;div id="alvo" class="mt-4 bg-amber-100 p-4"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+margin-top: 16px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="-mt-4 bg-amber-100 p-4"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>No painel, <code>margin-top</code> muda de <code>16px</code> para <code>-16px</code>. Não é um valor
+"inválido": é margem negativa de verdade, e o navegador aceita em quase todas as direções. O que você
+não pode é inventar um sinal onde ele não existe — <code>-p-4</code> não é uma classe do catálogo,
+porque respiro negativo não faz sentido.</p>
+
+<h2>6. Os colchetes: o valor escrito à mão</h2>
+
+<p>A escala cobre quase tudo, mas um dia a padaria quer 18 px — um valor que não está na lista. Em vez
+de inventar uma classe nova, você escreve o valor entre colchetes, colado no nome da família:</p>
+
+<pre class="term" data-title="CSS gerado">.p-\[18px\] {
+  padding: 18px;
+}</pre>
+
+<p>O Tailwind lê o que está entre colchetes como CSS puro e gera a regra com aquele valor exato. Serve
+para espaçamento, tamanho, cor, qualquer coisa que aceite valor:
+<code>w-[320px]</code>, <code>text-[13px]</code>, <code>bg-[#fef3c7]</code>,
+<code>top-[7px]</code>. É a válvula de escape do catálogo, e é justamente por isso que ela tem de ser
+usada com motivo. Escala é ritmo; valor solto quebra o ritmo — e vale para uma exceção, não para o dia
+a dia.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=18px">
+  <p class="try-task">O cartão precisa de 18 px de respiro por dentro, um valor que não existe na
+  escala. Escreva esse valor com colchetes.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-100 p-4"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-amber-100 p-[18px]"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>Quando o colchete é legítimo? Quando o número vem de fora: a largura de uma imagem exportada, um
+deslocamento medido no desenho, uma cor de marca que ainda não virou variável. Quando ele é
+suspeito? Quando substitui um degrau que existia ao lado — <code>p-[15px]</code> onde cabia
+<code>p-4</code>. A diferença não é matemática, é de intenção: valor de fora entra com colchete;
+decisão de desenho usa a escala, para que o próximo bloco possa repetir a mesma decisão.</p>
+
+<p>Três detalhes que evitam dor de cabeça. Primeiro, não há espaço dentro dos colchetes: se o valor
+precisa de espaço — como em <code>grid-cols-[1fr_2fr]</code> ou
+<code>bg-[rgb(254_243_199)]</code> — use sublinhado, e o Tailwind troca por espaço na hora de gerar.
+Segundo, a unidade é obrigatória: <code>p-[18]</code> não vira 18 px, vira nada. Terceiro, os colchetes
+são parte do nome: se você errar a posição deles, o nome deixa de existir e a classe é ignorada em
+silêncio, como qualquer nome fora do catálogo.</p>
+
+<h2>7. A barra: fração de um lado, transparência do outro</h2>
+
+<p>O último sinal é a barra, e ele tem dois usos que assustam por parecerem iguais. Antes da barra vem
+o valor; depois vem uma segunda informação, e o que essa informação significa depende da família:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Leitura</th><th>O que ela faz</th></tr>
+<tr><td><code>w-1/2</code></td><td>largura, fração um meio</td><td>metade do espaço disponível</td></tr>
+<tr><td><code>w-1/3</code></td><td>largura, fração um terço</td><td>um terço do espaço disponível</td></tr>
+<tr><td><code>bg-amber-100/50</code></td><td>fundo âmbar 100, metade</td><td>o mesmo âmbar, com 50% de transparência</td></tr>
+<tr><td><code>text-amber-900/70</code></td><td>texto âmbar 900, setenta</td><td>a mesma cor, com 70% de opacidade</td></tr>
+</table>
+</div>
+
+<p>Na largura, a barra é uma fração de verdade: <code>w-1/2</code> quer dizer "metade", e o CSS gerado
+é uma conta (<code>calc(1 / 2 * 100%)</code>). Na cor, a barra é transparência: o número depois dela é
+uma porcentagem de 0 a 100, e o CSS gerado mistura a cor com o transparente. O valor antes da barra é
+que diz qual dos dois mundos você está.</p>
+
+<div class="trytailwind" data-goal="rule:color-mix(in srgb, oklch(96.2% 0.059 95.617) 50%, transparent);;css:#alvo|padding=16px">
+  <p class="try-task">O aviso de "últimas unidades" precisa do fundo âmbar com metade da força. Deixe
+  o fundo com 50% de transparência, mantendo o respiro.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-100 p-4"&gt;Últimas unidades&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-amber-100/50 p-4"&gt;Últimas unidades&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra o fundo como <code>oklab(... / 0.5)</code>: quatro números, e o último depois da
+barra é a transparência. É o mesmo âmbar de sempre, com metade da presença. Como o texto em cima não
+muda, o contraste cai — e é aí que entra a aula de contraste, mais adiante. Por enquanto, guarde o
+formato: valor antes da barra, modificador depois.</p>
+
+<h2>8. Os sinais raros e os erros de leitura</h2>
+
+<p>Existem mais dois sinais que aparecem pouco e confundem muito quando aparecem. O primeiro é o ponto
+de exclamação no fim do nome, que marca a classe como importante — ela passa por cima de qualquer outra
+regra. O segundo são colchetes com uma propriedade inteira dentro,
+<code>[mask-type:luminance]</code>: nesse caso não há família nem valor, o nome é literalmente uma
+declaração de CSS. Os dois são recursos de exceção; se você precisar deles com frequência, o desenho
+está pedindo outra solução.</p>
+
+<p>Já os erros de leitura são sempre os mesmos três. Copiar o dois-pontos do exemplo para uma classe
+que não tem condição — <code>:p-4</code> não existe. Trocar hífen por underline, ou o contrário:
+<code>p_4</code> não existe, <code>bg_amber_100</code> não existe. E esquecer que maiúscula e minúscula
+são diferentes: <code>P-4</code> não é <code>p-4</code>, e <code>text-Amber-900</code> não é
+<code>text-amber-900</code>. Nenhum dos três dá erro na tela: a classe só não gera nada.</p>
+
+<p>Há ainda um erro de leitura conceitual, que não é de digitação. É achar que a condição vira parte da
+propriedade: <code>hover:bg-amber-200</code> não é "um fundo diferente", é o mesmo fundo de sempre com
+uma condição. E achar que o número é pixel: <code>p-6</code> é degrau seis, que dá 24 px. Ler certo
+evita metade dos ajustes por tentativa e erro.</p>
+
+<p>Um treino que vale a pena: pegue uma classe comprida e leia em voz alta, pedaço por pedaço.
+<code>md:bg-amber-200/80</code> é "a partir de tela média, fundo âmbar 200 com 80% de opacidade".
+<code>dark:hover:bg-amber-900</code> é "no tema escuro, com o mouse em cima, fundo âmbar 900".
+<code>-mt-2</code> é "margem de menos 8 px no topo". Depois de cinco ou seis leituras, o olho para de
+ver um bloco de letras e começa a ver as fatias — e aí você consegue escrever a classe que quer sem
+procurar em lugar nenhum.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: "escrevi hover:alguma coisa e não aconteceu nada"</h3>
+<p>Quase sempre faltou a classe base. <code>hover:bg-amber-200</code> sozinho só pinta o fundo com o
+mouse em cima; no estado normal, o elemento fica sem cor de fundo nenhuma. O par correto é
+<code>bg-amber-100 hover:bg-amber-200</code>: um fundo para o repouso, outro para o mouse. A condição é
+exceção, não base.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: "a etiqueta com margem negativa ficou por cima do texto"</h3>
+<p>Margem negativa não empurra o conteúdo vizinho: ela puxa o próprio elemento, então ele passa a
+ocupar o espaço de quem estava acima. Se o resultado foi sobreposição, o caminho é deslocar o outro
+elemento (<code>mt-6</code> no cartão) ou aceitar a sobreposição de propósito, com fundo sólido e
+cuidado com a ordem de empilhamento. Negativo é ferramenta de ajuste fino, não de layout.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: "o valor entre colchetes não funcionou"</h3>
+<p>Confira a unidade e o espaço. <code>p-[18]</code> não vira 18 px; <code>p-[18 px]</code> quebra o
+nome no meio, porque o atributo <code>class</code> separa classes por espaço — o navegador entende
+duas classes e nenhuma delas existe. Para valores compostos, sublinhado no lugar do espaço. E não
+esqueça que colchete não é escape para tudo: valor arbitrário continua sendo um valor, com unidade e
+sintaxe válidas.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. Em <code>md:p-6</code>, o que é o pedaço
+<code>md:</code>?</p>
+<label><input type="radio" name="q1"> uma família de espaço</label>
+<label><input type="radio" name="q1"> um valor de 6 px</label>
+<label><input type="radio" name="q1"> uma condição: a classe só vale a partir de certo tamanho de tela</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. O que <code>-mt-4</code> faz de diferente de
+<code>mt-4</code>?</p>
+<label><input type="radio" name="q2"> inverte o sentido: puxa para cima em vez de empurrar para baixo</label>
+<label><input type="radio" name="q2"> diminui o valor: 4 px em vez de 16 px</label>
+<label><input type="radio" name="q2"> nada, o sinal é ignorado</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Para que servem os colchetes em
+<code>p-[18px]</code>?</p>
+<label><input type="radio" name="q3"> para marcar a classe como importante</label>
+<label><input type="radio" name="q3"> para escrever um valor que não está na escala</label>
+<label><input type="radio" name="q3"> para combinar duas classes em uma</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: um valor fora da escala</h2>
+<p>O rótulo precisa de 12 px de respiro por dentro, e a escala não tem esse degrau. Escreva a classe
+com colchetes:</p>
+<div class="ex-code">&lt;span class="bg-amber-100 <input aria-label="resposta 1" data-answer="p-[12px]" placeholder="..."> rounded-lg"&gt;Pão quente&lt;/span&gt;</div>
+<p class="ex-dica">Dica: a família do respiro é <code>p</code>, o valor vai entre colchetes com a
+unidade colada no número e sem espaço nenhum.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Uma classe do Tailwind se lê em quatro fatias: condição, família, valor e sinal. A condição vem
+antes dos dois-pontos e não muda a propriedade, muda quando ela vale. A família é o assunto, o valor é
+a posição na escala, e o primeiro hífen separa os dois. Os sinais aparecem para casos específicos: menos
+inverte o sentido, colchetes escrevem um valor fora da escala, barra faz fração ou transparência
+conforme a família.</p>
+
+<p>Ler a classe é prever o desenho. Quem sabe que <code>mt-2</code> é degrau dois e não 2 px, que
+<code>hover:</code> é exceção e não base, e que <code>p-[18px]</code> é escape e não rotina, erra menos
+e confere menos. O catálogo continua grande — mas, com a anatomia na cabeça, ele deixa de ser uma lista
+de nomes para decorar e passa a ser um sistema previsível.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Leia da esquerda para a direita: condição, família, valor.</li>
+<li>O primeiro hífen separa família e valor; os outros são do valor.</li>
+<li>Condição (<code>hover:</code>, <code>md:</code>, <code>dark:</code>) não substitui a base.</li>
+<li>Duas condições se empilham na frente, e a ordem muda o resultado.</li>
+<li>O número é degrau de escala: <code>p-4</code> é 16 px, não 4 px.</li>
+<li><code>-</code> na frente inverte o valor; só existe onde negativo faz sentido.</li>
+<li><code>[valor]</code> escreve CSS puro, com unidade e sem espaço.</li>
+<li>Barra antes da cor é transparência; antes de largura, fração.</li>
+<li><code>!</code> e <code>[propriedade:valor]</code> são exceções raras.</li>
+<li>Maiúscula, underline e dois-ponto sobrando fazem a classe sumir em silêncio.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

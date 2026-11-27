@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classes Utilitárias | Guia Tailwind</title>
+<meta name="description" content="O que são classes utilitárias: cada uma cuida de uma propriedade só, você junta várias no mesmo elemento e o desenho nasce da composição, não de nomes inventados.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Classes <span class="hl">Utilitárias</span></h1>
+<p class="intro">"Utilitária" é uma palavra esquisita para uma ideia simples, e a Ana tropeçou nela:
+achou que fosse um tipo de classe "menos importante" que as outras. É o contrário. Utilitária é a
+classe que faz uma coisa só — e é justamente por fazer uma coisa só que ela combina com todas as
+outras. Nesta aula a Ana compara a classe <code>.cartao</code> que ela copiou de um tutorial com a
+soma de cinco utilitárias que produzem o mesmo desenho, e entende por que o Tailwind escolheu o
+segundo caminho. No fim, ela monta uma etiqueta de preço peça por peça, como quem segue uma receita.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que faz uma classe ser "utilitária" e o que ela não faz.</li>
+  <li>Por que uma propriedade por classe é uma vantagem, e não uma limitação.</li>
+  <li>Como compor seis utilitárias e ler o resultado como uma receita.</li>
+  <li>As famílias do catálogo e o vocabulário mínimo para uma página inteira.</li>
+  <li>Quando duas utilitárias do mesmo prefixo somam e quando elas brigam.</li>
+  <li>O que a classe semântica ainda resolve melhor.</li>
+  <li>O preço da repetição e o que fazer quando o HTML fica comprido.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a palavra que assusta</h2>
+
+<p>A Ana leu num vídeo que o Tailwind é "utilitário" e fechou a aba. Parecia coisa de quem já sabe
+programar. Depois voltou e fez a pergunta certa: o que uma classe utilitária tem que as outras não
+têm? A resposta é curta — ela faz uma coisa só — mas a consequência é grande, e é ela que muda o jeito
+de montar a página.</p>
+
+<p>Para sentir a diferença, olhe a classe que ela copiou para o cartão de produto. Ela dava respiro,
+pintava o fundo, arredondava o canto, escurecia a letra e engordava o texto. Cinco decisões escondidas
+dentro de um nome. Funcionava até o dia em que o cartão da promoção precisou das mesmas cinco coisas
+menos o fundo colorido. Aí a Ana criou <code>.cartao-promocao</code>, copiou as cinco linhas e apagou
+uma. Depois veio <code>.cartao-pequeno</code>. E o arquivo foi virando uma coleção de variações quase
+iguais.</p>
+
+<p>O caminho utilitário faz o contrário: quebra o cartão em cinco peças independentes e deixa você
+escolher quais usar. Sem fundo? Não escreva a peça do fundo. Mais respiro? Troque o número da peça do
+respiro. O cartão deixa de ser um nome e passa a ser uma lista de decisões visíveis.</p>
+
+<p>O nome "utilitária" vem daí: são ferramentas de uso geral, como um martelo. O martelo não sabe se
+está pregando um caixote ou um armário; ele prega. A classe <code>.cartao</code> é o oposto: é um
+canivete montado para uma tarefa específica, com cinco lâminas presas umas às outras. Quando a tarefa
+muda um pouquinho, o canivete inteiro precisa ser refeito. A caixa de ferramentas, não: você tira o
+martelo, guarda a chave de fenda e segue. O trabalho de montar é seu, e é justamente por isso que ele
+sai do jeito que você queria.</p>
+
+<h2>2. Uma classe, uma responsabilidade</h2>
+
+<p>Compare as duas versões do mesmo cartão. Primeiro, o jeito semântico, com um nome que descreve o
+objeto:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="cartao"&gt;Pão de queijo — R$ 4,00&lt;/div&gt;</pre>
+
+<pre class="term" data-title="estilo.css">.cartao {
+  padding: 16px;
+  background-color: #fef3c7;
+  border-radius: 8px;
+  color: #78350f;
+  font-weight: 600;
+}</pre>
+
+<p>Agora o jeito utilitário, com cinco nomes que descrevem efeitos:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="p-4 bg-amber-100 rounded-lg text-amber-900 font-semibold"&gt;Pão de queijo — R$ 4,00&lt;/div&gt;</pre>
+
+<pre class="term" data-title="CSS gerado">.p-4 {
+  padding: calc(var(--spacing) * 4);
+}
+.bg-amber-100 {
+  background-color: var(--color-amber-100);
+}
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+.text-amber-900 {
+  color: var(--color-amber-900);
+}
+.font-semibold {
+  font-weight: var(--font-weight-semibold);
+}</pre>
+
+<p>Dá para ver a diferença no CSS gerado. Repare que cada utilitária vira uma regra com uma
+declaração só — <code>padding</code> em uma, <code>background-color</code> em outra — enquanto
+<code>.cartao</code> vira uma regra com cinco declarações. O Tailwind chama essas peças de utilitárias
+porque elas são utilizáveis em qualquer lugar: a mesma regra de respiro serve ao cartão, ao botão e à
+etiqueta, sem saber o que está decorando.</p>
+
+<p>O desenho final é o mesmo. A diferença está em quem manda em quê. No primeiro caso, um nome manda em
+cinco propriedades e você só consegue mudar uma delas criando outro nome. No segundo, cinco nomes
+mandam em uma propriedade cada, e você muda só a peça que quer mudar — inclusive em um elemento só,
+sem tocar no resto da página.</p>
+
+<dl class="anatomy">
+<dt>utilitária</dt>
+<dd>Classe de uma responsabilidade: <code>p-4</code> só mexe no respiro interno, <code>rounded-lg</code>
+só no canto. Nada de efeito colateral.</dd>
+<dt>família</dt>
+<dd>O grupo de utilitárias que atacam o mesmo assunto: <code>p-</code>, <code>px-</code>,
+<code>py-</code> são da família do espaço; <code>bg-</code> e <code>text-</code> são da cor.</dd>
+<dt>composição</dt>
+<dd>O ato de juntar utilitárias no mesmo elemento até o desenho ficar pronto. É o trabalho principal
+de quem usa Tailwind.</dd>
+<dt>classe semântica</dt>
+<dd>Um nome que descreve o objeto (<code>.cartao</code>, <code>.preco</code>) e costuma juntar várias
+propriedades. Ainda existe, mas deixou de ser o jeito padrão.</dd>
+<dt>repetição</dt>
+<dd>O preço do estilo utilitário: as mesmas cinco classes voltam em cada cartão. É intencional e
+visível; esconder isso é assunto de componente.</dd>
+</dl>
+
+<h2>3. O nome fala do efeito, não do objeto</h2>
+
+<p>Essa é a mudança de cabeça que mais demora. Uma classe utilitária não responde "o que é isto?", e sim
+"o que isto faz?". <code>p-4</code> não sabe se está num cartão, num botão ou numa etiqueta. Isso
+parece uma perda — e é uma perda pequena — mas traz três ganhos grandes.</p>
+
+<p>Primeiro, acaba a reunião sobre nomes. Ninguém precisa decidir se é <code>.cartao</code>,
+<code>.card</code>, <code>.box</code> ou <code>.produto</code>. Segundo, a página inteira passa a usar
+o mesmo vocabulário: o respiro é sempre <code>p-4</code>, o tom claro é sempre <code>bg-amber-100</code>.
+Terceiro, você lê a aparência sem abrir outro arquivo: quem olha o HTML vê o desenho.</p>
+
+<p>O que se perde é a intenção. Daqui a seis meses, ninguém vai olhar
+<code>class="p-4 bg-amber-100"</code> e saber que aquilo é "o cartão do produto em promoção". A
+intenção passa a viver no conteúdo e na estrutura da página — no texto "Pão de queijo", no lugar onde
+o bloco está. Se você precisa que o nome diga a intenção, esse é o caso de criar um componente, e não
+de voltar a encher o CSS de nomes.</p>
+
+<p>Um jeito de treinar o olho: leia a lista de classes em voz alta, como uma receita. "Respiro de 16,
+fundo âmbar claro, canto de 8, letra âmbar escura, letra seminegrita." Se a frase descreve o que você
+quer, o desenho está certo.</p>
+
+<p>Existe também um método de três passos para achar a peça certa, que funciona para qualquer coisa.
+Primeiro, diga o efeito em português, sem termo técnico: "quero espaço por dentro". Segundo, traduza
+para o nome da propriedade: espaço por dentro é <em>padding</em>. Terceiro, procure a família no
+catálogo: <code>p-</code> com um degrau. Você acabou de chegar em <code>p-4</code> sem decorar nada. A
+ordem importa: quem procura "cartão bonito" no catálogo não acha; quem procura "padding" acha. O
+catálogo é indexado por propriedade, então é por propriedade que a busca funciona.</p>
+
+<h2>4. Compor é o trabalho</h2>
+
+<p>Montar uma utilitária de cada vez é mais lento no começo e muito mais rápido depois, porque cada
+passo tem um efeito previsível. Comece pelo que já está lá e acrescente só a peça que falta — é o que
+a caixa abaixo pede.</p>
+
+<div class="trytailwind" data-goal="rule:color: var(--color-amber-900);;css:#alvo|padding=16px">
+  <p class="try-task">A ficha já tem fundo e respiro. Falta a cor da letra: acrescente
+  <code>text-amber-900</code> e confira que o respiro de 16 px continua igual.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-100 p-4"&gt;Pão de queijo — R$ 4,00&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-amber-100 p-4 text-amber-900"&gt;Pão de queijo — R$ 4,00&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra três linhas: o respiro, o fundo e a cor da letra. Cada linha veio de
+uma classe, e nenhuma delas interferiu nas outras. É esse isolamento que permite compor sem medo:
+acrescentar <code>text-amber-900</code> não mexe no respiro, assim como pintar o fundo não mexe no
+canto. Você pode testar uma peça por vez e ver exatamente o que mudou.</p>
+
+<p>Vale notar que a lista de classes não tem hierarquia. Não existe "classe principal" nem "classe
+filha": são cinco decisões no mesmo nível, aplicadas ao mesmo elemento. Se você escrever na ordem
+inversa, o desenho é idêntico. A ordem só passa a importar quando duas classes disputam a mesma
+propriedade — e aí a resposta é não disputar.</p>
+
+<h2>5. As famílias e o vocabulário mínimo</h2>
+
+<p>O catálogo é grande, mas é organizado por famílias, e as famílias se repetem. Quem conhece meia
+dúzia delas adivinha o resto pelo nome. Esta é a lista que resolve a maior parte de uma página como a
+da padaria:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Família</th><th>Começa com</th><th>Exemplos</th><th>O que decide</th></tr>
+<tr><td>espaço</td><td><code>p-</code>, <code>m-</code></td><td><code>p-4</code>, <code>mt-2</code></td><td>respiro por dentro e por fora</td></tr>
+<tr><td>cor</td><td><code>bg-</code>, <code>text-</code></td><td><code>bg-amber-100</code>, <code>text-amber-900</code></td><td>fundo e cor da letra</td></tr>
+<tr><td>tipografia</td><td><code>text-</code>, <code>font-</code></td><td><code>text-sm</code>, <code>font-semibold</code></td><td>tamanho e peso da letra</td></tr>
+<tr><td>canto e borda</td><td><code>rounded-</code>, <code>border</code></td><td><code>rounded-lg</code>, <code>border</code></td><td>arredondamento e linha de contorno</td></tr>
+<tr><td>tamanho</td><td><code>w-</code>, <code>h-</code></td><td><code>w-full</code>, <code>max-w-sm</code></td><td>largura e altura</td></tr>
+<tr><td>layout</td><td><code>flex</code>, <code>grid</code>, <code>gap-</code></td><td><code>flex</code>, <code>gap-4</code></td><td>como os filhos se organizam</td></tr>
+</table>
+</div>
+
+<p>Repare na ambiguidade do prefixo <code>text-</code>: ele serve para cor (<code>text-amber-900</code>)
+e para tamanho (<code>text-sm</code>). O Tailwind decide pelo valor que vem depois. Isso não é
+capricho, é o que permite economizar palavras: o assunto é "texto", e o valor diz o resto. Com o tempo
+você lê <code>text-sm</code> e <code>text-amber-900</code> sem pensar, e nem nota a coincidência.</p>
+
+<p>Com essas famílias, uma padaria inteira sai: título grande e em negrito, preço em âmbar escuro,
+etiqueta com fundo claro, cartões com canto arredondado, seções com respiro, lista de produtos em
+coluna. Você não precisa decorar quinhentos nomes; precisa reconhecer o assunto e lembrar o padrão do
+valor. O resto é consulta.</p>
+
+<h2>6. Montando uma etiqueta peça por peça</h2>
+
+<p>Vamos a um caso completo, do tipo que aparece em toda loja: a etiqueta "Pão quente", que fica em cima
+do produto. Ela tem quatro decisões: fundo claro, respiro em cima e embaixo, respiro nas laterais e
+canto arredondado. Duas já estão escritas; faltam duas.</p>
+
+<div class="trytailwind" data-goal="rule:padding-inline: calc(var(--spacing) * 2);;rule:border-radius: var(--radius-lg);;css:#alvo|padding-block=4px">
+  <p class="try-task">Complete a etiqueta: 8 px de respiro nas laterais (<code>px-2</code>) e cantos
+  de 8 px (<code>rounded-lg</code>). O fundo e o respiro vertical têm de continuar.</p>
+  <pre class="html">&lt;span id="alvo" class="bg-amber-100 py-1"&gt;Pão quente&lt;/span&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.962 0.059 95.617)
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;span id="alvo" class="bg-amber-100 py-1 px-2 rounded-lg"&gt;Pão quente&lt;/span&gt;</pre>
+</div>
+
+<p>Vale ler o resultado como quem lê uma ficha técnica. <code>bg-amber-100</code> pinta o fundo,
+<code>py-1</code> dá 4 px em cima e embaixo, <code>px-2</code> dá 8 px nas laterais,
+<code>rounded-lg</code> arredonda 8 px. Quatro peças, quatro linhas no painel — e nenhuma delas manda
+na outra. Se amanhã a etiqueta precisar ser mais larga, você troca <code>px-2</code> por
+<code>px-4</code> e mais nada.</p>
+
+<p>É por isso que a etiqueta não precisa de um nome próprio. Ela é uma lista de decisões que você
+repete onde precisar. Se ela aparecer em cinquenta produtos, a repetição é o preço — e a página
+continua legível, porque a lista é curta e igual em todos.</p>
+
+<h2>7. Duas utilitárias da mesma família: quando somam e quando brigam</h2>
+
+<p>Aqui está a confusão mais comum de quem começa. Duas utilitárias do mesmo prefixo podem somar ou
+podem brigar, e o que decide é a <em>propriedade</em>, não o prefixo. <code>text-amber-900</code> é
+cor da letra; <code>text-sm</code> é tamanho da letra. Prefixo igual, propriedades diferentes: somam
+sem problema.</p>
+
+<div class="trytailwind" data-goal="rule:font-size: var(--text-sm);;rule:color: var(--color-amber-900)">
+  <p class="try-task">O preço já está na cor certa, mas a letra está grande demais. Acrescente
+  <code>text-sm</code> sem perder a cor âmbar escura.</p>
+  <pre class="html">&lt;p id="alvo" class="text-amber-900"&gt;Pão de queijo — R$ 4,00&lt;/p&gt;</pre>
+  <pre class="out">
+color: oklch(0.414 0.112 45.904)
+</pre>
+  <pre class="solucao">&lt;p id="alvo" class="text-amber-900 text-sm"&gt;Pão de queijo — R$ 4,00&lt;/p&gt;</pre>
+</div>
+
+<p>No painel aparecem as duas linhas: <code>color</code> e <code>font-size</code>. Nenhuma venceu
+ninguém. Agora troque a segunda por <code>text-2xl</code>: o tamanho muda, a cor continua. Só que se
+você escrever <code>text-sm</code> e <code>text-2xl</code> juntas, aí a briga é real — as duas querem
+a mesma propriedade, e vale a regra que o Tailwind gerou por último, não a que você digitou por
+último.</p>
+
+<p>A disciplina é uma frase: <strong>uma propriedade, uma classe</strong>. Antes de acrescentar, olhe o
+que já está lá. Se as duas mexem na mesma coisa, apague uma. Se mexem em coisas diferentes, pode
+empilhar sem medo — inclusive quando o prefixo é o mesmo.</p>
+
+<h2>8. Utilitária ou classe semântica?</h2>
+
+<p>As duas continuam existindo, e a escolha não é moral. A utilitária é ótima quando o desenho é
+específico daquele lugar e vai mudar com o conteúdo. A classe semântica é melhor quando o mesmo
+conjunto de decisões aparece em muitos lugares e precisa mudar de uma vez só.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Pergunta</th><th>Utilitária</th><th>Classe semântica</th></tr>
+<tr><td>quantas propriedades por nome?</td><td>uma</td><td>várias</td></tr>
+<tr><td>onde fica a decisão?</td><td>no HTML, junto do conteúdo</td><td>no CSS, longe do conteúdo</td></tr>
+<tr><td>como mudar um caso só?</td><td>trocando a classe daquele elemento</td><td>criando outra classe</td></tr>
+<tr><td>como mudar todos de uma vez?</td><td>trocando a classe em todos (busca e troca)</td><td>editando a regra no CSS</td></tr>
+<tr><td>quando brilha?</td><td>desenho próprio de cada bloco</td><td>peça repetida em muitas páginas</td></tr>
+</table>
+</div>
+
+<p>O uso maduro é quase todo utilitário, com um punhado de nomes semânticos para peças realmente
+repetidas — o botão principal, o cartão de produto, o menu. Esses nomes, no Tailwind, não voltam a ser
+um CSS paralelo: eles são feitos de utilitárias por dentro. A aula de estilos de componente mostra
+como, quando chegar a hora. Antes disso, repetir as cinco classes em três cartões é mais claro do que
+inventar uma abstração que você ainda não sabe se vai durar.</p>
+
+<p>Há um terceiro caso, que não é nem utilitária solta nem classe semântica: a variação. Quando a
+mesma peça muda por tamanho de tela, por estado do mouse ou por tema, você não cria outra classe — usa
+um prefixo na frente da utilitária. <code>hover:bg-amber-200</code> é a mesma família de fundo, com a
+condição "mouse em cima". Essas variações convivem com a versão simples sem brigar, porque o prefixo
+muda a condição de aplicação, não a propriedade. Elas têm aulas próprias mais adiante; fica só o
+aviso de que o vocabulário cresce por prefixo, e não por nome novo.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a linha de classes virou uma sopa</h3>
+<p>Cinco classes cabem numa linha; doze não cabem. A primeira providência é de formatação: quebre o
+atributo <code>class</code> em várias linhas e agrupe por assunto (espaço, cor, tipo). A segunda é
+perceber repetição: se o mesmo bloco de oito classes aparece em cinco lugares, aquilo já é um
+componente disfarçado. Extrair resolve — mas só depois de o desenho estar estável, senão você vai
+editar a abstração toda semana.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: "quero trocar o âmbar de todos os botões"</h3>
+<p>Com utilitárias espalhadas, é busca e troca: <code>bg-amber-600</code> por <code>bg-amber-700</code>
+em todos os arquivos. Parece trabalhoso, mas é uma operação única, verificável e sem surpresa. A
+alternativa — uma classe <code>.botao</code> no CSS — resolve com uma edição, porém cobra o preço de
+sempre: um nome a mais para manter e um arquivo a mais para abrir. Em times pequenos, a busca e troca
+costuma ganhar; em times grandes, o componente ganha.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: "meu colega não entende o meu HTML"</h3>
+<p>Ele entende se souber o vocabulário — que é pequeno e público. Um desenvolvedor que nunca viu
+Tailwind lê <code>p-4 bg-white rounded-lg</code> e deduz o desenho em segundos. O que ele não deduz é a
+intenção, e isso vale para qualquer estilo: com CSS à mão, ele também não saberia que
+<code>.caixa-2</code> é o cartão de promoção. A diferença é que, no Tailwind, o que está escrito é
+verdade — não há uma regra escondida em outro arquivo mudando o jogo.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. O que define uma classe utilitária?</p>
+<label><input type="radio" name="q1"> ela cuida de uma propriedade só e não depende do contexto</label>
+<label><input type="radio" name="q1"> ela é menor que as outras classes no arquivo</label>
+<label><input type="radio" name="q1"> ela só funciona em elementos de texto</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. <code>text-amber-900</code> e <code>text-sm</code> no
+mesmo elemento:</p>
+<label><input type="radio" name="q2"> brigam, porque têm o mesmo prefixo</label>
+<label><input type="radio" name="q2"> só a última escrita aparece</label>
+<label><input type="radio" name="q2"> somam: uma é cor, a outra é tamanho</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Qual é o preço honesto de usar utilitárias?</p>
+<label><input type="radio" name="q3"> o CSS fica maior que o de uma biblioteca de componentes</label>
+<label><input type="radio" name="q3"> a mesma lista de classes se repete em cada elemento parecido</label>
+<label><input type="radio" name="q3"> não dá para mudar uma cor em toda a página</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a peça que faltou</h2>
+<p>A classe antiga <code>.cartao</code> arredondava o canto em 8 px, entre outras coisas. Escreva a
+utilitária que cuida só disso:</p>
+<div class="ex-code">&lt;div class="p-4 bg-amber-100 <input aria-label="resposta 1" data-answer="rounded-lg" placeholder="...">"&gt;Pão de queijo&lt;/div&gt;</div>
+<p class="ex-dica">Dica: o assunto é o canto, então a família é <code>rounded</code>. O degrau de 8 px
+é o <code>lg</code> — o mesmo que você viu no cartão das aulas anteriores.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Classe utilitária é a classe que faz uma coisa só: uma propriedade, um valor, nenhum efeito
+colateral. Você monta o desenho juntando várias no mesmo elemento, e cada uma responde por uma linha
+do painel. O nome fala do efeito, não do objeto — o que tira a conversa sobre nomes do caminho e
+devolve a leitura do HTML para quem olha a página.</p>
+
+<p>O preço é a repetição: as mesmas decisões voltam em cada bloco parecido. Em troca, você ganha
+previsibilidade e mudanças locais baratas. Quando a repetição começar a doer, o caminho é extrair um
+componente — não voltar a esconder tudo num CSS paralelo. E a disciplina que evita 90% dos problemas é
+curta: uma propriedade, uma classe.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Utilitária = uma responsabilidade; semântica = um objeto com várias.</li>
+<li>O nome descreve o efeito (<code>p-4</code>), não o objeto (<code>.cartao</code>).</li>
+<li>Compor é juntar utilitárias no mesmo elemento até o desenho ficar pronto.</li>
+<li>Famílias: espaço, cor, tipografia, canto, tamanho, layout.</li>
+<li><code>text-</code> serve para cor e para tamanho; o valor decide.</li>
+<li>Prefixo igual não é briga: o que decide a briga é a propriedade.</li>
+<li>Uma propriedade, uma classe — apague a que perdeu em vez de empilhar.</li>
+<li>A lista de classes é plana: não há classe principal nem filha.</li>
+<li>A repetição é o preço; o componente é o remédio, mais tarde.</li>
+<li>Quem conhece o vocabulário lê o HTML e enxerga o desenho.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

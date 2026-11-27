@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seu Primeiro Cartão | Guia Tailwind</title>
+<meta name="description" content="Monte o primeiro cartão de produto da padaria com Tailwind: casco com fundo, respiro e borda, título com hierarquia, descrição discreta, preço em destaque e ação.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Seu Primeiro <span class="hl">Cartão</span></h1>
+<p class="intro">Chegou a hora de juntar tudo. A Ana quer mostrar o pão de queijo na página de
+produtos, e para isso precisa de um cartão: uma caixa com fundo, respiro e canto arredondado, com o
+nome do produto, uma descrição curta, o preço e um jeito de encomendar. Sozinha, ela provavelmente
+começaria pelo título e se perderia no meio. Nesta aula o cartão é montado de fora para dentro, uma
+camada por vez, e cada decisão tem um motivo que ela consegue explicar. No fim, o cartão fica pronto e
+ela sabe por que cada classe está onde está.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>As partes de um cartão e a ordem certa de montar cada uma.</li>
+  <li>Como o respiro do casco segura o conteúdo longe da borda.</li>
+  <li>Como criar hierarquia com tamanho, peso e cor do texto.</li>
+  <li>Por que a descrição fica menor e mais clara que o nome.</li>
+  <li>Como destacar o preço sem gritar.</li>
+  <li>Como distribuir o respiro entre as peças de dentro do cartão.</li>
+  <li>Os quatro erros de montagem que fazem o cartão parecer torto.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a ficha do pão de queijo</h2>
+
+<p>A página de produtos da padaria tem uma lista simples: um item por linha, com nome e preço
+separados por um traço. Funciona, mas não vende: o cliente não vê o produto, vê uma lista de
+supermercado. O que a Ana quer é uma ficha — aquela caixinha branca com o nome em destaque, uma frase
+contando o que tem dentro, o preço e um botão de encomendar.</p>
+
+<p>Um cartão parece simples e é cheio de decisões. Onde fica o respiro? Quanto? O nome é maior que o
+preço? A descrição é cinza ou âmbar? O botão tem a mesma cor do fundo? Quem decide no chute acerta por
+sorte; quem decide com um método acerta sempre. O método é sempre o mesmo: comece pelo casco, defina a
+hierarquia do texto, distribua o respiro, e só então pense em enfeite.</p>
+
+<p>Vale dizer de antemão: o cartão desta aula usa umas dez classes. Parece pouco para tanta conversa,
+e é justamente esse o ponto — um cartão bonito não é um cartão cheio de classes, é um cartão com as
+classes certas em cada camada.</p>
+
+<h2>2. O cartão é uma caixa com quatro peças</h2>
+
+<p>Antes de escrever a primeira classe, separe o que é estrutura do que é aparência. A estrutura do
+cartão é simples: uma caixa que contém quatro peças — nome, descrição, preço e ação. A aparência é o
+que cada peça ganha. Essa separação evita o erro mais comum de quem começa: tentar resolver tudo com
+uma classe só no elemento de fora.</p>
+
+<pre class="file" data-file="index.html">&lt;div&gt;
+  &lt;p&gt;Pão de queijo&lt;/p&gt;
+  &lt;p&gt;Assado às 5h, com queijo da serra.&lt;/p&gt;
+  &lt;p&gt;R$ 4,00&lt;/p&gt;
+  &lt;a href="#"&gt;Encomendar&lt;/a&gt;
+&lt;/div&gt;</pre>
+
+<p>Essa é a estrutura crua. No navegador, ela vira quatro linhas de texto encostadas na borda da
+página, todas do mesmo tamanho e da mesma cor. O trabalho do Tailwind é dar a cada peça o seu papel —
+e o papel vem do conteúdo, não do nome da classe.</p>
+
+<p>Uma palavra sobre a tag de fora: aqui usamos <code>div</code> porque é a caixa neutra do HTML. Numa
+lista de produtos, o certo é cada cartão ser um <code>li</code> dentro de um <code>ul</code>; num blog,
+um <code>article</code>. A escolha da tag não muda o desenho — o Tailwind aplica as mesmas classes em
+qualquer uma — mas muda a leitura por leitores de tela e por buscadores. Escolha a tag pelo significado
+e deixe a aparência para as classes.</p>
+
+<dl class="anatomy">
+<dt>casco</dt>
+<dd>A caixa de fora: fundo, respiro interno, canto, borda e largura. É o que separa o cartão do resto
+da página.</dd>
+<dt>hierarquia</dt>
+<dd>A ordem de importância do texto, feita com tamanho, peso e cor. O nome manda, o preço apoia, a
+descrição explica.</dd>
+<dt>respiro interno</dt>
+<dd>O espaço entre o conteúdo e a borda do casco. Sem ele, o texto encosta e o cartão parece apertado.</dd>
+<dt>separação</dt>
+<dd>O espaço entre as peças de dentro: um pouco acima do preço, outro tanto acima do botão.</dd>
+<dt>ação</dt>
+<dd>O último elemento, o que o cliente clica. Tem cor própria para ser encontrado de relance.</dd>
+</dl>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Parte</th><th>O que é</th><th>Classes típicas</th></tr>
+<tr><td>casco</td><td>a caixa que segura tudo</td><td><code>bg-white p-6 rounded-xl border</code></td></tr>
+<tr><td>nome</td><td>o título do produto</td><td><code>text-2xl font-semibold text-amber-900</code></td></tr>
+<tr><td>descrição</td><td>uma frase de apoio</td><td><code>mt-1 text-sm text-amber-700</code></td></tr>
+<tr><td>preço</td><td>o número que decide a compra</td><td><code>mt-4 text-xl font-semibold</code></td></tr>
+<tr><td>ação</td><td>o caminho para encomendar</td><td><code>mt-4 px-4 py-2 rounded-lg bg-amber-600</code></td></tr>
+</table>
+</div>
+
+<p>Repare que quase toda linha da tabela tem um <code>mt-</code> e só o casco tem <code>p-</code>. Não
+é coincidência: o respiro de dentro do casco é um só, grande, e o respiro entre as peças é pequeno e
+crescente. Essa diferença é o que faz o cartão parecer organizado em vez de uma pilha de textos.</p>
+
+<h2>3. O casco: fundo, respiro, canto e borda</h2>
+
+<p>Comece pela caixa. Quatro decisões: ela tem fundo branco para se destacar da página (que é âmbar
+bem claro), tem 24 px de respiro interno para o texto não encostar, tem cantos de 12 px para não
+parecer dura e tem uma borda quase invisível para separar do fundo quando as cores são parecidas. Em
+classes:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="bg-white p-6 rounded-xl border border-amber-200 max-w-sm"&gt;</pre>
+
+<p>Cada classe cuida de uma coisa, e você já sabe ler todas. <code>bg-white</code> é o fundo,
+<code>p-6</code> é o respiro de 24 px, <code>rounded-xl</code> é o canto de 12 px,
+<code>border</code> liga a linha de 1 px e <code>border-amber-200</code> dá a ela o âmbar clarinho.
+<code>max-w-sm</code> impede que o cartão estique numa tela larga — 384 px é uma boa largura de
+leitura para uma ficha.</p>
+
+<pre class="term" data-title="CSS gerado">.p-6 {
+  padding: calc(var(--spacing) * 6);
+}
+.rounded-xl {
+  border-radius: var(--radius-xl);
+}
+.border {
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+}</pre>
+
+<p>O CSS gerado mostra o que importa: o respiro é uma conta com a variável de espaço, o canto é uma
+variável de raio e a borda precisa de duas propriedades — o estilo e a largura. É por isso que
+<code>border</code> sozinho já desenha a linha, e <code>border-amber-200</code> sozinho não desenha
+nada: ele só define a cor de uma linha que ainda não existe.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=24px;;css:#alvo|border-radius=12px;;rule:border-width: 1px">
+  <p class="try-task">Dê ao casco do cartão 24 px de respiro, cantos de 12 px e uma borda de 1 px na
+  cor âmbar clara. O fundo branco já está lá.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-white p-4"&gt;Pão de queijo — R$ 4,00&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-white p-6 rounded-xl border border-amber-200"&gt;Pão de queijo — R$ 4,00&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra três linhas: o respiro de 24 px, o raio de 12 px e a largura da
+borda. Se a borda não aparecer, provavelmente faltou <code>border</code> — e o painel vazio já é o
+diagnóstico, como sempre.</p>
+
+<h2>4. O nome do produto manda</h2>
+
+<p>Casco pronto, o texto ainda está todo igual. A primeira peça a ganhar personalidade é o nome do
+produto, porque é ele que o cliente procura. Três decisões: tamanho maior que o resto
+(<code>text-2xl</code>), peso seminegrito para dar presença (<code>font-semibold</code>) e o âmbar
+escuro da marca (<code>text-amber-900</code>). Nada de cor berrante: o destaque vem do tamanho e do
+peso.</p>
+
+<pre class="term" data-title="CSS gerado">.text-2xl {
+  font-size: var(--text-2xl);
+  line-height: var(--tw-leading, var(--text-2xl--line-height));
+}
+.font-semibold {
+  --tw-font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-semibold);
+}</pre>
+
+<p>Um detalhe que vale observar: o tamanho de letra vem sempre acompanhado de uma altura de linha.
+Letra grande com entrelinha pequena fica esmagada; o Tailwind já entrega o par pronto, e é por isso que
+você não precisa se preocupar com isso agora. A variável <code>--text-2xl--line-height</code> guarda a
+altura que combina com aquele tamanho.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|font-size=24px;;css:#alvo|font-weight=600;;rule:color: var(--color-amber-900)">
+  <p class="try-task">Dê hierarquia ao nome: letra de 24 px (<code>text-2xl</code>), peso seminegrito
+  (<code>font-semibold</code>) e a cor âmbar escura.</p>
+  <pre class="html">&lt;div class="bg-white p-6 rounded-xl border border-amber-200"&gt;
+  &lt;p id="alvo" class="text-amber-900"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="text-sm text-amber-700"&gt;Assado às 5h, com queijo da serra.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+color: oklch(0.414 0.112 45.904)
+</pre>
+  <pre class="solucao">&lt;div class="bg-white p-6 rounded-xl border border-amber-200"&gt;
+  &lt;p id="alvo" class="text-2xl font-semibold text-amber-900"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="text-sm text-amber-700"&gt;Assado às 5h, com queijo da serra.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra 24 px de tamanho e peso 600. A cor aparece como <code>oklch(...)</code>, como
+sempre. E repare que a descrição continuou pequena e discreta: ela já tinha <code>text-sm</code> e
+<code>text-amber-700</code>, então o nome grande criou a hierarquia sozinho, sem mexer no resto.</p>
+
+<h2>5. A descrição em segundo plano</h2>
+
+<p>A descrição existe para tirar dúvida, não para competir com o nome. Por isso ela é menor
+(<code>text-sm</code>), mais clara (<code>text-amber-700</code> em vez de 900) e fica logo abaixo do
+título, com um respiro mínimo de 4 px (<code>mt-1</code>). Essa combinação — pequena, clara, colada —
+é o que faz o olho ler primeiro o nome e só depois o detalhe.</p>
+
+<p>Um erro frequente é usar cinza. O <code>text-gray-500</code> é a escolha automática de muita gente,
+mas num cartão de padaria o cinza destoa do âmbar. Usar o tom 700 da mesma família mantém a
+coerência: o texto continua legível, mas perde a força do 900. Se o contraste ficar baixo demais no
+celular, suba um degrau (de 700 para 800) em vez de trocar a família de cor.</p>
+
+<p>A descrição também é o lugar onde o texto varia de tamanho. Um produto pode ter uma frase; outro,
+três linhas. Como o casco tem respiro e não tem altura fixa, o cartão cresce junto — e é isso que você
+quer. Altura fixa em cartão é uma armadilha que só se resolve com layout, mais adiante.</p>
+
+<p>Vale caprichar no texto, porque nenhuma classe salva uma descrição ruim. "Assado às 5h, com queijo
+da serra" diz o que o cliente quer saber: quando sai do forno e o que tem dentro. "O melhor pão de
+queijo da cidade" não diz nada e ainda ocupa duas linhas. A regra é a de sempre: informação concreta
+em poucas palavras, e o cartão fica com metade do trabalho feito.</p>
+
+<h2>6. O preço em destaque e a ação</h2>
+
+<p>O preço é a segunda informação mais importante, e o erro é deixá-lo do mesmo tamanho da descrição.
+Ele precisa de um degrau acima (<code>text-lg</code> ou <code>text-xl</code>), peso seminegrito e um
+respiro maior antes (<code>mt-4</code>) para separar do bloco de texto. Não precisa de cor nova: o
+âmbar 900 do nome serve.</p>
+
+<p>A ação é a única peça com cor de fundo própria. Um fundo âmbar mais forte
+(<code>bg-amber-600</code>), texto branco e o mesmo raio do cartão (<code>rounded-lg</code>) dão o
+contorno de botão sem precisar de nada além das utilitárias. As aulas de botões e de sombras mostram
+variações; aqui o objetivo é o cartão inteiro funcionando.</p>
+
+<div class="trytailwind" data-goal="rule:padding-inline: calc(var(--spacing) * 4);;rule:padding-block: calc(var(--spacing) * 2);;css:#alvo|border-radius=8px;;css:#alvo|font-weight=600">
+  <p class="try-task">Complete a ação do cartão: 16 px de respiro nas laterais, 8 px em cima e embaixo,
+  cantos de 8 px e letra seminegrita. O fundo âmbar e o texto branco já estão.</p>
+  <pre class="html">&lt;div class="bg-white p-6 rounded-xl border border-amber-200"&gt;
+  &lt;p class="text-2xl font-semibold text-amber-900"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="mt-1 text-sm text-amber-700"&gt;Assado às 5h, com queijo da serra.&lt;/p&gt;
+  &lt;p class="mt-4 text-xl font-semibold text-amber-900"&gt;R$ 4,00&lt;/p&gt;
+  &lt;a id="alvo" class="mt-4 inline-block bg-amber-600 text-white" href="#"&gt;Encomendar&lt;/a&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: inline-block
+background-color: oklch(0.666 0.179 58.318)
+color: rgb(255, 255, 255)
+margin-top: 16px
+</pre>
+  <pre class="solucao">&lt;div class="bg-white p-6 rounded-xl border border-amber-200"&gt;
+  &lt;p class="text-2xl font-semibold text-amber-900"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="mt-1 text-sm text-amber-700"&gt;Assado às 5h, com queijo da serra.&lt;/p&gt;
+  &lt;p class="mt-4 text-xl font-semibold text-amber-900"&gt;R$ 4,00&lt;/p&gt;
+  &lt;a id="alvo" class="mt-4 inline-block bg-amber-600 px-4 py-2 rounded-lg font-semibold text-white" href="#"&gt;Encomendar&lt;/a&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O cartão está completo. Leia o HTML inteiro em voz alta e você vai ver a receita: casco branco com
+respiro e canto, nome grande e escuro, descrição pequena e clara, preço em degrau intermediário,
+ação colorida. Cada peça com uma função, nenhuma classe sobrando. Se algo parecer errado, o ajuste é
+em uma peça só — que é a vantagem inteira do jeito utilitário.</p>
+
+<h2>7. O respiro entre as peças</h2>
+
+<p>Aqui está o detalhe que separa um cartão amador de um cartão cuidado. Existem três níveis de
+espaço dentro de um cartão, e eles não são iguais: o respiro do casco é grande (24 px), a separação
+entre blocos é média (16 px) e a separação dentro de um bloco é pequena (4 px). Repare que a
+descrição usa <code>mt-1</code> (4 px) e o preço usa <code>mt-4</code> (16 px) — o olho entende que a
+descrição pertence ao nome e que o preço é assunto novo.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Onde</th><th>Classe</th><th>Valor</th></tr>
+<tr><td>entre o texto e a borda do casco</td><td><code>p-6</code></td><td>24 px</td></tr>
+<tr><td>entre o nome e a descrição</td><td><code>mt-1</code></td><td>4 px</td></tr>
+<tr><td>entre a descrição e o preço</td><td><code>mt-4</code></td><td>16 px</td></tr>
+<tr><td>entre o preço e a ação</td><td><code>mt-4</code></td><td>16 px</td></tr>
+<tr><td>entre dois cartões na lista</td><td><code>mt-6</code></td><td>24 px</td></tr>
+</table>
+</div>
+
+<p>Duas regras práticas saem daí. A primeira: respiro de dentro é do casco, respiro de separação é do
+elemento de baixo. Isso mantém o CSS previsível — quem chega, se afasta do que veio antes. A segunda:
+use a mesma escala de degraus para tudo; o cartão inteiro sai com quatro valores (4, 16, 24 e o canto
+de 12). Quem inventa 5 px aqui e 11 px ali consegue um cartão que "não sabe explicar por que está
+torto".</p>
+
+<h2>8. Os erros de montagem</h2>
+
+<p><strong>Respiro no filho em vez do casco.</strong> Colocar <code>p-6</code> em cada parágrafo dá um
+resultado parecido à primeira vista, mas cada texto passa a ter respiro próprio — e o primeiro encosta
+na borda do casco. O padrão é um respiro só, no elemento de fora.</p>
+
+<p><strong>Borda colorida sem borda.</strong> <code>border-amber-200</code> define a cor, não a linha.
+Sem <code>border</code>, nada aparece, e é um dos casos em que o painel fica vazio e a pessoa acha que
+errou a cor.</p>
+
+<p><strong>Contar com herança sem saber.</strong> Cor de texto é herdada: se o casco tiver
+<code>text-amber-900</code>, todos os filhos ficam âmbar escuro, e a descrição só muda se você
+sobrescrever com <code>text-amber-700</code>. Isso é útil — dá para pintar o cartão inteiro de uma vez
+— mas confunde quando o filho parece ignorar a classe. Espiar o painel do filho resolve.</p>
+
+<p><strong>Arredondar só um lado sem querer.</strong> <code>rounded-t-xl</code> arredonda só em cima,
+<code>rounded-xl</code> arredonda os quatro cantos. Uma letra a mais muda o desenho inteiro, e o painel
+mostra o valor final para você conferir: 12 px de um lado só ou dos quatro.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o cartão fica lindo com um produto e torto com outro</h3>
+<p>Quase sempre é altura fixa. Se o casco tem <code>h-40</code>, o texto de três linhas estoura ou
+sobra espaço. A cura é não fixar altura em cartão de conteúdo: deixe o texto definir, com respiro no
+casco. Quando a lista precisa de cartões alinhados, isso é trabalho de layout (flex ou grid, com
+alongamento), não de altura em pixels.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o cartão no celular ocupa a tela inteira</h3>
+<p>Sem <code>max-w-sm</code>, o cartão estica até a largura disponível — no celular isso pode ser bom,
+no monitor fica uma faixa enorme com texto de 200 caracteres por linha. O par que funciona é
+<code>w-full max-w-sm</code>: ocupa tudo o que cabe, até o limite de 384 px. E o texto continua com
+uma largura confortável de leitura.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: "quero mudar a cor de todos os cartões"</h3>
+<p>Como o cartão é feito de utilitárias, a mudança é uma busca e troca: <code>bg-white</code> por
+<code>bg-amber-50</code> em todos os arquivos onde o casco aparece. É rápido, mas é uma edição em cada
+lugar. Quando o cartão se repetir em muitas páginas e a mudança começar a doer, o passo seguinte é
+extrair um componente — o que só vale depois que o desenho parou de mudar toda semana.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Onde fica o respiro interno do cartão?</p>
+<label><input type="radio" name="q1"> em cada parágrafo de texto</label>
+<label><input type="radio" name="q1"> no casco, uma vez, com <code>p-6</code></label>
+<label><input type="radio" name="q1"> no título, com <code>mt-6</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que faz a hierarquia entre nome, descrição e
+preço?</p>
+<label><input type="radio" name="q2"> a ordem em que as classes aparecem no atributo</label>
+<label><input type="radio" name="q2"> o tamanho do arquivo HTML</label>
+<label><input type="radio" name="q2"> o tamanho, o peso e a cor de cada texto</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que <code>border-amber-200</code> sozinho não
+desenha a borda?</p>
+<label><input type="radio" name="q3"> porque ela só define a cor; falta <code>border</code> para criar a linha</label>
+<label><input type="radio" name="q3"> porque essa cor não existe na paleta</label>
+<label><input type="radio" name="q3"> porque borda só funciona em tabelas</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o casco do segundo cartão</h2>
+<p>A ficha do bolo de cenoura precisa do mesmo respiro do primeiro cartão, 24 px. Complete a classe do
+casco:</p>
+<div class="ex-code">&lt;div class="bg-white <input aria-label="resposta 1" data-answer="p-6" placeholder="..."> rounded-xl border border-amber-200 max-w-sm"&gt;Bolo de cenoura — R$ 8,00&lt;/div&gt;</div>
+<p class="ex-dica">Dica: respiro por dentro é a família <code>p</code>; o degrau de 24 px é o sexto,
+o mesmo que você usou no cartão do pão de queijo.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Um cartão é uma caixa com quatro peças e três níveis de respiro. O casco resolve fundo, respiro,
+canto, borda e largura máxima; o nome ganha tamanho e peso; a descrição fica pequena e clara; o preço
+sobe um degrau; a ação recebe a única cor de fundo forte. Montar de fora para dentro evita a bagunça de
+quem começa pelo título e tenta consertar depois.</p>
+
+<p>O respiro é a decisão mais visível e a mais barata: um <code>p-6</code> no casco, <code>mt-1</code>
+entre nome e descrição, <code>mt-4</code> antes do preço e da ação. Com esses quatro números o cartão
+já parece desenhado. O resto — sombra, animação, estado de foco — vem nas aulas seguintes, sobre uma
+base que já está no lugar.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Monte de fora para dentro: casco, título, descrição, preço, ação.</li>
+<li>Respiro de dentro é do casco (<code>p-6</code>); separação é do elemento de baixo.</li>
+<li>Hierarquia se faz com tamanho, peso e cor — nesta ordem.</li>
+<li>Descrição: menor e mais clara que o nome, colada nele com <code>mt-1</code>.</li>
+<li>Preço: um degrau acima da descrição e seminegrito.</li>
+<li>Ação: a única peça com fundo colorido e texto branco.</li>
+<li><code>border</code> cria a linha; <code>border-amber-200</code> só dá a cor.</li>
+<li>Cor de texto é herdada: pintar o casco pinta os filhos.</li>
+<li><code>w-full max-w-sm</code> deixa o cartão fluido com limite de leitura.</li>
+<li>Altura fixa em cartão de conteúdo é armadilha; deixe o texto mandar.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

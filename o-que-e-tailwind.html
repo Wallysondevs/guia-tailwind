@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O que é Tailwind | Guia Tailwind</title>
+<meta name="description" content="O que é o Tailwind, para que ele serve e o que ele não é: a ideia de classe utilitária, o catálogo de decisões prontas e a diferença para um kit de componentes.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>O que é <span class="hl">Tailwind</span></h1>
+<p class="intro">A Ana tem uma padaria, um notebook e três páginas de site que ela mesma escreveu. O
+texto está lá, os preços também, mas a página parece um documento sem graça: tudo do mesmo tamanho,
+tudo encostado, links azuis de fábrica. Foi aí que o primo dela, que trabalha com sites, falou a
+palavra: "isso resolve com Tailwind". Nesta aula a Ana não instala nada e não abre terminal. Ela só
+entende o que é essa ferramenta, de onde vêm os nomes esquisitos como <code>bg-amber-100</code> e por
+que tanta gente diz que ele muda o jeito de escrever a aparência de uma página.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Qual é o problema do jeito antigo de escrever CSS — e por que ele cansa.</li>
+  <li>A ideia central do Tailwind: a aparência escrita no próprio HTML.</li>
+  <li>O que é uma classe utilitária e o que é o "catálogo" de nomes.</li>
+  <li>As decisões que o Tailwind já toma por você (espaço, cor, tamanho).</li>
+  <li>O que ele <em>não</em> é: não é kit de componentes, não é JavaScript, não é mágica.</li>
+  <li>A diferença entre Tailwind, Bootstrap e CSS escrito à mão.</li>
+  <li>O que mudou na versão 4, em poucas linhas.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a padaria quer uma vitrine</h2>
+
+<p>A Ana vende pão de queijo, pão francês e bolo de cenoura. O site tem três páginas: a inicial, a
+lista de produtos e o contato. Ela escreveu o HTML sozinha, com a ajuda de um vídeo, e o resultado
+funciona: o navegador mostra o título, os parágrafos, a lista de preços. O problema é o "funciona".
+A página não fica feia por falta de conteúdo, fica feia porque ninguém decidiu nada sobre a
+aparência. O navegador usa o padrão dele, e o padrão dele é o mais sem graça possível.</p>
+
+<p>Ela tentou resolver do jeito clássico. Abriu um arquivo chamado <code>estilo.css</code>, copiou
+um exemplo de um site, trocou a cor de fundo e — sem entender bem como — quebrou o menu. Voltou o
+arquivo antigo, respirou, e desistiu. Não é burrice: CSS tem um jeito próprio de funcionar, com
+nomes, seletores e uma tal de cascata, e ninguém explica isso devagar para quem está começando.</p>
+
+<p>O Tailwind entra exatamente nesse ponto. Ele não é um programa que você abre, nem um editor
+mágico. É uma ferramenta que escreve CSS por você a partir de nomes curtos que você coloca nas tags.
+Em vez de inventar um nome para cada coisa e manter dois arquivos sincronizados, você escolhe
+palavras prontas — <code>p-4</code>, <code>bg-amber-100</code>, <code>rounded-lg</code> — e a
+aparência aparece. Nesta aula vamos entender por que isso é útil antes de aprender a instalar.</p>
+
+<h2>2. O problema: a aparência mora longe do conteúdo</h2>
+
+<p>Para entender a proposta, vale ver como é o caminho tradicional. Você tem o conteúdo num arquivo e
+a aparência em outro. O arquivo de conteúdo aponta para o de aparência por um nome:</p>
+
+<pre class="file" data-file="estilo.css">.cartao {
+  padding: 24px;
+  background: #fef3c7;
+  border-radius: 8px;
+}
+.destaque {
+  color: #78350f;
+  font-weight: 600;
+}</pre>
+
+<pre class="file" data-file="index.html">&lt;div class="cartao"&gt;
+  &lt;p class="destaque"&gt;Pão de queijo — R$ 4,00&lt;/p&gt;
+&lt;/div&gt;</pre>
+
+<p>Funciona. Então onde está o incômodo? Ele aparece quando o site cresce. Primeiro, você precisa
+inventar nomes: <code>cartao</code>, <code>destaque</code>, <code>cartao-grande</code>,
+<code>cartao-promocao</code>. Um mês depois ninguém lembra o que é o quê. Segundo, cada regra
+repete as mesmas decisões: o âmbar <code>#fef3c7</code> aparece em doze lugares diferentes, e trocar
+o tom da padaria vira doze edições — com uma esquecida no meio. Terceiro, ninguém apaga nada, porque
+não dá para saber se aquela regra ainda é usada em alguma página. O arquivo só engorda.</p>
+
+<p>Há ainda o pulo mental. Você está olhando o HTML, vê uma caixa apertada, quer dar respiro, mas o
+respiro não está ali: está em outro arquivo, numa regra com um nome que talvez seja
+<code>.cartao</code> ou talvez seja <code>.box-produto</code>. Você sai do arquivo, procura, volta,
+recarrega. Cada ajuste pequeno custa duas viagens.</p>
+
+<p>Existe uma razão histórica para ser assim. O CSS nasceu para separar conteúdo de apresentação, e
+isso foi uma boa ideia quando o mesmo conteúdo precisava aparecer em papel, celular e leitor de tela.
+Só que a web de hoje pede mudanças rápidas e muitos estados — tela pequena, tela grande, mouse em
+cima, tema escuro. Manter a aparência longe do conteúdo ficou caro justamente nesses casos.</p>
+
+<h2>3. A virada: a aparência vai para o HTML</h2>
+
+<p>A proposta do Tailwind é simples de dizer e estranha de ver pela primeira vez: as decisões de
+aparência ficam no atributo <code>class</code>, junto do conteúdo. Cada nome é uma utilidade, ou
+seja, uma coisa só:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="p-6 bg-amber-100 rounded-lg"&gt;
+  &lt;p class="text-amber-900 font-semibold"&gt;Pão de queijo — R$ 4,00&lt;/p&gt;
+&lt;/div&gt;</pre>
+
+<p>Repare que os nomes não descrevem o objeto ("cartão", "destaque"). Eles descrevem o efeito:
+"respiro de 24 px", "fundo âmbar claro", "cantos arredondados", "texto âmbar escuro", "peso
+seminegrito". Quem lê o HTML entende a aparência sem abrir outro arquivo. Quem apaga uma página
+apaga junto as decisões dela, e não sobra lixo em lugar nenhum.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-amber-100);;css:#alvo|padding=8px">
+  <p class="try-task">A ficha do pão precisa de fundo âmbar claro e já tem 8 px de respiro em
+  <code>p-2</code>. <code>cartao</code> foi um nome que a Ana inventou e o Tailwind não conhece:
+  troque só ele pela utilidade que pinta o fundo, sem perder o respiro.</p>
+  <pre class="html">&lt;div id="alvo" class="p-2 cartao"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-2 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>O que aconteceu ali é a lição inteira em miniatura. Antes de rodar, o painel mostrava uma linha só,
+<code>padding: 8px</code>, vinda de <code>p-2</code>. De <code>cartao</code>, nada: esse nome não
+existe no catálogo, então nenhum CSS é gerado para ele. Depois da troca, aparece também o
+<code>background-color</code>. O Tailwind não adivinha, não corrige, não avisa: ele só conhece os
+nomes do catálogo dele. É por isso que a palavra tem de ser exata — e é por isso que decorar não é o
+caminho, e sim reconhecer o padrão dos nomes.</p>
+
+<p>Uma consequência prática: quando a Ana quer mudar o tom do cartão, ela muda uma palavra no HTML
+daquele cartão e vê o resultado na hora. Não há arquivo para abrir, regra para procurar, cache de CSS
+para culpar. É a mesma sensação de editar texto no processador de texto: você vê o que fez.</p>
+
+<h2>4. O catálogo: nomes curtos, decisões já tomadas</h2>
+
+<p>Os nomes parecem código secreto, mas seguem uma gramática pequena. Quase sempre são duas ou três
+partes: a família (o que está sendo mudado), o valor (quanto) e, às vezes, um modificador. O
+Tailwind não aceita qualquer número: ele usa escalas fixas, as mesmas em todo projeto. É aí que está
+o ganho escondido.</p>
+
+<dl class="anatomy">
+<dt>utilitária</dt>
+<dd>Uma classe que faz uma coisa só, como <code>p-4</code> (respiro interno) ou
+<code>text-amber-900</code> (cor da letra). Você junta várias no mesmo elemento.</dd>
+<dt>família</dt>
+<dd>O prefixo que diz o assunto: <code>p-</code> é espaço por dentro, <code>bg-</code> é fundo,
+<code>text-</code> é texto, <code>rounded-</code> é canto.</dd>
+<dt>escala</dt>
+<dd>A lista fechada de valores de uma família. No espaço vai de 0 a 96 em passos de 4 px; na cor vai
+de 50 (claro) a 950 (escuro).</dd>
+<dt>classe semântica</dt>
+<dd>O nome que descreve o objeto, como <code>.cartao</code> ou <code>.destaque</code>, e que costuma
+juntar várias propriedades. É o jeito antigo, e ele não morreu: só deixou de ser o padrão.</dd>
+<dt>design system</dt>
+<dd>O conjunto de decisões repetidas — as cores, os espaços, os tamanhos de letra. No Tailwind ele já
+vem pronto; no CSS à mão, você precisa inventar e manter o seu.</dd>
+</dl>
+
+<p>Volte ao exemplo do começo e compare. No CSS à mão, o âmbar claro era um número hexadecimal
+copiado em doze lugares. No Tailwind, é o degrau <code>100</code> de uma paleta chamada
+<code>amber</code>. Se amanhã a padaria quiser um âmbar mais quente, você troca a paleta inteira num
+lugar só e todas as páginas acompanham. E, mais importante para quem está começando: você não precisa
+escolher 12 px ou 13 px. Os degraus são 12 e 16, e escolher entre eles é uma decisão que você
+consegue explicar.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-amber-900);;rule:color: var(--color-amber-50);;texto:Últimas encomendas">
+  <p class="try-task">O aviso de encomendas ficou sem contraste. Use o tom mais escuro da paleta no
+  fundo (<code>bg-amber-900</code>) e o mais claro na letra (<code>text-amber-50</code>).</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-100 text-amber-900"&gt;Últimas encomendas&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.962 0.059 95.617)
+color: oklch(0.414 0.112 45.904)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-amber-900 text-amber-50"&gt;Últimas encomendas&lt;/div&gt;</pre>
+</div>
+
+<p>O painel vai mostrar duas linhas de cor escritas em <code>oklch(...)</code>, um jeito moderno de
+escrever cor com três números: claridade, saturação e o ângulo do tom. Não é preciso calcular nada.
+O que importa é a ideia: os tons de uma paleta são parentes entre si, então qualquer combinação de
+50 com 900 tem contraste suficiente para ler. É esse tipo de decisão que o catálogo entrega de
+graça.</p>
+
+<h2>5. Não é mágica: é CSS</h2>
+
+<p>Aqui vale desfazer a confusão mais comum. O Tailwind não inventou uma linguagem nova, nem manda o
+navegador fazer algo especial. Ele escreve CSS comum, do tipo que você poderia escrever à mão, e
+entrega esse CSS para o navegador. Duas das classes acima viram isto:</p>
+
+<pre class="term" data-title="CSS gerado">.bg-amber-100 {
+  background-color: var(--color-amber-100);
+}
+.p-4 {
+  padding: calc(var(--spacing) * 4);
+}</pre>
+
+<p>É CSS de verdade, com variáveis. <code>--color-amber-100</code> guarda o tal âmbar claro e
+<code>--spacing</code> guarda 0,25 rem. O navegador resolve as contas como sempre resolveu. A
+diferença é que você não escreveu essas regras: alguém já escreveu, uma vez, para todo mundo, e o
+Tailwind só inclui na sua página as que você usou.</p>
+
+<div class="trytailwind" data-goal="rule:border-radius: var(--radius-lg);;css:#alvo|padding=16px">
+  <p class="try-task">Arredonde os cantos do cartão com <code>rounded-lg</code> e clique em Rodar
+  para ler o painel. O respiro de 16 px tem de continuar lá.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-100 p-4"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-amber-100 p-4 rounded-lg"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>border-radius: 8px</code> — o valor já resolvido, porque é isso que o
+navegador aplicou de fato. Ele mostra também o <code>padding: 16px</code>, que já estava lá antes. É
+uma boa imagem do que o Tailwind faz: soma características pequenas, cada uma responsável por uma
+propriedade, e nenhuma atrapalha a outra.</p>
+
+<p>Há um detalhe que tranquiliza quem vem do CSS à mão: todas as utilitárias têm o mesmo peso na
+cascata, porque são seletores de uma classe só. Isso significa que não existe briga de
+especificidade, aquele jogo de <code>.cartao p</code> contra <code>#conteudo .cartao</code>. Existe
+uma ordem — a da folha gerada — e você vai aprender a conviver com ela sem drama. Por enquanto,
+basta saber que não há truque: é CSS bem organizado, gerado a partir dos nomes que você escreveu.</p>
+
+<h2>6. O que o Tailwind não é</h2>
+
+<p>Boa parte da decepção com o Tailwind vem de esperar dele a coisa errada. Ele não traz uma página
+pronta, não tem um botão bonito embutido e não deixa o site bonito sozinho. O que ele traz é um
+vocabulário para você construir. As afirmações abaixo são as que mais aparecem:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que se diz por aí</th><th>O que é de verdade</th></tr>
+<tr><td>"é um kit de componentes"</td><td>não vem com card, menu ou botão prontos; vem com as peças para montá-los</td></tr>
+<tr><td>"é JavaScript"</td><td>é CSS; o navegador não roda script nenhum por causa dele</td></tr>
+<tr><td>"é um tema com cara própria"</td><td>a cara vem das suas escolhas de cor, espaço e tipo; a paleta padrão é só um ponto de partida</td></tr>
+<tr><td>"é estilo escrito na tag"</td><td><code>style=""</code> é valor solto; a classe aceita variações e pode ser trocada de um lugar só</td></tr>
+<tr><td>"dá para usar sem saber CSS"</td><td>dá para começar, mas cada utilitária é uma propriedade de CSS; saber o que ela faz é o que evita o chute</td></tr>
+</table>
+</div>
+
+<p>A última linha é a mais importante para a Ana. O Tailwind encurta o caminho, mas não elimina o
+assunto: <code>p-6</code> é <em>padding</em>, <code>bg-</code> é <em>background</em>, e saber
+traduzir essas palavras é o que permite prever o resultado antes de salvar. O guia inteiro é essa
+tradução, uma palavra por vez. O que o Tailwind elimina é o trabalho chato: inventar nomes,
+sincronizar arquivos, caçar por que a regra não pegou.</p>
+
+<p>Também não espere que ele resolva layout sozinho. Duas caixas lado a lado continuam exigindo uma
+decisão sua — flex, grid, largura, ordem. O Tailwind escreve a decisão em uma palavra
+(<code>flex</code>, <code>grid</code>, <code>gap-4</code>), mas a decisão é sua. Ferramenta boa não
+substitui o desenho; ela só para de atrapalhar.</p>
+
+<h2>7. Tailwind, Bootstrap e CSS à mão</h2>
+
+<p>Existem três caminhos para dar aparência a uma página, e eles não são equivalentes. O CSS à mão dá
+controle total e cobra o preço dos nomes. Um kit como o Bootstrap entrega componentes prontos com
+opinião — o botão, o menu, o alerta já vêm desenhados — e cobra o preço de brigar com a opinião
+quando o seu desenho é diferente. O Tailwind entrega ferramentas e cobra o preço de escrever mais no
+HTML.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Caminho</th><th>O que você escreve</th><th>Quem decide o visual</th><th>Trocar depois</th></tr>
+<tr><td>CSS à mão</td><td>regras com nomes inventados por você</td><td>você, do zero</td><td>editar cada regra que repete a decisão</td></tr>
+<tr><td>Bootstrap</td><td>classes prontas de componente</td><td>o kit, com ajustes seus</td><td>trocar de tema ou sobrescrever o kit</td></tr>
+<tr><td>Tailwind</td><td>utilitárias pequenas, no HTML</td><td>você, com escalas prontas</td><td>trocar a classe ou a escala num lugar só</td></tr>
+</table>
+</div>
+
+<p>Não existe vencedor absoluto. Um site institucional simples pode ficar pronto mais rápido com um
+kit. Um time que já domina CSS pode preferir escrever à mão. O Tailwind brilha quando a página muda
+muito — muitos estados, muitos tamanhos de tela, muitos componentes parecidos — porque cada mudança
+fica escrita onde ela acontece, e não espalhada em regras distantes.</p>
+
+<h2>8. A versão 4, em poucas linhas</h2>
+
+<p>Esta é a versão que o guia usa: a 4, lançada em 2025. Ela reescreveu o motor de geração, ficou bem
+mais rápida e — o que interessa a quem começa — tirou configuração do caminho. Antes era preciso um
+arquivo <code>tailwind.config.js</code>; agora a configuração é o próprio CSS, com o comando
+<code>@theme</code>:</p>
+
+<pre class="term" data-title="src/input.css">@import "tailwindcss";
+
+@theme {
+  --color-padaria: #b45309;
+}</pre>
+
+<p>São duas linhas de CSS que dizem "use o Tailwind" e "esta é a cor da padaria". O resto — paleta,
+escala de espaço, tamanhos de letra — já vem embutido. A versão 4 também passou a procurar sozinha os
+arquivos do projeto em que as classes aparecem, e adotou cores no espaço <code>oklch</code>, que
+aparecem mais vivas nas telas modernas. Se você já viu tutoriais antigos com
+<code>tailwind.config.js</code>, saiba que aquilo ainda funciona, mas não é mais o caminho normal.</p>
+
+<p>Instalar é o assunto de <a href="instalando.html">uma aula inteira</a>, e a mecânica de geração
+tem <a href="como-funciona.html">outra aula só para ela</a>. Aqui o importante é o modelo mental: uma
+linha manda o Tailwind olhar seus arquivos, e ele devolve um CSS pequeno com as classes que você
+escreveu. Nada de arquivo gigante com coisas que a página nem usa.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: "vou ter de decorar trezentas classes?"</h3>
+<p>A Ana viu a documentação, rolou a lista e assustou-se. Não precisa. Uma padaria como a dela vive
+com umas trinta: espaço, cor de fundo e de texto, tamanho de letra, peso, borda, canto, largura.
+As outras aparecem quando a página pede, e a documentação é uma lista de consulta, não um dever de
+memória. O que se decora é o padrão: família, traço, valor. Depois de duas semanas, você chuta
+<code>p-6</code> e acerta.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: "não quero que meu site pareça feito com Tailwind"</h3>
+<p>Não existe "o visual do Tailwind" — existem oito ou nove tons de cada cor e uma escala de espaço
+comum, e o desenho nasce da sua escolha entre eles. Dois sites feitos com Tailwind podem ser
+completamente diferentes. O que deixa sites parecidos é outra coisa: todo mundo usa as mesmas fontes
+do sistema e a mesma sombra leve. Escolher cor, tipografia e espaçamento com intenção resolve isso —
+e é o que a Ana vai fazer com o âmbar da padaria.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: "o HTML ficou enorme e ilegível"</h3>
+<p>Essa crítica é justa e tem resposta. No começo, três a seis classes por elemento bastam; se a
+linha ficar longa, quebre o atributo em várias linhas, que o HTML aceita. Quando o mesmo conjunto de
+utilitárias se repete em dez lugares, a resposta não é esconder o CSS: é extrair um componente — uma
+decisão que o guia só toma mais tarde, quando ela já souber o que está repetindo. Antes disso,
+repetir é mais claro do que abstrair.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que o Tailwind entrega, no fim das contas?</p>
+<label><input type="radio" name="q1"> uma linguagem nova que o navegador aprendeu a ler</label>
+<label><input type="radio" name="q1"> um catálogo de classes prontas que viram CSS comum</label>
+<label><input type="radio" name="q1"> um programa que desenha a página por você</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que acontece quando você usa uma classe que não
+existe no catálogo, como <code>cartao</code>?</p>
+<label><input type="radio" name="q2"> o navegador mostra um aviso em vermelho</label>
+<label><input type="radio" name="q2"> o Tailwind inventa uma regra parecida</label>
+<label><input type="radio" name="q2"> nada: nenhum CSS é gerado e o elemento fica como estava</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Qual é a diferença central entre o Tailwind e um
+kit como o Bootstrap?</p>
+<label><input type="radio" name="q3"> o kit entrega componentes com opinião; o Tailwind entrega peças para montar</label>
+<label><input type="radio" name="q3"> o Tailwind é mais rápido porque não usa CSS</label>
+<label><input type="radio" name="q3"> o kit funciona no celular e o Tailwind não</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a ficha do pão</h2>
+<p>A ficha já tem a cor da letra. Falta o fundo âmbar claro. Complete a classe que pinta o fundo:</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="bg-amber-100" placeholder="..."> text-amber-900"&gt;Pão de queijo — R$ 4,00&lt;/div&gt;</div>
+<p class="ex-dica">Dica: a família do fundo é <code>bg</code>, o nome da cor é <code>amber</code> e
+o tom clarinho é o <code>100</code>. Três pedaços, dois hífens.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O Tailwind é um catálogo de classes utilitárias que gera CSS comum a partir dos nomes que você
+escreve no HTML. Ele existe para resolver o cansaço do CSS à mão: nomes inventados, decisões
+repetidas em vários lugares, arquivos que ninguém ousa apagar. Em troca, ele pede que a aparência
+more junto do conteúdo e que você aceite as escalas prontas de espaço, cor e tamanho — que é
+justamente o que faz um site parecer coerente.</p>
+
+<p>Não é mágica, não é JavaScript e não é um kit de componentes. É CSS com variáveis, organizado por
+famílias e valores, gerado sob medida para as classes que você usou. Isso explica por que uma classe
+inexistente não faz nada — e por que vale conferir o resultado em vez de adivinhar. Instalar e ver
+funcionando é o próximo passo; entender a ideia era o passo de hoje.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Tailwind é ferramenta de CSS: entram classes, saem regras de CSS.</li>
+<li>A aparência fica no atributo <code>class</code>, junto do conteúdo.</li>
+<li>Cada utilitária faz uma coisa só; você junta várias no mesmo elemento.</li>
+<li>O nome segue um padrão: família, traço, valor (<code>bg-amber-100</code>).</li>
+<li>Os valores são degraus de escala, não números livres.</li>
+<li>Classe fora do catálogo não gera CSS e não avisa nada.</li>
+<li>Uma classe usada em dez elementos gera uma regra só.</li>
+<li>O catálogo traz decisões prontas: paleta, espaço, tipografia, cantos.</li>
+<li>Não é kit de componentes, não é JavaScript, não substitui entender CSS.</li>
+<li>A versão 4 se configura com CSS (<code>@theme</code>), sem arquivo JS.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

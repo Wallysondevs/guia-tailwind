@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Como Ele Funciona | Guia Tailwind</title>
+<meta name="description" content="Como o Tailwind funciona por dentro: ele lê os nomes de classe dos seus arquivos, gera só o CSS que você usa e entrega isso ao navegador como uma folha comum.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Como Ele <span class="hl">Funciona</span></h1>
+<p class="intro">A Ana já entendeu que o Tailwind é um catálogo de nomes que viram CSS. A pergunta
+dela agora é outra, e é bem mais curiosa: "mas quem é que escreve esse CSS?". Ela nunca viu um
+arquivo com <code>.bg-amber-100</code> dentro, nunca rodou comando nenhum e, ainda assim, a caixa
+desta página desenha o cartão colorido quando ela clica em Rodar. Nesta aula ela descobre o caminho
+inteiro: o Tailwind lê os nomes que estão escritos nos arquivos, gera uma regra para cada nome que
+conhece, e entrega ao navegador uma folha de estilo comum. Nada de mágica, nada de JavaScript
+rodando na página.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Os três passos do caminho: ler, gerar e aplicar.</li>
+  <li>Por que o Tailwind lê texto de arquivo, e não executa o seu código.</li>
+  <li>Por que só o CSS das classes usadas é gerado — e por que isso deixa a página leve.</li>
+  <li>Uma regra serve para todos os elementos que usam a mesma classe.</li>
+  <li>Por que a ordem em que você escreve as classes no HTML não decide nada.</li>
+  <li>O que acontece quando você para de usar uma classe.</li>
+  <li>As camadas do CSS e por que a utilitária vence o estilo padrão do navegador.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o CSS que ninguém escreveu</h2>
+
+<p>A Ana abre a página da padaria no navegador e clica com o botão direito, em Inspecionar. Espia a
+aba <em>Styles</em> esperando encontrar um arquivo chamado <code>estilo.css</code> com as regras que
+ela conhece. Em vez disso, encontra uma folha com dezenas de regras curtas, todas com nomes que ela
+reconhece do HTML: <code>.bg-amber-100</code>, <code>.p-6</code>, <code>.rounded-lg</code>. Nenhuma
+delas foi digitada por ela.</p>
+
+<p>Quem digitou foi um programa. E é aí que a maioria das dúvidas nasce: se eu não escrevi esse CSS,
+quando ele foi escrito? Ele é escrito quando você salva o HTML e roda o comando que gera o CSS — ou,
+nas caixas deste guia, quando você clica em Rodar. O programa lê os seus arquivos, encontra os nomes
+de classe e produz o CSS correspondente. Esse produto é o que o navegador recebe. O navegador nunca
+soube o que é Tailwind: para ele, é uma folha de estilo como qualquer outra.</p>
+
+<p>Entender esse caminho não é curiosidade de programador. Quase todo problema de "a classe não
+funciona" nasce em um dos três passos, e saber qual é o passo poupa horas. Se o nome não está escrito
+em lugar nenhum que o programa leia, o CSS não existe. Se existe, mas está velho, a página mostra o
+desenho antigo. Vamos passo a passo.</p>
+
+<h2>2. O caminho em três passos</h2>
+
+<p>O caminho é sempre o mesmo, do começo ao fim:</p>
+
+<ul>
+<li><strong>Ler.</strong> O Tailwind percorre os arquivos do projeto e anota todo nome de classe que
+encontra no texto.</li>
+<li><strong>Gerar.</strong> Para cada nome que ele conhece, escreve a regra de CSS correspondente —
+uma vez por nome, não uma vez por uso.</li>
+<li><strong>Aplicar.</strong> O navegador carrega essa folha e desenha os elementos que têm aquelas
+classes, exatamente como faria com qualquer CSS.</li>
+</ul>
+
+<p>Repare no que <em>não</em> está na lista: nenhum passo pergunta "qual é o estilo do cartão?". O
+Tailwind não tem ideia do que seja um cartão. Ele só vê nomes soltos — <code>p-6</code>,
+<code>bg-amber-100</code> — e devolve as regras desses nomes. Quem monta o desenho é você, juntando
+os nomes. É por isso que duas páginas com as mesmas classes ficam iguais e duas páginas com classes
+diferentes podem não ter nada em comum.</p>
+
+<dl class="anatomy">
+<dt>gerador</dt>
+<dd>O programa que faz os dois primeiros passos: lê os arquivos e escreve a folha. Não desenha nada e
+não avalia a sua página.</dd>
+<dt>arquivo-fonte</dt>
+<dd>Qualquer arquivo que ele percorre procurando nomes: o HTML, o JavaScript, o CSS de entrada. Fora
+dessa lista, nada é visto.</dd>
+<dt>regra</dt>
+<dd>Um seletor e as declarações dele. <code>.p-2</code> com <code>padding</code> é uma regra; três
+elementos usando <code>p-2</code> continuam gerando uma regra só.</dd>
+<dt>folha gerada</dt>
+<dd>O arquivo de CSS que sai do gerador e é ligado na página. É o que o navegador carrega — e o que
+fica velho quando o comando não roda.</dd>
+<dt>camada</dt>
+<dd>Um grupo de regras com prioridade definida: <em>theme</em>, <em>base</em>, <em>components</em> e
+<em>utilities</em>, nesta ordem.</dd>
+</dl>
+
+<p>Nas caixas deste guia, o passo de ler e gerar acontece dentro do navegador, para você ver o
+resultado na hora. No projeto de verdade, ele acontece num comando que você roda no terminal e que
+pode ficar vigiando os arquivos enquanto você trabalha. A aula de instalação mostra esse comando; o
+que importa agora é que o resultado é o mesmo: um arquivo de CSS com as regras dos nomes usados.</p>
+
+<h2>3. Passo 1: ele lê texto, não executa o seu código</h2>
+
+<p>Essa é a parte que mais confunde, então vale dizer com todas as letras: o Tailwind não abre a sua
+página no navegador, não espera o JavaScript rodar e não olha o que apareceu na tela. Ele lê os
+arquivos como texto, procurando padrões que pareçam nome de classe. É rápido justamente por isso —
+ele não precisa entender a sua aplicação, só o texto dela.</p>
+
+<p>Na versão 4 ele também descobre sozinho onde procurar: percorre a pasta do projeto, ignora o que
+está listado no <code>.gitignore</code> (como <code>node_modules</code>) e ignora arquivos binários,
+como imagens. Você não precisa entregar uma lista de arquivos, como se fazia em versões antigas. O
+preço dessa comodidade é justamente o que vimos acima: se o arquivo está fora da pasta do projeto — um
+rascunho em outra pasta, uma página copiada para a área de trabalho — ele fica invisível para o
+gerador, e nenhuma classe dele vira CSS.</p>
+
+<p>A consequência é direta: o que não está escrito, não existe. Se a classe é montada em pedaços, o
+programa vê os pedaços, não o resultado:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="p-{{ tamanho }}"&gt;Pão quentinho&lt;/div&gt;</pre>
+
+<p>Nesse exemplo, o leitor anota <code>p-</code> e <code>tamanho</code> — e nenhum dos dois é uma
+classe do catálogo. O CSS do respiro não é gerado, e no navegador a classe final,
+<code>p-6</code>, existe no HTML mas não tem regra nenhuma. O silêncio é total: nem erro, nem aviso.
+A solução é escrever as classes por inteiro e escolher entre elas na hora de montar a página.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Onde o nome está</th><th>O Tailwind vê?</th><th>Por quê</th></tr>
+<tr><td>no <code>class</code> de uma tag do HTML</td><td>sim</td><td>é o caso normal, texto puro no arquivo</td></tr>
+<tr><td>montado por código, em pedaços</td><td>não</td><td>os pedaços não formam um nome do catálogo</td></tr>
+<tr><td>dentro de um comentário do arquivo</td><td>sim</td><td>ele lê texto; comentário também é texto</td></tr>
+<tr><td>num arquivo fora da pasta do projeto</td><td>não</td><td>ele só percorre o que está no projeto</td></tr>
+<tr><td>com uma letra trocada</td><td>não</td><td>o nome não bate com nenhum do catálogo</td></tr>
+</table>
+</div>
+
+<p>Guarde a linha do comentário: ela explica por que às vezes o CSS tem uma regra que ninguém usa. Não
+é bug. O programa é burro de propósito — compara letras, não adivinha intenção. E é essa simplicidade
+que faz ele ser rápido o bastante para rodar a cada salvamento.</p>
+
+<h2>4. Passo 2: uma regra por nome, não por uso</h2>
+
+<p>Agora a parte elegante. Suponha que a Ana use <code>rounded-lg</code> em três fichas de pão. O
+Tailwind não escreve três regras: escreve uma, com o seletor <code>.rounded-lg</code>, que serve a
+qualquer elemento que tenha essa classe. É o mesmo princípio do CSS de sempre — a classe é um nome
+compartilhado — só que agora você não precisa inventar o nome nem manter a regra em outro arquivo.</p>
+
+<div class="trytailwind" data-goal="conta:.rounded-lg=3;;css:#alvo|border-radius=8px">
+  <p class="try-task">As três fichas de pão precisam do mesmo canto arredondado. A primeira já tem
+  <code>rounded-lg</code>; aplique a mesma classe nas outras duas e clique em Verificar.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-100 p-2 rounded-lg"&gt;Pão francês&lt;/div&gt;
+&lt;div class="bg-amber-100 p-2"&gt;Pão de queijo&lt;/div&gt;
+&lt;div class="bg-amber-100 p-2"&gt;Bolo de cenoura&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: oklch(0.962 0.059 95.617)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-amber-100 p-2 rounded-lg"&gt;Pão francês&lt;/div&gt;
+&lt;div class="bg-amber-100 p-2 rounded-lg"&gt;Pão de queijo&lt;/div&gt;
+&lt;div class="bg-amber-100 p-2 rounded-lg"&gt;Bolo de cenoura&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, repare no tamanho do que foi gerado: uma regra de canto arredondado, uma de fundo,
+uma de respiro — não importa se cada uma aparece em uma ficha ou em cinquenta. É por isso que uma
+página cheia de utilitárias não pesa o que parece. O CSS cresce com o número de nomes
+<em>diferentes</em>, e não com o número de elementos.</p>
+
+<p>Essa contagem vale também para o seu projeto: se você usar quarenta nomes, o arquivo terá umas
+quarenta regras curtas, mais o pequeno conjunto de variáveis e o reset. Uma biblioteca de componentes
+tradicional costuma entregar a folha inteira, com todos os componentes, mesmo os que a página não
+usa. A diferença é grande, e é a razão de o Tailwind ter ficado popular em sites com muitas
+páginas.</p>
+
+<h2>5. Passo 3: o navegador recebe CSS comum</h2>
+
+<p>Nada de especial chega ao navegador. O que chega é uma folha de estilo com esta cara:</p>
+
+<pre class="term" data-title="CSS gerado">.bg-amber-100 {
+  background-color: var(--color-amber-100);
+}
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+.p-2 {
+  padding: calc(var(--spacing) * 2);
+}</pre>
+
+<p>São três regras, cada uma com uma propriedade, e um punhado de variáveis no topo do arquivo
+(<code>--color-amber-100</code>, <code>--radius-lg</code>, <code>--spacing</code>). O navegador
+resolve as contas e desenha. Quando você lê o painel da caixa e vê <code>border-radius: 8px</code>,
+está vendo o resultado dessa conta — não o texto que o Tailwind escreveu.</p>
+
+<p>Isso explica duas coisas que assustam quem começa. Primeiro, as cores que aparecem como
+<code>oklch(0.962 0.059 95.617)</code> no painel: é o âmbar claro escrito do jeito que o navegador
+gosta, e não um erro. Segundo, o painel só mostrar o que mudou: ele compara o elemento com uma cópia
+sem classe, então propriedades que já eram iguais não aparecem. Se o painel está vazio, nenhuma
+classe daquele elemento gerou diferença — informação útil, não defeito.</p>
+
+<h2>6. A ordem que decide é a do CSS, não a sua</h2>
+
+<p>Chegamos ao ponto que mais causa discussão. Todas as utilitárias têm o mesmo peso: são seletores de
+uma classe só. Quando duas classes mexem na mesma propriedade, o navegador não olha qual você escreveu
+por último no HTML — olha qual regra aparece por último <em>na folha gerada</em>. E a ordem da folha é
+decidida pelo Tailwind, seguindo uma sequência interna dele.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-radius=8px;;conta:.rounded-sm=0">
+  <p class="try-task">A ficha deveria ter cantos de 8 px. A Ana escreveu <code>rounded-sm</code>
+  primeiro e <code>rounded-lg</code> depois, achando que a última venceria. Deixe só a classe que
+  dá o canto certo.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-100 p-2 rounded-sm rounded-lg"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: oklch(0.962 0.059 95.617)
+border-radius: 4px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-amber-100 p-2 rounded-lg"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>border-radius: 4px</code> antes, mesmo com <code>rounded-lg</code> escrito
+por último. Quem venceu foi a regra de <code>rounded-sm</code>, porque o Tailwind gerou os cantos
+pequenos depois dos grandes. Isso não é capricho: a ordem interna existe para que combinações
+previsíveis funcionem — borda depois de fundo, por exemplo. O efeito colateral é que você não controla
+nada pela posição no atributo.</p>
+
+<p>A regra prática que resolve é simples: <strong>uma propriedade, uma classe</strong>. Se o canto
+precisa ser 8 px, escreva só <code>rounded-lg</code>. Quando quiser variar por tamanho de tela ou por
+estado do mouse, use as variações próprias para isso — <code>md:rounded-xl</code>,
+<code>hover:rounded-none</code> — que têm assunto próprio mais adiante. Empilhar duas classes da
+mesma família é apostar na sorte.</p>
+
+<p>E não dá para deduzir a ordem interna de cabeça. Estes três casos mostram por que a aposta é ruim:
+em cada linha, a segunda classe foi gerada antes ou depois da primeira, e o resultado não segue a
+ordem em que você digitou.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Duas classes no mesmo elemento</th><th>O que acontece</th><th>Conclusão</th></tr>
+<tr><td><code>p-2</code> e <code>p-6</code></td><td>vale 24 px, em qualquer ordem</td><td><code>p-6</code> é gerado depois</td></tr>
+<tr><td><code>rounded-sm</code> e <code>rounded-lg</code></td><td>vale 4 px, mesmo com <code>rounded-lg</code> por último</td><td><code>rounded-sm</code> é gerado depois</td></tr>
+<tr><td><code>text-sm</code> e <code>text-2xl</code></td><td>vale 14 px, mesmo com <code>text-2xl</code> por último</td><td>a ordem não é "do menor para o maior"</td></tr>
+</table>
+</div>
+
+<p>Se você guardar uma coisa desta seção, guarde esta: não existe posição no atributo que garanta
+vitória. A conversa sobre quem vence é sempre sobre a folha gerada, e a única forma de não depender
+dela é não ter duas classes disputando a mesma propriedade.</p>
+
+<h2>7. A folha encolhe quando você para de usar</h2>
+
+<p>O terceiro passo tem uma consequência que a Ana vai adorar: o CSS acompanha o uso. Se ela apaga uma
+classe do HTML e roda o comando de novo, a regra daquela classe simplesmente não é gerada. Nada de
+arquivo morto acumulando, nada de limpeza manual no fim do projeto.</p>
+
+<div class="trytailwind" data-goal="conta:.bg-amber-100=0;;css:#alvo|padding=16px">
+  <p class="try-task">A ficha do pão passou a usar o fundo da página, sem cor própria. Apague a
+  classe de fundo e deixe o respiro: o painel deve perder a linha do <code>background-color</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-100 p-4"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>Compare o painel antes e depois: a linha do fundo sumiu, a do respiro ficou. No projeto, o mesmo
+acontece com a folha inteira — a regra deixa de existir porque nenhum arquivo pede mais por ela. É
+essa característica que faz o CSS de um site grande ficar em dezenas de kilobytes em vez de
+centenas.</p>
+
+<p>Vale notar o outro lado: como o CSS é gerado a partir do texto, ele também não sabe se a classe é
+útil. Uma classe escrita num comentário, num trecho de exemplo ou numa página que você nem usa mais
+gera regra do mesmo jeito. Não é problema de desempenho — são bytes — mas é bom saber por que às vezes
+aparece uma regra órfã na inspeção.</p>
+
+<h2>8. As camadas: por que a utilitária ganha do padrão</h2>
+
+<p>Falta explicar por que <code>p-4</code> funciona mesmo quando o navegador já tem uma opinião sobre
+espaçamento. A resposta está nas camadas do CSS. A versão 4 organiza a folha em quatro camadas, nesta
+ordem:</p>
+
+<pre class="term" data-title="CSS gerado">@layer theme, base, components, utilities;</pre>
+
+<p>A camada <em>theme</em> guarda as variáveis (cores, espaços, fontes). A <em>base</em> traz o
+pequeno reset que zera margens e deixa o desenho neutro. <em>components</em> é onde ficam estilos de
+conjunto, se você criar algum. <em>utilities</em> é a última — e, no CSS, quem vem depois ganha
+quando o peso é o mesmo. Resultado: a sua utilitária sempre vence o reset e os estilos de conjunto,
+sem precisar de <code>!important</code> nem de seletor comprido.</p>
+
+<p>É por isso que <code>m-0</code> realmente zera a margem que o navegador dava ao parágrafo, e por
+que <code>p-6</code> não briga com nada. Você não precisa decorar as quatro camadas. Precisa saber que
+existe uma ordem pensada e que a utilitária fica no fim: quando algo não pega, o suspeito raramente é
+a camada — quase sempre é o nome errado ou o CSS velho.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: "mudei o HTML e a página não mudou"</h3>
+<p>Três suspeitos, nesta ordem. O comando que gera o CSS não está rodando (ou não foi executado depois
+do salvamento) — o arquivo está velho. O navegador guardou a folha antiga no cache — recarregue com
+Ctrl + Shift + R. Ou você editou um arquivo que o Tailwind não lê, como uma cópia fora da pasta do
+projeto. Nas caixas do guia, o equivalente é não ter clicado em Rodar depois de editar.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: "a classe está no HTML e mesmo assim não aparece"</h3>
+<p>Se o nome está escrito e o CSS não existe, desconfie do nome: uma letra trocada, um hífen no lugar
+do traço, maiúscula onde devia ser minúscula. O Tailwind não corrige e não avisa. A conferência rápida
+é comparar com a solução da caixa, letra por letra, e olhar o painel: se a propriedade não aparece, a
+regra não foi gerada. O segundo suspeito é o tal nome montado em pedaços, que nunca chega inteiro ao
+leitor de arquivos.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: "o cartão mudou de tamanho sozinho quando eu reordenei as classes"</h3>
+<p>Sintoma clássico de duas classes da mesma família no mesmo elemento. Reordenar não muda nada por
+si; o que muda é que, ao editar, uma delas saiu sem querer. A cura é a mesma de sempre: uma
+propriedade, uma classe. Se precisar de valores diferentes por tela, use as variações
+(<code>p-4 md:p-8</code>) em vez de empilhar.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Como o Tailwind descobre quais classes a sua página
+usa?</p>
+<label><input type="radio" name="q1"> abre a página no navegador e lê o que apareceu na tela</label>
+<label><input type="radio" name="q1"> lê os arquivos como texto e anota os nomes que reconhece</label>
+<label><input type="radio" name="q1"> executa o JavaScript da página até achar as classes</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Duas classes da mesma propriedade no mesmo
+elemento: quem vence?</p>
+<label><input type="radio" name="q2"> a que foi escrita primeiro no atributo <code>class</code></label>
+<label><input type="radio" name="q2"> a que foi escrita por último no atributo <code>class</code></label>
+<label><input type="radio" name="q2"> a regra que o Tailwind gerou por último na folha</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que o navegador recebe no fim do caminho?</p>
+<label><input type="radio" name="q3"> uma folha de CSS comum, com as regras das classes usadas</label>
+<label><input type="radio" name="q3"> um programa que desenha a página em tempo de execução</label>
+<label><input type="radio" name="q3"> o HTML com os estilos escritos em <code>style=""</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: da regra para a classe</h2>
+<p>O CSS gerado tem a regra abaixo. Escreva no HTML a classe que a produziu:</p>
+<div class="ex-code">&lt;p class="<input aria-label="resposta 1" data-answer="text-center" placeholder="...">"&gt;Pão quentinho às 6h&lt;/p&gt;</div>
+<p class="ex-dica">Dica: a propriedade é <code>text-align</code>, o valor é <code>center</code>. A
+família do texto é <code>text</code> e o valor entra depois de um hífen, sem espaço.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O Tailwind é um gerador de CSS em três passos. Ele lê os arquivos do projeto como texto e anota os
+nomes de classe; para cada nome que conhece, escreve uma regra — uma só, mesmo que a classe apareça
+em cinquenta elementos; e entrega essa folha ao navegador, que não sabe nem se importa de onde ela
+veio.</p>
+
+<p>Como a leitura é textual, o nome precisa estar escrito por inteiro em algum arquivo que o programa
+percorra. Como a geração é sob demanda, a folha tem exatamente o tamanho do uso — e encolhe quando
+você deixa de usar uma classe. E como todas as utilitárias têm o mesmo peso, quem decide a briga entre
+duas classes da mesma propriedade é a ordem da folha gerada, e não a ordem do seu HTML. A saída
+continua sendo a mesma: uma propriedade, uma classe.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>O caminho é ler, gerar e aplicar — nessa ordem, sempre.</li>
+<li>A leitura é de texto: ele não executa o seu código nem olha a tela.</li>
+<li>Classe montada em pedaços não existe para o gerador.</li>
+<li>Classe desconhecida é ignorada em silêncio: sem erro, sem aviso.</li>
+<li>Uma regra serve a todos os elementos que usam a mesma classe.</li>
+<li>O CSS cresce com o número de nomes diferentes, não de elementos.</li>
+<li>A folha encolhe quando você apaga a classe do HTML.</li>
+<li>Entre duas classes da mesma propriedade, vence a última regra gerada.</li>
+<li>Utilitárias ficam na última camada, por isso vencem o reset do navegador.</li>
+<li>Nada de Tailwind chega ao navegador: ele recebe CSS comum.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

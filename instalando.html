@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instalando | Guia Tailwind</title>
+<meta name="description" content="Como instalar o Tailwind no seu projeto: as duas estradas (sem build e com npm), o CSS de entrada, o comando que gera a folha e as três provas de que deu certo.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Instalando</span> o Tailwind</h1>
+<p class="intro">Até agora a Ana viu o Tailwind funcionando nas caixas do guia, onde ele já está
+instalado e compila sozinho. Mas o site dela não mora numa caixa: mora numa pasta em
+<code>/home/ana/padaria</code>, com três arquivos HTML. Nesta aula ela leva o Tailwind para lá. São
+duas estradas — uma sem instalar nada, outra com alguns comandos no terminal — e a Ana vai percorrer as
+duas para entender quando cada uma serve. No fim, ela faz as três provas que mostram, sem dúvida, que
+o CSS gerado está chegando na página.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que significa "instalar" o Tailwind, na prática.</li>
+  <li>A estrada sem build, com uma linha de script no HTML.</li>
+  <li>A estrada com npm: Node, dois pacotes e um comando.</li>
+  <li>O papel do CSS de entrada e o do CSS gerado.</li>
+  <li>O que faz cada pedaço do comando <code>-i</code>, <code>-o</code> e <code>--watch</code>.</li>
+  <li>Como ligar a folha gerada na página com uma tag <code>link</code>.</li>
+  <li>Os quatro tropeços clássicos da primeira instalação.</li>
+</ul>
+</div>
+
+<h2>1. A cena: do guia para o projeto dela</h2>
+
+<p>A Ana entendeu a ideia e já sabe escrever meia dúzia de utilitárias. O problema é que, no projeto
+dela, nada acontece: ela abre o <code>index.html</code> da padaria, escreve
+<code>class="p-4 bg-amber-100"</code>, salva, recarrega — e o cartão continua sem respiro e sem cor.
+Nas caixas do guia funcionava. Por que ali não?</p>
+
+<p>Porque o guia injeta o Tailwind na prévia. Na pasta dela, não há nada: nem o gerador, nem a folha de
+CSS que ele produz. "Instalar" é exatamente isso — colocar o gerador dentro do projeto e criar um
+arquivo de CSS que o navegador possa carregar. Não é um programa com janela, não fica na barra de
+tarefas e não precisa ser aberto toda vez. É uma ferramenta de linha de comando que você chama quando
+quer (ou que fica vigiando enquanto você trabalha).</p>
+
+<p>O resto do caminho já é conhecido: as classes no HTML, o CSS gerado a partir delas, o navegador
+aplicando. A aula anterior mostrou o mecanismo; esta mostra o encanamento. Vale fazer uma vez com
+calma, porque a instalação é o único momento em que aparecem arquivos e comandos dos quais você vai
+depender todos os dias.</p>
+
+<h2>2. As duas estradas</h2>
+
+<p>Existem dois jeitos oficiais de usar a versão 4, e eles não competem: servem a momentos diferentes.
+A estrada curta é uma tag <code>script</code> no HTML, que traz um construtor de CSS para o navegador.
+A estrada longa é instalar com npm e rodar um comando que gera um arquivo de CSS de verdade.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Estrada</th><th>O que você precisa</th><th>O que acontece</th><th>Quando usar</th></tr>
+<tr><td>sem build</td><td>uma tag <code>script</code> no HTML</td><td>o navegador gera o CSS ao abrir a página</td><td>estudar, testar uma ideia, protótipo descartável</td></tr>
+<tr><td>com build</td><td>Node, npm e dois comandos</td><td>um arquivo <code>.css</code> pronto, ligado na página</td><td>site de verdade, projeto que vai ao ar</td></tr>
+</table>
+</div>
+
+<p>A diferença que importa é onde o CSS é gerado. Sem build, ele nasce no navegador de quem visita — e
+aí cada visitante paga esse custo, o que só faz sentido em estudo. Com build, ele nasce uma vez, na sua
+máquina, e o visitante recebe um arquivo comum, pequeno e rápido. O guia usa o build na parte de
+produção e tem aulas próprias para cada assunto: <a href="sem-build.html">sem build</a>,
+<a href="instalando-com-npm.html">instalando com npm</a> e <a href="build-de-producao.html">build de
+produção</a>. Aqui você vê o suficiente para escolher e para fazer a primeira instalação funcionar.</p>
+
+<p>Há ainda a questão da manutenção. Na estrada com build, as versões ficam anotadas no
+<code>package.json</code>, e atualizar é um comando (<code>npm update</code>) que vale para o projeto
+inteiro. Na estrada sem build, a versão está presa na URL da tag <code>script</code> e sobe quando
+alguém edita o HTML — prático para um teste, arriscado para um site com várias páginas.</p>
+
+<h2>3. Antes de começar: Node, npm e terminal</h2>
+
+<p>O Tailwind é escrito em JavaScript e roda fora do navegador. Para executá-lo, você precisa do
+<strong>Node.js</strong>, que é o programa que roda JavaScript no computador, e do <strong>npm</strong>,
+que vem junto e serve para baixar pacotes — bibliotecas de outras pessoas. O <strong>terminal</strong>
+é a janela onde você digita comandos em vez de clicar. No Ubuntu, ele abre com
+<code>Ctrl</code> + <code>Alt</code> + <code>T</code>; no macOS, fica em Aplicativos → Utilidades.</p>
+
+<dl class="anatomy">
+<dt>Node.js</dt>
+<dd>O programa que roda JavaScript fora do navegador. É ele que executa a ferramenta do Tailwind no
+seu computador.</dd>
+<dt>npm</dt>
+<dd>O gerenciador de pacotes que vem com o Node. Baixa bibliotecas, guarda na pasta
+<code>node_modules</code> e anota o que foi baixado.</dd>
+<dt>pacote</dt>
+<dd>Um conjunto de arquivos de outra pessoa, publicado para ser reaproveitado. O motor e a CLI do
+Tailwind são dois pacotes.</dd>
+<dt>build</dt>
+<dd>O passo que transforma arquivos-fonte em arquivos prontos para o navegador. Aqui, transforma o
+CSS de entrada no CSS gerado.</dd>
+<dt>watch</dt>
+<dd>O modo que fica rodando e refaz o build a cada salvamento. Sem ele, o build acontece uma vez e
+para.</dd>
+</dl>
+
+<p>Comece conferindo se os dois estão instalados e em que versão, e já entre na pasta do projeto. A
+versão 4 do Tailwind pede Node 20 ou mais novo:</p>
+
+<pre class="term">$ node -v
+v22.11.0
+$ npm -v
+10.9.0
+$ cd /home/ana/padaria
+$ ls
+index.html  produtos.html  contato.html</pre>
+
+<p>Duas linhas de resposta, e pronto. Se aparecer "comando não encontrado", instale a versão LTS no
+site oficial do Node e abra o terminal de novo — o instalador só é reconhecido em janelas abertas
+depois dele.</p>
+
+<p>O <code>cd</code> muda a pasta atual; o <code>ls</code> lista o que tem dentro. Daqui para a frente,
+todos os comandos são digitados com essa pasta como atual — se você fechar o terminal, o caminho se
+perde e é preciso entrar de novo. Isso explica a maioria dos "não achei o arquivo" da vida real.</p>
+
+<h2>4. A estrada sem build, em três passos</h2>
+
+<p>Para estudar, a estrada curta é imbatível. Passo um: crie um HTML comum. Passo dois: cole a tag
+<code>script</code> do construtor dentro do <code>head</code>. Passo três: escreva as classes e abra o
+arquivo no navegador. O construtor lê o conteúdo da página, gera o CSS das classes e injeta o
+resultado ali mesmo.</p>
+
+<pre class="file" data-file="index.html">&lt;!doctype html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;title&gt;Padaria da Ana&lt;/title&gt;
+  &lt;script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body class="p-6 bg-amber-50"&gt;
+  &lt;h1 class="text-2xl font-semibold text-amber-900"&gt;Padaria da Ana&lt;/h1&gt;
+  &lt;p class="mt-2 text-amber-800"&gt;Pão quentinho às 6h.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+
+<p>Funciona sem instalar nada, sem terminal, sem pasta nova. Mas há três limites que você precisa
+conhecer. O primeiro é a internet: a tag busca o construtor num servidor externo, então sem conexão
+nada é gerado. O segundo é o tempo: a geração acontece a cada abertura de página, no navegador do
+visitante, e isso é lento para um site com muitas páginas. O terceiro é que o CSS nasce depois do HTML,
+o que pode causar um piscar de conteúdo sem estilo. Por isso a própria documentação chama essa estrada
+de ferramenta de desenvolvimento: ótima para aprender, imprópria para publicar.</p>
+
+<h2>5. A estrada com build: instalar</h2>
+
+<p>Agora a estrada de verdade. A ideia é ter duas pastas: uma com os arquivos-fonte (o HTML e um CSS de
+entrada, que você escreve) e outra com o resultado (o CSS gerado, que o navegador carrega). A Ana vai
+usar <code>src/</code> para as fontes e <code>dist/</code> para a saída:</p>
+
+<pre class="file" data-file="padaria/">padaria/
+  index.html
+  src/input.css
+  dist/estilo.css</pre>
+
+<p>Com a pasta do projeto aberta no terminal, são esses os comandos:</p>
+
+<pre class="term" data-cwd="~/padaria">$ npm init -y
+Wrote to /home/ana/padaria/package.json
+$ npm install tailwindcss @tailwindcss/cli
+added 12 packages in 3s
+$ npx @tailwindcss/cli -i src/input.css -o dist/estilo.css --watch
+Done in 84ms</pre>
+
+<p>Linha por linha. <code>npm init -y</code> cria o <code>package.json</code>, a carteira de identidade
+do projeto: nome, versão e a lista de pacotes que ele usa. O <code>-y</code> aceita as respostas
+padrão, para não fazer perguntas. <code>npm install tailwindcss @tailwindcss/cli</code> baixa duas
+peças: o motor (<code>tailwindcss</code>) e o comando de linha de comando
+(<code>@tailwindcss/cli</code>). Na versão 4 eles são pacotes separados — o motor é usado por outras
+ferramentas também, e a CLI é só uma delas.</p>
+
+<p>A terceira linha é o comando que faz o trabalho: <code>-i src/input.css</code> diz qual arquivo ler,
+<code>-o dist/estilo.css</code> diz onde escrever o resultado, e <code>--watch</code> pede que ele fique
+rodando, olhando os arquivos e regerando a cada salvamento. Você vai ver uma linha de "Done in ...ms" e
+o cursor parado, sem devolver o prompt: é assim mesmo, o processo está vivo. Para parar, use
+<code>Ctrl</code> + <code>C</code>. Os detalhes de cada opção têm aula própria: a CLI do Tailwind e o
+modo watch, mais adiante no guia.</p>
+
+<h2>6. O CSS de entrada</h2>
+
+<p>Falta o arquivo que o comando lê. Ele fica em <code>src/input.css</code> e, na versão 4, começa com
+uma linha só:</p>
+
+<pre class="file" data-file="src/input.css">@import "tailwindcss";</pre>
+
+<p>Essa linha diz "carregue o Tailwind inteiro aqui". O resto — paleta, escala de espaço, tamanhos de
+letra, reset — vem junto, sem configuração. É a maior mudança da versão 4 em relação à 3, que pedia um
+arquivo <code>tailwind.config.js</code> com listas de cores e caminhos. Se você viu tutoriais antigos
+mandando criar esse arquivo, saiba que ele ainda é aceito, mas não é mais necessário. As
+personalizações — a cor da padaria, uma fonte própria — entram nesse mesmo CSS, com o comando
+<code>@theme</code>, como a aula de <a href="o-css-de-entrada.html">CSS de entrada</a> mostra.</p>
+
+<p>Duas observações práticas. Primeira: os nomes das pastas e dos arquivos são escolha sua; o guia usa
+<code>src/input.css</code> e <code>dist/estilo.css</code> porque são claros, e você deve manter os
+mesmos em todos os comandos. Segunda: o arquivo de entrada não é o que o navegador carrega. Quem carrega
+é o gerado, em <code>dist/</code>. Confundir os dois é o erro número um de quem está começando — o
+navegador nunca abre o <code>src/input.css</code>.</p>
+
+<h2>7. Ligar na página e fazer as três provas</h2>
+
+<p>Último passo: apontar o HTML para o arquivo gerado. A tag é a mesma de qualquer folha de estilo:</p>
+
+<pre class="file" data-file="index.html">&lt;link rel="stylesheet" href="dist/estilo.css"&gt;</pre>
+
+<p>O caminho é relativo ao HTML, então <code>dist/estilo.css</code> só funciona se o HTML está na raiz
+da pasta do projeto, ao lado de <code>dist/</code>. Depois de salvar, recarregue a página: o cartão
+deve aparecer com respiro, cor e canto. Se aparecer, a instalação está de pé — e você nunca mais precisa
+pensar nela, só manter o comando rodando enquanto edita.</p>
+
+<p>Vale reparar numa coisa curiosa: o arquivo gerado não é "o Tailwind". Se você abrir
+<code>dist/estilo.css</code> num editor, vai encontrar regras de CSS comuns, com variáveis e seletores
+de classe. É o mesmo tipo de arquivo que você escreveria à mão, e é ele que o navegador carrega em
+todas as páginas. O Tailwind não entra no site publicado: ele só participa do momento em que o arquivo
+é gerado.</p>
+
+<p>Para não ficar na fé, faça estas três provas. Elas testam o caminho inteiro: se o painel mostra o
+valor, é porque a classe chegou ao gerador, o gerador escreveu a folha e a folha está ligada na página.
+Se o painel ficar vazio, o problema está em um desses três elos.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=16px;;rule:background-color: var(--color-amber-100)">
+  <p class="try-task">Prova 1: o respiro já aparece. Acrescente o fundo âmbar claro. Se as duas linhas
+  aparecerem no painel, a folha gerada está chegando na página.</p>
+  <pre class="html">&lt;div id="alvo" class="p-4"&gt;Pão de queijo — R$ 4,00&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4 bg-amber-100"&gt;Pão de queijo — R$ 4,00&lt;/div&gt;</pre>
+</div>
+
+<p>Repare que a prova não olha o desenho bonito: olha duas linhas de CSS computado. É assim que se
+confere instalação — com um sinal objetivo, e não com "acho que está funcionando". A partir daqui, o
+trabalho é só escrever classes.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=24px;;rule:padding: calc(var(--spacing) * 6)">
+  <p class="try-task">Prova 2: a escala também está lá. Deixe o cartão com 24 px de respiro — o degrau
+  seis — e confira que o painel acompanha o valor.</p>
+  <pre class="html">&lt;div id="alvo" class="p-4 bg-amber-100"&gt;Pão de queijo — R$ 4,00&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-6 bg-amber-100"&gt;Pão de queijo — R$ 4,00&lt;/div&gt;</pre>
+</div>
+
+<p>Prova 2 confirma que o degrau novo foi gerado: o CSS computado muda de 16 para 24 px. Se a primeira
+prova passou e a segunda não, o problema não é de instalação — é de nome de classe, e a conferência é
+letra por letra.</p>
+
+<div class="trytailwind" data-goal="rule:max-width: var(--container-sm);;rule:width: 100%">
+  <p class="try-task">Prova 3: a ficha precisa caber em celular e em tela grande. Limite a largura a
+  384 px com <code>max-w-sm</code> e deixe-a ocupar a largura disponível com <code>w-full</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="p-4 bg-amber-100"&gt;Pão de queijo — R$ 4,00&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4 bg-amber-100 w-full max-w-sm"&gt;Pão de queijo — R$ 4,00&lt;/div&gt;</pre>
+</div>
+
+<p>A terceira prova é a que costuma revelar instalação incompleta: largura é uma família que depende de
+variáveis do tema (<code>--container-sm</code>). Se o respiro funciona e a largura não, o CSS gerado está
+velho ou incompleto — quase sempre porque o comando não estava rodando quando você salvou.</p>
+
+<h2>8. Quando não funciona</h2>
+
+<p>Os tropeços da primeira instalação são poucos e sempre os mesmos. Vale reconhecer o sintoma antes de
+mexer em qualquer coisa, porque a tentativa de conserto às cegas costuma piorar:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sintoma</th><th>Causa provável</th><th>Conserto</th></tr>
+<tr><td>"command not found: npm"</td><td>Node não instalado, ou terminal aberto antes da instalação</td><td>instalar a versão LTS e abrir um terminal novo</td></tr>
+<tr><td>a página fica toda sem estilo</td><td>o <code>link</code> aponta para um arquivo que não existe</td><td>conferir o caminho e rodar o comando uma vez sem <code>--watch</code></td></tr>
+<tr><td>as classes não fazem nada</td><td>o CSS gerado está velho, ou o nome está errado</td><td>rodar de novo, recarregar com cache limpo, conferir letra por letra</td></tr>
+<tr><td>"cannot find module"</td><td>o comando foi digitado em outra pasta</td><td><code>cd</code> para a pasta do projeto e repetir</td></tr>
+</table>
+</div>
+
+<p>Há um quinto caso, mais sutil, que não aparece como erro: você escreve a classe num arquivo que o
+gerador não lê. Ele percorre a pasta do projeto e ignora o que está no <code>.gitignore</code>; uma
+cópia do HTML na área de trabalho, ou um arquivo em <code>node_modules</code>, fica invisível. Se a
+classe está escrita e o CSS não tem a regra, desconfie do lugar do arquivo antes de desconfiar do nome.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: "instalei e a página ficou pior do que antes"</h3>
+<p>Provavelmente o reset entrou em cena e o CSS antigo da Ana não está mais sendo carregado — ou está,
+mas brigando. O Tailwind inclui uma base que zera margens e normaliza títulos, então a página sem
+classes fica realmente sem graça. O caminho é ir aplicando as utilitárias bloco por bloco, começando
+pelo corpo e pelos títulos, e deixar o CSS antigo para o fim, quando ele já não for necessário.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: "no meu computador funciona; no servidor, não"</h3>
+<p>O arquivo <code>dist/estilo.css</code> é gerado, não escrito à mão. Se ele não for gerado durante a
+publicação, o servidor recebe um HTML apontando para um arquivo ausente. As saídas são duas: gerar o CSS
+no momento do envio (o build de produção) ou enviar o arquivo junto. Em time, a primeira é a regra; em
+site pequeno, a segunda resolve. O que não pode é depender de um arquivo que só existe na sua máquina.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: "quero começar um projeto novo do zero"</h3>
+<p>Crie a pasta, o <code>index.html</code>, a pasta <code>src</code> com o <code>input.css</code> de uma
+linha, e rode os três comandos. Antes de escrever qualquer classe, abra a página e confirme que ela
+carrega o CSS (mesmo que sem estilo visível). Depois faça a prova 1. Só então comece o desenho — assim,
+se algo der errado mais tarde, você sabe que a instalação não é a culpada.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Quais pacotes a estrada com build instala?</p>
+<label><input type="radio" name="q1"> só o <code>tailwindcss</code></label>
+<label><input type="radio" name="q1"> o <code>tailwindcss</code> e o <code>@tailwindcss/cli</code></label>
+<label><input type="radio" name="q1"> o Node e o npm</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que <code>--watch</code> faz no comando de
+geração?</p>
+<label><input type="radio" name="q2"> gera uma vez e encerra</label>
+<label><input type="radio" name="q2"> abre a página no navegador para você conferir</label>
+<label><input type="radio" name="q2"> fica rodando e regera o CSS a cada salvamento</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que não usar a tag <code>script</code> do
+construtor num site publicado?</p>
+<label><input type="radio" name="q3"> o CSS é gerado no navegador do visitante, e isso custa tempo e depende da rede</label>
+<label><input type="radio" name="q3"> porque ela impede o uso de utilitárias</label>
+<label><input type="radio" name="q3"> porque só funciona no Firefox</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: ligar a folha na página</h2>
+<p>O comando gravou o CSS em <code>dist/estilo.css</code>. Complete o caminho da tag que carrega esse
+arquivo:</p>
+<div class="ex-code">&lt;link rel="stylesheet" href="<input aria-label="resposta 1" data-answer="dist/estilo.css" placeholder="...">"&gt;</div>
+<p class="ex-dica">Dica: o caminho é relativo ao HTML, que está na raiz do projeto. Pasta primeiro,
+barra, nome do arquivo com a extensão. O arquivo de <code>src/</code> não é este.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Instalar o Tailwind é colocar o gerador no projeto e produzir uma folha de CSS que o navegador
+carregue. A estrada curta faz isso com uma tag <code>script</code> e serve para estudar; a estrada longa
+usa Node e npm, um arquivo de entrada com <code>@import "tailwindcss";</code> e um comando que lê esse
+arquivo e escreve o CSS final — com <code>--watch</code>, ele fica rodando e regera a cada
+salvamento.</p>
+
+<p>O navegador sempre carrega o arquivo gerado, nunca o de entrada. Saber disso resolve metade dos
+problemas de primeira instalação: caminho errado no <code>link</code>, comando parado, arquivo velho,
+pasta errada no terminal. E as três provas — espaço, degrau e largura — dizem em dez segundos se o
+encanamento está de pé, sem depender de impressão visual.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Instalar = gerador no projeto + folha de CSS ligada na página.</li>
+<li>Estrada curta: tag <code>script</code> do construtor, boa para estudo, ruim para publicar.</li>
+<li>Estrada longa: Node 20+, <code>npm init -y</code> e <code>npm install tailwindcss @tailwindcss/cli</code>.</li>
+<li>O CSS de entrada tem uma linha na versão 4: <code>@import "tailwindcss";</code>.</li>
+<li><code>-i</code> é o arquivo lido; <code>-o</code> é o arquivo escrito.</li>
+<li><code>--watch</code> mantém o processo vivo; <code>Ctrl</code> + <code>C</code> encerra.</li>
+<li>O <code>link</code> aponta para o CSS gerado, com caminho relativo ao HTML.</li>
+<li>Nomes de pasta são escolha sua — desde que iguais em todos os comandos.</li>
+<li>Classe em arquivo fora do projeto não é lida: nada é gerado.</li>
+<li>Página sem estilo depois de instalar: confira o caminho do <code>link</code> primeiro.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
