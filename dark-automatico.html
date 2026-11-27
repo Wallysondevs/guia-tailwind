@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escuro Automático | Guia Tailwind</title>
+<meta name="description" content="O tema escuro do Tailwind seguindo o sistema: como o dark: vira prefers-color-scheme, o color-scheme que escurece controles nativos e o script que evita o piscar branco.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Escuro <span class="hl">Automático</span></h1>
+<p class="intro">A Ana instalou um botão de tema no site: uma lua pequena no canto do cabeçalho. Ninguém
+achou. Em três meses, duas pessoas clicaram — uma delas foi ela mesma, testando. Enquanto isso, a
+cliente que abre o site de madrugada continua levando o clarão, porque o celular dela já está no escuro
+e o site não acompanha. Nesta aula a Ana descobre o contrário do que imaginava: o jeito mais comum de
+ter tema escuro não é botão nenhum. O site pergunta ao sistema operacional em que tema ele está e se
+veste sozinho — e o Tailwind já sabe fazer isso sem uma linha de JavaScript.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que <code>prefers-color-scheme</code> é e quem responde a pergunta.</li>
+  <li>Qual é a configuração padrão do <code>dark:</code> no Tailwind v4 — e por que ela não tem
+  classe nenhuma.</li>
+  <li>Quando vale trocar o gatilho do sistema pela classe <code>dark</code>.</li>
+  <li>O <code>color-scheme</code>, que escurece barra de rolagem, caixinhas e campos nativos.</li>
+  <li>O <code>scheme-light-dark</code> do Tailwind e o <code>&lt;meta name="color-scheme"&gt;</code>.</li>
+  <li>O script de quatro linhas que evita o piscar branco ao carregar (é JavaScript, e é pouco).</li>
+  <li>Como testar o escuro automático sem mudar o tema do computador.</li>
+  <li>Os tropeços de quem liga o escuro e esquece das bordas.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o botão que ninguém aperta</h2>
+
+<p>O botão de tema parecia uma boa ideia. Fica no cabeçalho, tem um ícone de lua, funciona: clicou,
+trocou. O problema é que ele exige que a pessoa (a) repare nele, (b) descubra o que ele faz e (c) queira
+apertar. Nenhuma das três coisas acontece com naturalidade.</p>
+
+<p>A alternativa é não perguntar nada. O sistema operacional já sabe a resposta: quem usa o computador
+à noite costuma deixar o modo escuro ligado, e o mesmo vale para o celular. O navegador repassa essa
+informação para a página, numa pergunta chamada <code>prefers-color-scheme</code> — algo como
+“prefere esquema de cor escuro?”. A página que responde “sim” está fazendo tema automático, e não precisa
+de botão, de memória, de nada.</p>
+
+<p>O Tailwind já faz essa pergunta por você. É por isso que uma classe como
+<code>dark:bg-stone-900</code>, escrita sem nenhuma configuração extra, funciona em quem está no escuro —
+e continua clara para quem está no claro. O que quase ninguém conta é que existem três formas de ligar o
+escuro, e cada uma serve a um tipo de site. Esta aula passa pelas três.</p>
+
+<h2>2. As três formas de ligar o escuro</h2>
+
+<dl class="anatomy">
+<dt>sistema</dt>
+<dd>O tema vem da preferência do aparelho, lida pelo navegador. Nenhum botão, nenhuma memória: o site
+segue o que o sistema diz.</dd>
+<dt>classe</dt>
+<dd>O tema é ligado por uma classe <code>dark</code> colocada em algum elemento acima. É o que permite
+um botão de tema que troca na hora.</dd>
+<dt>atributo</dt>
+<dd>Mesma ideia, mas com um atributo — <code>data-theme="dark"</code> — em vez de classe. Serve para
+quem quer mais de dois temas (claro, escuro, alto contraste).</dd>
+<dt>preferência</dt>
+<dd>A escolha do visitante, guardada no navegador (<code>localStorage</code>). É o que faz o botão
+“lembrar” da última escolha.</dd>
+<dt>piscar</dt>
+<dd>O clarão branco que aparece por uma fração de segundo quando a página carrega antes de o tema ser
+aplicado. Tem nome técnico e tem conserto.</dd>
+</dl>
+
+<p>O padrão do Tailwind v4 é o primeiro: sistema. Você não escreve nada, não configura nada, e o
+<code>dark:</code> responde à preferência do aparelho. É também o mais acessível dos três, porque respeita
+uma configuração que a pessoa já fez — e não uma que ela teria de descobrir no seu site.</p>
+
+<h2>3. O padrão: a media query que você não escreveu</h2>
+
+<p>Por trás do <code>dark:</code> existe uma regra de CSS comum. No Tailwind v4, sem configuração, o que
+ele gera para uma classe escura é isto:</p>
+
+<pre class="term">@media (prefers-color-scheme: dark) {
+  .dark\:bg-stone-900 {
+    background-color: var(--color-stone-900);
+  }
+}</pre>
+
+<p>É a mesma estrutura que você já viu no CSS do <code>md:</code>, só que a condição não é largura, é
+preferência. A media query <code>prefers-color-scheme</code> aceita três valores:
+<code>light</code>, <code>dark</code> e <code>no-preference</code> (este último praticamente não é usado
+hoje). O navegador resolve a condição sozinho, consultando o sistema — e o resultado muda até sem
+recarregar, se a pessoa trocar o tema do aparelho enquanto o site está aberto.</p>
+
+<p>Repare numa diferença importante em relação ao <code>md:</code>: lá a largura é uma coisa que você
+pode conferir arrastando a janela; aqui não há como mexer no sistema operacional a cada teste. Por isso
+todo navegador tem um jeito de fingir a preferência, e a seção 8 mostra onde fica. Sem isso, você vai
+editar o tema escuro às cegas.</p>
+
+<p>E por que a versão do guia funciona com classe, então? Porque cada caixa desta página injeta uma
+linha de configuração que troca o gatilho do sistema pela classe <code>dark</code> — é o que permite ver
+o escuro aqui dentro sem mexer no seu computador, e é o assunto da seção 4. No seu projeto, essa linha
+só entra se você quiser um botão de tema.</p>
+
+<h2>4. O gatilho por classe</h2>
+
+<p>Trocar o gatilho é uma decisão de projeto, e o Tailwind v4 deixa isso numa linha de CSS. Primeiro, a
+experiência: com o gatilho por classe, quem liga o escuro é a presença da classe <code>dark</code> em
+algum elemento acima. Basta colocar a classe no bloco de fora para todo o conteúdo de dentro mudar.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|background-color=oklch(0.216 0.006 56.043);;css:#alvo|color=oklch(0.97 0.001 106.424)">
+  <p class="try-task">O cartão já tem os pares do escuro, mas nada acontece — falta o gatilho. Acrescente
+  a classe <code>dark</code> ao <code>&lt;div&gt;</code> de fora, o que envolve o cartão, e clique em
+  Rodar. O painel confere o fundo e a cor do texto do cartão.</p>
+  <pre class="html">&lt;div class="bg-stone-50 p-6"&gt;
+  &lt;div id="alvo" class="rounded-xl bg-white p-4 text-stone-900 dark:bg-stone-900 dark:text-stone-100"&gt;
+    &lt;p class="font-semibold"&gt;Horário da padaria&lt;/p&gt;
+    &lt;p class="mt-1"&gt;Aberto das 6h às 19h.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+color: oklch(0.216 0.006 56.043)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div class="dark bg-stone-50 p-6"&gt;
+  &lt;div id="alvo" class="rounded-xl bg-white p-4 text-stone-900 dark:bg-stone-900 dark:text-stone-100"&gt;
+    &lt;p class="font-semibold"&gt;Horário da padaria&lt;/p&gt;
+    &lt;p class="mt-1"&gt;Aberto das 6h às 19h.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Antes da missão, o painel mostra fundo branco e texto escuro: nenhuma regra <code>dark:</code> vale,
+porque não existe a classe em lugar nenhum. Depois de rodar a solução, os dois valores viram os tons
+escuros. A prévia desta caixa está no tema claro de propósito — repare que a única coisa que mudou foi
+uma palavra no <code>class</code> do bloco de fora. É assim que um botão de tema funciona por dentro:
+ele não troca cor nenhuma, só liga e desliga uma classe.</p>
+
+<p>Agora, o que essa experiência ensina e vale para os dois gatilhos: o <code>dark:</code> de um filho
+responde ao pai. Se você puser a classe no <code>&lt;html&gt;</code>, a página inteira responde. Se
+puser num cartão, só o cartão. Esse controle fino é útil: dá para mostrar um “veja como fica no escuro”
+dentro de uma página clara, com a classe num único bloco.</p>
+
+<p>Para trocar o gatilho no seu projeto, a linha é esta, escrita no arquivo de CSS de entrada:</p>
+
+<pre class="file" data-file="estilo.css">@import "tailwindcss";
+@custom-variant dark (&amp;:where(.dark, .dark *));</pre>
+
+<p>Ela diz: “<code>dark:</code> quer dizer <em>quando existe um ancestral com a classe dark</em>”. Para
+usar atributo em vez de classe, a linha muda só no pedaço de dentro:
+<code>@custom-variant dark (&amp;:where([data-theme="dark"], [data-theme="dark"] *));</code>. Nada mais
+no HTML precisa mudar — as classes <code>dark:bg-…</code> continuam iguais.</p>
+
+<h2>5. color-scheme: os controles que o Tailwind não veste</h2>
+
+<p>Tema escuro com CSS funciona para tudo o que você desenhou. Mas alguns pedaços da página não são
+seus: a barra de rolagem, a caixinha de marcar, o seletor de data, a setinha do <code>&lt;select&gt;</code>,
+o fundo claro do preenchimento automático. Esses são desenhados pelo navegador, e ele não sabe que a
+página está escura — a menos que você avise.</p>
+
+<p>O aviso é uma propriedade chamada <code>color-scheme</code>. Ela diz ao navegador quais temas o
+elemento aceita, e o navegador pinta os controles nativos de acordo: escuros no escuro, claros no claro.
+O Tailwind tem utilitárias para isso, e o CSS gerado é de uma linha:</p>
+
+<pre class="term">.scheme-light-dark {
+  color-scheme: light dark;
+}</pre>
+
+<div class="trytailwind" data-goal="rule:color-scheme: light dark">
+  <p class="try-task">Este cartão tem um campo de busca e uma caixinha de marcar. Para os controles
+  nativos acompanharem o tema do sistema, o bloco precisa declarar que aceita os dois: acrescente
+  <code>scheme-light-dark</code> ao <code>&lt;div id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl border border-stone-200 bg-white p-4 text-stone-900"&gt;
+  &lt;label class="flex items-center gap-2 text-sm"&gt;
+    &lt;input type="checkbox"&gt; Avisar quando o pão sair
+  &lt;/label&gt;
+  &lt;input type="search" placeholder="Buscar produto" class="mt-3 w-full rounded-lg border border-stone-300 p-2"&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+color: oklch(0.216 0.006 56.043)
+border-radius: 12px
+border-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="scheme-light-dark rounded-xl border border-stone-200 bg-white p-4 text-stone-900"&gt;
+  &lt;label class="flex items-center gap-2 text-sm"&gt;
+    &lt;input type="checkbox"&gt; Avisar quando o pão sair
+  &lt;/label&gt;
+  &lt;input type="search" placeholder="Buscar produto" class="mt-3 w-full rounded-lg border border-stone-300 p-2"&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A prévia não muda de aparência porque o sistema desta janela está no tema claro — o
+<code>color-scheme</code> não pinta nada por conta própria, só dá permissão. No computador de quem usa o
+escuro, a diferença aparece: a caixinha de marcar fica escura, a barra de rolagem também, e o
+preenchimento automático do campo deixa de ser um retângulo claro no meio da página escura. Sem essa linha, você tem uma página escura com
+uma barra de rolagem branca — um detalhe que parece pequeno até o dedo do visitante encostar nele.</p>
+
+<p>As variações mais usadas são quatro: <code>scheme-light-dark</code> (aceita os dois e segue o
+sistema), <code>scheme-dark</code> (força o escuro), <code>scheme-light</code> (força o claro) e
+<code>scheme-normal</code> (volta ao padrão do navegador). Existem ainda <code>scheme-only-dark</code> e
+<code>scheme-only-light</code>, que travam o tema e proíbem o navegador de oferecer o outro. No caso
+automático, a que interessa é a primeira.</p>
+
+<h2>6. O pacote completo no seu projeto</h2>
+
+<p>Juntando as peças, o escuro automático de um site tem três camadas, e é fácil esquecer a terceira:</p>
+
+<ul>
+<li><strong>As cores</strong> — os pares <code>bg-white dark:bg-stone-900</code>, do jeito que a aula
+anterior mostrou.</li>
+<li><strong>O gatilho</strong> — nenhum, se você ficar no sistema; a classe <code>dark</code>, se quiser
+botão.</li>
+<li><strong>O <code>color-scheme</code></strong> — no elemento raiz, para os controles nativos
+acompanharem.</li>
+</ul>
+
+<div class="trytailwind" data-tema="escuro" data-goal="rule:color-scheme: light dark;;rule:.dark\:bg-stone-950;;escuro:1">
+  <p class="try-task">Esta prévia está no escuro. O bloco de fora é a “página” e continua clara.
+  Acrescente a ele <code>scheme-light-dark</code> e o par do fundo escuro,
+  <code>dark:bg-stone-950</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="min-h-40 bg-stone-50 p-4"&gt;
+  &lt;div class="rounded-xl bg-white p-4 text-stone-900 dark:bg-stone-900 dark:text-stone-100"&gt;
+    &lt;p class="font-semibold"&gt;Padaria Pão Quente&lt;/p&gt;
+    &lt;p class="mt-1 text-sm"&gt;Aberto das 6h às 19h.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+min-height: 160px
+padding: 16px
+background-color: oklch(0.985 0.001 106.423)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="scheme-light-dark min-h-40 bg-stone-50 p-4 dark:bg-stone-950"&gt;
+  &lt;div class="rounded-xl bg-white p-4 text-stone-900 dark:bg-stone-900 dark:text-stone-100"&gt;
+    &lt;p class="font-semibold"&gt;Padaria Pão Quente&lt;/p&gt;
+    &lt;p class="mt-1 text-sm"&gt;Aberto das 6h às 19h.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>No seu projeto, o <code>scheme-light-dark</code> não vai num bloco qualquer: vai no
+<code>&lt;html&gt;</code> (ou no <code>&lt;body&gt;</code>), porque a barra de rolagem pertence à página
+inteira. Existem dois jeitos de declarar isso, e os dois funcionam:</p>
+
+<pre class="file" data-file="index.html">&lt;html lang="pt-BR" class="scheme-light-dark"&gt;
+&lt;!-- ou, no &lt;head&gt;: --&gt;
+&lt;meta name="color-scheme" content="light dark"&gt;</pre>
+
+<p>O <code>&lt;meta&gt;</code> tem uma vantagem discreta: o navegador o lê antes de carregar o CSS, então
+a barra de rolagem já nasce certa e não pisca branca na abertura. Se você usa o tema por classe, o
+<code>&lt;meta&gt;</code> é o companheiro natural do script da seção seguinte. Se usa só o sistema,
+qualquer um dos dois serve.</p>
+
+<p>Uma última peça de CSS que vale conhecer, mesmo sem usar agora: a função <code>light-dark()</code>.
+Ela recebe duas cores e escolhe sozinha, com base no <code>color-scheme</code> — sem <code>dark:</code>,
+sem classe. É o jeito “raiz” de fazer o automático, e você vai encontrar isso em folhas de estilo de
+terceiros. No Tailwind, o <code>dark:</code> faz o mesmo com mais controle, mas saber que a função existe
+evita estranheza ao ler o CSS de outra pessoa.</p>
+
+<h2>7. O piscar branco e o script que resolve</h2>
+
+<p>Quando o tema é ligado por classe, aparece um problema de tempo. O navegador começa a desenhar a
+página antes de o seu JavaScript rodar. Se o tema escuro só é aplicado depois, a pessoa vê um flash
+branco — meio segundo de clarão, justamente em quem está no escuro. Chama-se FOUC, e a solução é colocar
+o script no <code>&lt;head&gt;</code>, antes de qualquer conteúdo, para ele rodar cedo.</p>
+
+<p>O pedaço abaixo é <strong>JavaScript</strong>, e é o único da aula. São poucas linhas, e cada uma faz
+uma coisa:</p>
+
+<pre class="file" data-file="index.html">&lt;script&gt;
+  (function () {
+    try {
+      var escolha = localStorage.getItem("tema");
+      var escuro = escolha
+        ? escolha === "escuro"
+        : matchMedia("(prefers-color-scheme: dark)").matches;
+      if (escuro) document.documentElement.classList.add("dark");
+    } catch (e) {}
+  })();
+&lt;/script&gt;</pre>
+
+<p>Lendo em português: “veja se a pessoa já escolheu um tema antes; se escolheu, respeite a escolha; se
+nunca escolheu, pergunte ao sistema; e, se a resposta for escuro, ligue a classe <code>dark</code> no
+<code>&lt;html&gt;</code>”. O botão de tema, quando existir, faz o caminho de volta: grava
+<code>"claro"</code> ou <code>"escuro"</code> com <code>localStorage.setItem("tema", …)</code> e liga ou
+desliga a mesma classe.</p>
+
+<p>O <code>try</code> em volta existe porque alguns navegadores com privacidade rigorosa bloqueiam o
+<code>localStorage</code> e o script quebraria; com o <code>catch</code> vazio, ele simplesmente segue
+sem lembrar a escolha. E o <code>matchMedia</code> é a versão JavaScript da media query da seção 3: a
+mesma pergunta, feita no mesmo navegador, só que respondida para o código em vez de para o CSS.</p>
+
+<p>Note que ele usa as duas informações: a escolha guardada e o sistema. É o comportamento que a maioria
+das pessoas espera — o site segue o aparelho até o momento em que elas dizem o contrário, e a partir daí
+lembra. Também note que ele não decide cor nenhuma: só liga a classe. Quem decide o que é escuro
+continua sendo o CSS, com os pares do <code>dark:</code>.</p>
+
+<p>Se o seu site não tem botão de tema, nada disso é necessário: o gatilho do sistema resolve, sem
+JavaScript e sem piscar. Esse é o argumento mais forte a favor do automático puro — menos código, menos
+coisas para dar errado, e a preferência de quem visita respeitada de graça.</p>
+
+<h2>8. Como testar o escuro automático</h2>
+
+<p>Você não precisa desligar a luz da sala. O navegador sabe fingir que o sistema está no escuro:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Navegador</th><th>Onde</th><th>O que escolher</th></tr>
+<tr><td>Chrome e Edge</td><td><em>DevTools</em> → menu ⋮ → <em>More tools</em> → <em>Rendering</em></td><td><em>Emulate CSS media feature prefers-color-scheme</em> → dark</td></tr>
+<tr><td>Firefox</td><td><em>Inspector</em> → ícone de tema na aba de regras</td><td><em>Simulate color scheme</em> → dark</td></tr>
+<tr><td>Safari</td><td>Ajustes do Sistema → Aparência</td><td>escolher Escuro e recarregar a página</td></tr>
+<tr><td>Qualquer um</td><td>o próprio sistema</td><td>trocar o tema do aparelho e recarregar</td></tr>
+</table>
+</div>
+
+<p>Com a emulação ligada, a página responde na hora — e você pode testar as duas versões sem fechar o
+inspetor. Um aviso útil: a emulação vale para a aba em que você ligou, e volta ao normal quando você
+fecha o DevTools. Se o site parecer “preso” no escuro depois de um teste, recarregue antes de procurar
+defeito no CSS.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Estratégia</th><th>Como liga</th><th>Quando escolher</th></tr>
+<tr><td>Sistema</td><td><code>@media (prefers-color-scheme: dark)</code>, o padrão do v4</td><td>site simples, sem botão; respeita a escolha do aparelho</td></tr>
+<tr><td>Classe</td><td><code>@custom-variant dark (&amp;:where(.dark, .dark *))</code> + classe no <code>&lt;html&gt;</code></td><td>quando há botão de tema e a escolha precisa ser lembrada</td></tr>
+<tr><td>Atributo</td><td><code>@custom-variant dark (&amp;:where([data-theme="dark"], [data-theme="dark"] *))</code></td><td>mais de dois temas (claro, escuro, alto contraste)</td></tr>
+</table>
+</div>
+
+<p>As três convivem com o mesmo HTML de classes: os pares <code>dark:bg-stone-900</code> não mudam. O que
+muda é só a condição — e essa é a vantagem de aprender o assunto nesta ordem. Quem começa pelo botão
+costuma achar que o <code>dark:</code> e o botão são a mesma coisa; são camadas diferentes.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o site fica escuro, mas a barra de rolagem continua branca</h3>
+<p>O caso mais comum de “quase pronto”. As cores estão todas certas e, no canto direito da janela, a
+barra de rolagem aparece branca — um risco de luz na página escura. Falta o
+<code>color-scheme</code>: sem ele, o navegador desenha a barra no tema padrão dele, que é o claro.
+Acrescente <code>scheme-light-dark</code> no <code>&lt;html&gt;</code> (ou o
+<code>&lt;meta name="color-scheme"&gt;</code>) e a barra acompanha. O mesmo resolve a caixinha de marcar
+e o seletor de data.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: no celular escuro, o site continua claro</h3>
+<p>“Liguei o modo escuro no celular e o site não mudou.” Aqui há duas causas prováveis. A primeira: o
+gatilho do site é por classe, e ninguém ligou a classe — o que só acontece com botão ou com o script do
+<code>&lt;head&gt;</code>. A segunda: o navegador do celular está desatualizado ou o site tem uma
+configuração que força o tema claro (um <code>scheme-light</code> esquecido, por exemplo). Antes de
+mexer no CSS, abra o site no computador com a emulação de <code>prefers-color-scheme</code> ligada: se
+lá funcionar, o CSS está certo e o problema é do gatilho naquele aparelho.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o flash branco na abertura</h3>
+<p>Ao abrir o site no escuro, aparece um piscar branco antes de a página escurecer. É o tempo entre o
+navegador desenhar e o script rodar. Três consertos, em ordem de eficácia: colocar o script no
+<code>&lt;head&gt;</code>, antes do conteúdo (o mais importante); acrescentar o
+<code>&lt;meta name="color-scheme"&gt;</code> para a barra de rolagem já nascer certa; e deixar o fundo
+do <code>&lt;html&gt;</code> com a cor escura declarada direto no CSS de entrada, para o primeiro quadro
+já sair escuro. Nenhum deles custa mais que três linhas.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. Qual é o gatilho do <code>dark:</code> no Tailwind v4,
+sem nenhuma configuração?</p>
+<label><input type="radio" name="q1"> a preferência do sistema, via <code>@media (prefers-color-scheme: dark)</code></label>
+<label><input type="radio" name="q1"> a classe <code>dark</code> no <code>&lt;html&gt;</code></label>
+<label><input type="radio" name="q1"> o botão de tema que o Tailwind cria sozinho</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Para que serve o <code>scheme-light-dark</code>?</p>
+<label><input type="radio" name="q2"> para escurecer o fundo da página automaticamente</label>
+<label><input type="radio" name="q2"> para trocar as cores do texto no tema escuro</label>
+<label><input type="radio" name="q2"> para os controles nativos e a barra de rolagem seguirem o tema</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Por que o script do tema vai no <code>&lt;head&gt;</code>?</p>
+<label><input type="radio" name="q3"> porque JavaScript só funciona dentro do <code>&lt;head&gt;</code></label>
+<label><input type="radio" name="q3"> para rodar antes de a página ser desenhada e evitar o piscar branco</label>
+<label><input type="radio" name="q3"> porque o Tailwind exige essa ordem</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a permissão dos controles</h2>
+<p>Este é o bloco raiz do site da Ana. Complete a classe do Tailwind que declara que a página aceita os
+dois temas e segue o sistema — é ela que faz a barra de rolagem e as caixinhas acompanharem.</p>
+<div class="ex-code">&lt;html lang="pt-BR" class="<input aria-label="resposta 1" data-answer="scheme-light-dark" placeholder="...">"&gt;</div>
+<p class="ex-dica">Dica: são três pedaços separados por hífen — o assunto (<em>scheme</em>), o tema claro
+e o tema escuro, nessa ordem.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O tema escuro automático é o que não pede botão: o site consulta o sistema com
+<code>prefers-color-scheme</code> e se veste sozinho. No Tailwind v4 esse é o comportamento padrão do
+<code>dark:</code> — a classe vira <code>@media (prefers-color-scheme: dark)</code> e nenhuma
+configuração é necessária.</p>
+
+<p>Quem precisa de botão de tema troca o gatilho com uma linha de <code>@custom-variant</code>, que
+transforma o <code>dark:</code> em “quando existe um ancestral com a classe <code>dark</code>”; aí entra
+o script de quatro linhas no <code>&lt;head&gt;</code> para lembrar a escolha e evitar o piscar branco.
+As classes do HTML não mudam em nenhum dos casos: os pares são os mesmos.</p>
+
+<p>Falta a camada que quase todo mundo esquece: o <code>color-scheme</code>. Ele não pinta nada, só dá
+permissão para o navegador desenhar barra de rolagem, caixinhas e campos nativos de acordo com o tema.
+Com <code>scheme-light-dark</code> no <code>&lt;html&gt;</code> — ou o
+<code>&lt;meta name="color-scheme"&gt;</code> no <code>&lt;head&gt;</code> — o escuro fica inteiro, sem
+um risco branco na lateral.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Padrão do v4: <code>dark:</code> segue o sistema, sem classe e sem JS.</li>
+<li>Com botão de tema: <code>@custom-variant dark (&amp;:where(.dark, .dark *))</code> e a classe no
+<code>&lt;html&gt;</code>.</li>
+<li>A classe no pai liga o <code>dark:</code> de todos os filhos.</li>
+<li><code>scheme-light-dark</code> = <code>color-scheme: light dark</code>: barra de rolagem e controles
+nativos acompanham.</li>
+<li>O <code>&lt;meta name="color-scheme"&gt;</code> vale antes do CSS carregar.</li>
+<li>Script no <code>&lt;head&gt;</code>, antes do conteúdo, para não piscar branco.</li>
+<li>Teste com a emulação de <code>prefers-color-scheme</code> no DevTools, não com o sistema.</li>
+<li>Sem botão é mais simples, mais acessível e quase sempre o suficiente.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

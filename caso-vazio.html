@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estado Vazio | Guia Tailwind</title>
+<meta name="description" content="Estado vazio no Tailwind: distinguir vazio de erro, a anatomia da caixa centrada, a moldura tracejada, a ilustração sem imagem, as ações e o texto que explica o próximo passo.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Estado <span class="hl">Vazio</span></h1>
+
+<p class="intro">No primeiro dia do painel novo, a Ana abriu a tela de encomendas e viu um retângulo
+branco. Nada dentro. Ela clicou três vezes em "atualizar", abriu o console, ligou para quem fez o
+sistema e ouviu a resposta que ninguém quer ouvir: "está funcionando, só não tem encomenda ainda". A
+tela estava tecnicamente certa e era inútil: não dizia o que era aquilo, não dizia que era normal, e
+não dizia o que fazer. Nesta aula ela desenha o estado vazio daquele painel — a tela que recebe a
+pessoa quando ainda não há nada para mostrar — e aprende por que ele é uma das telas mais importantes
+de qualquer sistema.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que tela vazia não é tela quebrada, e como dizer isso sem escrever um parágrafo.</li>
+  <li>Os quatro tipos de vazio e a ação que cada um pede.</li>
+  <li>A anatomia: ícone, título, uma frase, ação principal e saída secundária.</li>
+  <li>O casco centrado com <code>flex-col items-center text-center</code> e uma altura mínima.</li>
+  <li>A moldura tracejada e o que ela comunica sem uma palavra.</li>
+  <li>Como fazer ilustração com <code>div</code> e <code>svg</code>, sem baixar imagem.</li>
+  <li>Hierarquia entre a ação principal e a secundária.</li>
+  <li>O texto do vazio: os erros que todo sistema comete e como sair deles.</li>
+  <li>As variantes: primeiro uso, busca sem resultado, filtro zerado e falha de carregamento.</li>
+  <li>O estado vazio no tema escuro.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a tela em branco no primeiro dia</h2>
+
+<p>Um retângulo branco de 400 px de altura, com borda cinza. Era isso. A Ana achou que o sistema tinha
+travado. A filha achou a mesma coisa. A cliente que testou antes do lançamento perguntou se precisava
+"instalar alguma coisa". Três pessoas, três interpretações erradas, nenhuma delas culpa das pessoas.</p>
+
+<p>O vazio é o primeiro estado que muita gente vê e o último que alguém desenha. É compreensível: quem
+programa testa com dados, e com dados a tela fica cheia. O vazio só aparece na vida real — no primeiro
+dia, na conta nova, no mês em que ninguém pediu nada, ou quando um filtro esconde tudo.</p>
+
+<p>E é justamente aí que ele decide. Uma tela vazia bem desenhada ensina o sistema em três segundos:
+diz o que aquela lista guarda, diz que estar vazio é normal e oferece o primeiro passo. Uma tela vazia
+mal desenhada gera ligação para o suporte, que é o oposto do que qualquer sistema quer.</p>
+
+<h2>2. Vazio não é erro</h2>
+
+<p>Antes de desenhar, separe as duas coisas. Vazio é ausência de dado; erro é falha em buscar o dado.
+A diferença não é filosófica: elas pedem ações opostas. No vazio, a pessoa cria alguma coisa. No erro,
+a pessoa tenta de novo ou pede ajuda. Mostrar "nenhum resultado" quando o servidor caiu é mentir para
+o usuário — e ele vai procurar o problema no lugar errado.</p>
+
+<p>Dentro do vazio, ainda há quatro situações diferentes, e cada uma tem uma ação principal distinta:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Tipo de vazio</th><th>Quando acontece</th><th>Ação principal</th></tr>
+<tr><td>Primeiro uso</td><td>a conta é nova e nunca teve dado</td><td>criar o primeiro item, com o caminho completo</td></tr>
+<tr><td>Busca sem resultado</td><td>o termo não existe no catálogo</td><td>limpar a busca ou tentar outro termo</td></tr>
+<tr><td>Filtro zerado</td><td>existe dado, mas o filtro escondeu tudo</td><td>limpar os filtros, sempre visível</td></tr>
+<tr><td>Falha de carga</td><td>o pedido de dados deu erro</td><td>tentar de novo, e um contato se persistir</td></tr>
+</table>
+</div>
+
+<p>O erro de projeto mais comum é usar o mesmo texto para os quatro. "Nenhum registro encontrado"
+serve para os quatro e não ajuda em nenhum. A Ana descobriu isso na prática: quando o filtro de "hoje"
+escondia as encomendas de amanhã, a mensagem genérica fazia ela pensar que o sistema tinha perdido os
+pedidos.</p>
+
+<p>Há ainda um quinto estado que não é vazio nem erro: <em>carregando</em>. Ele tem desenho próprio —
+blocos cinza no lugar do conteúdo, como a aula de <a href="carregando.html">estado de carregando</a>
+mostra. Mostrar o vazio enquanto os dados viajam é o pior dos mundos: a pessoa lê "não tem nada", e
+três segundos depois aparece tudo.</p>
+
+<h2>3. A anatomia de um estado vazio</h2>
+
+<p>Cinco peças, sempre na mesma ordem. Você pode cortar a quinta, nunca a segunda.</p>
+
+<dl class="anatomy">
+<dt>ícone</dt>
+<dd>Uma figura simples que dá assunto à tela. Pode ser um <code>svg</code> de traço, dentro de um
+círculo colorido. É decorativo: vai com <code>aria-hidden="true"</code>.</dd>
+<dt>título</dt>
+<dd>Uma frase curta que nomeia a situação. "Nenhuma encomenda ainda" — não "Sem dados".</dd>
+<dt>frase</dt>
+<dd>Uma ou duas linhas explicando o que aquilo significa e quando vai mudar. É aqui que a pessoa
+entende que o sistema está funcionando.</dd>
+<dt>ação principal</dt>
+<dd>O botão que resolve. Um só. Se houver dois caminhos igualmente importantes, o desenho está
+confuso.</dd>
+<dt>saída secundária</dt>
+<dd>Um link discreto para quem não quer criar nada agora: ver o cardápio, ler a ajuda, falar com a
+gente.</dd>
+</dl>
+
+<p>A ordem também é uma decisão: o ícone dá o tom, o título nomeia, a frase explica, o botão resolve,
+o link oferece alternativa. Se você inverter — botão antes de explicar —, a pessoa clica sem saber no
+quê.</p>
+
+<h2>4. O casco: centrado, com ar</h2>
+
+<p>O vazio é uma caixa com o conteúdo no meio. Centralizar no CSS tem várias receitas; aqui a mais
+simples é uma coluna flexível que alinha no eixo transversal e centraliza o texto:</p>
+
+<div class="trytailwind" data-goal="css:#alvo|align-items=center;;css:#alvo|text-align=center;;css:#alvo|min-height=256px">
+  <p class="try-task">O conteúdo do vazio está grudado no canto esquerdo e sem altura, o que faz a
+  caixa parecer um aviso de erro. Centralize na horizontal, centralize o texto e dê 256 px de altura
+  mínima.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-2xl border border-stone-200 p-6 text-left"&gt;
+  &lt;div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700"&gt;!&lt;/div&gt;
+  &lt;p class="font-medium text-stone-900"&gt;Nenhuma encomenda por aqui ainda&lt;/p&gt;
+  &lt;p class="mt-1 text-sm text-stone-600"&gt;Quando alguém pedir pão, a encomenda aparece nesta lista.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 24px
+text-align: left
+border-radius: 16px
+border-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-stone-200 p-10 text-center"&gt;
+  &lt;div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700"&gt;!&lt;/div&gt;
+  &lt;p class="font-medium text-stone-900"&gt;Nenhuma encomenda por aqui ainda&lt;/p&gt;
+  &lt;p class="mt-1 text-sm text-stone-600"&gt;Quando alguém pedir pão, a encomenda aparece nesta lista.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Quatro classes trabalham juntas e é bom saber o papel de cada uma. <code>flex</code> e
+<code>flex-col</code> põem os filhos em coluna. <code>items-center</code> centraliza cada filho no eixo
+transversal — o horizontal, numa coluna. <code>justify-center</code> distribui o conjunto no eixo
+principal, o vertical. <code>text-center</code> centraliza o texto <em>dentro</em> de cada filho, e é
+essa classe que faz a frase ficar alinhada ao meio, não à esquerda.</p>
+
+<p>O <code>min-h-64</code> é a decisão de altura. Sem ele, o vazio encolhe até o tamanho do conteúdo e
+parece uma tarja de aviso. Com ele, a caixa ocupa espaço e o olho entende que ali é uma área de
+conteúdo esperando conteúdo. O CSS gerado:</p>
+
+<pre class="term">.min-h-64 {
+  min-height: calc(var(--spacing) * 64);
+}</pre>
+
+<p>Vale guardar a diferença entre os dois eixos com um exemplo concreto. Se o título ocupar duas
+linhas, <code>items-center</code> continua centralizando o bloco inteiro na horizontal — ele alinha
+<em>filhos</em>. Já <code>text-center</code> alinha as linhas <em>dentro</em> do título, uma embaixo da
+outra. Trocar uma pela outra é o erro mais comum aqui: com só <code>items-center</code>, a caixa fica
+no meio e o texto continua à esquerda; com só <code>text-center</code>, o texto centraliza dentro de
+uma caixa que começa na borda esquerda.</p>
+
+<p>Sessenta e quatro passos de 0,25 rem dão 16 rem, ou 256 px. É altura <em>mínima</em>, não fixa: se a
+frase crescer, a caixa cresce junto. Num vazio de página inteira, troque por <code>min-h-96</code> ou
+por <code>min-h-dvh</code>; no celular, prefira menos — uma tela inteira de vazio com um botão perdido
+no meio não ajuda ninguém.</p>
+
+<h2>5. A moldura tracejada</h2>
+
+<p>A borda do vazio não é igual à borda de um cartão. Borda contínua diz "isto está pronto"; borda
+tracejada diz "isto é um espaço reservado". É uma convenção antiga e ainda funciona — a mesma ideia do
+campo de upload que mostra onde soltar o arquivo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-style=dashed;;css:#alvo|border-width=2px">
+  <p class="try-task">A caixa tem borda fina e contínua, que a faz parecer um cartão comum. Troque por
+  uma borda de 2 px, tracejada, mantendo o canto arredondado.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-2xl border border-stone-200 p-10 text-center"&gt;
+  Área de conteúdo vazia
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 40px
+text-align: center
+border-radius: 16px
+border-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-2xl border-2 border-dashed border-stone-300 p-10 text-center"&gt;
+  Área de conteúdo vazia
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>border-2</code> compensa o tracejado: 1 px tracejado quase desaparece na tela do celular ao
+sol. E a cor precisa ser um pouco mais escura que a borda normal, porque o traço tem menos área
+pintada. O CSS mostra que o Tailwind separa espessura de estilo:</p>
+
+<pre class="term">.border-2 {
+  border-style: var(--tw-border-style);
+  border-width: 2px;
+}
+.border-dashed {
+  --tw-border-style: dashed;
+  border-style: dashed;
+}</pre>
+
+<p>É por isso que <code>border-dashed</code> sozinho não desenha nada: ele muda o <em>estilo</em>, e sem
+espessura a borda continua com 0 px. As duas classes andam juntas — o mesmo vale para
+<code>border-dotted</code> e <code>border-double</code>.</p>
+
+<p>Quando usar tracejado? Quando o espaço é reservado para algo que ainda vai chegar. Quando o vazio é
+só "não há nada aqui", a borda contínua e discreta é mais elegante. A Ana usa tracejado no primeiro
+uso e contínuo na busca sem resultado, porque na busca o espaço não está reservado: ele está vazio
+porque o termo não existe.</p>
+
+<h2>6. A ilustração sem imagem</h2>
+
+<p>Ilustração de estado vazio virou moda, e virou peso: um PNG de 300 KB para dizer "nada aqui". Dá
+para fazer o mesmo efeito com duas caixas e um ícone, sem baixar nada. O truque é um círculo colorido
+com o ícone dentro e um anel claro em volta.</p>
+
+<pre class="file" data-file="encomendas.html">&lt;div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-700 ring-8 ring-amber-50" aria-hidden="true"&gt;
+  &lt;svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-8 w-8"&gt;
+    &lt;path d="M4 8h16v11H4z"&gt;&lt;/path&gt;
+    &lt;path d="M8 8V6a4 4 0 0 1 8 0v2"&gt;&lt;/path&gt;
+  &lt;/svg&gt;
+&lt;/div&gt;</pre>
+
+<p>O <code>ring-8 ring-amber-50</code> desenha um anel de 32 px em volta do círculo — de graça, sem
+<code>div</code> extra. O <code>aria-hidden="true"</code> tira o ícone da árvore de acessibilidade: ele
+não informa nada que o título já não diga, e o leitor de tela só perderia tempo ali.</p>
+
+<p>Se a Ana quisesse algo mais elaborado, três círculos deslocados com <code>absolute</code> e
+<code>blur-2xl</code> fazem um fundo suave, como você viu em <a href="filtros.html">filtros</a>. O
+limite é o bom senso: a ilustração serve para dar assunto, não para virar a atração principal. Um
+vazio que chama mais atenção que o botão está trabalhando contra o próprio objetivo.</p>
+
+<h2>7. A ação principal e a secundária</h2>
+
+<p>Um vazio sem ação é um beco. Dois botões igualmente fortes são um empate que a pessoa não sabe
+resolver. A regra da Ana: um botão cheio e um link discreto, separados por <code>gap-3</code>, lado a
+lado no computador e empilhados no celular.</p>
+
+<pre class="file" data-file="encomendas.html">&lt;div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row"&gt;
+  &lt;a href="#" class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"&gt;
+    Criar a primeira encomenda
+  &lt;/a&gt;
+  &lt;a href="#" class="rounded-lg px-4 py-2 text-sm font-medium text-stone-600 hover:bg-stone-100"&gt;
+    Ver o cardápio
+  &lt;/a&gt;
+&lt;/div&gt;</pre>
+
+<p><code>flex-col sm:flex-row</code> é o padrão que você já viu: no celular, um embaixo do outro; no
+computador, lado a lado. O <code>justify-center</code> mantém o par no meio da caixa. E a diferença
+entre os dois é só de roupa — fundo âmbar contra fundo transparente —, o que já basta para o olho saber
+qual é o caminho principal.</p>
+
+<p>O texto do botão merece atenção. "Criar" é vago; "Criar a primeira encomenda" diz o que vai
+acontecer e por que é a primeira. Verbo no infinitivo, objeto concreto. Se o botão leva para uma tela
+com campos, diga isso: "Cadastrar produto" prepara melhor que "Continuar".</p>
+
+<h2>8. O texto: escrever como gente</h2>
+
+<p>A parte mais difícil do estado vazio não é o CSS, é a frase. Todo sistema tem a tentação de escrever
+como máquina, e é aí que a tela perde a pessoa. Compare:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que os sistemas escrevem</th><th>Por que não funciona</th><th>O que dizer</th></tr>
+<tr><td>"Nenhum registro encontrado"</td><td>fala de banco de dados, não de pão</td><td>"Nenhuma encomenda por aqui ainda"</td></tr>
+<tr><td>"Erro 0 resultados"</td><td>parece falha do sistema</td><td>"Não achamos nada com 'queijo'"</td></tr>
+<tr><td>"Lista vazia"</td><td>descreve a tela, não a situação</td><td>"As encomendas de hoje aparecem aqui"</td></tr>
+<tr><td>"Você não tem permissão"</td><td>culpa quem está lendo</td><td>"Peça acesso ao dono da padaria"</td></tr>
+</table>
+</div>
+
+<p>Três regras resolvem quase todos os casos. Primeira: fale do assunto, não do sistema — pão,
+encomenda, horário. Segunda: diga o que vai acontecer, não o que não aconteceu — "quando alguém pedir,
+aparece aqui" é mais útil que "nada encontrado". Terceira: assuma a responsabilidade quando for sua —
+"não conseguimos carregar" é honesto; "nenhum dado" é confuso.</p>
+
+<p>O tom acompanha a marca. A Ana pode escrever "por aqui ainda", com o "por aqui" que ela usa no
+balcão. O que ela não pode é escrever humor num momento de frustração: se a pessoa chegou ali porque um
+filtro escondeu o pedido que ela procurava, piada atrapalha. Vazio de primeiro uso aceita leveza;
+vazio de busca e de erro pedem clareza seca.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<p>Com o casco pronto, as variantes são trocas de texto e de ação — o desenho é o mesmo, e é isso que
+mantém o sistema coerente. Três histórias da padaria mostram a diferença na prática.</p>
+
+<div class="cenario">
+<h3>Cenário 1: o primeiro uso da conta da filha</h3>
+<p>A filha da Ana ganhou acesso ao painel para cuidar das encomendas do site. Abriu no primeiro dia e
+encontrou o retângulo branco. A correção foi a versão desta aula: ícone de caixa, "Nenhuma encomenda
+por aqui ainda", a frase explicando que a lista enche quando alguém pedir pelo site, o botão "Criar a
+primeira encomenda" e o link para o cardápio. No primeiro uso, a ação principal cria o primeiro dado —
+é a única variante em que o botão constrói o conteúdo da própria tela.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o filtro de "amanhã" que escondeu tudo</h3>
+<p>Numa terça, o painel mostrou vazio. A Ana entrou em pânico: oito encomendas tinham desaparecido. O
+filtro de data estava em "amanhã", e nenhuma encomenda era para o dia seguinte. O dado existia; a tela
+mentia. A correção foi de texto e de desenho: "Nenhuma encomenda para amanhã", com um botão "Limpar
+filtros" sempre visível ao lado. É o vazio que mais gera chamado de suporte, e o mais fácil de
+resolver — basta dizer que foi o filtro.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o dia em que o servidor não respondeu</h3>
+<p>O sistema caiu por vinte minutos. O painel mostrou "Nenhuma encomenda por aqui ainda", com o
+botão de criar. A Ana criou uma encomenda que já existia, e depois descobriu que a lista estava cheia o
+tempo todo. Vazio e erro precisam de desenhos diferentes: ícone de atenção, "Não conseguimos carregar
+as encomendas", botão "Tentar de novo" e uma linha com o contato. Nunca a mesma tela para os dois —
+<a href="caso-erro.html">página de erro</a> é o lugar dessa conversa.</p>
+</div>
+
+<p>A quarta variante, a busca sem resultado, é a mais parecida com o vazio de verdade: o termo não
+existe no catálogo. O casco é o mesmo, sem a moldura tracejada, e a frase carrega o termo — "Não
+achamos nada com 'queijo'". A ação é "Limpar a busca", e a secundária sugere um termo próximo. O botão
+de criar não faz sentido aqui: o problema não é falta de dado, é a palavra escolhida.</p>
+
+<p>E o tema escuro? O vazio tem muito espaço em branco, e branco no escuro ofusca. A troca é a mesma de
+qualquer cartão — fundo escuro, texto claro e o círculo do ícone um tom acima do fundo.</p>
+
+<div class="trytailwind" data-goal="escuro:1;;rule:.dark\:bg-stone-900" data-tema="escuro">
+  <p class="try-task">A prévia está no tema escuro e o cartão continua branco, ofuscando. Faça o fundo
+  virar <code>stone-900</code> e o texto <code>stone-100</code> só no tema escuro.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-2xl bg-white p-8 text-stone-900"&gt;
+  &lt;p class="font-medium"&gt;Nenhuma encomenda por aqui ainda&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 32px
+background-color: rgb(255, 255, 255)
+color: oklch(0.216 0.006 56.043)
+border-radius: 16px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-2xl bg-white p-8 text-stone-900 dark:bg-stone-900 dark:text-stone-100"&gt;
+  &lt;p class="font-medium"&gt;Nenhuma encomenda por aqui ainda&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Repare que as classes claras continuam ali: <code>bg-white</code> e <code>text-stone-900</code> são
+o estado normal, e <code>dark:</code> só entra quando o tema escuro está ativo. É sempre assim — você
+não apaga a versão clara, você acrescenta a escura. E o <code>bg-white</code> não é redundante: sem
+ele, o cartão herdaria o fundo da página e perderia a separação no tema claro.</p>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual é a diferença entre estado vazio e erro?</p>
+<label><input type="radio" name="v1"> o vazio é mais bonito e o erro é vermelho</label>
+<label><input type="radio" name="v1"> o vazio é ausência de dado; o erro é falha ao buscar o dado</label>
+<label><input type="radio" name="v1"> não há diferença: os dois mostram uma caixa sem conteúdo</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que <code>border-dashed</code> sozinho não
+desenha nada?</p>
+<label><input type="radio" name="v2"> porque a cor da borda precisa ser informada antes</label>
+<label><input type="radio" name="v2"> porque o tracejado só funciona em <code>div</code></label>
+<label><input type="radio" name="v2"> porque ele muda o estilo, e a espessura da borda continua em 0 px</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Quantas ações principais um estado vazio deve ter?</p>
+<label><input type="radio" name="v3"> uma, com uma saída secundária discreta ao lado</label>
+<label><input type="radio" name="v3"> duas, sempre lado a lado com o mesmo peso</label>
+<label><input type="radio" name="v3"> nenhuma: o usuário deve descobrir sozinho</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a altura da caixa vazia</h2>
+<p>O vazio do painel ficou baixo demais e parece uma tarja de aviso. Complete a classe que dá 256 px
+de altura mínima à caixa.</p>
+<div class="ex-code">&lt;div class="flex <input aria-label="resposta 1" data-answer="min-h-64" placeholder="..."> flex-col items-center justify-center rounded-2xl p-10 text-center"&gt;</div>
+<p class="ex-dica">Dica: comece por <code>min-h-</code> e use o degrau 64 da escala de espaço — o mesmo
+que dá 16 rem. Não use <code>h-</code>, que fixa a altura e corta o conteúdo.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Estado vazio é a tela que recebe quem ainda não tem dado, e ele precisa de cinco peças: um ícone
+decorativo, um título que nomeia a situação, uma frase que explica, uma ação principal e uma saída
+secundária. O casco é uma coluna flexível com <code>items-center justify-center text-center</code> e
+uma altura mínima — <code>min-h-64</code> para uma área dentro da página, mais quando o vazio ocupa a
+tela inteira.</p>
+
+<p>A moldura tracejada sinaliza espaço reservado e pede <code>border-2 border-dashed</code>: estilo e
+espessura são propriedades diferentes. A ilustração se faz com um círculo, um ícone e um anel
+(<code>ring-8</code>), sem imagem. E o texto é metade do trabalho: fale do assunto, diga o que vai
+acontecer e ofereça o próximo passo. Distinga sempre primeiro uso, busca sem resultado, filtro zerado e
+falha de carga — são quatro telas diferentes com o mesmo nome.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Vazio não é erro: um pede criação, o outro pede nova tentativa.</li>
+<li>Quatro vazios: primeiro uso, busca, filtro, falha de carga. Quatro textos.</li>
+<li>Cinco peças: ícone, título, frase, ação principal, saída secundária.</li>
+<li>Casco: <code>flex min-h-64 flex-col items-center justify-center text-center</code>.</li>
+<li><code>text-center</code> alinha o texto dentro do filho; <code>items-center</code> alinha os filhos.</li>
+<li>Espaço reservado pede <code>border-2 border-dashed</code>; vazio simples pede borda contínua.</li>
+<li>Ilustração sem imagem: círculo + <code>svg</code> + <code>ring-8</code>, com <code>aria-hidden</code>.</li>
+<li>Uma ação principal; a secundária é link, não botão.</li>
+<li>Frase sobre o assunto, não sobre o banco de dados.</li>
+<li>No escuro, <code>dark:bg-stone-900 dark:text-stone-100</code> — sem apagar as classes claras.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

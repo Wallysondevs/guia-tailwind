@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Custom Variants | Guia Tailwind</title>
+<meta name="description" content="Crie variantes com nome no Tailwind v4: o @custom-variant, o & que representa o elemento, o :where() da especificidade e variantes feitas de media query.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Custom <span class="hl">Variants</span></h1>
+<p class="intro">A Ana tem doze botões no site e, em todos, o mesmo comportamento: o fundo muda quando o
+mouse passa e também quando o botão está com o foco do teclado. Como não existia um prefixo que dissesse
+“mouse ou teclado”, ela escreveu a condição à mão, em colchetes, doze vezes:
+<code>[&amp;:is(:hover,:focus)]:bg-amber-200</code>. Funciona — e é ilegível. Um dia ela errou uma
+vírgula em um dos doze e passou vinte minutos procurando. Nesta aula ela aprende a dar nome a uma
+condição: escreve <code>@custom-variant</code> uma vez no CSS e passa a usar <code>hocus:</code> no HTML,
+como qualquer outro prefixo.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é uma variante e o que o prefixo dela faz com o seletor.</li>
+  <li>O papel do <code>&amp;</code> dentro do <code>@custom-variant</code>.</li>
+  <li>Como juntar duas condições num nome só, com a vírgula.</li>
+  <li>Por que quase sempre vale escrever <code>:where()</code> em volta da condição.</li>
+  <li>O que é especificidade e como ela decide quem vence.</li>
+  <li>Como criar uma variante que é uma media query, e não um seletor.</li>
+  <li>Quando usar a variante própria, a arbitrária e a que já vem pronta.</li>
+  <li>O que conferir quando a variante nova não faz nada.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a condição escrita doze vezes</h2>
+
+<p>O botão de encomenda da Ana precisa reagir de dois jeitos: com o mouse em cima e com o foco do
+teclado. Ela já sabia que existem <code>hover:</code> e <code>focus:</code>, e que dá para empilhar
+prefixos. Mas empilhar significa “as duas coisas ao mesmo tempo”, e não é isso: o botão nunca está com
+mouse e teclado juntos. Então ela foi para a variante arbitrária, aquela em que você escreve o seletor
+entre colchetes:</p>
+
+<pre class="file" data-file="encomenda.html">&lt;button class="[&amp;:is(:hover,:focus)]:bg-amber-200 rounded-lg bg-amber-100 p-3"&gt;
+  Encomendar
+&lt;/button&gt;</pre>
+
+<p>Funciona, e o CSS gerado está correto. O problema é de manutenção, não de mecanismo. Aquele prefixo
+tem colchetes, dois-pontos, parênteses e uma vírgula; para ler em voz alta, é um trava-língua. Em doze
+botões, ele aparece doze vezes, e cada cópia é uma chance de errar um caractere — o que aconteceu, como
+sempre acontece. E se amanhã ela quiser que o estado inclua também <code>:active</code>? São doze
+edições idênticas.</p>
+
+<p>É para isso que existe <code>@custom-variant</code>: um lugar no CSS onde você registra um nome e
+diz qual condição ele representa. Depois disso, o nome vira prefixo como qualquer outro. Você troca
+dezoito caracteres ilegíveis por cinco legíveis, ganha um lugar único para mudar a regra e passa a ler
+o HTML sem parar para decifrar colchetes.</p>
+
+<h2>2. O que é uma variante, por dentro</h2>
+
+<p>Antes de escrever a primeira, vale desmontar a ideia. Uma variante é um <strong>envelope</strong>: ela
+não muda o que a classe faz, muda <em>quando</em> aquilo vale. Em <code>hover:bg-amber-200</code>, o
+pedaço <code>bg-amber-200</code> continua sendo “fundo âmbar”; o <code>hover:</code> diz que a regra só
+se aplica em um estado do elemento.</p>
+
+<p>O Tailwind escreve esse envelope como seletor de CSS. <code>hover:bg-amber-200</code> vira
+<code>.hover\:bg-amber-200:hover { … }</code> — e aquele <code>\:</code> no meio do nome não é enfeite:
+é a barra invertida escapando os dois-pontos, porque dois-pontos não pode aparecer cru dentro de um nome
+de classe. Toda variante funciona assim: pega o seletor da classe e acrescenta uma condição.</p>
+
+<p>O que o <code>@custom-variant</code> faz é dizer qual condição acrescentar. A forma é sempre a mesma:
+o nome da variante, um parênteses e a condição escrita em CSS. Dentro da condição, o caractere
+<code>&amp;</code> é o elemento que tem a classe. Se você escreve <code>(&amp;:focus)</code>, está
+dizendo “o elemento com a classe, quando estiver em foco”. Se escreve <code>(&amp; &gt; li)</code>, está
+dizendo “os filhos diretos desse elemento”.</p>
+
+<dl class="anatomy">
+<dt>variante</dt>
+<dd>O prefixo antes dos dois-pontos que muda a condição de uma classe: <code>hover:</code>,
+<code>md:</code>, <code>dark:</code>. Ela não troca a utilidade, só quando ela vale.</dd>
+<dt>@custom-variant</dt>
+<dd>A linha do CSS de entrada que registra um nome de variante e a condição dele. Uma vez registrado, o
+nome vale em qualquer HTML do projeto.</dd>
+<dt>&amp;</dt>
+<dd>Dentro da condição, representa o elemento que carrega a classe. É o mesmo <code>&amp;</code> do CSS
+aninhado, e é o que permite escrever <code>&amp;:hover</code> ou <code>&amp; &gt; li</code>.</dd>
+<dt>:where()</dt>
+<dd>Um invólucro que aplica a condição com especificidade zero. Serve para a sua variante não roubar a
+disputa de quem deve vencer no CSS.</dd>
+<dt>especificidade</dt>
+<dd>O peso de um seletor na hora de decidir qual regra vale quando duas mexem na mesma propriedade.
+Quanto mais “específico”, mais forte.</dd>
+<dt>variante arbitrária</dt>
+<dd>A condição escrita na hora, entre colchetes, direto na classe:
+<code>[&amp;:hover]:bg-amber-200</code>. Serve para o caso isolado; não tem nome nem lugar único.</dd>
+</dl>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No HTML</th><th>O que o Tailwind escreve</th><th>De onde vem a condição</th></tr>
+<tr><td><code>hover:bg-amber-200</code></td><td><code>.hover\:bg-amber-200:hover</code></td><td>variante pronta do Tailwind</td></tr>
+<tr><td><code>hocus:bg-amber-200</code></td><td><code>.hocus\:bg-amber-200:hover, .hocus\:bg-amber-200:focus</code></td><td><code>@custom-variant</code> com vírgula</td></tr>
+<tr><td><code>destaque:bg-amber-100</code></td><td><code>.destaque\:bg-amber-100:where([data-destaque])</code></td><td><code>@custom-variant</code> com atributo</td></tr>
+<tr><td><code>[&amp;:nth-child(3)]:border-t</code></td><td><code>.\[\&amp;\:nth-child\(3\)\]\:border-t:nth-child(3)</code></td><td>variante arbitrária, escrita na hora</td></tr>
+<tr><td><code>apertado:bg-amber-100</code></td><td><code>@media (width &lt; 30rem) { .apertado\:bg-amber-100 { … } }</code></td><td><code>@custom-variant</code> com media query</td></tr>
+</table>
+</div>
+
+<p>Repare que a variante não é um atalho de digitação: é uma peça do projeto. Ela mora no CSS de entrada,
+junto do tema, e vale para todas as páginas. Quando você muda a condição ali, todos os usos acompanham —
+é essa a diferença que justifica o nome.</p>
+
+<h2>3. O primeiro nome: hocus</h2>
+
+<p>Hora de escrever. O nome escolhido é <code>hocus</code>, uma brincadeira antiga de quem faz componente:
+<em>hover</em> mais <em>focus</em>, as duas condições que, para quem usa o teclado, devem ser a mesma
+coisa. A linha é esta:</p>
+
+<pre class="file" data-file="style.css">@custom-variant hocus (&amp;:hover, &amp;:focus);</pre>
+
+<p>A vírgula dentro dos parênteses separa as duas condições: o Tailwind gera uma regra para cada uma,
+com o mesmo corpo. O HTML fica curto e honesto: <code>hocus:bg-amber-200</code>. E o CSS gerado mostra
+o envelope em ação.</p>
+
+<p>Na caixa abaixo, o botão existe e a variante ainda não. Sua missão é registrar <code>hocus</code> e
+usar o prefixo no botão. O painel desta caixa mostra as <em>regras geradas</em>, e não o CSS computado,
+porque o que interessa aqui é justamente o seletor.</p>
+
+<div class="trytailwind" data-goal="rule:.hocus\:bg-amber-200:hover, .hocus\:bg-amber-200:focus">
+  <p class="try-task">Escreva <code>@custom-variant hocus (&amp;:hover, &amp;:focus);</code> no bloco
+  <code>&lt;style&gt;</code> e acrescente <code>hocus:bg-amber-200</code> ao botão. O painel deve
+  mostrar a regra com as duas condições.</p>
+  <pre class="html" data-saida="css">&lt;style type="text/tailwindcss"&gt;
+/* nenhuma variante própria ainda */
+&lt;/style&gt;
+
+&lt;button id="alvo" class="rounded-lg bg-amber-100 p-3 text-amber-900"&gt;
+  Encomendar pão
+&lt;/button&gt;</pre>
+  <pre class="out">
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+.bg-amber-100 {
+  background-color: var(--color-amber-100);
+}
+.p-3 {
+  padding: calc(var(--spacing) * 3);
+}
+.text-amber-900 {
+  color: var(--color-amber-900);
+}
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@custom-variant hocus (&amp;:hover, &amp;:focus);
+&lt;/style&gt;
+
+&lt;button id="alvo" class="rounded-lg bg-amber-100 p-3 text-amber-900 hocus:bg-amber-200"&gt;
+  Encomendar pão
+&lt;/button&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra uma regra só, com dois seletores separados por vírgula. Repare na
+barra invertida antes dos dois-pontos do nome da classe: ela está ali para o navegador não achar que
+<code>hocus</code> termina naquele ponto. Repare também que não existe nada parecido com
+<code>.hocus { }</code> — a variante não cria regra própria; ela só muda o envelope das classes que a
+usam.</p>
+
+<p>Uma consequência prática que vale dizer em voz alta: variante sem uso não gera CSS. Se você registrar
+<code>hocus</code> e não escrever <code>hocus:</code> em lugar nenhum, o arquivo final não muda um byte.
+É o mesmo comportamento das utilidades — o Tailwind só escreve o que encontra escrito no HTML. E é por
+isso que a variante nova “não faz nada” quando você esquece de usá-la: ela existe no CSS de entrada, mas
+ninguém pediu.</p>
+
+<h2>4. Duas condições, um nome</h2>
+
+<p>A vírgula é o único detalhe de sintaxe que costuma morder. Ela não significa “e sim”; significa
+“ou”: as duas condições produzem a mesma declaração, e o navegador aplica a que casar. Se você quisesse
+“mouse e teclado ao mesmo tempo”, escreveria sem vírgula,
+<code>(&amp;:hover:focus)</code> — que quase nunca é o que se quer, porque ninguém usa os dois juntos.</p>
+
+<p>Esse é o motivo de <code>hocus</code> ser tão comum em bibliotecas de componente: é a condição dupla
+que deixa o botão bonito para quem usa mouse e visível para quem usa teclado, sem duplicar classes. E é
+também o caso em que a variante arbitrária fica feia: <code>[&amp;:is(:hover,:focus)]</code> é a mesma
+ideia, escrita de um jeito que ninguém lê em voz alta sem parar.</p>
+
+<p>Com a variante registrada, o CSS gerado sai assim, e vale olhar com calma porque ele explica o resto
+da aula:</p>
+
+<pre class="term">.hocus\:bg-amber-200:hover,
+.hocus\:bg-amber-200:focus {
+  background-color: var(--color-amber-200);
+}</pre>
+
+<p>Duas coisas para levar. Primeira: o corpo é o mesmo das outras classes — a cor continua vindo de uma
+variável do tema, e nada foi duplicado à mão. Segunda: a condição foi <em>acrescentada</em> ao seletor da
+classe, não trocada. Isso significa que a variante pode ser empilhada com outras, e
+<code>dark:hocus:bg-amber-200</code> funciona como você espera: no tema escuro e com mouse ou foco. A
+ordem dos prefixos nesse caso é livre, mas escrever sempre na mesma ordem — tema, tamanho de tela,
+estado — deixa o HTML previsível.</p>
+
+<h2>5. Especificidade: por que :where() aparece tanto</h2>
+
+<p>Agora a parte que separa quem só copia a receita de quem entende. Toda regra de CSS tem um peso, e
+quando duas regras mexem na mesma propriedade do mesmo elemento, vence a de peso maior — não a última que
+você escreveu. Seletor de id pesa mais que classe, classe pesa mais que tag, e assim por diante.</p>
+
+<p>Uma variante que acrescenta <code>:hover</code> ao seletor deixa a regra mais pesada que a classe
+simples. Isso costuma ser bom, mas cria um problema sutil: a sua variante pode passar a ganhar de coisas
+que deveriam vencê-la, e você fica sem ferramenta para sobrescrever, a não ser com <code>!important</code>
+— que é o sinal de que o desenho das camadas está errado.</p>
+
+<p>O <code>:where()</code> resolve isso embrulhando a condição numa camada de peso zero. A condição
+continua valendo, mas não soma força ao seletor. Por isso a receita que você vai ver em todo lugar é
+<code>&amp;:where([data-destaque])</code> em vez de <code>&amp;[data-destaque]</code>: as duas funcionam,
+e a primeira deixa o CSS fácil de sobrescrever depois.</p>
+
+<p>Na caixa abaixo, o preço está marcado com o atributo <code>data-destaque</code> — um jeito de o
+JavaScript dizer “este item está em promoção” sem trocar classe. A variante <code>destaque:</code> precisa
+existir para o prefixo funcionar. Sua missão é escrever a linha, com <code>:where()</code>.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|background-color=oklch(0.962 0.059 95.617);;rule::where([data-destaque])">
+  <p class="try-task">Registre a variante <code>destaque</code> com a condição
+  <code>&amp;:where([data-destaque])</code>. O preço marcado deve ganhar fundo âmbar claro.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+/* a variante destaque ainda não existe */
+&lt;/style&gt;
+
+&lt;p id="alvo" class="p-2 text-amber-900 destaque:bg-amber-100" data-destaque&gt;
+  Pão de queijo, R$ 6
+&lt;/p&gt;</pre>
+  <pre class="out">
+padding: 8px
+color: oklch(0.414 0.112 45.904)
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@custom-variant destaque (&amp;:where([data-destaque]));
+&lt;/style&gt;
+
+&lt;p id="alvo" class="p-2 text-amber-900 destaque:bg-amber-100" data-destaque&gt;
+  Pão de queijo, R$ 6
+&lt;/p&gt;</pre>
+</div>
+
+<p>Antes de rodar, o painel mostra o respiro e a cor do texto, e nenhum fundo: a classe
+<code>destaque:bg-amber-100</code> está no HTML, mas o prefixo não existe no CSS, então não há regra para
+ela. Depois de registrar a variante, o fundo aparece. É o mesmo silêncio de sempre — classe sem CSS não
+avisa nada.</p>
+
+<p>O CSS gerado para essa variante tem a condição depois do nome da classe, e o <code>:where()</code>
+aparece literalmente no seletor — não é uma convenção de leitura, é CSS de verdade:</p>
+
+<pre class="term">.destaque\:bg-amber-100:where([data-destaque]) {
+  background-color: var(--color-amber-100);
+}</pre>
+
+<p>Se você tirar o <code>:where()</code> e escrever <code>&amp;[data-destaque]</code>, o seletor vira
+<code>.destaque\:bg-amber-100[data-destaque]</code> e o fundo aparece igual. A diferença só se revela no
+dia em que outra regra disputa a mesma propriedade: aí a versão com atributo “cru” ganha por ter mais
+peso, e você fica sem argumento para sobrescrever.</p>
+
+<p>Vale conhecer o atalho que dispensa variante própria neste caso específico: para atributos
+<code>data-*</code> simples, o Tailwind já aceita o nome do atributo como prefixo. <code>data-destaque</code>
+no HTML combina com <code>data-destaque:bg-amber-100</code> na classe, sem <code>@custom-variant</code>
+nenhum. A variante própria vale quando a condição é composta — atributo mais estado, dois atributos,
+filho de algo — ou quando você quer um nome curto e estável que não dependa do nome do atributo.</p>
+
+<h2>6. Variante que não é seletor: a media query</h2>
+
+<p>Até aqui as condições foram seletores: estados do elemento, atributos, posição na árvore. Mas uma
+variante também pode ser uma <strong>media query</strong> — e aí ela pergunta algo sobre o ambiente, não
+sobre o elemento. É o mesmo mecanismo dos breakpoints, com um nome escolhido por você.</p>
+
+<p>Dois exemplos que aparecem em projeto de verdade. O primeiro, acessibilidade: quem marcou no sistema
+“reduzir movimento” não quer animação. O segundo, impressão: a página precisa de outro respiro no papel.
+Os dois se escrevem assim, sem nenhum seletor:</p>
+
+<pre class="file" data-file="style.css">@custom-variant sem-movimento (@media (prefers-reduced-motion: reduce));
+@custom-variant papel (@media print);</pre>
+
+<p>Na caixa abaixo, a condição é a largura da janela, porque é a única que dá para testar na prévia. A
+variante <code>apertado</code> está registrada com um limite pequeno demais, e por isso o fundo não
+aparece na janela de 375 px. Sua missão é corrigir o número.</p>
+
+<div class="trytailwind" data-largura="375" data-goal="css:#alvo|background-color=oklch(0.962 0.059 95.617);;rule:@media (width &lt; 30rem)">
+  <p class="try-task">A prévia tem 375 px. Mude o limite de <code>20rem</code> para <code>30rem</code> e
+  rode: em telas apertadas o cartão deve ganhar fundo âmbar claro.</p>
+  <pre class="html" data-largura="375">&lt;style type="text/tailwindcss"&gt;
+@custom-variant apertado (@media (width &lt; 20rem));
+&lt;/style&gt;
+
+&lt;div id="alvo" class="border border-amber-300 p-4 apertado:bg-amber-100"&gt;
+  &lt;p class="font-semibold"&gt;Encomendas&lt;/p&gt;
+  &lt;p class="text-sm"&gt;Retire no balcão até as 18h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+border-width: 1px
+border-color: oklch(0.879 0.169 91.605)
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@custom-variant apertado (@media (width &lt; 30rem));
+&lt;/style&gt;
+
+&lt;div id="alvo" class="border border-amber-300 p-4 apertado:bg-amber-100"&gt;
+  &lt;p class="font-semibold"&gt;Encomendas&lt;/p&gt;
+  &lt;p class="text-sm"&gt;Retire no balcão até as 18h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS gerado é uma media query comum embrulhando a classe, exatamente como o Tailwind faz com
+<code>sm:</code> e companhia. A diferença é que o número e o nome são seus, e que o nome não vem de uma
+variável <code>--breakpoint-*</code>: ele mora no <code>@custom-variant</code>. Por isso, essa variante
+não ganha um par <code>max-apertado</code> automático; se você quiser os dois lados, escreva as duas
+linhas.</p>
+
+<p>Se a condição que você quer já existe como breakpoint, use o breakpoint. Criar uma variante de largura
+quando <code>balc:</code> faria o mesmo serviço é sinal de que o projeto está com duas réguas de tamanho
+— e duas réguas é sempre uma a mais do que se consegue lembrar.</p>
+
+<h2>7. Pronta, arbitrária ou própria?</h2>
+
+<p>Toda condição que você imaginar cabe em uma destas três caixas, e escolher a caixa certa é a decisão
+do dia a dia.</p>
+
+<p>A <strong>pronta</strong> é a primeira tentativa: <code>hover</code>, <code>focus</code>,
+<code>disabled</code>, <code>data-*</code>, os breakpoints, <code>dark</code>. O Tailwind traz dezenas, e
+a documentação lista todas. Use antes de inventar.</p>
+
+<p>A <strong>arbitrária</strong> é a segunda: a condição escrita na hora, entre colchetes. Ótima para o
+caso isolado — um seletor de filho numa tabela, um <code>[&amp;:nth-child(3)]</code> para acertar uma
+borda. Ruim quando repete, porque não tem nome, não tem lugar único e não tem como mudar em bloco.</p>
+
+<p>A <strong>própria</strong> é a terceira: um nome no <code>@custom-variant</code>. Vale quando a
+condição aparece em três lugares ou mais, quando o nome dela é uma palavra que o time já usa, ou quando
+você quer poder mudar a condição sem tocar no HTML.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Situação</th><th>O que usar</th><th>Por quê</th></tr>
+<tr><td>mouse e teclado no mesmo botão</td><td><code>@custom-variant hocus (&amp;:hover, &amp;:focus)</code></td><td>a condição se repete e ganha nome curto</td></tr>
+<tr><td>marcar um item em promoção</td><td><code>data-destaque:bg-amber-100</code></td><td>atributo simples já tem prefixo pronto</td></tr>
+<tr><td>terceiro filho de uma lista</td><td><code>[&amp;:nth-child(3)]:border-t</code></td><td>caso isolado, não vale nome</td></tr>
+<tr><td>respeitar quem reduziu movimento</td><td><code>@custom-variant sem-movimento (@media …)</code></td><td>condição de ambiente, sem seletor</td></tr>
+<tr><td>tema escuro por classe</td><td><code>@custom-variant dark (&amp;:where(.dark, .dark *))</code></td><td>a receita oficial, já pronta no projeto</td></tr>
+</table>
+</div>
+
+<p>Duas armadilhas de nomenclatura. Não batize uma variante com o nome de uma que já existe:
+<code>@custom-variant hover (…)</code> não “melhora” o <code>hover:</code>, ela o substitui, e o resto do
+site passa a obedecer à sua condição. E não use o nome de uma utilidade, como <code>flex</code> ou
+<code>grid</code>: o prefixo e a classe ficam iguais na leitura e ninguém entende o HTML depois.</p>
+
+<h2>8. Quando a variante nova não faz nada</h2>
+
+<p>O sintoma é sempre o mesmo: você escreveu <code>minha-variante:bg-amber-100</code>, salvou, e o fundo
+não apareceu. Não há mensagem de erro. A lista de conferência é curta e resolve quase todos os casos.</p>
+
+<ul>
+<li><strong>O <code>@custom-variant</code> está no arquivo compilado?</strong> Ele precisa estar no CSS de
+entrada, junto do <code>@import "tailwindcss";</code>. Num projeto com build, um arquivo CSS solto não é
+lido por ninguém.</li>
+<li><strong>O nome está igual?</strong> <code>hocus</code> e <code>Hocus</code> são coisas diferentes, e
+variante com hífen (<code>sem-movimento</code>) só combina com o prefixo escrito do mesmo jeito.</li>
+<li><strong>Falta o <code>&amp;</code>?</strong> A condição precisa dizer onde ela se encaixa: sem o
+<code>&amp;</code>, o que você escreveu vira um seletor de descendente, e a regra passa a procurar aquele
+atributo num filho. O elemento com a classe não é pintado.</li>
+<li><strong>Falta a condição real?</strong> No caso do atributo, o HTML precisa ter
+<code>data-destaque</code> de verdade. Variante que pergunta algo que ninguém responde nunca casa.</li>
+<li><strong>O CSS foi recompilado?</strong> No modo com npm, o processo de build tem de estar rodando; se
+ele parou, o CSS fica velho e a variante nova não chega no navegador.</li>
+</ul>
+
+<p>Há ainda o caso do “não faz nada porque outra regra venceu”. Aí o painel do navegador resolve: na aba
+<em>Styles</em>, a declaração riscada mostra quem ganhou. Se o vencedor é uma variante sua sem
+<code>:where()</code>, você já sabe o conserto.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a variante que nasceu grande demais</h3>
+<p>A Ana criou <code>@custom-variant promo (&amp;:where([data-promo], .promo))</code> e passou a usar
+<code>promo:</code> em tudo: preço, selo, botão e até no rodapé. Seis meses depois, queria mudar só o
+comportamento do preço e descobriu que a condição era uma só para o site inteiro. O conserto foi criar
+uma segunda variante, mais específica, e migrar o preço. Variante é contrato: nasce pequena, e cresce
+quando a repetição justifica.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o botão que só funcionava com mouse</h3>
+<p>Ela usou <code>hover:bg-amber-200</code> no botão de encomenda e testou no mouse: perfeito. No
+teclado, o foco aparecia na borda e o fundo não mudava, então o botão parecia desligado. Trocar para
+<code>hocus:</code> resolveu os dois casos com uma classe. O detalhe que fica: quem navega por teclado
+depende de <code>focus</code>, e quem usa leitor de tela depende de <code>focus-visible</code>; a
+variante própria é o lugar onde o time decide o que vale para os dois.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: duas variantes com o mesmo peso</h3>
+<p>Num cartão, ela tinha <code>destaque:border-amber-500</code> e <code>hover:border-amber-700</code>. No
+mouse, a borda não mudava: as duas regras tinham o mesmo peso, e vencia a que o Tailwind escreveu por
+último. A solução foi de desenho, não de força: a variante própria ganhou <code>:where()</code> e passou
+a ser mais fraca que o <code>hover:</code>, que é o estado mais urgente. Sem <code>:where()</code>, o
+conserto seria <code>!important</code> — e aí o próximo caso seria pior.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que o <code>&amp;</code> representa dentro do
+<code>@custom-variant</code>?</p>
+<label><input type="radio" name="q1"> o elemento pai do componente</label>
+<label><input type="radio" name="q1"> o elemento que tem a classe com aquela variante</label>
+<label><input type="radio" name="q1"> a raiz do documento, como no <code>:root</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Para que serve o <code>:where()</code> na condição de
+uma variante?</p>
+<label><input type="radio" name="q2"> para a condição valer só no tema escuro</label>
+<label><input type="radio" name="q2"> para o navegador ignorar a condição quando ela não casa</label>
+<label><input type="radio" name="q2"> para a condição não somar peso ao seletor, deixando o CSS fácil de sobrescrever</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Você registrou <code>hocus</code> e escreveu
+<code>hocus:bg-amber-200</code> num botão. O que aparece no CSS final?</p>
+<label><input type="radio" name="q3"> uma regra com dois seletores, um para <code>:hover</code> e outro para <code>:focus</code></label>
+<label><input type="radio" name="q3"> um bloco <code>@custom-variant</code> copiado para o CSS final</label>
+<label><input type="radio" name="q3"> nada, porque variante própria não gera CSS</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a promoção marcada por atributo</h2>
+<p>Complete a linha que registra a variante <code>destaque</code> para valer em quem tem o atributo
+<code>data-destaque</code>, com a condição embrulhada para não pesar no seletor:</p>
+<div class="ex-code">@custom-variant destaque (&amp;<input aria-label="resposta 1" data-answer=":where([data-destaque])" placeholder="...">);</div>
+<p class="ex-dica">Dica: são o <code>:where(</code>, o seletor de atributo entre colchetes e o
+fechamento. Sem o <code>:where</code>, a regra funciona igual, mas fica mais forte do que devia.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Variante é envelope: ela não troca o que a classe faz, troca quando vale. <code>@custom-variant</code>
+registra um nome para uma condição escrita em CSS, e o <code>&amp;</code> dentro dela é o elemento que
+carrega a classe. Uma vírgula junta duas condições no mesmo nome — é assim que nasce
+<code>hocus:</code> — e o CSS gerado mostra o seletor com a condição acrescentada, sem criar regra
+própria.</p>
+
+<p>A condição pode ser um seletor ou uma media query, e quase sempre vale embrulhá-la em
+<code>:where()</code> para ela não somar especificidade. Use a variante pronta quando existir, a
+arbitrária para o caso isolado e a própria quando a condição se repete ou merece um nome. E lembre que
+variante sem uso não gera CSS: se o prefixo novo não faz nada, comece conferindo se o
+<code>@custom-variant</code> está no arquivo compilado e se o nome está escrito igual.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Variante muda o quando, não o que: o corpo da regra continua igual.</li>
+<li><code>@custom-variant nome (condição);</code> registra o prefixo <code>nome:</code>.</li>
+<li><code>&amp;</code> é o elemento que tem a classe; <code>&amp; &gt; li</code> são os filhos diretos.</li>
+<li>Vírgula = “ou”; <code>&amp;:hover, &amp;:focus</code> gera duas regras com o mesmo corpo.</li>
+<li><code>:where()</code> zera a especificidade e evita briga com quem deveria vencer.</li>
+<li>A condição pode ser media query: <code>(@media (prefers-reduced-motion: reduce))</code>.</li>
+<li>Atributo <code>data-*</code> simples já tem prefixo pronto, sem variante própria.</li>
+<li>Não reuse nome de variante existente nem de utilidade no batismo.</li>
+<li>Variante registrada e não usada não aparece no CSS final.</li>
+<li>Prefixo que não faz nada: arquivo não compilado, nome diferente ou falta de <code>&amp;</code>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

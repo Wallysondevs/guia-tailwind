@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Galeria | Guia Tailwind</title>
+<meta name="description" content="A galeria de fotos da padaria com Tailwind: blocos quadrados com aspect-square, recorte com object-cover, grade responsiva de 2 a 4 colunas e auto-fill.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Galeria</span></h1>
+<p class="intro">A Ana fotografou tudo: o pão francês saindo do forno, a broa de milho, o sonho com
+açúcar, o balcão às seis da manhã. São dezoito fotos, cada uma com um tamanho diferente, porque
+telefone fotografa de pé e máquina fotográfica fotografa deitada. Ela colou todas na página do site e o
+resultado é uma torre: uma foto gigante embaixo da outra, cada uma de uma altura, a página com três mil
+pixels de rolagem. Nesta aula ela monta a galeria da vitrine — blocos quadrados, do mesmo tamanho, numa
+grade que mostra duas colunas no celular, três no tablet e quatro no computador.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que foto solta desmonta o layout e bloco quadrado conserta.</li>
+  <li>Como reservar a forma do bloco com <code>aspect-square</code>.</li>
+  <li>O recorte das fotos com <code>object-cover</code>, <code>object-contain</code> e
+  <code>overflow-hidden</code>.</li>
+  <li>A grade responsiva: <code>grid-cols-2 sm:grid-cols-3 lg:grid-cols-4</code>.</li>
+  <li>O <code>gap</code> que dá o ritmo da vitrine — e o <code>gap-px</code> da folha de contatos.</li>
+  <li>A grade que se vira sozinha: <code>repeat(auto-fill, minmax(9rem, 1fr))</code>.</li>
+  <li>A diferença entre <code>auto-fill</code> e <code>auto-fit</code>.</li>
+  <li>O mosaico com uma foto em destaque atravessando colunas e linhas.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a torre de fotos</h2>
+
+<p>O HTML da primeira galeria da Ana era uma lista de imagens, uma atrás da outra:</p>
+
+<pre class="file" data-file="galeria.html">&lt;img src="pao-frances.jpg" alt="Pão francês saindo do forno"&gt;
+&lt;img src="broa.jpg" alt="Broa de milho na forma"&gt;
+&lt;img src="sonho.jpg" alt="Sonho com açúcar"&gt;</pre>
+
+<p>Funcionou no sentido literal: as fotos apareceram. O problema é que apareceram do jeito que foram
+tiradas. Uma imagem sem medida declarada usa o tamanho do arquivo — 4.000 px de largura, se a foto veio
+da câmera. O navegador obedece: encolhe para caber na tela e a altura acompanha. Como cada foto tem
+proporção diferente, a coluna vira um zigue-zague de alturas. Se todas são retrato, a página fica com
+cinco mil pixels de rolagem e ninguém chega à última.</p>
+
+<p>O problema de fundo é que a foto está sendo usada como se fosse conteúdo de texto: um após o outro,
+na ordem, cada um com o seu tamanho. Galeria não é isso. Galeria é <strong>vitrine</strong>: você quer
+ver várias fotos ao mesmo tempo, comparar, escolher. Para isso cada foto vira um <em>bloco</em> de
+tamanho igual, e os blocos se organizam numa grade. A foto deixa de mandar no layout e passa a ser
+conteúdo dentro de uma caixa que você desenhou.</p>
+
+<h2>2. As peças de uma galeria</h2>
+
+<p>São cinco peças, e vale decorar o nome de cada uma antes de ver as classes:</p>
+
+<dl class="anatomy">
+<dt>vitrine</dt>
+<dd>A galeria inteira: a grade que contém os blocos. Quem manda nas colunas é ela, não a foto.</dd>
+<dt>bloco</dt>
+<dd>A caixa de cada foto. Todos com a mesma forma, quase sempre quadrada, e com cantos
+arredondados.</dd>
+<dt>recorte</dt>
+<dd>O que acontece quando a proporção da foto não é a do bloco: sobra espaço ou corta. Aqui você
+escolhe cortar.</dd>
+<dt>legenda</dt>
+<dd>O nome do produto, embaixo ou por cima do bloco. Em letra pequena, sem competir com a foto.</dd>
+<dt>mosaico</dt>
+<dd>Uma vitrine em que uma ou duas fotos ocupam mais de um bloco. Dá destaque sem sair da grade.</dd>
+</dl>
+
+<p>Essa tradução — foto vira bloco, bloco vira célula de grade — resolve três problemas de uma vez. As
+fotos ficam do mesmo tamanho, o que faz a página parecer cuidada. A altura total da página passa a ser
+previsível, porque você sabe quantas linhas de bloco existem. E o layout fica igual no celular e no
+monitor, mudando só o número de colunas.</p>
+
+<h2>3. O bloco quadrado com aspect-square</h2>
+
+<p>O primeiro passo é dar forma ao bloco. Quadrado é a escolha da maioria das galerias: combina com
+foto de produto, alinha linhas com precisão e funciona em qualquer número de colunas. A classe é
+<code>aspect-square</code>, e ela não escreve altura nenhuma — ela escreve uma <em>proporção</em>:</p>
+
+<pre class="term">.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+.object-cover {
+  object-fit: cover;
+}</pre>
+
+<p><code>aspect-ratio: 1 / 1</code> quer dizer “largura e altura na mesma medida”. Quem decide essa
+medida é a largura: o bloco obedece à coluna da grade e calcula a altura sozinho. É diferente de
+<code>h-40</code>, que crava 160 px e não se importa com a largura. Numa grade, altura fixa e coluna
+elástica brigam: o bloco fica com forma de tijolo quando a tela muda de tamanho.</p>
+
+<div class="trytailwind" data-goal="rule:aspect-ratio: 1 / 1">
+  <p class="try-task">Os blocos têm a altura do texto e viram retângulos achatados. Dê a eles a forma
+  quadrada — a altura passa a acompanhar a largura: acrescente <code>aspect-square</code> a todos os
+  blocos (o painel confere o primeiro, <code>id="alvo"</code>).</p>
+  <pre class="html">&lt;div class="grid grid-cols-2 gap-3"&gt;
+  &lt;div id="alvo" class="rounded-xl bg-amber-200 p-3 text-sm font-medium text-amber-900"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="rounded-xl bg-amber-200 p-3 text-sm font-medium text-amber-900"&gt;Broa de milho&lt;/div&gt;
+  &lt;div class="rounded-xl bg-amber-200 p-3 text-sm font-medium text-amber-900"&gt;Bolo de fubá&lt;/div&gt;
+  &lt;div class="rounded-xl bg-amber-200 p-3 text-sm font-medium text-amber-900"&gt;Sonho&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 12px
+background-color: oklch(0.924 0.12 95.746)
+color: oklch(0.414 0.112 45.904)
+font-size: 14px
+font-weight: 500
+line-height: 20px
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div class="grid grid-cols-2 gap-3"&gt;
+  &lt;div id="alvo" class="aspect-square rounded-xl bg-amber-200 p-3 text-sm font-medium text-amber-900"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-amber-200 p-3 text-sm font-medium text-amber-900"&gt;Broa de milho&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-amber-200 p-3 text-sm font-medium text-amber-900"&gt;Bolo de fubá&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-amber-200 p-3 text-sm font-medium text-amber-900"&gt;Sonho&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, os quatro blocos ficam quadrados e, o mais importante, do mesmo tamanho — mesmo com
+nomes de comprimentos diferentes dentro deles. É isso que uma vitrine precisa: previsibilidade. Na
+prática, o retângulo colorido desta caixa vai ser substituído por uma foto, e a caixa continua com a
+mesma forma.</p>
+
+<p>A escala de proporções tem outras opções úteis, e todas viram <code>aspect-ratio</code>:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Proporção</th><th>Onde serve</th></tr>
+<tr><td><code>aspect-square</code></td><td>1 / 1</td><td>vitrine de produtos, avatar</td></tr>
+<tr><td><code>aspect-video</code></td><td>16 / 9</td><td>vídeo, capa de página</td></tr>
+<tr><td><code>aspect-[4/3]</code></td><td>4 / 3</td><td>foto de máquina, foto deitada</td></tr>
+<tr><td><code>aspect-[3/4]</code></td><td>3 / 4</td><td>foto de telefone, retrato</td></tr>
+<tr><td><code>aspect-auto</code></td><td>a do arquivo</td><td>quando a proporção é o conteúdo</td></tr>
+</table>
+</div>
+
+<p>Um benefício escondido: com a proporção declarada, o navegador reserva o espaço antes de a imagem
+terminar de baixar. Sem isso, a página “pula” quando cada foto chega — quem estava lendo perde a linha.
+Chama-se deslocamento de layout, e uma galeria com <code>aspect-</code> não tem esse problema.</p>
+
+<h2>4. O recorte: object-cover e overflow-hidden</h2>
+
+<p>O bloco está quadrado, mas a foto dentro dele continua com a proporção original. Uma foto deitada
+num bloco quadrado: o navegador estica? Achata? Deixa barra branca? Por padrão, ele encaixa a imagem
+inteira e, quando sobra, deixa espaço vazio. É aí que entra a classe que manda na relação entre a foto e
+o bloco:</p>
+
+<pre class="file" data-file="galeria.html">&lt;div class="aspect-square overflow-hidden rounded-xl"&gt;
+  &lt;img src="pao-frances.jpg" alt="Pão francês saindo do forno"
+       class="h-full w-full object-cover"&gt;
+&lt;/div&gt;</pre>
+
+<p>Leia em três pedaços. <code>h-full w-full</code> manda a imagem ocupar 100% da altura e da largura do
+bloco — sem isso, ela ficaria no tamanho natural e vazaria. <code>object-cover</code> manda preencher o
+espaço e cortar o que sobrar, mantendo a proporção: nada de foto achatada. E o
+<code>overflow-hidden</code> no bloco é o que faz o arredondamento valer para a imagem: sem ele, a foto
+cortada continua com cantos retos por cima do <code>rounded-xl</code>, e o resultado parece um erro de
+recorte.</p>
+
+<p>A alternativa é <code>object-contain</code>, que mostra a foto inteira e deixa faixas vazias nas
+laterais — útil quando cortar estraga a imagem (um bolo de três andares, uma foto com texto). E há
+<code>object-fill</code>, que estica e distorce: existe, funciona, e é quase sempre a escolha errada
+numa vitrine. A regra prática da galeria: <code>object-cover</code> no bloco quadrado, sempre.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que faz com a foto</th><th>Quando usar</th></tr>
+<tr><td><code>object-cover</code></td><td>preenche o bloco e corta o que sobra</td><td>vitrine de produtos, cartão, capa</td></tr>
+<tr><td><code>object-contain</code></td><td>mostra a foto inteira, com faixas vazias</td><td>foto com texto, peça alta, logo</td></tr>
+<tr><td><code>object-fill</code></td><td>estica e distorce até preencher</td><td>quase nunca; só em textura abstrata</td></tr>
+<tr><td><code>object-none</code></td><td>mantém o tamanho original e corta</td><td>detalhe de perto, textura do pão</td></tr>
+</table>
+</div>
+
+<p>Um cuidado de conteúdo, que é mais de gente do que de CSS: o recorte come pelas bordas, e o que está
+na borda costuma ser o assunto. Numa foto de pão em que o pão está no canto, o corte quadrado pode
+deixar só a toalha da mesa. Fotografe com o assunto no centro, ou ajuste o enquadramento na hora de
+editar a foto — o CSS não adivinha onde está o pão.</p>
+
+<h2>5. A grade de 2, 3 e 4 colunas</h2>
+
+<p>Com blocos quadrados e fotos recortadas, a vitrine é só uma grade. A regra de ouro da galeria
+responsiva é mudar o número de colunas pelo tamanho da tela, nunca a largura do bloco:</p>
+
+<div class="trytailwind" data-largura="1024" data-goal="rule:grid-template-columns: repeat(3, minmax(0, 1fr));;rule:grid-template-columns: repeat(4, minmax(0, 1fr));;rule:@media (width &gt;= 64rem);;largura:1024">
+  <p class="try-task">A prévia está com 1024 px e os blocos continuam em duas colunas, cada um com
+  500 px de largura. Deixe 3 colunas a partir de 640 px (<code>sm:grid-cols-3</code>) e 4 a partir de
+  1024 px (<code>lg:grid-cols-4</code>) no <code>&lt;div id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="grid grid-cols-2 gap-3"&gt;
+  &lt;div class="aspect-square rounded-xl bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-stone-200"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-amber-300"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-stone-300"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-amber-100"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-stone-100"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+gap: 12px
+grid-template-columns: 494px 494px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"&gt;
+  &lt;div class="aspect-square rounded-xl bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-stone-200"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-amber-300"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-stone-300"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-amber-100"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-stone-100"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Repare que a classe base, sem prefixo, continua sendo <code>grid-cols-2</code>. Ela é a regra do
+celular, onde a tela é estreita e dois blocos por linha é o máximo que cabe sem virar selo. O
+<code>sm:</code> entra a partir de 640 px, o <code>md:</code> a partir de 768 px e o
+<code>lg:</code> a partir de 1024 px. O CSS gerado para essas duas classes extras mostra a mecânica:</p>
+
+<pre class="term">@media (width &gt;= 40rem) {
+  .sm\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (width &gt;= 64rem) {
+  .lg\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}</pre>
+
+<p>Quarenta rem são 640 px, sessenta e quatro rem são 1024 px. O <code>1fr</code> de cada coluna é o
+que faz o bloco crescer e encolher junto com a tela, mantendo a forma quadrada pelo
+<code>aspect-square</code>. Como as três classes existem no mesmo elemento, vale a que estiver ativa
+naquela largura: base até 639 px, três colunas até 1023 px, quatro de 1024 para cima.</p>
+
+<p>Quantas colunas escolher? Depende do tamanho mínimo em que a foto ainda conta a história. Numa
+vitrine de pães, quatro colunas num monitor de 1.280 px dão blocos de 300 px — ótimo. Numa galeria de
+bolos de casamento, dois blocos grandes vendem melhor que seis pequenos. O número de colunas é uma
+decisão comercial disfarçada de CSS.</p>
+
+<h2>6. O gap: o respiro entre os blocos</h2>
+
+<p>O <code>gap-3</code> desta aula são 12 px de espaço entre os blocos, na horizontal e na vertical. É
+ele que separa uma foto da outra sem precisar de margem em cada bloco, e é uma das razões para usar
+grade em vez de empilhar <code>div</code> com margem: o espaçamento vive num lugar só.</p>
+
+<p>A escala do <code>gap</code> é a mesma do <code>p</code> e do <code>m</code>: 1 = 4 px, 2 = 8 px,
+3 = 12 px, 4 = 16 px, 6 = 24 px, 8 = 32 px. Uma vitrine de produtos costuma ficar bem com 3 ou 4;
+uma página de álbum de fotos, com 1 ou 2, porque o olho deve ler as imagens como um conjunto. E existe
+um extremo elegante: <code>gap-px</code>, de 1 pixel, que transforma a grade numa folha de contatos,
+com os blocos separados por um fio. Fica bonito com fundo claro atrás; fica estranho com fundo
+colorido, porque o fio assume a cor do fundo e some.</p>
+
+<p>Cuidado com um detalhe que pega muita gente: <code>gap</code> só funciona em <code>grid</code> e em
+<code>flex</code>. Se você esquecer o <code>grid</code>, o <code>gap-3</code> não faz nada e os blocos
+ficam colados — sem aviso nenhum. O sintoma é sempre o mesmo: “coloquei o gap e não mudou nada”.</p>
+
+<h2>7. A grade que se vira sozinha</h2>
+
+<p>Existe um jeito de não escrever breakpoint nenhum e ainda assim ter a coluna certa em cada tela. Em
+vez de dizer <em>quantas</em> colunas, você diz <em>qual o tamanho mínimo</em> de cada bloco, e a grade
+encaixa quantos couberem:</p>
+
+<pre class="term">grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));</pre>
+
+<p>Leia em três pedaços. <code>minmax(9rem, 1fr)</code> é a regra de cada coluna: no mínimo 9 rem
+(144 px), no máximo o espaço que sobrar dividido igualmente. <code>repeat(…)</code> repete essa regra.
+E <code>auto-fill</code> é quem decide quantas repetições: tantas quantas couberem na largura
+disponível. Numa tela de 640 px cabem quatro colunas de 144 px com os gaps; numa de 375 px cabem duas.
+Nenhum <code>sm:</code>, nenhum <code>lg:</code>.</p>
+
+<div class="trytailwind" data-goal="rule:grid-template-columns: repeat(auto-fill,minmax(9rem,1fr))">
+  <p class="try-task">A vitrine está presa em duas colunas em qualquer tela. Troque a contagem fixa por
+  uma grade que caiba sozinha: use <code>grid-cols-[repeat(auto-fill,minmax(9rem,1fr))]</code> no lugar
+  de <code>grid-cols-2</code> (lembre: colchetes no lugar da escala e underline no lugar do espaço).</p>
+  <pre class="html">&lt;div id="alvo" class="grid grid-cols-2 gap-3"&gt;
+  &lt;div class="aspect-square rounded-xl bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-stone-200"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-amber-300"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-stone-300"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-amber-100"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-stone-100"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+gap: 12px
+grid-template-columns: 302px 302px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-3"&gt;
+  &lt;div class="aspect-square rounded-xl bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-stone-200"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-amber-300"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-stone-300"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-amber-100"&gt;&lt;/div&gt;
+  &lt;div class="aspect-square rounded-xl bg-stone-100"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Agora a diferença que quase ninguém explica: <code>auto-fill</code> e <code>auto-fit</code> calculam
+o mesmo número de colunas, mas reagem de forma diferente às colunas que ficam sem foto. Com
+<code>auto-fill</code>, elas continuam lá, segurando o lugar: numa tela em que cabem quatro colunas, duas
+fotos ocupam um quarto da largura cada e sobram dois quartos vazios à direita. Com <code>auto-fit</code>,
+as colunas vazias encolhem para zero e as duas fotos se esticam para dividir a linha inteira.</p>
+
+<p>Qual usar? Se a galeria tem poucas fotos e você quer que elas preencham a linha,
+<code>auto-fit</code>. Se você quer que os blocos mantenham sempre o mesmo tamanho, mesmo com a linha
+pela metade, <code>auto-fill</code>. Com muitas fotos, os dois dão o mesmo resultado — a diferença só
+aparece quando as fotos acabam.</p>
+
+<h2>8. O mosaico com foto em destaque</h2>
+
+<p>Uma variação que dá vida à vitrine: a primeira foto ocupa quatro blocos (duas colunas por duas
+linhas) e o resto se acomoda em volta. É o mesmo <code>col-span</code> da aula de colunas e linhas,
+aplicado ao bloco:</p>
+
+<pre class="file" data-file="galeria.html">&lt;div class="grid grid-cols-2 gap-3 sm:grid-cols-4"&gt;
+  &lt;div class="col-span-2 row-span-2 overflow-hidden rounded-xl"&gt;
+    &lt;img src="forno.jpg" alt="O forno às seis da manhã" class="h-full w-full object-cover"&gt;
+  &lt;/div&gt;
+  &lt;!-- as outras fotos entram com um bloco cada --&gt;
+&lt;/div&gt;</pre>
+
+<p>O bloco em destaque recebe <code>col-span-2</code> e <code>row-span-2</code> e pronto. Só que a
+grade tem um comportamento que surpreende: se a foto grande não couber na linha, ela “empurra” e sobra
+buraco. Para o navegador preencher os buracos com os blocos menores, use
+<code>grid-flow-row-dense</code> na vitrine — o <em>dense</em> diz “pode voltar e ocupar o espaço que
+ficou para trás”. O resultado é um mosaico apertadinho, sem furos.</p>
+
+<p>Duas armadilhas do mosaico. A primeira: em tela pequena, o bloco em destaque precisa voltar a ter
+uma coluna só, senão ele espreme os vizinhos — use <code>col-span-1 sm:col-span-2</code>. A segunda: o
+bloco em destaque com <code>aspect-square</code> fica quadrado, mas ocupa duas colunas de largura; a
+altura dele dobra junto, e isso está certo. Só não misture <code>aspect-square</code> com uma altura
+fixa no mesmo bloco: uma das duas vai perder a disputa e você não vai entender qual.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: as fotos “pulam” enquanto carregam</h3>
+<p>A galeria da Ana ficava bonita depois de carregada, mas durante o carregamento a página dava saltos:
+cada foto chegava e empurrava o conteúdo para baixo. Quem já tinha começado a rolar perdia o lugar. A
+causa é o navegador não saber a altura antes de a imagem chegar. Com <code>aspect-square</code> no
+bloco, a altura está declarada desde o começo: a foto baixa dentro de um espaço que já existe. Se você
+não puder usar proporção, dá para declarar <code>width</code> e <code>height</code> reais no
+<code>&lt;img&gt;</code> — o navegador calcula a proporção a partir deles.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o bloco quadrado virou retângulo no celular</h3>
+<p>“No computador é quadrado, no celular fica achatado.” Esse caso quase sempre tem a ver com a
+largura do bloco não ser o que se imagina: numa grade de duas colunas com <code>gap-3</code>, cada
+bloco fica com metade da largura disponível menos os gaps, e o <code>aspect-square</code> acompanha. Se
+o bloco parece achatado, desconfie de uma altura fixa (<code>h-40</code>) junto com a proporção, ou de
+um <code>overflow-hidden</code> com <code>object-fill</code>: a imagem foi esticada para preencher. O
+conserto é tirar a altura e trocar o recorte para <code>object-cover</code>.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a grade com 18 fotos pesa demais</h3>
+<p>A galeria da vitrine tem dezoito fotos de 4.000 px, cada uma com dois megabytes. O CSS está
+impecável e a página demora nove segundos para abrir no celular da cliente. Não há classe do Tailwind
+que resolva isso: é a hora de reduzir as fotos para o tamanho em que elas vão aparecer (400 px de
+largura é bastante para um bloco quadrado), salvar em formato comprimido e, se possível, usar
+carregamento preguiçoso com <code>loading="lazy"</code> nas imagens que estão fora da primeira tela. A
+regra: o layout está pronto quando a página está rápida <em>e</em> bonita.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. O que <code>aspect-square</code> garante no
+bloco?</p>
+<label><input type="radio" name="q1"> que a foto dentro dele não precise de recorte</label>
+<label><input type="radio" name="q1"> que o bloco tenha 160 px de altura em qualquer tela</label>
+<label><input type="radio" name="q1"> que a altura seja igual à largura, seja qual for a tela</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">2. Para que serve o <code>object-cover</code> na
+foto?</p>
+<label><input type="radio" name="q2"> para a foto ficar mais leve no carregamento</label>
+<label><input type="radio" name="q2"> para preencher o bloco e cortar o que sobra, sem distorcer</label>
+<label><input type="radio" name="q2"> para a foto aparecer inteira, com faixas nas laterais</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Numa galeria responsiva, o que muda do celular para
+o computador?</p>
+<label><input type="radio" name="q3"> o número de colunas: 2, 3 e 4, enquanto o bloco se adapta</label>
+<label><input type="radio" name="q3"> a largura fixa de cada bloco, em pixels</label>
+<label><input type="radio" name="q3"> o recorte das fotos, que troca de <code>object-cover</code> para <code>object-fill</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a coluna que se adapta</h2>
+<p>Esta é a grade que mostra tantos blocos quantos couberem na tela, cada um com no mínimo 9 rem. Falta
+o número que define esse mínimo. Escreva o valor completo, com a unidade.</p>
+<div class="ex-code">&lt;div class="grid grid-cols-[repeat(auto-fill,minmax(<input aria-label="resposta 1" data-answer="9rem" placeholder="...">,1fr))] gap-3"&gt;</div>
+<p class="ex-dica">Dica: é o mesmo valor do <code>minmax</code> da prosa — o tamanho mínimo que a foto
+precisa para ainda contar a história. Sem a unidade, o valor não vale.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Galeria é vitrine, e vitrine é grade. Cada foto vira um bloco com forma declarada por
+<code>aspect-square</code>, que guarda a proporção 1 / 1 e faz a altura acompanhar a largura da coluna.
+A foto entra dentro do bloco com <code>h-full w-full object-cover</code>, e o <code>overflow-hidden</code>
+no bloco é o que deixa o arredondamento valer para o recorte.</p>
+
+<p>A vitrine muda de coluna pelo tamanho da tela: <code>grid-cols-2 sm:grid-cols-3 lg:grid-cols-4</code>,
+com <code>gap-3</code> para o respiro. Quem não quer escrever breakpoint pode usar
+<code>grid-cols-[repeat(auto-fill,minmax(9rem,1fr))]</code>: a grade encaixa quantos blocos de 9 rem
+couberem, e a diferença entre <code>auto-fill</code> e <code>auto-fit</code> só aparece quando as fotos
+acabam e sobra espaço.</p>
+
+<p>Para dar destaque, um bloco pode atravessar colunas e linhas com <code>col-span-2 row-span-2</code>,
+e o <code>grid-flow-row-dense</code> preenche os buracos. O resto é disciplina: o mesmo <code>gap</code>
+para todos, a mesma proporção, o mesmo recorte — e fotos leves o bastante para a página abrir rápido no
+celular da cliente, que é onde a vitrine é vista de verdade.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Bloco de galeria: <code>aspect-square overflow-hidden rounded-xl</code>.</li>
+<li>Foto dentro: <code>h-full w-full object-cover</code>; nada de <code>object-fill</code>.</li>
+<li><code>overflow-hidden</code> no bloco para o canto arredondado cortar a imagem.</li>
+<li>Vitrine: <code>grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4</code>.</li>
+<li><code>gap</code> só funciona com <code>grid</code> ou <code>flex</code> — esquecer o <code>grid</code> é o erro clássico.</li>
+<li><code>repeat(auto-fill, minmax(9rem, 1fr))</code>: encaixa sozinho, sem breakpoint.</li>
+<li><code>auto-fit</code> estica os blocos quando sobram colunas; <code>auto-fill</code> deixa o vazio.</li>
+<li>Destaque no mosaico: <code>col-span-2 row-span-2</code> + <code>grid-flow-row-dense</code>.</li>
+<li>Proporção declarada evita o pulo da página enquanto as fotos carregam.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

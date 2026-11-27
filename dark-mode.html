@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O dark: | Guia Tailwind</title>
+<meta name="description" content="O prefixo dark: do Tailwind na prática: os pares de cor do tema escuro, o seletor que o Tailwind gera, o que herda e o que não herda e como empilhar variantes.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>O <span class="hl">dark:</span></h1>
+<p class="intro">Uma cliente escreveu para a Ana: “seu site é ótimo, mas eu abro de madrugada para ver o
+horário e levo um clarão na cara”. Era verdade. O site da padaria é branco do topo ao rodapé, e no
+quarto escuro isso dói. A Ana decidiu fazer o tema escuro e logo descobriu que o assunto não é trocar
+branco por preto: é escrever duas cores para cada cor e deixar que o navegador escolha. Nesta aula ela
+aprende o <code>dark:</code> — o prefixo que liga uma classe só quando o tema é escuro — e as regras
+que fazem o tema ficar bom em vez de virar um buraco preto.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é uma variante e por que <code>dark:</code> é um prefixo, não uma classe nova.</li>
+  <li>Como escrever o par de cada cor: <code>bg-white dark:bg-stone-900</code>.</li>
+  <li>O seletor que o Tailwind gera — <code>:where(.dark, .dark *)</code> — e o que ele significa.</li>
+  <li>O que herda no tema escuro e o que precisa de classe própria.</li>
+  <li>Borda, texto de apoio e cor da marca: os pares que costumam faltar.</li>
+  <li>Como empilhar <code>dark:</code> com <code>hover:</code> e com breakpoints.</li>
+  <li>Por que preto puro e branco puro são más escolhas no escuro.</li>
+  <li>Como a prévia do guia liga o tema escuro para você ver o resultado.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o clarão da madrugada</h2>
+
+<p>O site da Ana era feito de cores declaradas uma vez. O cartão de horários tinha fundo branco, texto
+cinza-escuro, borda cinza-clara. Tudo pensado para a luz do dia, que é quando a padaria funciona. Só que
+o site não fecha junto com a padaria: quem procura o horário de madrugada, no celular, na cama, recebe
+uma tela branca acesa a trinta centímetros do rosto.</p>
+
+<p>A primeira tentativa dela foi trocar o branco por preto. O cartão ficou
+<code>bg-black text-white</code>, ficou moderno por dez segundos e revelou o problema: a página inteira
+virou uma mancha preta, as bordas cinzas sumiram, o âmbar da marca ficou sujo e o texto branco puro
+brilhou mais que o problema original. Tema escuro não é inversão de cores. É um segundo conjunto de
+cores, escolhido a dedo, que entra em cena quando o leitor pede.</p>
+
+<p>E é aqui que o Tailwind faz a parte difícil: você não escreve arquivo nenhum de tema, nem
+<code>if</code>, nem JavaScript. Você escreve a cor do dia e, ao lado dela, a cor da noite — e o
+<code>dark:</code> cuida de aplicar a segunda só quando for a hora.</p>
+
+<h2>2. A ideia: uma variante é um prefixo condicional</h2>
+
+<p>Um prefixo com dois-pontos no Tailwind se chama <strong>variante</strong>. Você já usou várias sem
+pensar: <code>hover:</code> aplica no mouse em cima, <code>md:</code> aplica a partir de 768 px,
+<code>focus:</code> aplica quando o campo está em foco. O <code>dark:</code> é da mesma família — aplica
+quando o tema é escuro.</p>
+
+<dl class="anatomy">
+<dt>variante</dt>
+<dd>O prefixo antes dos dois-pontos: <code>dark:</code>, <code>hover:</code>, <code>md:</code>. Ela
+diz <em>quando</em> a classe vale, não <em>o que</em> ela faz.</dd>
+<dt>par</dt>
+<dd>A dupla formada pela classe normal e pela versão escura — <code>bg-white</code> e
+<code>dark:bg-stone-900</code>. Sempre juntas no mesmo elemento.</dd>
+<dt>tema</dt>
+<dd>O conjunto de cores em uso. Claro e escuro são dois temas do mesmo site, com o mesmo HTML.</dd>
+<dt>gatilho</dt>
+<dd>O que faz o tema escuro valer. No jeito que o guia usa, é a classe <code>dark</code> em algum
+elemento acima.</dd>
+<dt>contraste</dt>
+<dd>A diferença de claridade entre texto e fundo. É o que decide se o tema escuro é confortável ou
+ilegível.</dd>
+</dl>
+
+<p>Uma consequência prática que assusta no começo: cada cor do site passa a ter duas linhas de escrita.
+O cartão não tem <code>bg-white</code>; ele tem <code>bg-white dark:bg-stone-900</code>. São duas
+classes no mesmo atributo, e o navegador aplica as duas — uma sempre, a outra quando o tema muda. Não há
+conflito: a regra escura vem depois no CSS e só vale dentro da condição, então ela toma o lugar da clara
+na hora em que o tema vira.</p>
+
+<h2>3. O primeiro par: fundo e texto</h2>
+
+<p>Comece pelo par que resolve a maior parte da página. O fundo claro vira um cinza muito escuro, e o
+texto escuro vira um cinza muito claro — repare que não é branco puro nem preto puro, e a seção 7
+explica por quê.</p>
+
+<div class="trytailwind" data-tema="escuro" data-goal="rule:.dark\:bg-stone-900;;rule:.dark\:text-stone-100;;escuro:1">
+  <p class="try-task">Esta prévia já está no tema escuro — é o que o selo avisa. O cartão continua
+  branco, porque <code>bg-white</code> não tem par. Acrescente ao <code>&lt;div id="alvo"&gt;</code> as
+  classes <code>dark:bg-stone-900</code> e <code>dark:text-stone-100</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl bg-white p-6 text-stone-900"&gt;
+  &lt;p class="font-semibold"&gt;Horário da padaria&lt;/p&gt;
+  &lt;p class="mt-1"&gt;Aberto de segunda a sábado, das 6h às 19h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 24px
+background-color: rgb(255, 255, 255)
+color: oklch(0.216 0.006 56.043)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-xl bg-white p-6 text-stone-900 dark:bg-stone-900 dark:text-stone-100"&gt;
+  &lt;p class="font-semibold"&gt;Horário da padaria&lt;/p&gt;
+  &lt;p class="mt-1"&gt;Aberto de segunda a sábado, das 6h às 19h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Antes da missão, o painel mostra o fundo branco e o texto quase preto, apesar de a prévia estar no
+escuro. Isso não é bug: as classes <code>bg-white</code> e <code>text-stone-900</code> não têm condição
+nenhuma, então valem sempre. Depois de rodar a solução, os dois valores mudam para os tons escuros — e o
+painel passa a mostrar o cinza-escuro do fundo e o cinza-claro do texto. As classes do dia continuam no
+HTML, cumprindo o papel delas no tema claro.</p>
+
+<p>Se você olhar só o HTML, parece redundância. Na prática é o contrário de redundância: é a única forma
+de ter os dois temas no mesmo arquivo. Quem tenta economizar escrevendo só a versão escura descobre que
+o site ficou escuro para todo mundo. Quem escreve só a clara é o site da Ana de antes desta aula.</p>
+
+<h2>4. O CSS que o Tailwind gera</h2>
+
+<p>Vale ver a regra por baixo, porque ela explica todos os comportamentos estranhos desta aula:</p>
+
+<pre class="term">.dark\:bg-stone-900:where(.dark, .dark *) {
+  background-color: var(--color-stone-900);
+}</pre>
+
+<p>O seletor tem duas partes coladas. A primeira é o nome da classe, com a barra invertida escapando os
+dois-pontos (senão o navegador leria <code>dark</code> como um estado). A segunda é a condição, escrita
+em <code>:where()</code>: o elemento tem de estar dentro de algo com a classe <code>dark</code>, ou ser
+ele mesmo esse algo. O <code>.dark *</code> é o pedaço que faz o trabalho sujo — significa “qualquer
+elemento descendente de <code>.dark</code>”, e é por isso que você pode pôr <code>dark:</code> num
+parágrafo fundo e ele funciona, desde que a página tenha a classe.</p>
+
+<p>Daí saem três consequências que valem decorar. A primeira: alguém precisa pôr a classe
+<code>dark</code> em algum lugar — no <code>&lt;html&gt;</code>, no <code>&lt;body&gt;</code> ou num
+bloco. Sem ela, nenhuma regra <code>dark:</code> vale, e o site fica claro. A segunda: a classe tem de
+estar <em>acima</em> do elemento, no caminho até a raiz. A terceira: <code>:where()</code> tem
+especificidade zero, então a regra escura não pesa mais que a clara — ela vence por vir depois no
+arquivo. É por isso que você nunca precisa de <code>!important</code> para o tema escuro pegar, e por que
+a ordem interna do CSS gerado importa mais do que a ordem das classes no seu HTML.</p>
+
+<p>Nesta prévia, o guia põe a classe <code>dark</code> no <code>&lt;html&gt;</code> do iframe e injeta a
+definição do que o <code>dark:</code> significa. No seu projeto, quem faz esse papel é o CSS do site
+(uma linha de <code>@custom-variant</code>) mais um pedacinho de JavaScript que troca a classe — assunto
+da próxima aula. Por hoje, basta saber que o gatilho é uma classe e que ela precisa existir.</p>
+
+<h2>5. O que herda e o que não herda</h2>
+
+<p>Esta é a parte que economiza metade das classes do site — e que, mal entendida, faz metade delas
+faltar. Em CSS, algumas propriedades passam de pai para filho automaticamente e outras não. A cor do
+texto herda; o fundo não.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Propriedade</th><th>Herda?</th><th>Consequência no tema escuro</th></tr>
+<tr><td><code>color</code> (texto)</td><td>sim</td><td>o parágrafo filho já vem claro; não repita <code>dark:text-</code></td></tr>
+<tr><td><code>background-color</code></td><td>não</td><td>cada bloco com fundo próprio precisa do seu par</td></tr>
+<tr><td><code>border-color</code></td><td>não</td><td>borda cinza-clara continua clara e grita no escuro</td></tr>
+<tr><td><code>box-shadow</code></td><td>não</td><td>sombra preta sobre fundo escuro desaparece</td></tr>
+<tr><td><code>font-size</code></td><td>sim</td><td>tamanho de texto não muda de tema</td></tr>
+</table>
+</div>
+
+<p>Na prática: o cartão recebe <code>dark:bg-stone-900 dark:text-stone-100</code> e os parágrafos dentro
+dele não precisam de nada. Se você puser <code>dark:text-stone-100</code> em cada parágrafo, vai
+funcionar — e vai ter seis classes a mais para manter, cada uma uma chance de erro de digitação. A
+exceção é quando o filho tem cor própria: um <code>&lt;p class="text-stone-500"&gt;</code> também
+precisa do seu par, porque ele já declarou uma cor e a herança não age mais.</p>
+
+<p>A borda é o caso mais esquecido. Uma borda <code>border-stone-200</code> num cartão escuro vira um
+fio branco berrante — o olho vai direto para ele. O par certo é <code>dark:border-stone-700</code>:
+escuro o bastante para separar sem brilhar. Um detalhe que ajuda: se você não declarar cor de borda
+nenhuma, ela usa a cor do texto e acompanha o tema sozinha. O problema aparece quando a cor está
+declarada — e é aí que falta o par. E a sombra, que dá profundidade no claro, some no escuro:
+por isso o tema escuro costuma trocar sombra por borda, ou usar sombras mais amplas e mais fracas.</p>
+
+<h2>6. O par que falta: borda e texto de apoio</h2>
+
+<p>Este é o cartão típico que sobra meio pronto. O fundo e o título já têm par; a borda e a linha de
+apoio, não. No escuro, a borda clara vira um contorno luminoso e a linha de apoio fica escura demais
+para ser lida.</p>
+
+<div class="trytailwind" data-tema="escuro" data-goal="rule:.dark\:border-stone-700;;rule:.dark\:text-stone-400;;escuro:1">
+  <p class="try-task">A prévia está no escuro. O fundo e o título já estão resolvidos; faltam a borda e
+  a linha de apoio. Acrescente <code>dark:border-stone-700</code> e <code>dark:text-stone-400</code> ao
+  <code>&lt;p id="alvo"&gt;</code> — sim, a borda vai no parágrafo, que é o dono do cartão aqui.</p>
+  <pre class="html">&lt;div class="rounded-xl bg-stone-100 p-6"&gt;
+  &lt;div class="rounded-lg border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900"&gt;
+    &lt;p class="font-semibold text-stone-900 dark:text-stone-100"&gt;Encomendas&lt;/p&gt;
+    &lt;p id="alvo" class="mt-1 border-t border-stone-200 pt-2 text-sm text-stone-600"&gt;Bolos com 48 horas de antecedência.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+color: oklch(0.444 0.011 73.639)
+font-size: 14px
+line-height: 20px
+border-top-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+margin-top: 4px
+padding-top: 8px
+</pre>
+  <pre class="solucao">&lt;div class="rounded-xl bg-stone-100 p-6 dark:bg-stone-950"&gt;
+  &lt;div class="rounded-lg border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900"&gt;
+    &lt;p class="font-semibold text-stone-900 dark:text-stone-100"&gt;Encomendas&lt;/p&gt;
+    &lt;p id="alvo" class="mt-1 border-t border-stone-200 pt-2 text-sm text-stone-600 dark:border-stone-700 dark:text-stone-400"&gt;Bolos com 48 horas de antecedência.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Repare no que a solução fez além do pedido: o bloco de fora, que era <code>bg-stone-100</code>,
+ganhou <code>dark:bg-stone-950</code>. Era necessário — um cinza-claro atrás de um cartão escuro
+continuaria claro no escuro, e o cartão ficaria ilhado num retângulo branco. É o efeito dominó do tema:
+cada camada de fundo precisa do seu par, da mais externa para a mais interna. Fundo da página, fundo do
+cartão, fundo do campo, fundo da etiqueta.</p>
+
+<p>Escolher os tons fica mais fácil quando você pensa em degraus. No claro, a página é
+<code>stone-50</code> ou branca, o cartão é branco, a borda é <code>stone-200</code>. No escuro, a
+página é <code>stone-950</code>, o cartão sobe um degrau para <code>stone-900</code> e a borda é
+<code>stone-700</code>. Repare que o cartão fica mais <em>claro</em> que a página nos dois temas: no
+claro, branco sobre cinza; no escuro, cinza-escuro sobre quase preto. A relação entre as camadas se
+mantém, e é isso que faz o tema escuro parecer o mesmo site.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>No claro</th><th>No escuro</th></tr>
+<tr><td>Fundo da página</td><td><code>bg-stone-50</code></td><td><code>dark:bg-stone-950</code></td></tr>
+<tr><td>Cartão</td><td><code>bg-white</code></td><td><code>dark:bg-stone-900</code></td></tr>
+<tr><td>Borda</td><td><code>border-stone-200</code></td><td><code>dark:border-stone-700</code></td></tr>
+<tr><td>Título</td><td><code>text-stone-900</code></td><td><code>dark:text-stone-100</code></td></tr>
+<tr><td>Texto de apoio</td><td><code>text-stone-600</code></td><td><code>dark:text-stone-400</code></td></tr>
+<tr><td>Botão da marca</td><td><code>bg-amber-600</code></td><td><code>dark:bg-amber-500</code></td></tr>
+</table>
+</div>
+
+<h2>7. Escolher as cores do escuro</h2>
+
+<p>Três regras de bolso que evitam os resultados feios.</p>
+
+<p><strong>Nada de preto e branco puros.</strong> <code>#000</code> no fundo e <code>#fff</code> no
+texto criam o contraste máximo possível, e contraste máximo não é conforto: as letras parecem tremer e
+o olho cansa mais rápido do que no tema claro. Por isso as paletas do Tailwind usam
+<code>stone-950</code> (um quase-preto quente) e <code>stone-100</code> (um quase-branco). A regra
+prática: nenhum dos dois extremos, sempre um degrau dentro.</p>
+
+<p><strong>A cor da marca muda de degrau.</strong> O âmbar 600 é ótimo sobre branco e fica pesado sobre
+fundo escuro. No escuro ele sobe um ou dois degraus (500 ou 400), ganhando luminosidade. O contrário
+também vale: um texto âmbar-700 sobre branco funciona; no escuro, precisa virar âmbar-300 ou 400, senão
+some. Cor de marca não é um valor, são dois.</p>
+
+<p><strong>Contraste é medida, não opinião.</strong> A conta de contraste compara a claridade do texto
+com a do fundo, e o mínimo confortável para texto normal fica em torno de 4,5 para 1. Você não precisa
+decorar a fórmula: as ferramentas de inspeção mostram o número, e o guia tem uma aula inteira sobre
+contraste. O que vale guardar agora é que o tema escuro tem os seus próprios problemas de leitura — texto
+cinza-500 sobre fundo cinza-900, por exemplo, é ilegível mesmo sendo “cinza sobre cinza”.</p>
+
+<p>Um detalhe de sensação, que não é regra: no escuro, menos cor saturada funciona melhor. O cartão
+branco do site claro pode ter detalhes em âmbar; no escuro, esses detalhes costumam ficar melhores com
+opacidade baixa — <code>dark:bg-amber-500/10</code> — do que com a cor cheia. É o mesmo raciocínio de
+quem decora um ambiente à noite: menos luz, não mais tinta.</p>
+
+<h2>8. Empilhar <code>dark:</code> com outras variantes</h2>
+
+<p>Variantes se empilham, e a ordem importa. Um botão que muda de cor no mouse precisa de duas versões:
+a do claro e a do escuro. A escrita é <code>dark:hover:bg-amber-400</code>, nessa ordem — primeiro
+<code>dark:</code>, depois <code>hover:</code>.</p>
+
+<div class="trytailwind" data-tema="escuro" data-saida="css" data-goal="rule:.dark\:bg-amber-500;;rule:.dark\:hover\:bg-amber-400;;escuro:1">
+  <p class="try-task">O botão da marca está com o âmbar do tema claro. Dê a ele o par do escuro
+  (<code>dark:bg-amber-500</code>) e o par do mouse em cima
+  (<code>dark:hover:bg-amber-400</code>). O painel desta caixa mostra as regras geradas, e não o CSS
+  computado — porque <code>hover</code> não acontece no estado de repouso.</p>
+  <pre class="html" data-saida="css">&lt;button id="alvo" class="rounded-lg bg-amber-600 px-4 py-2 font-semibold text-white hover:bg-amber-700"&gt;Encomendar bolo&lt;/button&gt;</pre>
+  <pre class="out">
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+.bg-amber-600 {
+  background-color: var(--color-amber-600);
+}
+.px-4 {
+  padding-inline: calc(var(--spacing) * 4);
+}
+.py-2 {
+  padding-block: calc(var(--spacing) * 2);
+}
+.font-semibold {
+  --tw-font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-semibold);
+}
+.text-white {
+  color: var(--color-white);
+}
+@media (hover: hover) {
+  .hover\:bg-amber-700:hover {
+    background-color: var(--color-amber-700);
+  }
+}
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-amber-600 px-4 py-2 font-semibold text-white hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400"&gt;Encomendar bolo&lt;/button&gt;</pre>
+</div>
+
+<p>O painel mostra as regras na ordem em que o Tailwind as escreveu. As suas, sem prefixo, vêm primeiro;
+depois as de <code>hover:</code>, dentro de um <code>@media (hover: hover)</code>; depois as de
+<code>dark:</code>. Para o par escuro do mouse, o seletor gerado é:</p>
+
+<pre class="term">@media (hover: hover) {
+  .dark\:hover\:bg-amber-400:where(.dark, .dark *):hover {
+    background-color: var(--color-amber-400);
+  }
+}</pre>
+
+<p>As duas condições aparecem no mesmo seletor: dentro de algo com a classe <code>dark</code> <em>e</em>
+com o mouse em cima. Se uma das duas falhar, a regra não vale. Repare também no
+<code>@media (hover: hover)</code> por fora, que o Tailwind põe em toda classe de hover: em tela de
+toque não existe mouse em cima, e a regra nem chega a valer — o que evita o efeito fantasma de um botão
+que fica pintado depois do toque.</p>
+
+<p>Sobre a ordem: <code>dark:hover:</code> e <code>hover:dark:</code> chegam ao mesmo resultado visual,
+mas geram seletores diferentes — o <code>:where(.dark, .dark *)</code> vem antes do <code>:hover</code>
+numa forma, e depois na outra. A convenção do guia é escrever o tema antes da interação, lendo da
+condição mais ampla para a mais estreita. Quando você tiver três variantes na mesma classe, é essa ordem
+que mantém o nome legível: <code>md:dark:hover:bg-stone-800</code> se lê “tela larga, tema escuro, mouse
+em cima”.</p>
+
+<p>Com breakpoints a lógica é a mesma: <code>md:dark:bg-stone-800</code> vale em telas largas no tema
+escuro. Mas cuidado com a ordem das responsabilidades: se o seu site tem <em>um</em> tema por vez (claro
+ou escuro), o mais comum é escrever <code>md:</code> para a estrutura e <code>dark:</code> para as
+cores, sem misturar muito os dois na mesma classe. Misturar tudo produz nomes como
+<code>md:dark:hover:bg-stone-800</code>, que funcionam e são impossíveis de revisar depois.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o tema não muda nada</h3>
+<p>A Ana copiou as classes certinhas e, ao clicar no botão de tema do site, nada aconteceu. Nove entre
+dez vezes é o gatilho: ninguém pôs a classe <code>dark</code> em algum ancestral. A regra do Tailwind é
+<code>:where(.dark, .dark *)</code>, e sem essa classe nenhuma regra escura vale. O teste rápido no
+navegador: abra o inspetor, ache o <code>&lt;html&gt;</code>, acrescente a classe <code>dark</code> à
+mão e veja a página virar. Se virar, o CSS está certo e o problema é o JavaScript que deveria trocar a
+classe.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: só metade da página escureceu</h3>
+<p>O fundo principal ficou escuro, o texto ficou claro, mas um bloco continuou branco — e o texto dele,
+que herdou a cor clara, desapareceu. A causa é sempre a mesma: um <code>bg-white</code> sem par. Como
+fundo não herda, cada bloco com fundo próprio precisa do seu <code>dark:bg-…</code>. O caminho para
+achar o culpado é ler a página de fora para dentro, camada por camada: página, seção, cartão, campo,
+etiqueta. Na dúvida, procure no arquivo por <code>bg-white</code> e
+<code>bg-stone-50</code> e veja quais estão sem par.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o texto claro sobre branco ficou invisível</h3>
+<p>É o mesmo problema do cenário anterior, com uma vítima específica: um parágrafo com
+<code>dark:text-stone-100</code> dentro de um cartão que ficou branco. O texto herdou a versão escura do
+par e o fundo não a dele. A correção é completar o par do cartão, não apagar o par do texto. E vale a
+lição geral: quando o escuro fica errado, quase sempre falta uma classe no pai — não sobra uma no
+filho.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que <code>dark:bg-stone-900</code> faz?</p>
+<label><input type="radio" name="q1"> deixa o fundo escuro para sempre, em qualquer tema</label>
+<label><input type="radio" name="q1"> troca o fundo para <code>stone-900</code> só quando o tema é escuro</label>
+<label><input type="radio" name="q1"> inverte automaticamente todas as cores do elemento</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que o cartão precisa das duas classes,
+<code>bg-white</code> e <code>dark:bg-stone-900</code>?</p>
+<label><input type="radio" name="q2"> porque o Tailwind exige pares para qualquer cor</label>
+<label><input type="radio" name="q2"> porque <code>bg-white</code> deixa de existir no tema escuro</label>
+<label><input type="radio" name="q2"> porque a primeira vale no tema claro e a segunda, só no escuro</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que o seletor gerado
+<code>:where(.dark, .dark *)</code> significa?</p>
+<label><input type="radio" name="q3"> vale no próprio elemento com a classe <code>dark</code> e em qualquer descendente dele</label>
+<label><input type="radio" name="q3"> vale só no <code>&lt;body&gt;</code></label>
+<label><input type="radio" name="q3"> vale quando o navegador está no tema escuro do sistema, sem classe</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o par do texto</h2>
+<p>Este parágrafo é a linha de apoio de um cartão. No tema claro ele é <code>text-stone-600</code>.
+Complete a classe que deixa o texto legível no tema escuro, usando o degrau <code>stone-400</code>.</p>
+<div class="ex-code">&lt;p class="text-sm text-stone-600 <input aria-label="resposta 1" data-answer="dark:text-stone-400" placeholder="...">"&gt;</div>
+<p class="ex-dica">Dica: variante, dois-pontos, a mesma família de cor e o degrau novo. Sem espaço
+nenhum entre as partes.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p><code>dark:</code> é uma variante: um prefixo que diz quando a classe vale. Cada cor do site ganha um
+par — <code>bg-white dark:bg-stone-900</code>, <code>text-stone-900 dark:text-stone-100</code>,
+<code>border-stone-200 dark:border-stone-700</code> — e o navegador aplica a segunda só quando o tema é
+escuro.</p>
+
+<p>Por baixo, o Tailwind gera <code>:where(.dark, .dark *)</code>: a regra vale no elemento com a classe
+<code>dark</code> e em qualquer descendente dele. Por isso alguém precisa ligar o gatilho em algum
+ancestral, e por isso o <code>dark:</code> funciona num parágrafo fundo. Fundo não herda, texto herda: é
+o que decide onde repetir o par e onde confiar na herança.</p>
+
+<p>Para escolher as cores, nenhum extremo puro: quase-preto no fundo, quase-branco no texto, e a cor da
+marca um degrau acima no escuro. E variantes se empilham da esquerda para a direita:
+<code>dark:hover:bg-amber-400</code> vale quando é escuro <em>e</em> o mouse está em cima. O tema fica
+bom quando cada camada — página, cartão, campo, etiqueta — tem o seu par; quando falta uma, é ela que
+aparece como um retângulo branco no meio do escuro.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>dark:</code> é variante: aplica a classe quando o tema é escuro.</li>
+<li>Cada cor tem par: <code>bg-white</code> + <code>dark:bg-stone-900</code>.</li>
+<li>O seletor é <code>:where(.dark, .dark *)</code>: precisa de alguém com a classe <code>dark</code> acima.</li>
+<li>Texto herda cor; fundo, borda e sombra não herdam — cada um precisa do seu par.</li>
+<li>Camadas de fundo pedem pares em cascata: página, cartão, campo.</li>
+<li>No escuro: nada de preto puro nem branco puro; a marca sobe um degrau.</li>
+<li>Empilhe com <code>dark:hover:</code> — tema antes da interação.</li>
+<li>A prévia com o selo “escuro” põe a classe <code>dark</code> no <code>&lt;html&gt;</code> por você.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

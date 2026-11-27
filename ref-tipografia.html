@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tipografia | Guia Tailwind</title>
+<meta name="description" content="Referência de tipografia no Tailwind v4: a escala de tamanhos com entrelinha, os pesos de 100 a 900, leading, tracking, alinhamento, truncate e o que não funciona.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Tipografia</span></h1>
+
+<p class="intro">A Ana descobriu uma coisa simples e tarde: o texto é o produto. Na página da
+padaria, o que vende o pão é a frase que descreve o pão, e não a sombra do cartão. Só que tipografia
+tem muitas alavancas — tamanho, peso, entrelinha, espaço entre letras, alinhamento, corte — e cada
+uma tem uma escala própria no Tailwind. Esta página junta todas em um lugar, com os números que o
+navegador aplica de verdade, para você consultar no meio do trabalho em vez de testar cinco classes
+até acertar.</p>
+
+<h2>1. As quatro alavancas do texto</h2>
+
+<p>Uma frase na tela é decidida por quatro coisas, e vale separá-las na cabeça porque cada uma tem
+uma família de classes diferente. O <strong>tamanho</strong> é <code>text-*</code>. O
+<strong>peso</strong> (a espessura do traço) é <code>font-*</code>. A <strong>entrelinha</strong>, ou
+seja, a distância entre uma linha e a seguinte, é <code>leading-*</code>. O <strong>espaço entre
+letras</strong> é <code>tracking-*</code>. Nada disso é decorativo: entrelinha errada cansa a vista
+mais rápido do que tamanho errado, e é o ajuste que quase ninguém faz.</p>
+
+<p>O detalhe que muda o jogo no Tailwind v4 é que <code>text-lg</code> não define só o tamanho: ele
+define o par tamanho e entrelinha, junto, com valores que já foram testados. Um texto de 18 px com
+entrelinha de 28 px é confortável; se você trocar o tamanho e esquecer a entrelinha, o bloco
+desanda. Como o par vem pronto, você pode começar pela escala e só depois ajustar o que precisar.</p>
+
+<dl class="anatomy">
+<dt>tamanho</dt>
+<dd><code>text-sm</code>, <code>text-lg</code>, <code>text-3xl</code>. Vem com entrelinha embutida, o
+que é a maior conveniência da escala.</dd>
+<dt>peso</dt>
+<dd><code>font-medium</code>, <code>font-bold</code>. O número por trás vai de 100 a 900.</dd>
+<dt>entrelinha</dt>
+<dd><code>leading-relaxed</code> e afins. Multiplicador do tamanho da fonte; é o que decide se o
+parágrafo respira.</dd>
+<dt>tracking</dt>
+<dd>O espaço entre letras, em <code>em</code>. Negativo em títulos grandes, positivo em etiquetas
+em caixa alta.</dd>
+<dt>corte</dt>
+<dd>A família <code>truncate</code>, <code>line-clamp-*</code>, <code>break-*</code>: o que fazer
+quando o texto é maior que a caixa.</dd>
+</dl>
+
+<p>Uma armadilha que vale esclarecer agora, porque ela aparece na primeira semana de todo mundo:
+<code>text-*</code> serve para <strong>duas</strong> coisas. <code>text-lg</code> é tamanho,
+<code>text-amber-900</code> é cor. O que separa as duas é o que vem depois do hífen: nome de escala
+(<code>sm</code>, <code>lg</code>, <code>2xl</code>) é tamanho; família de cor com tom
+(<code>amber-900</code>) é cor. As duas convivem no mesmo elemento sem brigar, porque mudam
+propriedades diferentes. A <a href="ref-cores.html">paleta de cores</a> tem a lista das famílias.</p>
+
+<p>Antes das escalas, um lembrete de como o guia mede: todas as contas abaixo assumem a fonte base do
+navegador em 16 px, que é o padrão. Se o leitor aumentou a fonte, tudo cresce proporcionalmente
+porque a escala é em <code>rem</code>. E o texto comum, sem classe nenhuma, já nasce com 16 px e
+entrelinha de 24 px — esse é o ponto de partida escondido, e é por isso que <code>text-base</code> e
+<code>font-normal</code> às vezes não mudam nada na tela nem no painel.</p>
+
+<h2>2. A escala de tamanhos</h2>
+
+<p>São treze degraus, do minúsculo ao absurdo. A coluna da entrelinha é o par que vem junto com o
+tamanho, e ela não é proporcional: nos tamanhos grandes a entrelinha encolhe em relação à fonte,
+porque um título de 60 px com entrelinha de 90 px fica solto e feio.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Tamanho</th><th>Entrelinha</th><th>Uso típico</th></tr>
+<tr><td><code>text-xs</code></td><td>12 px</td><td>16 px</td><td>legenda, aviso legal, rodapé</td></tr>
+<tr><td><code>text-sm</code></td><td>14 px</td><td>20 px</td><td>texto de interface, tabela, formulário</td></tr>
+<tr><td><code>text-base</code></td><td>16 px</td><td>24 px</td><td>texto de leitura, o padrão do navegador</td></tr>
+<tr><td><code>text-lg</code></td><td>18 px</td><td>28 px</td><td>parágrafo de destaque, introdução</td></tr>
+<tr><td><code>text-xl</code></td><td>20 px</td><td>28 px</td><td>subtítulo, preço grande</td></tr>
+<tr><td><code>text-2xl</code></td><td>24 px</td><td>32 px</td><td>título de cartão, nome de produto</td></tr>
+<tr><td><code>text-3xl</code></td><td>30 px</td><td>36 px</td><td>título de seção</td></tr>
+<tr><td><code>text-4xl</code></td><td>36 px</td><td>40 px</td><td>título de página</td></tr>
+<tr><td><code>text-5xl</code></td><td>48 px</td><td>48 px</td><td>abertura de página inicial</td></tr>
+<tr><td><code>text-6xl</code></td><td>60 px</td><td>60 px</td><td>número de impacto, herói de campanha</td></tr>
+<tr><td><code>text-7xl</code></td><td>72 px</td><td>72 px</td><td>só em tela grande</td></tr>
+<tr><td><code>text-8xl</code></td><td>96 px</td><td>96 px</td><td>cartaz, página de erro</td></tr>
+<tr><td><code>text-9xl</code></td><td>128 px</td><td>128 px</td><td>experimento, nunca em celular</td></tr>
+</table>
+</div>
+
+<p>Duas leituras úteis dessa tabela. A primeira: de <code>text-5xl</code> para cima a entrelinha é
+igual ao tamanho, o que dá aquele aspecto de manchete de jornal. A segunda: a diferença de
+<code>text-xl</code> para <code>text-2xl</code> é de 4 px, mas a de entrelinha é de 4 px também —
+juntas, mudam bastante a mancha de texto. É por isso que trocar de degrau na escala costuma ser
+suficiente, e valor arbitrário raramente compensa.</p>
+
+<p>Se você precisa de uma hierarquia em uma página de conteúdo, três degraus bastam:
+<code>text-3xl</code> no título, <code>text-base</code> no corpo, <code>text-sm</code> nas legendas.
+Quem começa tende a usar sete tamanhos diferentes e o resultado fica barulhento. A Ana aprendeu isso
+na prática: o cartão de pão ficou melhor quando ela parou de mudar o tamanho e passou a separar por
+peso e por cor.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|font-size=24px;;css:#alvo|line-height=32px">
+  <p class="try-task">O nome do pão está em <code>text-sm</code>. Deixe-o com 24 px e entrelinha de
+  32 px, usando uma classe só — a escala já traz o par.</p>
+  <pre class="html">&lt;div id="alvo" class="text-sm"&gt;Pão de fermentação natural&lt;/div&gt;</pre>
+  <pre class="out">
+font-size: 14px
+line-height: 20px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="text-2xl"&gt;Pão de fermentação natural&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra as duas linhas: <code>font-size: 24px</code> e
+<code>line-height: 32px</code>. Se você tivesse escrito <code>text-[24px]</code>, teria o tamanho e
+não a entrelinha — o valor arbitrário só mexe na fonte. É uma diferença pequena no código e grande no
+resultado.</p>
+
+<h2>3. Peso: de 100 a 900</h2>
+
+<p>Peso é a espessura do traço. O CSS chama de <code>font-weight</code> e aceita números de 100 em
+100, com nomes consagrados. O Tailwind traz os nove, e a regra é simples: quanto maior o número, mais
+grosso o traço — e mais escura a mancha de texto, o que já cria hierarquia sem mudar o tamanho.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor</th><th>Onde faz sentido</th><th>Cuidado</th></tr>
+<tr><td><code>font-thin</code></td><td>100</td><td>título gigante, editorial</td><td>ilegível em tamanho pequeno</td></tr>
+<tr><td><code>font-extralight</code></td><td>200</td><td>abertura de página</td><td>falha em tela barata</td></tr>
+<tr><td><code>font-light</code></td><td>300</td><td>texto grande, romântico</td><td>poucas fontes entregam de verdade</td></tr>
+<tr><td><code>font-normal</code></td><td>400</td><td>texto de corpo</td><td>é o padrão: não muda nada</td></tr>
+<tr><td><code>font-medium</code></td><td>500</td><td>rótulo de campo, item de menu</td><td>o melhor "quase negrito"</td></tr>
+<tr><td><code>font-semibold</code></td><td>600</td><td>botão, subtítulo, tabela</td><td>o mais usado em interface</td></tr>
+<tr><td><code>font-bold</code></td><td>700</td><td>título de seção, preço</td><td>em excesso, achata a hierarquia</td></tr>
+<tr><td><code>font-extrabold</code></td><td>800</td><td>número de destaque</td><td>precisa de fonte com 8 pesos</td></tr>
+<tr><td><code>font-black</code></td><td>900</td><td>cartaz, logo tipográfico</td><td>raro em texto corrido</td></tr>
+</table>
+</div>
+
+<p>O problema prático do peso é que ele depende da fonte. Cada família tipográfica é um arquivo — ou
+um conjunto de arquivos, um por peso. Se a fonte só tem 400 e 700, pedir <code>font-medium</code> faz
+o navegador <em>inventar</em> o 500, engordando o traço de forma artificial, e o resultado fica sujo
+em telas de alta densidade. As fontes do sistema, que são as que o Tailwind usa por padrão, entregam
+400, 500, 600 e 700 na maioria das máquinas. Para os extremos, use uma fonte que traga os pesos.</p>
+
+<p>Um hábito que vale mais do que qualquer escala: use no máximo dois pesos na mesma tela. Um para
+tudo que é texto (<code>font-normal</code>) e outro para tudo que é comando ou título
+(<code>font-semibold</code>). A Ana tinha três pesos no mesmo cartão e o resultado parecia três
+pessoas escrevendo.</p>
+
+<h2>4. Entrelinha: a alavanca esquecida</h2>
+
+<p><code>leading-*</code> é a distância entre as linhas de um mesmo parágrafo. Ela não muda a altura
+de uma linha só; muda a mancha do bloco inteiro. A escala nomeada tem seis valores, e os números
+abaixo são medidos em um texto de 16 px, que é onde a maioria dos leitores está.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Multiplicador</th><th>Em texto de 16 px</th><th>Quando usar</th></tr>
+<tr><td><code>leading-none</code></td><td>1</td><td>16 px</td><td>número grande, uma linha só</td></tr>
+<tr><td><code>leading-tight</code></td><td>1,25</td><td>20 px</td><td>título grande, manchete</td></tr>
+<tr><td><code>leading-snug</code></td><td>1,375</td><td>22 px</td><td>subtítulo, cartão compacto</td></tr>
+<tr><td><code>leading-normal</code></td><td>1,5</td><td>24 px</td><td>padrão do navegador</td></tr>
+<tr><td><code>leading-relaxed</code></td><td>1,625</td><td>26 px</td><td>texto longo de leitura</td></tr>
+<tr><td><code>leading-loose</code></td><td>2</td><td>32 px</td><td>texto didático, respiro máximo</td></tr>
+<tr><td><code>leading-4</code></td><td>escala de espaço</td><td>16 px</td><td>raro: prefira a escala nomeada</td></tr>
+<tr><td><code>leading-6</code></td><td>escala de espaço</td><td>24 px</td><td>casar com a grade de 4 px</td></tr>
+<tr><td><code>leading-8</code></td><td>escala de espaço</td><td>32 px</td><td>casar com a grade de 4 px</td></tr>
+</table>
+</div>
+
+<p>Aqui está a pegadinha mais comum da tipografia no Tailwind, e ela vale ser lida duas vezes:
+<strong><code>leading-6</code> não é "seis vezes o tamanho da fonte"</strong>. Números soltos em
+<code>leading-*</code> usam a escala de espaço, então <code>leading-6</code> é 6 × 4 px = 24 px,
+independente do tamanho do texto. Isso é ótimo para alinhar com a grade e péssimo quando você queria
+um multiplicador. Para multiplicador puro, use <code>leading-[1.5]</code> ou os nomes
+(<code>tight</code>, <code>relaxed</code>).</p>
+
+<p>Para texto corrido, a faixa confortável é de 1,5 a 1,7. Abaixo disso as linhas se grudam e o olho
+pula de linha; acima de 2, o olho perde o fio. Títulos grandes pedem o contrário: entrelinha menor,
+porque a altura das letras já separa visualmente as linhas. É por isso que a escala de
+<code>text-5xl</code> para cima traz entrelinha igual ao tamanho, e por isso
+<code>leading-tight</code> combina com <code>text-4xl</code> mas não com <code>text-base</code>.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|line-height=26px;;rule:--tw-leading: var(--leading-relaxed)">
+  <p class="try-task">O parágrafo da receita está com <code>leading-tight</code>, apertado demais. Use
+  a entrelinha de leitura longa: 1,625.</p>
+  <pre class="html">&lt;p id="alvo" class="text-base leading-tight"&gt;Misture a farinha, a água e o fermento. Descanse por doze horas antes de assar.&lt;/p&gt;</pre>
+  <pre class="out">
+line-height: 20px
+</pre>
+  <pre class="solucao">&lt;p id="alvo" class="text-base leading-relaxed"&gt;Misture a farinha, a água e o fermento. Descanse por doze horas antes de assar.&lt;/p&gt;</pre>
+</div>
+
+<p><code>tracking-*</code> é a alavanca vizinha, e serve a outra coisa: o espaço entre letras. Os
+valores são em <code>em</code>, então acompanham o tamanho do texto. <code>tracking-tight</code> é
+−0,025 em (−0,4 px num texto de 16 px), <code>tracking-wide</code> é 0,025 em,
+<code>tracking-wider</code> é 0,05 em e <code>tracking-widest</code> é 0,1 em. Os negativos
+(<code>tighter</code>, −0,05 em) servem para títulos grandes, que ficam naturalmente frouxos. Os
+positivos servem para caixa alta: uma etiqueta <code>uppercase tracking-widest text-xs</code> parece
+desenhada, e a mesma etiqueta sem tracking parece apressada.</p>
+
+<h2>5. Alinhamento, caixa e decoração</h2>
+
+<p>Essas classes não mudam o tamanho do texto, mudam a disposição dele na linha. É aqui que ficam os
+ajustes que dão acabamento e que quase nunca aparecem em tutorial.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Família</th><th>Classes</th><th>Efeito</th></tr>
+<tr><td>alinhamento</td><td><code>text-left</code>, <code>text-center</code>, <code>text-right</code>, <code>text-justify</code></td><td>alinha as linhas na caixa</td></tr>
+<tr><td>alinhamento lógico</td><td><code>text-start</code>, <code>text-end</code></td><td>segue a direção do idioma</td></tr>
+<tr><td>caixa</td><td><code>uppercase</code>, <code>lowercase</code>, <code>capitalize</code>, <code>normal-case</code></td><td>muda a forma das letras, não o texto</td></tr>
+<tr><td>estilo</td><td><code>italic</code>, <code>not-italic</code></td><td>itálico de verdade ou sintético</td></tr>
+<tr><td>sublinhado</td><td><code>underline</code>, <code>overline</code>, <code>line-through</code>, <code>no-underline</code></td><td>decoração da linha</td></tr>
+<tr><td>espessura do risco</td><td><code>decoration-2</code>, <code>decoration-4</code></td><td>grossura do sublinhado</td></tr>
+<tr><td>estilo do risco</td><td><code>decoration-dotted</code>, <code>decoration-dashed</code>, <code>decoration-wavy</code></td><td>traço pontilhado, tracejado, ondulado</td></tr>
+<tr><td>distância do risco</td><td><code>underline-offset-4</code>, <code>underline-offset-8</code></td><td>afasta o risco da letra</td></tr>
+<tr><td>cor do risco</td><td><code>decoration-amber-600</code></td><td>pinta só a decoração</td></tr>
+<tr><td>números</td><td><code>tabular-nums</code></td><td>dígitos de mesma largura, alinhados em coluna</td></tr>
+<tr><td>relevo</td><td><code>antialiased</code>, <code>subpixel-antialiased</code></td><td>suavização da fonte</td></tr>
+<tr><td>recuo</td><td><code>indent-4</code>, <code>-indent-4</code></td><td>primeira linha recuada</td></tr>
+<tr><td>lista</td><td><code>list-disc</code>, <code>list-decimal</code>, <code>list-inside</code></td><td>marcador e posição do marcador</td></tr>
+</table>
+</div>
+
+<p><code>tabular-nums</code> merece um parágrafo próprio, porque é o ajuste que separa uma tabela de
+preços amadora de uma profissional. Em fontes normais, o "1" é mais estreito que o "8"; quando os
+números ficam um embaixo do outro, a coluna fica torta. Com <code>tabular-nums</code> todos os dígitos
+ocupam a mesma largura, e a coluna fica reta. Em uma lista de preços com dez linhas, é a diferença
+entre "cuidado" e "digitado no Word".</p>
+
+<p>Alinhamento centralizado é o caso onde a maioria erra por excesso. Centralizar um parágrafo de
+cinco linhas deixa as bordas irregulares e atrapalha a leitura; centralizar um título de uma linha é
+ótimo. A regra: centralize o que é curto, alinhe à esquerda o que é longo. E evite
+<code>text-justify</code> sem hifenização — o navegador abre buracos enormes entre palavras em vez de
+quebrar a palavra.</p>
+
+<p><code>uppercase</code> tem uma consequência que ninguém espera: o texto em caixa alta ocupa mais
+largura, porque as letras maiúsculas são maiores. Uma etiqueta que cabia em uma linha passa a ocupar
+duas. Se o espaço é apertado, combine com <code>text-xs</code> e um <code>tracking-wide</code> — e
+nunca use caixa alta em texto longo, porque em português as palavras ficam sem acento visível e a
+leitura trava.</p>
+
+<h2>6. Quando o texto não cabe</h2>
+
+<p>Este é o capítulo que resolve o layout. Um título de produto com quarenta caracteres vai quebrar
+de algum jeito quando a tela encolher; a única decisão é qual jeito você quer. São cinco
+comportamentos diferentes, e cada um tem sua classe.</p>
+
+<p><code>truncate</code> é o mais conhecido: corta em uma linha só e coloca reticências. Ele faz três
+coisas ao mesmo tempo, e é por isso que funciona sempre igual:</p>
+
+<pre class="term">.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}</pre>
+
+<p>O detalhe que faz gente perder uma tarde: <code>truncate</code> precisa de um limite de largura
+para ter o que cortar. Em um elemento que pode crescer — como filho de um <code>flex</code> —, o
+navegador prefere crescer a cortar. A solução é <code>min-w-0</code> no filho flexível, que permite a
+ele encolher abaixo do conteúdo. Sem isso, o texto vaza para fora do cartão e o truncate não age.</p>
+
+<p><code>line-clamp-2</code> corta em duas linhas, com reticências no fim da segunda. É o que se usa
+em cartão de notícia e descrição de produto. O CSS por baixo é antigo e um pouco estranho — usa
+<code>-webkit-line-clamp</code> — mas o resultado é estável em todos os navegadores atuais. Aceita
+qualquer número: <code>line-clamp-3</code>, <code>line-clamp-4</code>, <code>line-clamp-none</code>
+para desfazer.</p>
+
+<p>Para o caso oposto, quando o texto tem uma palavra gigante — uma URL, um código de pedido, um
+endereço de e-mail —, o problema são os <code>break-*</code>. <code>break-words</code> permite
+quebrar palavras longas só quando necessário, e é o mais seguro. <code>break-all</code> quebra em
+qualquer ponto, o que serve para sequências sem espaço e atrapalha em texto normal.
+<code>whitespace-nowrap</code> impede qualquer quebra, e é a base de barras de navegação e
+<code>truncate</code>.</p>
+
+<p>Existem ainda duas classes que melhoram a estética da quebra de linha sem cortar nada.
+<code>text-balance</code> equilibra as linhas de um título curto, evitando a última linha com uma
+palavra sozinha; <code>text-pretty</code> evita órfãs em parágrafos. Ambas são baratas e o efeito é
+discreto — do tipo que ninguém elogia e todo mundo sente.</p>
+
+<h2>7. Ajuste fino, valores próprios e tema</h2>
+
+<p>A escala cobre 95% dos casos. Para os outros 5%, existem três ferramentas. A primeira é o valor
+arbitrário entre colchetes: <code>text-[17px]</code>, <code>leading-[1.35]</code>,
+<code>tracking-[0.2em]</code>. O Tailwind gera a classe com aquele valor exato e você não sai da
+sintaxe. A segunda é a barra, que troca só a entrelinha mantendo o tamanho: <code>text-sm/6</code> é
+14 px com 24 px de entrelinha, e <code>text-lg/loose</code> é 18 px com 36 px.</p>
+
+<p>A terceira é declarar um degrau novo no tema. Cada tamanho é uma variável, e a entrelinha é uma
+variável companheira com o sufixo <code>--line-height</code>. É assim que o Tailwind consegue
+entregar o par pronto:</p>
+
+<pre class="term">--text-sm: 0.875rem;
+--text-sm--line-height: calc(1.25 / 0.875);
+.text-sm {
+  font-size: var(--text-sm);
+  line-height: var(--tw-leading, var(--text-sm--line-height));
+}</pre>
+
+<p>Ler esse CSS resolve a dúvida de onde vêm os 14 e os 20. A entrelinha é escrita como uma divisão
+— <code>1.25 / 0.875</code> — e não como um número pronto, porque assim ela se ajusta se você trocar
+o tamanho. Declarar <code>--text-receita: 1.375rem</code> com
+<code>--text-receita--line-height: 2rem</code> cria uma classe <code>text-receita</code> com 22 px e
+32 px, no mesmo padrão do resto do sistema. É o caminho para uma escala editorial própria sem
+inventar valores em cada parágrafo.</p>
+
+<p>As famílias de fonte também são variáveis: <code>font-sans</code>, <code>font-serif</code> e
+<code>font-mono</code> apontam para <code>--font-sans</code>, <code>--font-serif</code> e
+<code>--font-mono</code>. Redeclarar <code>--font-sans</code> no <code>@theme</code> troca a fonte do
+site inteiro, inclusive nos lugares em que você não pensou — o que é bom, desde que você teste. E
+declarar <code>--font-receita</code> cria uma classe <code>font-receita</code> para usar só nos
+títulos.</p>
+
+<p>Um último ajuste que não é de escala: <code>max-w-prose</code> limita a largura do bloco a
+aproximadamente 65 caracteres, que é a medida confortável de leitura. Um parágrafo de 900 px de
+largura tem 120 caracteres por linha, e o olho se perde ao voltar. Se você guardar uma única
+recomendação desta página inteira, guarde esta: limite a largura do texto, não o tamanho da
+fonte.</p>
+
+<h2>8. O que não funciona</h2>
+
+<p>Todos os casos abaixo foram testados no motor do guia. A maioria produz silêncio absoluto: nenhum
+CSS, nenhum aviso, nenhuma pista.</p>
+
+<ul>
+<li><strong><code>text-500</code> não é tamanho.</strong> <code>500</code> é um tom de cor, e um
+tamanho precisa de nome (<code>lg</code>) ou colchete. O mesmo vale para <code>text-2xs</code> e
+<code>text-xlarge</code>, que não existem.</li>
+<li><strong><code>font-600</code> não existe.</strong> Peso usa nomes: <code>font-semibold</code>. Se
+você precisa do número exato, use colchetes: <code>font-[600]</code>.</li>
+<li><strong><code>leading-1.5</code> não é multiplicador.</strong> Números soltos em
+<code>leading-*</code> usam a escala de espaço, e <code>leading-1.5</code> dá 6 px — quase colado.
+Para multiplicador, <code>leading-[1.5]</code>.</li>
+<li><strong><code>tracking-2</code> não existe.</strong> Tracking não aceita número solto: os valores
+têm nome (<code>tracking-wide</code>) ou colchete (<code>tracking-[0.2em]</code>).</li>
+<li><strong><code>text-base</code> e <code>font-normal</code> em um texto que já é 16 px e 400</strong>
+não mudam nada, e por isso o painel fica vazio. Não é erro: é o valor repetindo o padrão.</li>
+<li><strong><code>truncate</code> em filho de flex sem <code>min-w-0</code></strong> não corta: o
+elemento cresce em vez de encolher.</li>
+<li><strong><code>line-clamp</code> com altura fixa</strong> brigam: a altura manda, e o corte por
+linhas perde o efeito.</li>
+<li><strong>Duas classes de tamanho no mesmo elemento</strong> — <code>text-sm text-xl</code> — não
+somam: vence a que o Tailwind gerou por último, e você não controla isso pela ordem do HTML.</li>
+<li><strong>Caixa alta em texto longo.</strong> Além de cansar, esconde os acentos das palavras em
+português.</li>
+</ul>
+
+<p>Uma confusão que não é de digitação: achar que <code>font-bold</code> e <code>text-2xl</code>
+juntos "deixam o texto igual ao do Figma". Eles deixam parecido, mas o desenho pode usar uma fonte
+que não está no site. Quando o texto parece diferente entre o desenho e a tela, o problema
+normalmente é a família da fonte, não o tamanho nem o peso.</p>
+
+<h2>9. Resumo</h2>
+
+<p>Tamanho é <code>text-*</code> e vem em treze degraus, de 12 px a 128 px, cada um com entrelinha
+própria. A partir de <code>text-5xl</code> a entrelinha é igual ao tamanho, o que dá o efeito de
+manchete; nos tamanhos de leitura ela fica entre 1,4 e 1,7 do tamanho. Trocar de degrau na escala
+resolve quase toda decisão de hierarquia, e três degraus por página já é bastante.</p>
+
+<p>Peso é <code>font-*</code>, com nomes de <code>thin</code> (100) a <code>black</code> (900), e
+depende de a fonte trazer o peso de verdade. Entrelinha é <code>leading-*</code>: os nomes dão
+multiplicadores (1, 1,25, 1,375, 1,5, 1,625, 2) e os números usam a escala de espaço — daí
+<code>leading-6</code> valer 24 px em qualquer tamanho de texto. Tracking é <code>tracking-*</code>,
+em <code>em</code>, negativo para título grande e positivo para etiqueta em caixa alta.</p>
+
+<p>Para o texto que não cabe, a ordem de preferência é: <code>truncate</code> quando precisa ser uma
+linha, <code>line-clamp-*</code> quando podem ser duas ou três, <code>break-words</code> quando há
+palavras longas. Lembre do <code>min-w-0</code> no filho flexível e de que nada disso funciona sem um
+limite de largura.</p>
+
+<p>E o ajuste que muda mais a leitura com menos código: <code>max-w-prose</code> no bloco de texto e
+<code>leading-relaxed</code> no parágrafo longo. Feito isso, o resto é detalhe — e o detalhe que
+realmente importa é a família da fonte, que é uma decisão de projeto, não de classe.</p>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

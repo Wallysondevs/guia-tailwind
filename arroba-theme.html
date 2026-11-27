@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O @theme | Guia Tailwind</title>
+<meta name="description" content="O bloco @theme do Tailwind 4 explicado por dentro: os namespaces que geram classes, como sobrescrever um valor padrão e como usar as variáveis publicadas no seu CSS.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>O <span class="hl">@theme</span></h1>
+<p class="intro">A Ana copiou um bloco <code>@theme</code> de um tutorial e funcionou: o site ganhou a
+cor da marca. Animada, escreveu <code>--cor-do-botao: #b4532a</code>, criou a classe
+<code>bg-cor-do-botao</code> e nada aconteceu. Nesta aula ela abre o bloco e olha dentro: quais nomes
+o Tailwind reconhece, o que ele faz com cada um, por que um prefixo errado não gera classe nenhuma e
+como as variáveis que ele publica podem servir também para o CSS que ela escreve à mão. É a aula que
+transforma o <code>@theme</code> de receita copiada em ferramenta que ela sabe usar.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que o <code>@theme</code> é — e o que ele não é.</li>
+  <li>O caminho que o Tailwind percorre do bloco até a classe na tela.</li>
+  <li>Os namespaces (<code>--color-*</code>, <code>--font-*</code>, <code>--spacing</code>…) e o que cada um gera.</li>
+  <li>A diferença entre acrescentar um token e sobrescrever um padrão.</li>
+  <li>Por que <code>--cor-marca</code> não vira classe e <code>--color-marca</code> vira.</li>
+  <li>Como usar as variáveis publicadas dentro de um CSS comum.</li>
+  <li>Por que nem toda variável declarada aparece no arquivo final.</li>
+  <li>Como apagar uma família inteira de valores quando a paleta é fechada.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o bloco que funcionou por acidente</h2>
+
+<p>O bloco que a Ana copiou tinha sete linhas e três cores. Ela trocou os valores pelos da padaria,
+salvou, e o site ficou terracota. Só isso já justificava a aula — mas ela quis mais: criou
+<code>--cor-do-botao</code> com o terracota escuro, escreveu <code>bg-cor-do-botao</code> no botão e
+salvou. O botão continuou branco.</p>
+
+<p>Nada de erro, nada de aviso. Ela conferiu a ortografia três vezes, comparou com as linhas que
+funcionavam, e a diferença era invisível: <code>--cor-do-botao</code> em vez de
+<code>--color-do-botao</code>. Uma letra. Em português, "cor"; em inglês, "color". O Tailwind lê o
+começo do nome e decide o que fazer; se o começo não é de um nome que ele conhece, ele guarda a
+variável e não cria classe nenhuma.</p>
+
+<p>Essa é a chave da aula inteira: <strong>o <code>@theme</code> não é uma lista de cores, é uma
+tabela de nomes</strong>. O prefixo é o que diz ao Tailwind em que prateleira o valor está, e a
+prateleira determina quais classes ele vai gerar. Quem entende a tabela inventa token sem medo; quem
+não entende fica tentando adivinhar por que uma linha funciona e a vizinha não.</p>
+
+<h2>2. O que o @theme é (e o que ele não é)</h2>
+
+<p>O <code>@theme</code> é um bloco de CSS. Ele fica no mesmo arquivo onde está o
+<code>@import "tailwindcss"</code> — o CSS de entrada do projeto — e contém apenas declarações de
+variáveis, no formato <code>--nome: valor;</code>. Nada de seletores, nada de <code>body</code>, nada
+de regra solta: se você precisa de uma regra, ela vai fora do bloco, como qualquer CSS.</p>
+
+<pre class="file" data-file="src/style.css">@import "tailwindcss";
+
+@theme {
+  --color-marca: #b4532a;
+  --font-titulo: Georgia, serif;
+  --radius-cartao: 0.75rem;
+}
+
+.card {
+  background-color: var(--color-marca);
+}</pre>
+
+<p>O que ele <strong>não</strong> é: um arquivo de configuração em JavaScript. Quem vem do Tailwind 3
+procura um <code>tailwind.config.js</code> com uma lista de cores e não encontra. No Tailwind 4, essa
+lista virou este bloco, dentro do CSS. Ganhou-se uma coisa boa: o tema passa a ser CSS, então as
+mesmas variáveis servem para as classes do Tailwind e para o seu CSS escrito à mão.</p>
+
+<p>Também não é um lugar mágico onde qualquer nome vira classe. O Tailwind lê o bloco
+<em>antes</em> de gerar o CSS, monta uma tabela de nomes e usa essa tabela para decidir se
+<code>bg-marca</code> existe. Se o nome não estiver na tabela, a classe não existe — e classe que não
+existe não avisa, como você já sabe.</p>
+
+<p>Por fim, ele não substitui a paleta: ele <strong>convive</strong> com ela. Declarar
+<code>--color-marca</code> não apaga <code>bg-amber-100</code>; os dois funcionam. Apagar uma família
+inteira é possível, mas é um ato deliberado, com uma sintaxe própria, que aparece mais adiante nesta
+aula.</p>
+
+<h2>3. O caminho do bloco até a tela</h2>
+
+<p>Vale acompanhar o que acontece entre o seu texto e o pixel, porque isso explica todos os erros desta
+aula. São três passos.</p>
+
+<p><strong>Primeiro</strong>: o Tailwind lê o bloco e anota os nomes, junto com os valores padrão que
+ele já traz. É uma tabela interna, com as prateleiras separadas por prefixo. <strong>Segundo</strong>:
+ele varre o HTML, encontra classes como <code>bg-marca</code> e <code>p-4</code>, e para cada uma
+procura na tabela o valor correspondente. <strong>Terceiro</strong>: escreve o CSS final, com as
+variáveis publicadas em <code>:root</code> e as regras das classes apontando para elas.</p>
+
+<pre class="term">@layer theme {
+  :root, :host {
+    --color-marca: #b4532a;
+    --spacing: 0.25rem;
+    --font-sans: system-ui, sans-serif;
+  }
+}
+
+.bg-marca {
+  background-color: var(--color-marca);
+}
+
+.p-4 {
+  padding: calc(var(--spacing) * 4);
+}</pre>
+
+<p>Repare em dois detalhes que mudam o jeito de pensar. As variáveis vão para <code>:root</code>, que é
+a raiz do documento: qualquer elemento da página pode usar <code>var(--color-marca)</code>, inclusive
+os que não têm classe nenhuma. E as classes não repetem o valor: elas apontam para a variável. É por
+isso que trocar o valor no bloco muda todos os lugares de uma vez, e é por isso que o CSS final fica
+pequeno mesmo com muitas cores.</p>
+
+<dl class="anatomy">
+<dt>namespace</dt>
+<dd>O prefixo que classifica o valor: <code>--color-</code>, <code>--font-</code>,
+<code>--radius-</code>. É ele que determina quais classes o token gera.</dd>
+<dt>token</dt>
+<dd>Um nome com valor, como <code>--color-marca</code>. A palavra vem de "símbolo": algo curto que
+representa uma decisão.</dd>
+<dt>valor padrão</dt>
+<dd>O que o Tailwind já traz, como <code>--color-amber-100</code> ou <code>--spacing: 0.25rem</code>.
+Você pode sobrescrever qualquer um.</dd>
+<dt>:root</dt>
+<dd>A raiz do documento. É onde o Tailwind publica as variáveis, deixando-as disponíveis para toda a
+página.</dd>
+<dt>acrescentar</dt>
+<dd>Declarar um nome que não existe. A classe correspondente passa a existir, e nada mais muda.</dd>
+<dt>sobrescrever</dt>
+<dd>Declarar um nome que já existe com outro valor. A classe continua com o mesmo nome e passa a usar o
+valor novo.</dd>
+</dl>
+
+<h2>4. As prateleiras: os namespaces que geram classes</h2>
+
+<p>Não são muitos, e os que importam no dia a dia cabem numa tabela. A regra é sempre a mesma: o que
+vem depois do prefixo é o nome da classe.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Prefixo no @theme</th><th>Classe que nasce</th><th>Exemplo do guia</th></tr>
+<tr><td><code>--color-*</code></td><td><code>bg-*</code>, <code>text-*</code>, <code>border-*</code></td><td><code>--color-marca</code> vira <code>bg-marca</code></td></tr>
+<tr><td><code>--font-*</code></td><td><code>font-*</code></td><td><code>--font-titulo</code> vira <code>font-titulo</code></td></tr>
+<tr><td><code>--text-*</code></td><td><code>text-*</code> (tamanho)</td><td><code>--text-chamada</code> vira <code>text-chamada</code></td></tr>
+<tr><td><code>--spacing</code> e <code>--spacing-*</code></td><td><code>p-*</code>, <code>m-*</code>, <code>gap-*</code>, <code>w-*</code></td><td><code>--spacing-cartao</code> vira <code>p-cartao</code></td></tr>
+<tr><td><code>--radius-*</code></td><td><code>rounded-*</code></td><td><code>--radius-lacre</code> vira <code>rounded-lacre</code></td></tr>
+<tr><td><code>--shadow-*</code></td><td><code>shadow-*</code></td><td><code>--shadow-cartao</code> vira <code>shadow-cartao</code></td></tr>
+<tr><td><code>--breakpoint-*</code></td><td>prefixo de variante</td><td><code>--breakpoint-portatil</code> cria <code>portatil:</code></td></tr>
+<tr><td><code>--ease-*</code>, <code>--animate-*</code></td><td><code>ease-*</code>, <code>animate-*</code></td><td><code>--animate-flutuar</code> vira <code>animate-flutuar</code></td></tr>
+</table>
+</div>
+
+<p>Duas linhas dessa tabela merecem atenção especial. A de <code>--spacing</code> não tem asterisco:
+ela é uma variável só, que multiplica a escala inteira, e tem <a href="espacamento-proprio.html">aula própria</a> adiante. A de
+<code>--breakpoint-*</code> é a única que não gera classe, e sim um prefixo de variante — o
+<code>portatil:</code> funciona como <code>md:</code>, com o tamanho que você escolher.</p>
+
+<p>Há mais prateleiras do que caberia aqui: <code>--tracking-*</code> para o espaçamento entre letras,
+<code>--leading-*</code> para a altura da linha, <code>--container-*</code> para larguras máximas,
+<code>--blur-*</code>, <code>--aspect-*</code>. Você não precisa decorar a lista: quando sentir falta
+de um valor com nome, procure na documentação qual prefixo corresponde, ou repare no CSS que o
+Tailwind gerou — ele mostra o nome da variável de onde o valor veio.</p>
+
+<p>E o mais importante da tabela é o que ela <em>não</em> tem: não existe <code>--cor-*</code>, não
+existe <code>--fonte-*</code>, não existe <code>--espaco-*</code>. O namespace é sempre em inglês,
+porque é o Tailwind que o lê — o nome do token, depois do prefixo, é livre: você pode escrever
+<code>--color-trigo</code>, <code>--color-marca</code> ou <code>--color-padaria</code> e todos
+funcionam.</p>
+
+<h2>5. Acrescentar ou sobrescrever</h2>
+
+<p>Existem duas operações no mesmo bloco, e a diferença entre elas é o nome que você escolhe. Nome
+novo, como <code>--color-marca</code>: acrescenta. A classe <code>bg-marca</code> passa a existir e a
+paleta continua intacta. Nome que já existe, como <code>--color-amber-100</code>: sobrescreve. O
+Tailwind não cria uma segunda variável; ele troca o valor daquela, e todas as classes que usam
+<code>amber-100</code> passam a mostrar a sua cor.</p>
+
+<p>Sobrescrever é uma ferramenta poderosa e um pouco perigosa. Poderosa porque você ajusta a paleta
+inteira sem sair dos nomes que todo mundo conhece: se o âmbar do Tailwind é amarelo demais para o pão,
+você declara o seu <code>--color-amber-100</code> e a página toda acompanha, incluindo as aulas e os
+componentes escritos antes. Perigosa porque o nome deixa de dizer a verdade: quem lê
+<code>bg-amber-100</code> espera âmbar claro, e pode encontrar bege.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|background-color=rgb(255, 228, 196);;rule:background-color: var(--color-amber-100)">
+  <p class="try-task">O âmbar da paleta está forte demais para o cartão. Dentro do <code>@theme</code>,
+  declare <code>--color-amber-100: #ffe4c4</code> — sobrescrevendo o padrão — e veja o cartão mudar sem
+  trocar nenhuma classe.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="rounded-lg bg-amber-100 p-4 text-amber-900"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+color: oklch(0.414 0.112 45.904)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+  --color-amber-100: #ffe4c4;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="rounded-lg bg-amber-100 p-4 text-amber-900"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>A missão não pediu para mexer no HTML, e é essa a lição: as classes do cartão continuam iguais. Quem
+mudou foi a tabela. O painel mostra <code>background-color: rgb(255, 228, 196)</code> porque o
+Tailwind traduziu o seu hexadecimal para o formato que o navegador devolve — o mesmo bege, escrito de
+outro jeito.</p>
+
+<p>Uma consequência prática: sobrescrever é ótimo para ajustar a paleta existente, e ruim para nomear a
+marca. Se você declarar <code>--color-amber-700</code> com o terracota da padaria, daqui a seis meses
+ninguém vai saber se aquele âmbar escuro é âmbar ou é a marca. O caminho saudável é usar nomes próprios
+para as decisões da marca e deixar a paleta do Tailwind em paz — é o assunto de <a href="cores-proprias.html">Cores Próprias</a>.</p>
+
+<h2>6. O prefixo é a regra: quando nada acontece</h2>
+
+<p>Agora o erro que abriu a aula. O Tailwind lê o nome da variável para decidir em que prateleira ela
+entra. Se o nome não começa com um prefixo conhecido, ele faz a coisa mais razoável do ponto de vista
+dele: guarda a variável como está e não gera classe. O valor continua disponível em
+<code>var(--cor-marca)</code>, o que aumenta a confusão — a cor existe, só não virou utilitária.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|background-color=rgb(180, 83, 42);;rule:background-color: var(--color-marca)">
+  <p class="try-task">O selo está transparente porque o token foi declarado na prateleira errada.
+  Corrija o nome no <code>@theme</code> para que <code>bg-marca</code> passe a existir.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --cor-marca: #b4532a;
+}
+&lt;/style&gt;
+
+&lt;span id="alvo" class="rounded-full bg-marca px-3 py-1 text-white"&gt;Feito hoje&lt;/span&gt;</pre>
+  <pre class="out">
+color: rgb(255, 255, 255)
+border-radius: 3.35544e+07px
+padding-inline: 12px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+}
+&lt;/style&gt;
+
+&lt;span id="alvo" class="rounded-full bg-marca px-3 py-1 text-white"&gt;Feito hoje&lt;/span&gt;</pre>
+</div>
+
+<p>O exercício de diagnóstico vale para todos os casos parecidos, e é curto: olhe o começo do nome. Se
+não estiver na tabela de namespaces, é ali o problema. Depois disso, olhe a classe no HTML — mesmo
+token certo, classe errada não funciona. As combinações que aparecem na prática:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que você escreveu</th><th>O que o Tailwind fez</th><th>O que corrigir</th></tr>
+<tr><td><code>--cor-marca: #b4532a</code></td><td>guardou a variável, nenhuma classe</td><td>trocar por <code>--color-marca</code></td></tr>
+<tr><td><code>--color-marca: #b4532a</code> e <code>bg-cor-marca</code></td><td>gerou <code>bg-marca</code></td><td>usar <code>bg-marca</code> no HTML</td></tr>
+<tr><td><code>--color-Marca: #b4532a</code></td><td>gerou a classe com maiúscula</td><td>minúsculas, sempre</td></tr>
+<tr><td><code>--color-marca #b4532a;</code></td><td>nada: falta o dois-pontos</td><td>CSS exige <code>nome: valor;</code></td></tr>
+<tr><td><code>@theme { .selo { color: red } }</code></td><td>descartou a regra</td><td>regras ficam fora do bloco</td></tr>
+</table>
+</div>
+
+<p>A última linha da tabela merece uma frase a mais, porque é um erro de conceito e não de digitação.
+O <code>@theme</code> é uma declaração de valores, não um lugar para CSS solto. Se você precisa de uma
+regra com seletor, escreva-a fora; se ela usa classes do Tailwind, use <code>@apply</code>. Misturar as
+duas coisas costuma dar o mesmo resultado de tudo o que falha em silêncio: nada.</p>
+
+<p>Existe ainda o caso do valor com espaços. <code>--font-titulo: Georgia, serif</code> funciona porque
+a vírgula separa as famílias e o navegador entende. Mas um nome de fonte com espaço precisa de aspas
+dentro do valor, e as aspas do HTML e do CSS não são a mesma coisa — em uma tag de estilo dentro da
+página, escreva <code>--font-titulo: "Trebuchet MS", sans-serif</code> e confira o resultado no painel,
+não no código.</p>
+
+<h2>7. As variáveis publicadas servem para o seu CSS</h2>
+
+<p>Como as variáveis vão para <code>:root</code>, elas não são propriedade exclusiva das classes do
+Tailwind. Qualquer CSS da página pode usá-las com <code>var()</code>, e isso resolve um problema
+antigo: o CSS escrito à mão e as classes do Tailwind passam a ler a mesma tabela de valores.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|background-color=rgb(180, 83, 42);;texto:Encomendas">
+  <p class="try-task">A etiqueta de encomendas está com uma borda sem graça. Pinte o fundo dela com a
+  variável que o <code>@theme</code> publicou: <code>background-color: var(--color-marca)</code>.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+}
+
+.etiqueta {
+  border: 1px solid #e7e5e4;
+  color: white;
+}
+&lt;/style&gt;
+
+&lt;span id="alvo" class="etiqueta rounded-full px-3 py-1 text-xs"&gt;Encomendas&lt;/span&gt;</pre>
+  <pre class="out">
+color: rgb(255, 255, 255)
+font-size: 12px
+line-height: 16px
+border: 1px solid rgb(231, 229, 228)
+border-radius: 3.35544e+07px
+padding-inline: 12px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+}
+
+.etiqueta {
+  border: 1px solid #e7e5e4;
+  background-color: var(--color-marca);
+  color: white;
+}
+&lt;/style&gt;
+
+&lt;span id="alvo" class="etiqueta rounded-full px-3 py-1 text-xs"&gt;Encomendas&lt;/span&gt;</pre>
+</div>
+
+<p>O ganho aparece no dia da troca de cor. A Ana muda <code>--color-marca</code> no bloco e a etiqueta
+muda junto com todos os botões e selos do site: um lugar, muitos efeitos. Sem o <code>@theme</code>,
+ela teria a variável numa ponta e as classes na outra, e as duas pontas dariam para divergir.</p>
+
+<p>Essa ponte tem um nome no vocabulário do Tailwind: as variáveis do tema são <em>tokens</em>, e um
+token é a menor unidade de decisão visual. Um site com dez tokens é um site que você consegue mudar;
+um site com duzentos valores soltos é um site que você reescreve. Não é preciosismo: é a diferença
+entre uma tarde de trabalho e uma semana.</p>
+
+<h2>8. O que sai no arquivo final (e como apagar uma prateleira)</h2>
+
+<p>Uma surpresa agradável de quem abre o CSS gerado pela primeira vez: as variáveis que você declarou e
+<strong>não usou</strong> não aparecem no arquivo final. O Tailwind publica só o que a página precisa.
+Se <code>--color-trigo</code> está no bloco e nenhuma classe o usa, ele é descartado — o que mantém o
+arquivo pequeno e evita que um tema de teste vaze para a produção.</p>
+
+<p>Isso tem um efeito colateral que confunde: você declara uma cor, abre o CSS gerado e não a encontra.
+A conferência honesta é procurar no arquivo publicado:</p>
+
+<pre class="term">ana@notebook:~/padaria$ grep -c -- "--color-trigo" dist/site.css
+0
+ana@notebook:~/padaria$ grep -c -- "--color-marca" dist/site.css
+3</pre>
+
+<p>Zero para o token que ninguém usa, três para o que aparece no tema e em duas classes. Não é bug.
+Existe uma palavra para forçar a saída de tudo: <code>@theme static { … }</code>. Use com
+parcimônia, porque o arquivo cresce sem necessidade. E existe a operação oposta, que é apagar uma
+família inteira:</p>
+
+<pre class="file" data-file="src/style.css">@import "tailwindcss";
+
+@theme {
+  --color-*: initial;
+  --color-marca: #b4532a;
+  --color-trigo: #e7d8b8;
+}</pre>
+
+<p>A linha <code>--color-*: initial</code> diz "esqueça todas as cores padrão". Depois dela, a única
+paleta que existe é a sua: <code>bg-amber-100</code> deixa de gerar CSS, <code>bg-red-500</code>
+também. Parece radical, e é — mas é a diferença entre um site com liberdade total e um site com
+curadoria. Em projeto de cliente, com identidade visual fechada, essa linha é uma aliada: ninguém
+consegue colar um <code>bg-lime-300</code> no meio da vitrine.</p>
+
+<p>O mesmo vale para outras prateleiras: <code>--font-*: initial</code> apaga as famílias padrão,
+<code>--radius-*: initial</code> apaga os arredondamentos. O asterisco é o coringa do namespace. E o
+atalho mais radical de todos, <code>--*: initial</code>, apaga o tema inteiro — só faça isso se você
+pretende declarar tudo de novo, porque aí até <code>--spacing</code> desaparece e <code>p-4</code>
+para de funcionar.</p>
+
+<p>Uma ressalva de convivência: se você apagar a prateleira de cores e um componente antigo usar
+<code>bg-stone-100</code>, ele fica sem cor. O CSS não se queixa, o componente é que some. Por isso a
+ordem saudável é primeiro mapear o que o site usa, depois fechar a paleta e só então revisar as páginas
+uma a uma.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o tema está certo e a página não muda</h3>
+<p>A Ana declarou <code>--color-marca</code>, salvou, e o cartão continuou branco. Depois de dez
+minutos, descobriu que o bloco estava no HTML, dentro de uma tag <code>style</code> comum, e não no CSS
+de entrada. O <code>@theme</code> tem de estar no CSS que o Tailwind compila — no arquivo de entrada do
+projeto, ou numa tag <code>style type="text/tailwindcss"</code> no modo sem build. Tag comum é lida
+pelo navegador, que descarta o <code>@theme</code> em silêncio.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: dois @theme no projeto e ninguém sabe qual venceu</h3>
+<p>Ela colou um bloco no topo do arquivo de entrada e outro no fim de um CSS de componente. Os dois
+funcionam: o Tailwind lê os blocos e junta os valores. Quando o mesmo nome aparece duas vezes, vale o
+último declarado na ordem do arquivo final — e é aí que nasce a confusão. A regra prática é ter um
+<code>@theme</code> só, no arquivo de entrada, e tratar qualquer segundo bloco como sinal de que a
+decisão precisa ser centralizada.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o cliente mandou a paleta em hexadecimal e a equipe em oklch</h3>
+<p>O <code>@theme</code> aceita qualquer formato de cor que o CSS aceite: hexadecimal,
+<code>rgb()</code>, <code>oklch()</code>, <code>color-mix()</code>. Não há conversão obrigatória, e o
+Tailwind não reclama de mistura. O que não dá para fazer é usar a cor em um lugar como hexadecimal e
+em outro como token com nome diferente — aí a troca futura volta a ser uma caça. Escolha um formato,
+declare uma vez, use o nome em todo o resto.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. O que uma linha como <code>--color-marca: #b4532a</code> faz dentro do <code>@theme</code>?</p>
+<label><input type="radio" name="q1"> publica a variável em <code>:root</code> e cria a classe <code>bg-marca</code></label>
+<label><input type="radio" name="q1"> pinta de terracota todos os elementos da página</label>
+<label><input type="radio" name="q1"> cria um arquivo de configuração em JavaScript</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que acontece com <code>--cor-marca: #b4532a</code>?</p>
+<label><input type="radio" name="q2"> vira <code>bg-cor-marca</code></label>
+<label><input type="radio" name="q2"> dá erro no terminal</label>
+<label><input type="radio" name="q2"> a variável existe, mas nenhuma classe é gerada</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Qual é a diferença entre acrescentar e sobrescrever?</p>
+<label><input type="radio" name="q3"> acrescentar usa <code>@theme</code>; sobrescrever usa <code>:root</code></label>
+<label><input type="radio" name="q3"> nome novo cria classe nova; nome existente troca o valor daquela classe</label>
+<label><input type="radio" name="q3"> não há diferença: o Tailwind sempre substitui</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o nome completo do token</h2>
+<p>A Ana quer a classe <code>bg-trigo-300</code> com o bege claro da farinha. Escreva o nome completo da
+variável que precisa entrar no <code>@theme</code>, com os dois hífens e o prefixo.</p>
+<div class="ex-code">@theme { <input aria-label="resposta 1" data-answer="--color-trigo-300" placeholder="...">: #e7d8b8; }</div>
+<p class="ex-dica">Dica: o prefixo é o que garante a classe <code>bg-</code>, e o resto do nome vira o
+sufixo. Se você escrever <code>--trigo-300</code>, a variável existe e <code>bg-trigo-300</code> não.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O <code>@theme</code> é um bloco de CSS, no arquivo de entrada, com declarações de variáveis e nada
+mais. O Tailwind lê esse bloco antes de gerar o CSS, publica cada variável em <code>:root</code> e cria
+classes conforme o prefixo do nome: <code>--color-*</code> gera <code>bg-*</code> e
+<code>text-*</code>, <code>--font-*</code> gera <code>font-*</code>, <code>--radius-*</code> gera
+<code>rounded-*</code>, e assim por diante. Nome fora da tabela não gera classe — e não avisa.</p>
+
+<p>Nome novo acrescenta; nome que já existe sobrescreve o padrão, sem mudar o nome da classe. Como as
+variáveis ficam em <code>:root</code>, o seu CSS escrito à mão pode usá-las com
+<code>var(--color-marca)</code>, e as duas pontas passam a ler a mesma decisão. O arquivo final leva só
+as variáveis usadas, a menos que você peça <code>@theme static</code>, e a linha
+<code>--color-*: initial</code> apaga a paleta padrão para trabalhar com curadoria.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>@theme</code> mora no CSS de entrada, depois do <code>@import "tailwindcss"</code>.</li>
+<li>Dentro dele, só variáveis: regra com seletor fica fora, com <code>@apply</code> quando precisar.</li>
+<li>O prefixo é a prateleira, e a prateleira decide a classe: <code>--color-x</code> vira <code>bg-x</code>.</li>
+<li>Prefixo em inglês: <code>--cor-</code> não gera nada, <code>--color-</code> gera.</li>
+<li>Nome novo acrescenta; nome existente sobrescreve o valor padrão.</li>
+<li>As variáveis vão para <code>:root</code>: use <code>var(--color-marca)</code> no seu CSS.</li>
+<li>Só as variáveis usadas aparecem no arquivo final; <code>@theme static</code> força todas.</li>
+<li><code>--color-*: initial</code> apaga a paleta padrão e deixa só a sua.</li>
+<li>Valor com espaço pede aspas dentro do valor.</li>
+<li>Um <code>@theme</code> só no projeto evita dúvida sobre qual valor venceu.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard | Guia Tailwind</title>
+<meta name="description" content="Como montar um dashboard com Tailwind: a grade de métricas, a área principal com col-span, cartões de altura igual, números alinhados e a tabela que rola dentro do cartão.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Dashboard</span></h1>
+<p class="intro">A Ana agora quer olhar os números da padaria de uma vez: pães vendidos, encomendas,
+ticket médio e a lista do que saiu na semana. Ela juntou tudo numa página só e o resultado foi uma
+torre de cartões empilhados — um embaixo do outro, cada um com uma largura diferente, e a tabela
+empurrando o resto para fora da tela. Nesta aula ela monta um dashboard de verdade: a grade de
+métricas, a área principal com o gráfico ocupando duas colunas e a tabela que rola dentro do próprio
+cartão.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A grade de métricas com <code>grid gap-4 sm:grid-cols-2 xl:grid-cols-4</code>.</li>
+  <li>Como fazer o gráfico ocupar duas colunas com <code>md:col-span-2</code>.</li>
+  <li>Cartões de altura igual com <code>h-full flex flex-col</code> e o rodapé com <code>mt-auto</code>.</li>
+  <li>Números que não dançam: <code>tabular-nums</code>, <code>text-2xl</code> e o rótulo em <code>text-xs uppercase</code>.</li>
+  <li>Como impedir que uma tabela larga estoure o layout: <code>min-w-0</code> no cartão e <code>overflow-x-auto</code> na tabela.</li>
+  <li>O cabeçalho que fica no topo com <code>sticky top-0 z-10</code>.</li>
+  <li>Cor com significado: <code>text-emerald-600</code> e <code>text-rose-600</code> sem depender só da cor.</li>
+  <li>Os três defeitos comuns: cartões de alturas diferentes, números desalinhados e página rolando de lado.</li>
+</ul>
+</div>
+
+<h2>1. A cena: uma torre de cartões</h2>
+
+<p>A Ana começou empilhando. Um cartão com "Pães hoje", outro com "Encomendas", outro com "Ticket
+médio". Cada <code>div</code> ocupa a linha inteira, então o painel ficou com quatro faixas altas e
+finas, e ela precisava rolar para ver o quarto número. No monitor, aquilo era um desperdício de tela:
+quatro informações pequenas gastando quatro linhas.</p>
+
+<p>Dashboard é, antes de tudo, uma questão de <strong>grade</strong>. Em vez de decidir a largura de
+cada cartão, você decide quantas colunas existem e deixa o navegador distribuir. Com
+<code>grid</code>, quatro cartões em duas colunas ocupam duas linhas; em quatro colunas, uma linha.
+Mudar isso é trocar uma classe, não reescrever o HTML.</p>
+
+<p>E há uma segunda decisão, mais sutil: o que é métrica e o que é conteúdo. Métrica é número
+pequeno e repetido — cabe em cartões iguais, lado a lado. Conteúdo é gráfico, tabela, lista — precisa
+de mais espaço e de uma hierarquia. No nosso painel, a primeira faixa é de métricas (quatro cartões
+iguais) e a segunda é de conteúdo (gráfico em duas colunas e uma lista lateral).</p>
+
+<h2>2. A grade de métricas</h2>
+
+<p>O contêiner leva <code>grid</code> e <code>gap-4</code>. Só isso já resolve o celular: uma coluna,
+cartões empilhados, 16 px entre eles. Para crescer, dois prefixos:
+<code>sm:grid-cols-2</code> a partir de 640 px e <code>xl:grid-cols-4</code> a partir de 1280 px.
+Entre 640 e 1280, ficam duas colunas; acima, quatro.</p>
+
+<div class="trytailwind" data-goal="rule:grid-template-columns: repeat(2, minmax(0, 1fr));;rule:grid-template-columns: repeat(4, minmax(0, 1fr));;rule:gap: calc(var(--spacing) * 4)">
+  <p class="try-task">As quatro métricas estão empilhadas. Deixe duas por linha a partir de 640 px e
+  quatro a partir de 1280 px: <code>sm:grid-cols-2 xl:grid-cols-4</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="grid gap-4 bg-slate-50 p-4"&gt;
+  &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+    &lt;p class="text-xs uppercase text-slate-500"&gt;Pães hoje&lt;/p&gt;
+    &lt;p class="text-2xl font-semibold tabular-nums text-slate-900"&gt;42&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+    &lt;p class="text-xs uppercase text-slate-500"&gt;Encomendas&lt;/p&gt;
+    &lt;p class="text-2xl font-semibold tabular-nums text-slate-900"&gt;7&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+    &lt;p class="text-xs uppercase text-slate-500"&gt;Ticket médio&lt;/p&gt;
+    &lt;p class="text-2xl font-semibold tabular-nums text-slate-900"&gt;R$ 24&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+    &lt;p class="text-xs uppercase text-slate-500"&gt;Vencidos&lt;/p&gt;
+    &lt;p class="text-2xl font-semibold tabular-nums text-slate-900"&gt;3&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+padding: 16px
+gap: 16px
+background-color: oklch(0.984 0.003 247.858)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid gap-4 bg-slate-50 p-4 sm:grid-cols-2 xl:grid-cols-4"&gt;
+  &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+    &lt;p class="text-xs uppercase text-slate-500"&gt;Pães hoje&lt;/p&gt;
+    &lt;p class="text-2xl font-semibold tabular-nums text-slate-900"&gt;42&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+    &lt;p class="text-xs uppercase text-slate-500"&gt;Encomendas&lt;/p&gt;
+    &lt;p class="text-2xl font-semibold tabular-nums text-slate-900"&gt;7&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+    &lt;p class="text-xs uppercase text-slate-500"&gt;Ticket médio&lt;/p&gt;
+    &lt;p class="text-2xl font-semibold tabular-nums text-slate-900"&gt;R$ 24&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+    &lt;p class="text-xs uppercase text-slate-500"&gt;Vencidos&lt;/p&gt;
+    &lt;p class="text-2xl font-semibold tabular-nums text-slate-900"&gt;3&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Na prévia de 640 px você vê duas colunas, porque o <code>sm</code> vale e o <code>xl</code> ainda
+não. É o comportamento esperado: a classe não "desliga" a anterior, ela é aplicada em cima. Em 1280
+px, o <code>xl:grid-cols-4</code> entra e as duas colunas viram quatro. A ordem dos prefixos no HTML
+não importa; o que importa é o tamanho de cada breakpoint — <code>sm</code> 640, <code>md</code> 768,
+<code>lg</code> 1024, <code>xl</code> 1280.</p>
+
+<p>Uma escolha que vale explicar: por que não <code>md:grid-cols-2 lg:grid-cols-4</code>? Porque, num
+painel com sidebar de 256 px, a área útil é menor do que a tela. Quatro cartões em 1024 px de janela
+dão cerca de 180 px cada, e "Ticket médio" quebra em duas linhas. Começar a quarta coluna só em 1280
+é mais seguro. Grid é fácil; o difícil é escolher os pontos de virada olhando o conteúdo — a aula de
+<a href="grid.html">Grid</a> mostra a mecânica e a de <a href="breakpoints.html">Os Breakpoints</a>
+mostra os tamanhos.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Prefixo</th><th>Vale a partir de</th><th>Uso típico no painel</th></tr>
+<tr><td>sem prefixo</td><td>0 px</td><td>uma coluna, tudo empilhado</td></tr>
+<tr><td><code>sm:</code></td><td>640 px</td><td>métricas em duas colunas</td></tr>
+<tr><td><code>md:</code></td><td>768 px</td><td>gráfico e lista lado a lado</td></tr>
+<tr><td><code>lg:</code></td><td>1024 px</td><td>sidebar visível, conteúdo com respiro maior</td></tr>
+<tr><td><code>xl:</code></td><td>1280 px</td><td>métricas em quatro colunas</td></tr>
+</table>
+</div>
+
+<p>O CSS que o Tailwind gera para essa grade é curto e mostra por que ela funciona sem nenhuma
+conta:</p>
+
+<pre class="term">.grid {
+  display: grid;
+}
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.col-span-2 {
+  grid-column: span 2 / span 2;
+}</pre>
+
+<p><code>minmax(0, 1fr)</code> é o detalhe que evita dor de cabeça: cada coluna pode encolher até zero,
+em vez de ter uma largura mínima automática. É a mesma ideia do <code>min-w-0</code> que aparece mais
+adiante, só que aplicada pela própria grade. Com <code>3</code> colunas de <code>1fr</code>, o espaço
+é dividido igualmente, e o <code>span 2</code> faz um item ocupar duas dessas fatias.</p>
+
+
+<h2>3. A área principal: duas colunas para o gráfico</h2>
+
+<p>Abaixo das métricas, a Ana quer o gráfico de vendas grande à esquerda e a lista de encomendas à
+direita. A proporção natural é 2 para 1: o gráfico ocupa duas colunas de uma grade de três, e a lista
+ocupa uma. No papel isso é <code>grid md:grid-cols-3</code> no pai e <code>md:col-span-2</code> no
+gráfico.</p>
+
+<div class="trytailwind" data-largura="768" data-goal="rule:grid-template-columns: repeat(3, minmax(0, 1fr));;rule:grid-column: span 2 / span 2">
+  <p class="try-task">O gráfico e a lista estão empilhados. Crie três colunas a partir de 768 px no
+  contêiner e faça o gráfico ocupar duas delas: <code>md:grid-cols-3</code> e
+  <code>md:col-span-2</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="grid grid-cols-1 gap-4 bg-slate-50 p-4"&gt;
+  &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+    &lt;p class="font-semibold text-slate-800"&gt;Vendas da semana&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-slate-500"&gt;Gráfico de barras&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+    &lt;p class="font-semibold text-slate-800"&gt;Encomendas&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-slate-500"&gt;3 prontas&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+padding: 16px
+gap: 16px
+grid-template-columns: 712px
+background-color: oklch(0.984 0.003 247.858)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid grid-cols-1 gap-4 bg-slate-50 p-4 md:grid-cols-3"&gt;
+  &lt;div class="rounded-xl border border-slate-200 bg-white p-4 md:col-span-2"&gt;
+    &lt;p class="font-semibold text-slate-800"&gt;Vendas da semana&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-slate-500"&gt;Gráfico de barras&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+    &lt;p class="font-semibold text-slate-800"&gt;Encomendas&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-slate-500"&gt;3 prontas&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A prévia está em 768 px de propósito, para o <code>md:</code> valer e você ver o resultado. Repare
+que o gráfico fica com o dobro da largura da lista, e a grade mantém as duas colunas alinhadas. O
+<code>col-span-2</code> é a peça que faz o layout parecer desenhado em vez de improvisado.</p>
+
+<p>Existe um atalho que muita gente usa e que funciona bem aqui:
+<code>grid-cols-1 md:grid-cols-[2fr_1fr]</code>. Os colchetes declaram duas colunas com pesos, e o
+gráfico recebe o dobro sem precisar de <code>col-span</code>. A vantagem é ter uma regra só; a
+desvantagem é que, para um terceiro cartão, você precisa repensar a lista de frações. Com
+<code>grid-cols-3</code> e <code>col-span</code>, adicionar um cartão é só escolher quantas colunas
+ele ocupa.</p>
+
+<h2>4. Cartões de altura igual</h2>
+
+<p>Quando dois cartões ficam lado a lado, os itens do grid se esticam sozinhos para a mesma altura —
+isso é padrão do grid, não precisa de classe. Mas o <em>conteúdo</em> dentro deles não acompanha: o
+cartão da esquerda pode ter dois parágrafos e o da direita, um botão no meio, deixando um vazio
+embaixo. A receita é a mesma da aula de <a href="cards.html">Cards</a>: <code>flex flex-col</code> no
+cartão e <code>mt-auto</code> no rodapé.</p>
+
+<pre class="file" data-file="painel.html">&lt;div class="grid h-full grid-cols-1 gap-4 md:grid-cols-3"&gt;
+  &lt;div class="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-4 md:col-span-2"&gt;
+    &lt;p class="font-semibold"&gt;Vendas da semana&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-slate-500"&gt;R$ 1.840 em 312 pães.&lt;/p&gt;
+    &lt;a href="#" class="mt-auto pt-4 text-sm font-medium text-amber-700"&gt;Ver relatório&lt;/a&gt;
+  &lt;/div&gt;
+  &lt;div class="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-4"&gt;
+    &lt;p class="font-semibold"&gt;Encomendas&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-slate-500"&gt;3 prontas para retirada.&lt;/p&gt;
+    &lt;a href="#" class="mt-auto pt-4 text-sm font-medium text-amber-700"&gt;Ver todas&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<p><code>flex flex-col</code> no cartão transforma os filhos em uma coluna. <code>mt-auto</code> no
+último item consome toda a sobra de espaço em cima dele, empurrando-o para o rodapé. O resultado é que
+os dois links ficam na mesma linha de base, mesmo com textos de tamanhos diferentes. Num painel, isso
+importa mais do que num site: as fileiras de cartões repetem a mesma estrutura e qualquer desalinho
+salta aos olhos.</p>
+
+<h2>5. Números que não dançam</h2>
+
+<p>Em dashboard, número é o conteúdo principal. Três classes resolvem a maior parte dos problemas:
+<code>text-2xl</code> ou <code>text-3xl font-semibold</code> para o valor, <code>text-xs uppercase
+tracking-wide text-slate-500</code> para o rótulo, e <code>tabular-nums</code> para o número não
+mudar de largura quando o valor muda.</p>
+
+<p>O <code>tabular-nums</code> merece explicação, porque o efeito é invisível até você precisar dele.
+Em fontes normais, o "1" é mais estreito que o "8": quando o valor passa de 8 para 11, ou quando uma
+coluna de valores tem larguras diferentes, os números parecem tremidos. Com
+<code>tabular-nums</code>, todos os dígitos ocupam a mesma largura, como numa calculadora, e as
+colunas ficam perfeitamente alinhadas.</p>
+
+<pre class="term">.tabular-nums {
+  --tw-numeric-spacing: tabular-nums;
+  font-variant-numeric: var(--tw-ordinal, ) var(--tw-slashed-zero, ) var(--tw-numeric-figure, ) var(--tw-numeric-spacing, ) var(--tw-numeric-fraction, );
+}
+.uppercase {
+  text-transform: uppercase;
+}
+.text-2xl {
+  font-size: var(--text-2xl);
+  line-height: var(--tw-leading, var(--text-2xl--line-height));
+}</pre>
+
+<p>Aquele <code>font-variant-numeric</code> cheio de variáveis é a forma do Tailwind de permitir
+combinar <code>tabular-nums</code> com <code>slashed-zero</code> e <code>ordinal</code> sem que uma
+classe apague a outra. Você não precisa decorar: escreve <code>tabular-nums</code> e esquece.</p>
+
+<h2>6. A tabela que estoura o cartão</h2>
+
+<p>Chega a hora da tabela de encomendas e vem o defeito mais comum de painel. A tabela tem sete
+colunas e, num espaço de 600 px, não cabe. Aí acontece o efeito dominó: o conteúdo não encolhe, o
+cartão cresce, a coluna do grid cresce junto e o cartão vizinho é espremido — ou a página toda ganha
+uma barra de rolagem lateral.</p>
+
+<p>A correção tem duas partes, e as duas são necessárias. No cartão, <code>min-w-0</code>: ele é filho
+de um grid, e filhos de grid também têm largura mínima automática. No invólucro da tabela,
+<code>overflow-x-auto</code>: quando o conteúdo passa da largura, aparece rolagem ali dentro, sem
+mexer no resto da página. O mecanismo de cada uma é assunto de
+<a href="overflow.html">Overflow</a> e de <a href="tabelas.html">Tabelas</a>; aqui interessa o efeito
+combinado num painel, que é o teste de resistência do layout inteiro.</p>
+
+<div class="trytailwind" data-goal="rule:min-width: 0px;;css:#rolagem|overflow-x=auto">
+  <p class="try-task">A tabela de sete colunas empurra o cartão do resumo para fora. Dê
+  <code>min-w-0</code> ao cartão da tabela e <code>overflow-x-auto</code> ao invólucro dela.</p>
+  <pre class="html">&lt;div class="grid gap-4 bg-slate-50 p-4 md:grid-cols-3"&gt;
+  &lt;div id="alvo" class="rounded-xl border border-slate-200 bg-white p-4 md:col-span-2"&gt;
+    &lt;p class="mb-3 font-semibold text-slate-800"&gt;Encomendas da semana&lt;/p&gt;
+    &lt;div id="rolagem" class="rounded-lg border border-slate-100"&gt;
+      &lt;table class="w-full text-left text-sm whitespace-nowrap"&gt;
+        &lt;tr class="border-b border-slate-100"&gt;
+          &lt;th class="p-2 font-medium text-slate-500"&gt;Cliente&lt;/th&gt;
+          &lt;th class="p-2 font-medium text-slate-500"&gt;Pão&lt;/th&gt;
+          &lt;th class="p-2 font-medium text-slate-500"&gt;Quantidade&lt;/th&gt;
+          &lt;th class="p-2 font-medium text-slate-500"&gt;Retirada&lt;/th&gt;
+          &lt;th class="p-2 font-medium text-slate-500"&gt;Status&lt;/th&gt;
+          &lt;th class="p-2 font-medium text-slate-500"&gt;Telefone&lt;/th&gt;
+          &lt;th class="p-2 font-medium text-slate-500"&gt;Total&lt;/th&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td class="p-2"&gt;Marta&lt;/td&gt;
+          &lt;td class="p-2"&gt;Integral&lt;/td&gt;
+          &lt;td class="p-2 tabular-nums"&gt;2&lt;/td&gt;
+          &lt;td class="p-2"&gt;Sexta, 16h&lt;/td&gt;
+          &lt;td class="p-2"&gt;Pronta&lt;/td&gt;
+          &lt;td class="p-2"&gt;11 90000-0000&lt;/td&gt;
+          &lt;td class="p-2 tabular-nums"&gt;R$ 36&lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/table&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+    &lt;p class="font-semibold text-slate-800"&gt;Resumo&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-slate-500"&gt;3 prontas, 4 em produção.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+border-radius: 12px
+border-width: 1px
+border-color: oklch(0.929 0.013 255.508)
+</pre>
+  <pre class="solucao">&lt;div class="grid gap-4 bg-slate-50 p-4 md:grid-cols-3"&gt;
+  &lt;div id="alvo" class="min-w-0 rounded-xl border border-slate-200 bg-white p-4 md:col-span-2"&gt;
+    &lt;p class="mb-3 font-semibold text-slate-800"&gt;Encomendas da semana&lt;/p&gt;
+    &lt;div id="rolagem" class="overflow-x-auto rounded-lg border border-slate-100"&gt;
+      &lt;table class="w-full text-left text-sm whitespace-nowrap"&gt;
+        &lt;tr class="border-b border-slate-100"&gt;
+          &lt;th class="p-2 font-medium text-slate-500"&gt;Cliente&lt;/th&gt;
+          &lt;th class="p-2 font-medium text-slate-500"&gt;Pão&lt;/th&gt;
+          &lt;th class="p-2 font-medium text-slate-500"&gt;Quantidade&lt;/th&gt;
+          &lt;th class="p-2 font-medium text-slate-500"&gt;Retirada&lt;/th&gt;
+          &lt;th class="p-2 font-medium text-slate-500"&gt;Status&lt;/th&gt;
+          &lt;th class="p-2 font-medium text-slate-500"&gt;Telefone&lt;/th&gt;
+          &lt;th class="p-2 font-medium text-slate-500"&gt;Total&lt;/th&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td class="p-2"&gt;Marta&lt;/td&gt;
+          &lt;td class="p-2"&gt;Integral&lt;/td&gt;
+          &lt;td class="p-2 tabular-nums"&gt;2&lt;/td&gt;
+          &lt;td class="p-2"&gt;Sexta, 16h&lt;/td&gt;
+          &lt;td class="p-2"&gt;Pronta&lt;/td&gt;
+          &lt;td class="p-2"&gt;11 90000-0000&lt;/td&gt;
+          &lt;td class="p-2 tabular-nums"&gt;R$ 36&lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/table&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+    &lt;p class="font-semibold text-slate-800"&gt;Resumo&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-slate-500"&gt;3 prontas, 4 em produção.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>whitespace-nowrap</code> na tabela é o que impede as células de quebrarem em três linhas
+quando o espaço aperta. Com ele, a tabela mantém a forma e a rolagem aparece — que é exatamente o
+comportamento que queremos num painel: os dados legíveis, o layout intacto. Se a tabela for pequena
+e sempre couber, o <code>overflow-x-auto</code> não atrapalha em nada.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Problema</th><th>Classe</th><th>Onde vai</th></tr>
+<tr><td>quatro métricas empilhadas</td><td><code>grid sm:grid-cols-2 xl:grid-cols-4</code></td><td>no contêiner</td></tr>
+<tr><td>gráfico estreito</td><td><code>md:col-span-2</code></td><td>no cartão do gráfico</td></tr>
+<tr><td>cartões com rodapés desalinhados</td><td><code>flex flex-col</code> + <code>mt-auto</code></td><td>no cartão e no rodapé</td></tr>
+<tr><td>números tremendo</td><td><code>tabular-nums</code></td><td>no valor</td></tr>
+<tr><td>tabela estourando</td><td><code>min-w-0</code> + <code>overflow-x-auto</code></td><td>no cartão e no invólucro</td></tr>
+<tr><td>cabeçalho sumindo ao rolar</td><td><code>sticky top-0 z-10</code></td><td>no cabeçalho</td></tr>
+</table>
+</div>
+
+<h2>7. O cabeçalho que fica no topo</h2>
+
+<p>Um painel costuma ser mais alto que a tela. Se o cabeçalho com o filtro de período rolar junto, a
+Ana perde a referência de qual semana está olhando. A solução é <code>sticky top-0 z-10</code> no
+cabeçalho, com um fundo para o conteúdo não aparecer por baixo:
+<code>bg-white/80 backdrop-blur</code> dá o efeito translúcido que já virou padrão em painel.</p>
+
+<pre class="file" data-file="painel.html">&lt;header class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-slate-200 bg-white/80 px-4 py-3 backdrop-blur"&gt;
+  &lt;h1 class="text-lg font-semibold"&gt;Padaria da Ana&lt;/h1&gt;
+  &lt;select class="rounded-lg border border-slate-300 px-3 py-2 text-sm" aria-label="Período"&gt;
+    &lt;option&gt;Esta semana&lt;/option&gt;
+    &lt;option&gt;Este mês&lt;/option&gt;
+  &lt;/select&gt;
+&lt;/header&gt;</pre>
+
+<p>Três detalhes importam. O <code>z-10</code> garante que o cabeçalho fique na frente dos cartões;
+sem ele, a tabela passa por cima ao rolar. O <code>bg-white/80</code> é branco com 80% de opacidade,
+para o conteúdo de trás aparecer de leve; se você usar fundo transparente, o texto do cabeçalho se
+mistura com o que passa embaixo. E o <code>backdrop-blur</code> desfoca esse fundo, o que resolve o
+caso de um cartão colorido passando atrás de um cabeçalho claro.</p>
+
+<p>Cuidado com um erro comum: <code>sticky</code> precisa de um ancestral que role, e não funciona se
+algum deles tiver <code>overflow-hidden</code>. Num shell com <code>flex</code> e
+<code>min-h-screen</code>, o cabeçalho deve ser filho direto do shell, e não de um <code>div</code>
+que esconde o excesso.</p>
+
+<h2>8. Cor com significado</h2>
+
+<p>Dashboard usa cor para dizer direção: verde para o que subiu, vermelho para o que caiu. No
+Tailwind, <code>text-emerald-600</code> e <code>text-rose-600</code> dão conta sem gritar. O cuidado
+é não depender só da cor: quem não distingue verde de vermelho não vê a diferença. Por isso o número
+costuma vir com uma seta ou um sinal — <code>+12%</code> e <code>−4%</code> — e a cor fica como
+reforço.</p>
+
+<pre class="file" data-file="painel.html">&lt;p class="mt-2 text-sm font-medium text-emerald-600"&gt;+12% &amp;uarr; em relação à semana passada&lt;/p&gt;
+&lt;p class="mt-2 text-sm font-medium text-rose-600"&gt;−4% &amp;darr; em relação à semana passada&lt;/p&gt;</pre>
+
+<p>Para um selo de status, o par de fundo e texto funciona bem:
+<code>rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-900</code>. O
+<code>rounded-full</code> arredonda ao máximo, virando pílula. E o tom 100 de fundo com o 900 de texto
+é a combinação de contraste que o Tailwind já deixa pronta em qualquer família de cor.</p>
+
+<dl class="anatomy">
+<dt>métrica</dt>
+<dd>O número principal de um cartão, com <code>text-2xl font-semibold tabular-nums</code>. É o que a
+pessoa lê primeiro.</dd>
+<dt>rótulo</dt>
+<dd>O nome da métrica, em <code>text-xs uppercase tracking-wide text-slate-500</code>. Menor e mais
+claro, para não competir com o número.</dd>
+<dt>span</dt>
+<dd>Quantas colunas um item ocupa: <code>col-span-2</code> em uma grade de três dá o dobro de largura.</dd>
+<dt>min-w-0</dt>
+<dd><code>min-width: 0px</code>. Permite que um filho de grid encolha abaixo da largura do conteúdo.</dd>
+<dt>sticky</dt>
+<dd>Gruda o cabeçalho no topo enquanto o resto rola. Precisa de <code>top-0</code> e de um fundo.</dd>
+<dt>tabular-nums</dt>
+<dd>Todos os dígitos com a mesma largura. Evita o tremor dos números ao atualizar valores.</dd>
+</dl>
+
+<h2>9. Quando o painel quebra: três cenas</h2>
+
+<div class="cenario">
+<h3>Cenário 1: os cartões ficam com alturas diferentes</h3>
+<p>A Ana montou a fileira de cartões e o terceiro ficou mais baixo, porque tinha menos texto. A
+suspeita foi de erro na grade, mas a grade estava certa: os itens de grid se esticam por padrão. O que
+não esticava era o conteúdo dentro do cartão. A correção foi <code>flex h-full flex-col</code> no
+cartão e <code>mt-auto</code> no rodapé. Agora o botão fica sempre na base, alinhado com os vizinhos,
+mesmo quando o texto de cima tem uma linha a mais.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: os números desalinham quando mudam</h3>
+<p>O contador atualizava a cada venda e os valores pareciam pular de lado. Não era animação: era a
+largura dos dígitos. "111" ocupa menos espaço que "888" em fonte proporcional, então o texto ao lado
+se mexia. O <code>tabular-nums</code> no valor resolveu de imediato. Em tabelas de dinheiro, o efeito é
+ainda mais visível — vale aplicar em toda coluna numérica, junto com <code>text-right</code> para os
+valores ficarem alinhados pela direita, como em qualquer extrato.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a página inteira rola de lado</h3>
+<p>Depois de colocar a tabela de sete colunas, o painel ganhou rolagem horizontal e o menu lateral saía
+para fora. O cartão, filho do grid, tinha largura mínima automática e se recusava a encolher; a tabela
+mandava no tamanho. A correção foram duas classes em lugares diferentes: <code>min-w-0</code> no
+cartão, para ele poder encolher, e <code>overflow-x-auto</code> no invólucro da tabela, para a rolagem
+acontecer lá dentro. Se você usar só a segunda, o cartão continua sendo empurrado; se usar só a
+primeira, a tabela vaza por cima do cartão vizinho.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. Qual conjunto deixa a fileira de métricas com duas colunas no tablet e quatro no monitor grande?</p>
+<label><input type="radio" name="p1"> <code>grid-cols-2 grid-cols-4</code></label>
+<label><input type="radio" name="p1"> <code>flex-2 lg:flex-4</code></label>
+<label><input type="radio" name="p1"> <code>sm:grid-cols-2 xl:grid-cols-4</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. O que <code>md:col-span-2</code> faz no cartão do gráfico?</p>
+<label><input type="radio" name="p2"> faz ele ocupar duas colunas da grade a partir de 768 px</label>
+<label><input type="radio" name="p2"> duplica o conteúdo dele em telas médias</label>
+<label><input type="radio" name="p2"> dá a ele o dobro de respiro interno</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Por que a tabela larga precisa de <code>overflow-x-auto</code> no invólucro?</p>
+<label><input type="radio" name="p3"> para as células quebrarem em várias linhas</label>
+<label><input type="radio" name="p3"> para a rolagem acontecer dentro do cartão, sem esticar a página</label>
+<label><input type="radio" name="p3"> para a tabela ficar com a largura do cartão automaticamente</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a fileira de métricas</h2>
+<p>Complete a grade das quatro métricas: duas colunas a partir de 640 px e quatro a partir de 1280 px.</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="sm:grid-cols-2 xl:grid-cols-4|xl:grid-cols-4 sm:grid-cols-2"> grid gap-4 bg-slate-50 p-4"&gt;</div>
+<p class="ex-dica">Dica: dois prefixos, cada um com o número de colunas que passa a valer naquele
+tamanho. Um é de 640 px; o outro, de 1280 px.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Dashboard é grade com hierarquia. As métricas vão num <code>grid gap-4</code> que ganha colunas com
+<code>sm:grid-cols-2 xl:grid-cols-4</code>. O conteúdo ganha uma grade de três colunas, com o gráfico
+ocupando duas via <code>md:col-span-2</code>. Dentro dos cartões, <code>flex flex-col</code> e
+<code>mt-auto</code> alinham os rodapés, e <code>tabular-nums</code> mantém os números estáveis.</p>
+
+<p>A tabela larga é o teste de resistência do painel: <code>min-w-0</code> no cartão e
+<code>overflow-x-auto</code> no invólucro, sempre os dois juntos. O cabeçalho fica no topo com
+<code>sticky top-0 z-10</code> e um fundo semitransparente. E a cor conta a história junto com o
+sinal — verde e vermelho nunca sozinhos.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Métrica é <code>grid</code> com <code>gap-4</code>; colunas vêm com prefixo
+(<code>sm:</code>, <code>xl:</code>).</li>
+<li><code>col-span-2</code> faz um cartão ocupar duas colunas de uma grade de três.</li>
+<li><code>h-full flex flex-col</code> + <code>mt-auto</code> alinham rodapés de cartões vizinhos.</li>
+<li><code>tabular-nums</code> dá a todos os dígitos a mesma largura; use em valores e colunas numéricas.</li>
+<li><code>text-2xl font-semibold</code> no valor, <code>text-xs uppercase text-slate-500</code> no rótulo.</li>
+<li><code>min-w-0</code> no cartão permite que ele encolha dentro do grid.</li>
+<li><code>overflow-x-auto</code> no invólucro da tabela cria a rolagem ali dentro.</li>
+<li><code>whitespace-nowrap</code> impede a tabela de quebrar as células.</li>
+<li><code>sticky top-0 z-10</code> + <code>bg-white/80 backdrop-blur</code> = cabeçalho que acompanha.</li>
+<li>Cor nunca sozinha: acrescente o sinal (<code>+12%</code>) ou um ícone.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

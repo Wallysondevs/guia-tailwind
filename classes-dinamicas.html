@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classes Dinâmicas | Guia Tailwind</title>
+<meta name="description" content="Por que a classe montada por código não existe no CSS: como o Tailwind lê o seu projeto, o mapa de nomes inteiros, atributo com variante e variável para o valor.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Classes <span class="hl">Dinâmicas</span></h1>
+<p class="intro">A Ana aprendeu um pouco de JavaScript e montou a vitrine dos pães do dia com um laço:
+para cada pão da planilha, cria um cartão e escolhe a cor pelo estado dele. No celular funcionou, no
+notebook funcionou, e no sábado — justo no sábado — os cartões do pão esgotado saíram sem cor nenhuma.
+Ela conferiu o código três vezes, o nome estava certo, e o Tailwind parecia não ter visto. É que ele não
+vê: o Tailwind lê <em>texto</em>, não executa o seu programa. Nesta aula a Ana entende por que metade
+das classes calculadas funciona e metade não, e aprende as três saídas que resolvem isso de vez.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que o Tailwind faz quando lê o seu projeto — e o que ele não faz.</li>
+  <li>Por que <code>"bg-" + cor + "-100"</code> nunca vira CSS.</li>
+  <li>A regra de ouro: o nome inteiro tem de estar escrito em algum lugar.</li>
+  <li>O mapa de classes: escolher entre nomes completos em vez de montar pedaços.</li>
+  <li>Estado que muda: atributo no HTML e variante na classe.</li>
+  <li>Valor que muda: variável de CSS em vez de nome de classe.</li>
+  <li>Como forçar classes no build de verdade, e por que isso é o último recurso.</li>
+  <li>Onde procurar quando uma classe aparece na tela e não no CSS.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o cartão que saiu sem cor</h2>
+
+<p>A vitrine da Ana tem uma regra de negócio simples: pão fresquinho aparece em âmbar claro; pão que
+acabou aparece em cinza. A planilha tem uma coluna <code>estado</code>, com dois valores,
+<code>fresco</code> e <code>esgotado</code>. O código dela, simplificado, fazia isto:</p>
+
+<pre class="file" data-file="vitrine.js">const cores = { fresco: "bg-amber-100", esgotado: "bg-stone-100" };
+cartao.className = "p-4 " + cores[pao.estado];</pre>
+
+<p>Esse código está correto, e produz <code>class="p-4 bg-amber-100"</code> no navegador. O problema
+aparece antes: o Tailwind precisa ter escrito a regra <code>.bg-amber-100</code> no CSS, e para isso ele
+tem de ter <em>encontrado o texto</em> <code>bg-amber-100</code> em algum arquivo do projeto. Aqui ele
+encontrou — o nome está no objeto <code>cores</code>, inteiro, entre aspas. Por isso funcionou por dois
+meses.</p>
+
+<p>No sábado, ela quis uma terceira cor: pão de queijo, que vende rápido, em verde. Escreveu
+<code>queijo: "bg-" + "green" + "-100"</code> para “economizar repetição”. O navegador recebeu
+<code>class="p-4 bg-green-100"</code> corretamente. E o cartão saiu sem cor, porque no projeto inteiro
+nunca apareceu o texto <code>bg-green-100</code> — apenas três pedaços que, juntos, formam aquele nome
+quando o programa roda. E o programa roda no navegador de quem visita; o Tailwind rodou antes, na
+compilação, e já foi embora.</p>
+
+<p>Essa é a assimetria que causa todos os problemas deste assunto: o Tailwind olha o texto do arquivo,
+no momento do build; o seu código monta strings no navegador, no momento do uso. São dois momentos
+diferentes, e nada no primeiro adivinha o que o segundo vai produzir.</p>
+
+<h2>2. O que o compilador realmente faz</h2>
+
+<p>Vale entender o mecanismo, porque ele explica até os casos esquisitos. O Tailwind não tem uma lista de
+classes possíveis que ele aplica: ele faz o caminho contrário. Varre os arquivos do projeto procurando
+palavras que <em>pareçam</em> nomes de classe, e para cada candidato que reconhece, escreve a regra
+correspondente. É por isso que o CSS gerado é pequeno, e é por isso que classe não usada não existe
+nele.</p>
+
+<p>Nessa varredura, ele não sabe o que é HTML, o que é JavaScript ou o que é comentário: tudo é texto.
+Uma classe citada num comentário gera CSS. Uma classe dentro de uma string que nunca é usada também
+gera. Uma classe montada por concatenação não gera nada, porque o texto que existe no arquivo é
+<code>"bg-" +</code>, e isso não é um nome de classe.</p>
+
+<p>Daí a regra de ouro desta aula, e ela cabe numa frase: <strong>o nome completo da classe tem de estar
+escrito em algum arquivo que o Tailwind lê</strong>. Não importa se ele vai ser usado, nem se está num
+ramo de código que nunca roda; importa que exista como texto inteiro. Todo o resto é consequência.</p>
+
+<p>Um detalhe que tranquiliza: o Tailwind é generoso com o que aceita como “texto inteiro”. Ele acha
+nomes em atributos, em strings, em objetos, em listas, em comentários. Então escrever as classes num
+objeto de mapa, como a Ana fez no começo, é a solução normal — não é gambiarra, é o jeito recomendado. O
+que não funciona é esconder o nome atrás de uma conta.</p>
+
+<dl class="anatomy">
+<dt>varredura</dt>
+<dd>A passada do compilador pelos arquivos do projeto, procurando texto que pareça nome de classe. Acontece
+no build, antes de qualquer código rodar.</dd>
+<dt>candidato</dt>
+<dd>Cada palavra que a varredura encontra e testa. Se o Tailwind reconhece a palavra como classe, escreve
+a regra; se não, ignora sem avisar.</dd>
+<dt>nome completo</dt>
+<dd>O nome da classe inteiro, escrito em um só pedaço de texto: <code>bg-green-100</code>. É a única
+forma que a varredura enxerga.</dd>
+<dt>mapa de classes</dt>
+<dd>Um objeto com uma chave por estado e o nome completo do outro lado. Escolher a chave é seguro; montar
+o nome não é.</dd>
+<dt>estado</dt>
+<dd>A condição que muda o visual de um bloco — fresco, esgotado, pronto. Quando o conjunto é finito, vira
+atributo no HTML e variante na classe.</dd>
+<dt>valor livre</dt>
+<dd>O que não cabe numa lista: a cor escolhida pelo cliente, uma medida, um progresso. Vai para uma
+variável de CSS, não para o nome da classe.</dd>
+</dl>
+
+<h2>3. A regra de ouro, e o que ela proíbe</h2>
+
+<p>Com a regra na mão, fica fácil classificar o que serve e o que não serve. A tabela abaixo mostra
+formatos comuns de código e o que o compilador vê em cada um.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No seu código</th><th>Gera CSS?</th><th>Por quê</th></tr>
+<tr><td><code>"bg-amber-100"</code></td><td>sim</td><td>o nome inteiro está escrito</td></tr>
+<tr><td><code>"bg-" + cor + "-100"</code></td><td>não</td><td>nunca existe o texto <code>bg-amber-100</code></td></tr>
+<tr><td><code>`bg-${cor}-100`</code></td><td>não</td><td>é a mesma concatenação, com outra sintaxe</td></tr>
+<tr><td><code>pronto ? "bg-green-100" : "bg-amber-100"</code></td><td>sim</td><td>os dois nomes aparecem inteiros</td></tr>
+<tr><td><code>"bg-" + (pronto ? "green" : "amber") + "-100"</code></td><td>não</td><td>a decisão acontece longe do nome</td></tr>
+<tr><td><code>"p-4 " + mapa[estado]</code></td><td>sim</td><td>o mapa guarda nomes completos</td></tr>
+</table>
+</div>
+
+<p>Repare na quarta linha: escolher entre duas strings inteiras é seguro, e é o padrão que se usa em todo
+projeto. O que mata é o pedaço variável no <em>meio</em> do nome. A diferença parece pequena quando você
+escreve, e é enorme quando o compilador lê.</p>
+
+<p>Vale conhecer a forma mais elegante da mesma ideia, porque ela também ajuda a organizar o código.
+Em vez de espalhar <code>if</code>s, você declara um mapa único, com uma chave por estado e o nome
+completo do outro lado:</p>
+
+<pre class="file" data-file="estados.js">const classes = {
+  fresco:   "bg-amber-100 text-amber-900",
+  esgotado: "bg-stone-100 text-stone-500",
+  queijo:   "bg-green-100 text-green-900",
+};
+cartao.className = "p-4 rounded-xl " + classes[pao.estado];</pre>
+
+<p>Três vantagens de uma vez: todos os nomes existem como texto, então o CSS é gerado; o mapa é o único
+lugar onde a decisão de cor mora, então mudar o visual de “esgotado” é uma linha; e quem lê o arquivo
+entende as três variações sem abrir o HTML. Se o mapa crescer a ponto de ficar ilegível, é sinal de que
+o desenho tem estados demais — não de que o mapa está errado.</p>
+
+<h2>4. A primeira missão: juntar os pedaços</h2>
+
+<p>Na caixa abaixo está o código da Ana antes do sábado, reduzido ao essencial. O elemento carrega as
+duas partes separadas em atributos <code>data-</code>, como o JavaScript fazia antes de juntar. O
+Tailwind não encontra o nome completo, então a regra de fundo não existe — e o painel mostra só o respiro
+e a cor do texto.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|background-color=oklch(0.962 0.059 95.617)">
+  <p class="try-task">O fundo está partido em <code>data-cor</code> e <code>data-tom</code>. Escreva o
+  nome inteiro da classe no atributo <code>class</code> e rode: o cartão deve ficar âmbar claro.</p>
+  <pre class="html">&lt;div id="alvo" class="p-4 text-amber-900" data-cor="bg-amber" data-tom="100"&gt;
+  &lt;p class="font-semibold"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="text-sm"&gt;Sai do forno às 6h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+color: oklch(0.414 0.112 45.904)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4 text-amber-900 bg-amber-100" data-cor="bg-amber" data-tom="100"&gt;
+  &lt;p class="font-semibold"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="text-sm"&gt;Sai do forno às 6h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel ganha a linha do fundo. Nada mudou no Tailwind, nada foi instalado: o que
+mudou é que agora existe no texto uma classe que ele reconhece. Guarde a sensação, porque é sempre o
+mesmo conserto — trocar uma conta por um nome.</p>
+
+<p>E se o nome viesse de um lugar onde você não pode escrever? Aí é sinal de que a escolha está no lugar
+errado. Quem decide se o pão está fresco é a planilha, e isso é dado; a cor de cada estado é desenho, e
+isso é código seu. O dado pode mudar à vontade sem quebrar nada, desde que o desenho esteja escrito. Na
+prática: o mapa fica no arquivo, e o JavaScript só escolhe a chave.</p>
+
+<h2>5. Quando o estado muda: atributo e variante</h2>
+
+<p>Cor por estado é o caso mais comum, e tem um jeito de escrever que dispensa JavaScript para trocar
+classe: deixe o atributo contar o estado e a classe perguntar sobre ele. O Tailwind tem variantes para
+atributos <code>data-*</code>, e elas leem o valor do atributo no momento em que o navegador desenha.</p>
+
+<p>Na caixa abaixo, o cartão já tem <code>data-estado="pronto"</code>, que é o que o sistema de pedidos
+grava quando o pão sai do forno. Falta a classe dizer o que fazer com isso. A vantagem aparece no dia
+seguinte: se o estado virar <code>esperando</code>, é o atributo que muda, e nenhuma classe é remontada —
+o CSS já tem as duas.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|background-color=oklch(0.962 0.044 156.743);;rule:[data-estado=&quot;pronto&quot;]">
+  <p class="try-task">Acrescente ao cartão a classe que pinta o fundo de verde quando
+  <code>data-estado</code> for <code>pronto</code>: <code>data-[estado=pronto]:bg-green-100</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="p-4 text-green-900" data-estado="pronto"&gt;
+  &lt;p class="font-semibold"&gt;Pedido 42&lt;/p&gt;
+  &lt;p class="text-sm"&gt;Pão de queijo, 6 unidades.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+color: oklch(0.393 0.095 152.535)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4 text-green-900 data-[estado=pronto]:bg-green-100" data-estado="pronto"&gt;
+  &lt;p class="font-semibold"&gt;Pedido 42&lt;/p&gt;
+  &lt;p class="text-sm"&gt;Pão de queijo, 6 unidades.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O seletor que o Tailwind escreve é literal e não precisa de nenhum código rodando:
+<code>[data-estado="pronto"]</code>. Isso significa que a mesma classe serve para todos os pedidos, e
+que a decisão “verde ou cinza” saiu do JavaScript e foi para o CSS — que é justamente onde ela é
+desenhada.</p>
+
+<p>O CSS gerado mostra a condição escrita por extenso no seletor, e vale ver a forma exata porque
+ela explica o comportamento:</p>
+
+<pre class="term">.data-\[estado\=pronto\]\:bg-green-100[data-estado="pronto"] {
+  background-color: var(--color-green-100);
+}</pre>
+
+<p>Leia como uma frase: “o elemento que tem esta classe <em>e</em> o atributo <code>data-estado</code>
+igual a <code>pronto</code> recebe o fundo”. Como o navegador reavalia o seletor a cada mudança de
+atributo, trocar o valor no elemento basta — e o CSS já tem as regras de todos os estados escritos.</p>
+
+<p>Outros estados seguem a mesma receita: <code>data-[estado=esperando]:bg-stone-100</code>,
+<code>data-[estado=entregue]:bg-amber-50</code>. Todas escritas por inteiro, todas no CSS final. E como
+o atributo é lido na hora, a troca é instantânea, sem recarregar e sem recompilar. Este é o caminho
+preferido quando o conjunto de estados é pequeno e conhecido.</p>
+
+<h2>6. Quando o valor muda: variável, não classe</h2>
+
+<p>Nem todo dinamismo é escolha entre estados. Às vezes é um valor contínuo: a cor que o cliente escolheu
+no seletor, a altura que veio da medição, o progresso de uma barra. Aí não existe um número finito de
+classes para escrever, e montar <code>bg-red-500</code> por concatenação é justamente o que não funciona.</p>
+
+<p>A saída é inverter a lógica: a classe fica fixa e aponta para uma variável de CSS; o valor variável
+entra na variável. Em vez de mudar o nome da classe, você muda o conteúdo, e o CSS não precisa ser
+gerado de novo.</p>
+
+<p>Na caixa abaixo, o JavaScript grava a cor escolhida pelo cliente em <code>--cor-do-dia</code>, no
+<code>style</code> do elemento. Falta a classe usar esse valor.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|background-color=rgb(21, 128, 61);;rule:background-color: var(--cor-do-dia)">
+  <p class="try-task">Aponte o fundo para a variável com <code>bg-(--cor-do-dia)</code> e rode. O cartão
+  deve assumir o verde gravado no <code>style</code>, sem que nenhum nome de cor apareça na classe.</p>
+  <pre class="html">&lt;div id="alvo" class="p-4 text-white" style="--cor-do-dia: #15803d"&gt;
+  &lt;p class="font-semibold"&gt;Cor escolhida pela cliente&lt;/p&gt;
+  &lt;p class="text-sm"&gt;Vale para o bolo de aniversário.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4 text-white bg-(--cor-do-dia)" style="--cor-do-dia: #15803d"&gt;
+  &lt;p class="font-semibold"&gt;Cor escolhida pela cliente&lt;/p&gt;
+  &lt;p class="text-sm"&gt;Vale para o bolo de aniversário.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS gerado é curto e não tem cor nenhuma: ele apenas repassa a variável. É por isso que qualquer
+valor serve, inclusive os que ainda não existem quando o CSS foi compilado — e é por isso que esse
+caminho não pede safelist, nem lista de classes, nem recompilação.</p>
+
+<pre class="term">.bg-\(--cor-do-dia\) {
+  background-color: var(--cor-do-dia);
+}</pre>
+
+<p>O preço é que a cor deixa de ser “uma classe do Tailwind” e passa a ser um valor em execução: o painel
+mostra, o navegador desenha, mas ninguém procurando <code>bg-</code> no CSS vai achar aquele verde. Para
+os casos em que o valor realmente é livre, é uma troca boa. Para os casos em que existem cinco cores
+possíveis, o mapa do começo da aula é melhor — ele é documentação de si mesmo.</p>
+
+<h2>7. A lista forçada, e por que é último recurso</h2>
+
+<p>Existe uma terceira saída, que serve para quando você não controla o código que gera as classes: uma
+biblioteca, um CMS, um campo de texto em que o cliente digita a classe. No projeto com npm, o Tailwind v4
+aceita uma declaração que força nomes para dentro do CSS, sem que eles apareçam no HTML:</p>
+
+<pre class="file" data-file="style.css">@import "tailwindcss";
+
+@source inline("bg-green-100 bg-green-900 bg-green-50");</pre>
+
+<p>Isso é o que o v3 chamava de <code>safelist</code>, e o efeito é o mesmo: os nomes listados entram no
+CSS final mesmo sem uso. Duas observações honestas. A primeira: nas caixas deste guia essa linha não tem
+efeito, porque o motor compila só o HTML da caixa e não tem projeto para varrer — o lugar dela é o seu
+<code>style.css</code>, no build de verdade. A segunda: use com parcimônia. Cada nome forçado é uma
+regra que vai para o navegador do cliente sem ninguém usar, e a lista envelhece calada: você troca o
+verde, esquece de trocar a lista, e o CSS cresce com nomes que não existem mais.</p>
+
+<p>Antes de chegar nela, prefira o mapa. Ele resolve o mesmo problema mantendo o nome escrito em um
+lugar que se lê. A lista forçada é para o caso em que o nome vem de fora do seu código — e, mesmo aí,
+vale perguntar se não é melhor receber um estado em vez de uma classe.</p>
+
+<h2>8. Onde procurar quando a classe “não existe”</h2>
+
+<p>O sintoma é sempre o mesmo: o HTML no navegador mostra a classe, o elemento está sem o estilo, e não há
+erro em lugar nenhum. A tabela abaixo é a ordem de conferência que resolve quase todos os casos.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sintoma</th><th>Onde olhar</th><th>Conserto</th></tr>
+<tr><td>uma classe funciona, a vizinha não</td><td>o texto do arquivo, não o valor final</td><td>escrever o nome inteiro</td></tr>
+<tr><td>funcionava e parou depois de um refactor</td><td>o código que monta a string</td><td>voltar ao mapa de nomes completos</td></tr>
+<tr><td>só falta no navegador do cliente</td><td>o build que foi para produção</td><td>gerar o CSS do mesmo código que roda</td></tr>
+<tr><td>a classe aparece no CSS, mas não pinta</td><td>o painel de CSS computado</td><td>outra regra está vencendo, ou o valor é inválido</td></tr>
+<tr><td>o nome vem de um CMS</td><td>a lista forçada do projeto</td><td><code>@source inline(…)</code> com a lista mínima</td></tr>
+</table>
+</div>
+
+<p>Repare que três das cinco linhas apontam para o mesmo conserto de fundo: trocar geração de nome por
+nome escrito. Não é teimosia do Tailwind; é o preço de um sistema que gera só o CSS necessário. Quem
+mantém a lista de todos os nomes possíveis — o que os frameworks de CSS tradicional fazem — paga com
+arquivos grandes; quem gera sob demanda paga com a regra de escrever o nome inteiro.</p>
+
+<p>A conferência de dez segundos, no seu projeto: procure no CSS gerado pelo nome que não pegou. Se não
+estiver lá, o problema é de geração, e é esta aula. Se estiver lá, o problema é de disputa, e o
+inspetor do navegador mostra quem venceu.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o mapa que virou três mil linhas</h3>
+<p>Começou com três estados e uma cor cada. Depois vieram tamanhos, depois variantes de tema, e o mapa
+passou a ter combinações demais — cada uma escrita à mão, cada uma para manter. O conserto não foi de
+sintaxe, foi de desenho: o estado virou atributo no HTML, a cor ficou em duas classes com
+<code>data-[estado=…]</code>, e o mapa encolheu. Quando o mapa cresce sozinho, o problema é o número de
+variações, não o Tailwind.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a classe certa, o build errado</h3>
+<p>Em produção, os cartões saíram sem cor, mas no computador da Ana tudo funcionava. A diferença estava no
+build: o CSS publicado tinha sido gerado antes do último commit, quando o mapa ainda não tinha a chave
+nova. O sintoma é idêntico ao da concatenação, e a conferência é a mesma — olhar o CSS publicado. Antes
+de acusar o Tailwind, compare a data do arquivo de CSS com a data do último código que mudou.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o cliente digita a classe</h3>
+<p>A padaria quis um campo em que o cliente escolhe a cor da etiqueta de aniversário, digitando o nome da
+cor. As combinações eram livres, e aí nenhuma das duas saídas normais servia: o mapa não cobre o
+infinito, e a concatenação não gera CSS. A solução foi o campo gravar um valor de cor numa variável,
+como na seção 6. Regra geral: entrada livre pede valor, não pede nome de classe.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Por que <code>"bg-" + cor + "-100"</code> não gera
+CSS?</p>
+<label><input type="radio" name="q1"> porque o Tailwind não aceita JavaScript no projeto</label>
+<label><input type="radio" name="q1"> porque nunca existe, em texto, o nome completo da classe nos arquivos lidos</label>
+<label><input type="radio" name="q1"> porque a cor precisa ser declarada no <code>@theme</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual destes formatos é seguro?</p>
+<label><input type="radio" name="q2"> <code>`bg-${cor}-100`</code></label>
+<label><input type="radio" name="q2"> <code>"text-" + tamanho</code></label>
+<label><input type="radio" name="q2"> <code>mapa[estado]</code>, com os nomes completos dentro do mapa</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Para uma cor que o cliente escolhe livremente, o
+caminho é…</p>
+<label><input type="radio" name="q3"> escrever o valor numa variável de CSS e a classe apontar para ela</label>
+<label><input type="radio" name="q3"> montar o nome da classe com o valor escolhido</label>
+<label><input type="radio" name="q3"> criar uma classe para cada cor possível do sistema</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o estado no atributo</h2>
+<p>O pedido já traz <code>data-estado="pronto"</code> no HTML. Complete o prefixo que faz o fundo ficar
+verde só nesse estado, usando o atributo como condição:</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="data-[estado=pronto]:bg-green-100">" data-estado="pronto"&gt;</div>
+<p class="ex-dica">Dica: é o prefixo, com colchetes, dois-pontos e a classe inteira. O prefixo também
+pode ser escrito com aspas dentro do colchete — <code>data-[estado="pronto"]</code> —, mas a forma sem
+aspas é mais curta e dá no mesmo.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O Tailwind gera CSS a partir do texto que encontra nos arquivos, não do que o seu programa calcula. Por
+isso uma classe só existe se o nome inteiro estiver escrito em algum lugar lido pelo compilador. Mapa de
+nomes completos, escolha entre strings inteiras e objetos com uma chave por estado funcionam; concatenação
+no meio do nome não funciona, e falha em silêncio.</p>
+
+<p>Quando o que muda é um estado finito, use o atributo no HTML e a variante na classe:
+<code>data-[estado=pronto]:bg-green-100</code> decide sem JavaScript. Quando o que muda é um valor livre,
+use uma variável de CSS e a classe <code>bg-(--cor)</code>. A lista forçada
+(<code>@source inline(…)</code>) existe no build de verdade e serve para o que vem de fora do seu código;
+é o último recurso, não o primeiro.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>O Tailwind lê texto; não executa o seu JavaScript.</li>
+<li>Classe existe no CSS só se o nome inteiro aparece em algum arquivo lido.</li>
+<li><code>"bg-" + cor</code> e <code>`bg-${cor}-100`</code> nunca geram CSS.</li>
+<li>Escolher entre duas strings inteiras é seguro e é o padrão.</li>
+<li>Mapa com uma chave por estado: um lugar para mudar e todos os nomes visíveis.</li>
+<li>Estado finito pede atributo + variante: <code>data-[estado=pronto]:…</code>.</li>
+<li>Valor livre pede variável: <code>bg-(--cor)</code> e o valor no <code>style</code>.</li>
+<li><code>@source inline(…)</code> força nomes no build de npm; a prévia do guia não o aplica.</li>
+<li>Nome que vem de CMS ou de campo livre é entrada de dado, não desenho.</li>
+<li>Se a classe está no CSS e não pinta, o problema é disputa de regra, não geração.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

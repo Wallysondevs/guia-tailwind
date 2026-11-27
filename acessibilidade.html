@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acessibilidade | Guia Tailwind</title>
+<meta name="description" content="Acessibilidade com Tailwind v4 na prática: link para pular o menu, foco visível, alvo de toque de 44 px, aria-label e as variantes motion-reduce e contrast-more.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Acessibilidade</span></h1>
+<p class="intro">O mouse da Ana morreu numa terça de manhã, no meio do expediente. Sem tempo de ir à
+loja, ela resolveu terminar o dia usando o teclado. Foi aí que descobriu que o próprio site não
+deixava: para chegar ao botão de comprar, ela precisava passar por vinte links do menu, um por um,
+sem conseguir ver onde estava o foco. O botão que só tem um “+” não dizia nada quando lido em voz
+alta, e a animação do “carregando” continuou pulsando mesmo depois que ela configurou o sistema para
+reduzir movimento. Nesta aula, a Ana conserta o site para ela mesma — e para todo mundo que não usa
+o mouse do jeito que ela usa.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que acessibilidade não é um público especial, é o seu dia ruim.</li>
+  <li>Como a ordem do Tab segue o HTML, e o que os <em>landmarks</em> têm a ver com isso.</li>
+  <li>O que é o link “Pular para o conteúdo” e como esconder/mostrar com <code>sr-only</code>.</li>
+  <li>Nome acessível: <code>aria-label</code>, <code>aria-hidden</code> e <code>aria-live</code>.</li>
+  <li>Alvo de toque: por que 44 px e como garantir isso com <code>min-h-11</code>.</li>
+  <li>As variantes que respeitam as preferências do sistema: <code>motion-reduce:</code>,
+  <code>contrast-more:</code> e <code>forced-colors:</code>.</li>
+  <li>O que nunca fazer com o foco visível.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o site que não deixa a Ana usar</h2>
+
+<p>O site da padaria está bonito. A Ana abre, aperta Tab e o primeiro retângulo de foco aparece em um
+link do rodapé — o último da página, porque foi o último que ela escreveu no HTML. Aperta Tab de
+novo e o foco vai para um lugar que ela não consegue ver: o contorno padrão do navegador foi apagado
+por uma classe que ela copiou de um tutorial. Aperta mais quinze vezes e finalmente chega ao menu.
+Trinta e duas vezes depois, ao botão de comprar.</p>
+
+<p>Enquanto isso, no celular de uma cliente, a mesma página tem um botão “+” de 24 px por 24 px, no
+canto da tela, que exige precisão de cirurgião para acertar com o polegar. E um “carregando” que
+pulsa para sempre — inclusive para quem sente enjoo com movimento na tela, uma condição real e mais
+comum do que parece.</p>
+
+<p>Nenhum desses três problemas é de CSS bonito. Os três são de acessibilidade, e os três têm
+conserto pequeno, do tipo que muda uma linha. É isso que a aula faz: três consertos com Tailwind e um
+punhado de decisões de HTML que o Tailwind não resolve sozinho, mas que você precisa conhecer para
+não estragar o que ele faz bem.</p>
+
+<h2>2. Acessibilidade não é “para cegos”</h2>
+
+<p>Vale começar desmontando a ideia de que acessibilidade é um favor para um grupo pequeno. As
+situações que quebram uma página são banais: um mouse que morre (a Ana), um braço na tipoia, um
+celular segurado com uma mão só enquanto a outra segura o bebê, sol na tela deixando o cinza claro
+ilegível (assunto da aula <a href="contraste.html">Contraste e Leitura</a>), internet ruim que faz o
+conteúdo chegar em pedaços, uma pessoa idosa que aumenta a fonte do navegador para 150% e vê tudo
+estourar.</p>
+
+<p>Tem também quem usa leitor de tela — um programa que lê em voz alta o que está na página. Esse é
+o caso que mais assusta quem começa, e o mais fácil de melhorar, porque a receita é curta: HTML
+semântico, texto que descreve o que o elemento faz, e nada de informação que exista só na cor ou no
+ícone. O Tailwind não atrapalha nada disso; ele só cuida da aparência. A parte de significado é HTML,
+e é ali que mora a maior parte do trabalho.</p>
+
+<p>Existe, inclusive, um jeito de escrever HTML com Tailwind que piora a acessibilidade: apagar o
+contorno de foco porque “fica feio”, usar <code>&lt;div&gt;</code> clicável no lugar de
+<code>&lt;button&gt;</code>, esconder texto com <code>hidden</code> quando o leitor de tela precisava
+dele. A aula é sobre o contrário disso: usar as classes para <em>melhorar</em> o que o HTML já
+oferece.</p>
+
+<h2>3. A ordem do Tab é a ordem do HTML</h2>
+
+<p>O primeiro fato que a Ana precisou aceitar: não existe “ordem de foco” no Tailwind. A tecla Tab
+percorre os elementos na ordem em que eles aparecem no HTML — links, botões, campos, qualquer coisa
+que receba foco. Se o seu HTML põe o menu depois do conteúdo, é assim que o teclado vai andar, mesmo
+que o CSS desenhe o menu em cima.</p>
+
+<p>Isso resolve dois problemas de uma vez. Primeiro, o visual: a ordem do HTML deve ser a ordem de
+leitura que faz sentido — cabeçalho, menu, conteúdo, rodapé. Segundo, os <em>landmarks</em>: as tags
+<code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>,
+<code>&lt;footer&gt;</code> e <code>&lt;aside&gt;</code> dizem ao leitor de tela “aqui começa uma
+região”, e é por elas que a pessoa pula direto para o conteúdo. Uma página com tudo em
+<code>&lt;div&gt;</code> é uma página sem mapa.</p>
+
+<p>Junto com os landmarks vem a hierarquia dos títulos. Um <code>&lt;h1&gt;</code> por página, com o
+assunto principal; <code>&lt;h2&gt;</code> para as seções; <code>&lt;h3&gt;</code> dentro delas. O
+leitor de tela navega por essa lista de títulos como você navega pelo sumário de um livro. Se todas
+as seções são <code>&lt;h4&gt;</code> porque “o tamanho ficou melhor”, o sumário fica torto — e o
+tamanho, no Tailwind, é a parte fácil de corrigir com <code>text-lg</code>.</p>
+
+<dl class="anatomy">
+<dt>landmark</dt>
+<dd>Região nomeada da página: <code>header</code>, <code>nav</code>, <code>main</code>,
+<code>footer</code>. Permite pular direto para um pedaço.</dd>
+<dt>nome acessível</dt>
+<dd>O texto que o leitor de tela anuncia para um elemento. Num botão de ícone, vem do
+<code>aria-label</code>; num link, do próprio texto.</dd>
+<dt>foco visível</dt>
+<dd>O sinal de onde o teclado está. Sem ele, quem navega por Tab anda às cegas.</dd>
+<dt>alvo de toque</dt>
+<dd>A área clicável de um controle. Pequena demais, vira teste de mira no celular.</dd>
+<dt>sr-only</dt>
+<dd>Classe que esconde visualmente sem esconder do leitor de tela. O oposto de
+<code>hidden</code>.</dd>
+<dt>leitor de tela</dt>
+<dd>Programa que lê a página em voz alta e navega por títulos, links e landmarks.</dd>
+</dl>
+
+<h2>4. O foco precisa aparecer</h2>
+
+<p>Antes das missões, o conserto mais urgente do site da Ana: o foco sumiu. Alguém escreveu
+<code>outline-none</code> no botão porque o contorno padrão do navegador “estragava o desenho”, e
+ninguém pôs nada no lugar. O resultado é o pior possível: o teclado funciona, mas a pessoa não vê
+onde está.</p>
+
+<p>No Tailwind, o caminho é a variante <code>focus-visible:</code>, que só age quando o foco veio do
+teclado — e não a cada clique de mouse:</p>
+
+<pre class="file" data-file="index.html">&lt;button class="rounded-lg bg-amber-500 px-4 py-2 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700"&gt;Comprar&lt;/button&gt;</pre>
+
+<p>A regra prática é simples e não tem exceção: <strong>se você tirar o contorno, ponha outro no
+lugar</strong>. O <code>outline-offset-2</code> dá um respiro entre o contorno e a borda, o que
+importa quando o botão está encostado em outro. As aulas <a href="focus.html">O foco</a>,
+<a href="anel-e-foco.html">Anel e Foco</a> e <a href="outline.html">Outline</a> mostram as variações
+com calma; aqui o que importa é o compromisso.</p>
+
+<p>Um detalhe que economiza discussão: o contorno padrão do navegador é feio de propósito? Não, ele é
+genérico. Você pode trocá-lo por um anel âmbar da sua marca — o que não pode é deixar a pessoa sem
+sinal nenhum. E vale testar com o teclado de verdade: Tab, Shift+Tab, Enter e espaço. Se você
+consegue comprar um pão sem tocar no mouse, está bom.</p>
+
+<h2>5. Missão 1: o link “Pular para o conteúdo”</h2>
+
+<p>O primeiro elemento focável da página deve ser um link que leva direto ao conteúdo, pulando o
+menu. Quem usa teclado agradece a cada visita: em vez de trinta Tabs, um Enter. Para quem usa mouse,
+ele é invisível — mas aparece no instante em que recebe foco.</p>
+
+<p>A receita tem duas classes e uma ideia. <code>sr-only</code> esconde visualmente, mantendo o texto
+disponível para o leitor de tela e para o Tab. <code>focus:not-sr-only</code> desfaz o esconderijo
+quando o link recebe foco. A missão é acrescentar o “aparecer no foco”:</p>
+
+<div class="trytailwind" data-goal="rule:position: static;;conta:.pular=1">
+  <p class="try-task">O link “Pular para o conteúdo” já é o primeiro da página, mas continua invisível
+  mesmo quando recebe foco pelo teclado. Acrescente <code>focus:not-sr-only</code> (e, se quiser,
+  <code>focus:bg-amber-500 focus:p-3</code>) para ele aparecer ao ser focado. A meta confere, no CSS
+  gerado, que existe uma regra devolvendo o link ao fluxo normal.</p>
+  <pre class="html">&lt;a class="pular sr-only" href="#conteudo"&gt;Pular para o conteúdo&lt;/a&gt;
+&lt;nav class="flex gap-3 bg-amber-100 p-2"&gt;Início · Pães · Encomendas&lt;/nav&gt;
+&lt;main id="conteudo" class="p-4"&gt;
+  &lt;p&gt;A padaria abre às 6h.&lt;/p&gt;
+&lt;/main&gt;</pre>
+  <pre class="out">
+position: absolute
+width: 1px
+height: 1px
+margin: -1px
+overflow: hidden
+clip-path: inset(50%)
+white-space: nowrap
+</pre>
+  <pre class="solucao">&lt;a class="pular sr-only focus:not-sr-only focus:bg-amber-500 focus:p-3" href="#conteudo"&gt;Pular para o conteúdo&lt;/a&gt;
+&lt;nav class="flex gap-3 bg-amber-100 p-2"&gt;Início · Pães · Encomendas&lt;/nav&gt;
+&lt;main id="conteudo" class="p-4"&gt;
+  &lt;p&gt;A padaria abre às 6h.&lt;/p&gt;
+&lt;/main&gt;</pre>
+</div>
+
+<p>O painel mostra o CSS como ele é, e vale ler as duas regras juntas:</p>
+
+<pre class="term">.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
+}
+.focus\:not-sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+}</pre>
+
+<p>É um jogo de oito declarações, e todas fazem sentido quando você lê em voz alta: o link vira um
+ponto de 1 px fora do fluxo; ao receber foco, volta a ser um bloco normal. Repare que
+<code>sr-only</code> <em>não</em> é <code>display: none</code>: o texto continua no documento, e o
+leitor de tela o encontra. <code>hidden</code> apagaria o link da página para todo mundo, inclusive
+para quem precisa dele — a aula <a href="esconder-mostrar.html">Esconder e Mostrar</a> compara os
+jeitos de esconder; aqui fica a diferença que importa.</p>
+
+<p>Duas condições para o link funcionar de verdade. Ele precisa ser o primeiro elemento focável do
+<code>&lt;body&gt;</code> — antes do menu, antes do logo, antes de tudo. E o destino tem de existir:
+<code>href="#conteudo"</code> só funciona se houver um <code>id="conteudo"</code> no
+<code>&lt;main&gt;</code>. Um link que não leva a lugar nenhum é pior que nenhum link, porque gasta a
+confiança de quem usa.</p>
+
+<h2>6. Nome acessível: o botão que só tem um “+”</h2>
+
+<p>O botão de adicionar ao carrinho da Ana tem um ícone e nada mais. Na tela, todo mundo entende.
+No leitor de tela, ele é anunciado como “botão” — e a pessoa fica sabendo que existe um botão, sem
+saber para quê. Esse é o problema de <em>nome acessível</em>, e ele se resolve com um atributo:</p>
+
+<pre class="file" data-file="index.html">&lt;button class="rounded-full bg-amber-500 p-2" aria-label="Adicionar pão ao carrinho"&gt;
+  &lt;span aria-hidden="true"&gt;+&lt;/span&gt;
+&lt;/button&gt;</pre>
+
+<p>O <code>aria-label</code> dá o nome que o leitor de tela vai anunciar. O
+<code>aria-hidden="true"</code> no ícone diz “não anuncie este sinal de mais”: ele é decoração. Sem o
+segundo, o leitor pode anunciar “mais, botão, adicionar pão ao carrinho”, que é redundante mas não é
+grave; sem o primeiro, não há nome nenhum. Se você só puder fazer uma coisa, faça o nome.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Situação</th><th>O que fazer</th><th>Por quê</th></tr>
+<tr><td>botão só com ícone</td><td><code>aria-label</code> no botão + <code>aria-hidden</code> no ícone</td><td>o desenho não fala</td></tr>
+<tr><td>imagem que informa (o pão do dia)</td><td><code>alt</code> descrevendo a imagem</td><td>é o texto que o leitor anuncia</td></tr>
+<tr><td>imagem decorativa</td><td><code>alt=""</code></td><td>vazio diz “ignore”; ausente confunde</td></tr>
+<tr><td>campo de formulário</td><td><code>&lt;label for&gt;</code> ligado ao <code>id</code></td><td>o rótulo é o nome do campo</td></tr>
+<tr><td>aviso que aparece sozinho (“pão adicionado”)</td><td><code>aria-live="polite"</code> na região</td><td>o leitor anuncia a mudança</td></tr>
+</table>
+</div>
+
+<p>As duas últimas linhas têm aula própria: <a href="rotulos-e-ajuda.html">Rótulos e Ajuda</a> cuida
+de <code>label</code>, texto de ajuda e mensagem de erro; o <code>aria-live</code> é o que faz um
+aviso aparecer para quem não está vendo a tela. Um exemplo de uso na padaria: quando alguém clica em
+“adicionar”, o contador do carrinho muda. Quem vê, percebe. Quem não vê, precisa que a mudança seja
+anunciada:</p>
+
+<pre class="file" data-file="index.html">&lt;p aria-live="polite" class="text-sm text-neutral-600"&gt;3 pães no carrinho&lt;/p&gt;</pre>
+
+<p>O valor <code>polite</code> quer dizer “anuncie quando puder, sem interromper”. Existe o
+<code>assertive</code>, que interrompe — e que só se justifica em erro grave. A regra é não usar
+<code>aria-live</code> em tudo: uma página que fala o tempo todo é uma página que ninguém escuta.</p>
+
+<h2>7. Missão 2: um alvo de toque confortável</h2>
+
+<p>Botão pequeno é problema de acessibilidade, não de estética. A norma WCAG 2.2 pede alvo mínimo de
+24 por 24 px; 44 px é o número que Apple e Google recomendam para o dedo e o que o guia usa como
+padrão confortável. O botão de “+” da Ana tem 24 px — cabe, mas exige mira.</p>
+
+<p>O conserto combina duas coisas: um tamanho mínimo garantido e o conteúdo centralizado dentro dele.
+<code>min-h-11</code> e <code>min-w-11</code> valem 2,75 rem, ou 44 px. Como o alvo é quadrado,
+<code>size-11</code> faria o mesmo em uma classe; aqui o mínimo é melhor, porque o botão pode crescer
+se o texto aumentar.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|min-height=44px;;css:#alvo|min-width=44px">
+  <p class="try-task">O botão de adicionar tem só 24 px de altura e largura. Garanta um alvo de 44 px
+  nos dois sentidos (<code>min-h-11</code> e <code>min-w-11</code>) e centralize o “+” dentro dele com
+  <code>inline-flex items-center justify-center</code>.</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-full bg-amber-500 p-2" aria-label="Adicionar pão ao carrinho"&gt;
+  &lt;span aria-hidden="true"&gt;+&lt;/span&gt;
+&lt;/button&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: oklch(0.769 0.188 70.08)
+border-radius: 3.35544e+07px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full bg-amber-500 p-2" aria-label="Adicionar pão ao carrinho"&gt;
+  &lt;span aria-hidden="true"&gt;+&lt;/span&gt;
+&lt;/button&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>min-height: 44px</code> e <code>min-width: 44px</code>.
+Repare numa coisa: o <code>p-2</code> continua ali. Ele não define o tamanho, define o respiro em
+volta do ícone; quem garante o mínimo é o <code>min-</code>. Se o ícone crescer, o botão cresce
+junto. Se o ícone sumir, o botão ainda tem 44 px de área clicável — que é o ponto.</p>
+
+<p>A conta de 44 px aparece em vários lugares: link do rodapé em lista, ícone de fechar do modal,
+setas do carrossel, checkbox. Em vez de repetir quatro classes por controle, vale criar um componente
+com esse mínimo — exatamente o caso da aula <a href="estilos-de-componente.html">Estilos de
+Componente</a>. E lembre do espaçamento entre alvos: dois botões de 44 px encostados ainda são
+difíceis de acertar; um <code>gap-2</code> entre eles separa os alvos sem mudar o desenho.</p>
+
+<h2>8. Missão 3: respeitar quem pediu menos movimento</h2>
+
+<p>Sistemas operacionais têm uma preferência chamada “reduzir movimento”. Quem ativa tem motivo:
+labirintite, enxaqueca, transtorno do processamento sensorial, ou simplesmente enjoo com animação.
+Quando ela está ligada, o navegador avisa o CSS pela condição <code>prefers-reduced-motion</code>. O
+Tailwind expõe isso como variante: <code>motion-reduce:</code>.</p>
+
+<div class="trytailwind" data-goal="rule:prefers-reduced-motion: reduce">
+  <p class="try-task">O esqueleto de carregamento pulsa sem parar. Acrescente
+  <code>motion-reduce:animate-none</code> para que a animação pare quando a pessoa pediu menos
+  movimento no sistema. O painel aqui mostra as regras geradas, porque o efeito é condicional.</p>
+  <pre class="html">&lt;div id="alvo" class="animate-pulse rounded-lg bg-neutral-200 p-4 text-neutral-500"&gt;
+  Carregando os pães…
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.922 0 none)
+color: oklch(0.556 0 none)
+border-radius: 8px
+animation: 2s cubic-bezier(0.4, 0, 0.6, 1) infinite pulse
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="animate-pulse rounded-lg bg-neutral-200 p-4 text-neutral-500 motion-reduce:animate-none"&gt;
+  Carregando os pães…
+&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS gerado é curto e mostra a condição:</p>
+
+<pre class="term">@media (prefers-reduced-motion: reduce) {
+  .motion-reduce\:animate-none {
+    animation: none;
+  }
+}</pre>
+
+<p>Existe a variante contrária, <code>motion-safe:</code>, que age só quando a pessoa
+<em>não</em> pediu redução. Para uma animação que é enfeite, ela costuma ser a escolha mais honesta:
+em vez de animar sempre e desligar no fim, você anima só para quem quer. Na prática, é a diferença
+entre <code>animate-pulse motion-reduce:animate-none</code> e
+<code>motion-safe:animate-pulse</code> — as duas funcionam, a segunda é mais fácil de ler.</p>
+
+<p>Movimento não é só <code>animate-</code>. Transição longa, <code>translate-</code> no hover,
+carrossel automático e rolagem suave também contam. A regra que o guia usa: animação que dura mais de
+meio segundo ou que se repete merece a variante. E há o caso especial de quem tem epilepsia
+fotossensível: nada que pisque mais de três vezes por segundo, em nenhuma hipótese.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Preferência do sistema</th><th>Variante do Tailwind</th><th>Quando a regra vale</th></tr>
+<tr><td>reduzir movimento</td><td><code>motion-reduce:</code></td><td>quando a pessoa pediu menos animação</td></tr>
+<tr><td>movimento permitido</td><td><code>motion-safe:</code></td><td>quando ninguém pediu redução</td></tr>
+<tr><td>mais contraste</td><td><code>contrast-more:</code></td><td>com <code>prefers-contrast: more</code> ligado</td></tr>
+<tr><td>alto contraste do sistema</td><td><code>forced-colors:</code></td><td>com as cores forçadas ao mínimo</td></tr>
+<tr><td>tema escuro</td><td><code>dark:</code></td><td>classe <code>dark</code> no <code>html</code> do guia</td></tr>
+</table>
+</div>
+
+<p>As duas do meio são as menos usadas e as mais impressionantes quando aparecem. Com
+<code>contrast-more:border-2</code> num campo, quem ligou “mais contraste” no sistema ganha uma borda
+de 2 px que ninguém mais vê. Com <code>forced-colors:border</code>, a página continua legível no modo
+de alto contraste do Windows, onde o navegador descarta as suas cores e deixa só as bordas. São
+classes de uma linha para um público que costuma ser ignorado.</p>
+
+<p>Como testar tudo isso sem mudar o sistema: no Chrome e no Edge, o painel do DevTools tem a aba
+<em>Rendering</em>, com as opções de emular <code>prefers-reduced-motion</code> e
+<code>forced-colors</code>. No Firefox, as preferências equivalentes ficam em
+<em>about:config</em>. É o mesmo caminho que a aula <a href="depuracao-de-css.html">Depurar o
+CSS</a> usa para variantes: você força a condição e vê a regra agir.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o menu que engole o teclado</h3>
+<p>O menu da Ana tem dezoito links. Sem o link de pular, quem usa teclado aperta Tab dezoito vezes
+antes de chegar ao conteúdo — em toda página do site. Com o link, é um Enter. O detalhe que faz
+diferença: colocar o menu dentro de <code>&lt;nav&gt;</code> com um <code>aria-label="Menu
+principal"</code>, para que o leitor de tela possa pular a região inteira quando quiser. Dois
+atributos e uma classe, e o site deixa de punir quem não usa mouse.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o contraste que só existe no monitor bom</h3>
+<p>No monitor da Ana, o cinza <code>text-neutral-400</code> sobre branco parece elegante. No celular
+da cliente, na rua, é quase invisível. E o pior: o selo de “esgotado” é comunicado só pela cor
+vermelha, sem nenhuma palavra. Quem não distingue vermelho de verde não vê diferença nenhuma. O
+conserto é duplo: escurecer a tinta (a aula <a href="contraste.html">Contraste e Leitura</a> tem as
+contas) e escrever a palavra “esgotado” no selo, porque cor sozinha nunca carrega informação.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o modal que prende a pessoa do lado de fora</h3>
+<p>O modal abre, o fundo escurece e o teclado continua no link que estava atrás. A pessoa aperta Tab e
+navega por uma tela que não vê. Isso se chama gerenciamento de foco e é JavaScript, não CSS — mas o
+Tailwind ajuda no que é dele: o botão de fechar precisa de <code>aria-label="Fechar"</code> se for só
+um “×”, precisa dos 44 px da missão 2 e precisa aparecer no foco. O resto é a aula
+<a href="modal.html">Modal</a>, e vale conferir com o teclado antes de publicar.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Por que o link “Pular para o conteúdo” usa
+<code>sr-only</code> e não <code>hidden</code>?</p>
+<label><input type="radio" name="q1"> porque <code>hidden</code> deixa um espaço vazio na tela</label>
+<label><input type="radio" name="q1"> porque <code>hidden</code> tira o link também do leitor de tela e do teclado</label>
+<label><input type="radio" name="q1"> porque <code>sr-only</code> é mais rápido de desenhar</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que <code>focus:not-sr-only</code> faz?</p>
+<label><input type="radio" name="q2"> esconde o elemento quando ele recebe foco</label>
+<label><input type="radio" name="q2"> aumenta o foco em 2 px</label>
+<label><input type="radio" name="q2"> desfaz o esconderijo do <code>sr-only</code> quando o elemento é focado</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Qual variante respeita quem pediu menos movimento no sistema?</p>
+<label><input type="radio" name="q3"> <code>motion-reduce:</code></label>
+<label><input type="radio" name="q3"> <code>motion-safe:</code></label>
+<label><input type="radio" name="q3"> <code>contrast-more:</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o botão de fechar o aviso</h2>
+<p>O aviso de “encomenda pronta” tem um botão de fechar que só mostra um “×”. Complete a classe que
+dá ao botão um alvo de 44 px por 44 px:</p>
+<div class="ex-code">&lt;button aria-label="Fechar aviso" class="<input aria-label="resposta 1" data-answer="size-11|min-h-11 min-w-11" placeholder="..."> flex items-center justify-center rounded-full bg-amber-500"&gt;×&lt;/button&gt;</div>
+<p class="ex-dica">Dica: <code>size-11</code> dá largura e altura iguais em uma classe (2,75 rem = 44
+px). Se preferir o caminho do mínimo, são duas classes: <code>min-h-11</code> e
+<code>min-w-11</code>.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Acessibilidade começa no HTML e termina no detalhe. A ordem do Tab é a ordem do HTML; os landmarks
+(<code>header</code>, <code>nav</code>, <code>main</code>, <code>footer</code>) dão o mapa; um
+<code>h1</code> por página e títulos em hierarquia dão o sumário. O Tailwind entra depois, com
+<code>sr-only</code> para o link de pular, <code>focus-visible:</code> para o foco nunca sumir e
+<code>min-h-11</code> para o dedo acertar o alvo.</p>
+
+<p>Nome acessível é o que o leitor de tela anuncia: <code>aria-label</code> no botão de ícone,
+<code>aria-hidden</code> na decoração, <code>aria-live</code> no aviso que muda sozinho. E as
+preferências do sistema têm variante própria: <code>motion-reduce:</code>,
+<code>motion-safe:</code>, <code>contrast-more:</code>, <code>forced-colors:</code>. São classes
+condicionais — não mudam nada para quem não pediu, e mudam tudo para quem pediu.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Tab anda na ordem do HTML: menu antes do conteúdo só se o HTML puser o menu antes.</li>
+<li>Um <code>h1</code> por página; o tamanho da fonte resolve com classe, não com tag errada.</li>
+<li>Nunca apague o contorno sem pôr outro: <code>focus-visible:outline-2</code>.</li>
+<li><code>sr-only</code> esconde só dos olhos; <code>hidden</code> esconde de todos.</li>
+<li><code>focus:not-sr-only</code> faz o link aparecer quando recebe foco.</li>
+<li>Botão de ícone precisa de <code>aria-label</code>; o ícone leva <code>aria-hidden</code>.</li>
+<li>Alvo confortável: 44 px — <code>size-11</code> ou <code>min-h-11 min-w-11</code>.</li>
+<li><code>motion-reduce:animate-none</code> desliga animação para quem pediu menos movimento.</li>
+<li><code>contrast-more:</code> e <code>forced-colors:</code> salvam a página no alto contraste.</li>
+<li>Cor nunca é a única informação; ícone nunca é o único nome.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

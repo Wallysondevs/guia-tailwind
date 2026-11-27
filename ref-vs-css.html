@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tailwind x CSS | Guia Tailwind</title>
+<meta name="description" content="Lado a lado: o CSS que uma classe do Tailwind v4 gera, as variáveis do tema, camadas e especificidade, valores avulsos e quando o CSS puro ainda ganha.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Tailwind <span class="hl">x CSS</span></h1>
+<p class="intro">A Ana aprendeu Tailwind, mas continua lendo CSS: tutoriais, respostas de fórum, o
+código de um tema pronto que ela baixou para a padaria. Ela quer saber o que está fazendo quando escreve
+<code>p-4</code> — e o que exatamente aquilo vira no navegador. Também quer saber quando vale a pena
+escrever CSS do jeito antigo, e se as duas coisas podem conviver no mesmo arquivo sem uma sabotar a
+outra. Esta página é a mesa de tradução: classe de um lado, CSS do outro, com os valores reais que o
+motor do guia produz.</p>
+
+<h2>1. A mesma caixa, dois jeitos de escrever</h2>
+
+<p>Todo CSS tem três peças: um seletor que encontra elementos, uma declaração que diz o que mudar e um
+valor. <code>.cartao { padding: 16px; }</code> tem o seletor <code>.cartao</code>, a propriedade
+<code>padding</code> e o valor <code>16px</code>. O Tailwind não muda essa gramática: ele entrega
+seletores prontos. Cada classe utilitária é um seletor de uma regra só, com uma declaração ou duas, e um
+nome que descreve o efeito.</p>
+
+<p>A diferença de verdade está em quem escolhe o nome. No CSS clássico, você inventa
+<code>.cartao</code>, <code>.cartao-destaque</code>, <code>.cartao-grande</code> e depois precisa manter
+esse vocabulário em dois arquivos, o HTML e o CSS, sincronizados. No Tailwind, o vocabulário já existe e
+mora no próprio HTML: <code>class="rounded-xl bg-white p-4"</code> diz tudo sobre aquela caixa, e não há
+outro arquivo para abrir. Quem lê a marcação entende a aparência; quem muda a aparência muda ali.</p>
+
+<p>O preço é o tamanho da linha. Uma caixa com sete características vira sete palavras, e isso incomoda
+na primeira semana. A compensação vem depois, quando você percebe que nunca precisa procurar onde uma
+classe é definida — ela não é definida em lugar nenhum, é gerada. Nomes inventados são ótimos quando
+você tem um componente reutilizado em cinquenta lugares; classes utilitárias são melhores quando cada
+tela é ligeiramente diferente, que é o caso de quase todo site pequeno.</p>
+
+<dl class="anatomy">
+<dt>utilitária</dt>
+<dd>Classe que faz uma coisa só: <code>p-4</code> só dá respiro, <code>bg-white</code> só pinta o
+fundo.</dd>
+<dt>declaração</dt>
+<dd>Um par propriedade e valor, terminado em ponto e vírgula: <code>padding: 16px;</code>.</dd>
+<dt>seletor</dt>
+<dd>O que encontra o elemento: <code>.p-4</code>, <code>#alvo</code>, <code>li:first-child</code>.</dd>
+<dt>cascata</dt>
+<dd>A ordem de prioridade entre regras que disputam a mesma propriedade. Quem vence é decidido por
+origem, camada, especificidade e ordem.</dd>
+<dt>variável de tema</dt>
+<dd>Um valor nomeado com dois traços, como <code>--spacing</code>, que as classes usam no lugar de um
+número solto.</dd>
+</dl>
+
+<h2>2. A tabela de equivalência</h2>
+
+<p>Aqui está o coração da consulta: a classe, o CSS que ela gera e o efeito em português. Todos os
+trechos abaixo saíram do motor do guia, com o Tailwind v4.3.5 — não são aproximações. Duas observações
+antes de ler: o Tailwind escreve <code>calc(var(--spacing) * n)</code> em vez de <code>16px</code>, e
+usa variáveis para cor, raio, sombra e fonte. É por isso que o painel das caixas mostra o valor
+computado (16 px) e o CSS gerado mostra a conta.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>CSS gerado</th><th>O que faz</th></tr>
+<tr><td><code>p-4</code></td><td><code>padding: calc(var(--spacing) * 4)</code></td><td>16 px de respiro interno nos quatro lados</td></tr>
+<tr><td><code>m-2</code></td><td><code>margin: calc(var(--spacing) * 2)</code></td><td>8 px de espaço externo</td></tr>
+<tr><td><code>mx-auto</code></td><td><code>margin-inline: auto</code></td><td>centraliza um bloco que tem largura</td></tr>
+<tr><td><code>w-full</code></td><td><code>width: 100%</code></td><td>ocupa toda a largura disponível</td></tr>
+<tr><td><code>h-screen</code></td><td><code>height: 100vh</code></td><td>altura da janela; no celular prefira <code>h-dvh</code></td></tr>
+<tr><td><code>flex</code></td><td><code>display: flex</code></td><td>liga o modo flexível nos filhos</td></tr>
+<tr><td><code>grid-cols-3</code></td><td><code>grid-template-columns: repeat(3, minmax(0, 1fr))</code></td><td>três colunas iguais que encolhem sem estourar</td></tr>
+<tr><td><code>gap-4</code></td><td><code>gap: calc(var(--spacing) * 4)</code></td><td>16 px entre as células, sem margem nos filhos</td></tr>
+<tr><td><code>bg-amber-500</code></td><td><code>background-color: var(--color-amber-500)</code></td><td>fundo âmbar médio da paleta</td></tr>
+<tr><td><code>text-lg</code></td><td><code>font-size: var(--text-lg)</code> e <code>line-height: var(--tw-leading, var(--text-lg--line-height))</code></td><td>18 px com entrelinha de 28 px</td></tr>
+<tr><td><code>font-semibold</code></td><td><code>font-weight: var(--font-weight-semibold)</code></td><td>peso 600</td></tr>
+<tr><td><code>text-center</code></td><td><code>text-align: center</code></td><td>texto centralizado</td></tr>
+<tr><td><code>truncate</code></td><td><code>overflow: hidden</code>, <code>text-overflow: ellipsis</code>, <code>white-space: nowrap</code></td><td>corta com reticências numa linha só</td></tr>
+<tr><td><code>line-clamp-2</code></td><td><code>display: -webkit-box</code>, <code>-webkit-line-clamp: 2</code>, <code>overflow: hidden</code></td><td>no máximo duas linhas, sem reticências garantidas</td></tr>
+<tr><td><code>relative</code></td><td><code>position: relative</code></td><td>referência para filhos posicionados</td></tr>
+<tr><td><code>z-10</code></td><td><code>z-index: 10</code></td><td>sobe uma camada; precisa de <code>position</code></td></tr>
+<tr><td><code>opacity-50</code></td><td><code>opacity: 50%</code></td><td>metade transparente, inclusive nos filhos</td></tr>
+<tr><td><code>rounded-lg</code></td><td><code>border-radius: var(--radius-lg)</code></td><td>cantos de 8 px</td></tr>
+<tr><td><code>border</code></td><td><code>border-style: var(--tw-border-style)</code> e <code>border-width: 1px</code></td><td>borda de 1 px, cor vinda de outra classe</td></tr>
+<tr><td><code>shadow-md</code></td><td><code>--tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)</code> e <code>box-shadow: …</code></td><td>sombra média, desenhada por <code>box-shadow</code></td></tr>
+<tr><td><code>ring-2</code></td><td><code>--tw-ring-shadow: … calc(2px + var(--tw-ring-offset-width)) …</code></td><td>anel de 2 px que não ocupa espaço</td></tr>
+<tr><td><code>aspect-video</code></td><td><code>aspect-ratio: var(--aspect-video)</code></td><td>mantém 16 por 9 ao redimensionar</td></tr>
+<tr><td><code>sr-only</code></td><td><code>position: absolute</code>, <code>width: 1px</code>, <code>clip-path: inset(50%)</code></td><td>some da tela e continua no leitor de tela</td></tr>
+<tr><td><code>space-y-2</code></td><td><code>:where(.space-y-2 &gt; :not(:last-child))</code> com <code>margin-block</code></td><td>espaço entre irmãos, sem margem sobrando no fim</td></tr>
+</table>
+</div>
+
+<p>Algumas linhas merecem atenção porque explicam confusões comuns. <code>border</code> escreve a
+<em>largura</em> e o estilo; sem <code>border-stone-200</code> a borda sai com a cor do texto, que quase
+nunca é o que se quer. <code>shadow-md</code> guarda o desenho numa variável própria
+(<code>--tw-shadow</code>) e compõe o <code>box-shadow</code> final com outras quatro variáveis — é por
+isso que sombra, anel e contorno interno convivem sem se apagar. E <code>space-y-2</code> usa
+<code>:not(:last-child)</code> justamente para não sobrar margem embaixo do último item, um problema
+clássico de quem fazia isso à mão.</p>
+
+<h2>3. As variáveis por baixo</h2>
+
+<p>O Tailwind v4 não gera hexadecimal atrás de hexadecimal: ele gera variáveis CSS e aponta para elas.
+Isso muda três coisas na sua vida. Primeiro, a página inteira fica coerente com uma troca só. Segundo,
+você pode usar as mesmas variáveis no seu CSS, com <code>var(--color-amber-500)</code>. Terceiro, o
+build só publica as variáveis que alguém usou — se nenhuma classe pede <code>--color-rose-300</code>,
+ela não aparece no arquivo final. A tabela traz valores reais do motor.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Variável</th><th>Valor</th><th>Quem usa</th></tr>
+<tr><td><code>--spacing</code></td><td><code>0.25rem</code></td><td>toda a escala de <code>p</code>, <code>m</code>, <code>gap</code>, <code>w</code></td></tr>
+<tr><td><code>--color-amber-500</code></td><td><code>oklch(76.9% 0.188 70.08)</code></td><td><code>bg-amber-500</code>, <code>text-amber-500</code>, <code>border-amber-500</code></td></tr>
+<tr><td><code>--radius-lg</code></td><td><code>0.5rem</code></td><td><code>rounded-lg</code></td></tr>
+<tr><td><code>--radius-sm</code></td><td><code>0.25rem</code></td><td><code>rounded-sm</code></td></tr>
+<tr><td><code>--text-lg</code></td><td><code>1.125rem</code></td><td><code>text-lg</code></td></tr>
+<tr><td><code>--text-lg--line-height</code></td><td><code>calc(1.75 / 1.125)</code></td><td>a entrelinha que vem junto com o tamanho</td></tr>
+<tr><td><code>--font-weight-semibold</code></td><td><code>600</code></td><td><code>font-semibold</code></td></tr>
+<tr><td><code>--leading-relaxed</code></td><td><code>1.625</code></td><td><code>leading-relaxed</code></td></tr>
+<tr><td><code>--tracking-wide</code></td><td><code>0.025em</code></td><td><code>tracking-wide</code></td></tr>
+<tr><td><code>--container-md</code></td><td><code>28rem</code></td><td><code>max-w-md</code></td></tr>
+<tr><td><code>--container-7xl</code></td><td><code>80rem</code></td><td><code>max-w-7xl</code></td></tr>
+<tr><td><code>--blur-sm</code></td><td><code>8px</code></td><td><code>blur-sm</code></td></tr>
+<tr><td><code>--ease-out</code></td><td><code>cubic-bezier(0, 0, 0.2, 1)</code></td><td><code>ease-out</code> e a transição padrão</td></tr>
+<tr><td><code>--animate-spin</code></td><td><code>spin 1s linear infinite</code></td><td><code>animate-spin</code></td></tr>
+</table>
+</div>
+
+<pre class="term">@layer theme {
+  :root, :host {
+    --spacing: 0.25rem;
+    --color-amber-500: oklch(76.9% 0.188 70.08);
+    --radius-lg: 0.5rem;
+    --text-lg: 1.125rem;
+    --text-lg--line-height: calc(1.75 / 1.125);
+    --font-weight-semibold: 600;
+    --container-md: 28rem;
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  }
+}</pre>
+
+<p>Repare no seletor: <code>:root, :host</code>. O <code>:root</code> é o elemento raiz da página, o que
+faz a variável valer em todo lugar. O <code>:host</code> é para quando esse CSS roda dentro de um Web
+Component, com sombra própria. E note que as variáveis moram dentro de <code>@layer theme</code> — a
+primeira camada declarada no arquivo, o que significa que qualquer camada posterior pode sobrescrevê-las
+sem briga de especificidade.</p>
+
+<h2>4. Camadas e especificidade: por que uma classe ganha de um seletor comprido</h2>
+
+<p>Aqui está a parte que ninguém conta e que resolve a maior parte dos "meu CSS não pega". O Tailwind v4
+declara quatro camadas na primeira linha do arquivo gerado, nesta ordem:
+<code>@layer theme, base, components, utilities;</code>. Camadas do CSS são um mecanismo oficial: entre
+regras de camadas diferentes, vence a camada declarada por último, <em>independentemente da
+especificidade</em>. Como <code>utilities</code> é a última, uma classe utilitária vence
+<code>.cartao p</code> escrito em <code>components</code>, mesmo que o seletor comprido pareça mais
+forte.</p>
+
+<pre class="term">@layer theme, base, components, utilities;
+@layer utilities {
+  .p-4 {
+    padding: calc(var(--spacing) * 4);
+  }
+}</pre>
+
+<p>Isso tem uma consequência que pega muita gente na migração: CSS escrito à mão <strong>sem</strong>
+<code>@layer</code> vence qualquer camada. Se você tem um <code>.cartao { padding: 8px }</code> solto no
+fim de um arquivo antigo, ele passa por cima de <code>p-4</code>, e a conclusão apressada é "o Tailwind
+não funciona". A regra é: ou você coloca o CSS antigo dentro de <code>@layer base</code> (para as
+utilitárias vencerem), ou assume que ele é a última palavra e para de tentar sobrescrever com classe.</p>
+
+<p>Para os casos em que a classe precisa vencer de qualquer jeito, o v4 tem o <code>!</code> no
+<strong>fim</strong> da classe: <code>bg-amber-100!</code> gera <code>background-color: … !important</code>.
+No v3 o <code>!</code> ia na frente (<code>!bg-amber-100</code>), e essa é uma das trocas que mais
+confundem quem tem código antigo. Já o atributo <code>style=""</code> continua invencível: nenhuma
+classe, nem com <code>!</code>, passa por cima de estilo inline — só outro <code>!important</code> no
+próprio <code>style</code>.</p>
+
+<h2>5. Valores avulsos: quando o catálogo não tem o número</h2>
+
+<p>A escala do Tailwind cobre 95% do que você precisa, mas não tudo. Para o resto existem os colchetes,
+que aceitam CSS cru. Dentro deles, espaço vira sublinhado, porque espaço separa classes no HTML. A
+tabela mostra o que o motor escreve para cada forma.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>CSS gerado</th><th>Quando usar</th></tr>
+<tr><td><code>p-[13px]</code></td><td><code>padding: 13px</code></td><td>medida exata de um desenho aprovado</td></tr>
+<tr><td><code>text-[11px]</code></td><td><code>font-size: 11px</code></td><td>letra miúda de nota fiscal</td></tr>
+<tr><td><code>w-[277px]</code></td><td><code>width: 277px</code></td><td>largura que vem de uma imagem</td></tr>
+<tr><td><code>bg-[#fdf6e3]</code></td><td><code>background-color: #fdf6e3</code></td><td>cor da marca que não está na paleta</td></tr>
+<tr><td><code>grid-cols-[1fr_2fr]</code></td><td><code>grid-template-columns: 1fr 2fr</code></td><td>colunas com proporções diferentes</td></tr>
+<tr><td><code>min-h-[calc(100dvh-4rem)]</code></td><td><code>min-height: calc(100dvh - 4rem)</code></td><td>tela cheia descontando a barra de cima</td></tr>
+<tr><td><code>shadow-[0_1px_2px_rgb(0_0_0/0.2)]</code></td><td><code>--tw-shadow: 0 1px 2px rgb(0 0 0/0.2)</code></td><td>sombra específica de um componente</td></tr>
+<tr><td><code>bg-(--minha-cor)</code></td><td><code>background-color: var(--minha-cor)</code></td><td>cor que vem de variável do seu tema</td></tr>
+<tr><td><code>[&amp;&gt;li]:mt-2</code></td><td><code>.mt-2 &gt; li</code></td><td>estilo nos filhos diretos, sem classe neles</td></tr>
+</table>
+</div>
+
+<p>Duas armadilhas dos colchetes. A primeira é o espaço: <code>p-[10px 20px]</code> no atributo
+<code>class</code> são duas classes, e nenhuma existe — o certo é <code>p-[10px_20px]</code>. A segunda
+é que colchetes aceitam qualquer coisa, inclusive erros: <code>p-[16]</code> sem unidade gera CSS
+inválido, o navegador descarta a declaração e a caixa fica sem respiro. O compilador não avisa, porque
+para ele a sintaxe está certa.</p>
+
+<p>A variante com <code>&amp;</code> merece um parágrafo próprio, porque é o que substitui o CSS filho do
+jeito antigo. <code>[&amp;&gt;li]:mt-2</code> quer dizer "aplique <code>mt-2</code> aos <code>li</code>
+filhos diretos deste elemento". O <code>&amp;</code> representa o elemento que tem a classe. Você pode
+usar isso para qualquer seletor: <code>[&amp;:hover]:underline</code>,
+<code>[&amp;::placeholder]:italic</code>, <code>[&amp;:nth-child(3)]:bg-amber-50</code>. É a válvula de
+escape completa, e mora no mesmo lugar das outras classes.</p>
+
+<div class="trytailwind" data-goal="rule:padding: calc(var(--spacing) * 4);;conta:.p-4=1">
+  <p class="try-task">Este cartão usa <code>style="padding:16px"</code>, escrito à mão. Troque o estilo
+  inline pela classe equivalente, sem mudar o resultado na tela.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-lg bg-amber-50" style="padding:16px"&gt;
+  &lt;p&gt;Pão quentinho&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-lg bg-amber-50 p-4"&gt;
+  &lt;p&gt;Pão quentinho&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>padding: 16px</code> nas duas versões — o resultado na tela é idêntico, e é
+justamente essa a lição: a diferença não está no pixel, está no que você ganha depois. Com
+<code>p-4</code>, dá para escrever <code>md:p-8</code> e <code>dark:p-4</code>; com
+<code>style=""</code>, não. O estilo inline é ponto final, não ponto de partida.</p>
+
+<h2>6. O que o Tailwind não resolve</h2>
+
+<p>Existe uma lenda de que Tailwind "substitui CSS". Não substitui: ele substitui a maior parte do CSS
+de aparência. Continuam sendo CSS, e continuam no seu arquivo, os casos abaixo. Saber quais são evita a
+frustração de procurar uma classe que não existe.</p>
+
+<p><strong>Animação com vários quadros.</strong> As quatro prontas são giro, pulso, ping e quique. Uma
+animação de cinco etapas com cores diferentes precisa de <code>@keyframes</code> escrito por você — no
+<code>@theme</code>, como mostrado em <a href="ref-animacoes.html">Animações</a>.</p>
+
+<p><strong>Seletores que dependem de estrutura incomum.</strong> O Tailwind cobre pai
+(<code>group</code>), irmão anterior (<code>peer</code>), filhos com <code>[&amp;&gt;li]</code> e até
+<code>:has()</code>. Mas um seletor como "o terceiro item de uma lista aninhada dentro de uma tabela"
+não tem classe; escreve-se à mão, com <code>@layer components</code>.</p>
+
+<p><strong>Estilos globais.</strong> Cor de fundo do site, fonte base, seleção de texto, barra de
+rolagem, <code>scroll-behavior</code>. Isso vai em <code>@layer base</code>, com seletor de elemento
+(<code>body</code>, <code>html</code>), e não em classe no HTML. A aula
+<a href="estilos-de-base.html">Estilos de Base</a> mostra onde colocar cada um.</p>
+
+<p><strong>Componentes repetidos em muitos lugares.</strong> Um botão que aparece em vinte páginas merece
+uma classe só. O caminho no v4 é <code>@layer components</code> com <code>@apply</code> para reaproveitar
+as utilitárias. Em arquivo CSS separado — módulo, componente de framework —, o v4 exige
+<code>@reference "caminho/entrada.css"</code> no topo, para o compilador saber onde estão as definições do
+tema.</p>
+
+<p><strong>Valores que vêm de fora.</strong> Uma cor escolhida pelo cliente, salva no banco e injetada na
+página. Não dá para gerar classe em tempo de execução: use <code>style="--cor: #a33"</code> no elemento
+e <code>bg-(--cor)</code> na classe, ou aceite o <code>style=""</code> completo para aquele pedaço.</p>
+
+<p><strong>Interação com JavaScript.</strong> Arrastar, medir, animar em função da posição do dedo. O
+Tailwind dá a aparência do estado; quem troca o estado é o seu código, com <code>classList</code> ou com
+atributos que as variantes leem (<code>data-*</code>, <code>aria-*</code>).</p>
+
+<h2>7. Misturando os dois sem brigar</h2>
+
+<p>A convivência é possível e comum. A regra que organiza tudo é a das camadas: coloque cada coisa na
+camada certa e o resto se resolve sozinho. <code>@layer base</code> para o que é padrão de página,
+<code>@layer components</code> para o que tem nome e se repete, e utilitárias soltas no HTML para o que
+é específico daquela tela. O CSS sem camada fica reservado para correções conscientes e comentadas.</p>
+
+<p>Um exemplo de componente com <code>@apply</code>, do jeito que o v4 aceita no mesmo arquivo que
+importa o Tailwind:</p>
+
+<pre class="file" data-file="entrada.css">@import "tailwindcss";
+
+@layer components {
+  .botao-padaria {
+    @apply inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-white;
+  }
+  .botao-padaria:hover {
+    @apply bg-amber-700;
+  }
+}</pre>
+
+<p>Atenção a um detalhe do <code>@apply</code>: ele copia as declarações, não as variantes. Escrever
+<code>@apply hover:bg-amber-700</code> funciona em versões recentes, mas o resultado é uma regra com
+<code>:hover</code> dentro do seletor — e aí a classe perde a vantagem de ser uma utilitária isolada. O
+exemplo acima deixa o hover numa regra separada, o que é mais fácil de ler e de depurar. E lembre: o
+<code>@apply</code> não enxerga classes que você inventou; ele só conhece utilitárias e o que estiver no
+tema.</p>
+
+<p>Para valores do tema dentro do seu CSS, existem duas funções. <code>var(--color-amber-500)</code> lê a
+variável em tempo de navegador — simples e direto. <code>theme(--color-amber-500)</code> resolve o valor
+no momento de compilar, o que só é necessário quando o destino não aceita variáveis, como dentro de uma
+consulta de mídia. Na prática, use <code>var()</code> e guarde <code>theme()</code> para os casos
+especiais.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|font-size=18px;;css:#alvo|line-height=28px;;rule:.text-lg">
+  <p class="try-task">O título do cartão está com <code>text-base</code> e parece apagado. Suba para
+  <code>text-lg</code>: a missão confere o tamanho e a entrelinha que vêm juntos.</p>
+  <pre class="html">&lt;h3 id="alvo" class="font-semibold text-stone-800"&gt;Pão do dia&lt;/h3&gt;</pre>
+  <pre class="out">
+color: oklch(0.268 0.007 34.298)
+font-weight: 600
+</pre>
+  <pre class="solucao">&lt;h3 id="alvo" class="text-lg font-semibold text-stone-800"&gt;Pão do dia&lt;/h3&gt;</pre>
+</div>
+
+<p>O interessante desta missão é o que ela revela sobre a escala tipográfica: <code>text-lg</code> não
+mexe só no tamanho, mexe também na entrelinha, porque as duas andam juntas. Se você trocar por
+<code>text-[18px]</code>, ganha os 18 px mas perde a entrelinha de 28 px — e a linha fica apertada. É a
+diferença entre usar o sistema e usar um número.</p>
+
+<h2>8. Traduzindo uma regra escrita à mão</h2>
+
+<p>Vale treinar a tradução no sentido inverso, porque é o que você vai fazer ao migrar um site pronto.
+Pegue a regra abaixo, típica de tutorial:</p>
+
+<pre class="file" data-file="estilo.css">.cartao {
+  background: #fff;
+  border: 1px solid #e7e5e4;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+}
+.cartao h3 {
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 600;
+  color: #292524;
+}
+.cartao p {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #78716c;
+}</pre>
+
+<p>A tradução honesta não é uma classe só; é o conjunto aplicado onde cada coisa mora. A tabela abaixo
+faz o serviço linha por linha, com o valor que o v4 realmente usa.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No CSS antigo</th><th>No Tailwind</th><th>O que conferir</th></tr>
+<tr><td><code>background: #fff</code></td><td><code>bg-white</code></td><td>o branco da paleta é puro, não é <code>stone-50</code></td></tr>
+<tr><td><code>border: 1px solid #e7e5e4</code></td><td><code>border border-stone-200</code></td><td>a cor é classe separada; <code>border</code> sozinho herda a cor do texto</td></tr>
+<tr><td><code>border-radius: 12px</code></td><td><code>rounded-xl</code></td><td>12 px é o degrau <code>xl</code> da escala</td></tr>
+<tr><td><code>padding: 16px</code></td><td><code>p-4</code></td><td>16 px é o degrau 4 da escala de espaço</td></tr>
+<tr><td><code>box-shadow: 0 1px 2px rgb(0 0 0 / 0.05)</code></td><td><code>shadow-xs</code></td><td>no v4 a escala desceu um nome; o antigo <code>shadow-sm</code> virou <code>shadow-xs</code></td></tr>
+<tr><td><code>font-size: 18px</code> e <code>line-height: 28px</code></td><td><code>text-lg</code></td><td>as duas vêm juntas; <code>text-[18px]</code> perderia a entrelinha</td></tr>
+<tr><td><code>font-weight: 600</code></td><td><code>font-semibold</code></td><td>o peso 600 tem nome próprio</td></tr>
+<tr><td><code>color: #292524</code></td><td><code>text-stone-800</code></td><td>cinza quente da família <code>stone</code></td></tr>
+<tr><td><code>margin-top: 8px</code></td><td><code>mt-2</code></td><td>8 px é o degrau 2</td></tr>
+<tr><td><code>font-size: 14px</code> e <code>color: #78716c</code></td><td><code>text-sm text-stone-600</code></td><td>14 px com entrelinha de 20 px</td></tr>
+<tr><td><code>display: flex</code> e <code>align-items: center</code></td><td><code>flex items-center</code></td><td>uma propriedade por classe</td></tr>
+<tr><td><code>gap: 16px</code></td><td><code>gap-4</code></td><td>vale para flex e para grid</td></tr>
+<tr><td><code>width: 100%</code></td><td><code>w-full</code></td><td>não é <code>w-screen</code>, que é a largura da janela</td></tr>
+<tr><td><code>.cartao h3 { … }</code></td><td>classes no próprio <code>h3</code></td><td>sem seletor descendente, sem estilo vazando</td></tr>
+</table>
+</div>
+
+<p>Com a tabela na mão, a caixa recebe
+<code>rounded-xl border border-stone-200 bg-white p-4 shadow-xs</code>. O título recebe
+<code>text-lg font-semibold text-stone-800</code> — e aqui está a graça: <code>text-lg</code> já traz os
+18 px com 28 px de entrelinha, exatamente o que a regra escrita à mão fazia em duas linhas. O parágrafo
+recebe <code>mt-2 text-sm text-stone-600</code>.</p>
+
+<p>Repare no que desapareceu: o seletor descendente <code>.cartao h3</code>. No Tailwind, o estilo mora
+no próprio <code>h3</code>, e não importa quem é o pai. Isso parece mais verboso e é, mas elimina uma
+classe inteira de bugs — o estilo que "vaza" para um título que não devia recebê-lo, porque estava
+dentro do cartão sem querer. Em compensação, se amanhã você quiser mudar todos os títulos de cartão,
+precisa editar cada arquivo onde há um. É o trade-off de sempre, e não tem resposta única.</p>
+
+<p>Três conferências fecham a tradução. A cor da borda: no CSS antigo ela vinha junto com
+<code>border</code>; no Tailwind, <code>border</code> sozinho não define cor, e a borda herda a cor do
+texto. A sombra: a escala mudou de nome no v4 — o <code>shadow-sm</code> do v3 virou
+<code>shadow-xs</code>, e o <code>shadow</code> sem sufixo do v3 virou <code>shadow-sm</code>. Quem
+copiou a classe antiga vê uma sombra mais forte do que esperava. O raio: 12 px é <code>rounded-xl</code>
+na escala, e <code>rounded-[12px]</code> faria o mesmo com um número explícito.</p>
+
+<p>Por fim, um teste de sanidade que vale para qualquer migração: rode a página e compare o painel de
+CSS computado do elemento antigo com o do novo. As propriedades que a classe mudou devem ser as mesmas,
+com os mesmos valores. Se algo divergir, a diferença está numa variável — e a seção 3 desta página é o
+mapa para descobrir qual.</p>
+
+<h2>9. Resumo</h2>
+
+<p>Classe utilitária é um seletor de uma declaração, com nome pronto. <code>p-4</code> gera
+<code>padding: calc(var(--spacing) * 4)</code>; <code>text-lg</code> gera tamanho e entrelinha juntos;
+<code>shadow-md</code> guarda o desenho em <code>--tw-shadow</code> e compõe com anel e contorno interno.
+Os valores moram em variáveis de tema, e o build publica só as que alguém usa — a lista completa das
+cores está em <a href="ref-cores.html">Paleta de Cores</a>.</p>
+
+<ul>
+<li>Camadas na ordem <code>theme</code>, <code>base</code>, <code>components</code>,
+<code>utilities</code>: utilitária vence componente, mesmo com seletor mais fraco.</li>
+<li>CSS escrito à mão sem <code>@layer</code> vence todas as camadas — é a causa número um de "não
+pegou".</li>
+<li><code>!</code> vai no fim da classe no v4; <code>style=""</code> vence classe e <code>!</code>.</li>
+<li>Colchetes aceitam CSS cru, com sublinhado no lugar do espaço: <code>p-[13px]</code>,
+<code>bg-[#fdf6e3]</code>, <code>[&amp;&gt;li]:mt-2</code>.</li>
+<li>Fora do catálogo ficam keyframes longos, estilos globais, seletores estruturais raros e valores que
+vêm do banco — todos resolvidos com CSS, <code>@layer</code> e <code>@apply</code>.</li>
+<li><code>@apply</code> copia declarações; em arquivo separado, o v4 pede <code>@reference</code>.</li>
+</ul>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

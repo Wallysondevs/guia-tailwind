@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O Modo watch | Guia Tailwind</title>
+<meta name="description" content="O modo watch do Tailwind: como ligar, o que ele recompila a cada salvamento, o que ele não faz, como conviver com o terminal parado e quando desligá-lo.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>O Modo <span class="hl">watch</span></h1>
+<p class="intro">A Ana passou a manhã alternando entre o editor e o terminal: mudava uma classe, salvava,
+digitava o comando de build, esperava, voltava ao navegador, recarregava. Cinquenta vezes. No fim da
+manhã ela tinha feito mais exercício de digitação do que de CSS. Existe uma opção que faz esse trabalho
+por ela: o modo watch, que fica ligado e refaz o build a cada salvamento. Nesta aula ela aprende a ligar,
+a conviver e — principalmente — a desligar na hora certa.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que a opção <code>--watch</code> faz e por que ela não termina sozinha.</li>
+  <li>Quais arquivos disparam uma nova geração e quais não disparam.</li>
+  <li>Como organizar o terminal: um para o watch, outro para os comandos.</li>
+  <li>O que o watch não faz — servidor, recarga automática, correção de erro.</li>
+  <li>O que acontece quando dois watches rodam ao mesmo tempo.</li>
+  <li>Por que desligar antes de gerar a folha de produção.</li>
+  <li>Como descobrir por que "salvei e nada mudou".</li>
+</ul>
+</div>
+
+<h2>1. A cena: cinquenta builds numa manhã</h2>
+
+<p>O trabalho de ajustar uma tela é feito de tentativas pequenas: um pixel a mais aqui, uma cor mais
+escura ali, um texto que muda de lugar. Cada tentativa exige que o CSS gerado acompanhe o HTML — e, sem
+automação, cada tentativa custa quatro passos manuais. Quatro passos não parecem muito até você fazer
+cinquenta vezes e perceber que metade da sua atenção foi para o teclado, não para o desenho.</p>
+
+<p>O modo watch existe para transformar quatro passos em um. Você liga o comando uma vez, ele fica em
+execução e observa os arquivos do projeto. Quando algum muda, ele refaz o build e escreve a saída de
+novo. Você salva no editor, conta até dois e recarrega o navegador: o CSS já está atualizado. O nome
+"watch" é literal — o programa está vigiando.</p>
+
+<p>É a primeira vez no guia em que um comando não termina. Todas as ferramentas que vimos até aqui fazem
+o trabalho e devolvem o cursor; esta fica viva até você mandar parar. Essa diferença é a fonte de quase
+todos os mal-entendidos da aula, e é o que explica a sensação de terminal travado.</p>
+
+<h2>2. Como ligar e como desligar</h2>
+
+<p>É a mesma opção que já apareceu na aula da CLI, agora com o papel principal. Basta acrescentar
+<code>--watch</code> (ou <code>-w</code>) ao comando que você já usa:</p>
+
+<pre class="term" data-cwd="~/padaria">$ npx @tailwindcss/cli -i src/entrada.css -o dist/estilo.css --watch
+Done in 84ms
+
+Done in 31ms
+
+Done in 27ms</pre>
+
+<p>O primeiro <code>Done in 84ms</code> é o build inicial: ele compila tudo antes de começar a vigiar,
+para que a folha exista desde o primeiro segundo. Os seguintes aparecem a cada salvamento — 31 ms, 27 ms.
+Repare que o tempo cai: depois do primeiro, o trabalho é incremental, porque a maior parte do CSS
+anterior continua válida. Você não precisa fazer nada com esses números; eles servem para confirmar que
+o watch está vivo.</p>
+
+<p>Para desligar, <code>Ctrl</code> + <code>C</code>. O terminal mostra o acento circunflexo com o C e
+devolve o cursor:</p>
+
+<pre class="term">Done in 31ms
+
+^C
+$</pre>
+
+<p>O atalho vale para praticamente qualquer programa de terminal que fica rodando: vale para o watch do
+Tailwind, para um servidor local e para qualquer coisa que pareça travada. Se o terminal não responde e
+o <code>Ctrl</code> + <code>C</code> não resolve, o processo pode estar esperando uma resposta: aperte
+<code>Enter</code> uma vez e tente de novo.</p>
+
+<p>Existe uma alternativa ao atalho, para quando você fechou a janela sem querer e o processo ficou
+órfão: fechar a janela do terminal costuma matar tudo o que ela iniciou. Se em vez disso você
+suspendeu a janela, o processo continua vivo e escrevendo na saída. Na dúvida, abra outro terminal e
+rode <code>ps aux</code> para ver se há um <code>tailwindcss</code> rodando — é a única forma de saber
+sem adivinhar.</p>
+
+<h2>3. O que dispara uma nova geração</h2>
+
+<p>O watch observa as mesmas coisas que o build lê: o CSS de entrada e os arquivos de texto que a
+varredura alcança. Salvar qualquer um deles dispara uma nova geração. Isso surpreende quem acha que só
+classe nova conta: mudar uma palavra dentro do HTML também dispara, porque o programa não sabe
+distinguir uma mudança relevante de uma irrelevante sem reler o arquivo.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você salvou</th><th>Acontece</th><th>Por quê</th></tr>
+<tr><td>um HTML da pasta do projeto</td><td>novo build em milissegundos</td><td>o arquivo está na varredura</td></tr>
+<tr><td>o CSS de entrada</td><td>novo build, com o tema novo</td><td>é a fonte das configurações</td></tr>
+<tr><td>um arquivo fora da varredura</td><td>nada</td><td>o watch nunca ouviu falar dele</td></tr>
+<tr><td>uma imagem</td><td>nada</td><td>não é arquivo de texto com classes</td></tr>
+<tr><td>um arquivo dentro de <code>node_modules</code></td><td>nada</td><td>a pasta é ignorada de propósito</td></tr>
+</table>
+</div>
+
+<p>A terceira linha da tabela explica o caso mais frustrante. Se as páginas do site moram fora da pasta
+em que o comando foi chamado, o watch não as vê — e você salva, salva e nada acontece. A cura é a mesma
+da aula do CSS de entrada: rodar da raiz do projeto ou acrescentar o caminho com
+<code>@source "../pasta";</code>. O sintoma, nos dois casos, é um silêncio suspeito: o watch não imprime
+nada porque não tem nada para fazer.</p>
+
+<p>Para sentir isso, a caixa abaixo faz o papel do salvamento. A mudança é no texto <em>e</em> no
+respiro: as duas coisas moram no HTML, então as duas chegam ao build na mesma hora. Um watch ligado
+escreveria a folha nova antes de você soltar a tecla.</p>
+
+<div class="trytailwind" data-goal="texto:Pão quentinho às 5h;;css:#alvo|padding=16px;;rule:padding: calc(var(--spacing) * 4)">
+  <p class="try-task">A padaria mudou o horário e o cartão precisa de mais respiro: escreva
+  <em>Pão quentinho às 5h</em> e deixe 16 px de espaço interno — as duas mudanças no mesmo arquivo,
+  como num salvamento de verdade.</p>
+  <pre class="html">&lt;div id="alvo" class="p-2 bg-amber-100"&gt;Pão quentinho às 6h&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4 bg-amber-100"&gt;Pão quentinho às 5h&lt;/div&gt;</pre>
+</div>
+
+<h2>4. O que o watch não faz</h2>
+
+<p>Vale ser explícito, porque a expectativa errada gera meia hora de procura. O watch <strong>não</strong>
+abre servidor: ele escreve um arquivo, e quem serve é outra coisa. <strong>Não</strong> recarrega o
+navegador sozinho: você continua apertando <code>F5</code> ou <code>Ctrl</code> + <code>R</code> — o que
+ele economiza é o comando de build, não o recarregamento. E <strong>não</strong> corrige erro de sintaxe
+no seu CSS: se a entrada tiver um erro, ele avisa e continua esperando, com a folha anterior intacta.</p>
+
+<p>Essa última característica é uma proteção, e é bom entender o efeito colateral. Quando dá erro, a
+saída não é reescrita: o site continua com a última versão boa. Você vê a página bonita, salva, vê a
+página bonita de novo, e não entende por que a mudança não pegou — porque o build falhou e a mensagem
+passou no meio dos outros <code>Done in</code>. Por isso é bom ler o terminal de vez em quando, mesmo
+quando a página parece certa.</p>
+
+<dl class="anatomy">
+<dt>watch</dt>
+<dd>O modo de execução que fica observando arquivos e refaz o build quando algum muda.</dd>
+<dt>recompilação incremental</dt>
+<dd>Refazer só a parte do trabalho que mudou. É por isso que o segundo build leva 30 ms e o primeiro
+leva 80.</dd>
+<dt>servidor de arquivos</dt>
+<dd>Um programa que entrega os arquivos do projeto para o navegador em um endereço local. Não é papel
+do Tailwind.</dd>
+<dt>recarga automática</dt>
+<dd>Fazer o navegador recarregar sozinho depois de um salvamento. Vem de outras ferramentas, não do
+watch.</dd>
+<dt>processo</dt>
+<dd>Um programa em execução. O watch é um processo que só termina quando você manda, ou quando a janela
+do terminal fecha.</dd>
+</dl>
+
+<p>Se você quer recarga automática, o caminho moderno é usar uma ferramenta de desenvolvimento que
+junte as duas coisas — servidor com recarga e compilação de CSS. Existe uma aula própria sobre isso
+mais adiante, na parte de integração. Enquanto o projeto é HTML puro, o par "watch mais servidor local"
+resolve bem, com um <code>F5</code> no meio.</p>
+
+<h2>5. Um terminal para cada coisa</h2>
+
+<p>A organização que funciona é simples: um terminal fica com o watch, e não é usado para mais nada. Os
+comandos do dia a dia — <code>ls</code>, <code>npm ls</code>, um build avulso — vão para outro terminal,
+ou para outra aba. Duas razões: o watch ocupa o prompt, e a saída dele se mistura com a sua, o que
+confunde a leitura.</p>
+
+<p>Ter o segundo terminal é fácil: o atalho <code>Ctrl</code> + <code>Shift</code> + <code>T</code> abre
+uma aba nova na maioria dos terminais do Linux, e o menu do aplicativo sempre tem a opção. A partir
+dali, o fluxo fica: editor de um lado, navegador do outro, watch rodando na aba um, comandos na aba
+dois. Quando o watch precisa parar, você sabe exatamente onde apertar <code>Ctrl</code> + <code>C</code>.</p>
+
+<p>Uma vantagem discreta do segundo terminal: é nele que você roda o servidor local que entrega as
+páginas ao navegador, quando não quer abrir o arquivo direto. Dois processos, duas abas, cada um com sua
+saída. Quando algo parece não funcionar, você sabe onde olhar primeiro — e não precisa desligar o watch
+para testar um comando avulso.</p>
+
+<p>Vale também dar um apelido ao comando, no <code>package.json</code>. Com um script <code>dev</code>
+que já inclui <code>--watch</code>, você digita <code>npm run dev</code> e esquece os caminhos. O nome do
+script não é padronizado, mas a convenção é essa: <code>dev</code> para o modo de trabalho e
+<code>build</code> para o de produção. Quem abre o projeto pela primeira vez entende o que fazer só de
+ler os dois nomes.</p>
+
+<h2>6. O lado chato: terminal ocupado, build duplicado</h2>
+
+<p>Dois watches rodando ao mesmo tempo no mesmo arquivo de saída é uma receita de confusão. Os dois
+escrevem no mesmo lugar, cada um com a sua cópia do projeto em memória, e o resultado é uma folha que
+parece certa e errada ao mesmo tempo: uma classe nova aparece, outra desaparece. O sintoma clássico é
+"o CSS muda sozinho quando eu não fiz nada".</p>
+
+<p>A causa costuma ser uma aba antiga esquecida. Antes de investigar o Tailwind, vale listar os
+processos e matar o intruso. É mais comum do que parece: você abre um terminal novo porque o antigo
+parecia travado, liga o watch de novo, e o primeiro continua lá, vivo, escrevendo.</p>
+
+<p>O segundo lado chato é a memória. Cada watch carrega o motor, o catálogo de classes e os arquivos do
+projeto. Em um notebook modesto, dois ou três watches de projetos diferentes já pesam. Não é motivo para
+evitar o modo — é motivo para fechar o que não está em uso, do mesmo jeito que se fecham abas do
+navegador.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=24px;;rule:padding: calc(var(--spacing) * 6)">
+  <p class="try-task">Salve e veja o rebuild: o cartão estava com 8 px de respiro e precisa de 24 px.
+  Mude a classe e rode de novo — é exatamente o que o watch faria sozinho a cada salvamento.</p>
+  <pre class="html">&lt;div id="alvo" class="p-2 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-6 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra 24 px e a regra <code>padding: calc(var(--spacing) * 6)</code>. No seu projeto, o
+mesmo efeito aparece sem você clicar em nada: o watch percebe o salvamento e reescreve o arquivo. Se o
+painel demorar a mudar no navegador, o suspeito não é o watch — é o cache da página.</p>
+
+<h2>7. Quando desligar (e por que isso importa)</h2>
+
+<p>O watch é uma ferramenta de desenvolvimento, e o nome do ambiente está na própria palavra. Ele não
+tem lugar no build de produção. O motivo não é filosófico: é que ele pode sobrescrever a folha que você
+acabou de gerar com <code>--minify</code>, no segundo seguinte, ao salvar qualquer arquivo. Você publica
+achando que está compacta, e o visitante baixa a versão cheia.</p>
+
+<p>A sequência segura, que já apareceu na aula <a href="build-de-producao.html">Build de Produção</a>: um
+<code>Ctrl</code> + <code>C</code> no terminal do watch, depois o build de produção, depois a conferência
+do tamanho. Três passos, e o último mostra na hora se algo saiu do lugar. Publicar com o watch ligado é
+apostar que ninguém vai salvar nada até o upload terminar.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Assunto</th><th>Modo watch</th><th>Build de produção</th></tr>
+<tr><td>quando roda</td><td>enquanto você trabalha</td><td>uma vez, antes de publicar</td></tr>
+<tr><td>termina sozinho?</td><td>não: fica ligado até o <code>Ctrl</code> + <code>C</code></td><td>sim, em silêncio</td></tr>
+<tr><td>saída</td><td>legível, com espaços</td><td>compacta, com <code>--minify</code></td></tr>
+<tr><td>quem usa</td><td>você, no editor</td><td>o navegador de quem visita</td></tr>
+<tr><td>risco de rodar junto</td><td>sobrescreve a folha compacta</td><td>não percebe que foi sobrescrito</td></tr>
+</table>
+</div>
+
+<p>Existe também o caso do watch que ficou ligado a noite inteira. Não quebra nada, mas consome memória,
+mantém o terminal ocupado e, se você mexer nos arquivos de manhã sem lembrar que ele está lá, cada
+salvamento escreve na pasta de saída — inclusive salvamentos de rascunho que você não queria publicar.
+Um projeto organizado fecha o dia com o terminal limpo.</p>
+
+<h2>8. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: "salvei e a página não mudou"</h3>
+<p>Quatro suspeitos, na ordem. O watch não está rodando — confira a saída dele depois do salvamento. O
+arquivo salvo está fora da varredura — a página mora em outra pasta. O build falhou e a folha anterior
+continua no lugar — leia a mensagem no terminal. Ou o navegador está com a folha em cache — recarregue com
+<code>Ctrl</code> + <code>Shift</code> + <code>R</code>. Nessa ordem, você resolve a maioria em menos de
+um minuto.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: "o terminal não aceita mais comandos"</h3>
+<p>É o esperado: o watch está ocupando o prompt. Não está travado, está trabalhando. Se você precisa
+daquele terminal para outra coisa, <code>Ctrl</code> + <code>C</code> e o cursor volta; para ter os dois,
+abra outra aba. Se a tecla não fizer nada, tente <code>Enter</code> e depois <code>Ctrl</code> +
+<code>C</code> de novo — e, no limite, feche a janela.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: "o CSS muda sozinho"</h3>
+<p>Quase sempre são dois watches, ou um watch e um build automático, escrevendo no mesmo arquivo. Abra
+outro terminal, procure os processos do Tailwind e termine os que não deviam estar lá. Depois de
+eliminar o duplicado, rode um build limpo e compare o resultado: uma folha escrita por dois processos
+não tem como ser previsível.</p>
+</div>
+
+<h2>9. Uma mudança no CSS de entrada reconstrói tudo</h2>
+
+<p>Falta um efeito que muda a forma de trabalhar: o watch não vigia só o HTML. Como o CSS de entrada é a
+fonte dos valores do projeto, salvá-lo refaz o build inteiro — e o efeito pode alcançar todas as
+páginas. É a diferença entre mudar um cartão e mudar a escala do site.</p>
+
+<p>Na caixa abaixo, a alteração é na variável de espaçamento. Com ela, cada degrau da escala muda de
+tamanho: <code>p-4</code> deixa de valer 16 px e passa a valer 19,2 px, porque a conta é
+<code>4 × 0,3 rem</code>. Todos os elementos que usam qualquer classe de espaço acompanham. É o tipo de
+mudança que você não quer fazer sem conferir todas as páginas depois.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=19.2px;;rule:padding: calc(var(--spacing) * 4)">
+  <p class="try-task">A padaria quer respiros um pouco maiores em todo o site. No CSS de entrada, troque
+  a variável de espaçamento por <code>0.3rem</code> e veja o <code>p-4</code> do cartão virar 19,2 px sem
+  tocar no HTML.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme { --spacing: 0.25rem; }
+&lt;/style&gt;
+&lt;div id="alvo" class="p-4 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme { --spacing: 0.3rem; }
+&lt;/style&gt;
+&lt;div id="alvo" class="p-4 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>Repare que a regra gerada continua idêntica: <code>padding: calc(var(--spacing) * 4)</code>. O que
+mudou foi o valor da variável. É por isso que o Tailwind escreve contas em vez de números: uma edição na
+entrada alcança o site inteiro, sem reescrever regra nenhuma. E é por isso que o watch, ao ver o arquivo
+de entrada mudar, refaz tudo em vez de remendar um pedaço.</p>
+
+<p>O mesmo vale para uma cor da marca, para uma fonte, para um raio. Sempre que a mudança é no
+<code>@theme</code>, o build inteiro é refeito — e o watch faz isso em milissegundos, enquanto você olha
+outra coisa. O assunto tem aula própria na parte de configuração; aqui basta saber que o watch cobre
+essa parte também.</p>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. O que <code>--watch</code> faz?</p>
+<label><input type="radio" name="q1"> abre um servidor local para o site</label>
+<label><input type="radio" name="q1"> recarrega o navegador sozinho</label>
+<label><input type="radio" name="q1"> refaz o build a cada alteração nos arquivos observados</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">2. Como se encerra o modo watch?</p>
+<label><input type="radio" name="q2"> o comando termina sozinho depois do primeiro build</label>
+<label><input type="radio" name="q2"> com <code>Ctrl</code> + <code>C</code> no terminal dele</label>
+<label><input type="radio" name="q2"> apagando o arquivo de saída</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que desligar o watch antes de gerar a folha de
+produção?</p>
+<label><input type="radio" name="q3"> porque ele pode sobrescrever a folha compacta ao salvar qualquer arquivo</label>
+<label><input type="radio" name="q3"> porque ele apaga a pasta <code>dist</code> ao terminar</label>
+<label><input type="radio" name="q3"> porque o <code>--minify</code> não funciona com o watch instalado</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: completar o modo de trabalho</h2>
+<p>A Ana vai passar a tarde ajustando o site e não quer digitar o comando a cada mudança. Complete a
+linha com a opção que deixa o build rodando:</p>
+<div class="ex-code">$ npm run dev -- <input aria-label="resposta 1" data-answer="--watch|-w" placeholder="..."></div>
+<p class="ex-dica">Dica: são duas opções, uma longa e uma curta; a longa é a palavra inglesa para
+"vigiar". Se o script <code>dev</code> já tiver a opção dentro dele, não é preciso repetir aqui.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O modo watch é o mesmo build, rodando em pé. Ele compila uma vez, observa os arquivos do projeto e
+refaz o trabalho a cada salvamento, com tempo decrescente porque a recompilação é incremental. Enquanto
+está ligado, o prompt fica ocupado: isso é o desenho, não um defeito. <code>Ctrl</code> + <code>C</code>
+encerra, e o costume saudável é ter um terminal só para ele.</p>
+
+<p>Ele observa o CSS de entrada e os arquivos que a varredura alcança, e não faz mais nada: não serve
+site, não recarrega navegador, não corrige erro de sintaxe — quando o build falha, a folha anterior
+permanece. Como pode sobrescrever a saída, sai de cena antes do build de produção. E, como refaz tudo a
+partir do CSS de entrada, é o melhor jeito de sentir na hora o efeito de uma variável de tema.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>--watch</code> (ou <code>-w</code>) deixa o build rodando e vigilante.</li>
+<li>O primeiro build é completo; os seguintes são incrementais e mais rápidos.</li>
+<li>O prompt fica ocupado: é um processo vivo, não um terminal travado.</li>
+<li><code>Ctrl</code> + <code>C</code> encerra e devolve o cursor.</li>
+<li>Um terminal para o watch, outro para os comandos do dia a dia.</li>
+<li>Salvar HTML, CSS de entrada ou componente dispara um novo build.</li>
+<li>Arquivo fora da varredura, imagem e <code>node_modules</code> não disparam nada.</li>
+<li>O watch não serve páginas nem recarrega o navegador por você.</li>
+<li>Erro no CSS de entrada: ele avisa e mantém a folha anterior.</li>
+<li>Antes do build de produção, desligue: dois processos na mesma saída é confusão.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

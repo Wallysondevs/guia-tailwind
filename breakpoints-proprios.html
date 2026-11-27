@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Breakpoints Próprios | Guia Tailwind</title>
+<meta name="description" content="Crie breakpoints seus no Tailwind v4: a variável --breakpoint-* dentro do @theme, o prefixo que nasce dela, a conta em rem e como mexer nos pontos que já existem.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Breakpoints <span class="hl">Próprios</span></h1>
+<p class="intro">A Ana comprou um tablet para deixar no balcão da padaria, com a vitrine aberta o dia
+inteiro. O aparelho tem 896 px de largura, e é justo aí que o site dela fica feio: os três cartões da
+vitrine se espremem em colunas de 280 px, porque o <code>md:</code> já entrou em 768 px e ninguém
+avisou o Tailwind de que existe um tamanho intermediário entre o celular e o notebook. Ela tentou
+<code>tablet:grid-cols-3</code>, não aconteceu nada, e ficou a dúvida: será que dá para inventar um
+prefixo? Dá. Nesta aula ela cria o primeiro breakpoint próprio, entende de onde vem o número e aprende
+a mexer nos cinco pontos que já existem sem derrubar o resto do site.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que <code>tablet:</code> não existe e o que o Tailwind tem no lugar dele.</li>
+  <li>Que todo breakpoint é uma variável chamada <code>--breakpoint-*</code> dentro do <code>@theme</code>.</li>
+  <li>Como criar um ponto novo e ganhar dois prefixos de graça: <code>balc:</code> e <code>max-balc:</code>.</li>
+  <li>A conta de rem para pixel, e por que o tema usa rem.</li>
+  <li>Como mudar o valor de um ponto padrão, como apagar um e como apagar todos.</li>
+  <li>Por que a ordem das media queries não depende da ordem em que você escreveu.</li>
+  <li>Quando vale criar um breakpoint e quando é melhor usar <code>min-[900px]:</code> e seguir.</li>
+  <li>O que conferir quando o prefixo novo não faz nada.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o tablet que ninguém previu</h2>
+
+<p>A vitrine da Ana é uma grade de cartões. Cada cartão tem o pão do dia, o preço e um selo. No celular
+ela quer uma coluna; no notebook, três. Foi assim que ela escreveu, na aula de responsivo:</p>
+
+<pre class="file" data-file="vitrine.html">&lt;div class="grid gap-4 md:grid-cols-3"&gt;
+  &lt;article class="rounded-xl bg-amber-50 p-4"&gt;Pão de queijo&lt;/article&gt;
+  &lt;article class="rounded-xl bg-amber-50 p-4"&gt;Bolo de fubá&lt;/article&gt;
+  &lt;article class="rounded-xl bg-amber-50 p-4"&gt;Café coado&lt;/article&gt;
+&lt;/div&gt;</pre>
+
+<p>No celular, uma coluna: cada cartão ocupa a linha inteira, o texto tem espaço, tudo certo. No
+notebook, três colunas confortáveis. O problema apareceu no tablet do balcão, que tem 896 px: o
+<code>md:</code> já valeu — 896 é maior que 768 —, então são três colunas de 280 px cada. O nome do pão
+quebra em duas linhas, o preço encosta no selo, e o cliente que espera o troco vê um site apertado.</p>
+
+<p>O que ela queria era simples de dizer: “três colunas só a partir de 900 px”. O que ela tentou foi
+igualmente simples: trocar <code>md:</code> por <code>tablet:</code>. Salvou, recarregou e nada
+aconteceu. Nenhum erro, nenhum aviso, a grade continuou como estava.</p>
+
+<p>Isso não é teimosia do Tailwind. Ele não tem uma lista de aparelhos com nomes bonitos; tem uma lista
+de <strong>nomes e números</strong> que você pode editar. <code>tablet</code> não está nessa lista
+porque ninguém escreveu essa linha ainda. E escrever a linha é fácil — o difícil é entender o que ela
+significa, e é para isso que serve o resto da aula.</p>
+
+<h2>2. Todo breakpoint é uma variável</h2>
+
+<p>Você já viu o <code>@theme</code>: é o bloco do arquivo CSS de entrada onde o Tailwind lê os valores
+do seu projeto e, de quebra, inventa uma classe para cada nome que encontra. As cores moram lá, a régua
+de espaço mora lá, e os breakpoints também. Os cinco que você usa desde o nível 1 são cinco linhas
+assim:</p>
+
+<pre class="term">@import "tailwindcss";
+
+@theme {
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+  --breakpoint-2xl: 96rem;
+}</pre>
+
+<p>Leia a primeira linha em voz alta: “o breakpoint chamado <code>sm</code> vale 40 rem”. O pedaço
+depois de <code>--breakpoint-</code> é o nome, e é ele que vira prefixo de classe. O valor depois dos
+dois-pontos é o número que vai para dentro da media query. Pronto: é o sistema inteiro. Não há arquivo
+de configuração, não há JavaScript, não há lista escondida em outro lugar — há um bloco de CSS com
+pares de nome e número.</p>
+
+<p>É por isso que <code>tablet:</code> falha em silêncio. O Tailwind procura a variável
+<code>--breakpoint-tablet</code>; não acha; e uma classe de prefixo desconhecido simplesmente não gera
+CSS. O mesmo silêncio que você já viu com uma classe digitada errado, e o mesmo diagnóstico: não existe
+regra nenhuma por trás daquele nome.</p>
+
+<dl class="anatomy">
+<dt>breakpoint</dt>
+<dd>Uma largura de janela em que o desenho muda de ideia. Não é um aparelho: é um número de pixels (ou
+de rem) que serve de piso.</dd>
+<dt>--breakpoint-*</dt>
+<dd>A família de variáveis do tema que define os breakpoints. O sufixo é o nome que vira prefixo:
+<code>--breakpoint-balc</code> cria <code>balc:</code>.</dd>
+<dt>prefixo</dt>
+<dd>O nome do breakpoint mais dois-pontos, colado na classe: <code>balc:p-8</code>. Sem o prefixo, a
+classe vale em qualquer largura.</dd>
+<dt>media query</dt>
+<dd>A regra de CSS que pergunta a largura da janela antes de aplicar. O Tailwind escreve uma para cada
+prefixo que você usa.</dd>
+<dt>rem</dt>
+<dd>Unidade relativa ao tamanho de fonte padrão do navegador: 1 rem = 16 px no navegador comum, e mais
+se a pessoa aumentou a letra nas preferências.</dd>
+<dt>piso</dt>
+<dd>O jeito de ler um prefixo: <code>balc:</code> quer dizer “do número do balcão para cima”, e continua
+valendo nas telas maiores, junto com os prefixos seguintes.</dd>
+</dl>
+
+<p>Guarde a diferença entre “nome” e “número”, porque ela resolve metade dos problemas desta aula. O nome
+é escolha sua, livre, e só existe para você ler o HTML e entender. O número é o que o navegador
+compara. Se o nome diz uma coisa e o número diz outra, quem manda é o número — e a próxima pessoa que
+abrir o arquivo vai levar um susto.</p>
+
+<h2>3. O primeiro breakpoint: balc</h2>
+
+<p>Mãos à obra. O ponto novo da Ana merece um nome que ela reconheça daqui a seis meses:
+<code>balc</code>, de balcão. E o número? Aqui vale resistir à tentação de copiar a ficha do aparelho. O
+tablet do balcão tem 896 px, mas o que decide o piso é o desenho: ela diminuiu a janela do notebook até
+os três cartões começarem a se espremer, e isso aconteceu por volta de 880 px. Ela arredondou para cima:
+56 rem, que dá 896 px — coincidência agradável com o tamanho do tablet. O nome e o número estão
+definidos; falta ver o prefixo nascer.</p>
+
+<p>Antes de sujar as mãos, um aviso prático sobre esta aula. A prévia das caixas é uma janela de
+verdade, mas pequena: no computador ela chega a uns 880 px, e no celular, a uns 350. Se usássemos os
+56 rem da Ana, nenhuma caixa conseguiria mostrar o breakpoint entrando — a janela nunca seria grande o
+bastante. Então as caixas usam números menores, com o mesmo raciocínio: aqui, o ponto do balcão vale
+36 rem, ou 576 px. O rótulo na barra de cada caixa mostra a largura real da prévia; se ele disser 640,
+é 640 que vale. Anote isso, porque é a chave para ler todos os painéis desta aula.</p>
+
+<p>Na caixa abaixo, o breakpoint já existe, mas com o valor errado: 60 rem, ou 960 px. A prévia tem
+640 px de largura, então o respiro grande nunca entra. Sua missão é baixar o número.</p>
+
+<div class="trytailwind" data-largura="640" data-goal="css:#alvo|padding=32px;;rule:@media (width &gt;= 36rem)">
+  <p class="try-task">Troque <code>60rem</code> por <code>36rem</code> na variável
+  <code>--breakpoint-balc</code> e rode. O cartão deve passar de 8 px para 32 px de respiro interno,
+  porque 36 rem (576 px) cabem nos 640 px da prévia.</p>
+  <pre class="html" data-largura="640">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --breakpoint-balc: 60rem;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="bg-amber-50 p-2 balc:p-8"&gt;
+  &lt;p class="font-semibold"&gt;Pão quentinho&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h e às 16h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: oklch(0.987 0.022 95.277)
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --breakpoint-balc: 36rem;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="bg-amber-50 p-2 balc:p-8"&gt;
+  &lt;p class="font-semibold"&gt;Pão quentinho&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h e às 16h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Antes de rodar, o painel mostra <code>padding: 8px</code> — só o <code>p-2</code>. Depois de trocar o
+número, mostra <code>padding: 32px</code>, e nenhuma classe do HTML mudou: o <code>balc:p-8</code>
+estava lá desde o começo, esperando a condição ficar verdadeira. É o jeito mais direto de ver que o
+breakpoint mora no tema, não no HTML.</p>
+
+<p>Repare também no que o <code>@theme</code> te deu de brinde. Você escreveu <em>uma</em> linha e ganhou
+dois prefixos: <code>balc:</code> e <code>max-balc:</code>. O primeiro pergunta “a janela tem 36 rem ou
+mais?”; o segundo pergunta o contrário, “a janela é menor que 36 rem?”. Toda variável
+<code>--breakpoint-</code> funciona assim, inclusive as cinco de fábrica. Você não pede o
+<code>max-</code>: ele nasce junto.</p>
+
+<p>Onde essa linha mora no projeto de verdade? No arquivo CSS de entrada, aquele que começa com
+<code>@import "tailwindcss";</code>. Nas caixas desta aula, quem faz o papel desse arquivo é uma tag
+<code>&lt;style type="text/tailwindcss"&gt;</code> — é a maneira que o guia encontrou de deixar você
+escrever CSS de verdade dentro da prévia. Quando o assunto for o seu projeto, troque mentalmente uma
+coisa pela outra.</p>
+
+<h2>4. O número em rem, e a conta em pixels</h2>
+
+<p>Chegou a hora da aritmética chata e necessária. O tema usa <code>rem</code>, e no navegador comum
+1 rem vale 16 px. Então 56 rem são 896 px, e a sua conta de cabeça precisa de uma tabela de apoio até
+virar automática:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Em rem</th><th>Em pixels</th><th>Que tamanho costuma ser</th></tr>
+<tr><td><code>30rem</code></td><td>480 px</td><td>celular deitado; abaixo disso é celular em pé</td></tr>
+<tr><td><code>40rem</code></td><td>640 px</td><td>o <code>sm:</code> de fábrica</td></tr>
+<tr><td><code>48rem</code></td><td>768 px</td><td>o <code>md:</code>, o tablet em pé clássico</td></tr>
+<tr><td><code>56rem</code></td><td>896 px</td><td>tablet grande deitado, o balcão da Ana</td></tr>
+<tr><td><code>56.25rem</code></td><td>900 px</td><td>número redondo em pixel, útil para combinar com o time</td></tr>
+<tr><td><code>64rem</code></td><td>1024 px</td><td>o <code>lg:</code>, notebook pequeno</td></tr>
+<tr><td><code>90rem</code></td><td>1440 px</td><td>monitor grande; o texto já pede limite de largura</td></tr>
+</table>
+</div>
+
+<p>Por que não escrever <code>900px</code> direto e encerrar o assunto? Você <em>pode</em> — o tema aceita
+pixel, e o resultado é previsível. Acontece que rem carrega uma decisão de acessibilidade junto com o
+número. Quem tem dificuldade de ler costuma aumentar o tamanho de letra padrão nas preferências do
+navegador; feita essa escolha, o texto fica maior e a tela útil, na prática, fica menor. Com o
+breakpoint em rem, ele cresce na mesma proporção: a media query continua perguntando “cabe o desenho
+grande?” em vez de “o monitor tem tantos pixels?”. Em pixel, você responderia a segunda pergunta, que
+não é a que importa para quem está lendo o preço do pão.</p>
+
+<p>Tem um detalhe técnico que vale conhecer, porque ele já confundiu gente experiente: dentro de uma
+media query, o rem é medido pelo tamanho de fonte inicial do navegador, e não pelo
+<code>font-size</code> que você pôs no <code>html</code> do seu CSS. Ou seja, mudar
+<code>html { font-size: 14px }</code> não move os seus breakpoints. Só a preferência do leitor move.
+Isso é proposital: o ponto de virada fica amarrado à preferência dele, não à sua folha de estilo.</p>
+
+<h2>5. Mexendo nos pontos que já existem</h2>
+
+<p>Criar um ponto novo é o caso fácil. O caso que dá discussão é o outro: mudar o valor de um ponto
+padrão. A Ana, num sábado, decidiu que o <code>md:</code> do site inteiro devia virar mais cedo, em
+30 rem, porque os celulares grandes já comportam duas colunas no cardápio. Bastou uma linha, a mesma
+forma de antes, com o nome que já existe:</p>
+
+<pre class="file" data-file="style.css">@theme {
+  --breakpoint-md: 30rem;
+}</pre>
+
+<p>Declarar um nome que já existe não duplica nada: sobrescreve. O <code>md:</code> continua sendo
+<code>md:</code> no HTML — o que muda é onde ele entra. Na caixa abaixo o valor está em 48 rem, que é o
+padrão; com a prévia em 480 px, o <code>md:p-8</code> fica de fora e o cartão tem 8 px. Sua missão é
+antecipar esse ponto para 30 rem (480 px): o respiro grande deve passar a valer nesta prévia.</p>
+
+<div class="trytailwind" data-largura="480" data-goal="css:#alvo|padding=32px;;rule:@media (width &gt;= 30rem)">
+  <p class="try-task">A prévia tem 480 px. Mude <code>--breakpoint-md</code> para
+  <code>30rem</code> e rode: o cartão deve passar de 8 px para 32 px, porque a virada do
+  <code>md:</code> passou a acontecer dentro desta janela.</p>
+  <pre class="html" data-largura="480">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --breakpoint-md: 48rem;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="bg-amber-50 p-2 md:p-8"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: oklch(0.987 0.022 95.277)
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --breakpoint-md: 30rem;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="bg-amber-50 p-2 md:p-8"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>Agora pense no tamanho do estrago. Toda página do site que usa <code>md:</code> — e são quase todas —
+passa a virar 288 px mais cedo. A grade de três colunas que só aparecia no tablet em pé agora aparece em
+celular grande, e o texto que ficava confortável em uma coluna se espreme em três. Nada quebra na tela,
+nada dá erro, e é exatamente por isso que essa mudança é perigosa: ela é silenciosa e ampla. Se a
+intenção é ter um ponto novo só para o cardápio, crie um nome novo. Mexer no padrão é decisão de
+projeto, não de página.</p>
+
+<p>Há dois jeitos de apagar, e eles se confundem. Para tirar <strong>um</strong> breakpoint, atribua
+<code>initial</code> a ele: <code>--breakpoint-2xl: initial;</code> faz o <code>2xl:</code> deixar de
+existir, e as classes com esse prefixo passam a gerar nada. Para zerar <strong>a lista toda</strong>,
+use o curinga: <code>--breakpoint-*: initial;</code> apaga os cinco de uma vez, e você recria só os que
+quiser, com os nomes e números do seu projeto. É o que se faz quando se adota uma escala própria — e é
+também o jeito mais rápido de deixar o site sem nenhum breakpoint por acidente, então confira a lista
+depois.</p>
+
+<h2>6. O par “só até aqui”: max-balc</h2>
+
+<p>Você viu que o prefixo é um piso: <code>balc:</code> vale de 36 rem para cima. Para pedir o contrário
+existe o <code>max-</code>, e não é preciso criar nada: o Tailwind monta o par sozinho a partir da mesma
+variável. <code>max-balc:p-8</code> quer dizer “com a janela menor que 36 rem, use este valor”. O CSS
+gerado usa o sinal invertido, e a leitura em voz alta fica fácil.</p>
+
+<p>Na caixa abaixo a prévia tem 420 px, ou seja, abaixo do balcão. O cartão está sem fundo, e a missão é
+dar a ele o âmbar claro <em>só</em> nessa faixa: quando a tela crescer, o fundo deve sumir de novo, porque
+o desenho grande tem outras prioridades.</p>
+
+<div class="trytailwind" data-largura="420" data-goal="rule:background-color: var(--color-amber-100);;css:#alvo|padding=8px">
+  <p class="try-task">Com menos de 36 rem de largura, o cartão deve ter fundo <code>bg-amber-100</code>.
+  Use o prefixo <code>max-balc:</code> e rode. O respiro de 8 px tem de continuar, porque o
+  <code>balc:p-8</code> está fora de alcance nesta janela.</p>
+  <pre class="html" data-largura="420">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --breakpoint-balc: 36rem;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="p-2 balc:p-8 text-amber-900"&gt;Pão de queijo, R$ 6&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+color: oklch(0.414 0.112 45.904)
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --breakpoint-balc: 36rem;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="p-2 balc:p-8 text-amber-900 max-balc:bg-amber-100"&gt;Pão de queijo, R$ 6&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra o fundo em <code>oklch(...)</code>, que é o mesmo âmbar claro de sempre escrito de
+outro jeito. Se você aumentar a prévia — no seu projeto, diminuindo e aumentando a janela — o fundo
+desaparece assim que a largura chega a 36 rem, e quem cuida do visual a partir daí é o
+<code>balc:p-8</code>.</p>
+
+<p>Duas armadilhas do <code>max-</code> merecem uma linha cada. A primeira: <code>max-sm</code> não quer
+dizer “até 40 rem mais um pouquinho”; quer dizer literalmente “menos de 40 rem”. Se você quer o trecho entre dois pontos, empilhe os prefixos:
+<code>balc:max-lg:p-4</code> vale de 56 a 64 rem, e o CSS sai com dois <code>@media</code> aninhados. A
+segunda: <code>max-</code> e o prefixo normal disputam a mesma propriedade. Se você escrever
+<code>balc:p-8 max-balc:p-2</code>, as duas condições nunca são verdadeiras ao mesmo tempo, então não há
+briga — mas se escrever <code>p-8 max-balc:p-2</code>, o <code>max-</code> ganha no celular e perde no
+resto. Deixe o valor de base sem prefixo e use o <code>max-</code> só para o ajuste.</p>
+
+<h2>7. A escada se ordena sozinha</h2>
+
+<p>Um ponto novo levanta uma dúvida justa: e se eu criar um breakpoint com número menor que os
+existentes? Ou declarar os nomes fora de ordem no <code>@theme</code>? A resposta é tranquilizadora: o
+Tailwind ordena as media queries pelo <strong>valor</strong>, não pela ordem em que você escreveu. Num
+projeto com um ponto chamado <code>car</code> em 30 rem, os padrões e o <code>balc</code> em 56 rem, o
+CSS final sai assim:</p>
+
+<pre class="term">.p-2 { padding: calc(var(--spacing) * 2); }
+
+@media (width &gt;= 30rem) { .car\:p-6  { padding: calc(var(--spacing) * 6); } }
+@media (width &gt;= 40rem) { .sm\:p-4   { padding: calc(var(--spacing) * 4); } }
+@media (width &gt;= 48rem) { .md\:p-8   { padding: calc(var(--spacing) * 8); } }
+@media (width &gt;= 56rem) { .balc\:p-6 { padding: calc(var(--spacing) * 6); } }</pre>
+
+<p>Isso tem duas consequências práticas. A primeira é boa: você pode batizar os pontos na ordem que
+fizer sentido para a sua cabeça — alfabética, por página, por importância —, que o CSS sai na ordem
+certa. A segunda é a que resolve o dia a dia: numa tela de 1200 px, <em>todos</em> os prefixos abaixo de
+1200 continuam valendo ao mesmo tempo, e vence o último da lista, que é o maior. É a escada do
+<em>mobile first</em> que você já conhece, só que agora você é quem instala os degraus.</p>
+
+<p>Daí sai um conselho de nomenclatura. Evite batizar dois pontos com o mesmo número: o desempate fica
+sem régua visível, e você vai passar uma tarde descobrindo quem ganhou. Evite também o nome que já é uma
+variante do Tailwind — <code>hover</code>, <code>dark</code>, <code>print</code>, <code>group</code> —,
+porque aí o prefixo deixa de ser uma pergunta sobre largura e vira outra coisa. E prefira nomes que
+digam o papel, não o aparelho: <code>balc</code>, <code>vitrine</code>, <code>cardapio</code> continuam
+verdadeiros quando a Ana trocar de tablet; <code>ipad</code> não.</p>
+
+<h2>8. Quando vale criar um breakpoint</h2>
+
+<p>Criar é barato, e é justamente por isso que a gente exagera. Um tema com oito breakpoints é um tema
+em que ninguém consegue prever o resultado: cada classe tem oito versões possíveis, cada teste tem oito
+larguras para conferir, e o desenho final é a soma de decisões tomadas em dias diferentes. A pergunta
+certa não é “qual o próximo ponto?”, e sim “quantas vezes eu vou precisar <em>deste</em> ponto?”.</p>
+
+<p>Para um caso isolado — uma tabela de preços que precisa de duas colunas a partir de 900 px, e só ela
+—, não mexa no tema. Use a variante com colchetes, que cria a media query na hora:
+<code>min-[900px]:grid-cols-2</code>. O Tailwind gera exatamente a mesma coisa que um breakpoint faria,
+sem variável e sem nome para manter. O preço é que o número fica repetido em cada uso, e ninguém o
+encontra depois; por isso ela é para o caso avulso, não para o desenho do site.</p>
+
+<p>A tabela abaixo é o resumo da decisão, com o que escrever em cada situação:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>A situação</th><th>O que escrever</th><th>Por quê</th></tr>
+<tr><td>um elemento só, uma vez</td><td><code>min-[900px]:grid-cols-2</code></td><td>resolve na hora, sem mexer no tema</td></tr>
+<tr><td>o site inteiro tem esse degrau</td><td><code>--breakpoint-balc: 56rem</code></td><td>o nome vale para todas as páginas e é achável</td></tr>
+<tr><td>só abaixo de um ponto</td><td><code>max-balc:p-2</code></td><td>o par já nasce da mesma variável</td></tr>
+<tr><td>entre dois pontos</td><td><code>balc:max-lg:p-4</code></td><td>dois prefixos empilhados, sem criar nada</td></tr>
+<tr><td>escala toda da marca</td><td><code>--breakpoint-*: initial</code> e recriar</td><td>troca a régua inteira de uma vez</td></tr>
+</table>
+</div>
+
+<p>Uma nota de honestidade para quem já leu a aula de <code>container</code>: existe um jeito de
+perguntar a largura do <em>elemento</em>, e não da janela, que é a consulta de contêiner. Ela resolve
+bem o caso do cartão que aparece na lateral numa página e no meio em outra. Mas é outro assunto, com
+outras classes, e o breakpoint de janela continua sendo o padrão do dia a dia. Não misture os dois no
+mesmo componente sem necessidade.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o número escolhido é o do aparelho, não o do desenho</h3>
+<p>A Ana mediu o tablet do balcão, deu 896 px e escreveu <code>--breakpoint-balc: 56rem</code>. Certo?
+Quase. O número do breakpoint não é o tamanho do aparelho: é o ponto em que <em>o desenho</em> fica
+ruim. Se a grade de três colunas já fica apertada em 820 px, o piso certo é 52 rem, não 56. O teste é
+abarrotar a janela devagar e anotar onde o texto começa a quebrar feio. O aparelho que você tem hoje é
+uma amostra; o desenho é a régua.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o breakpoint criado e nunca usado</h3>
+<p>Ela criou <code>vitrine:</code> em 56 rem, mas o HTML continuou com <code>md:grid-cols-3</code>. O
+site não mudou nada, e ela passou a tarde reclamando do Tailwind. A causa é banal: existem duas regras
+no projeto, uma no tema e outra no HTML, e elas não se falam. O prefixo novo só vale quando aparece
+escrito na classe. Na dúvida, procure o cabeçalho <code>&lt;style type="text/tailwindcss"&gt;</code> das
+caixas, troque <code>md:</code> por <code>balc:</code> e veja o painel mudar — é o mesmo teste que você
+faria no projeto.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: apaguei um ponto e o site ficou torto</h3>
+<p>Depois de uma limpeza, ela tirou o <code>xl:</code> com <code>--breakpoint-xl: initial</code> e
+esqueceu que a página de encomendas usava <code>xl:grid-cols-4</code>. Nada deu erro: as classes
+simplesmente pararam de gerar CSS e a página ficou com uma coluna. O sintoma de um prefixo apagado é
+sempre o mesmo — a classe existe no HTML, o painel fica vazio, o desenho não muda. Antes de apagar,
+busque o prefixo no projeto inteiro; depois de apagar, abra as páginas grandes.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que faz a linha
+<code>--breakpoint-balc: 56rem;</code> dentro do <code>@theme</code>?</p>
+<label><input type="radio" name="q1"> cria uma classe chamada <code>balc</code>, sem relação com largura</label>
+<label><input type="radio" name="q1"> cria os prefixos <code>balc:</code> e <code>max-balc:</code>, com o valor que você declarou</label>
+<label><input type="radio" name="q1"> muda a largura da página no navegador para 56 rem</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que <code>tablet:p-8</code> não faz nada?</p>
+<label><input type="radio" name="q2"> porque <code>p-8</code> não combina com prefixos</label>
+<label><input type="radio" name="q2"> porque o navegador não reconhece a palavra tablet</label>
+<label><input type="radio" name="q2"> porque não existe a variável <code>--breakpoint-tablet</code> no tema</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Você criou <code>--breakpoint-car: 30rem</code>, um
+valor menor que o <code>sm:</code>. O que acontece com a ordem do CSS?</p>
+<label><input type="radio" name="q3"> o <code>car:</code> vem antes, porque a ordem segue o valor</label>
+<label><input type="radio" name="q3"> dá erro: breakpoint novo tem de ser maior que os padrões</label>
+<label><input type="radio" name="q3"> fica na ordem em que você escreveu no <code>@theme</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o ponto do balcão</h2>
+<p>A vitrine da Ana precisa de três colunas a partir de 900 px, e o número deve ser escrito em rem.
+Complete a linha do tema com o nome e o valor que criam esse ponto:</p>
+<div class="ex-code">@theme {
+  <input aria-label="resposta 1" data-answer="--breakpoint-balc: 56.25rem|--breakpoint-balc:56.25rem" placeholder="...">
+}</div>
+<p class="ex-dica">Dica: 900 px divididos por 16 dão 56,25 rem. Se você escrever
+<code>56rem</code>, o ponto entra em 896 px — quatro pixels mais cedo. A diferença é invisível na
+maioria dos casos, mas não é o que a vitrine pediu, e o hábito de arredondar “só um pouquinho” é o que
+faz dois números parecerem o mesmo sem serem.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Breakpoint no Tailwind v4 é uma variável do tema, e nada mais. <code>--breakpoint-balc: 56rem</code>
+cria dois prefixos de uma vez — <code>balc:</code> para “daqui para cima” e <code>max-balc:</code> para
+“daqui para baixo” —, e o número é o piso da media query. O valor é escrito em rem porque a conta do
+leitor é a que importa: 1 rem são 16 px no navegador comum, e a media query usa o tamanho de fonte
+inicial do navegador, não o que você puser no <code>html</code>.</p>
+
+<p>Para mexer no que já existe, declare o mesmo nome com outro valor: isso sobrescreve, sem duplicar. Para
+apagar um ponto, atribua <code>initial</code>; para apagar a lista inteira, use
+<code>--breakpoint-*: initial</code> e recrie só o que o projeto usa. A ordem do CSS final segue o valor
+de cada ponto, então a declaração pode estar em qualquer ordem e o maior sempre vence — e por isso dois
+pontos com o mesmo número são uma armadilha.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Todo breakpoint é uma variável: <code>--breakpoint-&lt;nome&gt;: &lt;largura&gt;</code>.</li>
+<li>O nome vira dois prefixos: <code>nome:</code> e <code>max-nome:</code>.</li>
+<li>O valor é um piso, não uma faixa: <code>balc:</code> vale de 56 rem para cima.</li>
+<li>56 rem = 896 px; 56,25 rem = 900 px. Divida os pixels por 16 para achar o rem.</li>
+<li>Prefira rem: o ponto de virada acompanha o tamanho de letra do leitor.</li>
+<li>Declarar um nome que já existe sobrescreve o valor padrão.</li>
+<li><code>--breakpoint-2xl: initial</code> apaga um; <code>--breakpoint-*: initial</code> apaga todos.</li>
+<li>O CSS é ordenado pelo valor, então a ordem no arquivo não importa.</li>
+<li>Um caso isolado não pede breakpoint: <code>min-[900px]:</code> resolve na hora.</li>
+<li>Prefixo que não faz nada é variável que não existe — ou classe que não foi escrita.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

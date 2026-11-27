@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instalando com npm | Guia Tailwind</title>
+<meta name="description" content="Instalar o Tailwind com npm, do começo ao fim: os dois pacotes, o package.json, a pasta node_modules, o que cada comando faz e as três provas de que deu certo.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Instalando com <span class="hl">npm</span></h1>
+<p class="intro">A Ana decidiu: o site da padaria vai ter uma folha de CSS de verdade, gerada no
+notebook dela e enviada pronta para o servidor. Ela já conhece a estrada curta, a da tag
+<code>script</code> no HTML, e já viu o defeito dela na prática: a página abre sem estilo e o desenho
+aparece meio segundo depois. Agora ela vai instalar o Tailwind como um pacote do projeto — a estrada
+que exige terminal, mas que entrega um arquivo <code>.css</code> comum. O assunto desta aula é só a
+instalação: o que o npm baixa, onde os arquivos caem, o que cada linha de comando faz e como provar
+que deu certo antes de escrever a próxima classe.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é o npm e o que ele baixa quando você pede o Tailwind.</li>
+  <li>Por que a instalação traz dois pacotes e não um.</li>
+  <li>O que são <code>package.json</code>, <code>package-lock.json</code> e a pasta <code>node_modules</code>.</li>
+  <li>Para que serve o <code>-D</code> e a diferença entre <code>dependencies</code> e <code>devDependencies</code>.</li>
+  <li>O comando de instalação linha por linha, sem parte decorada.</li>
+  <li>As três provas de que a instalação funcionou.</li>
+  <li>O que fazer quando o npm reclama de permissão, de versão ou de rede.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a padaria precisa de uma folha própria</h2>
+
+<p>A padaria da Ana tem três páginas: a inicial, a de produtos e a de contato. No celular de quem
+encomenda, o site abre com internet ruim — e é aí que a estrada curta mostra seu preço. O navegador
+precisa buscar o construtor do Tailwind num servidor de fora, ler o HTML inteiro e só então gerar o
+CSS. Enquanto isso não termina, a página aparece sem cor, sem espaçamento, com o texto grudado nas
+bordas. No Wi-Fi da padaria, isso leva quase um segundo. Na fila do pão, ninguém espera.</p>
+
+<p>O que a Ana quer é simples de dizer e exige trabalho para montar: um arquivo <code>.css</code>
+comum, pequeno, que o navegador baixe como baixa uma foto, e que já venha com todas as classes que as
+três páginas usam. Sem internet obrigatória, sem geração no aparelho do visitante, sem piscar. Para
+chegar nisso, alguém precisa gerar esse arquivo antes de publicar — e quem gera é a ferramenta do
+Tailwind, que mora dentro do projeto.</p>
+
+<p>Como esse arquivo nasce? Por enquanto, guarde a imagem: existe uma <strong>entrada</strong> (um
+arquivo de CSS pequeno, escrito por ela) e uma <strong>saída</strong> (o arquivo grande, escrito pela
+ferramenta). No meio das duas fica o comando que lê a entrada, percorre o HTML em busca de nomes de
+classe e escreve a saída. Instalar com npm é o passo que coloca esse comando dentro da pasta do
+projeto, para que ele possa ser chamado com uma linha.</p>
+
+<p>Vale saber o que muda em relação ao que a Ana já fez nas caixas deste guia. Nas caixas, o motor lê
+o HTML da prévia e gera o CSS na hora, no seu navegador — ótimo para aprender, impossível de publicar.
+No projeto dela, o mesmo motor lê arquivos e escreve um arquivo. O resultado visual é idêntico; o que
+muda é onde e quando o trabalho acontece. Esta aula cuida do "onde": a instalação.</p>
+
+<h2>2. O que é o npm, sem mistério</h2>
+
+<p>O npm é o gerenciador de pacotes que vem junto com o Node.js. Ele faz três coisas, e só isso:
+baixa pacotes de um catálogo público chamado registro (<em>registry</em>), guarda esses pacotes dentro
+do seu projeto e anota, num arquivo de texto, quais pacotes e quais versões o projeto usa. Não é uma
+loja com janela, não é um programa que fica aberto, não tem botão. É um comando de terminal chamado
+<code>npm</code>, e você o chama quando precisa.</p>
+
+<p>Pacote, aqui, é uma pasta com arquivos de outra pessoa, publicada para ser reaproveitada. O Tailwind
+é distribuído assim: você não baixa um instalador do site, você pede ao npm que traga o pacote
+<code>tailwindcss</code>. O npm conversa com o registro, baixa a versão pedida, descompacta dentro de
+<code>node_modules/</code> e registra o que fez. Da segunda vez em diante, ele reaproveita o que já
+está no cache do seu usuário e a instalação leva segundos.</p>
+
+<p>Duas consequências práticas que economizam muita dor de cabeça. A primeira: a instalação é um passo
+do projeto, não da máquina. Cada projeto tem o seu <code>node_modules</code>, com as versões que
+aquele projeto pediu. A segunda: como tudo está anotado em arquivos de texto, outra pessoa (ou você,
+seis meses depois, em outro notebook) consegue repetir a instalação com um comando e chegar no mesmo
+resultado. Isso é o que torna o fluxo com npm confiável — e o que a estrada sem build não oferece.</p>
+
+<h2>3. Os dois pacotes: motor e comando</h2>
+
+<p>Aqui está a primeira surpresa de quem instala a versão 4: não é um pacote, são dois. O motor
+<em>tailwindcss</em> sabe transformar nomes de classe em CSS, mas não sabe ler argumentos de terminal,
+nem procurar arquivos, nem escrever arquivos. Quem faz esse trabalho é a interface de linha de comando
+(CLI), publicada separadamente como <code>@tailwindcss/cli</code>. Um é o cérebro; o outro é a mão que
+segura a caneta.</p>
+
+<p>Por que separar? Porque o motor é usado por outras ferramentas que não são terminal: o plugin do
+Vite, o plugin do PostCSS, o construtor que roda no navegador, todos conversam com o mesmo motor. Se o
+comando de terminal viesse embutido, essas ferramentas carregariam código que nunca usam. A divisão é a
+mesma ideia de vender liquidificador e copo separados: quem já tem o copo não paga duas vezes.</p>
+
+<dl class="anatomy">
+<dt>tailwindcss</dt>
+<dd>O motor. Recebe o CSS de entrada mais uma lista de nomes de classe e devolve o CSS com as regras.
+Não tem interface: é chamado por outra ferramenta.</dd>
+<dt>@tailwindcss/cli</dt>
+<dd>O comando de terminal. Lê os arquivos do projeto, chama o motor e escreve a folha de saída.
+É o pacote que dá o binário <code>tailwindcss</code>.</dd>
+<dt>node_modules/</dt>
+<dd>A pasta onde o npm descompacta os pacotes. Você não edita nada dentro dela e não a copia para
+outro computador: ela é recriada a partir dos arquivos de anotação.</dd>
+<dt>package.json</dt>
+<dd>A caderneta de identidade do projeto: nome, versão, comandos apelidados e a lista de pacotes que
+ele precisa.</dd>
+<dt>package-lock.json</dt>
+<dd>O mapa exato do que foi instalado, com versão e endereço de cada pacote. É o que garante que
+outra máquina instale exatamente o mesmo conjunto.</dd>
+</dl>
+
+<p>Na prática, você quase nunca digita o nome do motor. Digita o comando da CLI, e a CLI chama o motor.
+A exceção são projetos com ferramentas de build (Vite, Next, Astro), que chamam o motor direto — e aí a
+CLI nem é instalada. Como o site da padaria é HTML puro, a dupla completa é o caminho.</p>
+
+<h2>4. O package.json: a caderneta do projeto</h2>
+
+<p>Todo projeto que usa npm tem um <code>package.json</code> na raiz. É um arquivo de texto, no formato
+JSON, com pares de nome e valor entre chaves. Você pode abrir no editor e ler: não há nada escondido.
+Depois da instalação do Tailwind, o da Ana ficou assim:</p>
+
+<pre class="term" data-file="package.json">{
+  "name": "padaria",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tailwindcss -i src/entrada.css -o dist/estilo.css",
+    "dev": "tailwindcss -i src/entrada.css -o dist/estilo.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.5",
+    "tailwindcss": "^4.3.5"
+  }
+}</pre>
+
+<p>Leia por partes. <code>name</code> é o nome do projeto, que o <code>npm init -y</code> tirou do nome
+da pasta. <code>version</code> é a versão do projeto (não do Tailwind). <code>private: true</code>
+impede que o projeto seja publicado sem querer no registro público: é uma trava de segurança que a Ana
+acrescentou à mão. <code>scripts</code> são apelidos para comandos compridos: em vez de digitar a linha
+inteira, você digita <code>npm run build</code>.</p>
+
+<p>E <code>devDependencies</code> é a lista dos pacotes que só servem durante o desenvolvimento. O
+Tailwind entra aí porque o visitante nunca o recebe: ele recebe apenas o CSS que o Tailwind produziu. A
+diferença entre <code>dependencies</code> e <code>devDependencies</code> não é decorativa — quando
+alguém instala o projeto para colocá-lo no ar, pode pular as dependências de desenvolvimento, que é
+justamente o caso do Tailwind. É por isso que o comando de instalação leva <code>-D</code>.</p>
+
+<p>Repare também no acento circunflexo antes da versão: <code>^4.3.5</code>. Ele quer dizer "aceito
+qualquer 4.x a partir de 4.3.5, mas não aceito 5". É o jeito de receber correções de erro sem quebrar
+o projeto com uma mudança grande. Se você quiser exatamente uma versão, sem surpresas, escreva
+<code>4.3.5</code> puro — o npm respeita. E se escrever <code>~4.3.5</code>, aceita correções de
+terceiro dígito e nada mais.</p>
+
+<h2>5. O comando de instalação, linha por linha</h2>
+
+<p>Com o terminal aberto na pasta do projeto, são quatro linhas. A primeira entra na pasta; as outras
+três fazem o serviço:</p>
+
+<pre class="term" data-cwd="~/padaria">$ cd /home/ana/padaria
+$ npm init -y
+Wrote to /home/ana/padaria/package.json
+$ npm install -D tailwindcss @tailwindcss/cli
+added 12 packages in 3s
+$ npx @tailwindcss/cli -i src/entrada.css -o dist/estilo.css</pre>
+
+<p><code>npm init -y</code> cria o <code>package.json</code> com as respostas padrão; o <code>-y</code>
+é o "sim" para todas as perguntas que ele faria. <code>npm install -D</code> baixa os dois pacotes e
+anota em <code>devDependencies</code>; sem o <code>-D</code>, eles entrariam em
+<code>dependencies</code>, o que não é errado, mas mente sobre a natureza da ferramenta.
+<code>npx</code> executa um comando que está dentro de <code>node_modules</code> sem você precisar
+saber o caminho completo dele.</p>
+
+<p>O <code>-i</code> aponta o arquivo de entrada, que a Ana criou com uma linha só; o <code>-o</code>
+aponta o arquivo de saída, que ainda não existe — e é a CLI que vai criá-lo. Nada é impresso quando dá
+certo: um comando que termina em silêncio, no terminal, é um comando bem-sucedido. A aula
+<a href="tailwind-cli.html">A CLI do Tailwind</a> destrincha cada opção; aqui basta saber que essa
+linha é o coração do fluxo.</p>
+
+<p>Existe um atalho que confunde muita gente. Escreva <code>npx @tailwindcss/cli</code> quando estiver
+digitando no terminal; dentro de um script do <code>package.json</code>, escreva só
+<code>tailwindcss</code>, sem o <code>npx</code>. Isso funciona porque o npm coloca a pasta
+<code>node_modules/.bin</code> no caminho de busca de qualquer script que ele executa. É por isso que
+o script <code>build</code> da Ana começa com <code>tailwindcss</code> e não com o nome completo do
+pacote.</p>
+
+<h2>6. Onde cada arquivo cai</h2>
+
+<p>Depois da instalação, a pasta da padaria tem mais coisas do que tinha antes. Vale conhecer cada uma,
+porque você vai conviver com elas todos os dias e mexer em apenas duas:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Arquivo ou pasta</th><th>Quem cria</th><th>Para que serve</th><th>Você mexe?</th></tr>
+<tr><td><code>package.json</code></td><td>o <code>npm init</code></td><td>identidade, scripts e lista de pacotes</td><td>sim, com cuidado</td></tr>
+<tr><td><code>package-lock.json</code></td><td>o <code>npm install</code></td><td>versões exatas de tudo o que foi baixado</td><td>não à mão</td></tr>
+<tr><td><code>node_modules/</code></td><td>o <code>npm install</code></td><td>o código dos pacotes baixados</td><td>nunca</td></tr>
+<tr><td><code>src/entrada.css</code></td><td>você</td><td>o CSS que você escreve, com o <code>@import</code></td><td>sim</td></tr>
+<tr><td><code>dist/estilo.css</code></td><td>a CLI</td><td>o CSS final que o navegador carrega</td><td>não à mão</td></tr>
+</table>
+</div>
+
+<p>Duas pastas com nomes de três letras contam a história toda: <code>src</code> vem de
+<em>source</em>, fonte; <code>dist</code> vem de <em>distribution</em>, distribuição. Tudo que é fonte
+mora em <code>src</code> (ou na raiz, junto do HTML); tudo que o navegador recebe mora em
+<code>dist</code>. Quando você publica o site, o servidor precisa das duas pastas — e pode ignorar
+<code>node_modules</code> tranquilamente, porque aquele código só serviu para gerar o CSS.</p>
+
+<p>A entrada da Ana é minúscula, e isso é normal:</p>
+
+<pre class="file" data-file="src/entrada.css">@import "tailwindcss";</pre>
+
+<p>Uma linha. Ela diz "traga o Tailwind para cá". O arquivo de entrada é o painel de controle do
+projeto: é nele que você declara cores da marca, fontes, e classes compostas. A aula
+<a href="o-css-de-entrada.html">O CSS de Entrada</a> é dedicada a ele. E o HTML liga a folha gerada do
+jeito mais comum do mundo:</p>
+
+<pre class="file" data-file="index.html">&lt;link rel="stylesheet" href="dist/estilo.css"&gt;</pre>
+
+<p>Note a ordem: o <code>link</code> aponta para <code>dist/estilo.css</code>, o arquivo que a CLI
+escreve. Se você apontar para <code>src/entrada.css</code>, o navegador vai receber um arquivo com uma
+linha de <code>@import</code> e nenhuma classe — e a página fica sem estilo. Esse é o erro número um de
+quem instala. A folha que se liga é sempre a da saída.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=24px;;rule:border-radius: var(--radius-xl);;rule:color: var(--color-amber-900)">
+  <p class="try-task">Primeira folha gerada: deixe o cartão com 24 px de respiro por dentro, cantos de
+  12 px e texto âmbar escuro, mantendo o fundo claro.</p>
+  <pre class="html">&lt;div id="alvo" class="p-4 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-6 bg-amber-100 rounded-xl text-amber-900"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>Essa caixa é o retrato do que a CLI faz depois de instalar: cada nome de classe vira uma regra, e
+só nasce regra para o nome que existe. <code>p-6</code> vira <code>padding</code> de 24 px,
+<code>rounded-xl</code> vira <code>border-radius</code> de 12 px, <code>text-amber-900</code> vira
+<code>color</code>. Nenhuma dessas regras vem de um arquivo mágico: todas foram geradas a partir do que
+está escrito no <code>class</code>.</p>
+
+<h2>7. As três provas de que a instalação funcionou</h2>
+
+<p>Instalar sem conferir é o caminho mais rápido para uma hora perdida. A Ana usa três provas, nesta
+ordem, e cada uma responde a uma pergunta diferente. A primeira prova é sobre o pacote; a segunda,
+sobre o arquivo; a terceira, sobre a página.</p>
+
+<p><strong>Prova 1 — o pacote está lá, e em que versão.</strong> O comando <code>npm ls</code> lista o
+que está instalado e mostra a versão resolvida. Se aparecer a árvore com os dois pacotes, a instalação
+aconteceu. Se aparecer uma linha com <code>empty</code> ou um aviso de pacote faltando, não aconteceu:</p>
+
+<pre class="term">$ npm ls tailwindcss @tailwindcss/cli
+padaria@1.0.0 /home/ana/padaria
+├── @tailwindcss/cli@4.3.5
+└── tailwindcss@4.3.5</pre>
+
+<p>Repare que a versão mostrada é a que está no disco, não a que está escrita no
+<code>package.json</code>. As duas podem divergir: o <code>^</code> autoriza o npm a pegar uma versão
+mais nova dentro do mesmo 4.x. Quando você precisa saber exatamente o que está rodando — e vai
+precisar, no dia em que um comportamento mudar do nada —, é esse comando que responde.</p>
+
+<p><strong>Prova 2 — o arquivo de saída tem regras.</strong> Abra <code>dist/estilo.css</code> no
+editor. A primeira linha é um comentário com a versão do Tailwind; depois vêm blocos de variáveis e,
+mais adiante, uma regra para cada classe usada no projeto. Se o arquivo tiver 30 linhas e nenhuma
+classe, desconfie: ou o <code>@import</code> não está na entrada, ou o caminho do <code>-i</code> está
+errado, ou o HTML não está na pasta que a ferramenta percorre.</p>
+
+<p><strong>Prova 3 — a página aplica o CSS.</strong> Esta é a que importa de verdade. Escreva uma
+classe no HTML, rode o comando, recarregue com <code>Ctrl</code> + <code>Shift</code> + <code>R</code>
+e veja se a aparência mudou. Quando não muda, o problema costuma ser uma classe digitada errado — e o
+Tailwind não avisa nada: ele simplesmente não gera regra para um nome que não conhece.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=16px;;rule:padding: calc(var(--spacing) * 4)">
+  <p class="try-task">O cartão está com <code>p-4x</code>, um nome que não existe — o gerador não
+  escreveu nada e o texto encosta na borda. Conserte a classe para 16 px de respiro interno.</p>
+  <pre class="html">&lt;div id="alvo" class="p-4x bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>Repare no painel: ele mostra o fundo âmbar e nenhuma linha de respiro. É esse o aviso que você
+recebe — nenhum erro, nenhuma mensagem, só a falta da propriedade. O silêncio é o diagnóstico, e é por
+isso que a terceira prova é olhar o resultado, e não a beleza do código.</p>
+
+<p>Existe uma quarta conferência, opcional, que ajuda a entender a segunda: pedir à caixa que mostre as
+regras geradas em vez do CSS computado. É a mesma coisa que abrir o <code>dist/estilo.css</code> e
+procurar o bloco da classe. Vale a pena fazer uma vez, porque o arquivo que a CLI escreve é exatamente
+esse tipo de texto:</p>
+
+<div class="trytailwind" data-goal="rule:border-radius: var(--radius-lg);;rule:background-color: var(--color-amber-100)">
+  <p class="try-task">Agora olhe a folha gerada, e não o resultado: acrescente ao cartão a classe que
+  arredonda os cantos em 8 px e deixe o painel de regras mostrar os dois blocos.</p>
+  <pre class="html" data-saida="css">&lt;div id="alvo" class="bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+.bg-amber-100 {
+  background-color: var(--color-amber-100);
+}
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-amber-100 rounded-lg"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>Cada bloco tem um seletor (a classe), chaves e uma ou duas propriedades. Repare que o valor não é
+<code>8px</code>: é <code>var(--radius-lg)</code>, uma variável. O Tailwind escreve variáveis para que
+o mesmo raio possa ser trocado em um lugar só. Você não precisa entender de variáveis agora; precisa
+saber que o arquivo gerado é legível, e que o valor final aparece no painel de CSS computado ou na aba
+<em>Computed</em> do navegador.</p>
+
+<h2>8. Atualizar, travar e repetir a instalação</h2>
+
+<p>Instalar é o começo, não o fim. Três situações vão aparecer: querer a versão mais nova, querer a
+mesma versão de ontem e recriar tudo do zero. Cada uma tem um comando e uma lógica.</p>
+
+<p>Para atualizar dentro do que o <code>^</code> permite, use <code>npm update</code>. Ele olha as
+faixas do <code>package.json</code> e sobe o que couber. Para ver o que está fora de faixa, existe
+<code>npm outdated</code>, que lista versão instalada, versão desejada e versão mais nova. Atualizar um
+projeto que já está no ar pede cuidado: rode o build e confira as páginas antes de publicar, porque
+uma correção de erro pode mudar um detalhe de aparência.</p>
+
+<p>Para repetir a instalação em outra máquina — o notebook novo, o computador da irmã, o servidor de
+build —, não copie a pasta <code>node_modules</code>. Ela tem milhares de arquivos, alguns com atalhos
+que não sobrevivem à cópia, e é específica do sistema. Em vez disso, leve o projeto e rode
+<code>npm ci</code> (ou <code>npm install</code>). O <code>ci</code> é o comando feito para isso:
+apaga o <code>node_modules</code> e reinstala exatamente as versões do <code>package-lock.json</code>,
+sem negociar faixas.</p>
+
+<p>O <code>package-lock.json</code> existe justamente para essa repetição dar certo. Ele guarda a
+versão resolvida de cada pacote — inclusive as dependências das dependências, que você nunca viu — e um
+resumo do conteúdo baixado. Sem ele, duas instalações no mesmo dia podem trazer conjuntos diferentes,
+porque o <code>^</code> aceita novidades. Com ele, o conjunto é o mesmo. É um arquivo chato de ler e
+essencial de manter.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Comando</th><th>O que faz</th><th>Quando usar</th></tr>
+<tr><td><code>npm install</code></td><td>lê o <code>package.json</code> e instala o que falta</td><td>primeira vez, ou depois de acrescentar um pacote</td></tr>
+<tr><td><code>npm install -D pacote</code></td><td>instala e anota em <code>devDependencies</code></td><td>ferramentas que só servem no desenvolvimento</td></tr>
+<tr><td><code>npm ci</code></td><td>reinstala exatamente o que o <code>lock</code> diz</td><td>máquina nova, servidor, build automático</td></tr>
+<tr><td><code>npm update</code></td><td>sobe versões dentro da faixa permitida</td><td>quando quer correções novas, com conferência depois</td></tr>
+<tr><td><code>npm ls pacote</code></td><td>mostra a versão que está no disco</td><td>para conferir o que está rodando de verdade</td></tr>
+</table>
+</div>
+
+<p>Uma última recomendação de organização, que vale para qualquer projeto: chame os comandos pelos
+scripts. Com <code>build</code> e <code>dev</code> no <code>package.json</code>, você digita
+<code>npm run build</code> e não precisa lembrar de <code>-i</code>, <code>-o</code> nem do nome dos
+arquivos. Quem abre o projeto pela primeira vez lê os scripts e entende como ele é montado. É
+documentação que não desatualiza, porque é o próprio comando.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: "npm: comando não encontrado"</h3>
+<p>O terminal não conhece a palavra <code>npm</code>. Na prática, o Node.js não está instalado, ou foi
+instalado depois que aquela janela do terminal abriu — o instalador mexe no caminho de busca, e janelas
+antigas não veem a mudança. Feche o terminal, abra de novo e teste <code>node -v</code>. Se continuar
+igual, instale a versão LTS no site oficial do Node e repita. Desconfie de tutoriais que mandam
+instalar o Node por gerenciador de pacotes do sistema: costuma dar versão velha demais para a versão 4
+do Tailwind, que pede Node 20 ou mais novo.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: "EACCES: permissão negada"</h3>
+<p>A instalação tentou escrever numa pasta do sistema e o computador disse não. Quase sempre a causa é
+um <code>sudo npm install -g</code> feito no passado, que deixou arquivos com dono errado. O conserto
+não é repetir com <code>sudo</code> — isso só espalha o problema —, e sim corrigir o dono da pasta de
+cache do npm, como a documentação do npm ensina, e instalar sempre dentro do projeto, sem
+<code>-g</code>. Regra prática: <code>npm install</code> com <code>sudo</code> é sinal de que algo
+está configurado errado, não de que faltou permissão.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: "aqui funciona, no computador da minha irmã não"</h3>
+<p>A pasta foi copiada inteira, com <code>node_modules</code> e tudo, e na outra máquina o comando
+reclama de arquivo faltando ou de binário incompatível. A cura é sempre a mesma: apague
+<code>node_modules</code> na máquina de destino, rode <code>npm ci</code> e confira com
+<code>npm ls</code>. O que se transporta é o projeto — HTML, CSS de entrada, <code>package.json</code>
+e <code>package-lock.json</code> —, nunca a pasta de pacotes. Ela é descartável por desenho: nasce de
+um comando e morre com um <code>rm -rf</code>.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que o <code>-D</code> do
+<code>npm install -D</code> muda?</p>
+<label><input type="radio" name="q1"> baixa uma versão mais recente do pacote</label>
+<label><input type="radio" name="q1"> anota o pacote em <code>devDependencies</code>, e não em <code>dependencies</code></label>
+<label><input type="radio" name="q1"> instala o pacote na pasta do sistema, para todos os projetos</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Para que serve a pasta <code>node_modules</code>?</p>
+<label><input type="radio" name="q2"> guardar o CSS gerado, que o navegador vai carregar</label>
+<label><input type="radio" name="q2"> guardar os arquivos-fonte do projeto, como o HTML</label>
+<label><input type="radio" name="q2"> guardar o código dos pacotes baixados pelo npm</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Qual arquivo o <code>link</code> da página deve
+carregar?</p>
+<label><input type="radio" name="q3"> o CSS de saída, gerado pela CLI</label>
+<label><input type="radio" name="q3"> o CSS de entrada, onde está o <code>@import</code></label>
+<label><input type="radio" name="q3"> o <code>package.json</code>, que tem as versões</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: completar a instalação</h2>
+<p>A Ana está num notebook novo e quer instalar a CLI do Tailwind como ferramenta de desenvolvimento.
+Complete o comando com o nome do pacote que falta:</p>
+<div class="ex-code">$ npm install -D tailwindcss <input aria-label="resposta 1" data-answer="@tailwindcss/cli" placeholder="..."></div>
+<p class="ex-dica">Dica: o motor é <code>tailwindcss</code>; o comando de terminal tem nome com
+<code>@</code> na frente e barra no meio, porque é um pacote do mesmo grupo. Sem ele, a linha
+<code>npx</code> do build não existe.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Instalar com npm é colocar o motor e o comando do Tailwind dentro da pasta do projeto, com as
+versões anotadas em dois arquivos de texto. O motor (<code>tailwindcss</code>) transforma nomes de
+classe em CSS; a CLI (<code>@tailwindcss/cli</code>) lê os arquivos, chama o motor e escreve a folha
+final. O <code>package.json</code> guarda a lista e os apelidos de comando; o
+<code>package-lock.json</code> guarda as versões exatas; o <code>node_modules</code> guarda o código
+baixado, e é a única peça descartável das três.</p>
+
+<p>Depois de instalar, o fluxo é sempre o mesmo: você escreve o CSS de entrada e o HTML, roda
+<code>npm run build</code> (ou o comando da CLI) e a página carrega o arquivo de
+<code>dist</code>. As três provas — <code>npm ls</code>, o arquivo com regras e a página com a
+aparência certa — respondem, nessa ordem, se o pacote chegou, se o build rodou e se o CSS está sendo
+aplicado. Quando algo falha, o silêncio do Tailwind diante de uma classe desconhecida é a pista mais
+útil: quase sempre é o nome.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>São dois pacotes: <code>tailwindcss</code> (motor) e <code>@tailwindcss/cli</code> (comando).</li>
+<li><code>npm install -D</code> anota em <code>devDependencies</code>: ferramenta de desenvolvimento.</li>
+<li><code>package.json</code> é a caderneta; <code>package-lock.json</code> é o mapa das versões.</li>
+<li><code>node_modules</code> não se edita, não se copia, não se publica.</li>
+<li><code>npm ci</code> reinstala exatamente o que o lock diz — o comando de outra máquina.</li>
+<li>No terminal, <code>npx @tailwindcss/cli</code>; dentro de script, só <code>tailwindcss</code>.</li>
+<li><code>-i</code> é a entrada; <code>-o</code> é a saída; a saída é o que se liga na página.</li>
+<li>O arquivo de saída é escrito pela ferramenta: não edite à mão.</li>
+<li>Classe que não existe não gera regra e não avisa nada.</li>
+<li>Terminal em silêncio, depois do build, é sinal de sucesso.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1027,7 +1027,10 @@ figcaption { margin-top: 8px; font-size: .92rem; color: var(--muted); line-heigh
   margin: 10px 0 6px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  overflow: hidden;
+  /* a prévia tem a largura declarada (é o viewport que decide o breakpoint):
+     se não couber, ela rola dentro da caixa, sem empurrar a página */
+  overflow-x: auto;
+  overflow-y: hidden;
   background: #fff;
 }
 html[data-theme="dark"] .trytailwind .try-vivo { background: #101014; }

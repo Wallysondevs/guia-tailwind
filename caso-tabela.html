@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tabela de Dados | Guia Tailwind</title>
+<meta name="description" content="O painel de encomendas da padaria: colunas decididas antes do código, etiquetas de status, totais alinhados, linha que responde ao mouse e tabela que vira cartões no celular.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Tabela de <span class="hl">Dados</span></h1>
+
+<p class="intro">A Ana passou a anotar as encomendas da padaria numa planilha. Funcionou até o dia em
+que ela quis mostrar o movimento para a filha, que cuida do caixa: copiou a planilha para uma página e
+o resultado foi uma grade de treze colunas com números em Times New Roman, tudo encostado, sem uma
+coluna que dissesse o que importa — quais encomendas ainda estão esperando. Nesta aula ela monta um
+painel de verdade: escolhe as colunas que ficam, aprende a desenhar a etiqueta de status, alinha os
+totais no pé da tabela, faz a linha reagir ao mouse e troca a tabela inteira por cartões quando a
+tela é pequena.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Como escolher as colunas de uma tabela antes de escrever a primeira célula.</li>
+  <li>A moldura do painel: cabeçalho, contagem e a caixa que recorta os cantos.</li>
+  <li>A etiqueta de status feita com <code>inline-flex</code>, <code>rounded-full</code> e cor de fundo.</li>
+  <li>Números que se comparam: <code>text-right</code>, <code>tabular-nums</code> e o pé de totais.</li>
+  <li>A linha que acende no mouse com <code>group-hover</code> e no teclado com <code>focus-within</code>.</li>
+  <li>Um cabeçalho que ordena, com botão de verdade e <code>aria-sort</code>.</li>
+  <li>A tabela que desaparece no celular e volta a partir de <code>md</code>.</li>
+  <li>Quando a resposta certa é abandonar a tabela e mostrar cartões.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a planilha virou página</h2>
+
+<p>Treze colunas. Nome do cliente, telefone, e-mail, bairro, data do pedido, data de entrega, produto,
+quantidade, peso, preço unitário, desconto, frete e observação. No papel, cada coluna fazia sentido. Na
+tela, ninguém lia nada: a tabela precisava de duas telas para caber, o nome do cliente quebrava em
+quatro linhas e o total do dia estava numa célula qualquer, no meio do nada.</p>
+
+<p>O erro não foi de CSS. Foi de decisão. Uma tabela de painel não é um depósito de dados: é uma
+resposta a uma pergunta. A pergunta da Ana era "o que ainda preciso preparar hoje?". Tudo que não
+ajudava a responder isso podia sair da tela — não do sistema, da tela. Telefone, e-mail e observação
+passaram para o lado da linha, visíveis só quando ela abre uma encomenda.</p>
+
+<p>Com a pergunta definida, sobraram cinco colunas: cliente, retirada, itens, total e status. Cinco
+cabem no celular com rolagem curta, e cabem inteiras no computador. É esse o trabalho desta aula:
+decidir, ordenar visualmente e desenhar — nessa ordem.</p>
+
+<h2>2. O que entra na tabela</h2>
+
+<p>A ordem das colunas segue o olho de quem trabalha, não a ordem em que os dados chegaram. Primeiro o
+que identifica (cliente), depois o que é urgente (horário de retirada), depois o que é detalhe (itens),
+depois o que é número (total) e por último o que muda de estado (status). O status fica no fim de
+propósito: é a coluna que a Ana vai olhar de relance, e a última coluna é a que fica na borda direita,
+onde o olho descansa.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Coluna</th><th>Alinhamento</th><th>O que faz o trabalho</th></tr>
+<tr><td>Cliente</td><td>esquerda</td><td><code>text-left</code>, <code>font-medium</code> e <code>whitespace-nowrap</code> no nome</td></tr>
+<tr><td>Retirada</td><td>esquerda</td><td><code>text-stone-500</code> no secundário, 16h em <code>tabular-nums</code></td></tr>
+<tr><td>Itens</td><td>esquerda</td><td>quantidade em texto curto: "3 itens", nunca uma lista dentro da célula</td></tr>
+<tr><td>Total</td><td>direita</td><td><code>text-right tabular-nums</code>, inclusive no <code>th</code></td></tr>
+<tr><td>Status</td><td>direita</td><td>etiqueta com fundo claro, texto escuro e um ponto de cor</td></tr>
+</table>
+</div>
+
+<p>Repare que a decisão de alinhamento aparece na tabela acima antes de aparecer no código. É assim que
+se escreve página: a decisão primeiro, a classe depois. Quando você pula essa etapa, acaba com uma
+tabela tecnicamente correta e praticamente ilegível.</p>
+
+<dl class="anatomy">
+<dt>toolbar</dt>
+<dd>A faixa acima da tabela com o título, a contagem e os botões. Sem ela, o painel começa sem dizer o
+que está mostrando.</dd>
+<dt>status</dt>
+<dd>A etiqueta que diz em que pé está a encomenda. Tem fundo claro, texto escuro e, de preferência,
+uma palavra — não só uma cor.</dd>
+<dt>tfoot</dt>
+<dd>O pé da tabela, onde ficam os totais. É a única linha que pode ter borda mais forte em cima.</dd>
+<dt>ações</dt>
+<dd>A coluna final com o que se pode fazer naquela linha. Fica discreta e aparece no mouse ou no
+foco.</dd>
+</dl>
+
+<h2>3. A moldura do painel</h2>
+
+<p>A tabela não nasce solta. Ela mora dentro de um cartão com cabeçalho, e esse cartão é o que dá a
+sensação de painel. Duas caixas aninhadas resolvem: a de fora corta os cantos, a de dentro rola de
+lado.</p>
+
+<pre class="file" data-file="encomendas.html">&lt;div class="overflow-hidden rounded-2xl border border-stone-200 bg-white"&gt;
+  &lt;div class="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 px-6 py-4"&gt;
+    &lt;div&gt;
+      &lt;h2 class="font-semibold text-stone-900"&gt;Encomendas de hoje&lt;/h2&gt;
+      &lt;p class="text-sm text-stone-500"&gt;7 pedidos · R$ 412,00&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;button type="button" class="rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-medium text-stone-700 hover:bg-stone-50"&gt;
+      Exportar
+    &lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;div class="overflow-x-auto"&gt;
+    &lt;table class="w-full text-sm"&gt;
+      &lt;!-- thead, tbody e tfoot --&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<p>O <code>overflow-hidden</code> no cartão é o detalhe que quase todo mundo esquece: sem ele, o fundo
+cinza do cabeçalho da tabela escapa pelos cantos arredondados e aparece um degrau branco em cada
+ponta. É um daqueles defeitos que ninguém sabe nomear e todo mundo percebe. Já o
+<code>overflow-x-auto</code> na caixa de dentro é o que impede a tabela de empurrar a página inteira
+para o lado — o mesmo invólucro da aula de <a href="tabelas.html">tabelas</a>.</p>
+
+<p>A faixa de cima usa <code>flex flex-wrap items-center justify-between gap-3</code>. O
+<code>flex-wrap</code> é importante: quando o título e o botão não cabem na mesma linha, em vez de
+espremer, o botão desce. Sem ele, no celular, o botão sai para fora do cartão.</p>
+
+<h2>4. A etiqueta de status</h2>
+
+<p>Na planilha, o status era uma palavra digitada na última coluna: "preparando", "pronta",
+"entregue". Na página, ela precisa ser reconhecida em meio segundo. Fundo claro, texto escuro e canto
+arredondado fazem isso — e o ponto colorido na frente faz o resto, porque a cor chega antes da
+leitura.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=inline-flex;;css:#alvo|padding-inline=10px">
+  <p class="try-task">O status está com a cor certa e o formato errado: parece texto comum. Deixe-o
+  como etiqueta — conteúdo em linha flexível, 10 px de respiro lateral e 2 px em cima e embaixo.</p>
+  <pre class="html">&lt;p&gt;Encomenda da Marta:
+  &lt;span id="alvo" class="bg-green-100 text-xs font-medium text-green-800"&gt;Pronta para retirar&lt;/span&gt;
+&lt;/p&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.962 0.044 156.743)
+color: oklch(0.448 0.119 151.328)
+font-size: 12px
+font-weight: 500
+line-height: 16px
+</pre>
+  <pre class="solucao">&lt;p&gt;Encomenda da Marta:
+  &lt;span id="alvo" class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800"&gt;Pronta para retirar&lt;/span&gt;
+&lt;/p&gt;</pre>
+</div>
+
+<p>Três classes fazem o formato: <code>inline-flex</code> para o conteúdo virar uma linha flexível (e
+aceitar o ponto colorido com <code>gap</code>), <code>rounded-full</code> para o canto virar meia-lua e
+<code>px-2.5 py-0.5</code> para o respiro. <code>px-2.5</code> é 10 px — a escala aceita meios passos
+justamente para etiquetas, onde 12 px ficaria gordo. E <code>py-0.5</code> são 2 px: o suficiente para
+o texto não tocar no arredondamento.</p>
+
+<p>O que não muda é a regra de acessibilidade: <strong>a palavra é obrigatória</strong>. Uma bolinha
+verde sem texto não diz nada para quem não distingue verde de vermelho, e não diz nada para o leitor de
+tela. A cor ajuda quem vê; a palavra informa todo mundo.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Status</th><th>Fundo e texto</th><th>Ponto</th></tr>
+<tr><td>Em preparo</td><td><code>bg-amber-100 text-amber-900</code></td><td><code>bg-amber-500</code></td></tr>
+<tr><td>Pronta</td><td><code>bg-green-100 text-green-800</code></td><td><code>bg-green-600</code></td></tr>
+<tr><td>Entregue</td><td><code>bg-stone-100 text-stone-600</code></td><td><code>bg-stone-400</code></td></tr>
+<tr><td>Cancelada</td><td><code>bg-red-50 text-red-700</code></td><td><code>bg-red-500</code></td></tr>
+</table>
+</div>
+
+<p>O status "entregue" é cinza de propósito. Ele é o passado, e o passado não deve competir com o que
+ainda precisa de trabalho. Numa tabela, a cor é hierarquia: o olho vai primeiro onde há ação pendente.
+Se tudo é colorido, nada é.</p>
+
+<h2>5. Números que se comparam e o pé da tabela</h2>
+
+<p>Preço à direita, todo mundo já sabe. O que quase ninguém faz é alinhar os dígitos, e é isso que
+permite comparar R$ 12,00 com R$ 1.248,00 sem ler os dois. A fonte padrão desenha o "1" mais estreito
+que o "8"; com <code>tabular-nums</code>, todos os dígitos passam a ocupar a mesma largura.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|text-align=right;;rule:--tw-numeric-spacing: tabular-nums">
+  <p class="try-task">Os dois preços estão à esquerda e as casas decimais não se alinham. Deixe a
+  célula à direita e com dígitos de largura fixa.</p>
+  <pre class="html">&lt;table class="w-full text-sm"&gt;
+  &lt;tr&gt;
+    &lt;td id="alvo" class="px-4 py-3"&gt;R$ 12,00&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="px-4 py-3"&gt;R$ 1.248,00&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</pre>
+  <pre class="out">
+padding-inline: 16px
+padding-block: 12px
+</pre>
+  <pre class="solucao">&lt;table class="w-full text-sm"&gt;
+  &lt;tr&gt;
+    &lt;td id="alvo" class="px-4 py-3 text-right tabular-nums"&gt;R$ 12,00&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="px-4 py-3 text-right tabular-nums"&gt;R$ 1.248,00&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</pre>
+</div>
+
+<p>A regra que o Tailwind gera para <code>tabular-nums</code> mostra por que ele existe separado de
+<code>text-right</code>:</p>
+
+<pre class="term">.tabular-nums {
+  --tw-numeric-spacing: tabular-nums;
+  font-variant-numeric: var(--tw-ordinal, ) var(--tw-slashed-zero, ) var(--tw-numeric-figure, ) var(--tw-numeric-spacing, ) var(--tw-numeric-fraction, );
+}</pre>
+
+<p>A classe só liga uma variável e a propriedade lê as cinco variáveis de uma vez. É por isso que
+<code>tabular-nums</code> convive com <code>ordinal</code> e com <code>slashed-zero</code> no mesmo
+elemento: quem manda é a variável que estiver preenchida. Você não precisa lembrar da lista; precisa
+lembrar que, em coluna de número, ela vai junto.</p>
+
+<p>Os totais ficam no <code>tfoot</code>, e ali a hierarquia muda: essa linha é a conclusão da tabela.
+Uma borda mais forte em cima separa o dado do resumo, e o peso do texto sobe.</p>
+
+<pre class="file" data-file="encomendas.html">&lt;tfoot&gt;
+  &lt;tr class="border-t-2 border-stone-300 font-semibold text-stone-900"&gt;
+    &lt;td class="px-4 py-3" colspan="2"&gt;Total do dia&lt;/td&gt;
+    &lt;td class="px-4 py-3 text-right tabular-nums"&gt;R$ 412,00&lt;/td&gt;
+    &lt;td class="px-4 py-3 text-right text-xs font-normal text-stone-500"&gt;7 pedidos&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tfoot&gt;</pre>
+
+<p>O <code>colspan="2"</code> junta as duas primeiras colunas, porque "Total do dia" não pertence a
+nenhuma delas em especial. O <code>font-normal</code> na última célula desfaz o negrito do
+<code>tr</code>: quantidade é legenda, valor é número. E o <code>border-t-2</code> é a única borda de
+2 px da tabela — se todas fossem assim, nenhuma se destacaria.</p>
+
+<h2>6. A linha que responde ao mouse</h2>
+
+<p>Uma tabela com sete linhas e cinco colunas é fácil de perder a linha com o olho. Pintar o fundo da
+linha sob o mouse resolve, e o Tailwind tem a variante para isso: <code>hover:bg-stone-50</code> no
+<code>tr</code>. Uma classe, o efeito aparece, e é só isso.</p>
+
+<p>O problema começa quando a linha tem um botão de ação. Se o botão fica sempre visível, a tabela
+vira uma parede de ícones. Se ele aparece só no mouse, some no celular e some para quem usa teclado.
+A solução que a Ana adotou tem dois gatilhos:</p>
+
+<pre class="file" data-file="encomendas.html">&lt;tr class="group border-b border-stone-200 hover:bg-stone-50"&gt;
+  &lt;td class="px-4 py-3 font-medium text-stone-900"&gt;Marta Oliveira&lt;/td&gt;
+  &lt;td class="px-4 py-3 text-stone-500 tabular-nums"&gt;16h&lt;/td&gt;
+  &lt;td class="px-4 py-3 text-right tabular-nums"&gt;R$ 48,00&lt;/td&gt;
+  &lt;td class="px-4 py-3 text-right"&gt;
+    &lt;a href="#" class="rounded-md px-2 py-1 text-sm font-medium text-amber-700 opacity-0 group-hover:opacity-100 focus:opacity-100"&gt;
+      Abrir
+    &lt;/a&gt;
+  &lt;/td&gt;
+&lt;/tr&gt;</pre>
+
+<p><code>group</code> no <code>tr</code> e <code>group-hover:opacity-100</code> no link: o mouse em
+qualquer ponto da linha revela a ação. O <code>focus:opacity-100</code> garante que, ao chegar pelo
+teclado, o link também apareça — sem ele, o foco entra num elemento invisível e a pessoa fica sem saber
+onde está. No celular, onde não existe mouse, essa coluna simplesmente não é renderizada; o cartão que
+a substitui já traz o botão visível.</p>
+
+<p>Um aviso prático: <code>opacity-0</code> deixa o elemento clicável mesmo invisível. Isso é aceitável
+aqui porque a linha inteira é de trabalho, mas nunca faça isso com um botão destrutivo — "cancelar
+encomenda" escondido atrás de opacidade é um acidente esperando acontecer.</p>
+
+<h2>7. O cabeçalho que ordena</h2>
+
+<p>Ordenar por total é a primeira coisa que qualquer pessoa tenta fazer numa tabela de dinheiro. Se o
+cabeçalho não responde ao clique, ela tenta duas vezes e desiste. Duas coisas fazem o cabeçalho
+funcionar: um botão dentro da célula e o atributo <code>aria-sort</code>, que é o que o leitor de tela
+anuncia.</p>
+
+<pre class="file" data-file="encomendas.html">&lt;th scope="col" aria-sort="descending" class="px-4 py-3 text-right"&gt;
+  &lt;button type="button" class="inline-flex items-center gap-1 font-medium text-stone-600 hover:text-stone-900"&gt;
+    Total
+    &lt;span aria-hidden="true" class="text-xs text-stone-400"&gt;▼&lt;/span&gt;
+  &lt;/button&gt;
+&lt;/th&gt;</pre>
+
+<p>O botão é obrigatório, e não é preciosismo: clicar num <code>th</code> só funciona com mouse. Um
+<code>button</code> recebe foco com Tab, dispara com Enter e com espaço, e o leitor de tela anuncia
+"botão, Total". O <code>aria-sort</code> fica no <code>th</code> e vale
+<code>ascending</code>, <code>descending</code> ou <code>none</code> — ele diz o estado, não a ação.
+Quem muda o estado é o seu script.</p>
+
+<p>A setinha é decorativa e por isso vai com <code>aria-hidden="true"</code>. Se você preferir não
+depender dela, use a variante <code>after:</code> para desenhar a seta por CSS — mas o texto do botão
+já basta. Detalhe que economiza discussão: a seta muda de lado conforme o estado e o
+<code>aria-sort</code> muda junto. Uma coisa sem a outra confunde quem não vê a tela.</p>
+
+<p>E há um cuidado de usabilidade que vale mais que qualquer classe: ordene um número de cada vez. Se
+o clique em "Total" reordenar e também mudar o filtro, a pessoa não entende o que aconteceu.</p>
+
+<h2>8. No celular: a tabela some, os cartões aparecem</h2>
+
+<p>Cinco colunas num celular de 375 px não cabem. Você já viu a saída de emergência — o invólucro que
+rola de lado — e ela serve bem para três ou quatro colunas. Para cinco, rolar de lado para ver o status
+é pior do que não ver: o dedo cobre justamente a informação que se procurava.</p>
+
+<p>A solução madura é trocar de formato. A tabela e a lista de cartões escrevem os mesmos dados; o CSS
+escolhe qual mostrar. E é aqui que aparece o erro que a Ana cometeu: ela pôs <code>hidden</code> na
+tabela para escondê-la no celular, esqueceu de trazer a tabela de volta no computador, e passou uma
+tarde achando que o site tinha quebrado.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=table;;largura:768" data-largura="768">
+  <p class="try-task">A tabela está escondida em todos os tamanhos. Faça-a reaparecer como tabela a
+  partir de 768 px, sem apagar o <code>hidden</code> — no celular ela continua fora.</p>
+  <pre class="html">&lt;table id="alvo" class="hidden w-full text-sm"&gt;
+  &lt;thead class="bg-stone-100 text-left text-xs uppercase text-stone-600"&gt;
+    &lt;tr&gt;&lt;th class="px-4 py-3" scope="col"&gt;Cliente&lt;/th&gt;&lt;th class="px-4 py-3" scope="col"&gt;Total&lt;/th&gt;&lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr class="border-b border-stone-200"&gt;&lt;td class="px-4 py-3"&gt;Marta&lt;/td&gt;&lt;td class="px-4 py-3"&gt;R$ 48,00&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td class="px-4 py-3"&gt;Jonas&lt;/td&gt;&lt;td class="px-4 py-3"&gt;R$ 12,00&lt;/td&gt;&lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</pre>
+  <pre class="out">
+display: none
+width: 100%
+font-size: 14px
+line-height: 20px
+</pre>
+  <pre class="solucao">&lt;table id="alvo" class="hidden w-full text-sm md:table"&gt;
+  &lt;thead class="bg-stone-100 text-left text-xs uppercase text-stone-600"&gt;
+    &lt;tr&gt;&lt;th class="px-4 py-3" scope="col"&gt;Cliente&lt;/th&gt;&lt;th class="px-4 py-3" scope="col"&gt;Total&lt;/th&gt;&lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr class="border-b border-stone-200"&gt;&lt;td class="px-4 py-3"&gt;Marta&lt;/td&gt;&lt;td class="px-4 py-3"&gt;R$ 48,00&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td class="px-4 py-3"&gt;Jonas&lt;/td&gt;&lt;td class="px-4 py-3"&gt;R$ 12,00&lt;/td&gt;&lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</pre>
+</div>
+
+<p>O valor que devolve a tabela ao mundo não é <code>block</code>, é <code>table</code>. Parece
+bobagem e não é: <code>block</code> num <code>&lt;table&gt;</code> quebra o alinhamento das colunas,
+porque o navegador deixa de tratá-la como tabela. O CSS gerado mostra a condição inteira:</p>
+
+<pre class="term">@media (width >= 48rem) {
+  .md\:table {
+    display: table;
+  }
+}</pre>
+
+<p>Do outro lado, a lista de cartões usa <code>md:hidden</code>. As duas classes são espelhos: uma
+esconde no pequeno e volta no grande, a outra faz o contrário. É o mesmo padrão de
+<a href="esconder-mostrar.html">esconder e mostrar</a>, agora com conteúdo diferente em cada
+formato.</p>
+
+<pre class="file" data-file="encomendas.html">&lt;ul class="md:hidden"&gt;
+  &lt;li class="flex items-center justify-between gap-3 border-b border-stone-200 px-4 py-3 last:border-0"&gt;
+    &lt;div&gt;
+      &lt;p class="font-medium text-stone-900"&gt;Marta Oliveira&lt;/p&gt;
+      &lt;p class="text-xs text-stone-500 tabular-nums"&gt;Retirada às 16h · 3 itens&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="text-right"&gt;
+      &lt;p class="font-medium tabular-nums"&gt;R$ 48,00&lt;/p&gt;
+      &lt;span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"&gt;Pronta&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;</pre>
+
+<p>O cartão repete a hierarquia da tabela: nome em cima e escuro, detalhe embaixo e cinza, valor e
+status à direita. É o mesmo dado, na mesma ordem de leitura — só que em duas colunas em vez de cinco.
+Quem aprendeu a decidir a ordem das colunas consegue montar o cartão em cinco minutos; quem só copiou
+um exemplo pronto fica travado.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a coluna de ações que empurrou a tabela</h3>
+<p>Ao acrescentar "Editar" e "Cancelar" em cada linha, a tabela passou a estourar a largura do cartão,
+mesmo no computador. As duas palavras somavam 140 px e as cinco colunas já ocupavam tudo. A correção
+foi enxugar: um único link "Abrir", que leva para a encomenda onde as ações vivem. A lição vale ouro:
+em tabela, ação é uma porta, não um menu.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o total que não batia com a soma</h3>
+<p>O pé da tabela mostrava R$ 412,00 e a soma das linhas dava R$ 411,00. O problema não era CSS: uma
+encomenda com desconto estava com o valor antigo na célula. Mas a investigação só foi possível porque
+o total estava alinhado e tabulado, e a diferença saltou aos olhos na primeira conferida. Tabela bem
+desenhada também é ferramenta de conferência.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a linha zebrada que brigou com a borda</h3>
+<p>A Ana tentou <code>odd:bg-stone-50</code> para ajudar a leitura e manteve a borda em cada linha.
+Ficou carregado: listra, borda e hover competindo. Ela escolheu um caminho só — borda fina e hover — e
+a tabela ficou mais limpa. Em tabela com mais de dez linhas, a listra volta a valer, mas aí a borda sai.
+Os dois ao mesmo tempo é o visual de planilha que ela queria evitar.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O status "Entregue" ficou cinza enquanto "Em preparo"
+é âmbar. Por quê?</p>
+<label><input type="radio" name="t1"> porque o cinza é a cor padrão e o âmbar é a cor da marca</label>
+<label><input type="radio" name="t1"> porque o que já terminou não deve competir com o que pede ação</label>
+<label><input type="radio" name="t1"> porque o cinza tem mais contraste que o âmbar</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual é a forma certa de esconder a tabela no celular
+e mostrá-la no computador?</p>
+<label><input type="radio" name="t2"> <code>hidden md:block</code> na tabela</label>
+<label><input type="radio" name="t2"> <code>hidden sm:table</code> na tabela</label>
+<label><input type="radio" name="t2"> <code>hidden md:table</code> na tabela</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que <code>tabular-nums</code> faz na coluna de
+total?</p>
+<label><input type="radio" name="t3"> dá a todos os dígitos a mesma largura, alinhando as casas</label>
+<label><input type="radio" name="t3"> deixa os números em negrito</label>
+<label><input type="radio" name="t3"> arredonda o valor para duas casas decimais</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a tabela que volta no computador</h2>
+<p>Complete a tabela do painel: ela fica escondida no celular e reaparece como tabela a partir de
+768 px. Qual classe falta?</p>
+<div class="ex-code">&lt;table class="hidden w-full text-sm <input aria-label="resposta 1" data-answer="md:table" placeholder="...">"&gt;</div>
+<p class="ex-dica">Dica: é a variante do breakpoint de 48 rem, e o valor é o mesmo nome da tag —
+<code>table</code>, não <code>block</code>.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Uma tabela de dados começa com uma pergunta, não com uma classe. Defina o que a pessoa precisa
+descobrir, escolha as colunas que respondem isso e alinhe cada uma conforme o conteúdo: texto à
+esquerda, número à direita com <code>tabular-nums</code>, status em etiqueta. O painel ganha uma
+moldura com cabeçalho, contagem e <code>overflow-hidden</code> para os cantos não vazarem.</p>
+
+<p>Os detalhes que fazem a diferença são poucos e baratos: <code>inline-flex items-center
+rounded-full px-2.5 py-0.5</code> na etiqueta, <code>tfoot</code> com <code>border-t-2 font-semibold
+tabular-nums</code> nos totais, <code>group</code> na linha com <code>group-hover:opacity-100
+focus:opacity-100</code> nas ações. No celular, <code>hidden md:table</code> na tabela e
+<code>md:hidden</code> na lista de cartões — nunca <code>hidden</code> sozinho.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Tabela de painel responde a uma pergunta; coluna que não ajuda sai da tela.</li>
+<li>Moldura: <code>overflow-hidden rounded-2xl border bg-white</code> + faixa de cabeçalho.</li>
+<li>Etiqueta: <code>inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium</code>.</li>
+<li>A palavra no status é obrigatória; a cor é reforço.</li>
+<li>Total sempre <code>text-right tabular-nums</code>, inclusive no <code>th</code>.</li>
+<li><code>tfoot</code> com <code>border-t-2</code> e <code>font-semibold</code>: uma hierarquia só.</li>
+<li>Linha: <code>group hover:bg-stone-50</code>; ação com <code>group-hover:</code> e
+<code>focus:</code>.</li>
+<li>Cabeçalho clicável é <code>button</code> com <code>aria-sort</code> no <code>th</code>.</li>
+<li>Celular: <code>hidden md:table</code> + lista de cartões <code>md:hidden</code>.</li>
+<li>Muitas colunas no celular pedem outro formato, não fonte menor.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estilo de Impressão | Guia Tailwind</title>
+<meta name="description" content="Estilo de impressão com Tailwind v4: a variante print:, como esconder o menu, evitar o cupom cortado com break-inside-avoid, tirar sombra e fundo e ajustar a página com @page.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Estilo de <span class="hl">Impressão</span></h1>
+<p class="intro">A Ana imprime a lista de encomendas toda sexta-feira. Na primeira vez, a folha saiu
+com o menu do site no topo, os botões de “comprar” no meio dos pedidos e um cupom cortado ao meio,
+com o preço na página 1 e o nome do cliente na página 2. Na segunda, ela tentou imprimir a página
+em preto e branco e o papel saiu quase todo cinza, porque o fundo âmbar do cartão tinha virado
+mancha. Nesta aula a Ana aprende que papel e tela são dois meios diferentes, e que o Tailwind tem uma
+variante inteira dedicada ao papel — a mesma página, dois desenhos.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que o papel não é uma tela pequena nem uma tela grande: é outro meio.</li>
+  <li>O que a variante <code>print:</code> faz e qual CSS ela gera.</li>
+  <li>Como esconder o que é só de tela: menu, botões, animações, rodapé de navegação.</li>
+  <li>Como mostrar o que só faz sentido no papel: endereço, telefone, data de emissão.</li>
+  <li>Como impedir que um cupom seja cortado no meio com <code>break-inside-avoid</code>.</li>
+  <li>Como começar uma seção em folha nova com <code>break-before-page</code>.</li>
+  <li>Por que sombra e fundo colorido são problema na impressora.</li>
+  <li>O que o Tailwind não tem: <code>@page</code>, margem de papel e <code>print-color-adjust</code>.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o cupom cortado e o menu no papel</h2>
+
+<p>O site da padaria tem uma página de encomendas que a Ana abre e imprime para levar para o balcão.
+Na tela, é linda: cabeçalho âmbar, menu com quatro links, cartões com sombra suave e um botão
+“Confirmar encomenda”. No papel, virou outra coisa. O menu ocupou o topo da folha, os botões
+apareceram como retângulos cinzentos e um cupom ficou dividido entre duas páginas — justo o cupom com
+o valor a pagar.</p>
+
+<p>O que aconteceu é simples: o navegador não imprimiu “a tela”. Ele pegou o mesmo HTML, aplicou as
+mesmas folhas de estilo e desenhou numa mídia diferente, com largura fixa, sem rolagem, sem mouse e,
+frequentemente, sem cor de fundo. O CSS tem, desde os anos 1990, um jeito de tratar essa mídia
+separadamente: a <code>@media print</code>. O Tailwind só deu um nome curto para ela.</p>
+
+<p>Vale dizer de saída: a impressão não é um detalhe retrô. Nota de encomenda, cupom não fiscal,
+etiqueta de validade, receita, contrato, boleto, comprovante de entrega — todos passam pelo mesmo
+caminho. Um site de padaria imprime toda semana; um site de escritório imprime todo dia.</p>
+
+<h2>2. Papel não é tela</h2>
+
+<p>Antes das classes, as cinco diferenças que explicam todos os problemas:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Na tela</th><th>No papel</th><th>O que fazer</th></tr>
+<tr><td>a largura muda com a janela</td><td>a largura é a da folha (A4, 210 mm)</td><td>não confie em <code>md:</code>; o papel tem largura própria</td></tr>
+<tr><td>o mouse passa por cima</td><td>não existe hover, nem foco, nem clique</td><td>esconda o que só funciona com interação</td></tr>
+<tr><td>a página rola</td><td>o conteúdo quebra em folhas</td><td>controle as quebras com <code>break-</code></td></tr>
+<tr><td>o fundo é colorido</td><td>o fundo costuma não ser impresso</td><td>não use cor de fundo para informar</td></tr>
+<tr><td>o endereço do link está escondido</td><td>o papel não tem link clicável</td><td>mostre o endereço quando ele importa</td></tr>
+</table>
+</div>
+
+<p>A terceira linha é a que mais dói e a que menos se prevê. Na tela, um cupom comprido simplesmente
+cresce para baixo. No papel, ele chega ao fim da folha e continua na próxima — no meio de uma linha,
+às vezes no meio de uma palavra. O navegador faz isso porque não sabe o que é “um cupom”; ele só sabe
+desenhar caixas. Quem sabe que aquele bloco não pode ser dividido é você.</p>
+
+<p>A quarta linha tem nome técnico e uma consequência prática: impressoras não imprimem cor de fundo
+por economia de tinta, e os navegadores respeitam isso por padrão. Então o fundo âmbar do cartão
+desaparece no papel, mas o texto claro em cima dele continua claro — resultado: texto quase invisível
+sobre branco. É o mesmo problema de contraste da aula <a href="contraste.html">Contraste e Leitura</a>,
+só que causado pelo papel.</p>
+
+<h2>3. A variante que só vale no papel</h2>
+
+<p>O Tailwind tem uma variante para cada condição de mídia, e a da impressão é
+<code>print:</code>. Ela funciona como <code>md:</code> ou <code>hover:</code>: você escreve na
+frente da classe e a regra passa a valer só naquela condição.</p>
+
+<pre class="file" data-file="encomendas.html">&lt;nav class="flex gap-4 bg-amber-100 p-2 print:hidden"&gt;Início · Pães · Encomendas&lt;/nav&gt;</pre>
+
+<p>O CSS gerado é curto e mostra a condição por fora:</p>
+
+<pre class="term">@media print {
+  .print\:hidden {
+    display: none;
+  }
+}</pre>
+
+<p>Duas leituras possíveis desse bloco, e as duas importam. A primeira: na tela, a regra nem é
+considerada — o menu continua lá. A segunda: no papel, ela ganha de qualquer <code>display: flex</code>
+que esteja fora de condição, porque <code>@media print</code> vem depois no arquivo gerado. É por
+isso que a combinação funciona: <code>flex</code> para a tela, <code>hidden</code> para o papel,
+sem precisar de <code>!important</code>.</p>
+
+<dl class="anatomy">
+<dt>@media print</dt>
+<dd>A condição de mídia do CSS: tudo o que está dentro dela só vale quando o destino é a impressora
+(ou o “Salvar como PDF”).</dd>
+<dt>print:</dt>
+<dd>A variante do Tailwind que embrulha uma regra em <code>@media print</code>.</dd>
+<dt>quebra de página</dt>
+<dd>O ponto em que uma folha termina e a próxima começa. Quem decide, na falta de instrução, é o
+navegador.</dd>
+<dt>break-inside</dt>
+<dd>A propriedade que diz se um elemento pode ser dividido entre duas folhas. O valor
+<code>avoid</code> pede que não.</dd>
+<dt>@page</dt>
+<dd>A regra que descreve a folha em si: margem e tamanho. Não é propriedade de elemento, então não
+vira classe.</dd>
+<dt>mm</dt>
+<dd>Milímetro, unidade real do CSS. É a unidade que faz sentido no papel:
+<code>w-[80mm]</code> é uma bobina de cupom.</dd>
+</dl>
+
+<p>Um aviso importante sobre as caixas deste guia: a prévia é uma tela, não uma impressora. O painel
+nunca vai mostrar o efeito de uma classe <code>print:</code> nos valores computados — ele mostra as
+<strong>regras geradas</strong>. Para ver o efeito de verdade, só no navegador, com
+<kbd>Ctrl</kbd> + <kbd>P</kbd> e a prévia de impressão.</p>
+
+<h2>4. Missão 1: esconder o que é de tela</h2>
+
+<p>A regra de ouro da impressão é a mais fácil de esquecer: <strong>o papel não tem interação</strong>.
+Tudo o que existe para ser clicado, passado por cima ou rolado não faz sentido impresso: menu de
+navegação, botões, ícones de rede social, carrossel, aviso de cookies, botão de “voltar ao topo”. Em
+vez de tentar deixá-los bonitos, esconda-os.</p>
+
+<div class="trytailwind" data-goal="rule:print\:hidden;;rule:@media print">
+  <p class="try-task">A nota de encomenda sai com o menu do site no topo da folha. Acrescente
+  <code>print:hidden</code> ao <code>nav</code> para o menu desaparecer no papel — e continuar
+  aparecendo na tela. A meta confere a regra gerada e a condição <code>@media print</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-white p-6"&gt;
+  &lt;nav class="flex gap-4 bg-amber-100 p-2"&gt;Início · Pães · Encomendas&lt;/nav&gt;
+  &lt;h1 class="mt-4 text-lg font-bold"&gt;Nota de encomenda&lt;/h1&gt;
+  &lt;p&gt;12 pães franceses — retirar às 7h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 24px
+background-color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-white p-6"&gt;
+  &lt;nav class="flex gap-4 bg-amber-100 p-2 print:hidden"&gt;Início · Pães · Encomendas&lt;/nav&gt;
+  &lt;h1 class="mt-4 text-lg font-bold"&gt;Nota de encomenda&lt;/h1&gt;
+  &lt;p&gt;12 pães franceses — retirar às 7h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Repare que a classe foi para o <code>nav</code>, e não para o <code>div</code> que envolve tudo.
+Esconder o pai esconderia a nota inteira — um erro comum e engraçado de ver: a pessoa põe
+<code>print:hidden</code> no elemento errado, imprime e sai uma folha em branco. A pergunta certa é
+“qual é a menor caixa que eu quero que suma?”.</p>
+
+<p>Três coisas costumam entrar nessa lista, além do menu: o rodapé com links de navegação (mas não o
+endereço da loja, que no papel é útil), os botões de ação e as animações. Animação no papel é
+particularmente inútil: a impressora desenha um quadro e pronto. Se o seu “carregando” aparece na
+impressão, ele sai como um retângulo cinza no meio da nota.</p>
+
+<h2>5. Mostrar o que só faz sentido no papel</h2>
+
+<p>O caminho inverso existe e é igualmente útil: informação que atrapalha na tela e ajuda no papel.
+Telefone da loja, endereço, CNPJ, data e hora da emissão, “documento gerado pelo site”. Na tela, isso
+é ruído; na folha, é o que permite ligar de volta.</p>
+
+<p>O jeito de esconder só na tela é a combinação <code>hidden print:block</code>. O
+<code>hidden</code> vale sempre; o <code>print:block</code> vale no papel e, por vir depois, ganha.</p>
+
+<pre class="file" data-file="encomendas.html">&lt;p class="hidden print:block text-xs text-neutral-600"&gt;
+  Padaria da Ana — Rua do Trigo, 12 — (11) 5555-0000 — emitido em 03/08
+&lt;/p&gt;</pre>
+
+<p>O mesmo raciocínio serve para trocar valores, não só mostrar e esconder. Uma nota que na tela tem
+botão grande e cor forte pode ficar com <code>print:text-xs</code> no papel, para caber mais pedido
+por folha. Um cartão com sombra pode perder a sombra
+(<code>print:shadow-none</code>) — sombra no papel é só uma mancha cinza em volta da caixa. E um
+título com <code>text-3xl</code> pode virar <code>print:text-xl</code>, porque folha não tem barra de
+rolagem para o exagero passar despercebido.</p>
+
+<p>Existe um caso em que esconder na tela não é opcional: o link. No papel, ninguém clica. Se a nota
+diz “acompanhe seu pedido aqui” e “aqui” é um link, o papel perde a informação inteira. Duas saídas:
+escrever o endereço por extenso no texto (simples e sempre funciona) ou imprimir o endereço do lado
+do link, com a técnica da seção 8.</p>
+
+<h2>6. Missão 2: o cupom que não pode ser cortado</h2>
+
+<p>Agora o problema mais grave da Ana. A lista de encomendas tem cupons, e cada cupom precisa sair
+inteiro numa folha. O navegador, sozinho, não sabe disso: ele enche a folha e corta onde chegar. Para
+dizer “não me divida”, existe a propriedade <code>break-inside</code>, e o Tailwind tem a classe
+pronta: <code>break-inside-avoid</code>.</p>
+
+<div class="trytailwind" data-goal="rule:break-inside: avoid;;conta:.cupom=2">
+  <p class="try-task">Os dois cupons podem ser cortados no meio quando a folha acaba. Acrescente
+  <code>break-inside-avoid</code> aos dois elementos com a classe <code>cupom</code>, para cada um
+  ficar inteiro numa folha. A meta confere a regra e que os dois cupons existem.</p>
+  <pre class="html">&lt;div class="cupom rounded border border-neutral-300 p-4"&gt;
+  &lt;p class="font-bold"&gt;Cupom 1 — 12 pães franceses&lt;/p&gt;
+  &lt;p&gt;Retirar às 7h — R$ 18,00&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="cupom rounded border border-neutral-300 p-4"&gt;
+  &lt;p class="font-bold"&gt;Cupom 2 — 6 pães de queijo&lt;/p&gt;
+  &lt;p&gt;Retirar às 8h — R$ 21,00&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+border-radius: 4px
+border-width: 1px
+border-color: oklch(0.87 0 none)
+</pre>
+  <pre class="solucao">&lt;div class="cupom break-inside-avoid rounded border border-neutral-300 p-4"&gt;
+  &lt;p class="font-bold"&gt;Cupom 1 — 12 pães franceses&lt;/p&gt;
+  &lt;p&gt;Retirar às 7h — R$ 18,00&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="cupom break-inside-avoid rounded border border-neutral-300 p-4"&gt;
+  &lt;p class="font-bold"&gt;Cupom 2 — 6 pães de queijo&lt;/p&gt;
+  &lt;p&gt;Retirar às 8h — R$ 21,00&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A regra é <code>break-inside: avoid</code>, e ela vale para o elemento em que está — não para os
+filhos. Se o cupom tem dez parágrafos e ocupa três folhas, a regra não faz milagre: o navegador não
+tem como caber o que não cabe, e vai cortar de qualquer jeito. <code>break-inside-avoid</code> é para
+blocos do tamanho de uma folha ou menos.</p>
+
+<p>Para o caso oposto — começar em folha nova — existem <code>break-before-page</code> (quebra antes
+do elemento) e <code>break-after-page</code> (quebra depois). O uso típico na padaria: cada
+encomenda grande começa numa folha limpa, para o cliente receber um documento que começa no topo. A
+regra gerada é literal e fácil de lembrar:</p>
+
+<pre class="term">.break-before-page { break-before: page; }
+.break-inside-avoid { break-inside: avoid; }
+.break-after-page { break-after: page; }</pre>
+
+<p>Uma armadilha de quem vem de CSS antigo: as propriedades antigas eram <code>page-break-*</code>
+(<code>page-break-before</code>, <code>page-break-inside</code>). Elas ainda funcionam por
+compatibilidade, mas o nome novo é <code>break-*</code>, e é o que o Tailwind usa. Se você procurar
+<code>page-break-inside-avoid</code> no catálogo, não vai achar — e não precisa.</p>
+
+<h2>7. Missão 3: papel branco, sem sombra, texto escuro</h2>
+
+<p>O terceiro conserto é o da tinta. O cartão da Ana tem fundo âmbar e sombra grande. No papel, a
+sombra vira uma mancha cinza e o fundo, quando é impresso, come tinta; quando não é, deixa o texto
+claro sobre branco. A solução é declarar o desenho do papel explicitamente: fundo branco, sem sombra,
+texto escuro.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-white);;rule:print\:shadow-none">
+  <p class="try-task">A nota sai com fundo âmbar e sombra. Acrescente <code>print:bg-white</code> e
+  <code>print:shadow-none</code> para o papel sair branco e sem mancha, mantendo o âmbar na tela. A
+  meta confere as duas regras na condição de impressão.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-lg bg-amber-100 p-6 shadow-lg"&gt;
+  &lt;p class="font-bold"&gt;Nota de encomenda — 12 pães&lt;/p&gt;
+  &lt;p&gt;Retirar às 7h — R$ 18,00&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 24px
+background-color: oklch(0.962 0.059 95.617)
+border-radius: 8px
+box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-lg bg-amber-100 p-6 shadow-lg print:bg-white print:shadow-none"&gt;
+  &lt;p class="font-bold"&gt;Nota de encomenda — 12 pães&lt;/p&gt;
+  &lt;p&gt;Retirar às 7h — R$ 18,00&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS gerado tem duas condições separadas, uma para cada utilitária, e isso é normal: cada classe
+com variante é uma regra própria dentro do <code>@media print</code>. Repare também que
+<code>print:shadow-none</code> gera duas declarações, porque no Tailwind v4 a sombra é montada com
+variáveis:</p>
+
+<pre class="term">@media print {
+  .print\:bg-white {
+    background-color: var(--color-white);
+  }
+}
+@media print {
+  .print\:shadow-none {
+    --tw-shadow: 0 0 #0000;
+    box-shadow: var(--tw-inset-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+}</pre>
+
+<p>Se o texto do cartão é claro demais para o papel, <code>print:text-black</code> resolve — e o
+mesmo raciocínio vale para bordas: uma borda clara na tela pode virar
+<code>print:border-neutral-400</code>, porque o que dá contraste no papel é tinta escura sobre branco,
+não fundo colorido. A aula <a href="contraste.html">Contraste e Leitura</a> tem os números; aqui basta
+a regra: no papel, cor de fundo não é informação.</p>
+
+<h2>8. O que o Tailwind não tem</h2>
+
+<p>Três coisas da impressão não são utilitárias e precisam ser escritas à mão no CSS — o que é
+perfeitamente normal, e nenhuma delas é trapaça:</p>
+
+<p><strong>A margem da folha.</strong> Quem define é a regra <code>@page</code>, que não é uma
+propriedade de elemento e por isso não vira classe:</p>
+
+<pre class="file" data-file="entrada.css">@media print {
+  @page {
+    margin: 12mm;
+  }
+}</pre>
+
+<p><strong>O tamanho do papel.</strong> A mesma regra aceita <code>size: A4;</code> ou
+<code>size: 80mm auto;</code> para bobina de cupom. E para o cupom em si, a largura pode vir de uma
+utilitária com unidade de papel: <code>w-[80mm]</code> no elemento que representa a bobina.</p>
+
+<p><strong>Cor de fundo obrigatória.</strong> Quando o fundo colorido precisa sair no papel (um selo,
+uma tarja de “pago”), a declaração é <code>print-color-adjust: exact</code>, escrita dentro de
+<code>@media print</code>. Não existe utilitária para ela no Tailwind; e mesmo com ela, a impressora
+da cliente pode estar configurada para não imprimir fundos. Por isso a regra de ouro: informação
+nunca depende de cor de fundo.</p>
+
+<pre class="file" data-file="entrada.css">@media print {
+  .selo-pago { print-color-adjust: exact; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.75rem; }
+}</pre>
+
+<p>A segunda regra do bloco é o truque do link que eu prometi. Ela pega os links externos e imprime o
+endereço entre parênteses, na fonte pequena. Dá para fazer com utilitárias de <code>content-</code>,
+mas em CSS é mais legível — e o resultado no papel é o mesmo.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que você quer</th><th>Como se escreve</th><th>É utilitária?</th></tr>
+<tr><td>esconder na impressão</td><td><code>print:hidden</code></td><td>sim</td></tr>
+<tr><td>mostrar só na impressão</td><td><code>hidden print:block</code></td><td>sim</td></tr>
+<tr><td>tirar sombra no papel</td><td><code>print:shadow-none</code></td><td>sim</td></tr>
+<tr><td>evitar corte no meio</td><td><code>break-inside-avoid</code></td><td>sim</td></tr>
+<tr><td>começar em folha nova</td><td><code>break-before-page</code></td><td>sim</td></tr>
+<tr><td>margem da folha</td><td><code>@page { margin: 12mm }</code></td><td>não: vai no CSS</td></tr>
+<tr><td>forçar fundo colorido</td><td><code>print-color-adjust: exact</code></td><td>não: vai no CSS</td></tr>
+</table>
+</div>
+
+<p>Por fim, o teste. Nenhuma dessas classes se confere olhando a tela. O caminho é abrir a prévia de
+impressão — <kbd>Ctrl</kbd> + <kbd>P</kbd> no Windows e no Linux, <kbd>Cmd</kbd> + <kbd>P</kbd> no Mac
+— e olhar o que ela mostra antes de mandar para a impressora. No Chrome, dá para escolher “Salvar como
+PDF”, que é a melhor forma de mandar a nota por mensagem. Confira três coisas na prévia: o menu sumiu,
+o cupom não está cortado e o texto está legível em preto e branco.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a folha em branco</h3>
+<p>A pessoa põe <code>print:hidden</code> no <code>body</code> ou no <code>main</code> “para tirar o
+menu” e imprime uma folha vazia. O Tailwind fez exatamente o que foi pedido: escondeu a caixa inteira.
+O conserto é descer um nível — a classe vai no elemento que precisa sumir, não no que contém o
+conteúdo. É o tipo de erro que só aparece na prévia de impressão, o que reforça o hábito de abrir a
+prévia antes de gastar papel.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o cupom em 80 mm que estoura a bobina</h3>
+<p>A Ana comprou uma impressora térmica de bobina e quis imprimir o cupom do site. Na primeira
+tentativa, o cupom saiu cortado na lateral, porque o layout assumia a largura da janela. O conserto
+foi declarar a largura em unidade de papel (<code>w-[80mm]</code>) e reduzir o respiro no papel
+(<code>print:p-2</code>). Unidade de papel é sempre milímetro: <code>mm</code> é uma unidade real do
+CSS, e o navegador sabe convertê-la em pontos na hora de imprimir.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: “no meu computador sai certo”</h3>
+<p>Impressão varia com o navegador e com a impressora, e varia também com as opções da caixa de
+diálogo: margem padrão, “imprimir fundos”, escala “ajustar à página”. Um cupom que cabe em A4 no
+Chrome pode ser reduzido a 90% no Firefox e mudar as quebras. O caminho é testar em pelo menos dois
+navegadores, com as mesmas opções, e não depender de um ajuste fino de milímetros para o documento
+fazer sentido. Se a nota só funciona com escala 97%, ela não funciona.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que a variante <code>print:</code> faz?</p>
+<label><input type="radio" name="q1"> imprime o elemento na tela, como prévia</label>
+<label><input type="radio" name="q1"> embrulha a regra em <code>@media print</code>, que só vale na impressão</label>
+<label><input type="radio" name="q1"> transforma o elemento em imagem para a impressora</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Para um cupom não ser cortado no meio da folha, usa-se:</p>
+<label><input type="radio" name="q2"> <code>break-before-page</code></label>
+<label><input type="radio" name="q2"> <code>page-break-inside-avoid</code>, que é o nome novo</label>
+<label><input type="radio" name="q2"> <code>break-inside-avoid</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que não confiar no fundo âmbar para dar
+contraste no papel?</p>
+<label><input type="radio" name="q3"> porque impressoras costumam não imprimir cor de fundo, e o texto claro fica sobre branco</label>
+<label><input type="radio" name="q3"> porque o Tailwind remove as cores na impressão</label>
+<label><input type="radio" name="q3"> porque papel não aceita cores claras</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o rodapé da nota</h2>
+<p>O rodapé com o telefone da padaria deve aparecer só no papel. Complete a classe que o esconde na
+tela e o mostra na impressão:</p>
+<div class="ex-code">&lt;p class="<input aria-label="resposta 1" data-answer="hidden print:block|print:block hidden" placeholder="..."> text-xs text-neutral-600"&gt;Padaria da Ana — (11) 5555-0000&lt;/p&gt;</div>
+<p class="ex-dica">Dica: são duas classes. <code>hidden</code> vale sempre; o <code>print:block</code>
+vale no papel e, por vir depois no CSS gerado, ganha do <code>hidden</code>.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Impressão é outra mídia, não uma tela menor. O navegador reaproveita o HTML e o CSS, mas muda tudo
+o que depende de interação, de rolagem e de cor de fundo. A variante <code>print:</code> embrulha a
+regra em <code>@media print</code>: <code>print:hidden</code> esconde o menu,
+<code>hidden print:block</code> mostra o rodapé só no papel, <code>print:bg-white</code> e
+<code>print:shadow-none</code> limpam a tinta, <code>print:text-black</code> garante leitura.</p>
+
+<p>Quebras de página são assunto de <code>break-</code>: <code>break-inside-avoid</code> impede o
+corte no meio do cupom, <code>break-before-page</code> começa em folha nova. O que não é utilitária —
+margem e tamanho da folha (<code>@page</code>), cor de fundo obrigatória
+(<code>print-color-adjust</code>) e endereço do link — vai no CSS, e o guia mostrou onde. E o teste é
+sempre a prévia de impressão, com o menu fora, o cupom inteiro e o texto legível em preto e branco.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>print:</code> só vale na impressão; o painel não mostra o efeito, mostra a regra.</li>
+<li>Esconder na impressão: <code>print:hidden</code> — no elemento certo, não no pai de tudo.</li>
+<li>Mostrar só no papel: <code>hidden print:block</code>.</li>
+<li>Cupom inteiro: <code>break-inside-avoid</code>; folha nova: <code>break-before-page</code>.</li>
+<li>O nome antigo era <code>page-break-*</code>; o atual é <code>break-*</code>.</li>
+<li>Papel: fundo branco, sem sombra, texto escuro.</li>
+<li>Margem e tamanho da folha ficam em <code>@page</code>, no CSS.</li>
+<li>Cor de fundo pode não sair; informação nunca depende dela.</li>
+<li>Unidade de papel é milímetro: <code>w-[80mm]</code> para bobina.</li>
+<li>Confira sempre na prévia de impressão, em dois navegadores.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

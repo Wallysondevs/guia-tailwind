@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Com Vite | Guia Tailwind</title>
+<meta name="description" content="Tailwind com Vite, do zero: criar o projeto da padaria, instalar tailwindcss e o plugin, ligar no vite.config.js, escrever o CSS de entrada e conferir o dist do build.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Com <span class="hl">Vite</span></h1>
+<p class="intro">A Ana passou a semana com dois terminais abertos: um gerando o CSS do Tailwind, outro
+servindo o site. Funcionava — até o dia em que ela esqueceu o primeiro e passou quarenta minutos
+procurando um erro de classe que não existia. Nesta aula ela conhece o Vite, o programa que faz o
+papel dos dois terminais de uma vez só: ela salva o arquivo, o CSS é recompilado, a página se
+atualiza sozinha. No fim, um comando gera a pasta que ela publica. É a primeira vez que o projeto da
+padaria fica com uma estrutura de verdade, com <code>src</code>, <code>package.json</code> e
+<code>dist</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que o Vite faz, em uma frase, e o que ele não faz.</li>
+  <li>Como criar o projeto da padaria com <code>npm create vite</code>.</li>
+  <li>Os dois pacotes do Tailwind e por que são dois.</li>
+  <li>Onde o <code>@theme</code> mora num projeto com Vite: no CSS de entrada.</li>
+  <li>Como ler o <code>vite.config.js</code> sem medo.</li>
+  <li>O que muda entre <code>npm run dev</code> e <code>npm run build</code>.</li>
+  <li>Por que a página abre sem estilo e como descobrir o motivo.</li>
+  <li>O que existe dentro da pasta <code>dist</code> que você publica.</li>
+</ul>
+</div>
+
+<h2>1. A cena: dois terminais e um CSS velho</h2>
+
+<p>O jeito que a Ana usava era o mais direto possível. No primeiro terminal, um comando que olhava os
+arquivos HTML e escrevia o CSS compilado num arquivo separado. No segundo, um programa que servia a
+pasta como site, para ela abrir no navegador. Dois processos, dois lugares para olhar, duas coisas
+para esquecer.</p>
+
+<p>Quando dava certo, era mágico: ela escrevia <code>p-4</code>, salvava, e o espaço aparecia. Quando
+dava errado, era cruel: ela escrevia <code>p-4</code>, salvava, e nada acontecia. Nenhuma mensagem,
+nenhum aviso. Só o silêncio do navegador mostrando o cartão encostado na borda. E o pior é que o
+arquivo estava certo — o CSS é que era de dez minutos atrás, de antes da última edição.</p>
+
+<p>Esse é o problema real que ferramentas de desenvolvimento vieram resolver, e não é sobre beleza de
+código: é sobre <strong>o resultado na tela corresponder ao que você acabou de escrever</strong>. Um
+projeto que compila sozinho a cada salvamento tira uma categoria inteira de erro do caminho. Você
+para de desconfiar do seu HTML e passa a desconfiar, com razão, do processo que gera o CSS.</p>
+
+<p>O Vite é o programa que junta as duas tarefas em um processo só, e faz a terceira — a da
+publicação — quando você pede. Ele não substitui o Tailwind: continua sendo o Tailwind que lê as suas
+classes e escreve o CSS. O Vite é o encanamento em volta: ele serve os arquivos, percebe o que mudou,
+manda o navegador atualizar e, no fim, monta a pasta que vai para o ar.</p>
+
+<h2>2. O que é o Vite (e o que ele não é)</h2>
+
+<p>O nome vem do francês <em>vite</em>, "rápido", e a promessa é essa: enquanto você edita, nada de
+esperar meio minuto a cada salvamento. A ideia por trás é simples de entender mesmo sem saber
+programar. Em vez de juntar todos os arquivos num pacote antes de abrir a página, o Vite entrega cada
+arquivo separado para o navegador e só transforma o que for pedido. Como o navegador moderno sabe ler
+os arquivos do projeto, quase nada precisa ser preparado antes.</p>
+
+<p>Na prática, você roda um comando e ganha um endereço. Abre esse endereço no navegador e vê o site
+da padaria funcionando, com o CSS já compilado. Salva um arquivo e, em menos de um segundo, o
+navegador mostra a mudança — muitas vezes sem recarregar a página inteira. Isso tem nome:
+<em>hot reload</em>, ou recarregamento quente. É o que faz a diferença no dia a dia, mais do que
+qualquer recurso avançado.</p>
+
+<p>Quando o site está pronto, o mesmo programa faz o contrário: pega tudo, compila, reduz, renomeia
+os arquivos com um código no nome e escreve o resultado numa pasta chamada <code>dist</code>. Essa
+pasta é o site. Você a envia para o servidor e acabou. Nada de Node no servidor, nada de Tailwind
+rodando no computador do cliente: só HTML, CSS e os arquivos que você já conhece.</p>
+
+<dl class="anatomy">
+<dt>Vite</dt>
+<dd>O programa que serve o projeto durante o desenvolvimento e monta a pasta final quando você manda.
+Não é o Tailwind, e não é o site.</dd>
+<dt>servidor de desenvolvimento</dt>
+<dd>Um programa que responde a um endereço no seu próprio computador, como
+<code>http://localhost:5173</code>, entregando os arquivos do projeto.</dd>
+<dt>build</dt>
+<dd>O passo de compilar e empacotar. Em inglês, "construir"; no dia a dia, "gerar o build".</dd>
+<dt>dependência</dt>
+<dd>Um pacote que o seu projeto usa e que fica listado no <code>package.json</code>. Instalar é
+baixar; o projeto não carrega esses arquivos no site final.</dd>
+<dt>plugin</dt>
+<dd>Um adaptador que ensina o Vite a fazer algo a mais. É por um plugin que o Tailwind entra
+no processo.</dd>
+</dl>
+
+<p>Uma coisa que o Vite <strong>não</strong> faz: ele não decide classes por você, não troca
+<code>p-4</code> por <code>p-6</code> e não corrige HTML. Ele é encanamento. Se o cartão está sem
+respiro, o problema continua sendo seu — e a solução continua sendo a mesma das aulas anteriores.</p>
+
+<h2>3. Node, npm e o primeiro comando</h2>
+
+<p>Tudo isso depende de um programa chamado Node, que é o que permite rodar JavaScript fora do
+navegador. Ele vem com o npm, o gerenciador de pacotes: é o npm que baixa o Vite, o Tailwind e o
+resto. Você instala uma vez, no computador, e esquece — mas vale conferir a versão antes de começar,
+porque projeto com ferramenta velha dá erro esquisito.</p>
+
+<pre class="term">ana@notebook:~$ node -v
+v22.14.0
+ana@notebook:~$ npm -v
+10.9.2</pre>
+
+<p>O <code>$</code> no começo da linha é o convite do terminal: ele está esperando um comando. Você
+não digita o <code>$</code>. O <code>ana@notebook</code> é só o nome da máquina, para você se
+localizar quando tiver duas janelas abertas. As respostas, <code>v22.14.0</code> e
+<code>10.9.2</code>, são versões: números maiores significam mais novo.</p>
+
+<p>Se o terminal responder que não conhece o comando, o Node não está instalado — e aí o caminho é
+baixar do site oficial e instalar como qualquer programa. Se as versões aparecerem, siga em frente.
+Para o Vite de hoje, o Node precisa ser razoavelmente novo: a partir da versão 20, com folga. Node 18
+ainda funciona em projetos antigos, mas o Vite mais recente pede 20 ou mais; se ele reclamar disso no
+meio da instalação, é atualização do Node, não erro seu.</p>
+
+<p>Duas palavras de vocabulário que aparecem em todo tutorial e confundem: <code>npm install</code> é
+"baixe o que está listado no <code>package.json</code>", enquanto <code>npm install alguma-coisa</code>
+é "baixe este pacote novo e acrescente na lista". O primeiro comando você roda toda vez que baixa um
+projeto; o segundo, só quando quer acrescentar algo. O Vite vem do segundo tipo, mas quem faz o
+trabalho é um comando de criação.</p>
+
+<h2>4. Criar o projeto da padaria</h2>
+
+<p>Existe um comando que monta a estrutura inteira, com as pastas e os arquivos no lugar, para você
+não começar do nada. Ele se chama <code>create</code> e faz parte do pacote do Vite. Rode na pasta
+onde você guarda os seus projetos — no caso da Ana, a pasta pessoal dela:</p>
+
+<pre class="term">ana@notebook:~$ npm create vite@latest padaria -- --template vanilla
+
+Scaffolding project in /home/ana/padaria...
+
+Done. Now run:
+
+  cd padaria
+  npm install
+  npm run dev</pre>
+
+<p>Vamos por partes, porque cada pedaço tem um motivo. <code>npm create vite@latest</code> quer dizer
+"baixe a versão mais recente do criador de projetos do Vite e rode". <code>padaria</code> é o nome da
+pasta que vai ser criada. <code>-- --template vanilla</code> é a receita: "sem framework, só HTML,
+CSS e JavaScript". Os dois traços antes de <code>--template</code> existem porque o npm repassa o
+resto da linha para o criador; é chato de decorar, e é por isso que todo tutorial copia e cola igual.</p>
+
+<p>Se você rodar sem os dois traços, o criador abre um menu interativo e pergunta o nome do projeto e
+o modelo. Funciona também, e talvez seja mais fácil na primeira vez: use as setas para escolher
+<em>Vanilla</em> e <em>JavaScript</em> quando ele perguntar. O resultado é o mesmo.</p>
+
+<p>Depois do <code>cd padaria</code> e do <code>npm install</code>, a pasta fica assim. Vale olhar com
+carinho, porque é a estrutura que você vai usar em todo projeto daqui para a frente:</p>
+
+<pre class="term">padaria/
+├── index.html
+├── package.json
+├── vite.config.js
+├── public/
+└── src/
+    ├── main.js
+    └── style.css</pre>
+
+<p>Três detalhes que surpreendem quem vem de tutorial antigo. Primeiro: o <code>index.html</code>
+mora na raiz do projeto, e não dentro de uma pasta de publicação — o Vite trata esse arquivo como o
+ponto de partida do site. Segundo: não existe pasta de CSS pronta, você cria. Terceiro: existe um
+<code>vite.config.js</code>, que é o arquivo de configuração do Vite — e é nele que o Tailwind vai
+entrar no próximo passo.</p>
+
+<h2>5. Instalar o Tailwind no projeto</h2>
+
+<p>Com o projeto criado, falta o Tailwind. São dois pacotes, e vale entender por que são dois antes de
+digitar o comando: um é o compilador, o cérebro que lê as classes e escreve o CSS; o outro é o
+adaptador, a peça que ensina o Vite a chamar esse compilador na hora certa.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Pacote</th><th>O que é</th><th>Se faltar</th></tr>
+<tr><td><code>tailwindcss</code></td><td>O compilador: lê as classes, resolve o tema, gera o CSS.</td><td>Nenhuma classe funciona; o CSS sai vazio.</td></tr>
+<tr><td><code>@tailwindcss/vite</code></td><td>O plugin que liga o compilador ao Vite.</td><td>O arquivo CSS é copiado como está, com o <code>@import</code> sem resposta.</td></tr>
+<tr><td><code>vite</code></td><td>O servidor de desenvolvimento e o empacotador.</td><td>Nem <code>dev</code> nem <code>build</code> existem.</td></tr>
+</table>
+</div>
+
+<p>O comando instala os dois de uma vez, dentro da pasta do projeto:</p>
+
+<pre class="term">ana@notebook:~/padaria$ npm install tailwindcss @tailwindcss/vite
+
+added 38 packages, and audited 40 packages in 5s
+
+found 0 vulnerabilities</pre>
+
+<p>O que mudou no disco foi o <code>package.json</code>, que ganhou duas linhas na lista de
+dependências, e a pasta <code>node_modules</code>, que é onde os pacotes baixados ficam. Essa pasta
+costuma ter milhares de arquivos e nunca é enviada para lugar nenhum: o <code>.gitignore</code> que
+vem no projeto já a exclui, e quem baixar o projeto roda <code>npm install</code> para recriá-la.</p>
+
+<p>Repare que a versão não aparece no comando. Isso é de propósito: o npm pega a mais recente. Se um
+dia um tutorial mandar <code>npm install tailwindcss@3</code>, desconfie — o três no fim é a versão 3,
+e o guia inteiro é sobre a 4. A diferença não é cosmética: na 3, a configuração vivia num arquivo
+JavaScript separado; na 4, ela vive no CSS, dentro do <code>@theme</code>, que é o assunto de
+<a href="arroba-theme.html">O @theme</a>.</p>
+
+<h2>6. Ligar o plugin: o vite.config.js</h2>
+
+<p>Instalar não é o mesmo que ligar. O Vite ainda não sabe que o Tailwind existe; é o arquivo de
+configuração que avisa. Ele já vem com um conteúdo mínimo, e você acrescenta duas coisas: a linha do
+<code>import</code> e o plugin na lista.</p>
+
+<pre class="file" data-file="vite.config.js">import { defineConfig } from "vite";
+import tailwindcss from "@tailwindcss/vite";
+
+export default defineConfig({
+  plugins: [tailwindcss()],
+});</pre>
+
+<p>Leia de cima para baixo, como uma receita. A primeira linha traz a função
+<code>defineConfig</code>, que serve só para o editor ajudar você a escrever; ela não faz nada no
+navegador. A segunda traz o plugin do Tailwind. Depois, o <code>export default</code> entrega a
+configuração: um objeto com uma chave <code>plugins</code>, que é uma lista, e dentro dela o plugin já
+chamado, com os parênteses.</p>
+
+<p>Os parênteses não são enfeite. <code>tailwindcss</code> sem parênteses é a fábrica;
+<code>tailwindcss()</code> é a peça pronta que o Vite espera. Escrever sem eles dá um erro no terminal
+que não explica nada — e é o erro mais comum deste arquivo, junto com o nome do pacote digitado
+errado.</p>
+
+<p>Uma coisa importante: esse arquivo é lido <strong>uma vez</strong>, quando o servidor começa. Se
+você mexer nele com o <code>npm run dev</code> rodando, nada acontece. Pare o servidor com
+<code>Ctrl</code> + <code>C</code> e comece de novo. Já no resto do projeto, com o arquivo de
+configuração quieto, o recarregamento é automático — e é aí que a mágica aparece.</p>
+
+<p>Se o seu projeto usa TypeScript, o arquivo se chama <code>vite.config.ts</code> e o conteúdo é
+idêntico, sem os tipos. O nome do arquivo muda, a ideia não. E se você viu por aí um
+<code>tailwind.config.js</code>, é da versão 3: no Tailwind 4 ele não é necessário, e criar um não vai
+fazer mal, mas também não vai fazer nada.</p>
+
+<h2>7. O CSS de entrada: @import e @theme</h2>
+
+<p>Falta a peça que liga o Tailwind ao CSS da página. No Vite, todo projeto tem um arquivo CSS de
+entrada, importado pelo JavaScript. No projeto da padaria, é o <code>src/style.css</code>, e ele
+precisa começar com uma linha só:</p>
+
+<pre class="file" data-file="src/style.css">@import "tailwindcss";
+
+@theme {
+  --color-marca: #b4532a;
+}
+
+.botao {
+  @apply rounded-lg bg-amber-600 px-4 py-2 text-white;
+}</pre>
+
+<p>São três partes, e cada uma tem um papel. O <code>@import "tailwindcss"</code> é o que traz todo o
+Tailwind — sem ele, nada de classes. O <code>@theme</code> é onde os valores da padaria moram: declare
+<code>--color-marca</code> e a classe <code>bg-marca</code> passa a existir, exatamente como nas
+<a href="variaveis-de-tema.html">aulas de variáveis de tema</a>. E o <code>.botao</code> mostra que
+esse arquivo é CSS de verdade processado pelo Tailwind:
+<code>@apply</code> pega classes e as escreve dentro de uma regra com nome.</p>
+
+<p>O <code>@import</code> precisa vir antes de tudo, na primeira linha do arquivo. CSS tem essa regra
+chata: importações vêm no topo. Se você escrever o <code>@theme</code> primeiro e o
+<code>@import</code> depois, o navegador ignora a importação e o Tailwind reclama. É um erro de uma
+linha de diferença e de mensagem confusa, então memorize a ordem.</p>
+
+<p>Agora a parte que costuma pegar: esse arquivo precisa estar <strong>importado</strong> em algum
+lugar do JavaScript. No modelo do Vite, o <code>src/main.js</code> já tem uma linha assim:</p>
+
+<pre class="file" data-file="src/main.js">import "./style.css";
+
+document.querySelector("#app").innerHTML = `
+  &lt;div class="p-4 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;
+`;</pre>
+
+<p>A linha <code>import "./style.css"</code> parece não fazer nada, mas é ela que diz ao Vite "este
+CSS faz parte do site". Sem ela, o arquivo existe no disco, o Tailwind até compila, e a página abre
+sem estilo nenhum. É o mesmo tipo de erro do capítulo 1: nada quebra, nada avisa, e você fica olhando
+um HTML que parece certo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=16px;;rule:background-color: var(--color-amber-100);;texto:Pão quentinho">
+  <p class="try-task">O cartão chegou sem respiro e com fundo branco. Deixe 16 px por dentro
+  (<code>p-4</code>) e o fundo âmbar claro (<code>bg-amber-100</code>).</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-lg bg-white p-2 text-stone-700"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: rgb(255, 255, 255)
+color: oklch(0.374 0.01 67.558)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-lg bg-amber-100 p-4 text-amber-900"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>Essa caixa é a prova número um do projeto com Vite: as classes do HTML viram CSS. Se depois de
+<code>npm run dev</code> o seu cartão continuar sem cor, o problema não está na classe — está no
+caminho entre o CSS de entrada e a página. Volte ao <code>import "./style.css"</code> e ao plugin no
+<code>vite.config.js</code>, nessa ordem.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|background-color=rgb(180, 83, 42);;rule:background-color: var(--color-marca)">
+  <p class="try-task">O bloco <code>@theme</code> existe, mas a cor da padaria não. Declare
+  <code>--color-marca: #b4532a</code> dentro dele e pinte o selo com <code>bg-marca</code>.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca-clara: #f6e7e0;
+}
+&lt;/style&gt;
+
+&lt;span id="alvo" class="rounded-full bg-stone-200 px-3 py-1 text-stone-700"&gt;Feito hoje&lt;/span&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.923 0.003 48.717)
+color: oklch(0.374 0.01 67.558)
+border-radius: 3.35544e+07px
+padding-inline: 12px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+}
+&lt;/style&gt;
+
+&lt;span id="alvo" class="rounded-full bg-marca px-3 py-1 text-white"&gt;Feito hoje&lt;/span&gt;</pre>
+</div>
+
+<p>Nas caixas deste guia, quem faz o papel do <code>src/style.css</code> é a tag
+<code>&lt;style type="text/tailwindcss"&gt;</code>: é a maneira de escrever CSS de verdade dentro da
+prévia. Quando o assunto for o seu projeto, troque mentalmente uma coisa pela outra — o conteúdo é
+idêntico, e é por isso que a caixa serve de ensaio.</p>
+
+<p>Uma observação que vale desde já: o <code>@theme</code> do Tailwind 4 é o mesmo em qualquer
+ferramenta. Se você migrar do Vite para outra coisa amanhã, o bloco vai junto, sem tradução. O que
+muda é só o nome do arquivo e o comando que liga o compilador. Essa portabilidade é uma das melhores
+razões para aprender o tema de verdade, e não decorar receitas de instalação — as receitas mudam, o
+bloco fica.</p>
+
+<h2>8. npm run dev e npm run build</h2>
+
+<p>Com tudo ligado, o comando é curto:</p>
+
+<pre class="term">ana@notebook:~/padaria$ npm run dev
+
+  VITE v7.1.0  ready in 412 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  press h + enter to show help</pre>
+
+<p>Essas quatro linhas contam quase tudo. <em>ready in 412 ms</em> é o tempo que o servidor levou para
+ficar pronto — meio segundo. <code>localhost</code> quer dizer "este computador": o endereço só
+existe na sua máquina, e ninguém de fora acessa. <code>5173</code> é a porta, o número que identifica
+qual programa atende naquele endereço; se você já tiver outro projeto rodando, o Vite escolhe a
+próxima livre e mostra o número certo na tela.</p>
+
+<p>Enquanto esse comando roda, o terminal fica ocupado — é assim que deve ser. Edite o HTML, salve, e
+o navegador atualiza. Edite o <code>src/style.css</code>, salve, e a mudança de cor aparece sem
+recarregar a página. Edite o <code>vite.config.js</code> e nada acontece, como já vimos: pare com
+<code>Ctrl</code> + <code>C</code> e comece de novo.</p>
+
+<p>Quando o site estiver do jeito que a Ana quer, é hora do segundo comando. Ele não abre endereço
+nenhum: ele escreve a pasta final.</p>
+
+<pre class="term">ana@notebook:~/padaria$ npm run build
+
+vite v7.1.0 building for production...
+✓ 12 modules transformed.
+dist/index.html                  0.62 kB
+dist/assets/index-Dk2f9a.css    14.71 kB
+✓ built in 1.08 s</pre>
+
+<p>Repare em dois detalhes. O CSS virou <strong>um</strong> arquivo de 14 kB, muito menor do que a
+soma dos arquivos do Tailwind: o compilador escreveu só as classes que a página usa. E o nome tem um
+código no meio (<code>index-Dk2f9a.css</code>), que muda a cada build — é de propósito, para o
+navegador do cliente nunca mostrar um CSS velho guardado na memória.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Comando</th><th>O que faz</th><th>Quando usar</th></tr>
+<tr><td><code>npm run dev</code></td><td>Servidor com recarregamento automático.</td><td>Enquanto você escreve a página.</td></tr>
+<tr><td><code>npm run build</code></td><td>Compila e escreve a pasta <code>dist</code>.</td><td>Antes de publicar, e para conferir o tamanho.</td></tr>
+<tr><td><code>npm run preview</code></td><td>Serve a pasta <code>dist</code> como ela vai ao ar.</td><td>Para testar o resultado final antes de publicar.</td></tr>
+</table>
+</div>
+
+<p>Existe um detalhe que faz o build parecer quebrado na primeira vez: abrir o
+<code>dist/index.html</code> com duplo clique. Os arquivos lá dentro usam caminhos absolutos, e o
+navegador, aberto direto do disco, procura o CSS na raiz do sistema de arquivos. A página aparece sem
+estilo e você jura que o build falhou. Não falhou: use <code>npm run preview</code>, que serve a pasta
+por um endereço de verdade.</p>
+
+<p>Outra coisa: se você publicar o site numa subpasta, como <code>loja.test/padaria</code>, avise o
+Vite no <code>vite.config.js</code> com <code>base: "/padaria/"</code>. Sem isso, o HTML vai procurar
+<code>/assets/index-Dk2f9a.css</code> na raiz do domínio, e o visual se perde do mesmo jeito. É o
+mesmo tipo de erro de caminho, agora com uma solução de uma linha.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=8px 16px;;rule:background-color: var(--color-amber-600)">
+  <p class="try-task">O <code>.botao</code> do CSS de entrada só tem o arredondamento. Complete com
+  <code>@apply rounded-lg bg-amber-600 px-4 py-2 text-white</code> e veja o botão inteiro.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+.botao {
+  border-radius: 8px;
+}
+&lt;/style&gt;
+
+&lt;button id="alvo" class="botao"&gt;Encomendar&lt;/button&gt;</pre>
+  <pre class="out">
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+.botao {
+  @apply rounded-lg bg-amber-600 px-4 py-2 text-white;
+}
+&lt;/style&gt;
+
+&lt;button id="alvo" class="botao"&gt;Encomendar&lt;/button&gt;</pre>
+</div>
+
+<p>O <code>@apply</code> funciona no Vite porque esse CSS passa pelo compilador do Tailwind — é o
+mesmo caminho do <code>@theme</code>. E aqui está uma diferença importante: no modo sem build, que é
+o assunto <a href="sem-build.html">da próxima aula</a>, o CSS também é processado; o que muda é <em>quando</em> e <em>onde</em>. Com
+Vite, tudo é compilado no seu computador, uma vez, e o site publicado leva o CSS pronto.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a página abre sem estilo e o terminal está limpo</h3>
+<p>Este é o campeão de audiência. O terminal não mostra erro, o servidor está de pé, e a página é um
+texto preto no branco. Na maioria das vezes, o <code>import "./style.css"</code> foi apagado do
+<code>src/main.js</code> em algum momento, ou o CSS de entrada nunca começou com
+<code>@import "tailwindcss"</code>. A conferência é rápida: abra o painel do navegador na aba
+<em>Network</em>, recarregue e veja se algum arquivo <code>.css</code> foi baixado. Se não foi, o
+problema é o import. Se foi e está vazio, o problema é o <code>@import</code>.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: mudou o vite.config.js e nada mudou</h3>
+<p>A Ana acrescentou o plugin e continuou achando que o Tailwind não funcionava. O servidor estava
+rodando desde antes da mudança, e a configuração é lida uma vez só, no começo. A solução é parar
+(<code>Ctrl</code> + <code>C</code>) e rodar <code>npm run dev</code> de novo. Vale a regra geral:
+mudou arquivo de configuração, reinicie. Mudou HTML, CSS ou JavaScript, não precisa.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: funciona no dev e quebra no servidor</h3>
+<p>No computador dela, tudo certo. Publicado, o site aparece sem imagem e sem CSS. Quase sempre é
+caminho: o HTML do <code>dist</code> pede <code>/assets/…</code>, a partir da raiz do domínio, e o
+site está numa subpasta. A correção é uma linha no <code>vite.config.js</code>
+(<code>base: "/padaria/"</code>) e um build novo. O outro suspeito é ter enviado a pasta errada para
+o servidor: o que vai ao ar é o conteúdo de <code>dist</code>, não a pasta do projeto com
+<code>node_modules</code> e tudo.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Para que serve o pacote <code>@tailwindcss/vite</code>?</p>
+<label><input type="radio" name="q1"> para baixar as fontes do Tailwind</label>
+<label><input type="radio" name="q1"> é o plugin que liga o compilador do Tailwind ao Vite</label>
+<label><input type="radio" name="q1"> para gerar o CSS dentro do navegador do visitante</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. Onde mora a configuração do tema num projeto com Vite?</p>
+<label><input type="radio" name="q2"> no CSS de entrada, dentro do bloco <code>@theme</code></label>
+<label><input type="radio" name="q2"> no <code>vite.config.js</code>, na chave <code>theme</code></label>
+<label><input type="radio" name="q2"> no <code>index.html</code>, dentro de um <code>style</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">3. O que o <code>npm run build</code> produz?</p>
+<label><input type="radio" name="q3"> um endereço novo para abrir no navegador</label>
+<label><input type="radio" name="q3"> uma cópia do projeto com o <code>node_modules</code></label>
+<label><input type="radio" name="q3"> a pasta <code>dist</code>, com HTML e um CSS compilado e reduzido</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: ligar o plugin</h2>
+<p>No <code>vite.config.js</code> da padaria, complete a lista de plugins com a chamada do plugin do
+Tailwind, do jeito que o Vite espera — com os parênteses.</p>
+<div class="ex-code">export default defineConfig({ plugins: [<input aria-label="resposta 1" data-answer="tailwindcss()" placeholder="...">] });</div>
+<p class="ex-dica">Dica: o nome sem parênteses é a fábrica; o Vite quer a peça pronta. Se você
+escrever só o nome, o terminal reclama de um plugin inválido.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O Vite junta duas tarefas que antes viviam separadas: servir o site enquanto você edita e montar a
+pasta de publicação quando você manda. O projeto nasce com <code>npm create vite@latest</code>, ganha
+o Tailwind com <code>npm install tailwindcss @tailwindcss/vite</code> e é ligado com duas linhas no
+<code>vite.config.js</code> — o <code>import</code> e o plugin na lista, com parênteses.</p>
+
+<p>O CSS de entrada, <code>src/style.css</code>, é o arquivo mais importante do conjunto: começa com
+<code>@import "tailwindcss"</code>, guarda o <code>@theme</code> da padaria e pode ter classes com
+<code>@apply</code>. Ele precisa ser importado no JavaScript, senão a página abre sem estilo e nenhum
+erro aparece. Durante o desenvolvimento, <code>npm run dev</code> dá um endereço em
+<code>localhost</code> e recarrega sozinho; antes de publicar, <code>npm run build</code> escreve a
+pasta <code>dist</code> e <code>npm run preview</code> deixa você ver o resultado como ele vai ao ar.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Vite é encanamento: serve em desenvolvimento, empacota na publicação.</li>
+<li><code>node -v</code> e <code>npm -v</code> antes de começar; Node 20 ou mais novo.</li>
+<li><code>npm create vite@latest padaria -- --template vanilla</code> cria a estrutura.</li>
+<li>Dois pacotes: <code>tailwindcss</code> (compilador) e <code>@tailwindcss/vite</code> (plugin).</li>
+<li><code>vite.config.js</code> precisa do <code>import</code> e de <code>plugins: [tailwindcss()]</code>.</li>
+<li>Mudou a configuração? Pare o servidor e rode <code>npm run dev</code> de novo.</li>
+<li>O CSS de entrada começa com <code>@import "tailwindcss"</code>, na primeira linha.</li>
+<li>O <code>@theme</code> e o <code>@apply</code> vivem nesse arquivo, não no config do Vite.</li>
+<li>O JavaScript precisa de <code>import "./style.css"</code>; sem isso, nada de estilo.</li>
+<li><code>build</code> gera <code>dist</code>; abra com <code>preview</code>, nunca com duplo clique.</li>
+<li>Publicando em subpasta, ajuste <code>base</code> no <code>vite.config.js</code>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

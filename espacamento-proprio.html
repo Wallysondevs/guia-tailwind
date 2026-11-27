@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Espaçamento Próprio | Guia Tailwind</title>
+<meta name="description" content="Espaçamento próprio no Tailwind 4: como a variável --spacing multiplica a escala inteira, o que muda junto quando você mexe nela e como criar tokens de espaço com nome.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Espaçamento <span class="hl">Próprio</span></h1>
+<p class="intro">O menu impresso da padaria tem uma respiração que o site não tem: as linhas de pão são
+separadas por um espaço generoso, quase o dobro do que a tela mostra. A Ana tentou consertar trocando
+<code>p-4</code> por <code>p-6</code> em vinte lugares e desistiu no oitavo. Nesta aula ela descobre que
+todo o espaçamento do Tailwind sai de <strong>uma variável só</strong>, que multiplica cada degrau. Muda
+a variável, muda o ritmo do site inteiro. E quando isso ainda não basta, ela aprende a criar degraus
+com nome próprio.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Como o Tailwind transforma o número da classe em pixels.</li>
+  <li>O que a variável <code>--spacing</code> faz — e quanto poder isso dá a ela.</li>
+  <li>Tudo o que muda junto quando você mexe na base: respiro, buraco e largura.</li>
+  <li>Quando mudar a base resolve e quando ela vira problema.</li>
+  <li>Como criar degraus próprios com <code>--spacing-*</code>.</li>
+  <li>A diferença entre um degrau com nome e um valor entre colchetes.</li>
+  <li>Como escolher uma escala que aguente o site crescer.</li>
+  <li>O que fazer quando só um elemento precisa de um valor fora da escala.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o respiro que o menu impresso tem e o site não</h2>
+
+<p>O menu da padaria foi diagramado por quem entende de papel. Entre uma linha de pão e a próxima há um
+espaço que parece o dobro do necessário — e é exatamente esse exagero que faz a leitura ficar confortável
+em pé, no balcão, com fila atrás. Na tela, a Ana usou o espaçamento padrão do Tailwind e o resultado
+ficou apertado, com cara de planilha.</p>
+
+<p>O primeiro reflexo é trocar as classes uma a uma: <code>p-4</code> vira <code>p-6</code> aqui,
+<code>gap-2</code> vira <code>gap-4</code> ali. Funciona e é insustentável. Na oitava troca ela já não
+sabe se o cartão de cima ficou igual ao de baixo, e o site passa a ter mais variações de espaço do que
+de conteúdo. É o sintoma clássico de quem ajusta cada peça em vez de ajustar a régua.</p>
+
+<p>A régua é o ponto. Todo espaçamento do Tailwind — respiro interno, margem, buraco entre itens,
+largura, altura — nasce de uma mesma unidade, que vale <strong>um quarto de <code>rem</code></strong>. O
+número da classe é o multiplicador: <code>p-4</code> é quatro vezes essa unidade, <code>p-6</code> é
+seis, <code>gap-2</code> é dois. Uma unidade, uma escala, vinte classes que se entendem.</p>
+
+<p>E a unidade tem nome: <code>--spacing</code>. Está na prateleira do <code>@theme</code>, e você pode
+declarar o seu valor. É a chave desta aula — e a razão de ela ser uma faca de dois gumes: o mesmo
+movimento que dá ao site o ritmo do menu impresso também mexe em tudo o que depende dessa régua.</p>
+
+<h2>2. O número da classe é uma multiplicação</h2>
+
+<p>Vale ver a conta como ela está escrita no CSS, porque isso resolve toda a confusão de "por que
+<code>p-4</code> é 16 e <code>p-6</code> é 24". O Tailwind não guarda uma tabela com vinte valores: ele
+escreve uma multiplicação e deixa o navegador resolver.</p>
+
+<pre class="term">@layer theme {
+  :root, :host {
+    --spacing: 0.25rem;
+  }
+}
+
+.p-4 {
+  padding: calc(var(--spacing) * 4);
+}</pre>
+
+<p>Com <code>--spacing: 0.25rem</code> e 1 rem igual a 16 px, quatro degraus dão 16 px. Se a base virar
+<code>0.3rem</code>, o mesmo <code>p-4</code> passa a dar 19,2 px — sem que ninguém toque no HTML. É
+essa a promessa da variável: uma decisão, vinte classes.</p>
+
+<p>Repare na <code>calc()</code>. Ela existe porque o CSS não multiplica uma variável por um número sem
+ajuda; a função <code>calc()</code> faz a conta na hora de aplicar. Isso também explica por que o valor
+final aparece quebrado às vezes: 0,3 × 4 × 16 = 19,2, um valor com casa decimal que o navegador guarda
+com precisão e você vê arredondado no painel.</p>
+
+<p>Guarde também a consequência oposta: como a base é uma variável, ela pode ser redefinida em um
+pedaço da página — um <code>div</code> com <code>style="--spacing: 0.2rem"</code> faz os filhos
+respirarem mais apertado. É útil em casos raros e confuso no dia a dia; por ora, o que importa é saber
+que o valor vem de cima, como herança.</p>
+
+<dl class="anatomy">
+<dt>escala</dt>
+<dd>O conjunto de degraus que o Tailwind conhece, cada um com um número: 1, 2, 3, 4, 6, 8, 12, 16…</dd>
+<dt>degrau</dt>
+<dd>Um ponto da escala. Na base padrão, cada degrau vale 4 px; o número da classe é quantos degraus.</dd>
+<dt>base</dt>
+<dd>A variável <code>--spacing</code>: o valor de um degrau. Mudar a base muda todos os degraus
+juntos.</dd>
+<dt>token de espaço</dt>
+<dd>Um degrau com nome, declarado com <code>--spacing-nome</code>, que gera <code>p-nome</code>,
+<code>gap-nome</code> e o resto.</dd>
+<dt>valor arbitrário</dt>
+<dd>O número escrito na classe, entre colchetes: <code>p-[18px]</code>. Não segue a base e não deixa
+rastro no tema.</dd>
+</dl>
+
+<h2>3. Mudando a base: o efeito no site inteiro</h2>
+
+<p>A Ana quer o respiro do menu impresso. Ela abre o CSS de entrada, muda uma linha e roda o servidor.
+O efeito é imediato e maior do que ela esperava, porque não muda só o respiro: muda tudo o que usa a
+escala.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Com <code>0.25rem</code></th><th>Com <code>0.3rem</code></th></tr>
+<tr><td><code>p-1</code></td><td>4 px</td><td>4,8 px</td></tr>
+<tr><td><code>p-2</code></td><td>8 px</td><td>9,6 px</td></tr>
+<tr><td><code>p-4</code></td><td>16 px</td><td>19,2 px</td></tr>
+<tr><td><code>p-6</code></td><td>24 px</td><td>28,8 px</td></tr>
+<tr><td><code>gap-3</code></td><td>12 px</td><td>14,4 px</td></tr>
+<tr><td><code>w-16</code></td><td>64 px</td><td>76,8 px</td></tr>
+</table>
+</div>
+
+<p>A tabela revela o tamanho do movimento: 20% a mais em tudo. Um cartão que respirava 16 px agora
+respira 19,2. O buraco entre dois botões que era 8 vira 9,6. E, no fim da lista, o efeito colateral que
+pega todo mundo: a <strong>largura</strong> também é espaçamento no Tailwind 4. Um bloco <code>w-16</code>
+era 64 px e passa a 76,8 px; um avatar de <code>size-12</code> cresce junto; uma barra lateral de
+<code>w-64</code> ganha 51 px de largura. Quem muda a base pensando só em respiro descobre o resto na
+hora em que o layout quebra.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=19.2px;;rule:padding: calc(var(--spacing) * 4)">
+  <p class="try-task">O cartão está com o respiro padrão de 16 px. No <code>@theme</code>, mude a base
+  do espaçamento para <code>--spacing: 0.3rem</code> e veja o <code>p-4</code> do HTML virar 19,2 px.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="rounded-lg bg-amber-100 p-4 text-amber-900"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+color: oklch(0.414 0.112 45.904)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+  --spacing: 0.3rem;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="rounded-lg bg-amber-100 p-4 text-amber-900"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>O HTML não mudou uma letra, e o respiro mudou. É a demonstração mais limpa do que significa
+"decisão centralizada": o <code>p-4</code> continua querendo dizer "quatro degraus", e o degrau é que
+ficou maior. Quando você quiser conferir isso no seu projeto, procure a variável no CSS publicado:</p>
+
+<pre class="term">ana@notebook:~/padaria$ grep -n -- "--spacing" dist/site.css
+9:    --spacing: 0.3rem;
+212:  padding: calc(var(--spacing) * 4);
+381:  gap: calc(var(--spacing) * 3);</pre>
+
+<p>Duas linhas, uma decisão. Se o cliente olhar o site e disser que está tudo apertado, você mexe na
+linha 9 e o site inteiro responde. Isso é exatamente o que a Ana queria quando começou a trocar classe
+por classe — só que feito de um jeito que não desfaz na semana seguinte.</p>
+
+<h2>4. Quando mexer na base é a resposta (e quando não é)</h2>
+
+<p>Mudar <code>--spacing</code> é uma decisão de projeto, não um ajuste. Ela responde a uma pergunta do
+tipo "este site deve respirar como um menu impresso ou como um aplicativo denso?". Se a resposta muda,
+a base muda — e é bom que mude num lugar só.</p>
+
+<p>Não é a resposta quando o problema é local. O cartão do bolo ficar apertado não é sinal de que o site
+inteiro precisa de 20% mais respiro; é sinal de que aquele cartão precisa de <code>p-6</code> em vez de
+<code>p-4</code>. A regra é simples: <strong>problema em um lugar, ajuste local; problema em todos os
+lugares, ajuste a base</strong>. Misturar os dois é o que produz sites com dezenove tamanhos de
+espaçamento.</p>
+
+<p>Também vale pensar no momento. Trocar a base no começo do projeto é barato: você ainda está
+escolhendo o ritmo. Trocar depois de quarenta telas prontas é caro, e não pelo CSS — pelo retrabalho de
+revisar cada tela, porque larguras e alturas também se movem. Se o projeto já está no ar, o caminho mais
+seguro é criar degraus com nome para o que precisa mudar, e deixar a base quieta.</p>
+
+<p>Uma nota sobre leitura: o espaço entre letras e a entrelinha <em>não</em> seguem
+<code>--spacing</code>. Eles moram nas prateleiras <code>--tracking-*</code> e <code>--leading-*</code>.
+Isso é bom: dá para dar mais respiro ao layout sem que o texto fique esparramado, e é a razão de o menu
+impresso precisar de duas decisões separadas — respiro entre linhas e espaço entre letras.</p>
+
+<h2>5. Degraus com nome: --spacing-*</h2>
+
+<p>Existe um meio-termo entre "usar a escala padrão" e "mudar a base do site": declarar degraus
+próprios, com nome. O prefixo é <code>--spacing-</code>, e o que vem depois vira o sufixo da classe —
+em todas as utilidades que usam a escala.</p>
+
+<pre class="file" data-file="src/style.css">@import "tailwindcss";
+
+@theme {
+  --spacing-cartao: 1.75rem;
+  --spacing-secao: 4.5rem;
+}</pre>
+
+<p>Com esse bloco, existem <code>p-cartao</code>, <code>px-cartao</code>, <code>gap-cartao</code>,
+<code>mt-secao</code>, <code>w-secao</code> e assim por diante. O nome não fica preso a uma utilidade:
+ele vira um degrau da régua, e a régua é usada por respiro, buraco, margem e tamanho.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=28px;;rule:padding: var(--spacing-cartao)">
+  <p class="try-task">O cartão da padaria pede um respiro próprio de 1,75 rem (28 px). Declare
+  <code>--spacing-cartao: 1.75rem</code> no <code>@theme</code>; a classe <code>p-cartao</code> já está
+  no HTML.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="rounded-lg bg-amber-100 p-cartao text-amber-900"&gt;Pão de queijo&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.962 0.059 95.617)
+color: oklch(0.414 0.112 45.904)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+  --spacing-cartao: 1.75rem;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="rounded-lg bg-amber-100 p-cartao text-amber-900"&gt;Pão de queijo&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS gerado é o mais honesto dos três caminhos: não há multiplicação, há um apontamento direto para
+o token. <code>padding: var(--spacing-cartao)</code>. Quem lê o CSS gerado entende a decisão sem contar
+nada.</p>
+
+<p>O ganho aparece na manutenção. Se a designer disser "os cartões precisam de mais ar", você muda
+<code>1.75rem</code> para <code>2rem</code> e todos os cartões do site acompanham — sem tocar em classe
+nenhuma, e sem mexer no respiro dos botões, que usam a escala padrão. É a granularidade certa: um token
+por decisão, não um token por elemento.</p>
+
+<p>Um cuidado de nomenclatura, o mesmo das <a href="cores-proprias.html">cores</a>: nomeie pelo papel, não pelo número.
+<code>--spacing-28</code> não diz nada e ainda tenta imitar a escala do Tailwind; <code>cartao</code>
+diz onde aquele espaço mora. E não crie um token por componente — se <code>p-cartao</code> e
+<code>p-selo</code> têm o mesmo valor, é um token só com o nome do papel mais geral.</p>
+
+<h2>6. Valor entre colchetes: a válvula de escape</h2>
+
+<p>Existe ainda o caminho mais direto: escrever o valor na classe, entre colchetes. <code>p-[18px]</code>
+gera exatamente 18 px, sem consultar escala nem token. É útil, é rápido, e é a origem de metade dos
+sites com espaçamento inconsistente — porque é fácil e não deixa rastro de decisão.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=4px;;rule:padding: 4px">
+  <p class="try-task">O selo "novo" precisa de 4 px exatos, sem seguir a escala do site. Use um valor
+  entre colchetes, do jeito que o Tailwind aceita: <code>p-[4px]</code>.</p>
+  <pre class="html">&lt;span id="alvo" class="rounded-full bg-amber-100 px-3 py-1 text-amber-900"&gt;novo&lt;/span&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.962 0.059 95.617)
+color: oklch(0.414 0.112 45.904)
+border-radius: 3.35544e+07px
+padding-inline: 12px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;span id="alvo" class="rounded-full bg-amber-100 p-[4px] text-amber-900"&gt;novo&lt;/span&gt;</pre>
+</div>
+
+<p>Repare que a solução trocou <code>px-3 py-1</code> por um valor único: o selo agora tem 4 px nos
+quatro lados. O painel mostra <code>padding: 4px</code>, e o CSS gerado mostra a classe escapada
+(<code>.p-\[4px\]</code>) com o valor cru. Nada de <code>calc()</code>, nada de variável: o número
+literal, do jeito que você escreveu.</p>
+
+<p>Quando vale usar colchetes? Em três situações honestas: quando o valor vem de uma medida externa
+(a altura de um ícone que a designer mandou), quando é um ajuste fino de uma borda óptica (1 px, 2 px),
+ou quando você está experimentando e ainda não sabe se aquilo vai virar padrão. Fora disso, o caminho é
+o token.</p>
+
+<p>E existe a terceira via, que quase ninguém lembra: colchetes com variável. <code>p-(--respiro)</code>
+usa o valor de uma variável CSS que você já tem, sem passar pelo <code>@theme</code>. É útil quando o
+valor é calculado por JavaScript ou vem de um componente, e é a ponte entre o mundo das classes e o
+mundo das variáveis soltas.</p>
+
+<h2>7. Escolhendo uma escala que aguenta crescer</h2>
+
+<p>Com base, tokens e colchetes na mão, a pergunta deixa de ser "como faço 18 px" e passa a ser "quais
+degraus este site precisa". A resposta prática é uma lista curta e estável. A padaria usa cinco:
+4, 8, 16, 32 e 56 px — respiro de selo, de botão, de cartão, de seção e de faixa de destaque. Todo o
+resto do site sai de combinações desses cinco.</p>
+
+<p>Uma escala curta tem um efeito que surpreende: o site parece <em>desenhado</em>, mesmo quando cada
+peça foi escrita em um dia diferente. Isso acontece porque o olho reconhece repetição de ritmo, mesmo
+sem saber nomear. Cinco degraus repetidos cento e cinquenta vezes produzem mais coerência do que trinta
+valores escolhidos com cuidado.</p>
+
+<p>Outra vantagem é o atrito na hora de decidir. Com poucos degraus, escolher é rápido: ou é 8, ou é 16,
+e a dúvida morre em dois segundos. Com trinta, cada cartão novo vira uma negociação — e é aí que o
+projeto começa a escorregar para valores inventados.</p>
+
+<p>Se você já tem um site com valores soltos e quer organizar, o roteiro é de uma tarde. Liste as classes
+de espaço que aparecem no HTML, conte quantas vezes cada uma é usada, promova as três ou quatro mais
+frequentes a tokens com nome e substitua as demais por um degrau vizinho da escala. O site fica
+levemente diferente em alguns cantos e muito mais fácil de manter em todos.</p>
+
+<h2>8. Os limites: onde o espaçamento não manda</h2>
+
+<p>Nem todo número da página vem de <code>--spacing</code>, e saber o que fica de fora evita meia hora
+de procura. A largura máxima de um contêiner, por exemplo, sai da prateleira <code>--container-*</code>:
+<code>max-w-md</code> não muda quando a base muda. As bordas têm a própria escala, os raios também, e a
+tipografia inteira — tamanho de fonte, entrelinha, espaço entre letras — vive em prateleiras separadas.</p>
+
+<p>Isso é uma boa notícia. Significa que dar mais respiro ao layout não deixa o texto esparramado, e que
+mudar o tamanho do texto não desalinha os cartões. Cada família de decisões tem a sua régua, e a
+graça do <code>@theme</code> é que todas moram no mesmo lugar, com nomes previsíveis.</p>
+
+<p>O resumo do que segue a escala de espaço: <code>p-*</code>, <code>m-*</code>, <code>gap-*</code>,
+<code>space-*</code>, <code>w-*</code>, <code>h-*</code>, <code>size-*</code>, <code>inset-*</code> e
+<code>translate-*</code>. Se você mudar a base e algo se mover sem estar nessa lista, provavelmente é
+porque esse algo tem uma das classes acima em um elemento que você não tinha notado — um pai, um
+contêiner, um ícone escondido. O painel das caixas e o inspetor do navegador mostram qual.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que você quer mudar</th><th>Prefixo no @theme</th><th>Classe</th></tr>
+<tr><td>respiro, buraco, largura, altura</td><td><code>--spacing</code> e <code>--spacing-*</code></td><td><code>p-4</code>, <code>gap-2</code>, <code>w-16</code></td></tr>
+<tr><td>largura máxima de um bloco</td><td><code>--container-*</code></td><td><code>max-w-md</code></td></tr>
+<tr><td>raio da borda</td><td><code>--radius-*</code></td><td><code>rounded-lg</code></td></tr>
+<tr><td>tamanho da fonte</td><td><code>--text-*</code></td><td><code>text-xl</code></td></tr>
+<tr><td>entrelinha</td><td><code>--leading-*</code></td><td><code>leading-6</code></td></tr>
+</table>
+</div>
+
+<p>Ter essa tabela na cabeça economiza uma busca por dia. Quando um número não se mexe com a base,
+procure a prateleira certa em vez de insistir no <code>--spacing</code> — e, se a mudança for só de
+um bloco, prefira a classe específica (<code>max-w-lg</code>, <code>leading-6</code>) a inventar
+token novo.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: mudou a base no meio do projeto e tudo desmontou</h3>
+<p>A Ana decidiu o novo ritmo três semanas depois de começar, e a barra lateral de <code>w-64</code>
+passou a ocupar 51 px a mais, empurrando o conteúdo para fora da tela. O respiro ficou ótimo e o layout
+quebrou. A lição: a base é uma decisão de começo de projeto. Se ela precisa mudar depois, trate como
+mudança de escopo — revise as telas uma a uma, começando pelas que têm larguras fixas.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o texto ficou apertado e o respiro cresceu</h3>
+<p>Ao aumentar a base para 0,3 rem, os buracos entre as linhas de um cartão cresceram e o texto dentro
+pareceu apertado — porque o respiro mudou e o tamanho da fonte não. Não é contradição: são réguas
+diferentes. A correção é ajustar a entrelinha do texto (<code>leading-*</code>) ou o tamanho da fonte,
+não voltar atrás na base. Quem entende que cada régua cuida de uma coisa para de tentar consertar uma
+com a outra.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: os colchetes se multiplicaram</h3>
+<p>Começou com um <code>p-[18px]</code> para acertar um cartão. Três semanas depois, havia
+<code>p-[18px]</code> em doze arquivos, cada um copiado do anterior. A faxina é curta: crie
+<code>--spacing-cartao: 1.125rem</code> se aquele valor for mesmo o certo, troque as doze ocorrências
+por <code>p-cartao</code> e apague os colchetes. Da próxima vez, a decisão está no tema, e não na pasta
+inteira.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. Declarar <code>--spacing: 0.3rem</code> no <code>@theme</code> faz o quê?</p>
+<label><input type="radio" name="q1"> multiplica a escala inteira: <code>p-4</code> passa a 19,2 px</label>
+<label><input type="radio" name="q1"> muda só o <code>p-4</code>, e só nesta página</label>
+<label><input type="radio" name="q1"> troca a fonte por uma maior</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">2. O que <code>--spacing-cartao: 1.75rem</code> cria?</p>
+<label><input type="radio" name="q2"> uma classe chamada <code>cartao</code>, só de respiro</label>
+<label><input type="radio" name="q2"> um degrau novo: <code>p-cartao</code>, <code>gap-cartao</code>, <code>w-cartao</code></label>
+<label><input type="radio" name="q2"> uma cópia da escala padrão com outro nome</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">3. Quando o valor entre colchetes (<code>p-[18px]</code>) é a escolha certa?</p>
+<label><input type="radio" name="q3"> sempre; é mais curto de escrever</label>
+<label><input type="radio" name="q3"> nunca; colchetes são proibidos no Tailwind</label>
+<label><input type="radio" name="q3"> num ajuste pontual ou em medida externa que não deve virar padrão</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: 32 px na escala padrão</h2>
+<p>Com a base padrão de <code>0.25rem</code>, qual classe de respiro interno dá exatamente 32 px?
+Escreva a classe completa.</p>
+<div class="ex-code">&lt;div class="rounded-lg bg-amber-100 <input aria-label="resposta 1" data-answer="p-8" placeholder="..."> text-amber-900"&gt;Pão quentinho&lt;/div&gt;</div>
+<p class="ex-dica">Dica: cada degrau vale 4 px na base padrão. Você também pode escrever
+<code>p-[32px]</code>, que funciona — mas aí o respiro deixa de acompanhar a base se ela mudar.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Todo o espaçamento do Tailwind 4 sai de <code>--spacing</code>, que vale 0,25 rem por padrão e
+multiplica o número da classe: <code>p-4</code> é <code>calc(var(--spacing) * 4)</code>. Mexer nessa
+variável é mexer no ritmo do site inteiro — e também nas larguras e alturas, porque <code>w-*</code>,
+<code>h-*</code> e <code>size-*</code> usam a mesma régua. É uma decisão de começo de projeto, não um
+ajuste de sexta-feira.</p>
+
+<p>Para necessidades locais, dois caminhos: um degrau com nome (<code>--spacing-cartao: 1.75rem</code>,
+que gera <code>p-cartao</code>, <code>gap-cartao</code> e companhia) ou um valor entre colchetes
+(<code>p-[18px]</code>), reservado para o pontual e para medida externa. A escala curta — quatro ou
+cinco degraus repetidos — é o que faz o site parecer desenhado, e é mais fácil manter do que trinta
+valores escolhidos a dedo.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>p-4</code> significa quatro degraus; o degrau é <code>--spacing</code>.</li>
+<li>Base padrão: 0,25 rem, que dá 4 px por degrau.</li>
+<li>Mudar a base muda respiro, buraco, margem, largura e altura de uma vez.</li>
+<li>Problema em um lugar, ajuste local; problema em todos, ajuste a base.</li>
+<li><code>--spacing-cartao</code> gera <code>p-cartao</code>, <code>gap-cartao</code>, <code>w-cartao</code>.</li>
+<li>Nomeie o token pelo papel, nunca pelo número.</li>
+<li><code>p-[18px]</code> é válvula de escape, não padrão de projeto.</li>
+<li><code>p-(--respiro)</code> usa uma variável CSS sem passar pelo tema.</li>
+<li>Tamanho de fonte, entrelinha e <code>max-w-*</code> têm réguas próprias.</li>
+<li>Escala curta e repetida dá mais coerência que muitos valores exatos.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

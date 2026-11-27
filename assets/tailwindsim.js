@@ -81,7 +81,6 @@
       iframe.setAttribute("title", "Prévia do HTML com Tailwind");
       /* a largura do iframe é o viewport da prévia: é ela que decide qual breakpoint vale */
       iframe.style.width = lerLargura(largura) + "px";
-      iframe.style.maxWidth = "100%";
       iframe.style.margin = "0 auto";
       iframe.style.border = "0";
       iframe.style.display = "block";

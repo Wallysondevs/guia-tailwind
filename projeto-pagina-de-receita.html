@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Página de Receita | Guia Tailwind</title>
+<meta name="description" content="Projeto completo de uma página de receita com Tailwind: a coluna de leitura, a foto em 16:9, a ficha técnica em três colunas, a lista de ingredientes e os passos numerados.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Página de <span class="hl">Receita</span></h1>
+<p class="intro">A Ana vende bolo de fubá por encomenda e responde a mesma pergunta cinco vezes por dia:
+"qual é a receita?". Ela já mandou foto do caderno, já mandou áudio, já mandou PDF — e o PDF, no
+telefone, abre minúsculo e ninguém consegue ler com a mão na massa. A solução é uma página de receita
+no site da padaria: um endereço que abre em qualquer tela, com a foto do bolo, os três números da ficha
+técnica, os ingredientes e o passo a passo. Nesta aula ela monta essa página inteira, começando pela
+coluna de leitura — a decisão que manda em todas as outras.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que uma receita vive em uma coluna estreita, com <code>mx-auto max-w-3xl</code>.</li>
+  <li>Como dar proporção à foto com <code>aspect-video</code> e <code>object-cover</code>.</li>
+  <li>A ficha técnica em três colunas: <code>grid grid-cols-3 gap-4</code>.</li>
+  <li>Lista de ingredientes com marcador colorido: <code>list-disc marker:text-amber-600</code>.</li>
+  <li>Passos numerados com um círculo de número e <code>shrink-0</code>.</li>
+  <li>O bloco de dica com borda de destaque: <code>border-l-4 border-amber-500 bg-amber-50</code>.</li>
+  <li>Duas colunas no desktop com <code>md:grid-cols-2</code>, e quando elas atrapalham.</li>
+  <li>O que conferir antes de publicar uma receita: hierarquia, medida e ordem de leitura.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a receita que ninguém consegue ler</h2>
+
+<p>A receita da Ana cabe em uma folha de caderno. Quando ela fotografa, a foto fica torta e a letra
+some no canto. Quando ela digita no aplicativo de mensagens, o texto chega em um bloco compacto, sem
+respiro, e a cliente perde a linha no meio do terceiro ingrediente. O problema não é o conteúdo, que é
+bom: é a <strong>forma</strong>. Receita é texto para ser seguido com as mãos ocupadas, e isso pede
+linhas curtas, espaço entre os passos e nada competindo por atenção.</p>
+
+<p>Uma página de receita tem uma ordem que funciona sempre: primeiro a pessoa quer saber <em>o que é</em>
+e <em>quanto tempo leva</em>; depois ela confere se tem os ingredientes; só então ela lê o modo de
+preparo. Quem monta a página nessa ordem resolve o problema. Quem começa pela história da família e
+deixa os ingredientes no fim faz a pessoa rolar três telas com o açúcar já na bancada.</p>
+
+<p>Existe ainda uma questão de tamanho de tela que muda o desenho. Receita é aberta no telefone, em pé,
+na cozinha, com a tela a um braço de distância. Isso significa que: a letra do corpo não pode ser
+pequena, as linhas não podem ser longas, e os itens de lista precisam de espaço entre eles — o dedo
+sujo não pode clicar em duas coisas ao mesmo tempo. Tudo o que veremos a seguir sai dessas três
+restrições.</p>
+
+<p>A página final tem quatro blocos: o topo com título e foto, a ficha técnica com três números, o
+bloco de ingredientes e o bloco de preparo. Mais uma dica destacada e um pé de página com o crédito.
+Só isso. Receita não precisa de menu, carrossel nem botão flutuante. Precisa de leitura confortável.</p>
+
+<h2>2. A coluna de leitura: a decisão que manda em tudo</h2>
+
+<p>Antes de qualquer enfeite, a página precisa de uma largura. Se o texto ocupar a tela inteira de um
+monitor, cada linha fica com 140 caracteres, e o olho se perde ao voltar para o começo da linha
+seguinte — é o mesmo problema de ler uma bula de remédio aberta no chão. A faixa confortável é de 45 a
+75 caracteres por linha, e no Tailwind <code>max-w-3xl</code> (768 px) entrega isso com folga para um
+texto de 16 px.</p>
+
+<p>A combinação é <code>mx-auto max-w-3xl px-6 py-12</code>. O <code>max-w-3xl</code> põe o teto, o
+<code>mx-auto</code> centraliza o bloco no espaço que sobra, o <code>px-6</code> garante 24 px nas
+laterais quando a tela é menor que o teto, e o <code>py-12</code> dá 48 px de respiro em cima e embaixo.
+Essas quatro classes vão se repetir em quase toda página de conteúdo que você montar — receita, artigo,
+política de privacidade. Vale decorar.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|max-width=768px;;rule:margin-inline: auto;;css:#alvo|padding-top=48px">
+  <p class="try-task">O texto da receita atravessa a tela toda, encostado nas bordas. Limite a 768 px,
+  centralize e dê 24 px de respiro lateral e 48 px em cima e embaixo: <code>mx-auto max-w-3xl px-6
+  py-12</code>.</p>
+  <pre class="html">&lt;main id="alvo" class="bg-stone-50 py-8"&gt;
+  &lt;h1 class="text-3xl font-semibold"&gt;Bolo de fubá da padaria&lt;/h1&gt;
+  &lt;p class="mt-4 text-slate-700"&gt;O bolo que sai da forma às seis da manhã e some antes das nove. A receita é da avó da Ana, com uma colher de manteiga a mais.&lt;/p&gt;
+&lt;/main&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.985 0.001 106.423)
+padding-block: 32px
+</pre>
+  <pre class="solucao">&lt;main id="alvo" class="mx-auto max-w-3xl bg-stone-50 px-6 py-12"&gt;
+  &lt;h1 class="text-3xl font-semibold"&gt;Bolo de fubá da padaria&lt;/h1&gt;
+  &lt;p class="mt-4 text-slate-700"&gt;O bolo que sai da forma às seis da manhã e some antes das nove. A receita é da avó da Ana, com uma colher de manteiga a mais.&lt;/p&gt;
+&lt;/main&gt;</pre>
+</div>
+
+<p>Repare que a solução colocou <code>mx-auto</code> junto com <code>max-w-3xl</code>: um sem o outro
+não funciona. Só <code>max-w-3xl</code> deixa o bloco com 768 px encostado à esquerda; só
+<code>mx-auto</code> não faz nada, porque não existe teto para sobrar espaço. É o par que centraliza, e
+o par é o hábito.</p>
+
+<pre class="term">.mx-auto {
+  margin-inline: auto;
+}
+.max-w-3xl {
+  max-width: var(--container-3xl);
+}
+.px-6 {
+  padding-inline: calc(var(--spacing) * 6);
+}
+.py-12 {
+  padding-block: calc(var(--spacing) * 12);
+}</pre>
+
+<p>A dupla <code>margin-inline</code> e <code>padding-inline</code> aparece toda vez que você escreve
+<code>mx-</code> ou <code>px-</code>. Elas são as versões horizontais de margem e respiro interno, e
+existem para respeitar a direção da escrita: em português, esquerda e direita; em árabe, o contrário.
+Você não precisa pensar nisso — só saber que <code>px</code> é lateral e <code>py</code> é vertical.</p>
+
+<h2>3. O topo: rótulo, título e a foto com proporção</h2>
+
+<p>O topo de uma receita tem quatro peças empilhadas: um rótulo pequeno, o título, uma linha de apoio e
+a foto. O rótulo é <code>text-xs font-semibold uppercase tracking-wide text-amber-700</code> — letras
+pequenas, espaçadas e coloridas, que dão contexto sem competir. O título é
+<code>mt-2 text-3xl font-semibold tracking-tight text-stone-900</code>. A linha de apoio é
+<code>mt-3 text-slate-600</code>, e é onde a Ana diz em uma frase por que esse bolo é diferente.</p>
+
+<p>A foto é o pedaço que mais estraga página de iniciante, e quase nunca por culpa da foto. Uma imagem
+sem proporção definida entra com o tamanho original: se a cliente mandou a foto na vertical do celular,
+ela aparece com 900 px de altura no meio de um texto de 600; se o arquivo é grande, a página demora e a
+imagem "salta" quando chega. O par <code>aspect-video w-full rounded-2xl object-cover</code> resolve as
+três coisas de uma vez: a caixa fica em 16:9, ocupa a largura da coluna, arredonda o canto e a imagem
+cobre a caixa sem distorcer.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|aspect-ratio=16 / 9;;css:#alvo|object-fit=cover">
+  <p class="try-task">A foto está com 192 px de altura fixa e achatada. Troque a altura por proporção
+  16:9 e mande a imagem preencher o quadro sem distorcer: <code>aspect-video</code> e
+  <code>object-cover</code>. O código esquisito no <code>src</code> é uma imagem desenhada na hora, para
+  a prévia não depender da internet.</p>
+  <pre class="html">&lt;img id="alvo" class="h-48 w-full rounded-2xl" alt="Bolo de fubá na forma"
+  src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23f59e0b'/%3E%3C/svg%3E"&gt;</pre>
+  <pre class="out">
+height: 192px
+border-radius: 16px
+</pre>
+  <pre class="solucao">&lt;img id="alvo" class="aspect-video w-full rounded-2xl object-cover" alt="Bolo de fubá na forma"
+  src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23f59e0b'/%3E%3C/svg%3E"&gt;</pre>
+</div>
+
+<p>O painel mostra <code>aspect-ratio: 16 / 9</code> e <code>object-fit: cover</code>. O
+<code>aspect-ratio</code> é uma propriedade do CSS que diz "a largura manda, a altura é consequência".
+Com ela, a caixa se ajusta sozinha em qualquer tela e a imagem nunca chega "pulando" — o espaço já está
+reservado. O <code>object-fit: cover</code> é o que permite a imagem preencher a caixa: o navegador corta
+o excesso nas laterais, como uma tesoura, em vez de espremer o bolo até ele ficar redondo. A aula de
+<a href="aspect-ratio.html">Proporção com aspect</a> tem a lista completa de proporções prontas, do
+<code>aspect-square</code> ao <code>aspect-video</code>.</p>
+
+<dl class="anatomy">
+<dt>rótulo</dt>
+<dd><code>text-xs uppercase tracking-wide text-amber-700</code>: diz o gênero do conteúdo
+("receita da casa") sem competir com o título.</dd>
+<dt>título</dt>
+<dd><code>text-3xl font-semibold tracking-tight</code>: 30 px, o maior elemento da página.</dd>
+<dt>apoio</dt>
+<dd><code>mt-3 text-slate-600</code>: uma frase que vende a receita, no segundo degrau de leitura.</dd>
+<dt>foto</dt>
+<dd><code>aspect-video w-full rounded-2xl object-cover</code>: proporção, largura da coluna, canto e
+recorte.</dd>
+<dt>legenda</dt>
+<dd><code>mt-2 text-xs text-slate-500</code>: o crédito da foto ou o nome do prato, abaixo da imagem.</dd>
+</dl>
+
+<p>Uma nota sobre o <code>h1</code>. A página tem um título principal e ele deve ser um
+<code>&lt;h1&gt;</code>, não um <code>div</code> com letra grande. Isso importa para quem usa leitor de
+tela — o programa que lê a página em voz alta navega por títulos — e também para o Google. Os blocos
+seguintes (ingredientes, preparo, dica) são <code>h2</code>, e o que estiver dentro deles é
+<code>h3</code>. Aparência vem das classes; <em>significado</em> vem da tag.</p>
+
+<h2>4. A ficha técnica: três números em três colunas</h2>
+
+<p>Quem abre uma receita quer saber três coisas antes de ler qualquer parágrafo: quanto tempo leva,
+quanto rende e se é difícil. Esses três números são a ficha técnica, e eles formam uma linha de três
+colunas iguais. No Tailwind: <code>grid grid-cols-3 gap-4</code>. O <code>grid</code> liga o modo grade,
+o <code>grid-cols-3</code> divide em três frações iguais e o <code>gap-4</code> dá 16 px entre elas.</p>
+
+<pre class="file" data-file="receita.html">&lt;dl class="mt-8 grid grid-cols-3 gap-4"&gt;
+  &lt;div class="rounded-xl bg-stone-50 p-4 text-center"&gt;
+    &lt;dt class="text-xs uppercase tracking-wide text-slate-500"&gt;Tempo&lt;/dt&gt;
+    &lt;dd class="mt-1 text-lg font-semibold text-stone-900"&gt;50 min&lt;/dd&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-xl bg-stone-50 p-4 text-center"&gt;
+    &lt;dt class="text-xs uppercase tracking-wide text-slate-500"&gt;Rende&lt;/dt&gt;
+    &lt;dd class="mt-1 text-lg font-semibold text-stone-900"&gt;12 fatias&lt;/dd&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-xl bg-stone-50 p-4 text-center"&gt;
+    &lt;dt class="text-xs uppercase tracking-wide text-slate-500"&gt;Dificuldade&lt;/dt&gt;
+    &lt;dd class="mt-1 text-lg font-semibold text-stone-900"&gt;Fácil&lt;/dd&gt;
+  &lt;/div&gt;
+&lt;/dl&gt;</pre>
+
+<p>Note que a ficha é uma <code>dl</code> — lista de descrição — e não três <code>div</code> soltas. Cada
+par <code>dt</code> (o termo) e <code>dd</code> (a descrição) é uma informação ligada à outra, e o
+leitor de tela anuncia isso do jeito certo. É o mesmo tipo de elemento usado nos blocos de anatomia
+deste guia, e o motivo é o mesmo: nome e valor andam juntos.</p>
+
+<p>Três colunas em um telefone de 360 px deixam 100 px para cada uma, e isso só funciona porque o
+conteúdo é curtíssimo: "50 min", "12 fatias", "Fácil". Se você tiver uma quarta informação ou textos
+maiores, use <code>grid-cols-2 gap-4</code> e deixe a terceira cair na linha de baixo. Existe uma
+alternativa elegante para fichas de uma linha só, com divisores verticais:
+<code>grid grid-cols-3 divide-x divide-stone-200</code>. O <code>divide-x</code> é o irmão horizontal do
+<code>divide-y</code> que você viu no cartão de visita.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que faz</th><th>Onde entra</th></tr>
+<tr><td><code>grid</code></td><td>liga o modo grade no elemento</td><td>o <code>dl</code> da ficha</td></tr>
+<tr><td><code>grid-cols-3</code></td><td>três colunas iguais</td><td>ficha técnica</td></tr>
+<tr><td><code>gap-4</code></td><td>16 px entre as colunas</td><td>ficha técnica</td></tr>
+<tr><td><code>divide-x</code></td><td>linha vertical entre colunas</td><td>ficha sem caixinhas</td></tr>
+<tr><td><code>rounded-xl</code></td><td>12 px de canto</td><td>cada caixinha da ficha</td></tr>
+<tr><td><code>bg-stone-50</code></td><td>cinza quente bem claro</td><td>fundo das caixinhas</td></tr>
+</table>
+</div>
+
+<p>Uma decisão de cor: aqui o neutro é <code>stone</code> (cinza quente) e não <code>slate</code> (cinza
+frio), porque comida pede temperatura. O <code>amber</code> continua sendo a cor da marca, aparecendo no
+rótulo e nos marcadores da lista. Não há nada de errado em usar <code>slate</code>; só não misture os
+dois cinzas na mesma página, porque a diferença é sutil e o resultado parece um erro de impressão.</p>
+
+<h2>5. Os ingredientes: lista com marcador e espaço</h2>
+
+<p>Ingrediente é lista, e lista no HTML é <code>ul</code>. A tentação é usar <code>div</code> para cada
+linha, o que funciona visualmente e estraga a leitura por voz — o leitor de tela anuncia "lista com 9
+itens" só quando encontra um <code>ul</code> de verdade. Com a lista certa, a aparência vem das classes:
+<code>mt-6 space-y-2 pl-5 list-disc marker:text-amber-600</code>.</p>
+
+<pre class="file" data-file="receita.html">&lt;h2 class="mt-10 text-xl font-semibold text-stone-900"&gt;Ingredientes&lt;/h2&gt;
+&lt;ul class="mt-4 list-disc space-y-2 pl-5 text-slate-700 marker:text-amber-600"&gt;
+  &lt;li&gt;2 xícaras de fubá mimoso&lt;/li&gt;
+  &lt;li&gt;1 xícara de farinha de trigo&lt;/li&gt;
+  &lt;li&gt;3 ovos inteiros&lt;/li&gt;
+  &lt;li&gt;1 xícara de leite&lt;/li&gt;
+  &lt;li&gt;1 e meia xícara de açúcar&lt;/li&gt;
+  &lt;li&gt;2 colheres de sopa de manteiga&lt;/li&gt;
+  &lt;li&gt;1 colher de sopa de fermento em pó&lt;/li&gt;
+  &lt;li&gt;Uma pitada de sal&lt;/li&gt;
+  &lt;li&gt;Erva-doce a gosto&lt;/li&gt;
+&lt;/ul&gt;</pre>
+
+<p>Cada classe tem um trabalho. O <code>list-disc</code> traz as bolinhas de volta — o Tailwind, na
+limpeza que faz no começo da folha de estilo, remove marcador e recuo de todas as listas. O
+<code>pl-5</code> devolve o recuo de 20 px para as bolinhas terem onde morar. O <code>space-y-2</code>
+dá 8 px entre um item e o seguinte, o que parece pouco e muda tudo na leitura com a mão ocupada. E o
+<code>marker:text-amber-600</code> pinta só a bolinha, deixando o texto escuro.</p>
+
+<pre class="term">.list-disc {
+  list-style-type: disc;
+}
+.pl-5 {
+  padding-left: calc(var(--spacing) * 5);
+}
+.space-y-2 :where(&gt; :not(:last-child)) {
+  margin-block-start: calc(var(--spacing) * 2);
+}
+.marker\:text-amber-600 ::marker {
+  color: var(--color-amber-600);
+}</pre>
+
+<p>O seletor do <code>space-y-2</code> parece assustador e diz uma coisa simples: "aplique a margem em
+todos os filhos, menos no último". É por isso que o espaço aparece <em>entre</em> os itens e não depois
+do último — sem essa exceção, a lista deixaria um buraco no fim. Entender esse <code>:not(:last-child)</code>
+economiza horas de depuração em qualquer layout vertical do guia.</p>
+
+<p>A aula de <a href="listas-e-marcadores.html">Listas e Marcadores</a> mostra as outras variações —
+<code>list-decimal</code>, <code>list-none</code> e os marcadores de cada nível. Sobre as quantidades:
+escreva por extenso quando a medida é caseira ("duas xícaras") e use a coluna
+como ela é na vida real. Um detalhe de conteúdo que vale mais que qualquer classe: a receita precisa
+dizer quantas fatias rende e qual é o tamanho da forma. Sem isso, a leitora descobre o problema no meio
+do preparo, quando a massa já está batida.</p>
+
+<h2>6. O modo de preparo: passos com número em círculo</h2>
+
+<p>Passo a passo pede número visível. A forma mais direta é <code>ol</code> com
+<code>list-decimal pl-5</code>, e funciona bem. A forma que fica bonita — e que ensina flexbox de
+verdade — é fazer o número com as mãos: cada passo é uma linha flexível com um círculo de 32 px à
+esquerda e o texto à direita.</p>
+
+<pre class="file" data-file="receita.html">&lt;ol class="mt-4 space-y-6"&gt;
+  &lt;li class="flex gap-4"&gt;
+    &lt;span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-semibold text-amber-800"&gt;1&lt;/span&gt;
+    &lt;p class="leading-relaxed text-slate-700"&gt;Bata os ovos com o açúcar até ficar claro, junte a manteiga derretida e o leite morno.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li class="flex gap-4"&gt;
+    &lt;span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-semibold text-amber-800"&gt;2&lt;/span&gt;
+    &lt;p class="leading-relaxed text-slate-700"&gt;Misture o fubá, a farinha e o sal em outra tigela e junte à massa, mexendo com colher de pau.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li class="flex gap-4"&gt;
+    &lt;span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-semibold text-amber-800"&gt;3&lt;/span&gt;
+    &lt;p class="leading-relaxed text-slate-700"&gt;Por último o fermento, mexendo devagar. Asse em forma untada, a 180 graus, por 35 minutos.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;</pre>
+
+<p>O que faz esse desenho funcionar é o <code>shrink-0</code> no círculo. Em uma linha flexível, os
+filhos encolhem para caber; se o texto do passo for longo, o círculo de 32 px viraria uma bolinha
+achatada e oval. O <code>shrink-0</code> diz "este aqui não encolhe", e o texto, que pode quebrar linha,
+fica com o espaço. É uma das classes mais úteis do flexbox e a menos lembrada: toda vez que um ícone ou
+avatar do lado de um texto aparece deformado, é isso que falta.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor</th><th>Para que serve no passo</th></tr>
+<tr><td><code>flex</code></td><td>linha flexível</td><td>número e texto lado a lado</td></tr>
+<tr><td><code>gap-4</code></td><td>16 px</td><td>espaço entre número e texto</td></tr>
+<tr><td><code>h-8 w-8</code></td><td>32 px</td><td>o círculo do número</td></tr>
+<tr><td><code>shrink-0</code></td><td>não encolhe</td><td>mantém o círculo redondo</td></tr>
+<tr><td><code>rounded-full</code></td><td>círculo</td><td>o formato do número</td></tr>
+<tr><td><code>leading-relaxed</code></td><td>1,625</td><td>entrelinha do texto do passo</td></tr>
+</table>
+</div>
+
+<p>O <code>leading-relaxed</code> não é enfeite. Texto que a pessoa lê em pé, com a tela a um braço de
+distância, precisa de mais entrelinha que texto de artigo lido sentado. O valor 1,625 dobra a distância
+entre as linhas e é o que diferencia "confortável" de "apertado". Em receita, use em todo parágrafo de
+preparo.</p>
+
+<p>Duas observações práticas. A primeira: mantenha um passo por <code>li</code>, mesmo quando dois passos
+parecem curtos demais — quem cozinha segue a receita com o dedo na tela e perde a conta em blocos longos.
+A segunda: comece cada passo com um verbo no imperativo ("bata", "misture", "asse"). Isso não é estilo:
+é o que faz o olho achar o começo do passo em uma olhada rápida.</p>
+
+<h2>7. O bloco de dica: destaque sem virar alerta</h2>
+
+<p>No fim da receita, a Ana quer dizer uma coisa que não é passo nem ingrediente: "o segredo é assar em
+forno já quente e não abrir a porta nos primeiros 20 minutos". Isso é uma dica, e dica precisa se
+destacar do texto sem assustar. O desenho clássico é uma faixa com borda grossa de um lado:
+<code>rounded-r-xl border-l-4 border-amber-500 bg-amber-50 p-4</code>.</p>
+
+<pre class="file" data-file="receita.html">&lt;aside class="mt-10 rounded-r-xl border-l-4 border-amber-500 bg-amber-50 p-4"&gt;
+  &lt;p class="text-sm font-semibold text-amber-900"&gt;O segredo da casa&lt;/p&gt;
+  &lt;p class="mt-1 text-sm leading-relaxed text-amber-900"&gt;Asse em forno já quente e não abra a porta nos primeiros 20 minutos. Bolo que afunda no meio quase sempre abriu a porta cedo.&lt;/p&gt;
+&lt;/aside&gt;</pre>
+
+<p>A borda esquerda de 4 px é o que cria o destaque: ela marca o começo do bloco sem fechar a caixa,
+dando a sensação de "comentário à margem". O <code>rounded-r-xl</code> arredonda só os dois cantos da
+direita — a esquerda fica reta, porque é ali que está a borda. Se você usar <code>rounded-xl</code>, o
+canto arredondado corta a borda e a faixa fica com um degrau esquisito.</p>
+
+<dl class="anatomy">
+<dt>borda de destaque</dt>
+<dd><code>border-l-4 border-amber-500</code>: 4 px só do lado esquerdo, na cor da marca.</dd>
+<dt>fundo</dt>
+<dd><code>bg-amber-50</code>: o tom mais claro da mesma família, para o bloco não competir com o texto.</dd>
+<dt>forma</dt>
+<dd><code>rounded-r-xl</code>: arredonda à direita e deixa a esquerda reta, onde está a borda.</dd>
+<dt>título</dt>
+<dd><code>text-sm font-semibold text-amber-900</code>: um grau acima do texto, na mesma cor quente.</dd>
+<dt>respiro</dt>
+<dd><code>p-4</code>: 16 px em todos os lados, para o texto não encostar na borda colorida.</dd>
+</dl>
+
+<p>O mesmo desenho serve para aviso e para erro, trocando a cor: <code>border-red-500 bg-red-50</code>
+para alerta, <code>border-emerald-500 bg-emerald-50</code> para confirmação. O que não pode acontecer é a
+página ter quatro blocos assim. Destaque é como exclamação: três por parágrafo e ninguém mais lê. Em uma
+receita, um bloco de dica e, no máximo, um de aviso sobre alergênicos.</p>
+
+<p>Detalhe de semântica que vale para o resto da vida: esse bloco é um <code>aside</code>, e não um
+<code>div</code> qualquer. O <code>aside</code> diz "isto é um comentário lateral, não faz parte do fluxo
+principal" — e o leitor de tela pode pular direto para o conteúdo. Aparência de destaque, significado de
+comentário. As duas coisas convivem sem brigar.</p>
+
+<h2>8. Duas colunas no desktop — e quando elas atrapalham</h2>
+
+<p>Em tela grande, ingredientes e preparo podem ficar lado a lado: a pessoa confere a lista enquanto lê o
+passo, sem rolar. A receita é <code>grid gap-8 md:grid-cols-2</code>, com os dois blocos como filhos. No
+telefone, uma coluna; a partir de 768 px, duas. O <code>gap-8</code> dá 32 px de separação, mais folgado
+que o <code>gap-4</code> da ficha, porque são blocos de texto inteiros, não números.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=grid;;rule:grid-template-columns: repeat(2, minmax(0, 1fr));;css:#alvo|gap=32px" data-largura="768">
+  <p class="try-task">Ingredientes e preparo estão em uma coluna só. Ponha os dois lado a lado a partir de 768 px, com os
+  32 px de distância que já estão lá: acrescente <code>md:grid-cols-2</code>.</p>
+  <pre class="html">&lt;div class="mx-auto max-w-3xl px-6 py-8"&gt;
+  &lt;div id="alvo" class="grid gap-8"&gt;
+    &lt;section class="rounded-xl bg-stone-50 p-4"&gt;
+      &lt;h2 class="text-xl font-semibold"&gt;Ingredientes&lt;/h2&gt;
+      &lt;p class="mt-2 text-sm text-slate-700"&gt;2 xícaras de fubá, 1 de farinha, 3 ovos, 1 de leite.&lt;/p&gt;
+    &lt;/section&gt;
+    &lt;section class="rounded-xl bg-stone-50 p-4"&gt;
+      &lt;h2 class="text-xl font-semibold"&gt;Preparo&lt;/h2&gt;
+      &lt;p class="mt-2 text-sm text-slate-700"&gt;Bata, misture, asse por 35 minutos em forno a 180 graus.&lt;/p&gt;
+    &lt;/section&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+gap: 32px
+</pre>
+  <pre class="solucao">&lt;div class="mx-auto max-w-3xl px-6 py-8"&gt;
+  &lt;div id="alvo" class="grid gap-8 md:grid-cols-2"&gt;
+    &lt;section class="rounded-xl bg-stone-50 p-4"&gt;
+      &lt;h2 class="text-xl font-semibold"&gt;Ingredientes&lt;/h2&gt;
+      &lt;p class="mt-2 text-sm text-slate-700"&gt;2 xícaras de fubá, 1 de farinha, 3 ovos, 1 de leite.&lt;/p&gt;
+    &lt;/section&gt;
+    &lt;section class="rounded-xl bg-stone-50 p-4"&gt;
+      &lt;h2 class="text-xl font-semibold"&gt;Preparo&lt;/h2&gt;
+      &lt;p class="mt-2 text-sm text-slate-700"&gt;Bata, misture, asse por 35 minutos em forno a 180 graus.&lt;/p&gt;
+    &lt;/section&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>md:</code> é o breakpoint de 768 px, e a prévia desta caixa tem exatamente 768 px de largura.
+Se ela tivesse 640 px, você veria os dois blocos empilhados — mesmo código, resultado diferente. É a régua
+que decide, não a sua vontade. O painel confirma: antes, só <code>display: grid</code> e <code>gap: 32px</code>, sem
+<code>grid-template-columns</code> — uma coluna; depois, a propriedade aparece com dois valores iguais, um
+para cada bloco. E o CSS gerado mostra o porteiro:</p>
+
+<pre class="term">@media (width >= 48rem) {
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}</pre>
+
+<p>Agora a parte que quase ninguém diz: duas colunas nem sempre são melhores. Em uma receita, o preparo é
+uma sequência, e sequências se leem em coluna única. Se você puser ingredientes à esquerda e preparo à
+direita, a pessoa que segue o passo 4 tem de voltar o olho para a esquerda a cada ingrediente — e no
+telefone isso deixa de ser possível, porque as colunas empilham. Por isso a ordem do HTML precisa fazer
+sentido sozinha: ingredientes primeiro, preparo depois. Se o layout de duas colunas depende de a pessoa
+entender a ordem visual, ele está errado.</p>
+
+<h2>9. Três cenas, três consertos</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a foto da receita "salta" quando carrega</h3>
+<p>Sem proporção definida, a imagem só ocupa espaço depois de baixar, e todo o texto abaixo pula para
+baixo. Em conexão de celular isso acontece na frente do leitor. O <code>aspect-video</code> reserva a
+caixa antes de a imagem chegar: a altura já está calculada a partir da largura. Se a foto original for
+vertical, o <code>object-cover</code> corta as sobras e mantém o bolo inteiro no quadro.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o passo 3 começa com uma bolinha oval</h3>
+<p>O texto do passo 3 era o mais longo e o círculo do número virou uma elipse de 20 px. Faltava
+<code>shrink-0</code> no <code>span</code> do número. Em linha flexível, quem tem largura definida
+encolhe quando falta espaço; o <code>shrink-0</code> proíbe o encolhimento e o texto é quem quebra linha.
+O mesmo conserto vale para ícone de botão e avatar de comentário.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a receita imprime com o texto cortado</h3>
+<p>Ao imprimir, a coluna de 768 px virava uma faixa estreita no meio da folha, porque o papel é mais
+largo que a coluna e o navegador manteve o teto. O diagnóstico é este: toda largura máxima é uma decisão
+de tela, e o papel é outro meio. A saída é dar um tratamento próprio para impressão — há aula sobre isso
+adiante — ou aceitar que a receita é feita para ser lida no telefone, e não impressa.</p>
+</div>
+
+<p>Esta é a lista que a Ana confere antes de publicar cada receita nova. Ela leva dois minutos e evita o
+tipo de erro que só a cliente encontra.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>Classes</th><th>Por quê</th></tr>
+<tr><td>coluna</td><td><code>mx-auto max-w-3xl px-6 py-12</code></td><td>medida de leitura e respiro</td></tr>
+<tr><td>foto</td><td><code>aspect-video w-full rounded-2xl object-cover</code></td><td>proporção fixa, sem distorcer</td></tr>
+<tr><td>ficha</td><td><code>grid grid-cols-3 gap-4</code></td><td>três números, três colunas</td></tr>
+<tr><td>ingredientes</td><td><code>list-disc space-y-2 pl-5 marker:text-amber-600</code></td><td>lista de verdade, com respiro</td></tr>
+<tr><td>passos</td><td><code>flex gap-4</code> + <code>h-8 w-8 shrink-0 rounded-full</code></td><td>número redondo que não deforma</td></tr>
+<tr><td>dica</td><td><code>border-l-4 border-amber-500 bg-amber-50 p-4</code></td><td>destaque sem virar alerta</td></tr>
+</table>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Por que a receita usa <code>max-w-3xl</code> em vez
+de ocupar a tela inteira?</p>
+<label><input type="radio" name="r1"> para o texto ficar menor e caber mais coisa</label>
+<label><input type="radio" name="r1"> para limitar a linha a uma medida confortável de leitura</label>
+<label><input type="radio" name="r1"> para a página carregar mais rápido</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que o <code>object-cover</code> faz na foto com
+<code>aspect-video</code>?</p>
+<label><input type="radio" name="r2"> estica a imagem até preencher a caixa</label>
+<label><input type="radio" name="r2"> mostra a imagem inteira, com faixas em branco nas laterais</label>
+<label><input type="radio" name="r2"> corta o excesso e mantém a proporção, sem distorcer</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Para que serve o <code>shrink-0</code> no círculo do
+número do passo?</p>
+<label><input type="radio" name="r3"> impede o círculo de encolher quando o texto do passo é longo</label>
+<label><input type="radio" name="r3"> impede o texto de quebrar linha</label>
+<label><input type="radio" name="r3"> deixa o círculo maior que o texto</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a coluna da receita</h2>
+<p>Complete a classe do <code>main</code> para o texto ficar em uma coluna de 768 px, centralizada, com
+24 px de respiro lateral e 48 px em cima e embaixo.</p>
+<div class="ex-code">&lt;main class="<input aria-label="resposta 1" data-answer="mx-auto max-w-3xl px-6 py-12"> bg-stone-50"&gt;</div>
+<p class="ex-dica">Dica: são quatro classes, em dois pares. Um par cuida da largura e da centralização;
+o outro cuida do respiro horizontal e do vertical. A ordem não importa.</p>
+</div>
+
+<h2>10. Resumo</h2>
+
+<p>Uma página de receita é uma coluna de leitura com quatro blocos empilhados. A coluna é
+<code>mx-auto max-w-3xl px-6 py-12</code>: teto de 768 px, centralizada, com respiro nas laterais e nas
+pontas. O topo traz rótulo, título e foto; a foto vive em <code>aspect-video w-full rounded-2xl
+object-cover</code>, que reserva o espaço antes do arquivo chegar e corta o excesso sem distorcer. A
+ficha técnica usa <code>grid grid-cols-3 gap-4</code> com uma <code>dl</code> de verdade.</p>
+
+<p>Ingredientes são <code>ul</code> com <code>list-disc space-y-2 pl-5 marker:text-amber-600</code> — o
+Tailwind tira os marcadores na limpeza inicial, e essas classes os devolvem coloridos. O preparo é
+<code>ol</code> com passos em <code>flex gap-4</code> e um círculo de <code>h-8 w-8 shrink-0
+rounded-full</code> para o número. A dica ganha <code>border-l-4 border-amber-500 bg-amber-50 p-4</code>
+e semântica de <code>aside</code>. As duas colunas do desktop chegam com <code>md:grid-cols-2</code> —
+mas só quando a ordem do HTML continua fazendo sentido no telefone.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Coluna de leitura: <code>mx-auto max-w-3xl px-6 py-12</code>; um sem o outro não centraliza.</li>
+<li>Foto com proporção: <code>aspect-video w-full rounded-2xl object-cover</code>.</li>
+<li>Ficha técnica: <code>grid grid-cols-3 gap-4</code>, dentro de uma <code>dl</code>.</li>
+<li>Lista de ingredientes: <code>list-disc pl-5 space-y-2 marker:text-amber-600</code>.</li>
+<li>Passo numerado: <code>flex gap-4</code> com <code>h-8 w-8 shrink-0 rounded-full</code>.</li>
+<li><code>shrink-0</code> impede o círculo de virar elipse.</li>
+<li>Dica: <code>border-l-4</code> + <code>bg-*-50</code> + <code>rounded-r-xl</code> + <code>p-4</code>.</li>
+<li>Duas colunas a partir de 768 px: <code>md:grid-cols-2</code> (o <code>md:</code> é 48rem = 768 px).</li>
+<li>O Preflight remove marcador e recuo das listas: devolva com <code>list-*</code> e <code>pl-*</code>.</li>
+<li>Uma tag com significado (<code>ul</code>, <code>ol</code>, <code>dl</code>, <code>aside</code>) vale
+tanto quanto a classe certa.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

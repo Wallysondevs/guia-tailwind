@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Responsivo | Guia Tailwind</title>
+<meta name="description" content="Referência do responsivo no Tailwind v4: os cinco breakpoints em rem e px, mobile-first, max- e faixas, container queries e as armadilhas de cada tela.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Responsivo</span></h1>
+<p class="intro">A Ana montou o cardápio da padaria no notebook e ficou ótimo: quatro colunas, tudo
+alinhado. Então ela abriu o mesmo arquivo no celular e levou um susto — as quatro colunas viraram
+quatro faixas de dois centímetros, o título quebrou em três linhas e o botão de encomendar saiu pela
+direita da tela. Ela não quer duas páginas, uma para cada aparelho. Quer uma página que se ajuste. Esta
+é a consulta do responsivo no Tailwind v4: os breakpoints de verdade, o que cada prefixo gera no CSS,
+o jeito mobile-first, as faixas e as armadilhas que fazem o layout pular.</p>
+
+<h2>1. Os breakpoints do Tailwind</h2>
+
+<p>O Tailwind traz cinco breakpoints com nome e mais o caso "sem prefixo". Todos são mínimos: o prefixo
+vale daquela largura para cima, e nunca "só naquela largura". <code>md:</code> não quer dizer "tablet";
+quer dizer "de 768 px em diante", o que inclui o notebook, o monitor grande e a TV. Essa é a primeira
+coisa a decorar, porque é a que mais gera confusão em quem vem de outras ferramentas.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Prefixo</th><th>A partir de</th><th>Em pixels</th><th>Onde costuma valer</th></tr>
+<tr><td>(sem prefixo)</td><td>0</td><td>qualquer largura</td><td>o celular: é aqui que se escreve o caso base</td></tr>
+<tr><td><code>sm:</code></td><td>40rem</td><td>640 px</td><td>celular grande, celular deitado</td></tr>
+<tr><td><code>md:</code></td><td>48rem</td><td>768 px</td><td>tablet em pé, janela estreita no notebook</td></tr>
+<tr><td><code>lg:</code></td><td>64rem</td><td>1024 px</td><td>notebook comum</td></tr>
+<tr><td><code>xl:</code></td><td>80rem</td><td>1280 px</td><td>monitor de mesa</td></tr>
+<tr><td><code>2xl:</code></td><td>96rem</td><td>1536 px</td><td>tela grande, sala de aula, painel</td></tr>
+</table>
+</div>
+
+<p>Os valores são em <code>rem</code>, não em pixels, de propósito. <code>rem</code> é relativo ao
+tamanho de fonte do elemento raiz — normalmente 16 px, mas quem aumenta a letra do navegador por
+dificuldade de visão muda essa base. Se o breakpoint fosse fixo em pixels, a pessoa com fonte 20 px
+teria um layout de 640 px numa área que, na prática, é menor. Com <code>rem</code>, tudo cresce junto.
+A aula <a href="breakpoints.html">Os Breakpoints</a> percorre essa escada com exemplos de layout.
+A conta que você faz de cabeça é <code>rem × 16</code>; os cinco números que importam são 640, 768,
+1024, 1280 e 1536.</p>
+
+<p>Repare também no que <em>não</em> existe: não há um breakpoint para "celular pequeno". O Tailwind
+parte do princípio de que o caso base já é o celular — 375 px, 360 px, 320 px, tanto faz. Quem precisa
+tratar a tela minúscula de um jeito especial usa faixa (seção 4) ou uma medida avulsa, e não um prefixo
+novo. Guarde isso: o layout nasce pequeno e cresce; ele não nasce grande e encolhe.</p>
+
+<dl class="anatomy">
+<dt>viewport</dt>
+<dd>A área visível da página, sem as barras do navegador. É a largura que os breakpoints medem.</dd>
+<dt>breakpoint</dt>
+<dd>A largura em que o desenho muda de regra. No Tailwind, cada um tem nome:
+<code>sm</code>, <code>md</code>, <code>lg</code>, <code>xl</code>, <code>2xl</code>.</dd>
+<dt>mobile-first</dt>
+<dd>Escrever primeiro o caso do celular, sem prefixo, e acrescentar o resto com
+<code>md:</code>, <code>lg:</code>.</dd>
+<dt>faixa</dt>
+<dd>Um intervalo com começo e fim, como <code>md:max-lg:</code> — vale entre 768 e 1024 px.</dd>
+<dt>container query</dt>
+<dd>Consulta que mede o espaço do componente, não o da janela. No Tailwind, o pai leva
+<code>@container</code> e o filho usa <code>@sm:</code>, <code>@md:</code>.</dd>
+</dl>
+
+<h2>2. O que o prefixo escreve no CSS</h2>
+
+<p>Cada classe com prefixo vira uma regra dentro de uma consulta de mídia. No Tailwind v4 a consulta
+usa a sintaxe moderna de intervalo, <code>@media (width &gt;= 48rem)</code>, e não o velho
+<code>min-width</code>. O efeito é o mesmo; o texto é mais curto e mais legível. Veja o que sai de
+três classes de uma vez:</p>
+
+<pre class="term">@media (width &gt;= 40rem) {
+  .sm\:block {
+    display: block;
+  }
+}
+@media (width &gt;= 48rem) {
+  .md\:block {
+    display: block;
+  }
+}
+@media (width &gt;= 64rem) {
+  .lg\:block {
+    display: block;
+  }
+}</pre>
+
+<p>Três detalhes que esse trecho revela. Primeiro, o nome da classe carrega o prefixo escapado
+(<code>.md\:block</code>), igual às variantes de estado: o dois-pontos faz parte do nome. Segundo, cada
+breakpoint é uma regra separada; não há "herança" de <code>md:</code> para <code>lg:</code> — se você
+quer o mesmo valor nos dois, escreva nos dois. Terceiro, a consulta olha a largura da
+<strong>janela</strong> (o viewport), não a largura do elemento. Um cartão de 300 px numa tela de
+1400 px continua recebendo as regras de <code>lg:</code>. Para reagir ao tamanho do cartão, existem as
+container queries da seção 6.</p>
+
+<p>Como a ordem das regras no CSS compilado segue a ordem dos breakpoints (do menor para o maior), o
+que vem depois vence quando as duas condições valem. Isso é o que faz a escada funcionar:
+<code>p-2 md:p-4 lg:p-8</code> termina com 32 px num monitor, porque a regra de <code>lg:</code> é a
+última. E é também o motivo de a ordem no HTML não importar — <code>md:p-4 p-2</code> desenha igual,
+já que o Tailwind ordena as regras por breakpoint na hora de compilar. Você pode escrever na ordem que
+fizer sentido para quem lê.</p>
+
+<h2>3. Mobile-first na prática</h2>
+
+<p>A regra de ouro é uma frase: escreva o caso base para o celular e use os prefixos para
+<em>acrescentar</em>. Nunca escreva o caso base pensando no monitor. Se o cartão tem 16 px de respiro no
+celular e 32 px no notebook, a classe é <code>p-4 lg:p-8</code>. Se você inverter e escrever
+<code>p-8</code> com <code>max-lg:p-4</code>, funciona, mas vive de exceção — e cada tela nova exige
+outra exceção. A aula <a href="mobile-first.html">Mobile First</a> mostra a mesma escada aplicada a um
+cartão inteiro, degrau por degrau.</p>
+
+<p>Um jeito de conferir se a escada está certa é ler a lista de classes como uma subida: o primeiro
+valor é o chão, cada prefixo é um degrau. <code>grid-cols-1 sm:grid-cols-2 lg:grid-cols-4</code> conta
+uma história clara: uma coluna no celular, duas a partir de 640, quatro a partir de 1024. Se a leitura
+não contar história nenhuma — <code>md:p-2 md:p-8</code> —, o problema está na classe, não no
+navegador.</p>
+
+<div class="trytailwind" data-largura="768" data-goal="largura:768;;rule:.md\:grid-cols-2;;rule:@media (width &gt;= 48rem)">
+  <p class="try-task">A grade do cardápio está com uma coluna em qualquer tela. Esta prévia tem 768 px
+  de largura, então o breakpoint <code>md:</code> já vale: acrescente <code>md:grid-cols-2</code> para
+  o tablet mostrar dois pães por linha.</p>
+  <pre class="html">&lt;div id="alvo" class="grid grid-cols-1 gap-2 rounded-xl bg-amber-50 p-2"&gt;
+  &lt;div class="rounded bg-white p-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="rounded bg-white p-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="rounded bg-white p-2"&gt;Croissant&lt;/div&gt;
+  &lt;div class="rounded bg-white p-2"&gt;Brioche&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+padding: 8px
+gap: 8px
+grid-template-columns: 728px
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid grid-cols-1 gap-2 rounded-xl bg-amber-50 p-2 md:grid-cols-2"&gt;
+  &lt;div class="rounded bg-white p-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="rounded bg-white p-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="rounded bg-white p-2"&gt;Croissant&lt;/div&gt;
+  &lt;div class="rounded bg-white p-2"&gt;Brioche&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel vai mostrar <code>grid-template-columns</code> com dois valores — algo como
+<code>368px 368px</code> — em vez de um valor só. É a prova de que a regra pegou. Se você reduzir a
+largura da janela do navegador abaixo de 768 px e clicar em Rodar de novo, o painel volta a mostrar uma
+coluna: a prévia respeita a intenção do breakpoint, e é por isso que a caixa declara
+<code>data-largura="768"</code> em vez de depender do tamanho da sua tela.</p>
+
+<p>Uma consequência prática do mobile-first: quase toda página tem mais classes de desktop do que de
+celular. Isso assusta quem lê o HTML pela primeira vez, mas é o esperado. O caso base é curto porque o
+celular é simples: uma coluna, tudo empilhado, fonte legível. O desktop é que precisa de instruções
+extras — quantas colunas, o que fica ao lado do quê. Você está descrevendo o que fazer com o espaço
+que sobra, e não o que fazer quando ele falta.</p>
+
+<h2>4. Faixas, medidas avulsas e outras consultas</h2>
+
+<p>Às vezes o caso não é "daqui para cima", e sim "só aqui". O Tailwind atende com as variantes
+<code>max-*</code>, com as faixas compostas e com medidas avulsas entre colchetes. A tabela abaixo é a
+lista do que o motor aceita, com o texto exato que ele escreve.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Vira no CSS</th><th>Vale quando</th></tr>
+<tr><td><code>max-sm:block</code></td><td><code>@media (width &lt; 40rem)</code></td><td>abaixo de 640 px</td></tr>
+<tr><td><code>max-md:hidden</code></td><td><code>@media (width &lt; 48rem)</code></td><td>abaixo de 768 px</td></tr>
+<tr><td><code>md:max-lg:block</code></td><td><code>&gt;= 48rem</code> com <code>&lt; 64rem</code> por dentro</td><td>só entre 768 e 1024 px</td></tr>
+<tr><td><code>min-[900px]:grid</code></td><td><code>@media (width &gt;= 900px)</code></td><td>uma medida que não está na escada</td></tr>
+<tr><td><code>max-[900px]:grid</code></td><td><code>@media (width &lt; 900px)</code></td><td>o mesmo, para baixo</td></tr>
+<tr><td><code>min-md:block</code></td><td><code>@media (width &gt;= 48rem)</code></td><td>sinônimo explícito de <code>md:</code></td></tr>
+<tr><td><code>portrait:block</code></td><td><code>@media (orientation: portrait)</code></td><td>tela em pé, celular na mão</td></tr>
+<tr><td><code>landscape:flex</code></td><td><code>@media (orientation: landscape)</code></td><td>tela deitada</td></tr>
+<tr><td><code>print:hidden</code></td><td><code>@media print</code></td><td>a receita impressa, sem o botão de comprar</td></tr>
+<tr><td><code>motion-reduce:transition-none</code></td><td><code>prefers-reduced-motion: reduce</code></td><td>quem pediu menos animação no sistema</td></tr>
+</table>
+</div>
+
+<p>A faixa composta merece uma explicação, porque o texto do CSS parece incompleto. O Tailwind aninha as
+duas consultas em vez de juntá-las com <code>and</code>: sai um
+<code>@media (width &gt;= 48rem)</code> por fora e um <code>@media (width &lt; 64rem)</code> por dentro.
+O resultado no navegador é o mesmo de um intervalo — vale só entre 768 e 1024 px —, com um detalhe
+importante: o limite de baixo é inclusivo e o de cima é exclusivo. Em 768 px vale; em 1024 px já não
+vale, porque <code>lg:</code> assumiu.</p>
+
+<p>Sobre as medidas avulsas: <code>min-[900px]:</code> existe para o caso de o desenho pedir uma quebra
+que não está na escada. Use com parcimônia e com um motivo que você saiba explicar — "a barra de
+navegação quebra em 900" é motivo; "achei 900 bonito" é dívida. A escada de cinco degraus é curta de
+propósito: quanto menos breakpoints, mais coerente o site parece, e menos combinações você precisa
+testar. Um site com <code>min-[700px]</code>, <code>md:</code> e <code>min-[850px]</code> tem três
+pontos de quebra em 150 px de diferença, o que ninguém consegue revisar.</p>
+
+<h2>5. O que costuma mudar em cada tela</h2>
+
+<p>Depois de algumas páginas, os mesmos ajustes se repetem. Esta tabela é o resumo do que quase todo
+layout precisa, na ordem em que vale conferir. Note que a coluna do celular é sempre mais simples — e
+essa simplicidade é a meta, não uma limitação.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que muda</th><th>No celular</th><th>Do tablet para cima</th><th>Classes</th></tr>
+<tr><td>Colunas</td><td>uma</td><td>duas, depois três ou quatro</td><td><code>grid-cols-1 md:grid-cols-2 lg:grid-cols-4</code></td></tr>
+<tr><td>Direção</td><td>empilhado</td><td>lado a lado</td><td><code>flex-col md:flex-row</code></td></tr>
+<tr><td>Menu</td><td>escondido, atrás do botão</td><td>visível na barra</td><td><code>hidden md:flex</code></td></tr>
+<tr><td>Respiro</td><td>apertado</td><td>folgado</td><td><code>p-4 md:p-8 lg:p-12</code></td></tr>
+<tr><td>Fonte do título</td><td>menor</td><td>maior</td><td><code>text-2xl md:text-4xl</code></td></tr>
+<tr><td>Largura do texto</td><td>tela toda</td><td>coluna de leitura</td><td><code>w-full lg:max-w-prose</code></td></tr>
+<tr><td>Boas-vindas</td><td>empilhado, botão embaixo</td><td>texto à esquerda, imagem à direita</td><td><code>grid-cols-1 lg:grid-cols-2</code></td></tr>
+<tr><td>Tabela</td><td>rola de lado</td><td>cabe inteira</td><td><code>overflow-x-auto</code> no invólucro</td></tr>
+<tr><td>Rodapé</td><td>um bloco</td><td>três colunas</td><td><code>grid gap-6 md:grid-cols-3</code></td></tr>
+</table>
+</div>
+
+<p>A linha do menu é a que mais dá errado, e por um motivo bobo: esconder é fácil, mostrar de novo é que
+exige o prefixo. <code>hidden</code> sozinho esconde em todas as telas, porque <code>hidden</code> não é
+"escondido no celular" — é <code>display: none</code>, ponto. Quem quer o menu fora do celular e dentro
+do desktop escreve <code>hidden md:flex</code>, e as duas classes brigam pela mesma propriedade com
+breakpoints diferentes. O Tailwind resolve pela ordem no CSS: <code>md:flex</code> vem depois, então
+vence a partir de 768 px. Esse vai e vem tem aula própria em
+<a href="esconder-mostrar.html">Esconder e Mostrar</a>.</p>
+
+<div class="trytailwind" data-largura="375" data-goal="css:#alvo|display=none;;rule:.md\:flex;;largura:375">
+  <p class="try-task">A barra de navegação está sempre visível e atrapalha no celular. Esta prévia tem
+  375 px: esconda a barra aqui e deixe que ela apareça como linha a partir de 768 px, acrescentando
+  <code>hidden md:flex</code>.</p>
+  <pre class="html">&lt;nav id="alvo" class="items-center gap-4 rounded-lg bg-white p-3 text-sm"&gt;
+  &lt;a href="#" class="text-amber-700"&gt;Pães&lt;/a&gt;
+  &lt;a href="#" class="text-amber-700"&gt;Doces&lt;/a&gt;
+  &lt;a href="#" class="text-amber-700"&gt;Encomendas&lt;/a&gt;
+&lt;/nav&gt;</pre>
+  <pre class="out">
+padding: 12px
+gap: 16px
+align-items: center
+background-color: rgb(255, 255, 255)
+font-size: 14px
+line-height: 20px
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;nav id="alvo" class="hidden items-center gap-4 rounded-md bg-white p-3 text-sm md:flex"&gt;
+  &lt;a href="#" class="text-amber-700"&gt;Pães&lt;/a&gt;
+  &lt;a href="#" class="text-amber-700"&gt;Doces&lt;/a&gt;
+  &lt;a href="#" class="text-amber-700"&gt;Encomendas&lt;/a&gt;
+&lt;/nav&gt;</pre>
+</div>
+
+<p>O painel mostra <code>display: none</code> depois da solução, e isso é o certo: a 375 px o menu está
+escondido. Para ver o outro lado, mude a largura da caixa para 768 — aí o painel passa a mostrar
+<code>display: flex</code>. Ter as duas provas, uma em cada largura, é o mínimo antes de dizer que um
+responsivo está pronto.</p>
+
+<p>A linha da tabela tem outra lição embutida. Não existe classe que faça uma tabela de oito colunas
+caber num celular sem virar sopa; o que existe é um invólucro com <code>overflow-x-auto</code> para o
+leitor arrastar de lado. E a linha do rodapé lembra uma coisa que o prefixo não resolve: a ordem dos
+blocos na tela. Quando o celular precisa mostrar a imagem antes do texto, mude a ordem com
+<code>order-first</code> e <code>md:order-none</code> em vez de duplicar o HTML.</p>
+
+<h2>6. Container queries: o cartão que sabe o próprio tamanho</h2>
+
+<p>Existe um caso em que o breakpoint de tela mente. Você tem um cartão de produto que aparece em três
+lugares: na vitrine (largura toda), na barra lateral (estreito) e dentro de um modal (médio). Numa tela
+de 1400 px, o cartão da barra lateral recebe todas as regras de <code>lg:</code> — e fica com duas
+colunas espremidas em 280 px. O certo seria o cartão reagir ao próprio espaço, não ao tamanho da janela.
+É isso que as container queries fazem.</p>
+
+<p>A mecânica tem duas partes. No pai, você marca <code>@container</code>, que no CSS vira
+<code>container-type: inline-size</code>. Nos filhos, usa os prefixos com arroba: <code>@sm:</code>,
+<code>@md:</code>, <code>@lg:</code>. O Tailwind então escreve <code>@container (width &gt;= 24rem)</code>
+no lugar de <code>@media</code>. Repare que a escala do container é outra: <code>@sm:</code> vale a
+partir de 24rem (384 px), e não 40rem.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Prefixo no filho</th><th>Vira no CSS</th><th>Em pixels</th><th>Serve para</th></tr>
+<tr><td><code>@3xs:</code></td><td><code>@container (width &gt;= 16rem)</code></td><td>256 px</td><td>um selo muito estreito</td></tr>
+<tr><td><code>@xs:</code></td><td><code>@container (width &gt;= 20rem)</code></td><td>320 px</td><td>cartão de barra lateral</td></tr>
+<tr><td><code>@sm:</code></td><td><code>@container (width &gt;= 24rem)</code></td><td>384 px</td><td>cartão de vitrine de celular</td></tr>
+<tr><td><code>@md:</code></td><td><code>@container (width &gt;= 28rem)</code></td><td>448 px</td><td>cartão de vitrine comum</td></tr>
+<tr><td><code>@lg:</code></td><td><code>@container (width &gt;= 32rem)</code></td><td>512 px</td><td>cartão grande, com foto ao lado</td></tr>
+<tr><td><code>@xl:</code></td><td><code>@container (width &gt;= 36rem)</code></td><td>576 px</td><td>bloco de destaque</td></tr>
+<tr><td><code>@2xl:</code></td><td><code>@container (width &gt;= 42rem)</code></td><td>672 px</td><td>área de conteúdo larga</td></tr>
+<tr><td><code>@3xl:</code></td><td><code>@container (width &gt;= 48rem)</code></td><td>768 px</td><td>a largura de um tablet</td></tr>
+</table>
+</div>
+
+<pre class="term">@container (width &gt;= 24rem) {
+  .\@sm\:flex {
+    display: flex;
+  }
+}
+@container (width &gt;= 28rem) {
+  .\@md\:grid {
+    display: grid;
+  }
+}</pre>
+
+<p>No HTML, a marcação fica assim: um <code>div</code> com <code>@container</code> e, dentro, o cartão
+com <code>@sm:flex</code> ou <code>@md:grid-cols-2</code>. A partir daí, o cartão se adapta ao espaço
+que recebeu — e o mesmo HTML funciona na vitrine, na barra lateral e no modal. Duas armadilhas: o
+<code>@container</code> precisa estar num ancestral direto ou indireto do filho que usa os prefixos, e
+o container consultado é o mais próximo; se houver dois aninhados, vale o de dentro. Para desempatar,
+o Tailwind aceita nome: <code>@container/cartao</code> no pai e <code>@sm/cartao:flex</code> no filho.</p>
+
+<p>Quando usar uma coisa e quando usar a outra? Regra prática: se o componente aparece em mais de um
+contexto de largura — cartão de produto, bloco de estatística, comentário —, container query. Se é o
+esqueleto da página — a barra lateral que vira gaveta, as colunas do conteúdo —, breakpoint de tela.
+Misturar os dois é normal e não tem problema; o que não se deve é tentar resolver componente com
+breakpoint de tela e ficar criando exceção para cada lugar onde ele aparece.</p>
+
+<h2>7. As armadilhas que fazem o layout pular</h2>
+
+<p>Comece pela ordem. A escada só sobe: <code>p-2 md:p-4 lg:p-8</code> funciona;
+<code>p-8 md:p-4</code> também "funciona", mas conta a história errada e no monitor deixa o cartão
+apertado, porque não existe <code>lg:</code> para desfazer. Se você escreveu um valor grande na base,
+todo breakpoint acima precisa de um valor maior, ou o desenho decresce conforme a tela cresce.</p>
+
+<p>Depois, o <code>hidden</code> sem par. <code>hidden</code> não é cosmético: o elemento sai do fluxo,
+não ocupa espaço e não é lido por leitor de tela. Se o objetivo é só "não mostrar no celular", o par é
+<code>hidden md:block</code> (ou <code>md:flex</code>, conforme o <code>display</code> que o elemento
+precisa). Há uma alternativa que preserva o espaço: <code>invisible</code>, que esconde sem tirar do
+layout — útil quando o sumiço mudaria o alinhamento dos vizinhos.</p>
+
+<p>Terceiro, a largura de teste. Muita gente revisa o responsivo no DevTools com o modo de aparelho
+ligado e acha que resolveu, mas o aparelho simulado tem 980 px de viewport se a página não declarar
+<code>&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;</code>. Sem essa
+linha, o celular finge ter 980 px e encolhe a página inteira; nenhum breakpoint do mundo conserta isso.
+O guia já traz a linha em todas as páginas — se você criar a sua, não esqueça.</p>
+
+<p>Quarto, as alturas. <code>h-screen</code> é <code>100vh</code>, e no celular <code>vh</code> conta a
+tela <em>sem</em> as barras do navegador, o que faz a seção passar do limite e criar rolagem. Para
+ocupar a tela de verdade, <code>h-dvh</code> usa a altura dinâmica do viewport. E uma altura em
+porcentagem só funciona se o pai tiver altura definida; <code>h-full</code> dentro de um
+<code>div</code> sem altura não faz nada, e parece que "o Tailwind não funcionou".</p>
+
+<p>Quinto, as imagens. Uma imagem grande dentro de uma coluna de grade estoura a coluna, porque o
+navegador respeita o tamanho natural do arquivo. O par que resolve é <code>max-w-full h-auto</code> no
+próprio <code>img</code>; num contexto flex ou grid, some <code>min-w-0</code> ao contêiner de texto
+para o conteúdo poder encolher. Não é bug do Tailwind: é o comportamento de <code>min-width: auto</code>
+no flex, que existe desde sempre.</p>
+
+<p>Sexto, o excesso. Cada breakpoint novo é uma combinação a mais para conferir, e o pior lugar para
+descobrir um layout quebrado é o tablet de alguém. Três degraus — base, <code>md:</code>,
+<code>lg:</code> — resolvem a maioria dos sites deste guia. Se você precisa de <code>sm:</code> e
+<code>xl:</code> também, tudo bem, mas teste as cinco larguras: 375, 640, 768, 1024 e 1280.</p>
+
+<h2>8. Como conferir antes de publicar</h2>
+
+<p>O teste que vale é o da largura, não o do aparelho. No Chrome ou no Firefox, abra o DevTools
+(<code>F12</code>), ligue o modo responsivo e arraste a alça devagar, olhando o número que aparece em
+cima. Os pontos de interesse são exatamente os cinco da tabela da seção 1, mais 375 px. Ao cruzar 768,
+o layout deve mudar de uma vez, sem tremer e sem sobrar espaço morto — se tremer, há duas regras
+disputando a mesma propriedade.</p>
+
+<p>Uma dica que economiza tempo: escreva a intenção antes da classe. "No celular, o preço embaixo do
+nome; no tablet, ao lado." Depois traduza para <code>flex-col md:flex-row</code>. Quando a frase não
+sai, geralmente o problema é de hierarquia, não de CSS. Já quando a frase sai e a tela não obedece, o
+suspeito é o <code>min-w-0</code>, a largura fixa em pixels no meio do caminho ou um
+<code>whitespace-nowrap</code> herdado — os três motivos clássicos de estouro horizontal no celular.</p>
+
+<p>As caixas deste guia fazem esse teste por você, com uma diferença importante: a largura da prévia é
+declarada na caixa (<code>data-largura</code>) e não depende do tamanho da sua janela. Por isso uma
+missão de <code>md:</code> fica com 768 px mesmo que você esteja lendo no celular. Quando a missão
+envolve breakpoint, confira também a etiqueta de largura no canto da barra de botões — ela mostra o
+número real que o motor usou.</p>
+
+<h2>9. Resumo</h2>
+
+<p>O Tailwind v4 trabalha com cinco breakpoints mínimos — <code>sm:</code> 40rem, <code>md:</code>
+48rem, <code>lg:</code> 64rem, <code>xl:</code> 80rem, <code>2xl:</code> 96rem, ou 640, 768, 1024,
+1280 e 1536 px com a fonte padrão. Cada prefixo gera um <code>@media (width &gt;= …)</code> e vale
+daquela largura para cima, nunca só nela. A base, sem prefixo, é o celular: o layout nasce pequeno e
+cresce.</p>
+
+<ul>
+<li>Escreva a base para o celular e use os prefixos para acrescentar: <code>p-4 md:p-8 lg:p-12</code>.</li>
+<li>Para faixas, <code>max-md:</code> vale abaixo de 768; <code>md:max-lg:</code> vale no meio, com as
+duas consultas aninhadas.</li>
+<li>Medida avulsa: <code>min-[900px]:</code>. Use pouco e saiba explicar por quê.</li>
+<li><code>hidden</code> esconde sempre; o par é <code>hidden md:flex</code>, com o
+<code>display</code> que o elemento precisa.</li>
+<li>Componente que aparece em vários lugares pede <code>@container</code> e <code>@sm:</code>; o
+esqueleto da página pede breakpoint de tela.</li>
+<li>Teste 375, 640, 768, 1024 e 1280 px — e nunca esqueça a linha do <code>viewport</code>.</li>
+<li>Altura de tela cheia no celular é <code>h-dvh</code>, não <code>h-screen</code>.</li>
+</ul>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

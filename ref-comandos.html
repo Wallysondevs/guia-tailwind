@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comandos e build | Guia Tailwind</title>
+<meta name="description" content="Os comandos do Tailwind v4 na prática: instalar com npm, gerar o CSS com a CLI, --watch e --minify, o que é cada arquivo e o que cada diretiva faz.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Comandos e <span class="hl">build</span></h1>
+<p class="intro">Até aqui, a Ana usou o Tailwind sem instalar nada: as caixas deste guia compilam o HTML
+no próprio navegador. Mas o site da padaria precisa de um arquivo CSS de verdade, que funcione sem
+internet e sem compilador na máquina de quem visita. É aí que entram dois comandos: um instala, o outro
+gera. Ela abriu o terminal em <code>/home/ana/padaria</code>, digitou a primeira linha e ficou olhando
+a tela — sem saber se tinha dado certo. Esta página é a consulta dos comandos: o que instalar, o que
+rodar, o que cada arquivo faz e por que o CSS gerado é diferente do que ela escreveu.</p>
+
+<h2>1. O que é "build" e por que ele existe</h2>
+
+<p>Build é a etapa em que um programa lê os seus arquivos e escreve outros, prontos para o navegador. No
+caso do Tailwind, o programa lê o seu HTML e o seu CSS de entrada, descobre quais classes aparecem e
+escreve um CSS final que contém só as regras dessas classes. O navegador não sabe o que é
+<code>p-4</code>: ele só entende CSS. Alguém precisa fazer essa tradução antes de a página abrir, e esse
+alguém é o build.</p>
+
+<p>É por isso que uma classe nova não aparece na tela até você recompilar. O arquivo final foi escrito
+num momento do passado, com a lista de classes daquele momento. Quando você acrescenta
+<code>md:grid-cols-2</code> no HTML e a grade não muda, o culpado quase sempre é o build que não rodou —
+e não o Tailwind. A exceção é justamente o que este guia usa nas caixas: o compilador de navegador, que
+lê o HTML a cada clique e compila na hora.</p>
+
+<p>Existem três jeitos de rodar esse build, e vale saber o nome dos três. O primeiro é a CLI
+(<code>@tailwindcss/cli</code>): um comando que você dá no terminal. O segundo é o plugin do Vite
+(<code>@tailwindcss/vite</code>), que compila junto com o resto do projeto. O terceiro é o compilador de
+navegador (<code>@tailwindcss/browser</code>), que é o deste guia e serve para estudar e prototipar, não
+para produção. Todos usam o mesmo motor e produzem o mesmo CSS; o que muda é quem aperta o botão. A
+aula <a href="sem-build.html">Sem Build</a> cobre o terceiro caminho, que é o desta página.</p>
+
+<dl class="anatomy">
+<dt>build</dt>
+<dd>A etapa que transforma os seus arquivos-fonte no arquivo que o navegador lê. Roda no seu
+computador, não no do visitante.</dd>
+<dt>entrada</dt>
+<dd>O CSS que você escreve, com <code>@import "tailwindcss";</code> e as suas diretivas. É pequeno: três
+linhas já bastam.</dd>
+<dt>saída</dt>
+<dd>O CSS gerado, com todas as regras. É esse arquivo que o HTML deve carregar no
+<code>&lt;link&gt;</code>.</dd>
+<dt>CLI</dt>
+<dd><em>Command line interface</em>: o programa que você chama pelo terminal, com flags como
+<code>-i</code> e <code>-o</code>.</dd>
+<dt>watch</dt>
+<dd>O modo que fica rodando e recompila a cada arquivo salvo. Evita o "esqueci de gerar de novo".</dd>
+</dl>
+
+<h2>2. Instalando as duas peças</h2>
+
+<p>São dois pacotes, e a divisão ajuda a entender. <code>tailwindcss</code> é o motor: a parte que lê
+classes e escreve CSS. <code>@tailwindcss/cli</code> é a interface de terminal em volta dele. Instalar o
+motor sozinho não dá comando nenhum; instalar a CLI sozinha não tem motor para chamar. Os dois vão como
+dependência de desenvolvimento (<code>-D</code>), porque o build roda na sua máquina e não precisa
+viajar para o servidor. Se for a primeira vez que você abre um terminal, a aula
+<a href="instalando.html">Instalando</a> faz esse passo com calma.</p>
+
+<pre class="term">$ cd /home/ana/padaria
+$ npm install -D tailwindcss @tailwindcss/cli
+
+added 2 packages, and audited 3 packages in 2s
+
+found 0 vulnerabilities</pre>
+
+<p>Duas coisas acabaram de acontecer. O npm criou (ou atualizou) o arquivo <code>package.json</code>,
+que é a lista de dependências do projeto, e a pasta <code>node_modules</code>, onde o código dos pacotes
+fica. O <code>package.json</code> é o que você versiona; <code>node_modules</code> não, porque é
+reconstruível com <code>npm install</code>. Se você clonar o projeto em outra máquina, roda
+<code>npm install</code> sem argumentos e o npm lê a lista do <code>package.json</code>.</p>
+
+<p>Uma pegadinha de versão: a partir do Tailwind v4, o pacote da CLI é <code>@tailwindcss/cli</code>, e
+não mais <code>tailwindcss</code> com comando embutido. Tutoriais antigos mandam rodar
+<code>npx tailwindcss init -p</code>, que era o v3 e não existe mais. Se um comando do tutorial não for
+reconhecido, a primeira suspeita é a versão. Este guia usa a v4.3.5 — a mesma que aparece no cabeçalho
+do CSS gerado.</p>
+
+<h2>3. O CSS de entrada e a saída</h2>
+
+<p>O arquivo de entrada é seu, e pode ter três linhas. O nome é escolha sua: <code>entrada.css</code>,
+<code>app.css</code>, <code>tailwind.css</code>. O que importa é a primeira linha, que manda o motor
+trazer o tema, a base e as utilitárias. O assunto tem aula inteira em
+<a href="o-css-de-entrada.html">O CSS de Entrada</a>.</p>
+
+<pre class="file" data-file="src/entrada.css">@import "tailwindcss";
+
+/* as suas personalizações vêm depois, se houver */</pre>
+
+<p>A saída é o arquivo que o HTML carrega. Ela não deve ser editada à mão — o próximo build apaga tudo
+o que você escrever ali. Guarde-a numa pasta separada, como <code>dist/</code>, e trate como produto:
+quem edita o produto em vez da receita perde a mudança na próxima fornada. O <code>&lt;link&gt;</code>
+no HTML aponta para ela, e não para o arquivo de entrada.</p>
+
+<pre class="file" data-file="index.html">&lt;link rel="stylesheet" href="dist/estilo.css"&gt;</pre>
+
+<p>Se você abrir a saída no editor, vai encontrar um cabeçalho de licença, uma camada de tema com
+variáveis, uma camada de base com a normalização do navegador e, no fim, só as utilitárias que você usou.
+Nada de 300 classes de cor que ninguém pediu: no v4 o build gera apenas o que encontra nos arquivos. Por
+isso um site pequeno costuma sair com poucos quilobytes, e a página do guia que você está lendo cabe
+folgada num arquivo só.</p>
+
+<p>E onde o motor procura as classes? A partir da pasta do arquivo de entrada, seguindo as regras de
+inclusão do projeto — e respeitando o <code>.gitignore</code>. Se o seu HTML está em outra pasta, ou se
+as classes vêm de um arquivo que ele não enxerga, existe a diretiva <code>@source</code> para apontar o
+caminho. É o primeiro lugar para olhar quando "o build roda, mas o CSS não tem a classe nova".</p>
+
+<h2>4. Os comandos do dia a dia</h2>
+
+<p>Não são muitos. A tabela abaixo é a lista completa do que você vai digitar nesta fase, com o efeito
+de cada um. Os caminhos são os da Ana: entrada em <code>src/entrada.css</code>, saída em
+<code>dist/estilo.css</code>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Comando</th><th>O que faz</th><th>Quando usar</th></tr>
+<tr><td><code>npm install -D tailwindcss @tailwindcss/cli</code></td><td>instala o motor e a CLI no projeto</td><td>uma vez, no começo</td></tr>
+<tr><td><code>npx @tailwindcss/cli -i src/entrada.css -o dist/estilo.css</code></td><td>compila uma vez e encerra</td><td>para conferir e antes de publicar</td></tr>
+<tr><td><code>npx @tailwindcss/cli -i src/entrada.css -o dist/estilo.css --watch</code></td><td>compila e fica observando os arquivos</td><td>durante o desenvolvimento</td></tr>
+<tr><td><code>npx @tailwindcss/cli -i src/entrada.css -o dist/estilo.css --minify</code></td><td>compila comprimido, sem espaços</td><td>no build de produção</td></tr>
+<tr><td><code>npx @tailwindcss/cli --help</code></td><td>mostra as opções disponíveis</td><td>quando esquecer uma flag</td></tr>
+<tr><td><code>npm run dev</code></td><td>roda o script <code>dev</code> do <code>package.json</code></td><td>o atalho do dia a dia</td></tr>
+<tr><td><code>npm run build</code></td><td>roda o script <code>build</code>, geralmente com <code>--minify</code></td><td>antes de subir para o servidor</td></tr>
+</table>
+</div>
+
+<p>O <code>npx</code> merece uma explicação, porque assusta. Ele executa um programa que está dentro de
+<code>node_modules</code> sem você precisar instalar nada globalmente. É por isso que o comando começa
+com <code>npx @tailwindcss/cli</code> e não com <code>tailwindcss</code>: o nome do pacote é
+<code>@tailwindcss/cli</code>, e o <code>npx</code> sabe achar o executável dentro dele. Quando você
+criar os scripts no <code>package.json</code>, o mesmo comando pode ficar ainda mais curto.</p>
+
+<p>Cuidado com um detalhe de ordem: o <code>--watch</code> não termina sozinho. Ele fica no terminal até
+você apertar <code>Ctrl</code> e <code>C</code>. Se você abrir outra aba e rodar o build de produção
+enquanto o watch está ligado, os dois escrevem no mesmo arquivo e o resultado pode ficar pela metade por
+um instante. Pare o watch antes de gerar a versão final — ou, melhor, aponte os dois para arquivos
+diferentes.</p>
+
+<div class="trytailwind" data-goal="rule:--color-marca: #7c2d12;;rule:.bg-marca">
+  <p class="try-task">A cor da marca da padaria é <code>#7c2d12</code> e não existe na paleta: a classe
+  <code>bg-marca</code> não gera nada. Declare a variável no <code>@theme</code> para essa classe passar
+  a existir.</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-lg bg-marca px-4 py-2 text-white"&gt;Encomendar&lt;/button&gt;</pre>
+  <pre class="out">
+color: rgb(255, 255, 255)
+border-radius: 8px
+padding-inline: 16px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #7c2d12;
+}
+&lt;/style&gt;
+&lt;button id="alvo" class="rounded-lg bg-marca px-4 py-2 text-white"&gt;Encomendar&lt;/button&gt;</pre>
+</div>
+
+<p>Esta caixa é o build em miniatura: o bloco <code>@theme</code> é o que você escreveria em
+<code>src/entrada.css</code>, e a classe <code>bg-marca</code> só passa a existir porque a variável
+existe. Repare que a variável vira uma classe com o nome da cor: <code>--color-marca</code> produz
+<code>bg-marca</code>, <code>text-marca</code>, <code>border-marca</code> e <code>ring-marca</code> de
+uma vez. O prefixo <code>--color-</code> não é enfeite: é ele que diz ao motor em que família a variável
+entra.</p>
+
+<h2>5. As flags: o que cada uma muda</h2>
+
+<p>Flag é a palavra que começa com dois traços e ajusta o comportamento do comando. São poucas na CLI do
+Tailwind, e todas cabem numa tabela. A regra de ouro é escrever por extenso quando estiver em dúvida —
+<code>--watch</code> e <code>--minify</code> se explicam sozinhos, e nenhuma versão confunde as duas.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Flag</th><th>Forma curta</th><th>O que muda</th></tr>
+<tr><td><code>--input</code></td><td><code>-i</code></td><td>qual arquivo é o CSS de entrada</td></tr>
+<tr><td><code>--output</code></td><td><code>-o</code></td><td>onde o CSS gerado é escrito</td></tr>
+<tr><td><code>--watch</code></td><td>—</td><td>fica rodando e recompila a cada gravação</td></tr>
+<tr><td><code>--minify</code></td><td>—</td><td>remove espaços e comentários da saída</td></tr>
+<tr><td><code>--help</code></td><td><code>-h</code></td><td>imprime a lista de opções e encerra</td></tr>
+</table>
+</div>
+
+<p>Sobre o <code>--minify</code>, vale entender o que ele faz e o que não faz. Ele remove espaços,
+quebras de linha e comentários: o arquivo fica menor para baixar, e ilegível para humanos — o que é
+esperado, porque ninguém edita a saída. Ele não remove classes não usadas, porque elas já não estão lá:
+o motor só gera o que encontrou. Se o seu CSS final está grande, o problema é a quantidade de classes
+diferentes espalhadas pelo projeto, não a formatação.</p>
+
+<p>E há uma flag que não existe mais: <code>--content</code>, do v3, usada para listar os arquivos onde
+procurar classes. No v4 esse trabalho passou para o CSS, com <code>@source</code>, e a detecção é
+automática a partir da pasta do arquivo de entrada. Quem cola um comando antigo e recebe "unknown
+option" está batendo nessa mudança.</p>
+
+<h2>6. O projeto por dentro</h2>
+
+<p>Depois do primeiro build, a pasta da Ana tem cinco vizinhos. Saber quem é quem evita 80% da confusão:
+metade dos problemas de "não atualizou" é um arquivo certo sendo gerado no lugar errado, ou um
+<code>&lt;link&gt;</code> apontando para o arquivo antigo.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Arquivo ou pasta</th><th>Quem escreve</th><th>Para que serve</th></tr>
+<tr><td><code>index.html</code></td><td>você</td><td>o conteúdo; carrega a saída no <code>&lt;link&gt;</code></td></tr>
+<tr><td><code>src/entrada.css</code></td><td>você</td><td>o <code>@import "tailwindcss"</code> e as suas diretivas</td></tr>
+<tr><td><code>dist/estilo.css</code></td><td>o build</td><td>o CSS final; não editar à mão</td></tr>
+<tr><td><code>package.json</code></td><td>npm e você</td><td>as dependências e os scripts</td></tr>
+<tr><td><code>node_modules/</code></td><td>npm</td><td>o código dos pacotes; nunca versionar</td></tr>
+<tr><td><code>package-lock.json</code></td><td>npm</td><td>as versões exatas; versionar sempre</td></tr>
+</table>
+</div>
+
+<p>Os scripts são a parte que economiza digitação todos os dias. Em vez de decorar o comando com dois
+caminhos e uma flag, você escreve uma vez no <code>package.json</code> e chama por um nome curto. O npm
+já coloca <code>node_modules/.bin</code> no caminho quando roda um script, então dentro dele o
+<code>npx</code> é dispensável — mas deixá-lo não faz mal e ajuda quem lê.</p>
+
+<pre class="file" data-file="package.json">{
+  "name": "padaria",
+  "private": true,
+  "scripts": {
+    "dev": "npx @tailwindcss/cli -i src/entrada.css -o dist/estilo.css --watch",
+    "build": "npx @tailwindcss/cli -i src/entrada.css -o dist/estilo.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.3.5",
+    "@tailwindcss/cli": "^4.3.5"
+  }
+}</pre>
+
+<p>Com isso, o dia de trabalho começa com <code>npm run dev</code> e o terminal fica mostrando cada
+recompilação. Antes de publicar, <code>Ctrl</code> e <code>C</code> para parar, <code>npm run
+build</code> e pronto. Um cuidado: o <code>^</code> antes da versão permite atualizações dentro da mesma
+major — <code>^4.3.5</code> aceita 4.4, 4.9, mas não 5.0. É uma forma de receber correções sem quebrar
+o projeto de um dia para o outro.</p>
+
+<pre class="term">$ npm run dev
+
+&gt; padaria@ dev
+&gt; npx @tailwindcss/cli -i src/entrada.css -o dist/estilo.css --watch
+
+≈ tailwindcss v4.3.5
+
+Done in 128ms
+Rebuilding...
+Done in 41ms</pre>
+
+<p>Esse <code>&gt;</code> no começo é o próprio npm repetindo o comando que vai rodar — não é erro. E o
+<code>≈ tailwindcss v4.3.5</code> é a única confirmação de versão que você vai ver no caminho. Se ele
+mostrar v3, o projeto tem o pacote errado instalado, e todas as diretivas novas vão falhar.</p>
+
+<h2>7. As diretivas do CSS de entrada</h2>
+
+<p>Diretiva é a linha que começa com arroba. No v3 quase tudo se configurava num
+<code>tailwind.config.js</code>; no v4 quase tudo se escreve no CSS, com diretivas. A tabela é o mapa
+completo do que existe e do que cada uma resolve.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Diretiva</th><th>Para que serve</th><th>Exemplo</th></tr>
+<tr><td><code>@import "tailwindcss"</code></td><td>traz tema, base e utilitárias</td><td><code>@import "tailwindcss";</code></td></tr>
+<tr><td><code>@theme</code></td><td>define ou troca valores do tema</td><td><code>--color-marca: #7c2d12;</code></td></tr>
+<tr><td><code>@source</code></td><td>aponta arquivos que o motor deve ler</td><td><code>@source "../paginas";</code></td></tr>
+<tr><td><code>@apply</code></td><td>usa utilitárias dentro de uma regra sua</td><td><code>@apply rounded-lg p-4;</code></td></tr>
+<tr><td><code>@layer</code></td><td>coloca a regra na camada certa</td><td><code>@layer components { … }</code></td></tr>
+<tr><td><code>@utility</code></td><td>cria uma utilitária própria, com variante</td><td><code>@utility tab-4 { … }</code></td></tr>
+<tr><td><code>@custom-variant</code></td><td>define uma variante nova</td><td><code>@custom-variant aberto (&amp;[open]);</code></td></tr>
+<tr><td><code>@variant</code></td><td>usa uma variante dentro do CSS seu</td><td><code>@variant dark { … }</code></td></tr>
+<tr><td><code>@plugin</code></td><td>carrega um plugin</td><td><code>@plugin "@tailwindcss/typography";</code></td></tr>
+<tr><td><code>@reference</code></td><td>dá contexto ao <code>@apply</code> em arquivo separado</td><td><code>@reference "../entrada.css";</code></td></tr>
+<tr><td><code>@config</code></td><td>lê um <code>tailwind.config.js</code> antigo</td><td><code>@config "../tailwind.config.js";</code></td></tr>
+</table>
+</div>
+
+<p>As três que você usa numa tarde normal são <code>@theme</code> (cor, fonte, espaçamento próprio),
+<code>@layer components</code> com <code>@apply</code> (quando um componente se repete) e
+<code>@source</code> (quando o motor não enxerga uma pasta). As outras existem para casos específicos, e
+vale saber que estão lá antes de inventar gambiarra.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding-inline=16px;;conta:.botao=1;;rule:padding-inline: calc(var(--spacing) * 4)">
+  <p class="try-task">O componente <code>.botao</code> só tem a cor e o texto branco. Complete com
+  <code>@apply</code> para ele ganhar raio de 8 px e respiro de 16 px por 12 px, e o botão sair do
+  tamanho do texto.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@layer components {
+  .botao {
+    @apply bg-amber-600 text-white;
+  }
+}
+&lt;/style&gt;
+&lt;button id="alvo" class="botao"&gt;Encomendar&lt;/button&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.666 0.179 58.318)
+color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@layer components {
+  .botao {
+    @apply rounded-lg bg-amber-600 px-4 py-3 text-white;
+  }
+}
+&lt;/style&gt;
+&lt;button id="alvo" class="botao"&gt;Encomendar&lt;/button&gt;</pre>
+</div>
+
+<p>O painel mostra o resultado como se as classes estivessem no HTML, porque é isso que o
+<code>@apply</code> faz: copia as declarações para dentro da sua regra. E repare no verde da missão: ela
+também confere que existe exatamente um elemento com a classe <code>.botao</code>. Esse tipo de
+conferência pega o erro mais comum de quem mexe em CSS de componente — editar a regra e não salvar o
+arquivo, ou salvar num lugar que o build não lê.</p>
+
+<h2>8. Quando dá errado</h2>
+
+<p>Os problemas de build são poucos e repetitivos. O primeiro é o arquivo de saída que ninguém carrega: o
+CSS é gerado em <code>dist/estilo.css</code>, mas o <code>&lt;link&gt;</code> do HTML aponta para
+<code>src/entrada.css</code>. Abra a aba <em>Network</em> do navegador e confira se o arquivo pedido é o
+mesmo que o build escreveu, com o mesmo tamanho. Um <em>404</em> ali explica tudo.</p>
+
+<p>O segundo é o caminho errado na flag. <code>-i</code> e <code>-o</code> são relativos à pasta em que
+você está quando digita o comando, e não à pasta do projeto. Rodar o comando de dentro de
+<code>src/</code> faz <code>src/entrada.css</code> virar <code>src/src/entrada.css</code>. Se a mensagem
+de erro falar de arquivo inexistente, confira o <code>pwd</code> antes de duvidar da flag.</p>
+
+<p>O terceiro é a classe que não existe. O build roda, o CSS é gerado, e a classe não está lá porque o
+nome está errado — <code>bg-amber-600</code> escrito <code>bg-amber600</code>. O motor não avisa: ele lê
+texto. O jeito de descobrir é procurar o nome da classe no arquivo final; se não estiver, o problema é
+de digitação ou de variante inválida, não de build.</p>
+
+<p>O quarto é o build antigo rodando junto com o novo. Dois terminais com <code>--watch</code> abertos,
+ou um watch de ontem que você esqueceu, escrevem no mesmo arquivo e o resultado alterna entre versões.
+Feche todos e rode um só. Um sintoma clássico: você muda o HTML, salva, e o CSS "volta" depois de alguns
+segundos com a versão anterior.</p>
+
+<p>O quinto é o <code>node_modules</code> corrompido por uma instalação interrompida. A saída é sempre a
+mesma: apague <code>node_modules</code> e rode <code>npm install</code> de novo. Não apague o
+<code>package-lock.json</code> — ele é o que garante que você receba exatamente as mesmas versões. Se o
+erro persistir, vale conferir a versão do Node: a v4 pede uma versão recente, e um Node antigo reclama
+de sintaxe antes mesmo de chegar ao Tailwind.</p>
+
+<p>O sexto é o mais chato e o mais raro: o build não enxerga o arquivo onde estão as classes. Isso
+acontece quando o HTML está numa pasta fora da árvore do CSS, quando o arquivo está no
+<code>.gitignore</code> ou quando as classes são montadas por concatenação em JavaScript. A resposta é
+<code>@source "../outra-pasta";</code> para o primeiro caso e classes completas para o último.</p>
+
+<p>Como alternativa a toda essa configuração, vale conhecer o caminho que dispensa a flag de entrada e
+saída. Se o projeto usa Vite, instale <code>@tailwindcss/vite</code> junto com o motor, registre o plugin
+no <code>vite.config.js</code> e mantenha o <code>@import "tailwindcss";</code> no CSS. Quem compila
+passa a ser o próprio servidor de desenvolvimento: você salva o arquivo e a página atualiza, sem terminal
+extra e sem caminho para errar. É o que a maioria dos projetos novos escolhe hoje.</p>
+
+<pre class="file" data-file="vite.config.js">import { defineConfig } from "vite";
+import tailwindcss from "@tailwindcss/vite";
+
+export default defineConfig({
+  plugins: [tailwindcss()],
+});</pre>
+
+<p>Um erro de sintaxe que aparece uma vez e nunca mais: a linha <code>@import</code> precisa ser a
+primeira do arquivo. CSS exige que todo <code>@import</code> venha antes de qualquer regra, e um
+<code>@theme</code> colocado acima dela faz o navegador descartar o import inteiro. Se o build passa e a
+página fica sem estilo nenhum, olhe as primeiras linhas do CSS de entrada antes de qualquer outra
+coisa.</p>
+
+
+<h2>9. Resumo</h2>
+
+<p>Instale <code>tailwindcss</code> e <code>@tailwindcss/cli</code> como dependência de desenvolvimento;
+escreva <code>@import "tailwindcss";</code> num CSS de entrada; rode
+<code>npx @tailwindcss/cli -i src/entrada.css -o dist/estilo.css</code>. Aponte o
+<code>&lt;link&gt;</code> do HTML para a saída, nunca para a entrada. E não edite a saída: ela é
+descartável e o próximo build escreve por cima.</p>
+
+<ul>
+<li><code>--watch</code> durante o desenvolvimento, <code>--minify</code> na versão final.</li>
+<li>Os scripts do <code>package.json</code> transformam o comando comprido em <code>npm run dev</code> e
+<code>npm run build</code>.</li>
+<li>O v4 configura no CSS: <code>@theme</code> para valores, <code>@source</code> para caminhos,
+<code>@apply</code> para componentes, <code>@plugin</code> para plugins.</li>
+<li><code>tailwind.config.js</code> só entra por compatibilidade, via <code>@config</code>.</li>
+<li>Classe que não aparece na tela é quase sempre build não rodado, caminho errado ou nome digitado
+errado.</li>
+<li>O compilador de navegador é para estudar e prototipar; o site publicado usa o CSS gerado.</li>
+</ul>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

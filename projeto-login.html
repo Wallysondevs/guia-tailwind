@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login | Guia Tailwind</title>
+<meta name="description" content="A tela de login da padaria montada por partes: o casco centralizado, o cartão de 384 px, os campos com rótulo e foco, o botão que carrega e a mensagem de erro.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Login</span></h1>
+<p class="intro">A Ana abriu a área de clientes da padaria e a primeira pergunta chegou no mesmo dia:
+“e as minhas encomendas?”. Ela quer que a Cláudia entre com o e-mail e veja o que encomendou, quando
+retira e quanto pagou. Para isso existe uma porta: a tela de login. É a página mais chata do site, e
+é de propósito — ninguém entra ali para admirar o desenho, entra para resolver a vida e sair. Nesta
+aula a Ana monta essa porta por partes: o casco que centraliza, o cartão, os campos, o botão, a
+mensagem de erro e a faixa da marca no computador.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que a tela de login precisa ser a mais simples do site.</li>
+  <li>Como centralizar um cartão no meio da tela com <code>grid</code> e <code>min-h-screen</code>.</li>
+  <li>O par <code>w-full max-w-sm</code>: largura total até um teto de 384 px.</li>
+  <li>As cinco decisões de um campo de formulário e o papel do rótulo.</li>
+  <li>Como desenhar o foco sem deixar quem usa teclado no escuro.</li>
+  <li>O botão largo, o estado de carregando e o clique duplo.</li>
+  <li>Uma mensagem de erro que ajuda sem entregar informação demais.</li>
+  <li>Como colocar uma faixa da marca ao lado no computador, sem atrapalhar o celular.</li>
+  <li>O que conferir antes de considerar a porta fechada.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a porta, não a vitrine</h2>
+
+<p>Quem chega na tela de login já decidiu: quer entrar. Não precisa ser convencido de nada. Chega com
+pressa, muitas vezes no celular, com uma mão só, às vezes com o teclado do celular aberto comendo
+metade da tela. O trabalho da página é um só: levar essa pessoa do “quero entrar” ao “entrei” em menos
+de vinte segundos.</p>
+
+<p>Isso muda tudo no desenho. A página precisa de um cartão, dois campos, um botão e dois links: um
+para quem esqueceu a senha e outro para quem ainda não tem conta. Mais nada. Cada elemento a mais é uma
+decisão que a pessoa é obrigada a tomar antes de entrar — e toda decisão custa tempo. Carrossel,
+vídeo, três botões de “entrar com…”, caixinha de newsletter: tudo isso é vitrine, e vitrine é para a
+<a href="projeto-loja.html">loja</a>.</p>
+
+<p>Também vale dizer o que a página <em>faz</em>, porque isso define o HTML. Login é um formulário: um
+<code>&lt;form&gt;</code> com <code>&lt;label&gt;</code>, <code>&lt;input&gt;</code> e
+<code>&lt;button&gt;</code>. O Tailwind não envia nada para lugar nenhum — quem confere a senha é o
+programa do outro lado. O que o Tailwind faz, e faz bem, é deixar o campo óbvio de preencher, o foco
+visível e a mensagem de erro legível.</p>
+
+<pre class="file" data-file="login.html">&lt;main class="grid min-h-screen place-items-center bg-stone-100 p-4"&gt;
+  &lt;form class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm"&gt;
+    &lt;h1 class="text-xl font-semibold text-stone-900"&gt;Entrar&lt;/h1&gt;
+    &lt;p class="mt-1 text-sm text-stone-500"&gt;Suas encomendas ficam aqui.&lt;/p&gt;
+    …campos…
+    &lt;button type="submit"&gt;Entrar&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/main&gt;</pre>
+
+<p>Repare que o título do cartão é um <code>&lt;h1&gt;</code> de verdade. Nesta página não existe outro
+título grande: o cartão <em>é</em> a página. Em uma tela de login dentro de um site maior, o
+<code>&lt;h1&gt;</code> pode ser só “Entrar” — e o leitor de tela agradece, porque ouve o assunto da
+página antes de qualquer campo.</p>
+
+<h2>2. O casco: a tela inteira e o cartão no meio</h2>
+
+<p>Cartão de login centralizado é o desenho mais comum da web, e ele tem três exigências: o fundo ocupa
+a tela toda, o cartão fica no meio e sobra respiro para o cartão não encostar no vidro. Três classes
+resolvem, e o CSS gerado mostra que não há mágica:</p>
+
+<pre class="term">.grid {
+  display: grid;
+}
+.min-h-screen {
+  min-height: 100vh;
+}
+.place-items-center {
+  place-items: center;
+}</pre>
+
+<p><code>min-h-screen</code> é <code>min-height: 100vh</code>: no mínimo a altura da janela. Note que é
+<em>mínimo</em>, e não altura fixa. Se o conteúdo passar de uma tela — e passa, quando o celular está
+deitado — o bloco cresce em vez de cortar. Usar <code>h-screen</code> aqui seria um erro clássico: o
+cartão ficaria cortado no rodapé e o botão sumiria.</p>
+
+<p><code>place-items-center</code> é o atalho que alinha o conteúdo no meio nos dois eixos. A palavra
+“place” junta <code>align-items</code> (vertical) e <code>justify-items</code> (horizontal). Com
+<code>grid</code> no pai e um filho só, o resultado é o cartão parado no centro exato da tela. E o
+<code>p-4</code> no pai é o que garante 16 px de folga entre o cartão e a borda quando a tela é
+pequena: em 375 px, o cartão fica com 343 px.</p>
+
+<p>No celular, a barra de endereço do navegador entra e sai e muda a altura visível. O
+<code>100vh</code> usa a altura da janela <em>maior</em>, o que às vezes empurra o cartão para baixo do
+que se vê. Se você quiser o comportamento mais moderno, existe <code>min-h-dvh</code>, que mede a
+altura visível de verdade (<code>100dvh</code>). A regra prática: comece com
+<code>min-h-screen</code>, que funciona em tudo; troque por <code>min-h-dvh</code> se notar o cartão
+“escapando” no celular.</p>
+
+<p>Falta o fundo. <code>bg-stone-100</code> é o cinza quente, quase branco, que faz o cartão branco
+aparecer sem precisar de sombra forte. É o tipo de decisão que parece detalhe e é o que dá o ar de
+“página inteira” em vez de “formulário solto”.</p>
+
+<h2>3. O cartão: 384 px e nada além</h2>
+
+<p>O cartão precisa de uma largura. Sem teto, ele estica pela tela toda e, em um monitor, vira uma faixa
+de 1.200 px com dois campos perdidos dentro. O par que resolve isso é
+<code>w-full max-w-sm</code>: “ocupe a largura toda, mas nunca passe de 384 px”. No celular, ocupa; no
+monitor, para.</p>
+
+<dl class="anatomy">
+<dt>w-full</dt>
+<dd>Largura total do espaço disponível. É o que faz o cartão aproveitar a tela do celular em vez de
+ficar pequeno no canto.</dd>
+<dt>max-w-sm</dt>
+<dd>O teto de 24 rem (384 px). A partir daí, o cartão para de crescer — é o que impede o formulário de
+virar faixa no monitor.</dd>
+<dt>rounded-2xl</dt>
+<dd>Cantos de 16 px. Arredondamento grande dá o ar de cartão; <code>rounded-lg</code> (8 px) parece
+formulário antigo.</dd>
+<dt>p-6</dt>
+<dd>24 px de respiro interno em todos os lados. Em um cartão de 343 px, sobram 295 px para os campos —
+confortável para o polegar.</dd>
+<dt>shadow-sm</dt>
+<dd>Uma sombra quase invisível que separa o branco do cartão do cinza do fundo. Alternativa:
+<code>border border-stone-200</code>.</dd>
+</dl>
+
+<div class="trytailwind" data-goal="css:#alvo|width=384px;;css:#alvo|max-width=384px;;rule:max-width: var(--container-sm)">
+  <p class="try-task">O cartão está com a largura toda e, na prévia, vira uma faixa. Dê a ele largura
+  total até um teto de 384 px: acrescente <code>w-full max-w-sm shadow-sm</code> ao
+  <code>&lt;form id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;main class="grid min-h-screen place-items-center bg-stone-100 p-4"&gt;
+  &lt;form id="alvo" class="rounded-2xl bg-white p-6"&gt;
+    &lt;h2 class="text-lg font-semibold text-stone-900"&gt;Entrar&lt;/h2&gt;
+    &lt;p class="mt-1 text-sm text-stone-500"&gt;Suas encomendas ficam aqui.&lt;/p&gt;
+  &lt;/form&gt;
+&lt;/main&gt;</pre>
+  <pre class="out">
+padding: 24px
+background-color: rgb(255, 255, 255)
+border-radius: 16px
+</pre>
+  <pre class="solucao">&lt;main class="grid min-h-screen place-items-center bg-stone-100 p-4"&gt;
+  &lt;form id="alvo" class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm"&gt;
+    &lt;h2 class="text-lg font-semibold text-stone-900"&gt;Entrar&lt;/h2&gt;
+    &lt;p class="mt-1 text-sm text-stone-500"&gt;Suas encomendas ficam aqui.&lt;/p&gt;
+  &lt;/form&gt;
+&lt;/main&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>width: 384px</code> e <code>max-width: 384px</code>. Os dois números iguais
+contam a história do par: com <code>w-full</code>, o cartão pediria a largura toda; com
+<code>max-w-sm</code>, o pedido é limitado a 384 px. Em um celular de 375 px, o mesmo par dá 343 px —
+largura total menos o respiro do casco.</p>
+
+<p>Se você quiser um cartão mais largo, use <code>max-w-md</code> (448 px). O que não vale é deixar sem
+teto: em formulário de duas colunas, largura grande até faz sentido; em formulário de uma coluna, é só
+espaço vazio entre o rótulo e o campo.</p>
+
+<h2>4. O campo de e-mail: rótulo, caixa e foco</h2>
+
+<p>Agora a peça que a pessoa realmente usa. Um campo de formulário tem cinco decisões, e nenhuma delas
+é enfeite:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Decisão</th><th>Classe</th><th>Sem ela</th></tr>
+<tr><td>Ocupar a linha</td><td><code>block w-full</code></td><td>o <code>input</code> é inline por padrão: fica pequeno e desalinhado do rótulo</td></tr>
+<tr><td>Parecer uma caixa</td><td><code>rounded-lg border border-stone-300</code></td><td>a caixa se mistura ao fundo branco do cartão</td></tr>
+<tr><td>Ter área de toque</td><td><code>px-3 py-2</code></td><td>o texto encosta na borda e o campo fica baixo demais para o dedo</td></tr>
+<tr><td>Receber o texto</td><td><code>bg-white text-stone-900</code></td><td>o texto do autofill pode aparecer em amarelo ou ilegível</td></tr>
+<tr><td>Responder ao foco</td><td><code>focus:border-amber-600 focus:ring-2 focus:ring-amber-200</code></td><td>quem usa teclado não vê onde está digitando</td></tr>
+</table>
+</div>
+
+<pre class="file" data-file="login.html">&lt;div class="mt-4"&gt;
+  &lt;label for="email" class="block text-sm font-medium text-stone-700"&gt;E-mail&lt;/label&gt;
+  &lt;input id="email" name="email" type="email" autocomplete="email"
+    placeholder="ana@notebook"
+    class="mt-1 block w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-stone-900 placeholder:text-stone-400 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-200"&gt;
+&lt;/div&gt;</pre>
+
+<p>As três primeiras linhas do CSS gerado para esse campo são as mais comuns do formulário inteiro:</p>
+
+<pre class="term">.block {
+  display: block;
+}
+.w-full {
+  width: 100%;
+}
+.px-3 {
+  padding-inline: calc(var(--spacing) * 3);
+}</pre>
+
+<p>O <code>block</code> é necessário porque <code>&lt;input&gt;</code> nasce como elemento de linha: sem
+ele, <code>w-full</code> não tem efeito e o campo fica com a largura do texto de exemplo. O
+<code>px-3</code> é 12 px nas laterais. O <code>py-2</code> é 8 px em cima e embaixo, e junto com o
+tamanho da fonte dá um campo de uns 40 px de altura — perto do mínimo confortável para o dedo.</p>
+
+<p>O rótulo merece um parágrafo próprio. Ele não é decoração: é a única pista de que campo é aquele,
+depois que a pessoa começou a digitar. <code>placeholder</code> desaparece no primeiro caractere; um
+exemplo dentro do campo não substitui o nome do campo. Por isso o <code>&lt;label for="email"&gt;</code>
+apontando para <code>id="email"</code> — a ligação entre os dois é o que faz o leitor de tela anunciar
+“E-mail, campo de edição” e o que faz o clique no rótulo levar o cursor para o campo.</p>
+
+<div class="trytailwind" data-goal="rule:border-color: var(--color-amber-600);;rule:--tw-ring-color: var(--color-amber-200)">
+  <p class="try-task">Clique dentro do campo da prévia: não acontece nada, o contorno é o do navegador.
+  Faça o campo ganhar borda âmbar e um anel claro quando receber o foco: acrescente
+  <code>focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-200</code> ao
+  <code>&lt;input id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;div class="w-full max-w-sm rounded-2xl bg-white p-6"&gt;
+  &lt;label for="alvo" class="block text-sm font-medium text-stone-700"&gt;E-mail&lt;/label&gt;
+  &lt;input id="alvo" type="email" autocomplete="email" placeholder="ana@notebook"
+    class="mt-1 block w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-stone-900 placeholder:text-stone-400"&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: block
+width: 336px
+background-color: rgb(255, 255, 255)
+color: oklch(0.216 0.006 56.043)
+border-radius: 8px
+border-width: 1px
+border-color: oklch(0.869 0.005 56.366)
+margin-top: 4px
+padding-inline: 12px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;div class="w-full max-w-sm rounded-2xl bg-white p-6"&gt;
+  &lt;label for="alvo" class="block text-sm font-medium text-stone-700"&gt;E-mail&lt;/label&gt;
+  &lt;input id="alvo" type="email" autocomplete="email" placeholder="ana@notebook"
+    class="mt-1 block w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-stone-900 placeholder:text-stone-400 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-200"&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel não muda ao rodar, porque o foco não está no campo — e isso é uma lição: o CSS do estado só
+aparece quando o estado acontece. Clique dentro do campo na prévia e o anel aparece; clique fora e ele
+some. É assim que se testa foco de verdade: com o dedo, não com o olho no código.</p>
+
+<p>Sobre o <code>focus:outline-none</code>: ele apaga o contorno que o navegador desenha. Sozinho, é
+uma armadilha — a pessoa que navega com Tab fica sem saber onde está. Ele só se justifica quando vem
+acompanhado de um substituto, que aqui é <code>focus:ring-2</code> mais a cor do anel. Regra dura:
+<strong>nunca apague o foco sem colocar outro no lugar</strong>.</p>
+
+<h2>5. A senha e o “esqueci”</h2>
+
+<p>O campo de senha é igual ao de e-mail em tudo, menos em duas coisas: o <code>type</code> e o texto de
+ajuda. <code>type="password"</code> troca os caracteres por bolinhas; <code>autocomplete="current-password"</code>
+permite que o gerenciador de senhas do navegador preencha o campo — e isso é bom, não é falha de
+segurança. Quem digita “padaria2024” no celular, no sol, com uma mão, merece esse alívio.</p>
+
+<dl class="anatomy">
+<dt>rótulo</dt>
+<dd><code>text-sm font-medium text-stone-700</code> e o <code>for</code> ligando ao <code>id</code> do
+campo. Em cima, nunca dentro.</dd>
+<dt>caixa</dt>
+<dd>O <code>&lt;input&gt;</code> com <code>block w-full rounded-lg border border-stone-300 px-3 py-2</code>.</dd>
+<dt>ajuda</dt>
+<dd><code>mt-1 text-xs text-stone-500</code>, ligada ao campo por <code>aria-describedby</code>: “mínimo
+de 8 caracteres”. É onde a dúvida se resolve antes do erro.</dd>
+<dt>erro</dt>
+<dd><code>mt-1 text-xs text-red-700</code> junto com <code>border-red-500</code> no campo. Um campo com
+erro não pode ser só vermelho: precisa dizer o que fazer.</dd>
+</dl>
+
+<p>A linha do rótulo da senha carrega o link do “esqueci”. São duas coisas na mesma linha, uma em cada
+ponta, e isso é <code>flex items-center justify-between</code> dentro de um <code>&lt;div&gt;</code>. O
+link, por sua vez, é <code>text-sm font-medium text-amber-700 hover:underline</code>: cor de marca e
+sublinhado no mouse. Não use <code>text-blue-600</code> se a marca é âmbar — link azul em loja de pão
+parece de outro site.</p>
+
+<p>O olho que mostra a senha é o único pedaço desta tela que precisa de JavaScript: ele troca
+<code>type="password"</code> por <code>type="text"</code>. O Tailwind só desenha o botão —
+<code>absolute right-2 top-2 text-stone-500 hover:text-stone-800</code> dentro de um
+<code>relative</code> — e o assunto fica para a aula de <a href="posicionamento.html">posicionamento</a>.
+Se você não tiver como fazer o JavaScript, não desenhe o botão: um olho que não faz nada irrita mais do
+que a falta dele.</p>
+
+<h2>6. O botão de entrar</h2>
+
+<p>O botão fecha o caminho. Ele precisa ser largo como os campos (o olho desce em linha reta), alto o
+bastante para o dedo e claro no texto. E precisa de um estado a mais que quase todo mundo esquece: o
+estado de <em>esperando</em>.</p>
+
+<pre class="file" data-file="login.html">&lt;button type="submit"
+  class="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 py-2.5 font-semibold text-white hover:bg-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 disabled:opacity-60"&gt;
+  Entrar
+&lt;/button&gt;</pre>
+
+<p>Quando o servidor demora, o botão vira isto:</p>
+
+<pre class="file" data-file="login.html">&lt;button type="submit" disabled aria-busy="true"
+  class="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 py-2.5 font-semibold text-white disabled:opacity-60"&gt;
+  &lt;span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"&gt;&lt;/span&gt;
+  Entrando…
+&lt;/button&gt;</pre>
+
+<p>O <code>animate-spin</code> é uma das animações prontas do Tailwind, e o CSS gerado é uma linha:</p>
+
+<pre class="term">.animate-spin {
+  animation: var(--animate-spin);
+}</pre>
+
+<p>A variável guarda a animação <code>spin</code>, que gira 360 graus em um segundo, sem parar. O anel
+de carregamento é um círculo (<code>rounded-full</code>) com borda de 2 px em três lados
+(<code>border-2 border-white</code>) e o topo transparente (<code>border-t-transparent</code>) — o
+“buraco” é o que faz o giro ser visível.</p>
+
+<p>O par <code>disabled</code> + <code>disabled:opacity-60</code> resolve o problema mais caro de uma
+tela de login: o clique duplo. Sem o atributo, quem toca duas vezes por ansiedade envia dois pedidos e
+às vezes cria dois registros. Com ele, o botão para de aceitar clique e fica apagado, então o
+comportamento fica visível. O <code>aria-busy="true"</code> avisa o leitor de tela que algo está
+acontecendo; o texto “Entrando…” avisa todo mundo.</p>
+
+<p>Um detalhe de ordem: o respiro entre o botão e o campo de cima vem do <code>mt-6</code> no próprio
+botão, e não de um <code>mb-</code> no campo. Escolha um lado e mantenha — misturar margens de cima e de
+baixo é como se faz um formulário com espaços desiguais sem perceber.</p>
+
+<h2>7. Quando algo dá errado</h2>
+
+<p>Erro em login acontece sempre: senha trocada, e-mail com um “ponto” a mais, conta criada com outro
+endereço. A mensagem é a peça que separa “tento de novo” de “desisto”. Ela aparece em um bloco acima do
+botão, com três classes de conteúdo e uma de estrutura:</p>
+
+<pre class="file" data-file="login.html">&lt;div role="alert" class="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"&gt;
+  Não foi possível entrar. Confira o e-mail e a senha e tente de novo.
+&lt;/div&gt;</pre>
+
+<p><code>role="alert"</code> faz o leitor de tela anunciar a mensagem no instante em que ela aparece —
+sem ele, quem não vê a tela não sabe que o botão falhou. <code>bg-red-50</code> com
+<code>border-red-200</code> cria o bloco suave, e <code>text-red-800</code> garante contraste de leitura
+sobre esse fundo claro. Vermelho claro demais em fundo claro é o erro de contraste mais comum em
+formulário.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Situação</th><th>O texto faz o quê</th><th>O texto não faz</th></tr>
+<tr><td>E-mail ou senha errados</td><td>diz o que conferir e oferece o link da senha</td><td>não diz se o e-mail existe: isso entrega a lista de clientes</td></tr>
+<tr><td>Campo vazio</td><td>aponta o campo e leva o foco até ele</td><td>não repete a mesma mensagem genérica em três campos</td></tr>
+<tr><td>Link expirado</td><td>oferece pedir outro link ali mesmo</td><td>não manda a pessoa procurar o suporte</td></tr>
+<tr><td>Deu certo</td><td>leva para as encomendas, sem mensagem</td><td>não pede confirmação de novo</td></tr>
+</table>
+</div>
+
+<p>Duas regras de ouro. A primeira: mesma mensagem para e-mail inexistente e senha errada. Um site que
+diz “este e-mail não está cadastrado” entrega de graça a informação de quem é cliente da padaria. A
+segunda: não limpe o e-mail digitado quando a senha falhar. Apagar o que a pessoa já escreveu é uma
+punição pequena e irritante; mantenha o e-mail e deixe o cursor na senha.</p>
+
+<p>Por último, o foco. Depois de um erro, o cursor deve estar no primeiro campo com problema. Isso
+parece detalhe de programador e é, na verdade, cortesia: no celular, cada toque a menos é uma linha de
+senha menos para errar.</p>
+
+<h2>8. No computador: a faixa da marca ao lado</h2>
+
+<p>No monitor sobra espaço. Em vez de esticar o cartão, use o espaço para lembrar onde a pessoa está: uma
+faixa âmbar de um lado com o nome da padaria e uma frase, e o formulário do outro. A partir de 768 px,
+duas colunas; abaixo disso, só o formulário.</p>
+
+<div class="trytailwind" data-largura="768" data-goal="rule:grid-template-columns: repeat(2, minmax(0, 1fr));;largura:768;;css:#alvo|display=grid">
+  <p class="try-task">A prévia está com 768 px e a faixa da marca ficou em cima do formulário, ocupando
+  a tela toda. Coloque as duas lado a lado a partir de 768 px: acrescente <code>md:grid-cols-2</code> ao
+  <code>&lt;div id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="grid min-h-screen bg-stone-100"&gt;
+  &lt;div class="hidden bg-amber-200 p-8 md:grid md:place-items-center"&gt;
+    &lt;p class="text-lg font-bold text-amber-900"&gt;Padaria Pão Quente&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="grid place-items-center p-4"&gt;
+    &lt;form class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm"&gt;
+      &lt;p class="text-lg font-semibold text-stone-900"&gt;Entrar&lt;/p&gt;
+      &lt;input type="email" placeholder="ana@notebook"
+        class="mt-4 block w-full rounded-lg border border-stone-300 px-3 py-2"&gt;
+      &lt;button type="submit"
+        class="mt-3 w-full rounded-lg bg-amber-600 px-4 py-2.5 font-semibold text-white"&gt;Entrar&lt;/button&gt;
+    &lt;/form&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+min-height: 338px
+background-color: oklch(0.97 0.001 106.424)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid min-h-screen bg-stone-100 md:grid-cols-2"&gt;
+  &lt;div class="hidden bg-amber-200 p-8 md:grid md:place-items-center"&gt;
+    &lt;p class="text-lg font-bold text-amber-900"&gt;Padaria Pão Quente&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="grid place-items-center p-4"&gt;
+    &lt;form class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm"&gt;
+      &lt;p class="text-lg font-semibold text-stone-900"&gt;Entrar&lt;/p&gt;
+      &lt;input type="email" placeholder="ana@notebook"
+        class="mt-4 block w-full rounded-lg border border-stone-300 px-3 py-2"&gt;
+      &lt;button type="submit"
+        class="mt-3 w-full rounded-lg bg-amber-600 px-4 py-2.5 font-semibold text-white"&gt;Entrar&lt;/button&gt;
+    &lt;/form&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Repare na faixa da marca: <code>hidden ... md:grid</code>. Ela está escrita antes do formulário no
+HTML, e mesmo assim não aparece no celular. Isso é melhor do que inverter a ordem por breakpoint: no
+celular, quem chega quer o formulário, não a apresentação — e a faixa, se aparecesse, empurraria os
+campos para baixo da dobra.</p>
+
+<p>Esconder também é uma decisão de conteúdo. Se a faixa traz uma informação útil (endereço, horário,
+“retire sem fila”), ela merece aparecer no celular também, em uma versão pequena. Se é só enfeite, pode
+sumir. O que não pode é a página parecer quebrada no celular — e é por isso que se testa em 375 px
+sempre.</p>
+
+<h2>9. Três cenas, três consertos</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o teclado que abre errado no celular</h3>
+<p>A Ana testou no celular e o campo de e-mail abriu o teclado comum, com 26 letras e nenhum “@” fácil.
+Faltava <code>type="email"</code>: com ele, o navegador do celular mostra o teclado certo e ainda valida
+o formato antes de enviar. O mesmo vale para <code>autocomplete="email"</code> e
+<code>autocomplete="current-password"</code>: eles são a diferença entre pedir que a pessoa digite tudo
+e deixar o gerenciador de senhas trabalhar. Nenhuma dessas duas coisas se vê no desenho — e as duas
+economizam mais tempo que qualquer sombra.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o botão que aceita dois cliques</h3>
+<p>O servidor da padaria demora quase dois segundos para responder. A Cláudia tocou em “Entrar”, nada
+aconteceu, e ela tocou de novo. Resultado: dois pedidos de login e uma mensagem de erro confusa.
+O conserto tem três partes — <code>disabled</code> no botão enquanto espera, texto “Entrando…” e
+<code>disabled:opacity-60</code> para o botão apagado. O Tailwind cuida da aparência, mas o atributo é
+quem trava o clique. Sem o atributo, nenhuma classe adianta.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o cartão no topo, centralizado só na horizontal</h3>
+<p>O cartão apareceu no meio da largura e colado no alto da tela. Faltava o <code>min-h-screen</code>:
+sem altura mínima, o pai tem só a altura do cartão, e centralizar na vertical é centralizar nada. O
+conserto é o trio completo — <code>grid min-h-screen place-items-center</code> — mais o
+<code>p-4</code>. Também acontece com quem usa <code>flex</code> e esquece o
+<code>items-center</code>: o <code>justify-center</code> sozinho só centraliza no eixo horizontal.</p>
+</div>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Conferência</th><th>Como se vê</th><th>O que resolve</th></tr>
+<tr><td>Dá para entrar só com o teclado?</td><td>Tab do começo ao botão, Enter para enviar</td><td>foco visível em todos os campos e no botão</td></tr>
+<tr><td>O cartão cabe em 375 px?</td><td>abra no celular ou estreite a janela</td><td><code>w-full max-w-sm</code> + <code>p-4</code> no casco</td></tr>
+<tr><td>A mensagem de erro é legível?</td><td>force um erro</td><td><code>bg-red-50</code>, <code>text-red-800</code> e <code>role="alert"</code></td></tr>
+<tr><td>O botão trava durante o envio?</td><td>toque duas vezes</td><td><code>disabled</code> + <code>disabled:opacity-60</code></td></tr>
+<tr><td>O autofill funciona?</td><td>deixe o navegador preencher</td><td><code>type</code> e <code>autocomplete</code> certos</td></tr>
+</table>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Por que o rótulo não pode ser substituído pelo
+<code>placeholder</code>?</p>
+<label><input type="radio" name="q1"> porque o <code>placeholder</code> tem cor fraca demais</label>
+<label><input type="radio" name="q1"> porque ele desaparece quando a pessoa começa a digitar, e aí ninguém mais sabe que campo é</label>
+<label><input type="radio" name="q1"> porque o <code>placeholder</code> é proibido em formulários</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que há de errado em
+<code>class="focus:outline-none"</code> sem mais nada?</p>
+<label><input type="radio" name="q2"> nada, é o padrão recomendado</label>
+<label><input type="radio" name="q2"> o <code>outline-none</code> só funciona no Chrome</label>
+<label><input type="radio" name="q2"> apaga o contorno de foco e deixa quem usa teclado sem saber onde está</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O cartão está centralizado na horizontal e colado no
+topo. O que falta?</p>
+<label><input type="radio" name="q3"> altura mínima no pai (<code>min-h-screen</code>) e alinhamento vertical (<code>items-center</code> ou <code>place-items-center</code>)</label>
+<label><input type="radio" name="q3"> <code>mx-auto</code> no cartão</label>
+<label><input type="radio" name="q3"> <code>shadow-sm</code> no cartão</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: feche a porta</h2>
+<p>No seu arquivo, o cartão precisa ficar no meio da tela inteira e parar de crescer em 384 px.
+Complete as duas classes que faltam.</p>
+<div class="ex-code">&lt;main class="grid <input aria-label="resposta 1" data-answer="min-h-screen"> place-items-center bg-stone-100 p-4"&gt;
+  &lt;form class="w-full <input aria-label="resposta 2" data-answer="max-w-sm"> rounded-2xl bg-white p-6 shadow-sm"&gt;
+    …
+  &lt;/form&gt;
+&lt;/main&gt;</div>
+<p class="ex-dica">Dica: a altura mínima da tela é <code>min-h-screen</code> (ou
+<code>min-h-dvh</code>); o teto de 384 px é <code>max-w-sm</code>, o mesmo tamanho do
+<code>max-w-sm</code> que aparece na aula de <a href="min-e-max.html">mínimos e máximos</a>.</p>
+</div>
+
+<h2>10. Resumo</h2>
+
+<p>A tela de login é a página mais simples do site de propósito: um cartão, dois campos, um botão e dois
+links. O casco é <code>grid min-h-screen place-items-center bg-stone-100 p-4</code> — altura mínima da
+tela, conteúdo no centro, respiro em volta. O cartão usa <code>w-full max-w-sm</code>: largura toda até
+384 px, e um <code>p-6</code> para o conteúdo respirar.</p>
+
+<p>Cada campo tem rótulo ligado por <code>for</code>/<code>id</code>, caixa com
+<code>block w-full rounded-lg border border-stone-300 px-3 py-2</code> e um foco desenhado com
+<code>focus:border-amber-600 focus:ring-2</code>. O botão é largo, alto e tem estado de espera
+(<code>disabled</code> + <code>disabled:opacity-60</code> + texto “Entrando…”). O erro aparece em bloco
+com <code>role="alert"</code> e uma frase que diz o que fazer. No computador, uma faixa da marca entra
+ao lado com <code>md:grid-cols-2</code> — e desaparece no celular com <code>hidden md:grid</code>.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Login é formulário: <code>form</code>, <code>label</code>, <code>input</code>, <code>button</code>.</li>
+<li>Centro da tela: <code>grid min-h-screen place-items-center</code> + <code>p-4</code>.</li>
+<li>Cartão: <code>w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm</code>.</li>
+<li>Campo: <code>block w-full rounded-lg border px-3 py-2</code> e <code>focus:ring-2</code>.</li>
+<li>Rótulo visível sempre; <code>placeholder</code> é exemplo, não nome.</li>
+<li><code>type="email"</code> e <code>autocomplete</code> economizam digitação no celular.</li>
+<li>Nunca <code>focus:outline-none</code> sem um anel ou borda no lugar.</li>
+<li>Botão que espera: <code>disabled</code>, texto novo e <code>disabled:opacity-60</code>.</li>
+<li>Erro: <code>role="alert"</code>, frase que orienta e a mesma resposta para os dois casos.</li>
+<li>Duas colunas no computador com <code>md:grid-cols-2</code>; no celular, só o formulário.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

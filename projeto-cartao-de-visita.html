@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cartão de Visita | Guia Tailwind</title>
+<meta name="description" content="Projeto completo: um cartão de visita digital com Tailwind, do esqueleto de tela cheia ao canto arredondado, passando por hierarquia, contraste, hover e o ajuste no celular.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Cartão de <span class="hl">Visita</span></h1>
+<p class="intro">A Ana mandou imprimir quinhentos cartões de visita e, três semanas depois, percebeu que
+ninguém guarda cartão de papel: a cliente fotografa, perde a foto, e pergunta o horário de novo no dia
+seguinte. Ela quer o mesmo cartão em forma de página — um endereço que caiba no link da bio do
+Instagram, com o nome da padaria, o horário, o endereço e um botão para pedir pão. Nesta aula ela monta
+essa página inteira, peça por peça: primeiro a moldura, depois a superfície do cartão, depois o conteúdo
+de dentro, e por último o ajuste para o celular, que é onde esse tipo de página é aberto de verdade.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A montar uma página inteira com poucas peças: moldura, cartão e conteúdo.</li>
+  <li>Como centralizar um bloco na tela com <code>flex min-h-screen items-center justify-center</code>.</li>
+  <li>Por que <code>w-full max-w-sm</code> é melhor que uma largura fixa.</li>
+  <li>A diferença entre a borda do cartão e a borda de cada item de dentro.</li>
+  <li>Hierarquia de texto: um título grande, um apoio pequeno e nada no meio do caminho.</li>
+  <li>Contraste de cor na prática, com <code>amber</code> para a marca e <code>slate</code> para o neutro.</li>
+  <li>Estados de mouse e teclado: <code>hover:</code>, <code>active:</code> e <code>focus-visible:</code>.</li>
+  <li>O ajuste para o celular, que é o tamanho de tela em que o cartão é visto.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o cartão de papel que ninguém guarda</h2>
+
+<p>O cartão de papel da Ana tem quatro informações: o nome da padaria, o endereço, o telefone e o
+horário. Ele custou caro e ficou bonito. O problema não é o desenho, é o suporte: papel não atualiza.
+Quando ela mudou o horário de sábado, os quinhentos cartões continuaram dizendo o horário velho, e não
+havia nada a fazer além de mandar imprimir outros quinhentos.</p>
+
+<p>A versão digital resolve isso e resolve mais uma coisa: quem abre o link está com o celular na mão,
+a dois toques de ligar ou de pedir. É por isso que esse tipo de página tem um formato tão específico.
+Não é um site com menu, não é uma página de vendas. É <strong>uma tela, um cartão, um convite</strong>.
+Tudo o que não ajuda a pessoa a ligar, pedir ou chegar até a padaria fica de fora.</p>
+
+<p>A primeira tentativa da Ana foi jogar tudo em um formulário: cada informação dentro de uma caixinha
+com borda, cada link com contorno, tudo alinhado à esquerda. Ficou parecendo uma ficha de cadastro de
+banco. A lição vale para qualquer página que você montar: <em>borda é caro</em>. Cada borda pede atenção
+do olho, e quando existem doze, o olho desiste. Em um cartão, a borda é da superfície — o cartão é uma
+coisa só, com uma borda só. O que separa as informações lá dentro é espaço e tamanho de letra.</p>
+
+<p>Então o plano da página é este, e ele cabe em quatro linhas: uma moldura cinza que ocupa a tela
+inteira; dentro dela, um cartão branco de no máximo 384 px; dentro do cartão, um avatar, um nome, uma
+linha de apoio, uma lista de contatos e dois botões. Vamos montar nessa ordem, conferindo cada pedaço
+antes de passar para o seguinte. É assim que se monta uma página de verdade: um pedaço, uma olhada,
+outro pedaço.</p>
+
+<h2>2. O esqueleto: uma tela, um cartão no meio</h2>
+
+<p>A moldura tem quatro decisões. A primeira é a altura: a página tem de ocupar a tela inteira, mesmo
+que o conteúdo seja pequeno, senão o cartão flutua no topo de uma área branca e parece erro. A segunda é
+o alinhamento: o cartão vai no meio, na horizontal e na vertical. A terceira é o fundo: um cinza claro,
+para o cartão branco aparecer como superfície. A quarta é o respiro: um <code>p-6</code> para o cartão
+nunca encostar na borda no celular.</p>
+
+<p>No Tailwind isso é <code>flex min-h-screen items-center justify-center bg-slate-100 p-6</code>. Vale
+ler cada palavra. <code>flex</code> transforma o elemento em caixa flexível, o que dá acesso aos
+alinhamentos. <code>min-h-screen</code> diz "no mínimo a altura da tela". <code>items-center</code>
+centraliza no eixo de cruzamento e <code>justify-center</code> no eixo principal — como a direção padrão
+é a linha, o primeiro cuida da vertical e o segundo da horizontal.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=flex;;css:#alvo|align-items=center;;css:#alvo|justify-content=center">
+  <p class="try-task">O cartão está colado no topo e à esquerda. Faça a moldura ocupar a altura da tela
+  e colocar o cartão no meio: <code>flex min-h-screen items-center justify-center</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="min-h-screen bg-slate-100 p-6"&gt;
+  &lt;div class="w-full max-w-sm rounded-2xl bg-white p-8 text-center shadow-lg"&gt;
+    &lt;p class="text-2xl font-semibold text-slate-900"&gt;Padaria da Ana&lt;/p&gt;
+    &lt;p class="mt-1 text-sm text-slate-500"&gt;Rua das Flores, 12&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+min-height: 150px
+padding: 24px
+background-color: oklch(0.968 0.007 247.896)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex min-h-screen items-center justify-center bg-slate-100 p-6"&gt;
+  &lt;div class="w-full max-w-sm rounded-2xl bg-white p-8 text-center shadow-lg"&gt;
+    &lt;p class="text-2xl font-semibold text-slate-900"&gt;Padaria da Ana&lt;/p&gt;
+    &lt;p class="mt-1 text-sm text-slate-500"&gt;Rua das Flores, 12&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>display: flex</code>, <code>align-items: center</code> e
+<code>justify-content: center</code>: exatamente as três classes que você acrescentou. Se você rodar o
+HTML inicial, vai ver <code>min-height</code> e o fundo cinza, e nada de alinhamento — é o
+<code>display: block</code> de fábrica mantendo o cartão no canto.</p>
+
+<p>Repare no <code>min-h-screen</code> e não em <code>h-screen</code>. A diferença parece pequena e não
+é. <code>h-screen</code> diz "tenha exatamente a altura da tela"; se o conteúdo for maior, ele vaza e,
+com o alinhamento centralizado, os pedaços de cima ficam cortados. <code>min-h-screen</code> diz "no
+mínimo a altura da tela": o conteúdo pequeno centraliza, o conteúdo grande empurra a caixa e a página
+rola. Os dois geram uma linha de CSS parecida, mas só um é seguro:</p>
+
+<pre class="term">.flex {
+  display: flex;
+}
+.min-h-screen {
+  min-height: 100vh;
+}
+.items-center {
+  align-items: center;
+}
+.justify-center {
+  justify-content: center;
+}</pre>
+
+<p>Uma observação de celular, porque esta página vive lá. <code>100vh</code> é a altura da janela
+<em>com</em> a barra do navegador contada; num telefone, a barra aparece e desaparece ao rolar, e o
+cartão dá um pulinho. O Tailwind v4 tem <code>min-h-dvh</code>, que usa a altura visível de verdade e
+evita esse pulo. Se a sua página for aberta principalmente no telefone, vale trocar. A ideia é a mesma;
+muda a régua com que o navegador mede a tela.</p>
+
+<h2>3. O cartão: largura, superfície e canto</h2>
+
+<p>Com a moldura no lugar, o cartão precisa de corpo. Ele é
+<code>w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-lg</code>. A
+dupla <code>w-full max-w-sm</code> é o coração da coisa: <code>w-full</code> manda ocupar toda a largura
+disponível e <code>max-w-sm</code> impõe um teto de 384 px. No celular de 360 px, o cartão ocupa os 360
+menos o respiro da moldura; no monitor, para de crescer em 384 px. Uma largura fixa
+(<code>w-96</code>, que também dá 384 px) parece a mesma coisa no monitor e é um desastre no telefone:
+o cartão passa da tela e a página ganha aquela rolagem lateral que ninguém entende.</p>
+
+<p>As outras peças contam a história da superfície. <code>bg-white</code> dá o branco do papel.
+<code>border border-slate-200</code> desenha uma linha de 1 px num cinza bem claro — é o contorno da
+única superfície da página. <code>rounded-2xl</code> arredonda em 16 px, um canto que diz "objeto" e não
+"tabela". <code>shadow-lg</code> levanta o cartão do fundo cinza com uma sombra difusa, o que dá
+profundidade sem precisar de borda escura. E <code>p-8 text-center</code> dá 32 px de respiro interno e
+centraliza o texto, porque um cartão de visita é simétrico.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-radius=16px;;css:#alvo|padding=32px;;css:#alvo|text-align=center">
+  <p class="try-task">O cartão está com canto reto, respiro pequeno e texto à esquerda. Deixe-o assim:
+  <code>rounded-2xl border border-slate-200 p-8 text-center shadow-lg</code>.</p>
+  <pre class="html">&lt;div class="min-h-screen bg-slate-100 p-6"&gt;
+  &lt;div id="alvo" class="w-full max-w-sm bg-white p-4"&gt;
+    &lt;p class="text-2xl font-semibold text-slate-900"&gt;Padaria da Ana&lt;/p&gt;
+    &lt;p class="mt-1 text-sm text-slate-500"&gt;Rua das Flores, 12&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+width: 384px
+max-width: 384px
+padding: 16px
+background-color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;div class="min-h-screen bg-slate-100 p-6"&gt;
+  &lt;div id="alvo" class="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-lg"&gt;
+    &lt;p class="text-2xl font-semibold text-slate-900"&gt;Padaria da Ana&lt;/p&gt;
+    &lt;p class="mt-1 text-sm text-slate-500"&gt;Rua das Flores, 12&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS que o Tailwind gera para essas classes é quase uma tradução palavra por palavra, e é útil
+justamente por isso. A aula de <a href="sombras.html">Sombras</a> tem a escala inteira, do
+<code>shadow-sm</code> ao <code>shadow-2xl</code>, com o valor de cada uma: você lê o nome da classe e vê a propriedade. Repare que os valores apontam para
+variáveis, e não para números soltos — é assim que o v4 se organiza por dentro:</p>
+
+<pre class="term">.w-full {
+  width: 100%;
+}
+.max-w-sm {
+  max-width: var(--container-sm);
+}
+.rounded-2xl {
+  border-radius: var(--radius-2xl);
+}
+.border {
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+}
+.p-8 {
+  padding: calc(var(--spacing) * 8);
+}</pre>
+
+<p>A sombra merece um parágrafo, porque é o enfeite que mais estraga página de iniciante. Uma sombra
+grande em um cartão pequeno parece sujeira; uma sombra em cada elemento da página parece um quebra-cabeça
+mal montado. A regra que funciona: <strong>uma sombra por superfície</strong>. O cartão tem sombra; o que
+está dentro dele não tem. Se você precisar de dois níveis de profundidade na mesma tela, use
+<code>shadow-sm</code> para o nível de baixo e <code>shadow-lg</code> para o de cima, e nunca dois
+<code>shadow-lg</code> disputando.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor</th><th>Onde entra neste cartão</th></tr>
+<tr><td><code>w-full</code></td><td>100%</td><td>ocupa a largura que a moldura oferecer</td></tr>
+<tr><td><code>max-w-sm</code></td><td>384 px</td><td>teto do cartão no monitor</td></tr>
+<tr><td><code>max-w-md</code></td><td>448 px</td><td>alternativa para cartão com mais texto</td></tr>
+<tr><td><code>rounded-2xl</code></td><td>16 px</td><td>o canto do cartão</td></tr>
+<tr><td><code>p-8</code></td><td>32 px</td><td>respiro interno em todos os lados</td></tr>
+<tr><td><code>shadow-lg</code></td><td>sombra difusa</td><td>levanta o cartão do fundo cinza</td></tr>
+</table>
+</div>
+
+<h2>4. Hierarquia: o olho precisa saber onde começar</h2>
+
+<p>Um cartão tem três níveis de informação e só isso. O primeiro é o nome da padaria, que a pessoa lê de
+longe. O segundo é a linha de apoio, que diz o que a padaria faz. O terceiro são os dados de contato,
+que a pessoa procura com o dedo, não com o olho. Se os três tiverem o mesmo tamanho e o mesmo peso, o
+cartão vira um bloco de texto e a pessoa desiste antes de achar o telefone.</p>
+
+<p>A montagem do topo do cartão fica assim: um círculo com as iniciais, o nome em
+<code>text-2xl font-semibold tracking-tight</code>, uma linha de apoio em
+<code>text-sm text-slate-500</code> e, acima de tudo, um rótulo pequeno em
+<code>text-xs uppercase tracking-wide text-amber-700</code>. O círculo é
+<code>mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-amber-700 text-2xl font-bold
+text-amber-50</code> — 80 px de lado, flex para centralizar as letras dentro, <code>rounded-full</code>
+para virar círculo, e <code>mx-auto</code> para ele mesmo se centralizar na largura do cartão.</p>
+
+<dl class="anatomy">
+<dt>rótulo</dt>
+<dd>A linha pequena acima do nome: <code>text-xs uppercase tracking-wide</code>. Ela dá contexto
+("padaria artesanal") sem competir com o título.</dd>
+<dt>avatar</dt>
+<dd>O círculo com as iniciais: <code>h-20 w-20 rounded-full</code>. Serve quando não há foto boa — e
+quase nunca há.</dd>
+<dt>título</dt>
+<dd>O nome da padaria: <code>text-2xl font-semibold tracking-tight</code>. É o único elemento grande do
+cartão.</dd>
+<dt>apoio</dt>
+<dd>A linha de baixo: <code>text-sm text-slate-500</code>. Menor e mais clara, porque é o segundo
+degrau de leitura.</dd>
+<dt>ação</dt>
+<dd>O botão ou link que resolve o problema da pessoa: <code>rounded-lg bg-slate-900 px-4 py-3
+text-white</code>.</dd>
+</dl>
+
+<pre class="file" data-file="cartao.html">&lt;div class="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-lg"&gt;
+  &lt;div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-amber-700 text-2xl font-bold text-amber-50"&gt;PA&lt;/div&gt;
+  &lt;p class="mt-4 text-xs uppercase tracking-wide text-amber-700"&gt;Padaria artesanal&lt;/p&gt;
+  &lt;h2 class="mt-1 text-2xl font-semibold tracking-tight text-slate-900"&gt;Padaria da Ana&lt;/h2&gt;
+  &lt;p class="mt-1 text-sm text-slate-500"&gt;Rua das Flores, 12 — Centro&lt;/p&gt;
+&lt;/div&gt;</pre>
+
+<p>Três detalhes aparecem nesse bloco e valem para o resto do guia. O <code>tracking-tight</code>
+aperta o espaço entre as letras, o que fica bem em título grande e mal em texto corrido. O
+<code>tracking-wide</code> faz o contrário, e é o que salva o rótulo em maiúsculas de parecer apertado.
+E o <code>mt-4</code> antes do rótulo é o respiro que separa o avatar do texto — sem ele, o círculo
+encosta na primeira linha e o cartão parece mal recortado.</p>
+
+<p>Uma coisa que ninguém conta: esses <code>mt-</code> espalhados são um sistema, não um acaso. O
+<code>mt-4</code> separa blocos diferentes; o <code>mt-1</code> separa linhas do mesmo bloco. Se você
+usar <code>mt-6</code> entre o título e a linha de apoio, o cartão se desmonta visualmente, porque o
+espaço pequeno é o que diz "estas duas linhas são a mesma coisa". Use dois degraus: um pequeno dentro do
+bloco, um grande entre blocos.</p>
+
+<h2>5. Cor: a marca em dois tons e um neutro</h2>
+
+<p>A padaria tem uma cor: o âmbar do pão. Ela não precisa de mais nada além disso e de um cinza. Essa é
+a decisão de cor mais comum em projeto pequeno: <strong>uma família de marca, uma família neutra</strong>.
+O âmbar aparece no avatar, no rótulo e no detalhe do link; o cinza faz o texto, a borda e o fundo. Duas
+famílias, seis tons no máximo, e a página inteira parece coerente — mesmo que você não saiba desenhar.</p>
+
+<p>O detalhe que separa um cartão bonito de um cartão ilegível é o contraste. Texto branco sobre
+<code>amber-500</code> é bonito no monitor e ruim na rua: o amarelo claro come o branco. Por isso o
+avatar usa <code>bg-amber-700</code>, o tom escuro da mesma família. E o botão principal não é âmbar: é
+<code>bg-slate-900 text-white</code>, porque o convite mais importante da página precisa do maior
+contraste que existe, e o âmbar fica para o enfeite. Essa troca — marca no detalhe, neutro escuro na
+ação — é um clássico e funciona em quase todo projeto.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Cor</th><th>Classe</th><th>Onde usar</th><th>Cuidado</th></tr>
+<tr><td>âmbar escuro</td><td><code>bg-amber-700</code></td><td>avatar, selo</td><td>texto claro por cima</td></tr>
+<tr><td>âmbar claro</td><td><code>text-amber-700</code></td><td>rótulo pequeno</td><td>só sobre fundo branco</td></tr>
+<tr><td>quase preto</td><td><code>bg-slate-900</code></td><td>botão principal</td><td>texto branco obrigatório</td></tr>
+<tr><td>cinza médio</td><td><code>text-slate-500</code></td><td>linha de apoio</td><td>não use em texto essencial</td></tr>
+<tr><td>cinza claro</td><td><code>border-slate-200</code></td><td>borda do cartão</td><td>1 px basta</td></tr>
+<tr><td>verde suave</td><td><code>bg-emerald-100</code></td><td>selo "aberto agora"</td><td>sempre com texto junto</td></tr>
+</table>
+</div>
+
+<p>A última linha da tabela tem uma regra de acessibilidade que vale a pena guardar desde já: cor
+sozinha não informa. Um selo verde sem a palavra "aberto" não diz nada para quem não distingue verde de
+vermelho — e não diz nada para ninguém que esteja no sol, com o brilho do telefone no máximo. O selo
+certo é <code>rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800</code> com a
+palavra dentro. A cor ajuda; o texto informa.</p>
+
+<h2>6. Estados: o que muda quando o dedo chega</h2>
+
+<p>Um link sem estado é um link que parece texto. No cartão da Ana, o endereço e o telefone são links —
+tocando, abrem o mapa e o discador. Se eles não mudarem de aparência no toque, a pessoa não descobre que
+são botões. O Tailwind resolve isso com prefixos: <code>hover:</code> para o mouse,
+<code>active:</code> para o instante do clique e <code>focus-visible:</code> para quem navega pelo
+teclado.</p>
+
+<pre class="file" data-file="cartao.html">&lt;a href="https://wa.me/5511999999999"
+   class="block w-full rounded-lg bg-slate-900 px-4 py-3 text-center font-medium text-white
+          transition hover:bg-slate-700 active:bg-slate-800
+          focus-visible:ring-2 focus-visible:ring-amber-700 focus-visible:ring-offset-2"&gt;
+  Pedir pelo WhatsApp
+&lt;/a&gt;
+
+&lt;a href="#mapa"
+   class="block w-full rounded-lg border border-slate-300 px-4 py-3 text-center font-medium
+          text-slate-700 transition hover:bg-slate-100"&gt;
+  Ver no mapa
+&lt;/a&gt;</pre>
+
+<p>O <code>transition</code> é o que faz a mudança de cor parecer suave em vez de piscar. Ele não muda
+nada sozinho: só avisa que as propriedades que mudarem devem animar por um tempinho curto. Sem ele,
+<code>hover:bg-slate-700</code> troca de cor de um quadro para o outro, e o resultado parece um
+tremido.</p>
+
+<p>Sobre o <code>focus-visible</code>: ele só aparece quando o navegador entende que o foco veio do
+teclado — tabulação — e não de um clique. É de propósito. Muita gente aprende a colocar
+<code>outline: none</code> nos links porque acha feio, e com isso quebra a página para quem usa
+teclado. Aqui você não tira o contorno: você troca por um anel mais bonito, com
+<code>ring-2 ring-amber-700 ring-offset-2</code>. O anel é desenhado por <code>box-shadow</code>, então
+não empurra o layout como uma borda faria.</p>
+
+<p>A aula de <a href="focus.html">O focus</a> mostra o mesmo mecanismo em campos de formulário. E uma
+dica prática que economiza tempo: as prévias deste guia mostram o estado normal, não o
+<code>hover</code>. Para ver o estado de mouse sem mexer no código, abra o navegador, inspecione o
+elemento, clique com o botão direito no nó do HTML e escolha <em>Forçar estado</em> →
+<em>:hover</em>. O elemento fica travado no estado e você ajusta a cor vendo o resultado. É o mesmo
+truque para <code>:focus</code> e <code>:active</code>, e serve para qualquer página, não só para as
+deste guia.</p>
+
+<h2>7. Os detalhes: lista de contatos, divisores e etiqueta</h2>
+
+<p>Com o topo pronto, falta o miolo: horário, endereço, telefone. A tentação é fazer três caixinhas com
+borda, uma embaixo da outra. Não faça. Use uma lista com divisores: uma única superfície branca, e uma
+linha fina entre os itens. No Tailwind, quem desenha essas linhas é o <code>divide-y</code>, aplicado no
+pai, junto com <code>divide-slate-200</code> para a cor. Ele coloca a borda <em>entre</em> os filhos e
+nunca depois do último — é essa economia que faz a lista parecer desenhada.</p>
+
+<pre class="file" data-file="cartao.html">&lt;ul class="mt-6 divide-y divide-slate-200 overflow-hidden rounded-xl border border-slate-200 text-left"&gt;
+  &lt;li class="flex items-center justify-between gap-3 px-4 py-3"&gt;
+    &lt;span class="text-sm text-slate-500"&gt;Horário&lt;/span&gt;
+    &lt;span class="text-sm font-medium text-slate-900"&gt;6h às 13h&lt;/span&gt;
+  &lt;/li&gt;
+  &lt;li class="flex items-center justify-between gap-3 px-4 py-3"&gt;
+    &lt;span class="text-sm text-slate-500"&gt;Situação&lt;/span&gt;
+    &lt;span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"&gt;Aberto agora&lt;/span&gt;
+  &lt;/li&gt;
+  &lt;li class="flex items-center justify-between gap-3 px-4 py-3"&gt;
+    &lt;span class="text-sm text-slate-500"&gt;Endereço&lt;/span&gt;
+    &lt;a href="#mapa" class="text-sm font-medium text-amber-700 underline underline-offset-4 hover:text-amber-800"&gt;Rua das Flores, 12&lt;/a&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;</pre>
+
+<p>Três classes desse bloco merecem atenção. O <code>overflow-hidden</code> no pai é o que faz o
+arredondamento valer: sem ele, o primeiro e o último item têm fundo reto e escapam do canto redondo,
+deixando um degrau visível. O <code>justify-between</code> empurra o rótulo para a esquerda e o valor
+para a direita, alinhados pela mesma coluna em todas as linhas — é o que dá a sensação de tabela sem
+tabela. E o <code>gap-3</code> garante que, se o valor for longo, ele não encoste no rótulo.</p>
+
+<dl class="anatomy">
+<dt>divisor</dt>
+<dd><code>divide-y divide-slate-200</code> no pai: uma linha entre itens, nenhuma no fim.</dd>
+<dt>superfície</dt>
+<dd><code>bg-white border border-slate-200 rounded-xl</code>: uma caixa só, com uma borda só.</dd>
+<dt>etiqueta</dt>
+<dd><code>rounded-full bg-emerald-100 px-2 py-0.5 text-xs</code>: pílula pequena, com texto dentro.</dd>
+<dt>alvo de toque</dt>
+<dd><code>min-h-11</code>: 44 px de altura mínima, o tamanho que o dedo acerta sem errar.</dd>
+<dt>recuo</dt>
+<dd><code>px-4 py-3</code>: 16 px nas laterais e 12 px em cima e embaixo, em cada linha.</dd>
+</dl>
+
+<p>O <code>min-h-11</code> é a aula inteira em uma classe. Onze na escala do Tailwind são 44 px, e 44 px
+é a medida que as diretrizes de acessibilidade pedem para um alvo de toque. Em um cartão de visita, isso
+não é preciosismo: é a diferença entre a pessoa conseguir tocar no telefone e tocar no telefone do lado.
+Se o item da lista for clicável, ele precisa dessa altura mínima — mesmo que o texto caiba em 20 px.</p>
+
+<h2>8. No celular e no monitor</h2>
+
+<p>Aqui está a parte que muda a forma de escrever as classes: a página é montada de baixo para cima. Você
+escreve o que vale no celular e só depois acrescenta o que muda em tela maior. O Tailwind chama isso de
+mobile first e o mecanismo são os prefixos de breakpoint: <code>sm:</code> a partir de 640 px,
+<code>md:</code> a partir de 768 px, <code>lg:</code> a partir de 1024 px. Sem prefixo, vale para todos
+os tamanhos.</p>
+
+<p>No cartão, dois ajustes resolvem tudo. O respiro interno cresce com a tela: <code>p-6 sm:p-8</code>.
+E os dois botões, que no celular ficam um embaixo do outro, viram duas colunas a partir de 640 px:
+<code>grid gap-3 sm:grid-cols-2</code>. Repare que a base é <code>grid gap-3</code> — no telefone já é
+uma coluna só, porque um grid sem <code>grid-cols-</code> tem uma coluna. O <code>sm:grid-cols-2</code>
+só entra quando há largura para dois botões lado a lado sem apertar.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=grid;;css:#alvo|gap=12px;;rule:grid-template-columns: repeat(2, minmax(0, 1fr))" data-largura="768">
+  <p class="try-task">Os dois botões já estão em uma coluna de grid, um embaixo do outro. Faça-os ficar lado a lado a partir
+  de 640 px, mantendo os 12 px de distância: acrescente <code>sm:grid-cols-2</code>.</p>
+  <pre class="html">&lt;div class="min-h-screen bg-slate-100 p-6"&gt;
+  &lt;div class="w-full max-w-sm rounded-2xl bg-white p-8"&gt;
+    &lt;p class="text-sm font-medium text-slate-500"&gt;Fale com a padaria&lt;/p&gt;
+    &lt;div id="alvo" class="mt-3 grid gap-3"&gt;
+      &lt;a href="#pedido" class="block rounded-lg bg-slate-900 px-4 py-3 text-center text-sm font-medium text-white"&gt;Pedir pelo WhatsApp&lt;/a&gt;
+      &lt;a href="#mapa" class="block rounded-lg border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700"&gt;Ver no mapa&lt;/a&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+gap: 12px
+margin-top: 12px
+</pre>
+  <pre class="solucao">&lt;div class="min-h-screen bg-slate-100 p-6"&gt;
+  &lt;div class="w-full max-w-sm rounded-2xl bg-white p-8"&gt;
+    &lt;p class="text-sm font-medium text-slate-500"&gt;Fale com a padaria&lt;/p&gt;
+    &lt;div id="alvo" class="mt-3 grid gap-3 sm:grid-cols-2"&gt;
+      &lt;a href="#pedido" class="block rounded-lg bg-slate-900 px-4 py-3 text-center text-sm font-medium text-white"&gt;Pedir pelo WhatsApp&lt;/a&gt;
+      &lt;a href="#mapa" class="block rounded-lg border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700"&gt;Ver no mapa&lt;/a&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Essa caixa tem <code>data-largura="768"</code>, ou seja, a prévia é uma janela de 768 px — larga o
+bastante para o breakpoint <code>sm:</code> valer. Antes de rodar, o painel mostra <code>display: grid</code> e
+<code>gap: 12px</code> — e nada de <code>grid-template-columns</code>, porque uma coluna só é o padrão. Depois
+do <code>sm:grid-cols-2</code>, a propriedade aparece com dois valores iguais, um para cada botão. Se você
+trocasse o <code>data-largura</code> por 375, veria os botões empilhados de novo — a mesma classe tem dois
+resultados, e só a régua diz qual você está vendo.</p>
+
+<p>O CSS gerado mostra o <code>@media</code> por fora da regra — ele é o porteiro, não a regra. Ler isso
+uma vez desfaz a confusão de achar que o <code>sm:</code> é uma classe diferente:</p>
+
+<pre class="term">@media (width >= 40rem) {
+  .sm\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}</pre>
+
+<p><code>40rem</code> são 640 px, porque 1 rem é 16 px. O <code>repeat(2, minmax(0, 1fr))</code> quer
+dizer duas colunas iguais que podem encolher até zero — o <code>minmax(0, 1fr)</code> é o que impede uma
+coluna de estourar quando o conteúdo dentro dela é grande. É por isso que o grid do Tailwind aguenta
+texto comprido sem quebrar o layout, e o grid feito à mão com <code>1fr 1fr</code> às vezes não.</p>
+
+<h2>9. Três cenas, três consertos</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o cartão estoura de lado no telefone</h3>
+<p>A Ana usou <code>w-96</code> porque no monitor ficava perfeito. No telefone de 360 px, o cartão passou
+da tela, apareceu a rolagem lateral e metade do texto ficou fora. A troca é uma só:
+<code>w-full max-w-sm</code>. Largura em porcentagem com teto em rem é a receita para qualquer caixa que
+precise caber em qualquer tela. Se você vir uma barra de rolagem horizontal em uma página sua, procure a
+largura fixa — em 90% dos casos é ela.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o rodapé do cartão desaparece em tela baixa</h3>
+<p>Em um notebook com 700 px de altura, o cartão tinha mais conteúdo do que a tela e os primeiros itens
+ficaram cortados. O culpado era <code>h-screen</code> na moldura, que fixa a altura em vez de permitir
+crescer. Trocar por <code>min-h-screen</code> resolve, e o <code>justify-center</code> continua
+centralizando quando sobra espaço. Em telas muito baixas, vale ainda reduzir o respiro:
+<code>py-6 sm:py-10</code> em vez de <code>p-8</code> fixo no cartão.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o cartão parece uma ficha de cadastro</h3>
+<p>Ela colocou borda em cada linha de informação e o resultado ficou burocrático. O conserto foi remover
+todas as bordas internas e deixar só duas marcas: a borda externa da lista e os divisores entre as
+linhas. Borda é uma ferramenta de separação; quando o espaço já separa, a borda só faz barulho. Se ainda
+parecer pesado, troque <code>border-slate-300</code> por <code>border-slate-200</code>: um tom mais
+claro muda a sensação sem mudar a estrutura.</p>
+</div>
+
+<p>Antes de fechar a página, passe o olho nesta lista. Ela é o que a Ana confere antes de mandar o link
+para a cliente — e é o mesmo roteiro para qualquer página curta que você montar.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>Classes</th><th>Por quê</th></tr>
+<tr><td>moldura</td><td><code>flex min-h-screen items-center justify-center bg-slate-100 p-6</code></td><td>centraliza e nunca encosta na borda</td></tr>
+<tr><td>cartão</td><td><code>w-full max-w-sm rounded-2xl border bg-white p-8 shadow-lg</code></td><td>uma superfície, um canto, uma sombra</td></tr>
+<tr><td>avatar</td><td><code>h-20 w-20 rounded-full bg-amber-700 text-amber-50</code></td><td>marca no detalhe, contraste garantido</td></tr>
+<tr><td>título</td><td><code>text-2xl font-semibold tracking-tight</code></td><td>um único elemento grande</td></tr>
+<tr><td>lista</td><td><code>divide-y divide-slate-200 overflow-hidden rounded-xl</code></td><td>separa sem bordas extras</td></tr>
+<tr><td>ação</td><td><code>rounded-lg bg-slate-900 px-4 py-3 text-white</code></td><td>o maior contraste no que importa</td></tr>
+</table>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual conjunto centraliza o cartão no meio da tela e
+deixa a página crescer se o conteúdo for maior?</p>
+<label><input type="radio" name="c1"> <code>h-screen block text-center</code></label>
+<label><input type="radio" name="c1"> <code>flex min-h-screen items-center justify-center</code></label>
+<label><input type="radio" name="c1"> <code>grid min-h-screen grid-cols-3</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que o cartão usa <code>w-full max-w-sm</code> em
+vez de <code>w-96</code>?</p>
+<label><input type="radio" name="c2"> porque <code>w-96</code> não existe no Tailwind</label>
+<label><input type="radio" name="c2"> porque assim o cartão fica mais largo no monitor</label>
+<label><input type="radio" name="c2"> porque a largura acompanha a tela e para de crescer em 384 px</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que o <code>divide-y</code> faz na lista de
+contatos?</p>
+<label><input type="radio" name="c3"> desenha uma linha entre um item e o outro, sem linha no fim</label>
+<label><input type="radio" name="c3"> coloca borda em todos os lados de cada item</label>
+<label><input type="radio" name="c3"> separa os itens com 16 px de margem</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a moldura do cartão</h2>
+<p>Falta a moldura da página. Complete a classe do <code>div</code> para ele ocupar a altura da tela e
+colocar o cartão no meio, na horizontal e na vertical.</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="flex min-h-screen items-center justify-center"> bg-slate-100 p-6"&gt;</div>
+<p class="ex-dica">Dica: são quatro classes. Uma liga o flex, uma cuida da altura mínima e duas cuidam
+do alinhamento — uma por eixo. Se você escrever <code>h-screen</code>, a resposta não vale: altura fixa
+corta o conteúdo em tela baixa.</p>
+</div>
+
+<h2>10. Resumo</h2>
+
+<p>Uma página de cartão de visita é uma moldura, uma superfície e um conteúdo. A moldura é
+<code>flex min-h-screen items-center justify-center bg-slate-100 p-6</code>: tela inteira, tudo no meio,
+respiro nas bordas. O cartão é <code>w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8
+text-center shadow-lg</code>: largura elástica com teto, uma borda só e uma sombra só. Dentro dele, o
+avatar em <code>h-20 w-20 rounded-full</code>, o nome em <code>text-2xl font-semibold</code> e o apoio
+em <code>text-sm text-slate-500</code> criam a hierarquia de três degraus que o olho precisa.</p>
+
+<p>O que transforma o desenho em página útil são os detalhes: a lista com <code>divide-y</code> em vez
+de caixinhas, o <code>min-h-11</code> para o dedo acertar, o <code>transition</code> com
+<code>hover:</code> e <code>focus-visible:</code> para o link não parecer texto, e o
+<code>sm:grid-cols-2</code> para os botões ficarem lado a lado quando há espaço. Tudo isso é nível 1 e
+nível 2 deste guia: nada de instalação, nada de arquivo de configuração, nada de
+<code>@theme</code>.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Moldura centralizada: <code>flex min-h-screen items-center justify-center</code>.</li>
+<li><code>min-h-screen</code> cresce com o conteúdo; <code>h-screen</code> corta.</li>
+<li>Cartão com largura elástica e teto: <code>w-full max-w-sm</code> (384 px).</li>
+<li>Uma superfície, uma borda, uma sombra. Borda em tudo vira formulário.</li>
+<li>Hierarquia de três degraus: <code>text-xs</code> do rótulo, <code>text-2xl</code> do nome,
+<code>text-sm</code> do apoio.</li>
+<li>Marca no detalhe, neutro escuro na ação: <code>bg-slate-900 text-white</code> no botão principal.</li>
+<li>Lista: <code>divide-y divide-slate-200 overflow-hidden rounded-xl</code> no pai.</li>
+<li><code>min-h-11</code> = 44 px de alvo de toque.</li>
+<li>Estados: <code>hover:</code>, <code>active:</code> e <code>focus-visible:ring-2</code>.</li>
+<li>Celular primeiro: base sem prefixo, ajuste com <code>sm:</code> a partir de 640 px.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

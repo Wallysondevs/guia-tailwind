@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A CLI do Tailwind | Guia Tailwind</title>
+<meta name="description" content="A CLI do Tailwind sem decoreba: as três formas de chamar o comando, o que -i, -o, --watch e --minify fazem, o código de saída e como ler o que ela escreveu.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>A <span class="hl">CLI</span> do Tailwind</h1>
+<p class="intro">A Ana já instalou os pacotes e já conseguiu gerar a folha de CSS uma vez — copiando o
+comando de um tutorial. O problema é que ela não sabe o que está copiando: se o caminho do arquivo
+mudar, se a pasta de saída não existir, se o terminal ficar horas sem responder, ela não tem para onde
+olhar. Nesta aula ela vira o jogo: entende o comando peça por peça, aprende as três formas de chamá-lo,
+descobre o que as poucas opções fazem e como saber, sem adivinhar, se o trabalho terminou bem.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é uma CLI e por que o Tailwind tem uma.</li>
+  <li>As três formas de chamar o comando: <code>npx</code>, o binário da pasta e o script do npm.</li>
+  <li>O que <code>-i</code>, <code>-o</code>, <code>--watch</code>, <code>--minify</code> e <code>--help</code> fazem.</li>
+  <li>O que a CLI lê, o que ela escreve e de que pasta rodar.</li>
+  <li>O que significa um comando terminar em silêncio e o que é código de saída.</li>
+  <li>Como ler a folha que a CLI escreveu, bloco por bloco.</li>
+  <li>O que fazer quando o comando reclama, trava ou não escreve nada.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o comando copiado</h2>
+
+<p>Na aula anterior a Ana instalou o Tailwind e rodou uma linha que encontrou num tutorial. Funcionou
+de primeira, e é justamente por isso que ela ficou incomodada. Ela quer mudar a saída de
+<code>dist/estilo.css</code> para <code>dist/padaria.css</code> e não sabe quais partes da linha mexer.
+Quer gerar uma segunda folha para a página de contato e não sabe se pode rodar o comando duas vezes.
+Quer entender por que o terminal às vezes devolve o cursor na hora e às vezes fica parado.</p>
+
+<p>Esse é o momento certo para aprender a ferramenta. Um comando de terminal tem uma anatomia simples:
+o nome do programa, os argumentos (aquilo sobre o que ele age) e as opções (os ajustes, que começam com
+um ou dois hífens). Quem entende a anatomia consegue ler qualquer comando da documentação — e, mais
+importante, consegue perceber quando uma linha copiada não faz sentido para o seu projeto.</p>
+
+<p>A CLI do Tailwind é pequena de propósito. Ela não compila JavaScript, não inicia servidor, não
+vigia pastas por conta própria, não tem arquivo de configuração próprio. Ela faz uma coisa: pega o CSS
+de entrada, pergunta ao motor quais classes o projeto usa e escreve o CSS final. Todo o resto —
+minificar, vigiar, otimizar — são variações dessa mesma tarefa.</p>
+
+<h2>2. O que é uma CLI, sem mistério</h2>
+
+<p>CLI é a sigla de <em>command line interface</em>, interface de linha de comando. É um programa sem
+janela própria: você o chama escrevendo o nome dele no terminal, ele faz o trabalho, imprime o que tem
+para imprimir e termina. Programas assim são ideais para tarefas repetitivas, porque podem ser
+chamados por scripts e por outras ferramentas, sem ninguém clicando em nada.</p>
+
+<p>A conversa tem três canais. A <strong>entrada</strong> são os argumentos que você digita. A
+<strong>saída padrão</strong> é o texto que aparece na tela — normalmente mensagens curtas de
+progresso. A <strong>saída de erro</strong> é o canal das mensagens ruins, que também aparece na tela,
+mas por outro caminho. E existe ainda um número silencioso, o <strong>código de saída</strong>: zero
+quando deu certo, diferente de zero quando falhou. Programas que automatizam o build olham esse número,
+não o texto.</p>
+
+<p>Guarde essa última ideia, porque ela resolve a dúvida mais comum de quem começa: "o terminal não
+mostrou nada, funcionou?". Se o código de saída é zero, sim. Ferramentas de linha de comando são
+econômicas por cultura: elas só falam quando têm algo a dizer. Silêncio, depois de um comando que
+deveria gerar um arquivo, é o som do sucesso.</p>
+
+<dl class="anatomy">
+<dt>argumento</dt>
+<dd>O alvo do comando. Em <code>npx @tailwindcss/cli</code>, o argumento é o nome do pacote; o
+resto são opções com os valores delas.</dd>
+<dt>opção</dt>
+<dd>Um ajuste, escrito com hífen: <code>-i</code> (curta) ou <code>--input</code> (longa). As duas
+formas fazem a mesma coisa; a curta economiza digitação.</dd>
+<dt>caminho</dt>
+<dd>O endereço de um arquivo ou pasta. Pode ser absoluto (<code>/home/ana/padaria/src</code>) ou
+relativo à pasta em que o terminal está.</dd>
+<dt>binário</dt>
+<dd>O arquivo executável de um pacote. O npm cria um atalho dele em <code>node_modules/.bin</code>
+para que você não precise escrever o caminho inteiro.</dd>
+<dt>código de saída</dt>
+<dd>O número que o programa devolve ao terminar. Zero é sucesso; qualquer outro valor é falha, e é
+por ele que os scripts decidem parar ou continuar.</dd>
+</dl>
+
+<p>Uma nota sobre a palavra <em>binário</em>: ela não quer dizer que o arquivo seja ilegível. O atalho
+do Tailwind é um pequeno arquivo de script que chama o JavaScript do pacote. No Windows ele ganha a
+extensão <code>.cmd</code>; no Linux e no macOS, não tem extensão e é executável. Quando o terminal diz
+"comando não encontrado", ele está reclamando justamente de não achar esse atalho.</p>
+
+<h2>3. As três formas de chamar o mesmo comando</h2>
+
+<p>O mesmo programa pode ser chamado de três jeitos, e os três chegam no mesmo lugar. Saber a diferença
+evita o erro de colar uma linha de um contexto no outro.</p>
+
+<p>A primeira é <code>npx</code>, que procura o comando dentro de <code>node_modules</code> e o executa.
+Se não achar, baixa o pacote numa pasta temporária e roda — útil para experimentar, arriscado para o dia
+a dia, porque você pode acabar usando uma versão diferente da que está no projeto. A segunda é o caminho
+completo do atalho, <code>./node_modules/.bin/tailwindcss</code>, que é o que o <code>npx</code> faz por
+baixo. A terceira é dentro de um script do <code>package.json</code>, escrevendo só
+<code>tailwindcss</code>: o npm coloca a pasta <code>.bin</code> no caminho de busca antes de executar o
+script, então o nome curto basta.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Como chamar</th><th>O que acontece</th><th>Quando usar</th></tr>
+<tr><td><code>npx @tailwindcss/cli -i … -o …</code></td><td>usa o pacote do projeto; se faltar, baixa um temporário</td><td>primeiros testes, comandos avulsos</td></tr>
+<tr><td><code>./node_modules/.bin/tailwindcss …</code></td><td>executa exatamente o que está instalado</td><td>quando precisa ter certeza da versão</td></tr>
+<tr><td><code>npm run build</code></td><td>roda o script <code>build</code> do <code>package.json</code></td><td>dia a dia, e tudo que for automatizado</td></tr>
+</table>
+</div>
+
+<p>Para o trabalho de todo dia, a terceira forma ganha. Ela é curta, fica documentada no projeto e
+esconde os caminhos compridos. Se amanhã a Ana mudar a saída de <code>dist/estilo.css</code> para
+<code>dist/padaria.css</code>, mexe em um lugar só — no script — e todos os comandos que chamam
+<code>npm run build</code> continuam funcionando.</p>
+
+<h2>4. O comando mínimo: entrada e saída</h2>
+
+<p>Sem opção nenhuma, a CLI não sabe o que fazer: ela precisa de um arquivo para ler e de um lugar para
+escrever. Essas são as duas únicas opções obrigatórias. Tudo o mais é ajuste.</p>
+
+<pre class="term" data-cwd="~/padaria">$ npx @tailwindcss/cli -i src/entrada.css -o dist/estilo.css
+$ echo $?
+0</pre>
+
+<p><code>-i</code> vem de <em>input</em>, entrada: é o CSS que você escreveu, com o
+<code>@import "tailwindcss";</code> e o que mais você quiser declarar. <code>-o</code> vem de
+<em>output</em>, saída: é o arquivo que a CLI cria ou sobrescreve, e é ele que a página carrega. Repare
+no <code>echo $?</code> logo depois: ele imprime o código de saída do último comando, e o
+<code>0</code> confirma que deu certo. No Windows, o equivalente é <code>echo %ERRORLEVEL%</code>.</p>
+
+<p>Se a pasta de saída não existir, crie antes: <code>mkdir -p dist</code> faz isso e não reclama se a
+pasta já existir. É um comando idempotente, ou seja, pode ser repetido sem efeito colateral. Vale a
+pena rodá-lo uma vez na vida do projeto e esquecer o assunto.</p>
+
+<h2>5. O que a CLI lê, o que ela escreve e de que pasta</h2>
+
+<p>Vale ser preciso sobre o trabalho dela, porque metade dos problemas de "a classe não funciona" nasce
+de uma expectativa errada aqui. A CLI lê dois tipos de coisa. Primeiro, o arquivo de entrada, que é o
+único caminho que você informa. Segundo, todos os arquivos de texto do projeto — HTML, JavaScript,
+componentes, Markdown —, porque é neles que os nomes de classe aparecem.</p>
+
+<p>A varredura começa na pasta em que o comando foi chamado e desce pelas subpastas. Ela pula o que não
+é texto e pula a própria <code>node_modules</code>, que tem milhares de arquivos e nenhuma classe sua.
+Se as páginas da Ana estão em <code>public/</code> ou se algum componente mora fora da pasta do
+projeto, a CLI precisa saber: é para isso que existe o <code>@source</code>, uma linha no CSS de
+entrada que acrescenta caminhos à varredura. A aula <a href="o-css-de-entrada.html">O CSS de
+Entrada</a> mostra como escrever essa linha.</p>
+
+<p>Por isso a pasta de onde você roda o comando não é detalhe. O terminal tem uma pasta atual, e todo
+caminho relativo é resolvido a partir dela. Se a Ana está em <code>/home/ana</code> e digita
+<code>-i src/entrada.css</code>, o programa vai procurar <code>/home/ana/src/entrada.css</code> e não
+vai achar. O caminho mais previsível é rodar sempre da raiz do projeto, a pasta que tem o
+<code>package.json</code> — e é de lá que os scripts do npm rodam por definição:</p>
+
+<pre class="term">$ cd /home/ana/padaria
+$ pwd
+/home/ana/padaria
+$ ls
+dist  index.html  package.json  src</pre>
+
+<p>Três comandos que você vai usar mais do que qualquer opção do Tailwind: <code>pwd</code> mostra onde
+você está, <code>ls</code> mostra o que tem ali, <code>cd</code> leva para outra pasta. Caminho errado
+é a causa de boa parte dos erros de iniciante, e esses três comandos custam menos que o erro.</p>
+
+<p>Na saída, a CLI escreve um arquivo de CSS comum. Não escreve JavaScript, não escreve HTML, não
+injeta nada na página. Ela sobrescreve o arquivo inteiro a cada execução: não há atualização
+incremental no arquivo, e é por isso que a data de modificação dele muda toda vez. Se você editar a
+saída à mão, a próxima execução apaga a sua edição — é sempre assim, e é uma proteção: a fonte da
+verdade é a entrada mais o HTML.</p>
+
+<h2>6. As opções que importam</h2>
+
+<p>São poucas, o que é uma vantagem. Estas cinco resolvem praticamente tudo, e cada uma tem forma curta
+e forma longa:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Opção</th><th>Forma longa</th><th>O que faz</th></tr>
+<tr><td><code>-i</code></td><td><code>--input</code></td><td>o arquivo de CSS a ser lido como entrada</td></tr>
+<tr><td><code>-o</code></td><td><code>--output</code></td><td>o arquivo de CSS a ser escrito como saída</td></tr>
+<tr><td><code>-w</code></td><td><code>--watch</code></td><td>fica rodando e refaz o build a cada salvamento</td></tr>
+<tr><td><code>-m</code></td><td><code>--minify</code></td><td>escreve o CSS sem espaços nem comentários, para ir ao ar</td></tr>
+<tr><td><code>-h</code></td><td><code>--help</code></td><td>mostra o resumo das opções e a versão</td></tr>
+</table>
+</div>
+
+<p>A ordem das opções não importa: <code>-i</code> antes ou depois de <code>-o</code> dá o mesmo
+resultado. O que importa é que cada opção venha seguida do seu valor, separados por espaço. Um hífen
+sozinho também é informação: <code>-i</code> é opção, <code>-input</code> é erro de digitação, e a CLI
+reclama de opção desconhecida em vez de adivinhar.</p>
+
+<p>Quando estiver em dúvida sobre uma opção nova, o primeiro reflexo deve ser
+<code>npx @tailwindcss/cli --help</code>. A resposta vem do programa que está instalado no seu projeto,
+não de um blog de dois anos atrás — e essa é a diferença entre uma resposta certa e uma resposta
+quase certa. As opções <code>--watch</code> e <code>--minify</code> têm aulas próprias, porque mudam o
+jeito de trabalhar: <a href="watch.html">O Modo watch</a> e
+<a href="build-de-producao.html">Build de Produção</a>.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|width=256px;;rule:width: calc(var(--spacing) * 64)">
+  <p class="try-task">A CLI escreveu a regra errada para a coluna da padaria: ela está com 128 px.
+  Deixe a coluna com 16 rem de largura — e note, no painel de CSS, que a regra gerada não tem número:
+  ela tem uma conta com variável.</p>
+  <pre class="html">&lt;div id="alvo" class="w-32 bg-amber-100 p-2"&gt;Encomendas&lt;/div&gt;</pre>
+  <pre class="out">
+width: 128px
+padding: 8px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="w-64 bg-amber-100 p-2"&gt;Encomendas&lt;/div&gt;</pre>
+</div>
+
+<p>Repare no painel: <code>width: 256px</code>, e a regra por trás é
+<code>width: calc(var(--spacing) * 64)</code>. A CLI não escreveu "256px" em lugar nenhum: ela escreveu
+a multiplicação, e o navegador resolve. Entender isso ajuda quando um valor parece estranho — a
+resposta costuma estar na variável, não na conta.</p>
+
+<h2>7. Silêncio, erro e código de saída</h2>
+
+<p>O comando termina de três maneiras. Termina em silêncio, com código zero: deu certo, o arquivo foi
+escrito. Termina com uma mensagem curta e código diferente de zero: alguma coisa está errada e a
+mensagem aponta o caminho. Ou não termina: nesse caso, quase sempre é porque o <code>--watch</code>
+está ligado e ele não termina por desenho — fica esperando o próximo salvamento.</p>
+
+<p>Essa distinção é a chave para não entrar em pânico. Um terminal parado depois de
+<code>--watch</code> não está travado: está trabalhando. Para sair, o atalho universal é
+<code>Ctrl</code> + <code>C</code>; ele interrompe o processo e devolve o cursor. Se você fechar a
+janela do terminal no meio, o processo morre junto, e a próxima alteração no HTML não vai gerar CSS
+nenhum — motivo de metade dos "parou de funcionar" de quem usa watch.</p>
+
+<p>Quando o assunto é automatizar, o código de saída vira o personagem principal. Um script de
+publicação roda o build e só continua se o código for zero. Nada de ler mensagens à mão: o número
+decide. É por isso que a CLI é silenciosa, e é por isso que vale conferir o <code>echo $?</code> pelo
+menos uma vez, para ver o zero com os próprios olhos.</p>
+
+<p>Vale conhecer também o caminho de erro mais instrutivo: rodar o comando sem o arquivo de entrada. A
+CLI responde dizendo que falta a entrada e mostra um exemplo de uso correto. Ler essa resposta com
+calma ensina mais do que qualquer aula — e é de graça. Repare que ela não tenta adivinhar qual arquivo
+você queria: ferramenta boa falha rápido e diz onde.</p>
+
+<h2>8. Lendo o que a CLI escreveu</h2>
+
+<p>O arquivo gerado é a prova do trabalho da CLI, e vale aprender a lê-lo. Ele começa com um comentário
+de versão, depois declara as variáveis do tema e, no fim, escreve as classes na ordem em que o motor
+as organiza. Cada classe vira um bloco pequeno, com o seletor da classe e as propriedades que ela
+muda. Duas classes que produzem a mesma regra não se repetem: uma regra serve a todos os elementos que
+usam o nome.</p>
+
+<p>Um detalhe que confunde quem compara o arquivo com o resultado na tela: a CLI escreve algumas
+classes com nomes de propriedade lógicos, como <code>padding-inline</code> e
+<code>padding-block</code>, em vez de <code>padding-left</code> e <code>padding-right</code>. O
+navegador entende os dois, e o painel de CSS computado resume tudo numa linha só. Não é bug: é o
+mesmo recurso que permite ao Tailwind funcionar em idiomas escritos da direita para a esquerda.</p>
+
+<p>Quando a classe tem uma condição, a CLI escreve um bloco em volta. Uma classe de breakpoint vira um
+<code>@media</code> com largura mínima; uma classe de estado vira um seletor com dois-pontos. É a mesma
+sintaxe de CSS que você já viu, só que gerada. Pedir que a caixa mostre as regras geradas é a maneira
+mais direta de ver isso acontecendo sem abrir o arquivo:</p>
+
+<div class="trytailwind" data-goal="rule:@media (width >= 48rem);;rule:padding: calc(var(--spacing) * 8);;css:#alvo|padding=32px" data-largura="768">
+  <p class="try-task">Na tela larga, o cartão precisa de 32 px de respiro; na estreita, 16 px bastam.
+  Deixe o respiro grande valendo a partir do breakpoint médio e observe o bloco <code>@media</code>
+  que aparece na saída.</p>
+  <pre class="html" data-saida="css">&lt;div id="alvo" class="p-4 md:p-4 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+.bg-amber-100 {
+  background-color: var(--color-amber-100);
+}
+.p-4 {
+  padding: calc(var(--spacing) * 4);
+}
+@media (width &gt;= 48rem) {
+  .md\:p-4 {
+    padding: calc(var(--spacing) * 4);
+  }
+}
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4 md:p-8 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>A saída traz o bloco da classe sem condição e o bloco dentro do <code>@media</code> — além do
+fundo âmbar, que já estava lá. A largura de <code>48rem</code> é o breakpoint médio do Tailwind,
+equivalente a 768 px. A prévia desta caixa está com 768 px justamente para que o breakpoint valha: em
+640 px, o bloco sairia com o valor de antes.</p>
+
+<div class="trytailwind" data-goal="rule:grid-template-columns: repeat(3, minmax(0, 1fr));;rule:gap: calc(var(--spacing) * 4)">
+  <p class="try-task">A vitrine dos pães precisa de três colunas iguais, com 16 px entre elas. A classe
+  <code>grid</code> já está no cartão; faltam as colunas e o espaço.</p>
+  <pre class="html" data-saida="css">&lt;div id="alvo" class="grid gap-2"&gt;
+  &lt;p&gt;Pão francês&lt;/p&gt;
+  &lt;p&gt;Broa&lt;/p&gt;
+  &lt;p&gt;Sonho&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+.grid {
+  display: grid;
+}
+.gap-2 {
+  gap: calc(var(--spacing) * 2);
+}
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid grid-cols-3 gap-4"&gt;
+  &lt;p&gt;Pão francês&lt;/p&gt;
+  &lt;p&gt;Broa&lt;/p&gt;
+  &lt;p&gt;Sonho&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Duas classes, dois blocos, e a grade aparece. A regra de <code>grid-cols-3</code> é
+<code>repeat(3, minmax(0, 1fr))</code> — três colunas de largura igual que nunca estouram o container.
+Você não precisa decorar esse texto; precisa reconhecer que ele é o resultado de um nome curto. O
+caminho mental é sempre o mesmo: a classe no HTML, a regra na saída, o valor na tela.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: "não achei o arquivo de entrada"</h3>
+<p>A mensagem fala de um caminho comprido que você não digitou. É sinal de que o caminho relativo foi
+resolvido a partir de outra pasta. Rode <code>pwd</code> e confira: se não estiver na raiz do projeto,
+volte com <code>cd</code> e repita o comando. Também vale olhar se o arquivo de entrada existe mesmo,
+com <code>ls src</code> — nome trocado, extensão trocada e pasta que nunca foi criada produzem a mesma
+mensagem.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: "a folha saiu, mas sem as minhas classes"</h3>
+<p>O arquivo existe e está quase vazio. Quase sempre a varredura não passou por onde o HTML está: ou o
+comando rodou numa pasta acima do projeto, ou as páginas moram fora da pasta do comando, ou a classe
+está montada em pedaços no JavaScript e nunca aparece escrita por inteiro. A cura é apontar o caminho
+com <code>@source</code> e rodar de novo da raiz. O Tailwind não avisa sobre classe que não encontrou:
+folha pequena é o aviso.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: "o terminal parou e não aceita mais nada"</h3>
+<p>Provavelmente o comando está em modo de espera, com <code>--watch</code> ligado. Não está travado:
+ele fica ouvindo alterações e só escreve quando você salva. Se você quer o cursor de volta, aperte
+<code>Ctrl</code> + <code>C</code>. Se quer continuar gerando CSS a cada salvamento, deixe esse
+terminal em paz e abra outro para os demais comandos — é o que a aula
+<a href="watch.html">O Modo watch</a> ensina a fazer.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. O que a opção <code>-o</code> aponta?</p>
+<label><input type="radio" name="q1"> o arquivo de CSS que a CLI lê</label>
+<label><input type="radio" name="q1"> a pasta do projeto, para a varredura</label>
+<label><input type="radio" name="q1"> o arquivo de CSS que a CLI escreve</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">2. Por que dentro de um script do
+<code>package.json</code> basta escrever <code>tailwindcss</code>, sem <code>npx</code>?</p>
+<label><input type="radio" name="q2"> porque o script roda com permissões de administrador</label>
+<label><input type="radio" name="q2"> porque o npm põe a pasta <code>node_modules/.bin</code> no caminho de busca antes de rodar</label>
+<label><input type="radio" name="q2"> porque o script é escrito em JavaScript</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O comando terminou sem imprimir nada e o
+<code>echo $?</code> mostrou <code>0</code>. O que isso quer dizer?</p>
+<label><input type="radio" name="q3"> deu certo: o arquivo de saída foi escrito</label>
+<label><input type="radio" name="q3"> deu errado: o silêncio é falta de configuração</label>
+<label><input type="radio" name="q3"> o comando ficou em modo de espera</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: completar o comando</h2>
+<p>A Ana quer gerar a folha da padaria a partir do CSS de entrada e guardar o resultado em
+<code>dist/estilo.css</code>. Complete a linha com a opção que falta:</p>
+<div class="ex-code">$ npx @tailwindcss/cli -i src/entrada.css <input aria-label="resposta 1" data-answer="-o dist/estilo.css|--output dist/estilo.css" placeholder="..."></div>
+<p class="ex-dica">Dica: a entrada já está na linha. Falta a saída, com a opção curta e o caminho do
+arquivo separados por espaço.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>A CLI do Tailwind é um programa de terminal pequeno: lê um CSS de entrada, percorre os arquivos do
+projeto em busca de nomes de classe e escreve um CSS de saída. Ela tem duas opções obrigatórias,
+<code>-i</code> e <code>-o</code>, e umas poucas opcionais — <code>--watch</code> para refazer o build
+a cada salvamento, <code>--minify</code> para compactar a saída, <code>--help</code> para lembrar do
+resto. Pode ser chamada por <code>npx</code>, pelo atalho em <code>node_modules/.bin</code> ou por um
+script do npm, que é a forma recomendada no dia a dia.</p>
+
+<p>O comportamento dela é discreto por desenho: não fala quando dá certo, e o código de saída zero é o
+atestado. A pasta de onde você roda o comando importa duas vezes — pelos caminhos relativos e pelo
+ponto de partida da varredura. E o arquivo que ela escreve é CSS comum, que vale a pena abrir e ler:
+cada classe vira um bloco, condições viram <code>@media</code>, e nada do que está lá foi escrito por
+você.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>CLI é programa de terminal: argumentos entram, texto e código de saída saem.</li>
+<li>Só duas opções são obrigatórias: <code>-i</code> (entrada) e <code>-o</code> (saída).</li>
+<li><code>--watch</code> fica rodando; <code>Ctrl</code> + <code>C</code> interrompe.</li>
+<li><code>--minify</code> compacta a saída; serve para publicar, não para estudar.</li>
+<li>Na dúvida sobre uma opção, rode <code>--help</code> e leia a resposta do próprio programa.</li>
+<li>No script do npm, o nome curto <code>tailwindcss</code> funciona; no terminal, use <code>npx</code>.</li>
+<li>Rode da raiz do projeto: caminhos e varredura dependem da pasta atual.</li>
+<li>Silêncio mais código zero é sucesso; mensagem mais código diferente de zero é falha.</li>
+<li>A CLI sobrescreve a saída inteira: não edite o arquivo gerado à mão.</li>
+<li>Ela escreve CSS comum, com <code>@media</code> e variáveis — e você pode ler tudo.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escala de Espaçamento | Guia Tailwind</title>
+<meta name="description" content="Consulta rápida da escala de espaçamento do Tailwind v4: todos os degraus de padding e margin em pixels, os atalhos por lado, space-y, gap e o que não funciona.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Escala de <span class="hl">Espaçamento</span></h1>
+
+<p class="intro">A Ana não decora tabela nenhuma. O que ela faz é abrir esta página quando trava em
+uma decisão pequena e repetida: 16 ou 24 px? O respiro vai por dentro ou por fora? O espaço entre os
+cartões é <code>gap</code> ou margem? São perguntas que voltam toda semana, e voltar toda semana é
+exatamente o que uma página de consulta resolve. Aqui está a escala inteira do Tailwind v4, com os
+pixels de verdade que o navegador aplica, os atalhos por lado, as três formas de separar irmãos e as
+tentativas que não dão em nada — tudo conferido no motor que roda as caixas deste guia.</p>
+
+<h2>1. Por que existe uma escala, e não pixels soltos</h2>
+
+<p>Quem vem do CSS tradicional pensa em pixels: <code>padding: 17px</code>, <code>margin: 5px</code>,
+<code>gap: 11px</code>. Cada valor é uma decisão isolada, e o resultado de cinquenta decisões
+isoladas é uma tela que parece torta mesmo quando ninguém errou nada. A escala existe para trocar
+cinquenta decisões por umas sete. Você escolhe um degrau, e o degrau se repete: o mesmo 16 px do
+respiro do cartão aparece no espaço entre os botões e na altura do ícone.</p>
+
+<p>O Tailwind chama esse multiplicador de <code>--spacing</code>. Por padrão ele vale
+<strong>0,25 rem</strong>, e 1 rem é o tamanho de fonte base do navegador, ou seja, 16 px. Logo
+0,25 rem são 4 px. Toda a escala nasce daí: o número da classe é quantas vezes 0,25 rem você quer.
+Por isso <code>p-4</code> dá 16 px, <code>p-6</code> dá 24 px e <code>p-96</code> dá 384 px. Não há
+uma tabela gigante escondida no CSS: há uma conta, e ela é feita pelo navegador na hora de pintar.</p>
+
+<p>Como a unidade é <code>rem</code> e não pixel, a escala acompanha o leitor. Quem aumenta a fonte
+padrão do navegador para ler melhor vê o espaçamento crescer junto — o desenho mantém a proporção em
+vez de virar texto apertado dentro de caixas grandes. É uma diferença que ninguém nota no dia a dia e
+que salva a leitura de quem precisa de fonte maior.</p>
+
+<dl class="anatomy">
+<dt>degrau</dt>
+<dd>O número que vem depois do prefixo: em <code>p-6</code>, o degrau é 6. Ele não é pixel, é
+quantas vezes 0,25 rem você quer.</dd>
+<dt>--spacing</dt>
+<dd>A variável que guarda o passo da escala. Vale <code>0.25rem</code> por padrão e pode ser
+trocada no tema, o que muda a escala inteira de uma vez.</dd>
+<dt>rem</dt>
+<dd>Unidade relativa ao tamanho de fonte do elemento raiz. Com o padrão do navegador, 1 rem = 16 px,
+então 0,25 rem = 4 px.</dd>
+<dt>inline e block</dt>
+<dd>Como o CSS moderno pensa os lados: <em>inline</em> é o eixo da linha (esquerda e direita, em
+português) e <em>block</em> é o eixo de cima para baixo. <code>px</code> mexe no inline,
+<code>py</code> no block.</dd>
+<dt>start e end</dt>
+<dd>O começo e o fim da linha, que dependem da direção do texto. <code>ps</code> é o começo,
+<code>pe</code> é o fim — em português, esquerda e direita.</dd>
+</dl>
+
+<p>Guarde a distinção entre <code>padding</code> e <code>margin</code>, porque ela explica metade dos
+layouts apertados: <strong>padding é respiro por dentro</strong> da caixa (o fundo cresce junto) e
+<strong>margin é espaço por fora</strong> (a caixa continua do mesmo tamanho e empurra as vizinhas).
+Uma etiqueta com fundo colorido precisa de padding; um bloco de título precisa de margin. Trocar um
+pelo outro dá aquele efeito clássico de "o fundo não cobre o texto". A aula
+<a href="p-e-m.html">Padding e Margin</a> percorre essa diferença com exemplos de cartão.</p>
+
+<h2>2. A tabela da escala</h2>
+
+<p>Todos os degraus que aparecem em projeto de verdade. A coluna do meio traz o valor que o painel da
+caixa mostra, com o respiro aplicado em todos os lados. Qualquer prefixo de espaço aceita os mesmos
+números: <code>p-</code>, <code>m-</code>, <code>gap-</code>, <code>space-y-</code>, <code>w-</code>,
+<code>size-</code>, <code>top-</code>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Vale</th><th>Em rem</th><th>Onde costuma servir</th></tr>
+<tr><td><code>p-px</code></td><td>1 px</td><td>—</td><td>linha de separação, borda falsa</td></tr>
+<tr><td><code>p-0</code></td><td>0 px</td><td>0</td><td>zerar um respiro que vinha do componente</td></tr>
+<tr><td><code>p-0.5</code></td><td>2 px</td><td>0,125</td><td>respiro de etiqueta minúscula</td></tr>
+<tr><td><code>p-1</code></td><td>4 px</td><td>0,25</td><td>etiqueta, selo, ícone</td></tr>
+<tr><td><code>p-1.5</code></td><td>6 px</td><td>0,375</td><td>selo com duas palavras</td></tr>
+<tr><td><code>p-2</code></td><td>8 px</td><td>0,5</td><td>botão pequeno, item de menu</td></tr>
+<tr><td><code>p-2.5</code></td><td>10 px</td><td>0,625</td><td>botão compacto de barra</td></tr>
+<tr><td><code>p-3</code></td><td>12 px</td><td>0,75</td><td>campo de formulário, célula de tabela</td></tr>
+<tr><td><code>p-3.5</code></td><td>14 px</td><td>0,875</td><td>botão principal apertado</td></tr>
+<tr><td><code>p-4</code></td><td>16 px</td><td>1</td><td>o padrão de cartão e botão</td></tr>
+<tr><td><code>p-5</code></td><td>20 px</td><td>1,25</td><td>cartão de destaque</td></tr>
+<tr><td><code>p-6</code></td><td>24 px</td><td>1,5</td><td>cartão grande, cabeçalho de seção</td></tr>
+<tr><td><code>p-7</code></td><td>28 px</td><td>1,75</td><td>bloco de chamada</td></tr>
+<tr><td><code>p-8</code></td><td>32 px</td><td>2</td><td>área de capa, bloco de destaque</td></tr>
+<tr><td><code>p-9</code></td><td>36 px</td><td>2,25</td><td>seção estreita</td></tr>
+<tr><td><code>p-10</code></td><td>40 px</td><td>2,5</td><td>faixa de abertura</td></tr>
+<tr><td><code>p-12</code></td><td>48 px</td><td>3</td><td>seção de página no computador</td></tr>
+<tr><td><code>p-14</code></td><td>56 px</td><td>3,5</td><td>seção larga</td></tr>
+<tr><td><code>p-16</code></td><td>64 px</td><td>4</td><td>respiro entre blocos grandes</td></tr>
+<tr><td><code>p-20</code></td><td>80 px</td><td>5</td><td>capa de página interna</td></tr>
+<tr><td><code>p-24</code></td><td>96 px</td><td>6</td><td>abertura de página inicial</td></tr>
+<tr><td><code>p-32</code></td><td>128 px</td><td>8</td><td>respiro de página inteira</td></tr>
+<tr><td><code>p-40</code></td><td>160 px</td><td>10</td><td>só em telas grandes</td></tr>
+<tr><td><code>p-48</code></td><td>192 px</td><td>12</td><td>raramente; quase sempre é muito</td></tr>
+<tr><td><code>p-56</code></td><td>224 px</td><td>14</td><td>raramente</td></tr>
+<tr><td><code>p-64</code></td><td>256 px</td><td>16</td><td>raramente</td></tr>
+<tr><td><code>p-96</code></td><td>384 px</td><td>24</td><td>experimentos e páginas de erro</td></tr>
+</table>
+</div>
+
+<p>Repare que a escala não é contínua em todos os trechos: depois de 12 ela pula para 14, 16, 20, 24,
+32, 40. Isso não é limitação, é curadoria. Nos valores grandes, a diferença de 4 px é invisível e
+só serve para criar inconsistência; nos pequenos, cada 2 px muda a leitura. Se você quiser mesmo 52
+px, pode escrever <code>p-13</code>: no Tailwind v4 a escala de espaço aceita qualquer número
+inteiro, e <code>p-13</code> dá 52 px porque é 13 × 4.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=24px;;rule:padding: calc(var(--spacing) * 6)">
+  <p class="try-task">O cartão está com <code>p-2</code>, ou seja 8 px. Deixe 24 px de respiro
+  interno, usando o degrau certo da escala.</p>
+  <pre class="html">&lt;div id="alvo" class="p-2 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-6 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>padding: 8px</code> antes e <code>padding: 24px</code>
+depois — e a regra gerada confirma a conta: <code>calc(var(--spacing) * 6)</code>. Esse é o teste que
+vale para qualquer degrau desta tabela: multiplique por 4 e você tem o pixel. Se o número que você
+quer não está na tabela, a conta existe, mas você acabou de sair do ritmo do projeto.</p>
+
+<h2>3. Os atalhos por lado</h2>
+
+<p>Metade dos problemas de layout nasce de um respiro aplicado nos quatro lados quando só um lado
+precisava. Por isso existem os atalhos: cada letra depois do <code>p</code> diz quais lados serão
+tocados. E há um detalhe do Tailwind v4 que confunde quem lê o CSS gerado: os nomes antigos
+continuam valendo, mas o CSS usa propriedades lógicas — <code>padding-inline</code> em vez de
+<code>left</code> e <code>right</code>. A aula <a href="px-py.html">PX e PY</a> mostra esses atalhos
+em uso; aqui o que interessa é a lista completa.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe com degrau 4</th><th>Propriedade que o motor gera</th><th>Valor aplicado</th><th>Quando serve</th></tr>
+<tr><td><code>p-4</code></td><td><code>padding</code></td><td>16 px nos quatro lados</td><td>cartão fechado</td></tr>
+<tr><td><code>px-4</code></td><td><code>padding-inline</code></td><td>16 px à esquerda e à direita</td><td>botão, campo, etiqueta</td></tr>
+<tr><td><code>py-2</code></td><td><code>padding-block</code></td><td>8 px em cima e embaixo</td><td>barra, faixa, item de lista</td></tr>
+<tr><td><code>pt-4</code></td><td><code>padding-top</code></td><td>16 px só em cima</td><td>afastar do cabeçalho</td></tr>
+<tr><td><code>pr-4</code></td><td><code>padding-right</code></td><td>16 px só à direita</td><td>dar ar ao ícone final</td></tr>
+<tr><td><code>pb-4</code></td><td><code>padding-bottom</code></td><td>16 px só embaixo</td><td>respiro antes da borda inferior</td></tr>
+<tr><td><code>ps-4</code></td><td><code>padding-inline-start</code></td><td>16 px no começo da linha</td><td>texto ao lado de ícone</td></tr>
+<tr><td><code>pe-4</code></td><td><code>padding-inline-end</code></td><td>16 px no fim da linha</td><td>espaço para a seta</td></tr>
+<tr><td><code>m-4</code></td><td><code>margin</code></td><td>16 px por fora, nos quatro lados</td><td>separar blocos</td></tr>
+<tr><td><code>mx-auto</code></td><td><code>margin-inline</code></td><td><code>auto</code> à esquerda e à direita</td><td>centralizar caixa com largura</td></tr>
+<tr><td><code>-mt-4</code></td><td><code>margin-top</code></td><td>−16 px</td><td>puxar um bloco para cima</td></tr>
+<tr><td><code>mt-auto</code></td><td><code>margin-top</code></td><td><code>auto</code></td><td>empurrar para o fim da coluna flex</td></tr>
+<tr><td><code>space-y-4</code></td><td>margem nos filhos</td><td>16 px entre um filho e o seguinte</td><td>lista vertical simples</td></tr>
+</table>
+</div>
+
+<p>Esses atalhos se combinam sem brigar, porque cada um cuida de um lado diferente:
+<code>px-4 py-2</code> é o par mais comum do guia inteiro — respiro lateral generoso, vertical
+enxuto. Já <code>p-4</code> junto de <code>pt-0</code> é briga: as duas mexem no topo, e vence a que
+o Tailwind colocou por último no CSS. Na prática, escolha um dos dois caminhos e não misture.</p>
+
+<p><code>mx-auto</code> merece uma nota porque falha silenciosamente. Margem automática só centraliza
+quando sobra espaço: um <code>div</code> ocupa a largura toda por padrão, então não há o que
+centralizar e nada muda na tela. Ponha uma largura — <code>max-w-md</code>, <code>w-80</code> — e o
+<code>mx-auto</code> passa a ter com o que trabalhar. É o mesmo motivo pelo qual o painel da caixa
+mostra a linha vazia nesse caso: o valor computado é 0, igual ao que já existia.</p>
+
+<pre class="term">.p-4 {
+  padding: calc(var(--spacing) * 4);
+}
+.px-4 {
+  padding-inline: calc(var(--spacing) * 4);
+}</pre>
+
+<p>Vale ler esse CSS com calma, porque ele explica a escala toda. Não há 16 px escrito em lugar
+nenhum: há a variável e o multiplicador. Trocar <code>--spacing</code> no tema muda todas as classes
+de espaço do site de uma vez — e é isso que permite ao Tailwind ter escala sem ter arquivo de
+configuração gigante.</p>
+
+<h2>4. Três jeitos de separar irmãos: margin, space-y e gap</h2>
+
+<p>Separar elementos que estão lado a lado é a decisão mais frequente do dia. Existem três caminhos,
+e eles não são equivalentes. O primeiro é margem no próprio elemento, com <code>m-*</code> ou
+<code>mt-*</code>: funciona em qualquer lugar, mas some quando o vizinho é o primeiro ou o último, e
+aí você precisa de uma exceção. O segundo é <code>space-y-*</code>, que empurra os filhos de um
+contêiner com margem — o último fica de fora automaticamente, como a aula de
+<a href="space-y.html">space-y</a> detalha. O terceiro é <code>gap-*</code>, que existe só em
+contêiner flex, grid e colunas.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Como age</th><th>Funciona em</th><th>Cuidado</th></tr>
+<tr><td><code>gap-4</code></td><td>espaço entre as células ou itens</td><td>flex, grid, colunas</td><td>nada acontece fora desses contêineres</td></tr>
+<tr><td><code>gap-x-4</code></td><td>só entre colunas</td><td>flex em linha, grid</td><td>em coluna flex, o eixo muda</td></tr>
+<tr><td><code>gap-y-4</code></td><td>só entre linhas</td><td>grid, flex com quebra</td><td>sem <code>flex-wrap</code> não há linha</td></tr>
+<tr><td><code>space-y-4</code></td><td>margem no filho seguinte</td><td>qualquer contêiner</td><td>não atravessa elementos que não são filhos diretos</td></tr>
+<tr><td><code>space-x-4</code></td><td>margem lateral entre filhos</td><td>qualquer contêiner</td><td>some quando os itens quebram de linha</td></tr>
+<tr><td><code>divide-y</code></td><td>borda entre os filhos</td><td>qualquer contêiner</td><td>é borda, não espaço: ocupa 1 px</td></tr>
+<tr><td><code>m-4</code></td><td>margem no elemento</td><td>qualquer lugar</td><td>as margens de vizinhos podem se somar ou se sobrepor</td></tr>
+</table>
+</div>
+
+<p>A regra de bolso que resolve a maioria dos casos: <strong>se o pai é flex ou grid, use
+<code>gap</code></strong>; se é uma lista simples dentro de um bloco, use <code>space-y</code>; se o
+espaçamento é parte do desenho daquele elemento específico, use margem. O <code>gap</code> tem uma
+vantagem silenciosa: ele não coloca espaço sobrando nas pontas. Com margem você sempre acaba
+escrevendo uma exceção para o primeiro item; com gap, o problema não existe.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|gap=16px;;rule:gap: calc(var(--spacing) * 4)">
+  <p class="try-task">A lista de pães está com <code>gap-1</code>, ou seja 4 px. Deixe 16 px entre os
+  dois cartões e clique em Rodar.</p>
+  <pre class="html">&lt;div id="alvo" class="flex flex-col gap-1"&gt;
+  &lt;p class="bg-amber-100 p-2"&gt;Pão francês&lt;/p&gt;
+  &lt;p class="bg-amber-100 p-2"&gt;Pão de queijo&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+gap: 4px
+flex-direction: column
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex flex-col gap-4"&gt;
+  &lt;p class="bg-amber-100 p-2"&gt;Pão francês&lt;/p&gt;
+  &lt;p class="bg-amber-100 p-2"&gt;Pão de queijo&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>gap</code> — assunto da aula de <a href="gap.html">gap</a> — também é o único dos três que
+aceita dois valores de uma vez:
+<code>gap-x-2 gap-y-6</code> dá 8 px na horizontal e 24 px na vertical. Em uma grade de produtos
+apertada na largura e folgada na altura, isso resolve em duas classes o que a margem resolveria com
+quatro exceções.</p>
+
+<p><code>space-y-4</code> tem uma implementação curiosa, e conhecê-la evita sustos. O Tailwind não
+coloca margem no contêiner: ele coloca margem em cada filho, menos no último, e usa uma variável para
+inverter o sentido quando você precisa. O CSS gerado é este:</p>
+
+<pre class="term">:where(.space-y-4 &gt; :not(:last-child)) {
+  --tw-space-y-reverse: 0;
+  margin-block-start: calc(calc(var(--spacing) * 4) * var(--tw-space-y-reverse));
+  margin-block-end: calc(calc(var(--spacing) * 4) * calc(1 - var(--tw-space-y-reverse)));
+}</pre>
+
+<p>Duas consequências práticas saem daí. A primeira: se você inserir um elemento que não é filho
+direto — um <code>div</code> embrulhando a lista, por exemplo — o espaço desaparece, porque o
+seletor fala em <code>&gt; :not(:last-child)</code>. A segunda: o <code>space-y</code> é margem, então
+ele soma com margens que os filhos já tenham, e essa soma pode virar um buraco. Quando o layout é
+flex ou grid, <code>gap</code> não tem nenhum desses dois problemas.</p>
+
+<h2>5. Valores fora da escala</h2>
+
+<p>Existem três portas de saída, e elas servem a situações diferentes. A primeira é usar um número
+que a escala aceita mas você não vê nas tabelas: <code>p-13</code> dá 52 px, <code>p-17</code> dá
+68 px, <code>p-25</code> dá 100 px. Como a escala é calculada, qualquer inteiro funciona. Isso é
+útil para bater com uma medida que veio do desenho; é ruim quando vira hábito, porque aí cada cartão
+tem um respiro diferente.</p>
+
+<p>A segunda porta é o colchete: <code>p-[18px]</code>, <code>gap-[11px]</code>,
+<code>mt-[3.5rem]</code>. Com colchetes você escreve a unidade que quiser, inclusive
+<code>calc()</code>. O Tailwind gera a classe com esse valor exato, sem passar pela escala. Use
+quando o número vem de fora — a altura de uma barra fixa, a largura de uma imagem exportada — e
+sempre com um motivo que caiba em uma frase.</p>
+
+<pre class="file" data-file="assets/estilo.css">@import "tailwindcss";
+
+@theme {
+  --spacing: 0.3rem;
+}</pre>
+
+<p>A terceira porta é a mais poderosa e a mais perigosa: trocar <code>--spacing</code> no tema. Com
+<code>--spacing: 0.3rem</code>, o <code>p-4</code> do site inteiro passa a valer 19,2 px em vez de
+16 px. Isso muda a respiração de tudo de uma vez, o que é ótimo para ajustar um projeto inteiro e
+terrível para quem espera 16 px porque a tabela diz 16. Se você fizer isso, escreva ao lado do tema
+por que a escala foi trocada; em três meses ninguém vai lembrar.</p>
+
+<p>Há ainda o caso do espaço que não é respiro: <code>w-4</code> e <code>h-4</code> usam a mesma
+escala para largura e altura, e <code>size-4</code> faz os dois de uma vez. Um ícone quadrado de
+16 px é literalmente <code>class="size-4"</code>. Como a escala é a mesma, o ícone alinha com o texto
+de 16 px sem nenhum ajuste fino — e essa é a razão estética pela qual a escala existe.</p>
+
+<h2>6. Receitas por peça</h2>
+
+<p>Quando a dúvida é "quanto", esta tabela resolve mais rápido do que qualquer raciocínio. Os valores
+são os que sobrevivem em projeto de verdade, com a escala padrão de 4 px.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>Classes</th><th>Medida</th><th>Observação</th></tr>
+<tr><td>Botão principal</td><td><code>px-4 py-2</code></td><td>16 × 8 px</td><td>o par mais usado do guia</td></tr>
+<tr><td>Botão grande</td><td><code>px-6 py-3</code></td><td>24 × 12 px</td><td>área de toque confortável</td></tr>
+<tr><td>Cartão</td><td><code>p-4</code> ou <code>p-6</code></td><td>16 ou 24 px</td><td>cartão pequeno usa 16</td></tr>
+<tr><td>Campo de formulário</td><td><code>px-3 py-2</code></td><td>12 × 8 px</td><td>cabe o texto digitado</td></tr>
+<tr><td>Lista de cartões</td><td><code>gap-4</code></td><td>16 px</td><td>menos que isso cola um no outro</td></tr>
+<tr><td>Seção de página</td><td><code>py-16</code></td><td>64 px</td><td>separa blocos de assunto</td></tr>
+<tr><td>Conteúdo centralizado</td><td><code>max-w-2xl mx-auto px-4</code></td><td>672 px</td><td>linha de leitura confortável</td></tr>
+<tr><td>Etiqueta</td><td><code>px-2 py-0.5</code></td><td>8 × 2 px</td><td>parece um selo, não um botão</td></tr>
+<tr><td>Cabeçalho fixo</td><td><code>px-4 py-3</code></td><td>16 × 12 px</td><td>deixe espaço para o ícone</td></tr>
+</table>
+</div>
+
+<p>Uma observação sobre ritmo vertical: se o cartão tem <code>p-4</code> e a lista tem
+<code>gap-4</code>, o espaço entre o texto de dois cartões é 16 + 16 = 32 px. É por isso que layouts
+feitos com um degrau só parecem calmos, e layouts com três degraus diferentes parecem barulhentos.
+Escolha o degrau base do projeto — 4 é o padrão — e multiplique: 4, 8, 12, 24, 48.</p>
+
+<h2>7. O que não funciona</h2>
+
+<p>Esta lista economiza meia hora de tentativa e erro. Todos os casos abaixo foram testados no motor
+que roda as caixas do guia.</p>
+
+<ul>
+<li><strong><code>-p-4</code> não existe.</strong> Respiro negativo não é uma coisa que o CSS aceite:
+padding é a distância entre a borda e o conteúdo, e não há distância negativa. Margem aceita —
+<code>-mt-4</code> dá −16 px e é o truque para sobrepor blocos.</li>
+<li><strong><code>gap</code> fora de flex, grid ou colunas não separa nada.</strong> O valor existe
+no CSS, o navegador até informa o número, mas nenhum espaço aparece porque não há itens para
+distribuir. Se o gap não muda a tela, confira se o pai tem <code>flex</code> ou <code>grid</code>.</li>
+<li><strong><code>space-y</code> em filho indireto não pega.</strong> O seletor é
+<code>&gt; :not(:last-child)</code>: só filhos diretos. Um <code>div</code> no meio corta o efeito.</li>
+<li><strong>Duas classes do mesmo lado no mesmo elemento.</strong> <code>p-4 p-6</code> não soma:
+vence a que o Tailwind gerou por último, e você não controla isso escrevendo na ordem que quiser.</li>
+<li><strong><code>mx-auto</code> sem largura.</strong> Sem <code>max-w-*</code> ou <code>w-*</code> não
+sobra espaço para centralizar, e o resultado é idêntico a não ter classe nenhuma.</li>
+<li><strong><code>mt-auto</code> fora de flex.</strong> Margem automática precisa de um contêiner que
+distribua espaço; em bloco normal ela vale zero.</li>
+<li><strong>Espaço em pixel fixo no lugar do degrau.</strong> <code>style="padding:17px"</code>
+funciona uma vez e destoa em todo o resto. Se o número não vem de fora, use a escala.</li>
+</ul>
+
+<p>Há também as falhas de digitação, que não avisam nada: <code>p4</code>, <code>padding-4</code>,
+<code>P-4</code>, <code>px4</code>. O Tailwind não reclama; simplesmente não gera CSS. O sintoma é o
+painel vazio ou a tela sem mudança. Compare a classe letra por letra com a tabela desta página — é
+chato e é o que funciona.</p>
+
+<h2>8. Como diagnosticar um espaço que não aparece</h2>
+
+<p>Primeiro, olhe o painel da caixa ou a aba <em>Computed</em> do navegador. Espaço que não aparece
+costuma ser uma de quatro coisas: a classe não existe, o elemento observado é outro, o valor já era
+aquele (o caso de <code>p-0</code>, que não muda nada e por isso não aparece na lista), ou outra
+classe está vencendo a disputa.</p>
+
+<p>Segundo, desconfie do colapso de margens. Quando dois blocos têm margem vertical e se encontram, o
+navegador não soma: usa a maior das duas. Um <code>mt-6</code> embaixo de um <code>mb-4</code> dá
+24 px, não 40. Padding não colapsa nunca; margem colapsa entre irmãos e entre pai e primeiro filho.
+Se um espaço parece menor do que você pediu, essa é a explicação em nove de dez casos.</p>
+
+<p>Terceiro, meça no tamanho de tela real. Um <code>p-6</code> confortável no monitor come 48 px dos
+375 px do celular — quase um oitavo da largura. O caminho é o prefixo de breakpoint, não a média:
+<code>p-4 md:p-6</code> dá 16 px no celular e 24 px a partir de 768 px. Espaçamento é uma decisão por
+tamanho de tela, e a aula de <a href="breakpoints.html">breakpoints</a> mostra a lista completa dos
+prefixos.</p>
+
+<p>Quarto, lembre que borda também come espaço. <code>border-4</code> em um cartão tira 8 px da
+largura útil dele, e é por isso que o texto parece colado depois de engrossar a moldura. A página de
+<a href="ref-bordas-e-sombras.html">bordas e sombras</a> tem as medidas; a conta mental é esta
+mesma.</p>
+
+<p>Quinto, atenção ao <code>overflow</code> e à largura. Um contêiner com <code>overflow-hidden</code>
+corta o respiro que parece ter sumido — e corta sombra também; um filho com <code>w-full</code> mais
+padding passa da largura do pai se o pai não tiver <code>box-sizing</code> previsível. O Tailwind já
+aplica <code>border-box</code> em tudo, então na prática o problema aparece só quando você mistura CSS
+antigo com as classes.</p>
+
+<h2>9. Resumo</h2>
+
+<p>A escala de espaço é um multiplicador: <code>--spacing</code> vale 0,25 rem e o degrau diz quantas
+vezes aplicá-lo. Com o padrão do navegador, cada degrau vale 4 px, então <code>p-4</code> é 16 px,
+<code>p-6</code> é 24 px e <code>p-96</code> é 384 px. Padding é respiro por dentro, margin é espaço
+por fora, e a diferença aparece na hora em que o fundo colorido precisa ou não cobrir a área.</p>
+
+<p>Os atalhos por lado evitam a maioria dos layouts apertados: <code>px</code> e <code>py</code>
+trabalham nos eixos, <code>ps</code> e <code>pe</code> no começo e no fim da linha,
+<code>pt</code> e <code>pb</code> em um lado só. Para separar irmãos, <code>gap</code> é a primeira
+escolha quando o pai é flex ou grid; <code>space-y</code> serve para listas simples e funciona por
+margem nos filhos, com as armadilhas que isso traz.</p>
+
+<p>Valores fora da escala têm três portas: um inteiro qualquer (<code>p-13</code>), o colchete
+(<code>p-[18px]</code>) e a troca de <code>--spacing</code> no tema. Quanto mais você usa a escala
+padrão, mais coerente o resultado parece — e o inverso também é verdadeiro. E lembre dos três
+sintomas de erro: classe que não existe não avisa, margem colapsa com margem, e <code>p-0</code> não
+aparece no painel porque não muda nada.</p>
+
+<p>Para consultar rápido, guarde só isto: <code>1</code>=4, <code>2</code>=8, <code>3</code>=12,
+<code>4</code>=16, <code>6</code>=24, <code>8</code>=32, <code>12</code>=48, <code>16</code>=64,
+<code>24</code>=96. São nove números que resolvem praticamente toda tela de um site pequeno, e eles
+aparecem de novo em cada aula deste guia.</p>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

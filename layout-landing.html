@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Landing Page | Guia Tailwind</title>
+<meta name="description" content="Como montar uma landing page com Tailwind: o hero que ocupa a tela, a medida de leitura com max-w-2xl, o ritmo das seções, a grade de benefícios e o bloco de chamada.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Landing</span> Page</h1>
+<p class="intro">A Ana quer uma página só para apresentar a padaria: a primeira coisa que a cliente vê,
+com o pão quentinho, a historia da casa e um convite para encomendar. Ela juntou tudo e o resultado
+pareceu um folheto: texto colado no topo, parágrafos atravessando a tela inteira e um botão perdido no
+meio de um bloco cinza. Nesta aula ela monta uma landing page de verdade — o hero que ocupa a tela, a
+medida de leitura, o ritmo das seções e o bloco de chamada que fecha a página.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O hero que ocupa a tela e centraliza o conteúdo: <code>flex min-h-screen flex-col items-center justify-center</code>.</li>
+  <li>Por que o título não pode atravessar a tela e como limitar com <code>max-w-2xl</code>.</li>
+  <li>O <code>text-balance</code>, que evita a última palavra sozinha numa linha.</li>
+  <li>O ritmo vertical das seções: <code>py-16 md:py-24</code>.</li>
+  <li>A caixa de conteúdo que alinha tudo: <code>mx-auto max-w-6xl px-6</code>.</li>
+  <li>A grade de benefícios com <code>sm:grid-cols-3</code>.</li>
+  <li>O bloco de chamada final com <code>rounded-3xl px-8 py-12 text-center</code>.</li>
+  <li>Imagens com proporção (<code>aspect-video object-cover</code>) e links de âncora.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a página que parece um folheto</h2>
+
+<p>A Ana escreveu a página em ordem: título, subtítulo, três parágrafos sobre a farinha, uma foto e um
+botão. No monitor dela, o título ocupava uma linha inteira de 1400 px e o parágrafo virava uma faixa
+larga e difícil de seguir — o olho chegava ao fim de uma linha e não achava o começo da próxima. O
+botão ficava encostado na margem esquerda, perdido.</p>
+
+<p>Landing page tem um trabalho diferente do resto do site. Ela precisa de <strong>hierarquia</strong>:
+algo grande que segura a pessoa por dois segundos, uma promessa curta, uma prova e um convite. O
+layout serve a essa ordem. Por isso as páginas que funcionam têm sempre o mesmo desenho: uma faixa
+alta com o essencial, seções com respiro entre elas, e um bloco de chamada no fim.</p>
+
+<p>Vale separar dois conceitos que a Ana misturou. O primeiro é <em>largura da tela</em>: o fundo de
+uma seção pode ir de borda a borda. O segundo é <em>largura da leitura</em>: o texto dentro dela não
+deve. Uma seção de fundo âmbar ocupando 1400 px é bonita; um parágrafo ocupando 1400 px é cansativo.
+O layout de landing é, em boa parte, a arte de manter o fundo largo e o texto estreito.</p>
+
+<h2>2. O hero: a primeira tela inteira</h2>
+
+<p>A primeira seção tem nome: <em>hero</em>. Ela precisa ocupar a altura da tela para que a pessoa
+veja o essencial sem rolar, e precisa centralizar o conteúdo nos dois eixos. A receita é
+<code>flex min-h-screen flex-col items-center justify-center</code>. O <code>min-h-screen</code> dá a
+altura mínima de uma tela; o <code>flex-col</code> empilha os filhos; <code>items-center</code>
+centraliza na horizontal (porque a coluna é vertical) e <code>justify-center</code> na vertical.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=flex;;css:#alvo|align-items=center;;css:#alvo|justify-content=center">
+  <p class="try-task">O hero está colado no topo e alinhado à esquerda. Faça ele ocupar a altura da
+  tela e centralizar o conteúdo: <code>flex min-h-screen flex-col items-center justify-center</code>.</p>
+  <pre class="html">&lt;section id="alvo" class="bg-amber-50 px-6 py-8"&gt;
+  &lt;p class="text-xs uppercase tracking-wide text-amber-700"&gt;Padaria artesanal&lt;/p&gt;
+  &lt;h2 class="mt-2 text-2xl font-semibold text-slate-900"&gt;Pão quentinho às 6h&lt;/h2&gt;
+  &lt;p class="mt-2 text-sm text-slate-600"&gt;Fermentação natural, forno a lenha.&lt;/p&gt;
+&lt;/section&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.987 0.022 95.277)
+padding-inline: 24px
+padding-block: 32px
+</pre>
+  <pre class="solucao">&lt;section id="alvo" class="flex min-h-screen flex-col items-center justify-center bg-amber-50 px-6 py-8"&gt;
+  &lt;p class="text-xs uppercase tracking-wide text-amber-700"&gt;Padaria artesanal&lt;/p&gt;
+  &lt;h2 class="mt-2 text-2xl font-semibold text-slate-900"&gt;Pão quentinho às 6h&lt;/h2&gt;
+  &lt;p class="mt-2 text-sm text-slate-600"&gt;Fermentação natural, forno a lenha.&lt;/p&gt;
+&lt;/section&gt;</pre>
+</div>
+
+<p>Repare que as três linhas ficam centralizadas, uma embaixo da outra, no meio da prévia. Sem o
+<code>flex-col</code>, o <code>flex</code> colocaria as três lado a lado — o que ninguém quer num hero.
+A ordem das classes não importa, mas a presença de cada uma, sim.</p>
+
+<p>Existe uma variação que aparece muito em landing: <code>min-h-[80vh]</code> em vez de
+<code>min-h-screen</code>, para o visitante ver um pedaço da seção seguinte e entender que a página
+continua. É uma decisão de conteúdo, não de CSS. Se o hero tem uma foto grande, 80% da tela costuma
+funcionar melhor; se é só texto, a tela cheia dá peso.</p>
+
+<pre class="term">.flex {
+  display: flex;
+}
+.flex-col {
+  flex-direction: column;
+}
+.items-center {
+  align-items: center;
+}
+.justify-center {
+  justify-content: center;
+}
+.min-h-screen {
+  min-height: 100vh;
+}</pre>
+
+<p>Vale olhar cada linha com calma, porque essa combinação de cinco classes vai se repetir em toda
+landing que você abrir daqui para a frente. <code>display: flex</code> cria a caixa flexível;
+<code>flex-direction: column</code> empilha os filhos; <code>align-items: center</code> centraliza no
+eixo de cruzamento, que numa coluna é a horizontal; <code>justify-content: center</code> centraliza no
+eixo principal, que numa coluna é a vertical. E <code>min-height: 100vh</code> é "no mínimo uma tela".
+Trocar <code>column</code> por <code>row</code> inverte o papel dos dois primeiros — é por isso que a
+dupla <code>items-center</code> e <code>justify-center</code> parece se comportar diferente em cada
+lugar.</p>
+
+<p>Centralizar uma caixa na tela é o mesmo problema da aula de
+<a href="layout-login.html">Tela de Login</a>, resolvido com as mesmas classes. O que muda numa
+landing é o que vem depois: o hero é a primeira de várias seções, e o trabalho dele é levar o olho
+para a próxima seção, não segurar a pessoa para sempre.</p>
+
+
+<h2>3. A medida da leitura</h2>
+
+<p>Aqui está o ajuste que mais muda a cara de uma página e que quase ninguém faz: limitar a largura do
+texto. A regra prática é de 45 a 75 caracteres por linha; no Tailwind, <code>max-w-2xl</code> (672 px)
+é um bom alvo para um bloco de texto centralizado, e <code>max-w-3xl</code> (768 px) para conteúdo
+com título e parágrafo. O raciocínio é o mesmo da aula de <a href="layout-blog.html">Página de
+Blog</a>; numa landing ele vale para o hero, para a seção de história e para o depoimento — que são
+blocos curtos e centralizados, e não colunas de artigo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|max-width=672px;;rule:margin-inline: auto;;rule:text-wrap: balance">
+  <p class="try-task">O bloco da história atravessa a seção inteira. Limite-o a 672 px, centralize com
+  margem automática e peça ao navegador para equilibrar as linhas: <code>mx-auto max-w-2xl
+  text-balance</code>.</p>
+  <pre class="html">&lt;section class="bg-white px-6 py-8"&gt;
+  &lt;div id="alvo" class="rounded-xl bg-slate-50 p-4"&gt;
+    &lt;h2 class="text-xl font-semibold text-slate-900"&gt;Nossa história&lt;/h2&gt;
+    &lt;p class="mt-2 text-sm text-slate-600"&gt;A Ana começou com um forno emprestado e duas receitas. Hoje são quarenta pães por dia, todos de fermentação natural.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.984 0.003 247.858)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;section class="bg-white px-6 py-8"&gt;
+  &lt;div id="alvo" class="mx-auto max-w-2xl rounded-xl bg-slate-50 p-4 text-balance"&gt;
+    &lt;h2 class="text-xl font-semibold text-slate-900"&gt;Nossa história&lt;/h2&gt;
+    &lt;p class="mt-2 text-sm text-slate-600"&gt;A Ana começou com um forno emprestado e duas receitas. Hoje são quarenta pães por dia, todos de fermentação natural.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</pre>
+</div>
+
+<p>O <code>mx-auto</code> é o que centraliza um bloco de largura limitada: margem automática nos dois
+lados divide o espaço que sobra. Sem ele, o bloco fica com 672 px encostado à esquerda. E o
+<code>max-w-2xl</code> não é largura fixa: em tela menor, o bloco ocupa o que couber; em tela grande,
+para de crescer em 672 px.</p>
+
+<p>O <code>text-balance</code> é um recurso mais novo, do CSS, e faz uma diferença visível em títulos.
+Sem ele, o navegador quebra as linhas enchendo cada uma ao máximo e joga a última palavra sozinha. Com
+ele, as linhas ficam com tamanhos parecidos e o título parece desenhado. Use em títulos e em
+parágrafos curtos; em texto longo, pode deixar a quebra natural.</p>
+
+<pre class="term">.mx-auto {
+  margin-inline: auto;
+}
+.max-w-2xl {
+  max-width: var(--container-2xl);
+}
+.text-balance {
+  text-wrap: balance;
+}</pre>
+
+<p>Repare no <code>margin-inline</code>: é a margem horizontal que respeita a direção do texto. Em
+português, esquerda e direita; em idiomas da direita para a esquerda, o contrário. O
+<code>mx-auto</code> que você escreve vira isso, e funciona nos dois casos.</p>
+
+<h2>4. O ritmo das seções</h2>
+
+<p>Uma landing page é uma sequência de faixas. Se todas tiverem o mesmo respiro, a página parece
+uniforme e a pessoa não percebe onde uma seção termina e outra começa. O respiro vertical é o que cria
+esse ritmo, e ele vem em dois níveis: o espaço dentro de cada seção (<code>py-16 md:py-24</code>) e o
+espaço entre os elementos dela (<code>mt-6</code>, <code>space-y-4</code>).</p>
+
+<pre class="file" data-file="index.html">&lt;section class="bg-amber-50 px-6 py-16 md:py-24"&gt;
+  &lt;div class="mx-auto max-w-6xl"&gt;
+    &lt;h2 class="text-2xl font-semibold"&gt;Como funciona a encomenda&lt;/h2&gt;
+    &lt;p class="mt-4 max-w-2xl text-slate-600"&gt;Você escolhe o pão, a gente assa na hora e você retira na sexta.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/section&gt;
+
+&lt;section class="bg-white px-6 py-16 md:py-24"&gt;
+  &lt;div class="mx-auto max-w-6xl"&gt;
+    &lt;h2 class="text-2xl font-semibold"&gt;Onde estamos&lt;/h2&gt;
+    &lt;p class="mt-4 max-w-2xl text-slate-600"&gt;Rua das Flores, 12. De terça a sábado, das 6h às 13h.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</pre>
+
+<p>Duas coisas se repetem em todas as seções e isso é proposital. A primeira é o par
+<code>px-6 py-16 md:py-24</code>: 24 px nas laterais (para o texto não encostar na borda no celular) e
+64 px em cima e embaixo no pequeno, 96 px a partir de 768 px no grande. A segunda é a caixa
+<code>mx-auto max-w-6xl</code>: ela limita o conteúdo a 1152 px e centraliza. O fundo da seção vai de
+borda a borda; o conteúdo para em 1152 px.</p>
+
+<p>Esse par é a espinha dorsal do layout. Se você só lembrar de duas coisas desta aula, lembre destas:
+<strong>toda seção tem respiro vertical</strong> e <strong>todo conteúdo vive dentro de uma caixa
+limitada</strong>. A aula de <a href="container.html">O container</a> aprofunda a ideia; aqui ela vira
+rotina.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor</th><th>Onde entra</th></tr>
+<tr><td><code>px-6</code></td><td>24 px</td><td>laterais da seção, para o texto não encostar na borda</td></tr>
+<tr><td><code>py-16</code></td><td>64 px</td><td>respiro vertical no celular</td></tr>
+<tr><td><code>md:py-24</code></td><td>96 px</td><td>respiro vertical a partir de 768 px</td></tr>
+<tr><td><code>mt-4</code></td><td>16 px</td><td>distância entre título e parágrafo</td></tr>
+<tr><td><code>gap-8</code></td><td>32 px</td><td>espaço entre cartões de uma grade</td></tr>
+<tr><td><code>max-w-6xl</code></td><td>1152 px</td><td>largura máxima da caixa de conteúdo</td></tr>
+</table>
+</div>
+
+<p>Se a página tem muitas seções, vale criar o hábito de conferir uma coisa só no navegador: role até o
+fim e veja se existe um ritmo. Quando todas as faixas têm o mesmo respiro e o mesmo fundo, a leitura
+vira um paredão. Alternar uma seção de fundo claro com uma de fundo branco já resolve; dobrar o
+respiro no desktop é o acabamento.</p>
+
+
+<h2>5. A grade de benefícios</h2>
+
+<p>No meio da página, a Ana quer três motivos para comprar ali: fermentação natural, forno a lenha e
+retirada na hora. Três cartões iguais, lado a lado no monitor e empilhados no celular. É o trabalho de
+<code>grid gap-8 sm:grid-cols-2 lg:grid-cols-3</code>.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="mx-auto grid max-w-6xl gap-8 sm:grid-cols-2 lg:grid-cols-3"&gt;
+  &lt;div class="rounded-2xl border border-slate-200 p-6"&gt;
+    &lt;h3 class="font-semibold"&gt;Fermentação natural&lt;/h3&gt;
+    &lt;p class="mt-2 text-sm text-slate-600"&gt;Doze horas de descanso, sem pressa.&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-2xl border border-slate-200 p-6"&gt;
+    &lt;h3 class="font-semibold"&gt;Forno a lenha&lt;/h3&gt;
+    &lt;p class="mt-2 text-sm text-slate-600"&gt;Casca crocante e miolo úmido.&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-2xl border border-slate-200 p-6"&gt;
+    &lt;h3 class="font-semibold"&gt;Retirada na hora&lt;/h3&gt;
+    &lt;p class="mt-2 text-sm text-slate-600"&gt;Saiu do forno, vai para a sua sacola.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<p>O <code>gap-8</code> dá 32 px entre os cartões — mais folgado que o <code>gap-4</code> de um painel,
+porque numa landing page o espaço em branco é parte do desenho. Dois breakpoints resolvem tudo: duas
+colunas a partir de 640 px e três a partir de 1024 px. No celular, uma coluna, cartões empilhados.</p>
+
+<p>Uma observação sobre a ordem: em telas pequenas, os cartões aparecem na ordem do HTML. Se o terceiro
+for o mais importante, ele fica no fim no celular. A solução do Tailwind é <code>order-</code>, mas
+cuidado: mudar a ordem visual sem mudar a ordem do HTML bagunça a navegação por teclado. O caminho mais
+honesto é escrever no HTML a ordem que faz sentido nos dois casos.</p>
+
+<h2>6. O bloco de chamada</h2>
+
+<p>Toda landing termina com um convite. O bloco de chamada (o pessoal chama de CTA) precisa se
+destacar do resto: fundo colorido, cantos grandes, bastante respiro e texto centralizado. A receita no
+Tailwind é <code>rounded-3xl bg-amber-500 px-8 py-12 text-center</code>.</p>
+
+<p>Antes dele, a prova. Uma landing sem prova social — um depoimento, uma foto, um número — pede uma
+coisa e não oferece confiança em troca. O bloco de depoimento é simples: uma citação com
+<code>text-xl italic</code> dentro de <code>mx-auto max-w-2xl text-center</code> e o nome de quem falou
+em <code>mt-4 text-sm text-slate-500</code>. O <code>text-balance</code> que você já conhece faz a
+citação terminar bonito em vez de deixar uma palavra órfã na última linha.</p>
+
+
+<div class="trytailwind" data-goal="css:#alvo|border-radius=24px;;css:#alvo|padding-top=48px;;rule:background-color: var(--color-amber-500);;rule:text-align: center">
+  <p class="try-task">O bloco de chamada está sem graça, com canto reto e respiro pequeno. Deixe-o
+  assim: <code>rounded-3xl bg-amber-500 px-8 py-12 text-center</code>.</p>
+  <pre class="html">&lt;section class="bg-white px-6 py-8"&gt;
+  &lt;div id="alvo" class="rounded-none bg-amber-100 p-2"&gt;
+    &lt;p class="text-lg font-semibold text-slate-900"&gt;Encomende seu pão&lt;/p&gt;
+    &lt;p class="text-sm text-slate-700"&gt;Retirada na sexta, das 6h às 13h.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;section class="bg-white px-6 py-8"&gt;
+  &lt;div id="alvo" class="rounded-3xl bg-amber-500 px-8 py-12 text-center"&gt;
+    &lt;p class="text-lg font-semibold text-slate-900"&gt;Encomende seu pão&lt;/p&gt;
+    &lt;p class="text-sm text-slate-700"&gt;Retirada na sexta, das 6h às 13h.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</pre>
+</div>
+
+<p>São quatro decisões que trabalham juntas. O <code>rounded-3xl</code> arredonda em 24 px — cantos
+grandes dizem "bloco de destaque", ao contrário dos 6 ou 8 px de um cartão comum. O
+<code>bg-amber-500</code> é o âmbar forte da marca da padaria, o mesmo do botão principal. O
+<code>px-8 py-12</code> dá 32 px nas laterais e 48 px em cima e embaixo; sem esse respiro, o bloco
+parece uma tarja. E o <code>text-center</code> alinha o convite com o resto do desenho.</p>
+
+<p>Um cuidado com contraste: amarelo forte pede texto escuro. Se você trocar para um marrom escuro de
+fundo, o texto precisa virar claro (<code>text-white</code> ou <code>text-amber-50</code>). O bloco
+de destaque é o lugar onde o contraste é mais importante, porque é ali que a pessoa clica.</p>
+
+<h2>7. Imagem com proporção</h2>
+
+<p>Foto de pão tem formato. Se você só puser a imagem, ela entra com a proporção original e empurra o
+layout de um jeito diferente em cada tela. O par que resolve é
+<code>aspect-video w-full rounded-2xl object-cover</code>: a caixa mantém a proporção 16:9, ocupa a
+largura disponível, arredonda os cantos e a imagem cobre a caixa sem distorcer.</p>
+
+<pre class="file" data-file="index.html">&lt;img src="paes.jpg" alt="Pães saindo do forno"
+     class="aspect-video w-full rounded-2xl object-cover"&gt;</pre>
+
+<p>O <code>object-cover</code> é o que diferencia uma foto bonita de uma foto esticada. Sem ele, a
+imagem é comprimida para caber na proporção e os pães ficam achatados. Com ele, a imagem é cortada nas
+bordas — o que quase sempre é melhor. A aula de <a href="aspect-ratio.html">Proporção com aspect</a>
+tem a tabela completa de proporções.</p>
+
+<p>Duas recomendações que não são de Tailwind, mas fazem parte do serviço. A primeira: toda
+<code>img</code> precisa de <code>alt</code> descrevendo o que aparece — "Pães saindo do forno", e não
+"imagem". Quem não vê a foto depende desse texto. A segunda: não esqueça do
+<code>rounded-2xl</code> na imagem se o resto da página usa cantos arredondados; canto reto numa
+página arredondada é o tipo de detalhe que ninguém sabe nomear, mas todo mundo sente.</p>
+
+
+<h2>8. Links de âncora e navegação</h2>
+
+<p>Landing page longa precisa de atalhos. Um cabeçalho com três links que pulam para as seções
+(<code>#encomendas</code>, <code>#onde-estamos</code>) resolve, e o Tailwind tem a classe que faz o
+salto ser suave: <code>scroll-smooth</code>. Ela vai no elemento que rola, que na prática é o
+<code>html</code>.</p>
+
+<pre class="file" data-file="index.html">&lt;html lang="pt-BR" class="scroll-smooth"&gt;
+...
+&lt;header class="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur"&gt;
+  &lt;nav class="mx-auto flex max-w-6xl items-center justify-between px-6 py-3"&gt;
+    &lt;span class="font-semibold"&gt;Padaria da Ana&lt;/span&gt;
+    &lt;a href="#encomendas" class="text-sm text-slate-600 hover:text-amber-700"&gt;Encomendas&lt;/a&gt;
+  &lt;/nav&gt;
+&lt;/header&gt;
+...
+&lt;section id="encomendas" class="px-6 py-16 md:py-24"&gt;…&lt;/section&gt;</pre>
+
+<p>Dois detalhes de usabilidade. Primeiro, o <code>id</code> precisa existir na seção de destino — link
+de âncora quebrado é o 404 mais silencioso do site, porque não dá erro, só não faz nada. Segundo, se o
+cabeçalho é <code>sticky</code>, o título da seção pode ficar escondido atrás dele ao pular; a solução
+é <code>scroll-mt-20</code> na seção de destino, e a aula de <a href="scroll-suave.html">Rolagem
+Suave</a> mostra o mecanismo em detalhe.</p>
+
+<dl class="anatomy">
+<dt>hero</dt>
+<dd>A primeira seção, que ocupa a altura da tela e centraliza o essencial. É o cartão de visita da
+página.</dd>
+<dt>seção</dt>
+<dd>Cada faixa da página, com respiro vertical próprio: <code>py-16 md:py-24</code>.</dd>
+<dt>caixa</dt>
+<dd>O <code>div</code> interno com <code>mx-auto max-w-6xl px-6</code>. Limita e centraliza o
+conteúdo.</dd>
+<dt>medida</dt>
+<dd>A largura máxima do texto: <code>max-w-2xl</code> para leitura, <code>max-w-6xl</code> para
+grades e imagens.</dd>
+<dt>CTA</dt>
+<dd>O bloco de chamada final, com fundo forte, canto grande e texto centralizado.</dd>
+<dt>âncora</dt>
+<dd>O <code>id</code> que um link com <code>#</code> procura. Com <code>scroll-smooth</code>, o salto
+é animado.</dd>
+</dl>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Largura</th><th>Valor</th><th>Para que serve numa landing</th></tr>
+<tr><td><code>max-w-xl</code></td><td>576 px</td><td>subtítulo curto do hero</td></tr>
+<tr><td><code>max-w-2xl</code></td><td>672 px</td><td>bloco de leitura centralizado</td></tr>
+<tr><td><code>max-w-3xl</code></td><td>768 px</td><td>conteúdo com título e parágrafo</td></tr>
+<tr><td><code>max-w-5xl</code></td><td>1024 px</td><td>grade de dois cartões grandes</td></tr>
+<tr><td><code>max-w-6xl</code></td><td>1152 px</td><td>a caixa padrão das seções</td></tr>
+<tr><td><code>max-w-7xl</code></td><td>1280 px</td><td>páginas com muito conteúdo lado a lado</td></tr>
+</table>
+</div>
+
+<h2>9. Quando a página quebra: três cenas</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o hero fica alto demais no celular</h3>
+<p>Com <code>min-h-screen</code>, o hero ocupa a tela toda do telefone. Se o título tem quatro linhas e
+o subtítulo mais três, o conteúdo passa da altura e o botão sai para fora da primeira tela — o
+visitante vê texto cortado e não vê o convite. A correção é <code>min-h-[70vh] sm:min-h-screen</code>
+ou simplesmente trocar por <code>py-20</code>: em tela pequena, respiro fixo costuma ser mais
+confiável que altura de tela. Altura de tela é uma promessa; o conteúdo é quem manda.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: as seções parecem um bloco só</h3>
+<p>A Ana usou <code>py-16</code> em todas as seções e todas tinham o mesmo fundo branco. O resultado:
+a página parecia um texto único, sem começo nem fim de assunto. Duas mudanças resolveram: alternar
+<code>bg-white</code> com <code>bg-amber-50</code> e dobrar o respiro a partir de 768 px com
+<code>md:py-24</code>. A faixa de cor dá o corte; o respiro maior dá o ritmo. Nenhuma das duas é
+obrigatória, mas juntas mudam completamente a leitura.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o botão de âncora esconde o título</h3>
+<p>Ao clicar em "Encomendas", a página pulava para a seção certa e o título dela ficava atrás do
+cabeçalho fixo. Ninguém tinha errado o <code>id</code>: o cabeçalho é que estava por cima. O ajuste é
+<code>scroll-mt-20</code> na seção de destino, que empurra o ponto de parada 80 px para baixo. Se o
+cabeçalho muda de altura entre celular e desktop, use <code>scroll-mt-16 md:scroll-mt-20</code>.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual conjunto faz o hero ocupar a tela e centralizar o conteúdo?</p>
+<label><input type="radio" name="l1"> <code>h-screen block text-center</code></label>
+<label><input type="radio" name="l1"> <code>flex min-h-screen flex-col items-center justify-center</code></label>
+<label><input type="radio" name="l1"> <code>grid min-h-screen grid-cols-3</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. Para que serve o <code>max-w-2xl</code> no bloco de texto?</p>
+<label><input type="radio" name="l2"> limitar a largura da leitura a 672 px, mesmo em tela grande</label>
+<label><input type="radio" name="l2"> deixar o texto menor em todas as telas</label>
+<label><input type="radio" name="l2"> reservar 672 px de margem nas laterais</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">3. O que <code>object-cover</code> faz numa imagem com <code>aspect-video</code>?</p>
+<label><input type="radio" name="l3"> estica a imagem para preencher a caixa</label>
+<label><input type="radio" name="l3"> mostra a imagem inteira com faixas brancas</label>
+<label><input type="radio" name="l3"> corta as sobras e mantém a proporção, sem distorcer</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o hero da padaria</h2>
+<p>Complete a seção para ela ocupar a altura da tela, empilhar o conteúdo e centralizar nos dois eixos.</p>
+<div class="ex-code">&lt;section class="<input aria-label="resposta 1" data-answer="flex min-h-screen flex-col items-center justify-center"> bg-amber-50 px-6"&gt;</div>
+<p class="ex-dica">Dica: são cinco classes. Uma vira a seção em coluna; uma cuida da altura; três
+cuidam do alinhamento — duas no contêiner, uma na direção.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Landing page é uma sequência de faixas com hierarquia. O hero leva
+<code>flex min-h-screen flex-col items-center justify-center</code> e segura a primeira tela. O texto
+dentro dele nunca atravessa a página: <code>mx-auto max-w-2xl</code> limita a leitura e o
+<code>text-balance</code> equilibra as linhas dos títulos. Cada seção leva
+<code>px-6 py-16 md:py-24</code> e um <code>div</code> interno com <code>mx-auto max-w-6xl</code>.</p>
+
+<p>Benefícios vão numa grade <code>sm:grid-cols-2 lg:grid-cols-3</code> com <code>gap-8</code>. O
+bloco de chamada fecha a página com <code>rounded-3xl bg-amber-500 px-8 py-12 text-center</code>. As
+imagens ganham proporção com <code>aspect-video object-cover</code>, e os links de âncora precisam de
+<code>id</code> nas seções, <code>scroll-smooth</code> no <code>html</code> e
+<code>scroll-mt-20</code> quando há cabeçalho fixo.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Hero: <code>flex min-h-screen flex-col items-center justify-center</code>.</li>
+<li>Fundo de borda a borda, texto em caixa limitada: <code>mx-auto max-w-2xl</code> ou
+<code>max-w-3xl</code>.</li>
+<li><code>mx-auto</code> centraliza bloco de largura limitada; <code>margin-inline: auto</code>.</li>
+<li><code>text-balance</code> evita a última palavra sozinha em títulos.</li>
+<li>Ritmo vertical: <code>py-16 md:py-24</code> em cada seção.</li>
+<li>Caixa padrão do conteúdo: <code>mx-auto max-w-6xl px-6</code>.</li>
+<li>Grade de benefícios: <code>grid gap-8 sm:grid-cols-2 lg:grid-cols-3</code>.</li>
+<li>CTA: <code>rounded-3xl</code> + cor forte + <code>px-8 py-12 text-center</code>.</li>
+<li>Imagem: <code>aspect-video w-full rounded-2xl object-cover</code>.</li>
+<li>Âncora precisa de <code>id</code> na seção; <code>scroll-smooth</code> vai no <code>html</code>.</li>
+<li>Cabeçalho fixo pede <code>scroll-mt-20</code> na seção de destino.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estilos de Base | Guia Tailwind</title>
+<meta name="description" content="A camada base do Tailwind na prática: o preflight que zera os títulos, o @layer base do projeto, por que a utilidade sempre vence e o que não vai para a base.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Estilos de <span class="hl">Base</span></h1>
+<p class="intro">A Ana escreveu a página de receitas com títulos, subtítulos, listas de ingredientes e
+parágrafos de modo de preparo. Ficou tudo igual: o título principal do mesmo tamanho do texto, o
+subtítulo também, e os parágrafos colados uns nos outros, sem respiro nenhum. Ela não errou o HTML — o
+<code>&lt;h1&gt;</code> está lá, com a tag certa. O que aconteceu é que o Tailwind, antes de qualquer
+classe sua, apaga os enfeites que o navegador dava às tags: é o <em>preflight</em>, uma camada de base que
+existe para o desenho começar do zero. Nesta aula a Ana entende essa camada, aceita o que ela faz e
+escreve a base do próprio projeto — os padrões que valem para o site inteiro, uma vez só.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>As quatro camadas do CSS do Tailwind e por que a ordem delas resolve discussão.</li>
+  <li>O que o preflight zera, e por que o <code>&lt;h1&gt;</code> fica do tamanho do texto.</li>
+  <li>Como escrever a base do projeto com <code>@layer base</code>.</li>
+  <li>Por que uma utilidade sempre ganha de uma regra de base.</li>
+  <li>Como usar <code>@apply</code> dentro da base sem perder as variáveis do tema.</li>
+  <li>O que vai na base, o que vai no HTML e o que não vai em lugar nenhum.</li>
+  <li>As armadilhas: <code>!important</code> desnecessário, seletor de classe na base, regra que some.</li>
+  <li>Como conferir uma regra de base quando o painel não mostra nada.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a página em que tudo é do mesmo tamanho</h2>
+
+<p>A receita do pão de queijo é simples, e o HTML também: um <code>&lt;h1&gt;</code> com o nome, um
+<code>&lt;h2&gt;</code> para os ingredientes, um <code>&lt;ul&gt;</code> com a lista e dois
+<code>&lt;p&gt;</code> para o modo de preparo. Em qualquer página sem CSS, o navegador mostraria o
+<code>h1</code> grande e em negrito, o <code>h2</code> médio e em negrito, a lista com bolinhas e espaço
+entre os parágrafos. Na página da Ana, tudo isso desapareceu.</p>
+
+<p>Ela abriu o inspetor e viu a resposta: <code>h1 { font-size: inherit; font-weight: inherit; }</code>,
+vindo de uma regra que ela não escreveu. É o preflight do Tailwind. Ele faz parte da biblioteca desde
+sempre, chega junto com o <code>@import "tailwindcss";</code> e tem um objetivo declarado: deixar todos os
+navegadores desenhando as tags do mesmo jeito, sem os enfeites diferentes que cada um inventou nos anos
+1990.</p>
+
+<p>A confusão é justa: você pediu “Tailwind”, não pediu “apagar meus títulos”. Mas pense no que seria o
+contrário. Sem o preflight, o seu <code>h1</code> teria 2 em de tamanho, 0,67 em de margem em cima e
+0,67 embaixo, e o seu <code>p</code> teria 1 em de margem em cima e embaixo — valores diferentes em cada
+navegador, e nenhum deles escolhido por você. A primeira classe <code>mt-4</code> que você escrevesse
+brigaria com uma margem que veio do navegador e que você não vê no código. O preflight troca esse
+pacote de surpresas por um começo conhecido: tudo zerado, e o desenho é decisão sua.</p>
+
+<h2>2. As quatro camadas, e por que a ordem importa</h2>
+
+<p>Antes de entender o preflight, vale ver onde ele mora. O CSS que o Tailwind gera começa declarando a
+ordem de quatro camadas, e essa única linha resolve metade das discussões de CSS que você vai ter na
+vida:</p>
+
+<pre class="term">@layer theme, base, components, utilities;
+
+@layer theme {
+  :root, :host {
+    --spacing: 0.25rem;
+    --color-amber-100: oklch(0.962 0.059 95.617);
+  }
+}</pre>
+
+<p>Camada, em CSS, é um jeito de agrupar regras e dizer qual grupo vence quando dois disputam a mesma
+propriedade. A ordem da primeira linha é a sentença: quem vem depois ganha. Então <code>utilities</code>
+vence <code>components</code>, que vence <code>base</code>, que vence <code>theme</code>. E isso vale
+independentemente de quantos seletores cada regra tem — o que, em CSS tradicional, seria impensável.</p>
+
+<p>Essa é a razão de o Tailwind poder usar seletores simples nas utilidades: ele não precisa de
+<code>!important</code> nem de especificidade alta para ganhar da base. Ele ganha porque está numa camada
+declarada depois. Na prática, você escreve <code>class="text-xl"</code> num <code>h1</code> que tem
+<code>font-size</code> na base, e a classe vence sem briga.</p>
+
+<p>Repare também no que a camada <code>theme</code> contém: as variáveis. Ela vem primeiro justamente
+porque é a fonte dos valores que as outras camadas vão usar. A ordem conta a história do arquivo: os
+valores, depois os padrões, depois os componentes, depois as utilidades.</p>
+
+<h2>3. O preflight: a base que você já usa</h2>
+
+<p>Agora o conteúdo da camada <code>base</code>. A primeira regra do preflight é a mais importantes de
+todas, e explica muita coisa que parece mágica:</p>
+
+<pre class="term">@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+  }
+}</pre>
+
+<p>Leia devagar. O seletor <code>*</code> pega todos os elementos; os outros pegam os pseudo-elementos.
+Para todos eles, o preflight zera margem, respiro e borda, e troca o cálculo de tamanho para
+<code>border-box</code> — aquele em que a largura inclui a borda, e não soma a ela. É por isso que a sua
+primeira <code>p-4</code> dá exatamente 16 px e não 16 px mais a borda.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que o preflight faz</th><th>Sem ele</th><th>Por que assim</th></tr>
+<tr><td>zera margem e respiro de tudo</td><td>cada tag com margem própria</td><td>o espaço passa a ser decisão sua</td></tr>
+<tr><td><code>border: 0 solid</code></td><td>bordas com estilo e cor de fábrica</td><td>a borda só aparece quando você pede</td></tr>
+<tr><td><code>box-sizing: border-box</code></td><td>largura + borda + respiro</td><td>medir uma caixa fica previsível</td></tr>
+<tr><td><code>h1…h6 { font-size: inherit }</code></td><td>títulos com tamanhos do navegador</td><td>a escala de texto é a sua</td></tr>
+<tr><td>listas sem marcador e sem recuo</td><td>bolinhas e recuo de fábrica</td><td>marcador vira escolha explícita</td></tr>
+</table>
+</div>
+
+<dl class="anatomy">
+<dt>camada</dt>
+<dd>Um grupo de regras de CSS com uma posição declarada na ordem de prioridade. Quem vem depois vence,
+mesmo com seletor mais fraco.</dd>
+<dt>preflight</dt>
+<dd>A camada de base que o Tailwind traz pronta, zerando margens, bordas e tamanhos de título para o
+desenho começar igual em todos os navegadores.</dd>
+<dt>@layer base</dt>
+<dd>O bloco onde você escreve os padrões do projeto: como um <code>h1</code>, um <code>p</code> ou um
+<code>body</code> se comportam antes de qualquer classe.</dd>
+<dt>herança</dt>
+<dd>O que desce do pai para o filho sem precisar de regra, como cor e fonte. É o que faz uma regra em
+<code>body</code> alcançar a página inteira.</dd>
+<dt>reset</dt>
+<dd>Outro nome para esse tipo de base: regras que apagam os padrões do navegador antes de você desenhar.</dd>
+</dl>
+
+<p>O segundo trecho mais famoso do preflight é o dos títulos. É ele que a Ana viu no inspetor, e é o
+motivo de a página dela parecer texto corrido:</p>
+
+<pre class="term">  h1, h2, h3, h4, h5, h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }</pre>
+
+<p><code>inherit</code> quer dizer “pegue o valor do pai”. Como o pai do <code>h1</code> é o
+<code>body</code>, e o <code>body</code> usa o tamanho normal do texto, o título herda esse tamanho. Não
+é bug: é o Tailwind dizendo “os títulos não têm tamanho até você decidir”. A decisão pode ser sua, no
+HTML, com classes; ou do projeto inteiro, na base.</p>
+
+<p>Uma coisa importante: o preflight não é obrigatório. Dá para importar só as utilidades e viver sem
+ele, e há projetos que fazem isso. Mas pense duas vezes: você passa a conviver com os padrões do
+navegador, e cada classe sua disputa com eles. Para quem está começando, o preflight é aliado, não
+obstáculo — ele deixa o ponto de partida igual em todo lugar.</p>
+
+<h2>4. A base do projeto</h2>
+
+<p>Com o preflight entendido, o caminho fica claro. Se os títulos nascem sem tamanho, alguém precisa dar
+tamanho a eles, e esse alguém é você. Escrever <code>class="text-3xl font-bold"</code> em cada
+<code>h1</code> do site funciona e é o que se faz no começo; quando o site tem quarenta páginas, a
+decisão vira uma regra de base.</p>
+
+<p>Na caixa abaixo, o <code>h1</code> da padaria está no tamanho do texto, porque o preflight fez o
+trabalho dele. Sua missão é escrever, no <code>@layer base</code>, o padrão dos títulos de primeiro
+nível: 30 px, peso 700 e a cor âmbar escura do tema.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|font-size=30px;;css:#alvo|font-weight=700">
+  <p class="try-task">Escreva no <code>@layer base</code> uma regra para <code>h1</code> com
+  <code>font-size: 30px</code>, <code>font-weight: 700</code> e
+  <code>color: var(--color-amber-900)</code>. O título deve ganhar tamanho e peso.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+/* a base do projeto ainda não tem regra para h1 */
+&lt;/style&gt;
+
+&lt;h1 id="alvo" class="bg-amber-50 p-4"&gt;Padaria da Ana&lt;/h1&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@layer base {
+  h1 {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--color-amber-900);
+  }
+}
+&lt;/style&gt;
+
+&lt;h1 id="alvo" class="bg-amber-50 p-4"&gt;Padaria da Ana&lt;/h1&gt;</pre>
+</div>
+
+<p>Depois de rodar, olhe a prévia: o título cresceu e engordou. Agora olhe o painel: ele continua
+mostrando só o respiro e o fundo, como antes. Isso não é falha. O painel mostra <em>o que as classes
+mudaram</em>, comparando o elemento com uma cópia sem classes — e a regra que você escreveu vale para as
+duas cópias, porque ela não pergunta nada sobre classe. Quem confere o resultado é o valor computado, e
+é por isso que a meta desta caixa olha <code>font-size</code> e <code>font-weight</code> direto.</p>
+
+<p>Guarde essa assimetria, porque ela vale para toda regra de base: <strong>a base não aparece no painel
+de diferenças</strong>. Se um dia você escrever uma regra de base e o painel não mudar nada, comece
+perguntando se ela é mesmo uma regra de base. Na dúvida, o inspetor do navegador, na aba
+<em>Computed</em>, mostra o valor final e de onde ele veio.</p>
+
+<h2>5. Base e utilidade: quem vence</h2>
+
+<p>O caso mais comum de confusão é o seguinte: você põe uma cor de link na base, e um dia precisa de um
+link com outra cor. Quem ganha? A resposta é sempre a mesma, e é a razão de as camadas existirem: a
+utilidade. Não importa se a regra de base foi escrita depois, não importa quantos seletores ela tem.</p>
+
+<p>Na caixa abaixo, a base pinta todos os links de âmbar escuro, e o link de horários é justamente o que
+precisa ser verde. Escreva a utilidade nele e veja a base perder a discussão sem precisar de
+<code>!important</code>.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|color=oklch(0.527 0.154 150.069);;rule:.text-green-700">
+  <p class="try-task">Acrescente <code>text-green-700</code> ao link e rode: o texto deve ficar verde,
+  mesmo com a regra de base pintando todos os links de âmbar.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@layer base {
+  a {
+    color: var(--color-amber-700);
+    text-underline-offset: 2px;
+  }
+}
+&lt;/style&gt;
+
+&lt;a id="alvo" class="underline" href="#"&gt;Horários da semana&lt;/a&gt;</pre>
+  <pre class="out">
+text-decoration-line: underline
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@layer base {
+  a {
+    color: var(--color-amber-700);
+    text-underline-offset: 2px;
+  }
+}
+&lt;/style&gt;
+
+&lt;a id="alvo" class="underline text-green-700" href="#"&gt;Horários da semana&lt;/a&gt;</pre>
+</div>
+
+<p>Antes, o painel mostra o sublinhado e nenhuma cor: a cor vem da base, e vale igual para a cópia sem
+classes, então não aparece como diferença. Depois, aparece a cor verde — porque agora ela vem de uma
+classe, e só o elemento com a classe a recebe.</p>
+
+<p>Se você já sofreu com CSS antigo, esse comportamento parece bom demais. Em CSS comum, uma regra
+<code>a { color: … }</code> e uma classe <code>.text-green-700</code> têm pesos diferentes: a classe
+(0,1,0) vence a tag (0,0,1), então funcionaria também. O problema apareceria com um seletor de base mais
+forte, como <code>.conteudo a</code> (0,1,1), que ganharia da classe. Com camadas, isso deixa de existir:
+a camada decide primeiro, e o peso só é comparado dentro da mesma camada. É por isso que o Tailwind v4
+consegue prometer que utilidade vence base, sempre.</p>
+
+<h2>6. Base com @apply</h2>
+
+<p>Escrever CSS cru dentro da base funciona, mas obriga você a lembrar dos valores: 30 px aqui, 700 ali,
+a cor em <code>var()</code>. Se a ideia é usar as decisões do tema, o <code>@apply</code> faz o trabalho
+de traduzir classe em declaração — e mantém as variáveis no lugar dos números, como você viu na aula de
+plugins.</p>
+
+<p>Na caixa abaixo, o bloco de ingredientes precisa de um padrão para os subtítulos: 24 px, peso 600 e a
+tinta escura do tema. O <code>h2</code> não tem classe nenhuma, e é a base que vai resolver.</p>
+
+<div class="trytailwind" data-goal="css:#alvo h2|font-size=24px;;rule:font-weight: var(--font-weight-semibold)">
+  <p class="try-task">No <code>@layer base</code>, aplique <code>text-2xl</code>,
+  <code>font-semibold</code> e <code>text-stone-900</code> ao <code>h2</code>. O subtítulo da receita deve
+  crescer e escurecer.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@layer base {
+  /* falta o padrão do h2 */
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="border border-amber-200 p-4"&gt;
+  &lt;h2&gt;Ingredientes&lt;/h2&gt;
+  &lt;p class="text-sm"&gt;Farinha, água, sal e paciência.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+border-width: 1px
+border-color: oklch(0.924 0.12 95.746)
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@layer base {
+  h2 {
+    @apply text-2xl font-semibold text-stone-900;
+  }
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="border border-amber-200 p-4"&gt;
+  &lt;h2&gt;Ingredientes&lt;/h2&gt;
+  &lt;p class="text-sm"&gt;Farinha, água, sal e paciência.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>@apply</code> na base é o mesmo <code>@apply</code> de qualquer lugar: ele expande a classe nas
+declarações e mantém os <code>var()</code>. A diferença é o destino — aqui, o CSS entra na camada
+<code>base</code>, e portanto perde para qualquer utilidade. É exatamente o que você quer de um padrão:
+valer como ponto de partida e poder ser sobrescrito por quem sabe mais.</p>
+
+<p>Uma ressalva de tamanho: <code>@apply</code> com três ou quatro classes é confortável; com dez, você
+escreveu um componente e o escondeu numa tag. Se o padrão do <code>h2</code> já é um bloco com borda,
+respiro e espaçamento entre linhas, o lugar dele não é a base — é uma classe aplicada no HTML. A base
+serve para o que é padrão de <em>tag</em>, não para o que é desenho de <em>peça</em>.</p>
+
+<h2>7. O que vai em cada camada</h2>
+
+<p>Com as quatro camadas na cabeça, a decisão de onde escrever cada regra fica quase automática. A regra
+de bolso é perguntar “quem deve poder mudar isso depois?”. Se a resposta é “ninguém, é o padrão do
+site”, é base. Se é “a página decide”, é utilidade no HTML.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que você quer</th><th>Onde escrever</th><th>Exemplo</th></tr>
+<tr><td>valor do tema (cor, fonte, espaço)</td><td><code>@theme</code></td><td><code>--color-marca</code></td></tr>
+<tr><td>padrão de tag no site inteiro</td><td><code>@layer base</code></td><td><code>h1 { font-size: 30px }</code></td></tr>
+<tr><td>aparência de uma peça reutilizável</td><td>classes no HTML</td><td><code>rounded-xl bg-amber-50 p-4</code></td></tr>
+<tr><td>uma variação pontual</td><td>utilidade no HTML</td><td><code>text-green-700</code></td></tr>
+<tr><td>estado ou tamanho de tela</td><td>variante na classe</td><td><code>hover:underline</code>, <code>md:text-4xl</code></td></tr>
+</table>
+</div>
+
+<p>Olhe a terceira linha com atenção, porque é a que mais gente erra: uma peça reutilizável não vira
+regra de base com seletor de classe. <code>@layer base { .cartao { … } }</code> funciona, e é uma
+armadilha: a classe fica com o peso de uma classe, mas mora numa camada que perde para as utilidades —
+então o cartão obedece ao HTML em umas propriedades e à base em outras, e ninguém entende a ordem. Se a
+peça é um componente, escreva as classes no HTML (ou use <code>@utility</code>, que vive na camada
+certa).</p>
+
+<p>Vale também ter clareza sobre o alcance da base. Ela vale para o documento inteiro, inclusive para o
+que você não escreveu: uma regra <code>p { margin-bottom: 1rem }</code> atinge parágrafos dentro de
+cartões, modais e rodapés. Isso é o que se quer num padrão de leitura, e é um problema quando o texto de
+um componente precisa de outro ritmo. Se você se pegar escrevendo exceções para a base, é sinal de que a
+regra era grande demais.</p>
+
+<h2>8. Armadilhas da base</h2>
+
+<p>Três coisas dão errado com uma frequência previsível, e todas têm conserto simples.</p>
+
+<p>A primeira é recorrer ao <code>!important</code> para a classe ganhar da base. Não precisa: a camada
+<code>utilities</code> já vem depois. Se a sua classe está perdendo, o problema é outro — normalmente uma
+classe mais específica do mesmo elemento ou uma regra inline no <code>style</code>, que ganha de tudo.
+Procurar o <code>!important</code> esconde a causa em vez de resolver.</p>
+
+<p>A segunda é escrever a base fora do <code>@layer base</code>. Uma regra de <code>h1</code> solta no
+arquivo, sem camada, tem prioridade <em>maior</em> que as camadas — e aí ela passa a ganhar das
+utilidades, o que derruba a promessa da seção 5. Regra de base sem camada é a causa número um de
+“coloquei <code>text-lg</code> e não mudou nada”.</p>
+
+<p>A terceira é a base que some. Isso acontece quando o <code>@layer base</code> está num arquivo que o
+build não lê, ou quando o import do Tailwind mudou de ordem e o seu bloco ficou antes do
+<code>@layer</code> ser declarado. No projeto com npm, o sintoma é o mesmo de sempre: o CSS publicado
+está velho. No modo de desenvolvimento, um <em>watch</em> parado deixa tudo como estava.</p>
+
+<p>Há ainda um detalhe de leitura que vale conhecer: o preflight muda de versão em versão do Tailwind, e
+um projeto que escreve muita base dependendo do que o preflight zera pode sentir a diferença numa
+atualização. É raro, mas é o tipo de coisa que aparece num sábado. A defesa é simples: escreva na base o
+que você quer, não o que você acha que o preflight deixou.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o título que não obedecia</h3>
+<p>A Ana escreveu <code>h1 { font-size: 30px }</code> direto no CSS, sem camada, e ficou feliz. Semanas
+depois, pôs <code>class="text-4xl"</code> num título de página e nada mudou. A regra solta tinha
+prioridade sobre as camadas, então ganhava até das utilidades. Mover a regra para dentro do
+<code>@layer base</code> resolveu na hora — e o título voltou a obedecer ao HTML, que é o que se espera
+de um padrão.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a lista sem bolinhas que ninguém pediu</h3>
+<p>A receita mostrou os ingredientes sem marcador, e a Ana estranhou o próprio HTML, que estava certo. O
+preflight remove o marcador e o recuo das listas de propósito. Para ter as bolinhas de volta, é uma
+utilidade: <code>list-disc</code>, com <code>pl-5</code> para o recuo. Quem quer marcador pede
+marcador — e essa é a mesma lógica que fez o <code>h1</code> nascer sem tamanho.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a base que estragou o rodapé</h3>
+<p>Ela escreveu <code>p { margin-bottom: 1rem }</code> na base e a página de receitas ficou ótima. Três
+dias depois, o rodapé ganhou um respiro enorme entre a linha de endereço e a de horário, porque as duas
+são parágrafos. O conserto não foi aumentar a especificidade: foi reconhecer que a regra era grande
+demais. O ritmo de leitura da receita passou a ser aplicado no bloco da receita, com
+<code>space-y-4</code>, e a base voltou a cuidar só do que é de todos.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Por que o <code>h1</code> aparece do tamanho do texto
+no Tailwind?</p>
+<label><input type="radio" name="q1"> porque a tag <code>h1</code> foi depreciada no HTML</label>
+<label><input type="radio" name="q1"> porque o preflight da camada base zera tamanho e peso dos títulos</label>
+<label><input type="radio" name="q1"> porque o navegador não sabe desenhar títulos sem CSS</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Você tem <code>a { color: … }</code> no
+<code>@layer base</code> e <code>text-green-700</code> no elemento. Quem pinta o link?</p>
+<label><input type="radio" name="q2"> a regra de base, porque foi escrita primeiro</label>
+<label><input type="radio" name="q2"> depende do tamanho do arquivo CSS</label>
+<label><input type="radio" name="q2"> a utilidade, porque a camada <code>utilities</code> vem depois da <code>base</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Onde fica uma regra que deve valer para todos os
+parágrafos do site, mas perder para qualquer classe?</p>
+<label><input type="radio" name="q3"> dentro de <code>@layer base</code></label>
+<label><input type="radio" name="q3"> solta no arquivo, sem camada nenhuma</label>
+<label><input type="radio" name="q3"> dentro de <code>@theme</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o padrão dos títulos</h2>
+<p>Complete o bloco que coloca a regra dos títulos na camada certa, aquela em que qualquer utilidade
+ainda pode sobrescrever:</p>
+<div class="ex-code">@layer <input aria-label="resposta 1" data-answer="base" placeholder="..."> {
+  h1 { font-size: 30px; }
+}</div>
+<p class="ex-dica">Dica: é o nome da camada que vem depois de <code>theme</code> e antes de
+<code>components</code> na primeira linha do CSS gerado. Sem a camada, a regra ganha das utilidades e
+vira um problema difícil de achar.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O CSS do Tailwind declara quatro camadas na primeira linha — <code>theme</code>, <code>base</code>,
+<code>components</code>, <code>utilities</code> — e a ordem decide quem vence. A camada
+<code>base</code> já vem preenchida com o preflight, que zera margens, bordas e tamanhos de título para o
+desenho começar igual em todos os navegadores. É por isso que um <code>h1</code> sem classe parece texto
+comum: ele herda o tamanho do pai.</p>
+
+<p>O padrão do projeto se escreve em <code>@layer base</code>, com CSS cru ou com <code>@apply</code>, e
+vale para o documento inteiro. Dali para baixo, toda utilidade ganha — sem <code>!important</code>, sem
+contar especificidade. Regra de base fora da camada é a exceção que estraga a regra; peça reutilizável
+não é base; e o painel das caixas não mostra efeito de base, porque ele mede a diferença que as classes
+fazem.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Quatro camadas, nesta ordem: <code>theme</code>, <code>base</code>, <code>components</code>, <code>utilities</code>.</li>
+<li>Quem vem depois vence, mesmo com seletor mais fraco.</li>
+<li>O preflight zera margem, respiro e borda de tudo, e troca para <code>box-sizing: border-box</code>.</li>
+<li><code>h1…h6 { font-size: inherit }</code> é o motivo de o título nascer sem tamanho.</li>
+<li>Padrão do site inteiro vai em <code>@layer base</code>; variação vai em classe no HTML.</li>
+<li>Dentro da base, <code>@apply</code> mantém as variáveis do tema no lugar dos números.</li>
+<li>Utilidade ganha de base sem <code>!important</code>: é a camada, não o peso.</li>
+<li>Regra de base fora do <code>@layer base</code> ganha das utilidades e causa confusão.</li>
+<li>Peça reutilizável não vira <code>.classe</code> dentro da base; use o HTML ou <code>@utility</code>.</li>
+<li>O painel das caixas não mostra efeito de base; confira no valor computado.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

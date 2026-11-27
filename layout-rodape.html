@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rodapé | Guia Tailwind</title>
+<meta name="description" content="O rodapé da padaria com Tailwind: colado no fim da página com mt-auto, três colunas que viram uma no celular e uma barra final com copyright e endereço.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Rodapé</span></h1>
+<p class="intro">O rodapé é a parte do site que todo mundo ignora até precisar dele. A Ana descobriu
+isso na semana passada: três clientes ligaram para a padaria perguntando o horário — o horário estava
+no rodapé, em letra pequena, espremido num canto. Ela olhou a própria página e entendeu o descaso: o
+rodapé era uma linha de texto colada embaixo do conteúdo, sem coluna, sem telefone, sem endereço, e
+quando a página era curta ele subia e ficava no meio da tela, como um cartão esquecido. Nesta aula ela
+monta o rodapé que serve de mapa do site: três colunas de informação, uma barra final com o copyright e
+o truque que mantém tudo colado no fim da janela.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que um rodapé de verdade precisa ter, e por que ele não é enfeite.</li>
+  <li>Como manter o rodapé no fim da página mesmo quando o conteúdo é curto:
+  <code>flex flex-col</code> + <code>min-h-screen</code> + <code>mt-auto</code>.</li>
+  <li>A faixa do rodapé: <code>border-t</code>, cor de fundo e respiro vertical.</li>
+  <li>As três colunas com <code>grid gap-8 sm:grid-cols-3</code>.</li>
+  <li>A barra final que empilha no celular e se alinha no computador.</li>
+  <li>As listas de links e a letra miúda do copyright.</li>
+  <li>Por que rodapé fixo (<code>fixed</code>) costuma ser uma armadilha.</li>
+  <li>Os tropeços de quem monta o primeiro rodapé.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o rodapé que sobe</h2>
+
+<p>O rodapé da Ana era assim:</p>
+
+<pre class="file" data-file="index.html">&lt;main&gt;
+  &lt;h1&gt;Padaria Pão Quente&lt;/h1&gt;
+  &lt;p&gt;Pão de fermentação natural, feito todos os dias.&lt;/p&gt;
+&lt;/main&gt;
+&lt;p&gt;Padaria Pão Quente — rua das Palmeiras, 42&lt;/p&gt;</pre>
+
+<p>É uma linha de texto depois do conteúdo. No computador, quando a página tem bastante coisa, funciona
+mais ou menos: o texto fica no fim. Mas o site da Ana tem páginas curtas — a de contato, a de aviso de
+feriado — e nelas o rodapé aparece logo embaixo do título, com um deserto branco de 400 px abaixo dele.
+Parece que a página não terminou de carregar.</p>
+
+<p>O motivo é o mesmo de sempre: o navegador empilha os blocos de cima para baixo e para. Um
+<code>&lt;p&gt;</code> depois do conteúdo é só mais um bloco na pilha — ele não tem como saber que
+deveria ir para o fim da janela. Quem sabe disso é o contêiner: se a página for uma coluna flexível com
+altura mínima da janela, o filho que tem margem automática é empurrado para o fim. É esse empurrão que
+a aula inteira vai montar, peça por peça.</p>
+
+<p>Antes disso, uma pergunta de conteúdo: o que precisa estar no rodapé? Segunda pesquisa que mais
+recebe atenção depois do topo, o rodapé é onde a pessoa procura o que é prático — endereço, horário,
+telefone, redes, as páginas que não cabem no menu. Se ele é uma linha de copyright, o visitante sai
+sem a informação que veio buscar.</p>
+
+<h2>2. As peças do rodapé</h2>
+
+<dl class="anatomy">
+<dt>faixa</dt>
+<dd>A área do rodapé inteira, com fundo próprio e um fio (<code>border-t</code>) separando do
+conteúdo.</dd>
+<dt>coluna</dt>
+<dd>Cada bloco de informação: a padaria, os links, o contato. No computador ficam lado a lado; no
+celular, empilhadas.</dd>
+<dt>letra miúda</dt>
+<dd>Copyright, CNPJ, aviso de privacidade. Texto pequeno e de cor fraca, porque é leitura de
+consulta.</dd>
+<dt>barra final</dt>
+<dd>A última linha, com o copyright de um lado e o endereço do outro. Tem um fio em cima para separar
+das colunas.</dd>
+<dt>voltar ao topo</dt>
+<dd>Link opcional para o começo da página, útil em páginas longas como a de receitas.</dd>
+</dl>
+
+<p>Repare no desenho: uma faixa, três colunas, um fio, uma barra. Isso é tudo. Quem começa tenta
+colocar borda em cada coluna, sombra na faixa, ícone em cada link — e o rodapé fica pesado, competindo
+com o conteúdo que ele deveria encerrar. O rodapé é o lugar mais discreto da página, e essa discrição é
+o que faz ele funcionar: fundo levemente diferente, texto em tom médio, tamanho menor.</p>
+
+<h2>3. O rodapé colado no fim: mt-auto</h2>
+
+<p>Aqui está o truque que resolve o rodapé flutuante. Ele tem três pedaços, e nenhum funciona sozinho:
+a página vira uma coluna flexível (<code>flex flex-col</code>), ganha altura mínima da janela
+(<code>min-h-screen</code>), e o rodapé recebe margem automática no topo (<code>mt-auto</code>). O CSS
+gerado é de uma linha:</p>
+
+<pre class="term">.mt-auto {
+  margin-top: auto;
+}</pre>
+
+<p>Uma margem automática tem um comportamento especial em flexbox: em vez de valer zero, ela absorve
+todo o espaço livre. Numa coluna, o espaço livre é a sobra vertical — e o rodapé, que é o último filho,
+fica empurrado para baixo com a sobra toda acima dele. Se o conteúdo crescer e não sobrar nada, a
+margem vira zero e o rodapé volta a ficar logo depois do conteúdo. É um elástico, não uma posição
+fixa.</p>
+
+<div class="trytailwind" data-goal="rule:margin-top: auto">
+  <p class="try-task">A página é curta e o rodapé está parado logo abaixo do texto. Faça a sobra da
+  página empurrá-lo para o fim: acrescente <code>mt-auto</code> ao
+  <code>&lt;footer id="alvo"&gt;</code>. O <code>flex flex-col</code> e o <code>min-h-screen</code> já
+  estão no bloco de fora — é a margem automática que falta.</p>
+  <pre class="html">&lt;div class="flex min-h-screen flex-col bg-white"&gt;
+  &lt;main class="p-6"&gt;
+    &lt;p class="font-bold text-stone-900"&gt;Padaria Pão Quente&lt;/p&gt;
+    &lt;p class="mt-2 text-stone-700"&gt;Pão de fermentação natural, todos os dias.&lt;/p&gt;
+  &lt;/main&gt;
+  &lt;footer id="alvo" class="border-t border-stone-200 bg-stone-100 p-4 text-sm text-stone-600"&gt;
+    Rua das Palmeiras, 42 — aberto das 6h às 19h.
+  &lt;/footer&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.97 0.001 106.424)
+color: oklch(0.444 0.011 73.639)
+font-size: 14px
+line-height: 20px
+border-top-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+</pre>
+  <pre class="solucao">&lt;div class="flex min-h-screen flex-col bg-white"&gt;
+  &lt;main class="p-6"&gt;
+    &lt;p class="font-bold text-stone-900"&gt;Padaria Pão Quente&lt;/p&gt;
+    &lt;p class="mt-2 text-stone-700"&gt;Pão de fermentação natural, todos os dias.&lt;/p&gt;
+  &lt;/main&gt;
+  &lt;footer id="alvo" class="mt-auto border-t border-stone-200 bg-stone-100 p-4 text-sm text-stone-600"&gt;
+    Rua das Palmeiras, 42 — aberto das 6h às 19h.
+  &lt;/footer&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Antes da missão, o painel mostra o rodapé com o respiro, o fio e o fundo, e nada de margem. Depois de
+rodar, aparece a linha <code>margin-top: auto</code> — e a prévia mostra o rodapé descendo para o fim do
+espaço disponível. Numa página longa, essa mesma margem vale zero e ninguém percebe que ela existe. É o
+tipo de classe que trabalha em silêncio.</p>
+
+<p>Cuidado com a ordem das peças. Se o <code>min-h-screen</code> estiver no rodapé, você está dizendo
+“o rodapé tem a altura da janela” — e ele passa a ocupar a tela inteira. Se o <code>flex flex-col</code>
+estiver no rodapé, você está organizando as colunas de dentro dele, não a página. As três classes têm
+donos diferentes: <code>flex flex-col</code> e <code>min-h-screen</code> na página;
+<code>mt-auto</code> no rodapé.</p>
+
+<p>Vale ter clara a diferença entre as quatro formas de posicionar um rodapé, porque a escolha errada é
+a origem de quase todo rodapé problemático:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Como</th><th>O que acontece</th><th>Quando usar</th></tr>
+<tr><td>Sem classe (bloco comum)</td><td>Fica logo depois do conteúdo; na página curta, sobe</td><td>nunca sozinho</td></tr>
+<tr><td><code>mt-auto</code> + página flex</td><td>Cola no fim da janela quando sobra espaço, e desce quando o conteúdo cresce</td><td>o padrão de qualquer site</td></tr>
+<tr><td><code>fixed bottom-0</code></td><td>Flutua por cima do conteúdo e cobre a última linha</td><td>barra de ação de aplicativo, com respiro reservado</td></tr>
+<tr><td><code>sticky bottom-0</code></td><td>Aparece só quando o conteúdo acaba de rolar</td><td>rodapé curto de uma linha, em telas altas</td></tr>
+</table>
+</div>
+
+<h2>4. A faixa: o fio, o fundo e o respiro</h2>
+
+<p>Com o rodapé no lugar, o trabalho é de acabamento. Três decisões:</p>
+
+<ul>
+<li><strong>O fio.</strong> <code>border-t border-stone-200</code> desenha uma linha de 1 px no topo da
+faixa. É o que separa o rodapé do conteúdo sem precisar de sombra. Sem ele, um rodapé de fundo claro
+sobre página branca parece conteúdo perdido.</li>
+<li><strong>O fundo.</strong> <code>bg-stone-100</code> ou <code>bg-stone-50</code>, um degrau de
+diferença do branco. Fundo escuro (<code>bg-stone-900</code> com texto claro) também funciona e dá um
+ar mais sério — só exige conferir o contraste de todos os textos.</li>
+<li><strong>O respiro.</strong> <code>py-10</code> dentro da faixa, para o conteúdo não colar no fio nem
+no fim da página. E <code>mt-16</code> na faixa quando o conteúdo de cima não tem respiro próprio: 64 px
+de distância entre a última seção e o rodapé.</li>
+</ul>
+
+<pre class="file" data-file="index.html">&lt;footer class="mt-16 border-t border-stone-200 bg-stone-100"&gt;
+  &lt;div class="mx-auto max-w-5xl px-6 py-10"&gt;
+    &lt;!-- as colunas entram aqui --&gt;
+  &lt;/div&gt;
+&lt;/footer&gt;</pre>
+
+<p>O <code>max-w-5xl</code> com <code>mx-auto</code> é a mesma dupla da aula de blog: o rodapé é uma
+faixa de largura total, mas o conteúdo dentro dela fica alinhado com o resto da página. Sem isso, num
+monitor grande, o texto do rodapé encosta na borda e o do conteúdo fica no meio — a página parece
+desmontada justamente na parte que deveria dar a sensação de acabamento.</p>
+
+<h2>5. As três colunas</h2>
+
+<p>O rodapé completo tem três blocos de informação. No computador eles ficam lado a lado; no celular,
+empilhados. É a mesma grade responsiva que você já viu, agora com um detalhe importante: as colunas do
+rodapé não disputam espaço, elas se dividem igualmente.</p>
+
+<div class="trytailwind" data-largura="768" data-goal="rule:@media (width &gt;= 40rem);;rule:grid-template-columns: repeat(3, minmax(0, 1fr));;largura:768">
+  <p class="try-task">A prévia está com 768 px e as três colunas estão empilhadas. A partir de 640 px,
+  ponha as três lado a lado: acrescente <code>sm:grid-cols-3</code> ao
+  <code>&lt;div id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="grid gap-8"&gt;
+  &lt;div&gt;
+    &lt;p class="font-semibold text-stone-900"&gt;Padaria Pão Quente&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-stone-600"&gt;Rua das Palmeiras, 42&lt;br&gt;Aberto das 6h às 19h.&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div&gt;
+    &lt;p class="font-semibold text-stone-900"&gt;Site&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-stone-600"&gt;Receitas&lt;br&gt;Encomendas&lt;br&gt;A padaria&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div&gt;
+    &lt;p class="font-semibold text-stone-900"&gt;Contato&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-stone-600"&gt;(11) 4002-8922&lt;br&gt;ana@notebook&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+gap: 32px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid gap-8 sm:grid-cols-3"&gt;
+  &lt;div&gt;
+    &lt;p class="font-semibold text-stone-900"&gt;Padaria Pão Quente&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-stone-600"&gt;Rua das Palmeiras, 42&lt;br&gt;Aberto das 6h às 19h.&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div&gt;
+    &lt;p class="font-semibold text-stone-900"&gt;Site&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-stone-600"&gt;Receitas&lt;br&gt;Encomendas&lt;br&gt;A padaria&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div&gt;
+    &lt;p class="font-semibold text-stone-900"&gt;Contato&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-stone-600"&gt;(11) 4002-8922&lt;br&gt;ana@notebook&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS gerado tem a cara de sempre:</p>
+
+<pre class="term">@media (width &gt;= 40rem) {
+  .sm\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}</pre>
+
+<p>Três colunas iguais a partir de 640 px, uma coluna abaixo disso. O <code>gap-8</code> garante 32 px
+entre as colunas no computador e 32 px entre os blocos empilhados no celular — o mesmo valor serve para
+os dois casos, o que é uma vantagem da grade sobre margens individuais. Se o rodapé tiver quatro blocos
+(por exemplo, acrescentando “Formas de pagamento”), a troca é uma classe:
+<code>sm:grid-cols-4</code>.</p>
+
+<p>Uma tentação a evitar: <code>grid-cols-3</code> sem prefixo. No celular, três colunas de 110 px
+quebram o e-mail, o endereço e o telefone em pedacinhos. Se você vir um rodapé de site pequeno com
+texto picado no telefone, é quase certo que alguém esqueceu o <code>sm:</code>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Bloco do rodapé</th><th>Classes típicas</th><th>Detalhe</th></tr>
+<tr><td>Faixa</td><td><code>mt-16 border-t border-stone-200 bg-stone-100</code></td><td>o fio separa do conteúdo</td></tr>
+<tr><td>Miolo</td><td><code>mx-auto max-w-5xl px-6 py-10</code></td><td>alinha com o resto da página</td></tr>
+<tr><td>Colunas</td><td><code>grid gap-8 sm:grid-cols-3</code></td><td>empilha no celular</td></tr>
+<tr><td>Título do bloco</td><td><code>font-semibold text-stone-900</code></td><td>contraste maior que os itens</td></tr>
+<tr><td>Itens</td><td><code>mt-2 text-sm text-stone-600</code></td><td>leitura de consulta, não de leitura</td></tr>
+<tr><td>Barra final</td><td><code>border-t pt-6</code></td><td>um segundo fio encerra o rodapé</td></tr>
+</table>
+</div>
+
+<h2>6. As listas de links</h2>
+
+<p>Na coluna do meio, cada linha é um link. A tentação é usar <code>&lt;br&gt;</code> entre eles — e
+funciona, mas o resultado é uma pilha de texto sem respiro nenhum, e o leitor não vê que são clicáveis.
+O jeito certo usa uma lista, que já existe no HTML para isso, e a grade para o espaçamento:</p>
+
+<pre class="file" data-file="index.html">&lt;ul class="mt-2 grid gap-1 text-sm text-stone-600"&gt;
+  &lt;li&gt;&lt;a href="#" class="hover:text-stone-900"&gt;Receitas&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="#" class="hover:text-stone-900"&gt;Encomendas&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="#" class="hover:text-stone-900"&gt;A padaria&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</pre>
+
+<p><code>grid gap-1</code> dá 4 px entre os links: suficiente para separar, pequeno o bastante para o
+bloco não parecer três parágrafos. O <code>hover:text-stone-900</code> escurece o link quando o mouse
+passa — é o sinal de que aquilo é clicável, e no celular não faz diferença nenhuma, o que é ótimo. Se
+você quiser que o link fique sublinhado só no hover, <code>hover:underline</code> resolve; sublinhado
+permanente em rodapé costuma poluir.</p>
+
+<p>Um cuidado de acessibilidade que vale para o site inteiro: o texto do link precisa dizer para onde
+ele vai. “Receitas” é bom; “clique aqui” é ruim, porque quem usa leitor de tela ouve só o texto do link,
+fora do contexto. E se o link leva para fora do site, vale avisar no texto (“Instagram, abre em outra
+aba”).</p>
+
+<h2>7. A barra final</h2>
+
+<p>Depois das colunas vem a barra do copyright. No celular ela é um bloco de texto empilhado; no
+computador, uma linha com o copyright à esquerda e o endereço à direita. As duas versões na mesma
+caixa:</p>
+
+<div class="trytailwind" data-largura="768" data-goal="rule:@media (width &gt;= 40rem);;rule:flex-direction: row;;rule:justify-content: space-between;;largura:768">
+  <p class="try-task">A prévia está com 768 px e o copyright está em cima do endereço. A partir de
+  640 px, ponha os dois na mesma linha e afastados nas pontas: acrescente <code>sm:flex-row</code> e
+  <code>sm:justify-between</code> ao <code>&lt;div id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="flex flex-col gap-2 border-t border-stone-200 pt-6 text-xs text-stone-500"&gt;
+  &lt;p&gt;© 2025 Padaria Pão Quente&lt;/p&gt;
+  &lt;p&gt;Rua das Palmeiras, 42 — São Paulo&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+gap: 8px
+flex-direction: column
+color: oklch(0.553 0.013 58.071)
+font-size: 12px
+line-height: 16px
+border-top-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+padding-top: 24px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex flex-col gap-2 border-t border-stone-200 pt-6 text-xs text-stone-500 sm:flex-row sm:justify-between"&gt;
+  &lt;p&gt;© 2025 Padaria Pão Quente&lt;/p&gt;
+  &lt;p&gt;Rua das Palmeiras, 42 — São Paulo&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A classe base <code>flex-col</code> diz “empilhe”; o <code>sm:flex-row</code> diz “a partir de 640 px,
+ponha lado a lado”. O <code>gap-2</code> continua valendo nos dois casos: 8 px entre as linhas quando
+empilhado, 8 px entre os dois textos quando em linha. E o <code>sm:justify-between</code> empurra um
+para cada ponta.</p>
+
+<p>Repare no <code>text-xs</code>: 12 px, um degrau abaixo do <code>text-sm</code> das colunas. E no
+<code>text-stone-500</code>, mais fraco ainda. A hierarquia do rodapé tem três andares — título com
+<code>text-stone-900</code>, itens com <code>text-stone-600</code>, copyright com
+<code>text-stone-500</code> — e é essa diferença que faz o olho entender o que é importante sem
+precisar de negrito em tudo.</p>
+
+<p>Sobre o ano: escrever “2025” no HTML é o que todos fazem e todo mundo esquece de atualizar. Se o
+site tem JavaScript, dá para preencher o ano automaticamente; se não tem, deixe só o nome da padaria na
+letra miúda e poupe-se do problema. Copyright com ano velho passa a impressão de site abandonado — e
+não existe classe do Tailwind que conserte isso.</p>
+
+<h2>8. O rodapé em todas as páginas</h2>
+
+<p>O rodapé é a peça mais repetida do site: ele aparece igual em todas as páginas. Isso muda a forma de
+escrevê-lo. Duas consequências práticas:</p>
+
+<p>A primeira é que ele precisa ser genérico. Nada de “veja as receitas desta semana” num rodapé que
+aparece na página de contato. Os links são os mesmos em qualquer lugar: as páginas principais do site.
+O conteúdo específico fica no corpo da página.</p>
+
+<p>A segunda é que a manutenção é uma só. Se o telefone mudar, você troca num lugar só — e para isso o
+rodapé precisa existir num único arquivo. Em HTML puro, sem geração automática, isso significa copiar o
+mesmo bloco em todas as páginas e lembrar de mudar em todas: motivo de sobra para o site da Ana ter
+poucas páginas. Em projetos maiores, o rodapé vira um arquivo incluído por todas as páginas — a mesma
+ideia de componente que você vai ver mais adiante no guia, quando o Tailwind passar a conversar com
+ferramentas de build.</p>
+
+<p>Um detalhe de HTML que ajuda quem usa leitor de tela: use a tag <code>&lt;footer&gt;</code>, e não
+um <code>&lt;div&gt;</code> com cara de rodapé. Ela é reconhecida como a região de rodapé da página, e a
+pessoa pode pular direto para lá quando procura endereço ou telefone. O mesmo vale para
+<code>&lt;nav&gt;</code> nos links de navegação e <code>&lt;main&gt;</code> no conteúdo — as tags
+contam a estrutura antes de qualquer classe.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: na página curta, o rodapé sobe</h3>
+<p>O caso clássico, e o mais fácil de reconhecer: a página de aviso de feriado tem três linhas e o
+rodapé aparece no meio da tela, com o branco sobrando embaixo. A solução é o trio da seção 3 —
+<code>flex flex-col</code> e <code>min-h-screen</code> na página, <code>mt-auto</code> no rodapé. O erro
+que faz o truque não funcionar é esquecer o <code>flex-col</code>: com <code>flex</code> sozinho, a
+direção padrão é linha, o eixo do espaço livre passa a ser horizontal, e o <code>mt-auto</code> empurra
+o rodapé para a direita, não para baixo. Se o rodapé “foi para o lado”, é isso.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o rodapé fixo que cobre o conteúdo</h3>
+<p>Encantada com a ideia de ter o rodapé sempre visível, a Ana usou <code>fixed bottom-0</code>. O
+rodapé passou a flutuar por cima de tudo, cobrindo a última linha de cada página — e no celular, com o
+teclado aberto, ele subia e tapava o campo de e-mail. Rodapé fixo é uma decisão de aplicativo, não de
+site: ocupa espaço nobre com informação de consulta. Se você realmente precisar de uma barra fixa
+embaixo, o conteúdo da página precisa de um <code>pb-</code> do tamanho da barra, senão o fim do texto
+fica escondido embaixo dela. Na maioria dos casos, o rodapé normal no fim da página é a resposta
+certa.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: no celular, o e-mail quebra no meio</h3>
+<p>No computador, o rodapé era uma beleza: três colunas alinhadas. No celular, o e-mail
+<code>ana@notebook</code> aparecia partido em duas linhas, no meio do “ana@” e do “notebook”. A causa:
+<code>grid-cols-3</code> sem o prefixo <code>sm:</code>, o que espremia cada coluna em 110 px. Com
+<code>sm:grid-cols-3</code>, o celular volta a ter uma coluna de largura inteira e o e-mail cabe. Se
+mesmo assim algum texto comprido estourar, <code>break-words</code> no bloco manda quebrar a palavra em
+vez de vazar.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual trio mantém o rodapé no fim da página quando o
+conteúdo é curto?</p>
+<label><input type="radio" name="q1"> <code>fixed bottom-0</code> no rodapé</label>
+<label><input type="radio" name="q1"> <code>flex flex-col</code> e <code>min-h-screen</code> na página, <code>mt-auto</code> no rodapé</label>
+<label><input type="radio" name="q1"> <code>h-screen</code> no rodapé e <code>absolute</code> na página</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que <code>margin-top: auto</code> faz num filho de
+uma coluna flexível?</p>
+<label><input type="radio" name="q2"> deixa 0 px de margem, como qualquer margem automática</label>
+<label><input type="radio" name="q2"> centraliza o filho na vertical</label>
+<label><input type="radio" name="q2"> absorve o espaço livre e empurra o filho para o fim</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que as colunas do rodapé usam
+<code>sm:grid-cols-3</code> e não <code>grid-cols-3</code>?</p>
+<label><input type="radio" name="q3"> para no celular as colunas ficarem empilhadas, cada uma com a largura inteira</label>
+<label><input type="radio" name="q3"> porque <code>grid-cols-3</code> não existe no Tailwind</label>
+<label><input type="radio" name="q3"> para o rodapé ficar mais alto no celular</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o rodapé no fim</h2>
+<p>Este é o rodapé da página curta. A página já é uma coluna flexível com altura mínima da janela
+(<code>flex min-h-screen flex-col</code> no bloco de fora). Complete a classe do rodapé que absorve a
+sobra e o empurra para o fim.</p>
+<div class="ex-code">&lt;footer class="<input aria-label="resposta 1" data-answer="mt-auto" placeholder="..."> border-t border-stone-200 bg-stone-100 p-4"&gt;</div>
+<p class="ex-dica">Dica: é uma margem — e ela é automática. O lado importa: o topo é que precisa
+absorver a sobra.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O rodapé se cola no fim da página com três peças: a página vira <code>flex flex-col</code> com
+<code>min-h-screen</code>, e o rodapé recebe <code>mt-auto</code>. A margem automática absorve a sobra
+vertical e o empurra para baixo; quando o conteúdo é longo, a sobra some e o rodapé fica logo depois
+dele.</p>
+
+<p>A faixa tem <code>border-t</code> para o fio, <code>bg-stone-100</code> para o degrau de cor e
+<code>py-10</code> para o respiro, com um miolo <code>mx-auto max-w-5xl px-6</code> alinhado ao resto da
+página. As três colunas são <code>grid gap-8 sm:grid-cols-3</code> — empilhadas no celular, lado a lado a
+partir de 640 px. A barra final usa <code>flex flex-col</code> com <code>sm:flex-row
+sm:justify-between</code> e vive na hierarquia mais fraca do rodapé: <code>text-xs
+text-stone-500</code>.</p>
+
+<p>E a lição que não é de CSS: o rodapé é a segunda parte mais procurada de um site. Endereço, horário,
+telefone, páginas principais — é ali que a cliente procura. Um rodapé bonito e vazio é pior que um
+rodapé simples e completo; o contrário do que a Ana pensava quando colou uma linha de texto no fim da
+página.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Página: <code>flex flex-col</code> + <code>min-h-screen</code>. Rodapé: <code>mt-auto</code>.</li>
+<li><code>margin-top: auto</code> absorve a sobra — sem <code>flex-col</code>, empurra para o lado.</li>
+<li>Faixa: <code>mt-16 border-t border-stone-200 bg-stone-100</code>.</li>
+<li>Miolo: <code>mx-auto max-w-5xl px-6 py-10</code>.</li>
+<li>Colunas: <code>grid gap-8 sm:grid-cols-3</code> — sem <code>sm:</code>, o texto quebra no celular.</li>
+<li>Três andares de cor: título <code>stone-900</code>, item <code>stone-600</code>, miúdo <code>stone-500</code>.</li>
+<li>Links em <code>&lt;ul&gt;</code> com <code>grid gap-1</code>, não separados por <code>&lt;br&gt;</code>.</li>
+<li>Barra final: <code>border-t pt-6 flex flex-col gap-2 sm:flex-row sm:justify-between</code>.</li>
+<li><code>fixed bottom-0</code> cobre o conteúdo: quase nunca é o que você quer num site.</li>
+<li>Use a tag <code>&lt;footer&gt;</code>: ela é a região de rodapé para quem usa leitor de tela.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

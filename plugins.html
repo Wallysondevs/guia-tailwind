@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plugins | Guia Tailwind</title>
+<meta name="description" content="Plugins do Tailwind v4 na prática: o que um plugin acrescenta, a linha @plugin no CSS, a instalação com npm e quando é melhor escrever seu próprio @utility.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Plugins</span></h1>
+<p class="intro">A Ana viu num vídeo uma linha que resolvia a formatação dos textos longos da página de
+receitas: <code>@plugin "@tailwindcss/typography";</code>. Copiou, colou no CSS, salvou e escreveu
+<code>class="prose"</code> no artigo. Nada aconteceu — nem a fonte mudou, nem apareceu erro na tela. Ela
+passou a manhã convencida de que o plugin estava quebrado. Não estava: faltava o pacote, e faltava
+entender o que é um plugin no Tailwind v4, onde ele mora e o que ele realmente entrega. Nesta aula a Ana
+instala, declara e confere um plugin de verdade — e descobre que metade das coisas que ela ia buscar num
+plugin dá para escrever em vinte linhas de CSS, com o <code>@utility</code> que ela mesma inventa.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é um plugin e o que ele pode acrescentar ao seu Tailwind.</li>
+  <li>A linha <code>@plugin</code> no CSS de entrada, e o que mudou em relação ao v3.</li>
+  <li>Por que instalar o pacote com npm vem antes de declarar.</li>
+  <li>O que a prévia deste guia consegue — e o que ela não consegue — fazer com plugins.</li>
+  <li>Como criar a sua própria utilidade com <code>@utility</code>.</li>
+  <li>Como empacotar utilidades prontas com <code>@apply</code> dentro dela.</li>
+  <li>Como um plugin entrega um par: a utilidade e a variante.</li>
+  <li>Quando não vale instalar nada e o CSS do projeto resolve.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a linha colada do tutorial</h2>
+
+<p>O que a Ana fez foi o que quase todo mundo faz: começou pelo meio. Ela copiou a linha que aparece no
+topo do tutorial, sem a parte de cima — a instalação do pacote. No Tailwind v4, a linha sozinha não faz
+nada, e o pior é que ela falha em dois lugares diferentes: no CSS do navegador (onde não há sistema de
+arquivos para procurar o pacote) e no terminal (onde o erro aparece, mas só se você estiver olhando a
+saída do build).</p>
+
+<p>Vale separar as duas coisas desde o começo, porque elas vivem em mundos diferentes.
+<strong>Plugin</strong> é o pacote: um pedaço de código publicado no npm, escrito por outra pessoa, que o
+seu projeto instala. <strong><code>@plugin</code></strong> é a linha do CSS que diz ao Tailwind para ler
+esse pacote e acrescentar o que ele traz. Uma coisa é a dependência; a outra é o aviso. Sem a primeira, a
+segunda é uma promessa vazia.</p>
+
+<p>E antes de sair instalando: no v4, boa parte do que os plugins do v3 faziam virou CSS do próprio
+projeto. Cor nova, espaçamento novo, fonte nova, animação nova e variante nova se escrevem em
+<code>@theme</code>, <code>@utility</code> e <code>@custom-variant</code>, sem pacote nenhum. O plugin
+continua fazendo sentido para o que é grande demais para copiar: uma tipografia inteira com regras para
+título, lista, citação e tabela; um conjunto de estilos de formulário para todos os campos nativos. Esta
+aula mostra os dois caminhos e, principalmente, quando cada um é o certo.</p>
+
+<h2>2. O que um plugin acrescenta</h2>
+
+<p>Um plugin é um arquivo de código que recebe o Tailwind e mexe nele. Na prática, o que ele pode
+acrescentar cai em quatro gavetas, e é útil saber qual delas você está procurando antes de instalar
+qualquer coisa.</p>
+
+<p>A primeira são <strong>utilidades novas</strong>: classes que não existem no Tailwind, como
+<code>prose</code> (o artigo inteiro formatado) ou <code>form-input</code> (o campo de formulário
+padronizado). A segunda são <strong>variantes novas</strong>: um prefixo que muda a condição de uma
+classe, como <code>pointer-coarse:</code> para telas de toque. A terceira são <strong>valores de
+tema</strong>: cores, fontes ou espaçamentos que passam a existir em <code>bg-</code>, <code>text-</code>
+e companhia. A quarta é <strong>CSS de base</strong>: regras que valem para tags, como ajustar a
+entrelinha de um <code>blockquote</code>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que o plugin traz</th><th>Como aparece no HTML</th><th>Exemplo conhecido</th></tr>
+<tr><td>utilidades</td><td><code>prose</code>, <code>form-input</code></td><td>tipografia, formulários</td></tr>
+<tr><td>variantes</td><td><code>nome:classe</code></td><td>condições de dispositivo ou estado</td></tr>
+<tr><td>valores de tema</td><td><code>bg-nome</code>, <code>font-nome</code></td><td>paletas e fontes de marca</td></tr>
+<tr><td>CSS de base</td><td>nada: muda tags direto</td><td>ajustes de tipografia e de campo</td></tr>
+</table>
+</div>
+
+<dl class="anatomy">
+<dt>plugin</dt>
+<dd>Um pacote de código que acrescenta utilidades, variantes, valores de tema ou CSS de base ao
+Tailwind. Instalado com npm, como qualquer dependência.</dd>
+<dt>@plugin</dt>
+<dd>A linha do CSS de entrada que manda o Tailwind ler um plugin instalado:
+<code>@plugin "@tailwindcss/typography";</code>.</dd>
+<dt>@utility</dt>
+<dd>A regra do CSS de entrada que cria uma utilidade sua, com o nome que você escolher. É o jeito v4 de
+fazer, sem pacote, o que os plugins pequenos faziam.</dd>
+<dt>@apply</dt>
+<dd>Dentro de um <code>@utility</code> (ou de uma regra comum), aplica classes do Tailwind como
+declarações de CSS.</dd>
+<dt>dependência</dt>
+<dd>Um pacote que o seu projeto precisa para funcionar, listado no <code>package.json</code> e instalado
+em <code>node_modules</code>.</dd>
+<dt>preflight</dt>
+<dd>O CSS de base que o próprio Tailwind traz, zerando margens e tamanhos de título. Um plugin pode
+acrescentar regras ao lado dele.</dd>
+</dl>
+
+<p>Repare que nenhuma dessas gavetas é mágica: são as mesmas quatro coisas que você escreve à mão no
+<code>@theme</code>, no <code>@utility</code> e no <code>@custom-variant</code>. A diferença é o volume e
+a manutenção — um plugin de tipografia tem dezenas de regras que você não quer escrever, e alguém as
+mantém atualizadas para todas as combinações de título, lista e citação.</p>
+
+<h2>3. Onde ele mora no v4</h2>
+
+<p>No Tailwind v3, plugin era JavaScript de configuração. Você instalava o pacote e depois abria o
+<code>tailwind.config.js</code> para listar o plugin numa array. Eram dois arquivos, duas sintaxes e uma
+ordem que ninguém lembrava.</p>
+
+<pre class="file" data-file="tailwind.config.js">// v3: plugin declarado em JavaScript, dentro da configuração
+module.exports = {
+  plugins: [require("@tailwindcss/typography")],
+};</pre>
+
+<p>No v4 o plugin passou a ser declarado no CSS, junto do <code>@import</code>, do <code>@theme</code> e
+das suas utilidades. O arquivo de configuração JavaScript não existe mais no fluxo normal, e a linha é
+curta:</p>
+
+<pre class="file" data-file="style.css">@import "tailwindcss";
+
+@plugin "@tailwindcss/typography";</pre>
+
+<p>Essa mudança tem uma consequência prática boa: tudo o que muda o Tailwind passa a estar num arquivo
+só, na ordem em que aparece — primeiro o import, depois os plugins, depois o tema, depois as suas
+utilidades. Quem abre o projeto vê a lista inteira de influências de uma vez, sem caçar arquivos. A
+ordem de leitura também serve de documentação: quem lê de cima para baixo sabe o que chega antes de quê,
+e é essa a ordem que você deve manter quando o projeto crescer.</p>
+
+<p>Um detalhe de nomenclatura que confunde: o nome dentro do <code>@plugin</code> é o nome do pacote no
+npm, com arroba e barra quando houver. <code>@plugin "@tailwindcss/forms";</code> aponta para o pacote
+<code>@tailwindcss/forms</code>. Não é um apelido, não é um caminho relativo: é o identificador exato do
+pacote instalado.</p>
+
+<h2>4. Instalar antes de declarar</h2>
+
+<p>Agora a parte que a Ana pulou. Plugin é dependência, e dependência se instala. No terminal, dentro da
+pasta do projeto, com o npm que você já conhece:</p>
+
+<pre class="term">ana@notebook:~/padaria$ npm i -D @tailwindcss/typography
+added 1 package, and audited 3 packages in 1s</pre>
+
+<p>O <code>-D</code> guarda o pacote em <code>devDependencies</code>, que é onde ficam as ferramentas que
+só existem durante o desenvolvimento e o build. Faz sentido: o navegador do cliente nunca baixa esse
+pacote, porque o que chega lá é o CSS já compilado, com as regras do plugin transformadas em CSS
+comum.</p>
+
+<p>Se a instalação não aconteceu e você declarar o <code>@plugin</code> assim mesmo, o build para com
+uma mensagem parecida com “não consegui resolver o módulo”. É um erro bom, porque aparece no terminal na
+hora. O erro ruim é o outro: você instala, declara, e esquece de usar as classes — aí não há mensagem
+nenhuma, e o CSS fica sem as regras do plugin, porque o Tailwind só escreve o que encontra escrito no
+HTML.</p>
+
+<p>Depois de instalar, duas conferências de dez segundos. A primeira: o pacote aparece no
+<code>package.json</code>? A segunda: o build roda sem reclamar? Se as duas respostas forem sim e a
+classe ainda não fizer nada, o problema é de uso, não de instalação — e a próxima seção explica por
+quê.</p>
+
+<h2>5. O que a prévia desta aula faz</h2>
+
+<p>Aqui no guia, as caixas compilam o seu HTML com o Tailwind de verdade, dentro do navegador, sem npm e
+sem pasta de projeto. Isso significa que elas <strong>não conseguem instalar pacotes</strong>: um
+<code>@plugin</code> escrito numa caixa não encontra o módulo e não gera regra nenhuma. Não é um defeito
+da caixa; é o mesmo comportamento de um projeto em que você esqueceu o <code>npm i</code>.</p>
+
+<p>Por isso as caixas desta aula ensinam o que um plugin <em>faz</em>, escrevendo à mão o que ele
+entregaria. É a parte transferível do assunto: quando você instalar um plugin de verdade no seu projeto,
+as classes dele vão se comportar exatamente como as utilidades que você criar aqui. E há um bônus: o que
+você escrever na caixa é código de projeto, não brinquedo de exemplo — dá para copiar para o seu
+<code>style.css</code> e usar.</p>
+
+<p>Guarde então a divisão: <code>@plugin</code> aparece nesta aula nos blocos de arquivo, como leitura;
+<code>@utility</code> aparece nas caixas, como prática. Um é instalação, o outro é autoria, e o v4
+aproximou tanto os dois que muita gente hoje resolve com o segundo o que antes pedia o primeiro.</p>
+
+<h2>6. @utility: a utilidade que você inventa</h2>
+
+<p>O <code>@utility</code> é a peça mais útil desta aula. Ele cria uma classe nova, com o nome que você
+quiser, que se comporta como qualquer utilidade do Tailwind: aceita variante (<code>hover:</code>,
+<code>md:</code>), entra na camada certa do CSS e não é copiada para o HTML como estilo solto.</p>
+
+<p>A sintaxe é a de uma regra comum, com o nome no lugar do seletor. Se você escrever
+<code>@utility moldura { … }</code>, a classe passa a ser <code>moldura</code>. Dentro, valem as
+propriedades de CSS que você já conhece, incluindo <code>var()</code> para os valores do tema. Na caixa
+abaixo, o cartão pede uma moldura de 2 px com cantos de 12 px, e a utilidade ainda não existe.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-width=2px;;css:#alvo|border-radius=12px">
+  <p class="try-task">Crie a utilidade <code>moldura</code>: 2 px de borda, na cor
+  <code>var(--color-amber-400)</code>, e cantos de 12 px. O cartão deve ganhar a moldura.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+/* a utilidade moldura ainda não existe */
+&lt;/style&gt;
+
+&lt;div id="alvo" class="moldura bg-amber-50 p-4"&gt;
+  &lt;p class="font-semibold"&gt;Pão quentinho&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@utility moldura {
+  border-width: 2px;
+  border-color: var(--color-amber-400);
+  border-radius: 12px;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="moldura bg-amber-50 p-4"&gt;
+  &lt;p class="font-semibold"&gt;Pão quentinho&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Antes de rodar, o painel mostra respiro e fundo, e a borda fica em <code>0px</code> — o
+<code>preflight</code> zera as bordas de todo elemento, então “sem borda” é o estado de partida. Depois,
+aparecem <code>border-width</code>, <code>border-color</code> e <code>border-radius</code>. Repare que
+nada disso precisou de variante nem de tema: a utilidade é CSS seu, com nome de classe.</p>
+
+<p>Duas coisas que o <code>@utility</code> faz e que valem a pena conhecer. A primeira: ele funciona com
+todas as variantes de graça — <code>hover:moldura</code>, <code>md:moldura</code>,
+<code>dark:moldura</code> passam a existir no momento em que a utilidade existe. A segunda: o nome pode
+ter hífen (<code>selo-promo</code>), e aí o CSS gerado escapa o hífen como faz com qualquer classe. E
+atenção à regra de ouro: utilidade não substitui componente. Se o bloco tem estrutura, filhos e estados,
+o lugar dele é o HTML com classes, não uma utilidade que tenta adivinhar tudo.</p>
+
+<h2>7. @utility com @apply: empacotando o que existe</h2>
+
+<p>Escrever CSS cru dentro de uma utilidade é chato quando você já tem as classes prontas. O
+<code>@apply</code> resolve: dentro do <code>@utility</code>, você liga as classes do Tailwind como se
+estivesse escrevendo CSS, e o compilador expande cada uma nas declarações correspondentes. É assim que
+nasce um “botão da casa” sem repetir oito classes em vinte lugares do HTML.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=8px 16px;;css:#alvo|border-radius=8px;;rule:background-color: var(--color-amber-500)">
+  <p class="try-task">Crie a utilidade <code>botao</code> com <code>@apply</code>, juntando
+  <code>rounded-lg</code>, <code>bg-amber-500</code>, <code>px-4</code>, <code>py-2</code> e
+  <code>text-white</code>. O botão deve ficar arredondado, âmbar e com texto branco.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+/* a utilidade botao ainda não existe */
+&lt;/style&gt;
+
+&lt;button id="alvo" class="botao text-sm"&gt;
+  Encomendar pão
+&lt;/button&gt;</pre>
+  <pre class="out">
+font-size: 14px
+line-height: 20px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@utility botao {
+  @apply rounded-lg bg-amber-500 px-4 py-2 text-white;
+}
+&lt;/style&gt;
+
+&lt;button id="alvo" class="botao text-sm"&gt;
+  Encomendar pão
+&lt;/button&gt;</pre>
+</div>
+
+<p>O CSS gerado mostra o que o <code>@apply</code> fez, e vale ler com atenção porque ele ensina duas
+coisas:</p>
+
+<pre class="term">.botao {
+  border-radius: var(--radius-lg);
+  background-color: var(--color-amber-500);
+  padding-inline: calc(var(--spacing) * 4);
+  padding-block: calc(var(--spacing) * 2);
+  color: var(--color-white);
+}</pre>
+
+<p>Primeira: o <code>@apply</code> não copia texto, copia a regra. Onde a classe original dizia
+<code>var(--color-amber-500)</code>, a utilidade também diz — ou seja, o botão continua acompanhando o
+tema, e trocar o âmbar no tema troca o botão junto. Segunda: <code>px-4</code> virou
+<code>padding-inline</code> e <code>py-2</code> virou <code>padding-block</code>. São as propriedades
+lógicas do CSS moderno, que respeitam a direção da escrita; o efeito visual é o mesmo, e é por isso que
+o painel desta caixa mostra <code>padding-inline</code> e <code>padding-block</code> em vez de um
+<code>padding</code> só.</p>
+
+<p>O limite do <code>@apply</code> é o de sempre: ele serve para juntar o que já existe, não para
+esconder decisões. Uma utilidade com dez linhas de <code>@apply</code> é um componente fantasiado de
+classe, e no dia em que precisar de uma variação você vai brigar com ela. Uma a três classes por
+utilidade é o tamanho saudável; acima disso, use as classes direto no HTML e deixe o leitor ver as
+decisões.</p>
+
+<h2>8. Utilidade e variante: o par de um plugin de bolso</h2>
+
+<p>Olhe agora para o que um plugin pequeno costuma entregar: uma utilidade e, às vezes, uma variante que
+combina com ela. Você já sabe fazer as duas coisas, e juntá-las num arquivo é o que dá o efeito de
+“plugin caseiro” — sem pacote, sem npm, sem dependência para atualizar.</p>
+
+<p>Na caixa abaixo, a variante <code>promo</code> já está escrita: ela vale para quem tem o atributo
+<code>data-promo</code>, que é o que o JavaScript do site põe quando o item entra em promoção. Falta a
+utilidade <code>selo</code>. O HTML já usa <code>promo:selo</code>, e é aí que a combinação aparece: a
+utilidade dá o formato de etiqueta, a variante decide quando ele vale.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-radius=9999px;;css:#alvo|padding=4px 12px;;css:#alvo|background-color=oklch(0.962 0.059 95.617)">
+  <p class="try-task">Crie a utilidade <code>selo</code>: cantos totalmente redondos
+  (<code>9999px</code>), fundo <code>var(--color-amber-100)</code> e respiro de
+  <code>0.25rem 0.75rem</code>. O preço em promoção deve virar uma etiqueta.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@custom-variant promo (&amp;:where([data-promo]));
+
+/* falta a utilidade selo */
+&lt;/style&gt;
+
+&lt;p id="alvo" class="text-amber-900 promo:selo" data-promo&gt;
+  Pão do dia, R$ 5
+&lt;/p&gt;</pre>
+  <pre class="out">
+color: oklch(0.414 0.112 45.904)
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@custom-variant promo (&amp;:where([data-promo]));
+
+@utility selo {
+  border-radius: 9999px;
+  background-color: var(--color-amber-100);
+  padding: 0.25rem 0.75rem;
+}
+&lt;/style&gt;
+
+&lt;p id="alvo" class="text-amber-900 promo:selo" data-promo&gt;
+  Pão do dia, R$ 5
+&lt;/p&gt;</pre>
+</div>
+
+<p>Quando a utilidade passa a existir, a classe que já estava no HTML ganha a regra dela com a condição
+da variante em volta. É o mesmo mecanismo de <code>hover:bg-…</code>, só que com dois pedaços que você
+escreveu. E repare no valor <code>9999px</code>: dentro de uma utilidade própria, você escreve CSS de
+verdade, com valores de verdade. Se quiser usar o arredondamento do tema, escreva
+<code>@apply rounded-full</code> e deixe o tema mandar.</p>
+
+<p>Com as três ferramentas na mão, a decisão fica fácil de resumir:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que você precisa</th><th>Onde escrever</th><th>Por quê</th></tr>
+<tr><td>uma cor, fonte ou espaço do projeto</td><td><code>@theme</code></td><td>vira classe e variável, sem pacote</td></tr>
+<tr><td>uma classe nova com CSS seu</td><td><code>@utility</code></td><td>aceita variante e vive na camada certa</td></tr>
+<tr><td>uma condição nova, com nome</td><td><code>@custom-variant</code></td><td>prefixo reutilizável no HTML</td></tr>
+<tr><td>tipografia inteira, formulários completos</td><td><code>@plugin</code> + npm</td><td>volume grande, mantido por outra pessoa</td></tr>
+</table>
+</div>
+
+<p>A régua prática: se você consegue escrever a regra em menos de dez linhas e ela é só sua, escreva.
+Se o pacote tem dezenas de regras entrelaçadas e uma documentação própria, instale. O que não vale é
+instalar um plugin de três utilidades e depois passar a tarde tentando sobrescrever o que ele faz — nesse
+caso, as três linhas de <code>@utility</code> teriam resolvido na primeira tentativa.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o plugin declarado que não faz nada</h3>
+<p>Ela colou <code>@plugin "@tailwindcss/typography";</code>, escreveu <code>prose</code> no artigo e nada
+mudou. Três suspeitos, na ordem em que se conferem: o pacote não está instalado (falta o
+<code>npm i -D</code>); o build não rodou de novo (o CSS está velho); ou a classe está escrita em outro
+lugar que não o HTML que o build lê. O primeiro dá erro no terminal, o segundo dá CSS desatualizado, o
+terceiro dá silêncio total. Nenhum dos três é bug do plugin.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: dois plugins mexendo na mesma tag</h3>
+<p>Um plugin de tipografia ajusta a entrelinha do <code>blockquote</code>; um plugin de formulário mexe
+no <code>input</code>. Enquanto os dois tocam tags diferentes, tudo bem. O problema aparece quando dois
+plugins escrevem na mesma camada de base: vale a ordem em que os <code>@plugin</code> foram declarados, e
+aí a ordem do arquivo passa a ser uma decisão de desenho. Se a página ficou estranha só depois de
+instalar o segundo, é ali que se olha primeiro.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o plugin que virou CSS do projeto</h3>
+<p>A Ana usava um plugin pequeno do v3 que criava três utilidades de etiqueta. Na migração para o v4,
+descobriu que ele não era mais necessário: as três utilidades cabiam em vinte linhas de
+<code>@utility</code>, sem dependência para atualizar e sem risco de o pacote abandonar o projeto. Ela
+copiou o comportamento, apagou o pacote e ganhou uma pasta <code>node_modules</code> menor. Nem toda
+migração precisa de plugin — muitas precisam de menos.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que a linha <code>@plugin "@tailwindcss/forms";</code>
+faz?</p>
+<label><input type="radio" name="q1"> instala o pacote no projeto</label>
+<label><input type="radio" name="q1"> manda o Tailwind ler o pacote já instalado e acrescentar o que ele traz</label>
+<label><input type="radio" name="q1"> copia o CSS do plugin para dentro do HTML</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual a diferença entre <code>@utility</code> e
+<code>@plugin</code>?</p>
+<label><input type="radio" name="q2"> nenhuma: são dois nomes para a mesma coisa</label>
+<label><input type="radio" name="q2"> <code>@plugin</code> é para o tema e <code>@utility</code> é para variantes</label>
+<label><input type="radio" name="q2"> <code>@utility</code> cria uma classe sua no CSS; <code>@plugin</code> carrega um pacote de fora</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que o <code>@apply</code> faz dentro de uma
+utilidade?</p>
+<label><input type="radio" name="q3"> expande as classes citadas nas declarações de CSS que elas produzem</label>
+<label><input type="radio" name="q3"> escreve o nome das classes no HTML do projeto</label>
+<label><input type="radio" name="q3"> instala as classes que faltam no tema</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a utilidade do selo</h2>
+<p>O selo de promoção precisa de cantos totalmente redondos. Complete a linha que declara a utilidade,
+usando o nome que o HTML já espera:</p>
+<div class="ex-code">@utility <input aria-label="resposta 1" data-answer="selo" placeholder="..."> {
+  border-radius: 9999px;
+}</div>
+<p class="ex-dica">Dica: é o mesmo nome que aparece na classe <code>promo:selo</code>. Sem o
+<code>@utility</code>, essa classe não existe no CSS — e o HTML fica com um prefixo que não gera
+nada.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Plugin é pacote; <code>@plugin</code> é a linha do CSS que manda o Tailwind lê-lo. No v4 essa linha
+mora no mesmo arquivo do <code>@import</code>, no lugar do <code>plugins:</code> do
+<code>tailwind.config.js</code>, e o pacote precisa estar instalado com npm antes. Um plugin pode trazer
+utilidades, variantes, valores de tema e CSS de base — as mesmas quatro gavetas que você preenche à mão
+com <code>@theme</code>, <code>@custom-variant</code> e <code>@utility</code>.</p>
+
+<p>Antes de instalar, pergunte o tamanho: menos de dez linhas de regra é <code>@utility</code>; dezenas de
+regras entrelaçadas e mantidas por outra pessoa é plugin. E lembre que, nas caixas deste guia, o
+<code>@plugin</code> não tem como funcionar — não há npm dentro da prévia —, mas o
+<code>@utility</code> funciona igual ao do seu projeto, e o que você escrever ali serve para copiar.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Plugin é pacote instalado com npm; <code>@plugin</code> é a declaração no CSS.</li>
+<li>No v4 não há <code>plugins:</code> em JavaScript: tudo fica no CSS de entrada.</li>
+<li>O nome no <code>@plugin</code> é o do pacote, com <code>@</code> e barra quando houver.</li>
+<li>Pacote ausente dá erro no build; classe esquecida no HTML não dá erro nenhum.</li>
+<li>Um plugin pode trazer utilidade, variante, valor de tema e CSS de base.</li>
+<li><code>@utility nome { … }</code> cria a classe <code>nome</code>, com variantes de graça.</li>
+<li><code>@apply</code> dentro da utilidade expande classes em declarações e mantém as variáveis do tema.</li>
+<li>Utilidade é para uma ou duas decisões; bloco grande é componente no HTML.</li>
+<li>Utilidade + variante no mesmo arquivo é o “plugin de bolso”, sem dependência.</li>
+<li>Regra prática: menos de dez linhas, escreva; dezenas de regras, instale.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

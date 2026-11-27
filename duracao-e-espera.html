@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duração e Espera | Guia Tailwind</title>
+<meta name="description" content="Duração, espera e curva das transições do Tailwind: o que duration-300 muda, quando delay-150 ajuda, por que ease-out parece mais rápido e o que a espera faz na volta.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Duração e <span class="hl">Espera</span></h1>
+<p class="intro">Na aula passada a Ana ligou a máquina do movimento: o botão da padaria deixou de piscar
+e passou a caminhar de uma cor para a outra. Só que agora <em>tudo</em> caminha no mesmo ritmo — o link
+miúdo do rodapé, o botão de encomendar e o cartão gigante da vitrine. E não é só o ritmo: o movimento
+também tem uma espera e uma curva que ela nem sabia que existiam. Nesta aula a Ana aprende as três
+classes que governam o tempo: <code>duration-</code> para o tempo de viagem, <code>delay-</code> para a
+espera antes de sair e <code>ease-</code> para a curva do caminho. É a diferença entre um site que se
+mexe e um site que parece bem feito.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que são milissegundos e por que 150 ms é o padrão do Tailwind.</li>
+  <li>A escala de <code>duration-</code> e o que cada degrau serve para fazer.</li>
+  <li>Por que, ao contrário de <code>p-4</code>, o número aqui já é o valor em ms.</li>
+  <li>O que é a espera (<code>delay-</code>) e como ela age na ida e na volta.</li>
+  <li>A curva (<code>ease-</code>): as quatro prontas e o que cada uma transmite.</li>
+  <li>O CSS gerado das três famílias, com as variáveis <code>--tw-duration</code> e <code>--tw-ease</code>.</li>
+  <li>Quais números usar no dia a dia — e os que estragam o efeito.</li>
+  <li>Como atrasar só a ida, sem atrasar a volta.</li>
+</ul>
+</div>
+
+<h2>1. A cena: tudo no mesmo ritmo</h2>
+
+<p>A Ana terminou a página de encomenda e ficou satisfeita. Passou o mouse em tudo, como sempre faz,
+e aí veio a sensação difícil de nomear: parecia um site de brinquedo. O botão grande, o link do rodapé,
+a etiqueta de preço e o cartão da vitrine se mexiam com exatamente a mesma velocidade. Nada estava
+errado; estava uniforme demais.</p>
+
+<p>Ela abriu o site de uma confeitaria que admira e ficou olhando o mesmo botão. A cor levava um tempo
+que dava para <em>sentir</em>. O cartão grande, por outro lado, respondia quase na hora — se demorasse,
+ela teria clicado duas vezes. Percebeu então que a duração não é um detalhe técnico: é uma decisão de
+leitura. Um elemento pequeno que responde rápido diz “clique em mim”. Um elemento grande que se move
+devagar diz “sou importante, olhe com calma”.</p>
+
+<p>E tem mais: no site da confeitaria, um dos botões não muda na hora em que o mouse chega. Ele espera
+um instante. Esse instante evita que a cor fique piscando quando o visitante atravessa a tela com o
+mouse. É a segunda peça desta aula, a espera. A terceira é a curva — o jeito como a velocidade varia
+durante o caminho, que ela só descobriu quando viu dois botões com o mesmo tempo parecendo ter tempos
+diferentes.</p>
+
+<h2>2. Milissegundos: a unidade do tempo</h2>
+
+<p>Tempo em CSS se mede em segundos (<code>s</code>) ou milissegundos (<code>ms</code>). Mil e
+duzentos milissegundos são 1,2 segundo; meio segundo são 500 ms. O Tailwind trabalha com milissegundos
+quase sempre, e isso combina com o tipo de movimento que ele faz: as transições boas são curtas demais
+para se pensar em segundos.</p>
+
+<p>Por que 150 ms é o padrão? Porque é aproximadamente o tempo em que o olho percebe a mudança sem
+achar que o site está lento. Abaixo de 100 ms, a maioria das pessoas vê um salto; acima de 400 ms, começa
+a parecer que o site está pensando. Os 150 ms ficam no meio desse corredor confortável — a zona em que a
+mudança é percebida como suave e não como demora.</p>
+
+<p>Vale um exercício de percepção, porque é isso que vai guiar todas as suas escolhas: pegue um botão
+seu, ponha <code>transition</code> e passe o mouse. Depois troque para <code>duration-1000</code> — um
+segundo inteiro — e passe de novo. A diferença é enorme, e não é sutil. Volte para 150 e repare que já
+está bom. Aprender a olhar isso com calma vale mais do que decorar a escala.</p>
+
+<p>Antes de seguir, vale fixar os nomes das peças, porque são só três e elas se confundem com
+facilidade:</p>
+
+<dl class="anatomy">
+<dt>duração</dt>
+<dd>Quanto tempo o valor leva para chegar ao destino. No Tailwind, <code>duration-300</code>: 300
+milissegundos de viagem.</dd>
+<dt>espera</dt>
+<dd>O tempo parado antes de a viagem começar. No Tailwind, <code>delay-150</code>. Vale na ida e na
+volta, a menos que você a coloque numa variante.</dd>
+<dt>curva</dt>
+<dd>Como a velocidade varia durante a viagem: constante, acelerando, freando. No Tailwind,
+<code>ease-out</code> e companhia.</dd>
+<dt>milissegundo</dt>
+<dd>Milésima parte do segundo. 1000 ms = 1 s; 150 ms = 0,15 s. É a unidade do tempo no CSS.</dd>
+<dt>escalonamento</dt>
+<dd>Dar esperas diferentes a itens de uma mesma lista, para que entrem em sequência em vez de todos de
+uma vez.</dd>
+</dl>
+
+<h2>3. A escala de duração</h2>
+
+<p>A escala de <code>duration-</code> é curta e direta. Os degraus que aparecem de verdade nos projetos
+são estes:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Tempo</th><th>Onde costuma servir</th></tr>
+<tr><td><code>duration-75</code></td><td>75 ms</td><td>quase instantâneo: item de menu que precisa responder rápido</td></tr>
+<tr><td><code>duration-150</code></td><td>150 ms</td><td>o padrão do Tailwind: hover de botão e link</td></tr>
+<tr><td><code>duration-200</code></td><td>200 ms</td><td>hover de cartão clicável</td></tr>
+<tr><td><code>duration-300</code></td><td>300 ms</td><td>cartão que levanta, sombra que cresce</td></tr>
+<tr><td><code>duration-500</code></td><td>500 ms</td><td>painel que abre, elemento que entra na tela</td></tr>
+<tr><td><code>duration-700</code></td><td>700 ms</td><td>entrada de seção inteira, cortina</td></tr>
+<tr><td><code>duration-1000</code></td><td>1 s</td><td>uso raro: efeito de destaque, nunca em hover</td></tr>
+</table>
+</div>
+
+<p>E aqui vem uma diferença que confunde quem vem da aula de espaçamento: em <code>p-4</code>, o número
+não era pixels, era um multiplicador de 0,25 rem. Em <code>duration-300</code>, o número
+<strong>é</strong> o valor. O CSS gerado escreve <code>transition-duration: 300ms</code>, e você pode
+usar qualquer número que quiser: <code>duration-250</code> vale 250 ms, <code>duration-4</code> vale
+4 ms. Não existe degrau obrigatório — existe a escala que o time escolheu usar para o desenho ficar
+coerente.</p>
+
+<div class="trytailwind" data-goal="rule:transition-duration: 500ms;;rule:--tw-duration: 500ms">
+  <p class="try-task">O botão grande “Encomendar” merece uma resposta mais calma. Deixe a transição com
+  meio segundo, trocando <code>duration-150</code> por <code>duration-500</code>.</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-lg bg-amber-500 p-3 text-white transition duration-150 hover:bg-amber-600"&gt;Encomendar pão&lt;/button&gt;</pre>
+  <pre class="out">
+padding: 12px
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+border-radius: 8px
+transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events
+transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1)
+transition-duration: 0.15s
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-amber-500 p-3 text-white transition duration-500 hover:bg-amber-600"&gt;Encomendar pão&lt;/button&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>transition-duration: 0.5s</code> — o navegador converte
+milissegundos em segundos ao responder, e é normal ver os dois formatos. No CSS gerado, a meta desta
+caixa procura <code>500ms</code>, que é como o Tailwind escreve. Duas unidades, o mesmo meio segundo.</p>
+
+<p>Repare também que a classe <code>duration-500</code> grava uma variável antes da declaração:
+<code>--tw-duration: 500ms</code>. Isso existe para que outras utilidades possam reaproveitar o valor —
+é o mesmo mecanismo que você viu na aula passada, quando a transição genérica escreveu
+<code>transition-duration: var(--tw-duration, var(--default-transition-duration))</code>. Ou seja: a
+classe de duração não briga com a classe de transição, ela preenche o espaço que a transição deixou
+reservado.</p>
+
+<h2>4. A curva: por que o mesmo tempo parece diferente</h2>
+
+<p>Aqui está a parte que a maioria dos iniciantes nunca ouve falar e que muda tudo. Uma transição não
+precisa andar em velocidade constante. Ela pode sair devagar e acelerar, ou sair correndo e frear no
+final. Essa variação de velocidade se chama curva de aceleração, e no CSS é a
+<code>transition-timing-function</code>.</p>
+
+<p>A curva padrão do Tailwind é <code>cubic-bezier(0.4, 0, 0.2, 1)</code> — quatro números que desenham
+uma linha no gráfico. Não é preciso entender os números: o efeito é que a mudança começa rápido e
+termina freando, como uma porta que abre com impulso e para sozinha antes de bater. É por isso que o
+padrão do Tailwind parece “natural”: ele imita como as coisas se movem no mundo real.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que a curva faz</th><th>Quando escolher</th></tr>
+<tr><td>(sem classe)</td><td>o padrão: sai rápido, chega freando</td><td>hover e foco do dia a dia</td></tr>
+<tr><td><code>ease-linear</code></td><td>velocidade constante, sem aceleração</td><td>barras de progresso, giros contínuos</td></tr>
+<tr><td><code>ease-out</code></td><td>sai rápido e freia bastante no fim</td><td>entrada de elemento, fim de movimento</td></tr>
+<tr><td><code>ease-in</code></td><td>sai devagar e acelera até o fim</td><td>saída de elemento, que vai embora</td></tr>
+<tr><td><code>ease-in-out</code></td><td>devagar nas duas pontas, rápido no meio</td><td>movimento de ida e volta, painel que abre e fecha</td></tr>
+</table>
+</div>
+
+<p>Vale um aviso que evita meia hora de investigação: a curva padrão do Tailwind tem o mesmo valor da
+<code>ease-in-out</code> — <code>cubic-bezier(0.4, 0, 0.2, 1)</code>. Então escrever <code>ease-in-out</code>
+num elemento que não tem outra curva não muda nada visualmente, e parece que a classe “não funcionou”.
+Ela funcionou; o valor era o mesmo.</p>
+
+<p>A sensação de tempo muda com a curva. Um <code>ease-in</code> de 300 ms parece mais lento que um
+<code>ease-out</code> de 300 ms, porque no primeiro o olho passa 200 ms vendo quase nada acontecer. É por
+isso que a recomendação prática é: para o que chega, <code>ease-out</code>; para o que sai,
+<code>ease-in</code>; e para o hover, o padrão.</p>
+
+<h2>5. A espera: delay-*</h2>
+
+<p>Falta a terceira peça. A espera é o tempo entre a mudança acontecer e a transição começar. Em CSS é
+<code>transition-delay</code>, e o Tailwind escreve com <code>delay-</code> mais o número em
+milissegundos — a mesma lógica e a mesma escala de <code>duration-</code>: <code>delay-75</code>,
+<code>delay-150</code>, <code>delay-300</code>, <code>delay-700</code>.</p>
+
+<p>Para que serve esperar? Para dar descanso ao olho e evitar pisca-pisca. Imagine uma grade de nove
+produtos com uma etiqueta “novo” que aparece no hover. Se a etiqueta surge instantaneamente, atravessar
+a grade com o mouse faz nove etiquetas acenderem e apagarem em sequência, como luzes de natal. Com uma
+espera de 300 ms, o visitante que só está de passagem não vê nada; quem para o mouse no produto vê a
+etiqueta chegar. Mesma tela, outra sensação.</p>
+
+<div class="trytailwind" data-goal="rule:transition-delay: 300ms">
+  <p class="try-task">A etiqueta “NOVO” aparece no mouse, mas com pressa demais: atravessar a grade faz
+  tudo piscar. Acrescente <code>delay-300</code> à etiqueta. Depois de rodar, passe o mouse no cartão
+  para ver a espera.</p>
+  <pre class="html">&lt;div class="group relative rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;h3 class="font-semibold"&gt;Pão de queijo&lt;/h3&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Assado às 15h.&lt;/p&gt;
+  &lt;span id="alvo" class="absolute right-2 top-2 rounded bg-amber-500 px-2 py-1 text-xs font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100"&gt;NOVO&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+position: absolute
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+font-size: 12px
+font-weight: 600
+line-height: 16px
+border-radius: 4px
+opacity: 0
+padding-inline: 8px
+padding-block: 4px
+right: 8px
+top: 8px
+transition-property: opacity
+transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1)
+transition-duration: 0.15s
+</pre>
+  <pre class="solucao">&lt;div class="group relative rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;h3 class="font-semibold"&gt;Pão de queijo&lt;/h3&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Assado às 15h.&lt;/p&gt;
+  &lt;span id="alvo" class="absolute right-2 top-2 rounded bg-amber-500 px-2 py-1 text-xs font-semibold text-white opacity-0 transition-opacity delay-300 group-hover:opacity-100"&gt;NOVO&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel desta caixa mostra <code>opacity: 0</code> e, depois da solução, também
+<code>transition-delay: 0.3s</code>. O <code>opacity: 0</code> não é erro: é a etiqueta invisível no
+repouso, exatamente como o CSS manda. A prévia começa sem etiqueta; passe o mouse no cartão e ela chega
+com atraso. Esse é o tipo de detalhe em que a ferramenta mostra o estado, e o olho confirma o
+comportamento.</p>
+
+<p>Tem uma consequência da espera que pega todo mundo: <strong>o atraso vale para os dois
+sentidos</strong>. Se a etiqueta espera 300 ms para aparecer, ela também espera 300 ms para desaparecer
+quando o mouse sai. Num caso como esse é aceitável — dá até a impressão de calma. Mas num botão em que
+o visitante quer resposta imediata ao sair, a espera na volta irrita.</p>
+
+<p>Existe uma saída elegante para isso, e ela usa o que você já sabe de variantes: em vez de
+<code>delay-300</code> na classe de repouso, escreva <code>hover:delay-300</code>. Assim a espera só
+existe enquanto o mouse está em cima; quando ele sai, a regra do hover deixa de valer, o atraso volta a
+zero e a volta é imediata. É a mesma lógica do <code>hover:bg-amber-600</code>, aplicada ao tempo em vez
+da cor.</p>
+
+<h2>6. O CSS gerado das três famílias</h2>
+
+<p>Com as três peças na mão, vale ver o que o compilador escreve. Esta é a saída real para um elemento
+com <code>duration-300</code>, <code>delay-150</code> e <code>ease-out</code>:</p>
+
+<pre class="term">.duration-300 {
+  --tw-duration: 300ms;
+  transition-duration: 300ms;
+}
+.delay-150 {
+  transition-delay: 150ms;
+}
+.ease-out {
+  --tw-ease: var(--ease-out);
+  transition-timing-function: var(--ease-out);
+}</pre>
+
+<p>Três observações de leitura. A primeira: só <code>duration</code> e <code>ease</code> gravam
+variável (<code>--tw-duration</code> e <code>--tw-ease</code>); <code>delay</code> escreve o valor direto.
+A segunda: as curvas apontam para as variáveis da paleta de movimento
+(<code>var(--ease-out)</code>), então trocar a curva do projeto inteiro é mexer num lugar só. A terceira:
+nenhuma dessas classes cria a transição. Elas configuram uma transição que precisa existir — e é aqui que
+muita gente se perde.</p>
+
+<p>Porque, tecnicamente, você <em>pode</em> escrever só <code>duration-300</code> e ver o elemento
+animar. O navegador tem um padrão para a propriedade da transição: <code>all</code>. Ou seja, sem
+<code>transition</code> nenhuma, a duração que você escreveu vale para todas as propriedades que
+mudarem. Funciona, e é o <code>transition-all</code> acidental que você aprendeu a evitar na
+<a href="transicoes.html">aula anterior</a>: bonito no botão, pesado na página inteira. O hábito saudável
+é sempre escrever a transição, e depois ajustar duração, espera e curva.</p>
+
+<p>Para comparar com o CSS escrito à mão, a mesma configuração fica assim:</p>
+
+<pre class="term">.meu-botao {
+  transition: background-color 300ms ease-out 150ms;
+}</pre>
+
+<p>Essa forma curta tem uma pegadinha clássica: são <strong>dois tempos</strong> na mesma linha, e a
+ordem importa. O primeiro é a duração; o segundo é a espera. Quem troca a ordem sem perceber fica com uma
+transição de 150 ms que começa depois de 300 ms. O Tailwind evita a confusão porque cada tempo tem a sua
+classe com nome claro: <code>duration-</code> é quanto dura, <code>delay-</code> é quanto espera.</p>
+
+<h2>7. Como escolher os números</h2>
+
+<p>Existe um jeito de decidir isso sem achismo, e ele parte de uma pergunta simples: <strong>quantas
+vezes essa transição vai acontecer na frente do visitante?</strong> Quanto mais repetida, mais curta ela
+deve ser.</p>
+
+<p>Um hover de menu acontece dezenas de vezes numa visita. Precisa ser rápido: 75 ms a 150 ms. Um cartão
+que levanta é visto algumas vezes: 200 ms a 300 ms. Um painel que abre é visto uma vez por ação
+deliberada: 300 ms a 500 ms. Uma animação de entrada de seção acontece uma vez: 500 ms a 700 ms. Acima
+disso, só em efeito de destaque, e mesmo assim com cuidado — em um segundo inteiro, o visitante já
+decidiu que a página travou.</p>
+
+<div class="trytailwind" data-goal="rule:transition-timing-function: var(--ease-out);;rule:--tw-ease: var(--ease-out)">
+  <p class="try-task">O cartão da vitrine sobe no mouse com <code>ease-linear</code>, e o movimento
+  parece mecânico, de esteira. Troque a curva por <code>ease-out</code>, que sai rápido e freia no
+  fim.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl border border-stone-200 bg-white p-4 transition-transform duration-300 ease-linear hover:-translate-y-1 hover:shadow-md"&gt;
+  &lt;h3 class="font-semibold"&gt;Pão do dia&lt;/h3&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h30.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+border-radius: 12px
+border-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+transition-property: transform, translate, scale, rotate
+transition-timing-function: linear
+transition-duration: 0.3s
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-xl border border-stone-200 bg-white p-4 transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-md"&gt;
+  &lt;h3 class="font-semibold"&gt;Pão do dia&lt;/h3&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h30.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, passe o mouse no cartão e compare com a versão anterior na sua memória: o tempo é o
+mesmo (300 ms), mas o fim do movimento é mais macio, porque a curva freia. O painel mostra
+<code>transition-timing-function</code> com o valor já resolvido em <code>cubic-bezier(0, 0, 0.2, 1)</code>,
+que é o conteúdo de <code>var(--ease-out)</code>. A meta desta caixa confere o CSS gerado justamente
+porque ali a curva aparece pelo nome da variável, e não pelo número.</p>
+
+<p>Uma tentação a evitar: empilhar <code>duration</code>, <code>delay</code> e <code>ease</code> em
+lugares diferentes do mesmo cartão. Se a duração está no cartão e a curva no botão de dentro, o botão não
+herda nada — transição e tempo não se herdam, como você já viu. O conjunto de classes de tempo vai
+<strong>no mesmo elemento</strong> que tem a classe de transição.</p>
+
+<p>Outra: usar a espera para “esconder” uma transição ruim. Se o movimento está feio, o problema quase
+sempre é a propriedade animada (aquela largura que empurra o texto) e não o relógio. Colocar
+<code>delay-700</code> só atrasa o momento em que o visitante percebe o problema.</p>
+
+<h2>8. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a espera que grudou na volta</h3>
+<p>A Ana pôs <code>delay-200</code> num link do menu para o sublinhado não piscar. Gostou da ida e
+estranhou a volta: ao tirar o mouse, o sublinhado demorava a sumir. É o comportamento normal da espera,
+que vale nos dois sentidos. A correção foi trocar <code>delay-200</code> por
+<code>hover:delay-200</code>: a ida continua esperando, a volta é imediata, porque a regra do hover deixa
+de existir no instante em que o ponteiro sai.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o botão que parecia travado</h3>
+<p>Um cliente reclamou que o botão de finalizar compra “não respondia”. O botão tinha
+<code>duration-700</code> e mudava de cor devagar. Para quem clica, 700 ms é uma eternidade: ele aperta,
+não vê resposta, aperta de novo. A Ana trocou para <code>duration-150</code> e o botão voltou a parecer
+vivo. Regra prática que ela adotou: <strong>tempo de resposta é diferente de tempo de espetáculo</strong>.
+Resposta fica abaixo de 200 ms; espetáculo pode passar de 300 ms.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a curva que ninguém viu</h3>
+<p>Ela escreveu <code>ease-in-out</code> num painel e não notou diferença nenhuma. Não era bug: o valor
+padrão do Tailwind é o mesmo da <code>ease-in-out</code>, então a classe não mudou nada. Para comparar de
+verdade, ela testou <code>ease-linear</code>, que é veloz constante do começo ao fim, e só então entendeu
+o que a curva faz. Curva se aprende comparando, não lendo a lista.</p>
+</div>
+
+<h2>9. Espera com propósito: sequências</h2>
+
+<p>A espera brilha quando existe uma <em>ordem</em> a ser contada. Se três itens de uma lista devem
+aparecer um depois do outro, o caminho mais simples é dar a cada um o mesmo tempo e esperas diferentes:
+o primeiro com <code>delay-0</code>, o segundo com <code>delay-150</code>, o terceiro com
+<code>delay-300</code>. No momento em que o elemento ganha a classe que o mostra, os três saem em
+sequência, como uma fila educada.</p>
+
+<p>Esse truque tem nome no mundo do CSS — <em>stagger</em>, algo como “escalonamento” — e é a base de
+quase toda animação de lista que você vê por aí. O segredo é que ele não precisa de JavaScript: cada item
+só tem uma espera diferente escrita na classe. Para três ou quatro itens, é o suficiente e não custa
+nada.</p>
+
+<p>O que estraga a sequência é exagerar. Com dez itens e esperas de 150 ms em 150 ms, o último só começa
+depois de 1,35 segundo — e a lista parece quebrada. Duas regras ajudam: use sequência em no máximo
+quatro ou cinco itens, e mantenha o passo pequeno (75 ms a 150 ms). Se você precisa de mais do que isso,
+o assunto já é animação de verdade, com <code>@keyframes</code>, que tem
+<a href="keyframes-proprios.html">aula própria</a> mais adiante.</p>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que <code>duration-300</code> faz?</p>
+<label><input type="radio" name="q1"> espera 300 ms antes de começar o efeito</label>
+<label><input type="radio" name="q1"> faz a transição durar 300 ms</label>
+<label><input type="radio" name="q1"> repete o efeito 300 vezes</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. Qual é o padrão de tempo do Tailwind quando você não
+escreve <code>duration-</code>?</p>
+<label><input type="radio" name="q2"> 150 ms</label>
+<label><input type="radio" name="q2"> 1 segundo</label>
+<label><input type="radio" name="q2"> 0 ms, ou seja, nenhuma transição</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">3. Como atrasar só a ida do efeito, sem segurar a
+volta?</p>
+<label><input type="radio" name="q3"> escrevendo <code>delay-0</code> e <code>delay-300</code> juntos</label>
+<label><input type="radio" name="q3"> aumentando a duração em vez da espera</label>
+<label><input type="radio" name="q3"> usando a espera na variante: <code>hover:delay-300</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a sombra que chega devagar</h2>
+<p>No cartão da vitrine, a sombra deve crescer em 500 ms, não em 150. Complete a classe do tempo:</p>
+<div class="ex-code">&lt;div class="rounded-xl bg-white p-4 transition-shadow <input aria-label="resposta 1" data-answer="duration-500" placeholder="..."> hover:shadow-lg"&gt;Pão do dia&lt;/div&gt;</div>
+<p class="ex-dica">Dica: aqui o número da classe já é o tempo em milissegundos, então meio segundo se
+escreve com o número 500 — e não com 3, como você faria no espaçamento.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Toda transição tem três números além da lista de propriedades: quanto dura, quanto espera e com que
+curva viaja. No Tailwind eles são <code>duration-</code>, <code>delay-</code> e <code>ease-</code>, e os
+dois primeiros usam milissegundos escritos direto no nome da classe. O padrão é 150 ms com a curva
+<code>cubic-bezier(0.4, 0, 0.2, 1)</code>, que sai rápido e chega freando.</p>
+
+<p>A escolha dos números segue uma lógica de uso: quanto mais repetida a transição, mais curta. Resposta
+a clique fica abaixo de 200 ms; movimento de cartão, entre 200 e 300; entrada de painel ou seção, entre
+300 e 700. A espera serve para dar descanso ao olho e para escalonar listas, e tem uma pegadinha: ela vale
+na ida e na volta, a menos que você a coloque numa variante como <code>hover:delay-300</code>.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Tempo em CSS é <code>ms</code> ou <code>s</code>; 500 ms é meio segundo.</li>
+<li>O padrão do Tailwind é 150 ms — abaixo de 100 ms o olho vê um salto.</li>
+<li>Em <code>duration-300</code> e <code>delay-300</code>, o número já é o valor em ms.</li>
+<li><code>duration</code> e <code>ease</code> gravam variáveis; <code>delay</code> escreve o valor direto.</li>
+<li>A curva padrão é igual à <code>ease-in-out</code>: escrevê-la não muda nada.</li>
+<li><code>ease-out</code> para o que chega; <code>ease-in</code> para o que sai; <code>ease-linear</code>
+para velocidade constante.</li>
+<li>A espera vale na ida e na volta; <code>hover:delay-300</code> atrasa só a ida.</li>
+<li>Sequência de lista: mesmo tempo, esperas em degraus de 75 a 150 ms, no máximo quatro ou cinco itens.</li>
+<li>Sem <code>transition</code>, a duração vale para tudo (<code>all</code>) — funciona, mas é armadilha.</li>
+<li>Se o movimento parece pesado, desconfie da propriedade animada antes de culpar o tempo.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

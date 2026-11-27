@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Página com Sidebar | Guia Tailwind</title>
+<meta name="description" content="Como montar uma página com sidebar no Tailwind: o shell flex min-h-screen, a coluna w-64 shrink-0, o conteúdo flex-1 min-w-0, a barra sticky e a versão de celular.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Página com <span class="hl">Sidebar</span></h1>
+<p class="intro">A Ana agora tem um painel de verdade: à esquerda a lista de seções da padaria, à
+direita o conteúdo de cada uma. Ela tentou fazer isso com duas <code>div</code>s lado a lado e o
+resultado foi uma coluna em cima da outra, com o menu espremido e o texto invadindo o rodapé. Nesta
+aula ela monta o esqueleto de qualquer página com sidebar — a linha flex que segura tudo, a coluna de
+largura fixa que não encolhe, o conteúdo que ocupa o resto e a barra que acompanha a rolagem.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O esqueleto <code>flex min-h-screen</code> que segura a página inteira.</li>
+  <li>Por que a sidebar leva <code>w-64 shrink-0</code>.</li>
+  <li>O que <code>flex-1</code> faz no conteúdo e por que ele vem com <code>min-w-0</code>.</li>
+  <li>Como limitar a largura da leitura com <code>max-w-3xl</code>.</li>
+  <li>A sidebar que acompanha a rolagem: <code>sticky top-0 h-screen overflow-y-auto</code>.</li>
+  <li>A versão com grid, <code>grid-cols-[16rem_1fr]</code>, e quando ela é melhor.</li>
+  <li>O celular: <code>hidden lg:flex</code> e a barra de cima com o botão de menu.</li>
+  <li>Os três defeitos comuns: página que rola de lado, sidebar que some e conteúdo colado no rodapé.</li>
+</ul>
+</div>
+
+<h2>1. A cena: duas colunas que viram uma</h2>
+
+<p>A Ana escreveu o painel assim: um <code>div</code> com o menu, outro com o conteúdo, cada um com
+sua cor de fundo. Na tela dela, ficou tudo empilhado — menu em cima, conteúdo embaixo, os dois com a
+largura toda. Ela tentou <code>w-1/2</code> nos dois e o resultado foi pior: duas faixas de metade da
+tela, cada uma com um buraco branco embaixo, e a página sem fim.</p>
+
+<p>O motivo é o mesmo de sempre: <code>div</code> é um bloco e bloco ocupa a linha inteira. Para pôr
+dois elementos lado a lado, alguém precisa organizar a linha. Esse alguém é o <code>flex</code>, que
+transforma os filhos em colunas (ou linhas) controladas. E o layout de sidebar é o caso mais simples e
+mais útil de flex que existe: <strong>uma coluna de largura fixa e uma coluna que come o resto</strong>.</p>
+
+<p>Vale entender o desenho antes das classes. A página tem três peças: o <em>shell</em>, que é a caixa
+que contém tudo e ocupa a altura da tela; a <em>sidebar</em>, que tem largura fixa e não encolhe; e o
+<em>conteúdo</em>, que recebe todo o espaço que sobra. Com esse trio na cabeça, as classes passam a
+ser consequência: o shell é <code>flex min-h-screen</code>, a sidebar é <code>w-64 shrink-0</code> e o
+conteúdo é <code>flex-1 min-w-0</code>.</p>
+
+<h2>2. O shell: flex e min-h-screen</h2>
+
+<p><code>flex</code> coloca os filhos em linha. <code>min-h-screen</code> garante altura mínima de uma
+tela inteira — e é o <em>min</em> que faz a diferença: se o conteúdo for baixo, o shell ainda ocupa a
+tela toda e o fundo não termina no meio; se o conteúdo for alto, o shell cresce junto, sem cortar
+nada. Altura fixa (<code>h-screen</code>) cortaria o conteúdo excedente.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=flex;;rule:min-height: 100vh">
+  <p class="try-task">O painel está empilhado: menu em cima, conteúdo embaixo. Ponha os dois lado a
+  lado e faça a caixa ocupar a altura da tela: <code>flex min-h-screen</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="block bg-slate-50"&gt;
+  &lt;aside class="w-64 bg-white p-4"&gt;
+    &lt;p class="font-semibold text-slate-800"&gt;Painel&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Pães&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Encomendas&lt;/p&gt;
+  &lt;/aside&gt;
+  &lt;main class="p-6"&gt;
+    &lt;p class="font-semibold text-slate-800"&gt;Bem-vinda, Ana&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Hoje saíram 42 pães.&lt;/p&gt;
+  &lt;/main&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.984 0.003 247.858)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex min-h-screen bg-slate-50"&gt;
+  &lt;aside class="w-64 bg-white p-4"&gt;
+    &lt;p class="font-semibold text-slate-800"&gt;Painel&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Pães&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Encomendas&lt;/p&gt;
+  &lt;/aside&gt;
+  &lt;main class="p-6"&gt;
+    &lt;p class="font-semibold text-slate-800"&gt;Bem-vinda, Ana&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Hoje saíram 42 pães.&lt;/p&gt;
+  &lt;/main&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o menu fica à esquerda com 256 px e o conteúdo ocupa o resto. Duas observações.
+
+A primeira: o <code>flex</code> alinha no topo por padrão, então os dois filhos começam na mesma linha.
+A segunda: o fundo cinza do shell aparece embaixo porque ele ocupa a altura toda, mesmo com pouco
+conteúdo. Sem o <code>min-h-screen</code>, o cinza acabaria junto com o último parágrafo e o restante
+da tela ficaria branco — o defeito clássico de layout "cortado".</p>
+
+<p>Uma escolha importante: use <code>main</code> de verdade para o conteúdo, e não <code>div</code>.
+Não muda nada visualmente, mas a estrutura fica correta para leitores de tela e para o navegador. No
+layout da sidebar, o <code>nav</code> ou <code>aside</code> fica na coluna da esquerda.</p>
+
+<h2>3. A coluna de largura fixa: w-64 shrink-0</h2>
+
+<p>A sidebar precisa de uma largura decidida por você, não pelo conteúdo. <code>w-64</code> dá 256 px —
+o padrão de fato em painéis. E precisa de <code>shrink-0</code>: no flex, quando falta espaço, os
+filhos encolhem por padrão. É por isso que muita sidebar "some" em tela média: ela não desapareceu,
+encolheu até caber. <code>shrink-0</code> é <code>flex-shrink: 0</code>, a instrução de nunca encolher.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|width=256px;;css:#alvo|flex-shrink=0">
+  <p class="try-task">A sidebar está com <code>w-full</code> e espremeu o conteúdo. Dê a ela 256 px e
+  proíba que encolha: <code>w-64 shrink-0</code>.</p>
+  <pre class="html">&lt;div class="flex min-h-screen bg-slate-50"&gt;
+  &lt;aside id="alvo" class="w-full bg-white p-4"&gt;
+    &lt;p class="font-semibold text-slate-800"&gt;Painel&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Pães&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Encomendas&lt;/p&gt;
+  &lt;/aside&gt;
+  &lt;main class="flex-1 p-6"&gt;
+    &lt;p class="font-semibold text-slate-800"&gt;Bem-vinda, Ana&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Hoje saíram 42 pães e três encomendas estão prontas.&lt;/p&gt;
+  &lt;/main&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+width: 399.016px
+padding: 16px
+background-color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;div class="flex min-h-screen bg-slate-50"&gt;
+  &lt;aside id="alvo" class="w-64 shrink-0 bg-white p-4"&gt;
+    &lt;p class="font-semibold text-slate-800"&gt;Painel&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Pães&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Encomendas&lt;/p&gt;
+  &lt;/aside&gt;
+  &lt;main class="flex-1 p-6"&gt;
+    &lt;p class="font-semibold text-slate-800"&gt;Bem-vinda, Ana&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Hoje saíram 42 pães e três encomendas estão prontas.&lt;/p&gt;
+  &lt;/main&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra as duas linhas que importam: <code>width: 256px</code> e
+<code>flex-shrink: 0</code>. A segunda é a que evita surpresa em tela menor. Se você quiser uma sidebar
+um pouco mais generosa, <code>w-72</code> dá 288 px; se o menu tem nomes curtos, <code>w-48</code> com
+192 px resolve.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Largura</th><th>Onde cabe bem</th></tr>
+<tr><td><code>w-48</code></td><td>192 px</td><td>menu com ícones e palavras curtas</td></tr>
+<tr><td><code>w-56</code></td><td>224 px</td><td>documentação enxuta</td></tr>
+<tr><td><code>w-64</code></td><td>256 px</td><td>o padrão de painel administrativo</td></tr>
+<tr><td><code>w-72</code></td><td>288 px</td><td>menu com descrições curtas embaixo do nome</td></tr>
+<tr><td><code>w-80</code></td><td>320 px</td><td>barra com busca, avatar e seções</td></tr>
+</table>
+</div>
+
+<h2>4. O conteúdo: flex-1 min-w-0</h2>
+
+<p>A coluna da direita recebe o que sobra. <code>flex-1</code> aparece no CSS gerado como
+<code>flex: 1</code>, que é o atalho de <code>1 1 0%</code>: cresce para preencher, encolhe quando
+precisa e parte de zero. Sem ele, o conteúdo fica do tamanho do texto e sobra um vazio cinza à
+direita.</p>
+
+<p>O <code>min-w-0</code> é o parceiro invisível e o motivo de muita dor de cabeça. Um filho flex tem
+largura mínima automática: ele se recusa a encolher abaixo do tamanho do seu conteúdo. Se dentro do
+conteúdo houver uma tabela larga, uma imagem grande ou uma palavra comprida, o filho se recusa a
+encolher, o shell estoura e a página inteira ganha rolagem lateral. <code>min-w-0</code> diz "pode
+encolher até zero, eu me organizo por dentro" — e aí a tabela rola dentro do próprio
+<code>overflow-x-auto</code>, sem arrastar a página junto. A aula de
+<a href="overflow.html">Overflow</a> esmiúça esse mecanismo; aqui ele é o que segura o layout de
+pé.</p>
+
+<pre class="term">.flex {
+  display: flex;
+}
+.flex-1 {
+  flex: 1;
+}
+.min-w-0 {
+  min-width: 0px;
+}</pre>
+
+<p>Três linhas, três papéis. O <code>display: flex</code> no pai vira o organizador da linha; o
+<code>flex: 1</code> no conteúdo diz "cresça"; o <code>min-width: 0px</code> diz "e você tem permissão
+para ficar pequeno". Sem a terceira, a segunda vira uma armadilha: o conteúdo cresce para caber a
+tabela e leva a página junto.</p>
+
+<pre class="file" data-file="painel.html">&lt;div class="flex min-h-screen bg-slate-50"&gt;
+  &lt;aside class="w-64 shrink-0 border-r border-slate-200 bg-white p-4"&gt;
+    &lt;nav class="space-y-1"&gt;
+      &lt;a href="#" class="block rounded-lg bg-amber-100 px-3 py-2 text-sm font-medium text-amber-900"&gt;Pães&lt;/a&gt;
+      &lt;a href="#" class="block rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100"&gt;Encomendas&lt;/a&gt;
+    &lt;/nav&gt;
+  &lt;/aside&gt;
+  &lt;main class="min-w-0 flex-1 p-8"&gt;
+    &lt;div class="mx-auto max-w-3xl"&gt;
+      &lt;h1 class="text-2xl font-semibold"&gt;Bem-vinda, Ana&lt;/h1&gt;
+    &lt;/div&gt;
+  &lt;/main&gt;
+&lt;/div&gt;</pre>
+
+<p>Repare na combinação do <code>main</code>: <code>min-w-0 flex-1 p-8</code> por fora e
+<code>mx-auto max-w-3xl</code> por dentro. São dois trabalhos diferentes. O <code>p-8</code> dá 32 px
+de respiro entre a sidebar e o texto; o <code>max-w-3xl</code> limita a linha de leitura a 768 px e o
+<code>mx-auto</code> centraliza o bloco no espaço que sobrou. Sem esse limite, num monitor largo o
+texto fica com 1200 px de largura e o olho se perde ao voltar para a linha seguinte.</p>
+
+<p>Essa é a diferença entre um layout que "funciona" e um layout confortável: a coluna pode ter 1400
+px, mas o texto dentro dela para em 768. Se você usar só <code>flex-1</code>, o conteúdo ocupa tudo e
+a leitura cansa.</p>
+
+<h2>5. A sidebar que acompanha a rolagem</h2>
+
+<p>Quando o conteúdo é longo, a sidebar sobe junto ao rolar e a navegação desaparece. Em painéis, o
+comportamento esperado é o contrário: o menu fica parado e só o conteúdo rola. Isso é
+<code>sticky top-0 h-screen overflow-y-auto</code>.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|position=sticky;;rule:top: 0px;;rule:height: 100vh">
+  <p class="try-task">A sidebar rola junto com a página. Faça ela grudar no topo, ocupar a altura da
+  tela e rolar por dentro quando o menu for maior que a tela:
+  <code>sticky top-0 h-screen overflow-y-auto</code>.</p>
+  <pre class="html">&lt;div class="flex min-h-screen bg-slate-50"&gt;
+  &lt;aside id="alvo" class="w-64 shrink-0 bg-white p-4"&gt;
+    &lt;p class="font-semibold text-slate-800"&gt;Painel&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Pães&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Encomendas&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Clientes&lt;/p&gt;
+  &lt;/aside&gt;
+  &lt;main class="min-w-0 flex-1 p-6"&gt;
+    &lt;p class="text-slate-600"&gt;Hoje saíram 42 pães.&lt;/p&gt;
+  &lt;/main&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+width: 256px
+padding: 16px
+background-color: rgb(255, 255, 255)
+flex-shrink: 0
+</pre>
+  <pre class="solucao">&lt;div class="flex min-h-screen bg-slate-50"&gt;
+  &lt;aside id="alvo" class="sticky top-0 h-screen w-64 shrink-0 overflow-y-auto bg-white p-4"&gt;
+    &lt;p class="font-semibold text-slate-800"&gt;Painel&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Pães&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Encomendas&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Clientes&lt;/p&gt;
+  &lt;/aside&gt;
+  &lt;main class="min-w-0 flex-1 p-6"&gt;
+    &lt;p class="text-slate-600"&gt;Hoje saíram 42 pães.&lt;/p&gt;
+  &lt;/main&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p><code>sticky</code> é o meio-termo entre <code>relative</code> e <code>fixed</code>: o elemento
+ocupa o lugar dele no fluxo (continua na fila, como se fosse relativo) mas gruda na posição indicada
+por <code>top-0</code> quando a rolagem chega ali. Diferente do <code>fixed</code>, ele não sai da
+coluna — a sidebar continua com 256 px de largura e o conteúdo não escorrega para baixo dela.</p>
+
+<p>O <code>h-screen</code> é o que dá altura para a barra grudada, e o <code>overflow-y-auto</code> é o
+que salva um menu com vinte itens em notebook pequeno: em vez de a sidebar crescer além da tela e
+esconder o último link, ela rola por dentro. O trio vale a pena decorar porque aparece em todo painel
+sério.</p>
+
+<pre class="term">.sticky {
+  position: sticky;
+}
+.top-0 {
+  top: 0px;
+}
+.h-screen {
+  height: 100vh;
+}
+.overflow-y-auto {
+  overflow-y: auto;
+}</pre>
+
+<p>Um detalhe que engana: <code>sticky</code> não funciona se algum ancestral tiver
+<code>overflow</code> diferente de <code>visible</code> e altura limitada — o elemento passa a grudar
+na caixa do ancestral, e não na janela. Se a sua sidebar não gruda, suba a árvore no inspetor
+procurando um <code>overflow-hidden</code> perdido no shell.</p>
+
+<h2>6. A alternativa com grid</h2>
+
+<p>O mesmo layout pode ser feito com grid, e às vezes fica mais legível. Em vez de flex na linha e
+classes diferentes em cada filho, você declara as colunas no pai:
+<code>grid min-h-screen grid-cols-[16rem_1fr]</code>. A primeira coluna tem 16 rem (256 px, igual ao
+<code>w-64</code>) e a segunda ocupa o resto.</p>
+
+<pre class="file" data-file="painel.html">&lt;div class="grid min-h-screen grid-cols-1 lg:grid-cols-[16rem_1fr]"&gt;
+  &lt;aside class="border-b border-slate-200 bg-white p-4 lg:border-b-0 lg:border-r"&gt;
+    &lt;nav class="space-y-1"&gt;…&lt;/nav&gt;
+  &lt;/aside&gt;
+  &lt;main class="min-w-0 p-8"&gt;…&lt;/main&gt;
+&lt;/div&gt;</pre>
+
+<p>A vantagem do grid aparece na responsividade: <code>grid-cols-1</code> empilha no celular e
+<code>lg:grid-cols-[16rem_1fr]</code> monta as duas colunas a partir de 1024 px. Os colchetes são o
+valor livre do Tailwind — <code>[16rem_1fr]</code> com underline no lugar do espaço, porque a classe
+inteira é um nome só. A desvantagem é que o <code>[16rem_1fr]</code> é mais difícil de ler que
+<code>w-64</code> para quem está começando.</p>
+
+<p>A escolha prática: flex quando as colunas têm conteúdo de tamanhos diferentes e uma delas precisa
+crescer (é o caso da sidebar); grid quando você quer declarar o esqueleto inteiro no pai e mexer nas
+colunas de uma vez. Os dois resolvem, e trocar depois não é drama.</p>
+
+<h2>7. No celular a sidebar não cabe</h2>
+
+<p>Em 375 px de tela, uma coluna de 256 px deixa 119 px para o conteúdo — inviável. A solução mais
+usada é esconder a sidebar e mostrar um botão de menu no topo. No Tailwind:
+<code>hidden lg:flex</code> na sidebar e uma barra com <code>lg:hidden</code> para o botão.</p>
+
+<pre class="file" data-file="painel.html">&lt;div class="flex min-h-screen flex-col lg:flex-row"&gt;
+  &lt;header class="flex items-center justify-between border-b border-slate-200 bg-white p-4 lg:hidden"&gt;
+    &lt;span class="font-semibold"&gt;Padaria da Ana&lt;/span&gt;
+    &lt;button type="button" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"&gt;Menu&lt;/button&gt;
+  &lt;/header&gt;
+  &lt;aside class="hidden w-64 shrink-0 border-r border-slate-200 bg-white p-4 lg:flex lg:flex-col"&gt;
+    &lt;nav class="space-y-1"&gt;…&lt;/nav&gt;
+  &lt;/aside&gt;
+  &lt;main class="min-w-0 flex-1 p-6 lg:p-8"&gt;…&lt;/main&gt;
+&lt;/div&gt;</pre>
+
+<p>Duas coisas acontecem nesse trecho. A direção do shell muda de coluna para linha a partir de
+<code>lg</code> (<code>flex-col lg:flex-row</code>), e a sidebar fica <code>hidden</code> até
+<code>lg</code>, quando volta como <code>flex</code>. O <code>lg:hidden</code> da barra faz o
+contrário: aparece no celular, desaparece no desktop. É mobile-first na prática: você escreve o
+estado pequeno primeiro e adiciona o grande com prefixo.</p>
+
+<p>Se o botão abre uma gaveta lateral, o HTML é a sidebar com
+<code>fixed inset-y-0 left-0 z-50 w-64</code> e um fundo escuro atrás — a mesma receita do
+<a href="modal.html">modal</a>, só que ancorada na esquerda. O JavaScript só alterna
+<code>hidden</code>, como sempre.</p>
+
+<h2>8. Cabeçalho, item ativo e divisores</h2>
+
+<p>Uma sidebar sem hierarquia é só uma lista de links. Três detalhes fazem ela parecer um produto:
+o título da seção em <code>text-xs uppercase tracking-wide text-slate-500</code>, os itens com
+<code>block rounded-lg px-3 py-2 text-sm</code> e o item ativo com
+<code>bg-amber-100 font-medium text-amber-900</code>. O <code>space-y-1</code> no <code>nav</code>
+dá 4 px entre os itens, e o <code>hover:bg-slate-100</code> avisa que aquilo é clicável.</p>
+
+<dl class="anatomy">
+<dt>shell</dt>
+<dd>A caixa que envolve tudo, com <code>flex min-h-screen</code>. É ela que garante a altura da
+tela e a linha das colunas.</dd>
+<dt>sidebar</dt>
+<dd>A coluna da esquerda, com <code>w-64 shrink-0</code>. Contém a navegação e não encolhe.</dd>
+<dt>conteúdo</dt>
+<dd>A coluna da direita, com <code>flex-1 min-w-0</code>. Recebe o espaço restante e pode encolher.</dd>
+<dt>sticky</dt>
+<dd>Faz a sidebar acompanhar a rolagem em vez de subir com a página. Precisa de
+<code>top-0</code> e de altura.</dd>
+<dt>shrink-0</dt>
+<dd><code>flex-shrink: 0</code>. Impede que a coluna encolha quando falta espaço.</dd>
+<dt>breakpoint lg</dt>
+<dd>Prefixo que vale a partir de 1024 px. É onde a sidebar volta a aparecer depois de
+<code>hidden</code>.</dd>
+</dl>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>Classes</th><th>Por quê</th></tr>
+<tr><td>shell</td><td><code>flex min-h-screen</code></td><td>coloca lado a lado e ocupa a tela</td></tr>
+<tr><td>sidebar</td><td><code>w-64 shrink-0</code></td><td>largura fixa, sem encolher</td></tr>
+<tr><td>conteúdo</td><td><code>flex-1 min-w-0 p-8</code></td><td>ocupa o resto e aceita encolher</td></tr>
+<tr><td>leitura</td><td><code>mx-auto max-w-3xl</code></td><td>limita a linha a 768 px</td></tr>
+<tr><td>barra fixa</td><td><code>sticky top-0 h-screen overflow-y-auto</code></td><td>acompanha a rolagem</td></tr>
+<tr><td>celular</td><td><code>hidden lg:flex</code></td><td>some no pequeno, volta no grande</td></tr>
+</table>
+</div>
+
+<h2>9. Quando o layout quebra: três cenas</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a página toda rola de lado</h3>
+<p>A Ana colou a tabela de encomendas dentro do conteúdo e a página ganhou uma barra de rolagem
+horizontal horrorosa: a sidebar saía para a esquerda quando ela arrastava. A culpada era a largura
+mínima automática do filho flex. A tabela, com muitas colunas, se recusava a encolher; o
+<code>flex-1</code> esticava o shell para caber. A correção foi <code>min-w-0</code> no
+<code>main</code> e <code>overflow-x-auto</code> num <code>div</code> em volta da tabela. A partir
+dali, a rolagem acontece dentro do bloco e a página fica parada.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a sidebar encolheu até virar um risco</h3>
+<p>Em um notebook de 1024 px, o menu ficou com menos de 100 px e os nomes quebraram em três linhas.
+Não foi o <code>w-64</code> que falhou: foi a ausência do <code>shrink-0</code>. Sem ele, o flex
+distribui a falta de espaço entre os filhos, e a sidebar paga a conta junto com o conteúdo. Com
+<code>shrink-0</code>, ela mantém os 256 px e quem encolhe é o conteúdo, que já tem
+<code>min-w-0</code> para isso. Se nem assim couber, é hora de esconder a sidebar com
+<code>lg:</code>.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o menu some no fim da página</h3>
+<p>O painel tinha um menu de trinta links e a Ana percebeu que, ao rolar até o fim da lista de
+encomendas, o menu já tinha subido havia muito. Ela tentou <code>fixed</code> e o menu saiu da coluna,
+flutuando sobre o conteúdo. O certo era <code>sticky top-0 h-screen overflow-y-auto</code>: a coluna
+continua na fila, com a largura dela, e o menu gruda no topo enquanto o conteúdo rola. Se o menu for
+maior que a tela, o <code>overflow-y-auto</code> deixa ele rolar por dentro — e aí o último link nunca
+fica inalcançável.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. Para que serve o <code>shrink-0</code> na sidebar?</p>
+<label><input type="radio" name="s1"> para a coluna não encolher quando falta espaço na linha</label>
+<label><input type="radio" name="s1"> para a coluna ficar fixa no topo ao rolar</label>
+<label><input type="radio" name="s1"> para a coluna ocupar todo o espaço restante</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que o <code>min-w-0</code> no conteúdo resolve?</p>
+<label><input type="radio" name="s2"> deixa o texto menor em telas grandes</label>
+<label><input type="radio" name="s2"> centraliza o conteúdo na coluna</label>
+<label><input type="radio" name="s2"> permite que a coluna encolha abaixo do tamanho do conteúdo</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Qual dupla esconde a sidebar no celular e a mostra no desktop?</p>
+<label><input type="radio" name="s3"> <code>hidden sm:flex</code></label>
+<label><input type="radio" name="s3"> <code>hidden lg:flex</code></label>
+<label><input type="radio" name="s3"> <code>invisible lg:visible</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a coluna do painel</h2>
+<p>Complete a sidebar para ela ter 256 px e não encolher quando a tela apertar.</p>
+<div class="ex-code">&lt;aside class="<input aria-label="resposta 1" data-answer="w-64 shrink-0|shrink-0 w-64"> border-r border-slate-200 bg-white p-4"&gt;</div>
+<p class="ex-dica">Dica: são duas classes. A primeira é a largura na escala do Tailwind; a segunda é a
+que impede o encolhimento. A ordem entre elas não muda nada.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Uma página com sidebar é uma linha flex com duas colunas de papéis diferentes. O shell leva
+<code>flex min-h-screen</code>: põe os filhos lado a lado e garante a altura da tela. A sidebar leva
+<code>w-64 shrink-0</code>: largura decidida por você, sem encolher. O conteúdo leva
+<code>flex-1 min-w-0</code>: recebe o resto e aceita encolher, o que impede a página de rolar de lado.
+Dentro dele, <code>mx-auto max-w-3xl</code> mantém a leitura confortável.</p>
+
+<p>Para o menu acompanhar a rolagem, <code>sticky top-0 h-screen overflow-y-auto</code> — sem sair da
+coluna como o <code>fixed</code> faria. E no celular, <code>hidden lg:flex</code> na sidebar com uma
+barra <code>lg:hidden</code> no topo resolve o espaço. Grid com
+<code>grid-cols-[16rem_1fr]</code> é a alternativa quando você quiser declarar o esqueleto todo no pai.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Layout com sidebar = <code>flex</code> na linha, largura fixa na esquerda, resto na direita.</li>
+<li><code>min-h-screen</code> é altura mínima, não fixa: o conteúdo pode crescer.</li>
+<li><code>w-64</code> = 256 px; <code>w-48</code> = 192 px; <code>w-72</code> = 288 px.</li>
+<li><code>shrink-0</code> impede a sidebar de encolher; <code>flex-1</code> faz o conteúdo crescer.</li>
+<li><code>min-w-0</code> no conteúdo evita a rolagem lateral causada por tabela ou imagem larga.</li>
+<li><code>max-w-3xl</code> limita a linha de leitura a 768 px, mesmo em monitor grande.</li>
+<li><code>sticky top-0 h-screen</code> prende a sidebar sem tirá-la da coluna.</li>
+<li><code>overflow-y-auto</code> na sidebar salva menus mais altos que a tela.</li>
+<li><code>hidden lg:flex</code> esconde no celular e devolve no desktop.</li>
+<li>Mobile-first: escreva o estado pequeno e acrescente <code>lg:</code> para o grande.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

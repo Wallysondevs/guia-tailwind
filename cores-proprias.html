@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cores Próprias | Guia Tailwind</title>
+<meta name="description" content="Cores próprias no Tailwind 4: montar a escala da marca em oklch, escolher só os degraus que a página usa, derivar tons com opacidade e fechar a paleta com --color-* initial.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Cores <span class="hl">Próprias</span></h1>
+<p class="intro">O cartão de visita da padaria tem quatro tons de terracota — o bege do papel, o
+terracota do logo, o marrom do texto e o quase-preto da assinatura. O site da Ana tem um. É por isso
+que o selo "novo" parece colado, o texto do botão fica pesado e o fundo dos cartões é branco de
+hospital. Nesta aula ela monta a paleta da marca de verdade: decide os nomes, escolhe os degraus,
+escreve tudo em <code>oklch</code> e fecha a paleta para ninguém colar um rosa limão no meio da
+vitrine.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Como nomear uma cor de marca sem se arrepender em seis meses.</li>
+  <li>O que os números 50 a 950 significam — e o que eles não fazem.</li>
+  <li>Por que cinco degraus resolvem mais que onze.</li>
+  <li>Como escrever uma escala coerente em <code>oklch</code>.</li>
+  <li>Como derivar tons claros de um token com a barra de opacidade.</li>
+  <li>Como fechar a paleta com <code>--color-*: initial</code> e o que redeclarar depois.</li>
+  <li>O roteiro do dia em que a marca muda de cor.</li>
+  <li>Como conferir se dois degraus vizinhos são distinguíveis de longe.</li>
+</ul>
+</div>
+
+<h2>1. A cena: quatro tons no papel, um na tela</h2>
+
+<p>O cartão da padaria foi feito por uma designer de verdade. Ele tem o papel cru, o terracota do
+logo, um marrom quente no endereço e um quase-preto no telefone. Quatro tons que conversam, porque
+foram escolhidos juntos. No site, a Ana usou um hexadecimal só — o do logo — e resolveu o resto com o
+que o Tailwind oferece.</p>
+
+<p>O resultado é aquele descompasso que a gente sente sem saber nomear. O selo branco no fundo branco
+precisa de borda para não desaparecer. O texto do botão em branco puro sobre o terracota parece duro
+demais, porque o papel do cartão é quente. E o cartão de produto, branco de hospital, briga com tudo.
+Não é falta de bom gosto: é falta de tons intermediários.</p>
+
+<p>Cor de marca não é um valor, é uma <strong>escada</strong>. Você precisa do degrau claro para os
+fundos, do médio para os botões, do escuro para o texto sobre claro, e de um quase-branco quente para
+o papel. Quem tem um degrau só fica inventando paliativo em cada canto da página — uma opacidade aqui,
+um cinza ali — e o resultado nunca parece o cartão.</p>
+
+<p>Montar essa escada é o que separa "usei o laranja do Tailwind" de "tenho a paleta da padaria". E
+não é trabalho de designer: são quatro ou cinco decisões, tomadas uma vez, escritas em oito linhas de
+CSS. Depois disso, o site inteiro passa a ter a mesma temperatura de cor — inclusive as partes que
+você ainda não escreveu.</p>
+
+<h2>2. O nome é a decisão mais importante</h2>
+
+<p>Antes de escolher valores, escolha nomes. Existem duas escolas, e a diferença aparece no dia da
+troca. A primeira nomeia pela cor: <code>--color-terracota-500</code>. A segunda nomeia pelo papel:
+<code>--color-marca-500</code>. As duas geram classes (<code>bg-terracota-500</code>,
+<code>bg-marca-500</code>) e as duas funcionam hoje.</p>
+
+<p>A diferença é o futuro. Se a padaria fizer dez anos e a identidade virar verde-salsa, o nome
+<code>terracota</code> fica mentiroso: o CSS vai dizer terracota e a tela vai mostrar verde. Já
+<code>marca</code> continua verdadeiro em qualquer cor. O nome do papel sobrevive à mudança; o nome da
+cor, não.</p>
+
+<p>Existe um meio-termo útil: guardar os dois. <code>--color-marca-500</code> para o que é decisão de
+identidade, e nomes de cor para o que é ilustração — se você desenha um pão, aquele marrom é do pão, e
+vale <code>--color-crosta-300</code>. A regra prática é perguntar: se a marca mudasse amanhã, esse nome
+ficaria errado? Se sim, ele descreve a cor, não o papel — e deve ser usado com parcimônia.</p>
+
+<p>Outra decisão de nome: o sufixo numérico. Ele <strong>não</strong> faz conta nenhuma. O Tailwind não
+calcula <code>500</code> a partir de <code>100</code>: <code>--color-marca-500</code> é um nome como
+<code>--color-marca</code>, com um pedaço a mais. A convenção dos números existe para você se achar e
+para bater com a paleta do Tailwind, que usa a mesma escada. Nada impede escrever
+<code>--color-marca-clara</code>.</p>
+
+<h2>3. O que os números 50 a 950 querem dizer</h2>
+
+<p>A paleta do Tailwind tem onze degraus por família, de 50 a 950, e a convenção vale a pena ser
+seguida porque toda a documentação e todo componente pronto falam essa língua. Não é uma escala
+matemática: é uma escala de <em>uso</em>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Degrau</th><th>Para que serve</th><th>No site da padaria</th></tr>
+<tr><td><code>50</code></td><td>fundo de página, área grande e clara</td><td>o papel cru do cartão</td></tr>
+<tr><td><code>100</code>–<code>200</code></td><td>fundo de selo, cartão, aviso</td><td>o selo "feito hoje"</td></tr>
+<tr><td><code>300</code>–<code>400</code></td><td>borda, ícone, detalhe</td><td>a linha entre as seções</td></tr>
+<tr><td><code>500</code></td><td>a cor da marca: botão, link, destaque</td><td>o botão "encomendar"</td></tr>
+<tr><td><code>600</code>–<code>700</code></td><td>o mesmo botão no mouse, texto sobre claro</td><td>o marrom do endereço</td></tr>
+<tr><td><code>800</code>–<code>950</code></td><td>texto principal, fundo escuro</td><td>o quase-preto da assinatura</td></tr>
+</table>
+</div>
+
+<p>Repare que o <code>500</code> não é "a cor certa" — é o meio da escada. A marca da Ana, que é escura,
+vive bem no <code>600</code>; uma marca amarela precisaria do <code>400</code> para o fundo e do
+<code>800</code> para o texto. O que importa é que os degraus tenham <em>espaço</em> entre si: um
+<code>500</code> e um <code>600</code> muito próximos não servem para nada, porque ninguém distingue
+um do outro na tela.</p>
+
+<p>Um jeito de pensar que ajuda: a escada é o mesmo tom com luz diferente. O <code>50</code> é o tom
+quase branco; o <code>950</code>, quase preto; o <code>500</code>, no meio. Se você desenhasse a
+paleta num papel e fosse misturando tinta branca de um lado e preta do outro, teria exatamente isso.</p>
+
+<h2>4. Cinco degraus bastam</h2>
+
+<p>A tentação, ao descobrir essa escada, é declarar os onze. Não faça. Onze degraus significam onze
+nomes para escolher a cada botão, e a escolha vai ser inconsistente: num dia o selo fica no
+<code>100</code>, no outro no <code>200</code>, e daqui a um mês ninguém sabe qual é o certo. Escala
+grande não é sinal de sistema; é sinal de indecisão.</p>
+
+<p>O caminho é o inverso: escreva as páginas primeiro, veja quantos tons aparecem de verdade e declare
+só eles. Na padaria, cinco resolvem tudo — <code>50</code> para o papel, <code>100</code> para o selo,
+<code>500</code> para o botão, <code>700</code> para o texto e <code>900</code> para o rodapé. Se
+amanhã precisar de um tom entre o <code>100</code> e o <code>500</code>, você declara o
+<code>300</code> — e ele fica coerente, porque a escada já tem uma lógica.</p>
+
+<p>Há uma consequência prática de declarar menos: o CSS final fica menor e o arquivo de tema fica
+legível. Um <code>@theme</code> de dez linhas você revisa em trinta segundos; um de cem, você evita
+abrir. E revisar o tema é exatamente o que se faz quando o cliente manda a paleta nova — ou seja, é
+uma tarefa que vai voltar.</p>
+
+<dl class="anatomy">
+<dt>escala</dt>
+<dd>O conjunto de degraus de um mesmo tom, do quase branco ao quase preto, com nomes numerados.</dd>
+<dt>degrau</dt>
+<dd>Um ponto da escala, como <code>500</code>. É só parte do nome: o Tailwind não calcula um a partir
+do outro.</dd>
+<dt>claridade</dt>
+<dd>O primeiro número do <code>oklch()</code>: quanto mais perto de 1, mais claro. É por aqui que a
+escada sobe e desce.</dd>
+<dt>croma</dt>
+<dd>O segundo número: a "força" da cor. Zero é cinza; valores altos são cores vivas.</dd>
+<dt>ângulo</dt>
+<dd>O terceiro número, em graus: o tom propriamente dito. Manter o mesmo ângulo é o que faz a escala
+parecer uma família só.</dd>
+</dl>
+
+<h2>5. Escrevendo a escada em oklch</h2>
+
+<p>Dá para montar a escada com hexadecimal, escolhendo cada valor a olho. Funciona, mas é lento e o
+resultado tende a fugir do tom: um degrau puxa para o laranja, o outro para o marrom, e a família perde
+a cara. Com <code>oklch()</code> é mais fácil, porque a cor é descrita em três partes separadas —
+claridade, croma e ângulo — e você mexe em uma de cada vez.</p>
+
+<pre class="file" data-file="src/style.css">@import "tailwindcss";
+
+@theme {
+  --color-marca-50: oklch(0.96 0.02 45);
+  --color-marca-500: oklch(0.62 0.12 45);
+  --color-marca-900: oklch(0.36 0.09 45);
+}</pre>
+
+<p>Leia em voz alta: "claridade 0,96, croma 0,02, ângulo 45". O ângulo é o mesmo nas três linhas — é
+ele que diz "isto é terracota". A claridade cai de 0,96 para 0,36, e é isso que faz o tom escurecer. O
+croma sobe no meio e desce nas pontas, porque cor muito clara não segura saturação e cor muito escura
+também não. Essa receita de três linhas é o suficiente para uma escada honesta.</p>
+
+<p>Se você nunca viu <code>oklch</code>, não se assuste: é só um jeito de escrever cor que o CSS
+entende desde 2023, e o navegador devolve o mesmo valor quando você pergunta. O painel das caixas
+mostra o valor como você escreveu, então dá para conferir sem tradutor.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|background-color=oklch(0.96 0.02 45);;css:#botao|background-color=oklch(0.62 0.12 45);;rule:background-color: var(--color-marca-500)">
+  <p class="try-task">A paleta da padaria precisa de três degraus. No <code>@theme</code>, declare
+  <code>--color-marca-50: oklch(0.96 0.02 45)</code>, <code>--color-marca-500: oklch(0.62 0.12 45)</code>
+  e <code>--color-marca-900: oklch(0.36 0.09 45)</code>; depois pinte o cartão com o 50 e o botão com o
+  500 (as classes já estão no HTML).</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="bg-marca-50 p-6"&gt;
+  &lt;p class="text-marca-900"&gt;Pão de queijo&lt;/p&gt;
+  &lt;span id="botao" class="bg-marca-500 px-3 py-1 text-white"&gt;Comprar&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 24px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca-50: oklch(0.96 0.02 45);
+  --color-marca-500: oklch(0.62 0.12 45);
+  --color-marca-900: oklch(0.36 0.09 45);
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="bg-marca-50 p-6"&gt;
+  &lt;p class="text-marca-900"&gt;Pão de queijo&lt;/p&gt;
+  &lt;span id="botao" class="bg-marca-500 px-3 py-1 text-white"&gt;Comprar&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra o cartão com o fundo claro e o botão com o terracota. O CSS gerado
+que o Tailwind escreveu é curto e mostra a mecânica: as três variáveis publicadas em <code>:root</code>
+e uma regra por classe, apontando para a variável certa.</p>
+
+<pre class="term">@layer theme {
+  :root, :host {
+    --color-marca-50: oklch(0.96 0.02 45);
+    --color-marca-500: oklch(0.62 0.12 45);
+    --color-marca-900: oklch(0.36 0.09 45);
+  }
+}
+
+.bg-marca-500 {
+  background-color: var(--color-marca-500);
+}</pre>
+
+<p>Se o terracota não aparecer em nenhum dos dois, o problema é de nome, não de cor: confira se o
+prefixo é <code>--color-</code> e se o sufixo da classe bate com o sufixo da variável. Esse diagnóstico
+é o mesmo da aula de <a href="arroba-theme.html">O @theme</a>, e vale a repetição porque é o erro mais frequente de todos.</p>
+
+<h2>6. Um tom, três usos: a barra de opacidade</h2>
+
+<p>Nem todo tom precisa ser declarado. O selo da padaria é o terracota com pouca força sobre o branco —
+e isso se escreve com a barra: <code>bg-marca/15</code>. A classe existe porque o token existe; o
+Tailwind calcula a mistura na hora.</p>
+
+<p>A diferença em relação a usar um hexadecimal com barra é sutil mas importante: com
+<code>bg-[#b4532a]/15</code>, a mistura nasce do número; com <code>bg-marca/15</code>, nasce da
+variável. Quando a marca mudar, a segunda acompanha e a primeira fica para trás. É o mesmo argumento de
+sempre — um lugar só — aplicado à transparência.</p>
+
+<div class="trytailwind" data-goal="rule:color-mix(in oklab, var(--color-marca) 15%, transparent);;texto:Feito hoje">
+  <p class="try-task">O selo está cinza. Pinte o fundo com a marca a 15% — <code>bg-marca/15</code> — e
+  mantenha o texto na cor da marca, que já está aplicada.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+}
+&lt;/style&gt;
+
+&lt;span id="alvo" class="rounded-full bg-stone-100 px-3 py-1 text-marca"&gt;Feito hoje&lt;/span&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.97 0.001 106.424)
+color: rgb(180, 83, 42)
+border-radius: 3.35544e+07px
+padding-inline: 12px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+}
+&lt;/style&gt;
+
+&lt;span id="alvo" class="rounded-full bg-marca/15 px-3 py-1 text-marca"&gt;Feito hoje&lt;/span&gt;</pre>
+</div>
+
+<p>No painel, o valor aparece como <code>oklab(… / 0.15)</code>, que é o jeito que o navegador devolve
+uma cor com transparência. Não tente ler os números: o que importa é a regra que o Tailwind gerou, com
+<code>color-mix</code> e <code>var(--color-marca)</code>. A transparência é só a receita; a cor
+continua sendo a da marca.</p>
+
+<p>Vale conhecer o limite dessa técnica. Transparência clareia sobre fundo claro e escurece sobre fundo
+escuro — ou seja, o selo muda de aparência conforme a página. Para um selo que fica sobre branco, tudo
+bem. Para um selo que aparece em cartão escuro, o tom vai ficar lamacento, e ali vale declarar um degrau
+próprio (<code>--color-marca-900</code>, por exemplo) em vez de confiar na mistura.</p>
+
+<p>Existe também o caminho de derivar o degrau dentro do próprio tema, com <code>color-mix</code>:</p>
+
+<pre class="file" data-file="src/style.css">@theme {
+  --color-marca: #b4532a;
+  --color-marca-clara: color-mix(in oklab, var(--color-marca) 12%, white);
+}</pre>
+
+<p>Isso funciona e o Tailwind até gera uma versão de reserva para navegadores antigos. Só use quando a
+relação entre os tons for uma regra de verdade ("o claro é sempre 12% da marca"). Se for uma decisão
+visual, é mais fácil de ajustar declarando o valor direto — e mais fácil de ler daqui a um ano.</p>
+
+<h2>7. Fechar a paleta: --color-*: initial</h2>
+
+<p>Com a paleta da marca pronta, aparece uma pergunta: e as outras dezenove famílias do Tailwind? Elas
+continuam ali, e alguém — você, num dia de pressa, ou um estagiário — vai colar um
+<code>bg-lime-300</code> no meio da vitrine. Para quem trabalha com identidade fechada, isso é um
+risco, e existe uma linha que resolve:</p>
+
+<pre class="file" data-file="src/style.css">@import "tailwindcss";
+
+@theme {
+  --color-*: initial;
+  --color-marca: #b4532a;
+  --color-white: #ffffff;
+}</pre>
+
+<p><code>--color-*: initial</code> diz "esqueça as cores padrão". A partir dela, só existe o que você
+declarar. O asterisco é o coringa do namespace: pega todas as variáveis que começam com
+<code>--color-</code> e joga fora. O mesmo vale para outros: <code>--font-*: initial</code> apaga as
+famílias padrão, <code>--radius-*: initial</code> apaga os arredondamentos.</p>
+
+<p>O efeito é imediato e um pouco assustador. <code>bg-amber-100</code> deixa de gerar CSS.
+<code>border-stone-300</code> também. Se alguma página antiga usava essas classes, ela perde a cor sem
+avisar. Por isso a ordem saudável é: listar o que o site usa, fechar a paleta, revisar as páginas uma a
+uma e redeclarar o que faltou.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que você usava</th><th>Depois de fechar a paleta</th><th>O que fazer</th></tr>
+<tr><td><code>bg-white</code></td><td>sem efeito</td><td>declarar <code>--color-white: #ffffff</code></td></tr>
+<tr><td><code>text-black</code></td><td>sem efeito</td><td>declarar <code>--color-black: #0b0b0c</code></td></tr>
+<tr><td><code>bg-stone-100</code></td><td>sem efeito</td><td>criar um neutro próprio, como <code>--color-papel</code></td></tr>
+<tr><td><code>bg-amber-100</code></td><td>sem efeito</td><td>trocar pelos degraus da marca</td></tr>
+<tr><td><code>border-red-500</code></td><td>sem efeito</td><td>declarar um token de erro, como <code>--color-erro</code></td></tr>
+</table>
+</div>
+
+<div class="trytailwind" data-goal="css:#alvo|background-color=rgb(255, 255, 255);;rule:background-color: var(--color-white)">
+  <p class="try-task">A paleta foi fechada e o cartão perdeu o fundo. Redeclare o branco dentro do
+  <code>@theme</code>, depois do <code>--color-*: initial</code>, para <code>bg-white</code> voltar a
+  existir.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-*: initial;
+  --color-marca: #b4532a;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="bg-white p-4 text-marca"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+color: rgb(180, 83, 42)
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-*: initial;
+  --color-marca: #b4532a;
+  --color-white: #ffffff;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="bg-white p-4 text-marca"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS final, depois disso, tem uma lista de cores curta e legível — e isso é um retrato fiel do
+projeto:</p>
+
+<pre class="term">@layer theme {
+  :root, :host {
+    --spacing: 0.25rem;
+    --color-marca: #b4532a;
+    --color-white: #ffffff;
+  }
+}</pre>
+
+<p>Uma ressalva de quem fecha paleta em projeto de cliente: combine com as pessoas antes. Tirar
+<code>bg-blue-600</code> do mapa parece detalhe técnico até alguém precisar de azul para um link de
+documento. A solução é declarar o azul como token do projeto — <code>--color-link</code> — e continuar
+com a curadoria de pé.</p>
+
+<h2>8. O dia em que a marca muda de cor</h2>
+
+<p>Este é o teste final de qualquer paleta, e ele vale mais que qualquer discussão teórica. A Ana
+recebeu a identidade nova: o terracota virou um marrom mais escuro, quase vinho. O que ela precisa fazer
+é uma lista de quatro passos, e o tempo depende só de como a paleta foi montada.</p>
+
+<p>Primeiro, troque os valores no <code>@theme</code>, mantendo os nomes. Segundo, rode
+<code>npm run dev</code> e passeie pelas três páginas. Terceiro, olhe o que ficou invisível: texto sobre
+fundo claro, botão com texto branco, selo sobre cartão. Quarto, ajuste o croma de um ou outro degrau,
+porque o vinho é mais dessaturado que o terracota.</p>
+
+<p>Se a paleta foi feita com nomes de papel, esse roteiro é de vinte minutos. Se foi feita com nomes de
+cor, o primeiro passo já falha: o nome <code>--color-terracota-500</code> agora mente, e alguém vai
+passar a tarde descobrindo onde está cada hexadecimal solto pela página. Essa é a razão prática de
+discutir nomes numa aula de cores.</p>
+
+<p>Vale também um teste de leitura, que não substitui uma ferramenta de contraste mas pega os erros
+grosseiros: diminua o zoom do navegador para 50% e olhe a página de longe. Os degraus vizinhos
+sobrevivem? O texto sobre o botão se destaca? O selo se distingue do cartão? Se tudo vira a mesma mancha
+terracota, a escada tem degraus de menos ou próximos demais — e o conserto é na paleta, não no CSS da
+página.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a cor sai diferente no celular</h3>
+<p>A Ana mandou o hexadecimal do cartão impresso, copiou no <code>@theme</code> e o terracota ficou
+mais vivo no celular. Não é bug: tela calibrada, brilho automático e o próprio painel mudam a percepção.
+O que dá para controlar é a coerência interna — o botão, o selo e o texto devem sair da mesma escada, e
+não de três hexadecimais escolhidos em dias diferentes. Quando a página inteira vem de cinco degraus, a
+diferença entre telas fica pequena; quando vem de cinco valores soltos, ela grita.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o selo some no tema escuro</h3>
+<p>O <code>bg-marca/15</code> funciona no branco e desaparece no quase-preto, porque 15% de terracota
+sobre preto é... quase preto. A correção não é mais opacidade, e sim outro degrau: no escuro, o selo
+pede o <code>--color-marca-900</code> como fundo e o <code>--color-marca-50</code> como texto. Isso é
+normal e é a razão de existir uma escada: cada fundo tem o degrau que funciona nele.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a paleta cresceu até virar bagunça</h3>
+<p>Três meses depois, o <code>@theme</code> tinha vinte e duas cores, sendo quatro terracotas
+ligeiramente diferentes. Acontece porque cada pedido novo vira uma linha nova, sem ninguém olhar a
+lista. A faxina é simples: percorra os HTML procurando as classes de cor que aparecem, risque as que não
+aparecem mais e una as que estão a menos de um degrau de distância. Quem faz isso uma vez por trimestre
+nunca chega ao ponto de ter medo do próprio tema.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. O que o número em <code>--color-marca-500</code> faz?</p>
+<label><input type="radio" name="q1"> calcula o tom a partir do <code>100</code></label>
+<label><input type="radio" name="q1"> define a opacidade da cor</label>
+<label><input type="radio" name="q1"> é só parte do nome, seguindo a convenção da escala</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. Por que nomear pelo papel (<code>marca</code>) e não pela cor (<code>terracota</code>)?</p>
+<label><input type="radio" name="q2"> porque o nome continua verdadeiro se a marca mudar de cor</label>
+<label><input type="radio" name="q2"> porque o Tailwind só aceita nomes em português</label>
+<label><input type="radio" name="q2"> porque nomes de cor gastam mais CSS</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. O que <code>--color-*: initial</code> faz?</p>
+<label><input type="radio" name="q3"> zera a opacidade de todas as cores</label>
+<label><input type="radio" name="q3"> apaga as cores padrão; só as declaradas por você continuam valendo</label>
+<label><input type="radio" name="q3"> transforma todas as cores em preto e branco</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o terracota com transparência</h2>
+<p>O selo da padaria usa o token <code>--color-marca</code> com 15% de força. Escreva a classe de fundo
+completa, do jeito que ela vai no HTML.</p>
+<div class="ex-code">&lt;span class="<input aria-label="resposta 1" data-answer="bg-marca/15" placeholder="..."> rounded-full px-3 py-1 text-marca"&gt;Feito hoje&lt;/span&gt;</div>
+<p class="ex-dica">Dica: primeiro o prefixo do fundo, depois o nome do token, e a barra com o número. Sem
+colchetes — colchete é para valor cru, e aqui você tem um token.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Cor de marca é uma escada, não um valor. Os nomes devem falar de papel (<code>marca</code>) e não de
+cor (<code>terracota</code>), porque o papel sobrevive à troca de identidade. Os números de 50 a 950 são
+convenção de uso — claro para fundo, médio para o botão, escuro para texto — e não fazem conta nenhuma:
+são parte do nome.</p>
+
+<p>Cinco degraus bastam, e <code>oklch()</code> é o jeito mais fácil de escrevê-los: mesmo ângulo para
+a família, claridade descendo, croma no meio. A barra de opacidade deriva tons claros do token
+(<code>bg-marca/15</code>) e acompanha a marca quando ela muda. Para projetos com identidade fechada,
+<code>--color-*: initial</code> apaga a paleta padrão e deixa só a sua — lembrando de redeclarar o
+branco, o preto e os neutros que as páginas usam.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Nomeie pelo papel: <code>--color-marca-500</code>, não <code>--color-terracota-500</code>.</li>
+<li>O sufixo numérico é parte do nome; o Tailwind não interpola valores.</li>
+<li>50 para fundo, 100–200 para selo, 500 para botão, 700–950 para texto.</li>
+<li>Declare cinco degraus, não onze: menos escolha, mais coerência.</li>
+<li><code>oklch(claridade croma ângulo)</code>: mesmo ângulo mantém a família.</li>
+<li><code>bg-marca/15</code> deriva do token; <code>bg-[#b4532a]/15</code> congela o número.</li>
+<li>Transparência clareia sobre claro e escurece sobre escuro: no escuro, use outro degrau.</li>
+<li><code>--color-*: initial</code> apaga a paleta padrão e exige redeclarar branco e preto.</li>
+<li>Feche a paleta depois de listar o que as páginas usam, e revise página por página.</li>
+<li>O teste final é trocar os valores mantendo os nomes e passar pelas páginas em vinte minutos.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

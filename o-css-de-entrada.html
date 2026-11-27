@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O CSS de Entrada | Guia Tailwind</title>
+<meta name="description" content="O arquivo de entrada do Tailwind explicado: por que ele tem uma linha só, o que o @import traz, o que você pode escrever nele, a ordem que importa e o @apply.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>O CSS de <span class="hl">Entrada</span></h1>
+<p class="intro">A Ana abriu o arquivo <code>src/entrada.css</code> da padaria e encontrou uma linha
+só: <code>@import "tailwindcss";</code>. Ficou desconfiada. Um arquivo com uma linha não pode ser o
+lugar onde se configura um site inteiro — ou pode? Nesta aula ela descobre que esse arquivo pequeno é o
+painel de controle do projeto: é nele que se diz de onde vêm as classes, quais valores a marca usa e
+quais estilos entram junto com as utilitárias. E descobre também o que não deve ir para lá.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é o CSS de entrada e por que ele não é o arquivo que a página carrega.</li>
+  <li>O que a linha <code>@import "tailwindcss";</code> traz para dentro do projeto.</li>
+  <li>Por que ela precisa ser a primeira linha do arquivo.</li>
+  <li>O que mais pode morar no arquivo: <code>@source</code>, <code>@theme</code>, <code>@apply</code> e CSS comum.</li>
+  <li>Como usar <code>@apply</code> para criar uma classe sua com utilitárias por dentro.</li>
+  <li>A ordem das regras e o que acontece quando um valor entra em conflito.</li>
+  <li>O que fazer quando a folha sai vazia ou o estilo esperado não aparece.</li>
+</ul>
+</div>
+
+<h2>1. A cena: um arquivo com uma linha</h2>
+
+<p>Depois de instalar e de rodar o build algumas vezes, a Ana resolveu abrir os dois arquivos de CSS do
+projeto, um ao lado do outro. O de <code>dist/</code> tinha centenas de linhas, cheio de blocos e
+variáveis. O de <code>src/</code> tinha uma linha. Um é o resultado do trabalho; o outro é o pedido. E é
+aí que vem a pergunta que esta aula responde: se o pedido é tão pequeno, onde é que se configura o
+resto?</p>
+
+<p>A resposta é que o pedido é pequeno porque o Tailwind já sabe o que fazer com quase tudo. Ele tem um
+catálogo de nomes prontos e um conjunto de valores padrão — cores, espaços, tamanhos de fonte, raios de
+borda. O arquivo de entrada serve para dizer o que é específico do seu projeto: de onde ler os arquivos,
+quais valores são da marca, quais combinações viram uma classe só. É a diferença entre um caderno
+impresso e as suas anotações nas margens.</p>
+
+<p>Antes de qualquer coisa, um ponto que confunde muita gente: esse arquivo nunca é ligado na página. O
+<code>link</code> do HTML aponta para o arquivo de <code>dist</code>. O de <code>src</code> é fonte,
+como o HTML: existe para ser lido pela ferramenta. Se você ligar o de <code>src</code> na página, o
+navegador recebe uma linha de <code>@import</code> e nenhuma classe — e o site fica sem estilo, sem
+nenhum erro visível.</p>
+
+<h2>2. O que é o CSS de entrada</h2>
+
+<p>O arquivo de entrada é um CSS comum, com uma diferença: ele passa pelo compilador do Tailwind antes
+de virar o arquivo final. Tudo o que o compilador entende — as diretivas dele e o CSS normal — sai do
+outro lado; o que ele não entende, ele reclama. Por isso o arquivo é, ao mesmo tempo, configuração e
+folha de estilo.</p>
+
+<p>Pense nele como a receita que você entrega ao padeiro. A receita não é o pão: é a instrução. O pão é
+o que sai do forno, e é ele que o cliente leva. Se você mudar a receita, o próximo pão muda; o que já
+saiu não muda. Essa imagem vale para o fluxo inteiro: mexa na entrada, rode o build, o arquivo de
+<code>dist</code> é reescrito do zero.</p>
+
+<dl class="anatomy">
+<dt>entrada</dt>
+<dd>O arquivo que você escreve, em <code>src/entrada.css</code> ou nome parecido. Aponta no
+<code>-i</code> da CLI. Nunca é ligado na página.</dd>
+<dt>saída</dt>
+<dd>O arquivo que a CLI escreve, em <code>dist/estilo.css</code>. É o que o navegador carrega. Nunca
+é editado à mão.</dd>
+<dt>diretiva</dt>
+<dd>Uma instrução que começa com <code>@</code>, como <code>@import</code>, <code>@theme</code> ou
+<code>@apply</code>. São ordens para o compilador, não para o navegador.</dd>
+<dt>camada</dt>
+<dd>Um grupo de regras com prioridade definida. O Tailwind usa camadas para que a utilitária vença o
+reset sem precisar de <code>!important</code>.</dd>
+<dt>utilitária</dt>
+<dd>Uma classe que faz uma coisa só, como <code>p-4</code>. É o que o Tailwind gera em série a partir
+do que encontra no projeto.</dd>
+</dl>
+
+<p>O nome do arquivo é escolha sua: <code>entrada.css</code>, <code>app.css</code>,
+<code>tailwind.css</code>, <code>estilos/fonte.css</code>. O que importa é que ele exista, que esteja
+apontado no <code>-i</code> e que ninguém o confunda com a saída. Projetos maiores às vezes têm mais de
+um, um por área do site.</p>
+
+<h2>3. A linha que faz tudo: <code>@import "tailwindcss"</code></h2>
+
+<p>Essa linha pede ao compilador que traga o Tailwind inteiro para o arquivo: as variáveis do tema, o
+reset de base e a capacidade de gerar utilitárias. Sem ela, o arquivo é só CSS comum — as classes do
+Tailwind no HTML não produzem regra nenhuma, e a página fica sem estilo.</p>
+
+<p>Ela precisa ser a primeira coisa do arquivo, antes de qualquer regra sua. Não é capricho do Tailwind:
+a regra de CSS para <code>@import</code> exige que ele venha antes de todas as outras regras, senão o
+navegador ignora. Se você escrever sua classe primeiro e o <code>@import</code> depois, o compilador
+avisa — e, se não avisasse, o resultado seria uma folha sem o tema.</p>
+
+<p>Quem vem de tutoriais antigos vai estranhar: a versão 3 pedia três linhas, <code>@tailwind base</code>,
+<code>@tailwind components</code> e <code>@tailwind utilities</code>. A versão 4 trocou as três por um
+<code>@import</code> só. Se você colar as linhas antigas num projeto novo, elas não fazem nada — não há
+erro, só uma folha sem o Tailwind. Quando um tutorial parecer certo e não funcionar, confira a versão
+antes de conferir o resto.</p>
+
+<p>Um detalhe prático: o <code>@import</code> também aceita a forma <code>@import "tailwindcss/preflight"</code>
+e outras fatias separadas, para quem quer só uma parte. É recurso de projeto grande, que prefere
+controlar cada pedaço. Para o site da padaria, a linha inteira é o que basta.</p>
+
+<h2>4. O que mais pode morar no arquivo</h2>
+
+<p>Aqui está a parte que responde à desconfiança da Ana: o arquivo pequeno pode crescer quando o projeto
+precisa. Estas são as diretivas que aparecem com mais frequência, com o que cada uma faz:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Diretiva</th><th>Para que serve</th><th>Exemplo</th></tr>
+<tr><td><code>@import</code></td><td>traz o Tailwind para o arquivo</td><td><code>@import "tailwindcss";</code></td></tr>
+<tr><td><code>@source</code></td><td>acrescenta pastas à varredura de classes</td><td><code>@source "../public";</code></td></tr>
+<tr><td><code>@theme</code></td><td>declara valores do projeto: cores, espaços, fontes</td><td><code>@theme { --color-marca: #b4532a; }</code></td></tr>
+<tr><td><code>@apply</code></td><td>usa utilitárias dentro de uma regra sua</td><td><code>.botao { @apply px-4 py-2; }</code></td></tr>
+<tr><td><code>@custom-variant</code></td><td>cria uma variação própria, como um tema</td><td><code>@custom-variant destaque (&amp;:where([data-destaque]));</code></td></tr>
+</table>
+</div>
+
+<p>Além das diretivas, cabe CSS comum: seletores de elemento, classes suas, regras de impressão, o que
+você quiser. O compilador deixa passar. É ali, por exemplo, que se ajusta a cor de fundo do
+<code>body</code> ou se define um estilo para links que não têm classe. A regra de bom senso é não
+duplicar: se existe uma utilitária que faz o serviço, use a utilitária no HTML.</p>
+
+<p>Duas diretivas ficaram de fora da tabela de propósito, porque são assunto de aulas próprias:
+<code>@config</code>, que carrega um arquivo de configuração no formato antigo, e <code>@plugin</code>,
+que carrega plugins da comunidade. Você não precisa delas para começar, e a documentação avisa que são
+caminhos de compatibilidade.</p>
+
+<p>A <code>@source</code> merece um parágrafo, porque resolve um problema real. Por padrão, a CLI
+percorre a pasta em que foi chamada. Se as páginas do site ficam em <code>public/</code> e o CSS em
+<code>src/</code>, a varredura já passa por ali, porque <code>public/</code> está dentro do projeto. Mas
+se algum arquivo mora fora — um componente compartilhado, uma pasta irmã —, a classe dele não entra no
+build. A linha <code>@source "../compartilhado";</code> conserta isso sem precisar mover arquivo nenhum.</p>
+
+<h2>5. A ordem importa, e as camadas explicam por quê</h2>
+
+<p>Dentro do arquivo de entrada, a ordem das suas regras conta. CSS é uma lista: quando duas regras
+atingem o mesmo elemento com a mesma prioridade, a última vence. O Tailwind organiza o próprio conteúdo
+em camadas — tema, base, componentes, utilitárias —, e as utilitárias ficam por último justamente para
+vencer o reset do navegador.</p>
+
+<p>Aqui vem a parte contraintuitiva, e ela vale ouro. Suas regras escritas depois do
+<code>@import</code> <strong>vencem</strong> as utilitárias, mesmo que a utilitária esteja no HTML. O
+motivo são as camadas: o Tailwind coloca as utilitárias dentro de <code>@layer utilities</code>, e a
+regra do CSS diz que o que está fora de camada ganha do que está dentro. Sua regra comum, escrita solta
+no arquivo, está fora de camada. Portanto ela manda.</p>
+
+<p>Isso explica o susto mais comum de quem começa: o cartão tem <code>class="cartao p-4"</code>, a regra
+<code>.cartao</code> fixa 40 px de padding, e o <code>p-4</code> parece não funcionar. Não é bug: a
+regra fora de camada está ganhando. As saídas são duas — tirar a propriedade da regra e deixar a
+utilitária cuidar dela, ou escrever a regra dentro de <code>@layer components</code>, que fica antes das
+utilitárias e perde a disputa de propósito.</p>
+
+<p>A recomendação prática é a primeira: cada propriedade tem um dono. Se o espaçamento é assunto da
+utilitária, a regra <code>.cartao</code> cuida de outra coisa. Quando você quiser mesmo que a utilitária
+vença, envolva a regra em <code>@layer components</code> e o conflito desaparece. Não é preciso decorar
+a ordem das camadas; é preciso saber que ela existe e que decide as brigas silenciosas.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=8px;;css:#alvo|border-radius=8px">
+  <p class="try-task">A regra <code>.cartao</code> fixa 40 px de padding e está vencendo o
+  <code>p-2</code>, que deveria dar 8 px. Deixe o espaçamento com a utilitária e a regra cuidando do
+  arredondamento de 8 px.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+.cartao { padding: 40px; }
+&lt;/style&gt;
+&lt;div id="alvo" class="cartao p-2"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 40px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+.cartao { border-radius: 8px; }
+&lt;/style&gt;
+&lt;div id="alvo" class="cartao p-2"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>Depois da missão, o painel mostra 8 px de respiro e 8 px de raio: um valor de cada dono, sem briga.
+Se você tivesse deixado os dois paddings, o resultado dependeria de quem foi escrito por último — e esse
+tipo de dúvida não aparece no código, só no resultado.</p>
+
+<h2>6. <code>@apply</code>: a classe sua que usa utilitárias</h2>
+
+<p>Existe uma situação em que repetir a mesma lista de classes em vinte botões cansa: quando o botão
+aparece em toda parte e sempre igual. O <code>@apply</code> existe para isso. Você escreve uma regra
+normal, com um seletor seu, e dentro dela pede as utilitárias que quiser. O compilador copia as
+propriedades para dentro da sua regra e o HTML fica com uma classe só.</p>
+
+<pre class="term" data-title="trecho de dist/estilo.css">.botao {
+  border-radius: var(--radius-lg);
+  padding-inline: calc(var(--spacing) * 4);
+  padding-block: calc(var(--spacing) * 2);
+}</pre>
+
+<p>É literalmente isso que sai no arquivo final: a classe <code>.botao</code> com as propriedades das
+utilitárias copiadas para dentro. Nada de <code>@apply</code> chega ao navegador — a diretiva é uma
+instrução de montagem, não um recurso de CSS.</p>
+
+<div class="trytailwind" data-goal="rule:border-radius: var(--radius-lg);;css:#alvo|padding=8px 16px;;rule:padding-inline: calc(var(--spacing) * 4)">
+  <p class="try-task">O botão da padaria usa a classe <code>botao</code>, definida no CSS de entrada.
+  Falta arredondar os cantos e dar respiro: acrescente ao <code>@apply</code> o raio de 8 px e o
+  respiro horizontal de 16 px.</p>
+  <pre class="html" data-saida="css">&lt;style type="text/tailwindcss"&gt;
+.botao { @apply py-2; }
+&lt;/style&gt;
+&lt;button id="alvo" class="botao"&gt;Encomendar&lt;/button&gt;</pre>
+  <pre class="out">
+.botao {
+  padding-block: calc(var(--spacing) * 2);
+}
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+.botao { @apply rounded-lg px-4 py-2; }
+&lt;/style&gt;
+&lt;button id="alvo" class="botao"&gt;Encomendar&lt;/button&gt;</pre>
+</div>
+
+<p>O painel de regras mostra o resultado: um bloco <code>.botao</code> com as propriedades das
+utilitárias escolhidas, e mais nada. O HTML não sabe que existe Tailwind ali. Isso tem um custo e um
+benefício. O custo é que a regra <code>.botao</code> deixa de responder a variações: não existe
+<code>botao:hover</code> nem <code>md:botao</code>, a não ser que você escreva outra regra. O benefício
+é que o HTML fica curto e o estilo do botão mora em um lugar só.</p>
+
+<p>O uso saudável do <code>@apply</code> é para peças realmente repetidas e realmente estáveis — o
+botão principal, o selo, o campo de formulário. Usar <code>@apply</code> em tudo devolve o problema que
+o Tailwind veio resolver: um CSS cheio de classes inventadas, longe do HTML, em que ninguém sabe de onde
+vem cada valor. Quando estiver em dúvida, repita as utilitárias no HTML; é mais fácil de ler.</p>
+
+<h2>7. <code>@theme</code>: os valores da casa</h2>
+
+<p>O <code>@theme</code> é onde se declaram os valores que o projeto usa e o Tailwind não tem. Uma cor
+de marca, por exemplo. A sintaxe é a de variáveis CSS, com um prefixo que diz ao Tailwind que tipo de
+valor é aquilo: <code>--color-</code> para cores, <code>--spacing</code> para a escala de espaço,
+<code>--font-</code> para famílias de fonte.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-marca);;rule:color: var(--color-white)">
+  <p class="try-task">A padaria tem uma cor de marca, o terracota <code>#b4532a</code>, já declarado no
+  CSS de entrada. Pinte o selo com essa cor e deixe o texto branco — usando só classes.</p>
+  <pre class="html" data-saida="css">&lt;style type="text/tailwindcss"&gt;
+@theme { --color-marca: #b4532a; }
+&lt;/style&gt;
+&lt;span id="alvo" class="px-2 py-1"&gt;Pão do dia&lt;/span&gt;</pre>
+  <pre class="out">
+.px-2 {
+  padding-inline: calc(var(--spacing) * 2);
+}
+.py-1 {
+  padding-block: var(--spacing);
+}
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme { --color-marca: #b4532a; }
+&lt;/style&gt;
+&lt;span id="alvo" class="px-2 py-1 bg-marca text-white"&gt;Pão do dia&lt;/span&gt;</pre>
+</div>
+
+<p>Repare no que aconteceu: a variável <code>--color-marca</code> virou uma família de utilitárias.
+<code>bg-marca</code> pinta o fundo, <code>text-marca</code> pinta a letra, <code>border-marca</code>
+pinta a borda — todas de graça, sem você escrever regra nenhuma. É esse o poder do <code>@theme</code>:
+declarar uma vez e ganhar o catálogo inteiro.</p>
+
+<pre class="term" data-title="trecho de dist/estilo.css">.bg-marca {
+  background-color: var(--color-marca);
+}</pre>
+
+<p>O bloco não tem o valor em hexadecimal: tem a variável. O hexadecimal fica declarado uma vez, no
+arquivo de entrada, e todas as regras apontam para ele. Trocar a cor da marca passa a ser uma edição de
+uma linha, seguida do build.</p>
+
+<p>Como o <code>@theme</code> gera variáveis CSS, o valor final aparece como
+<code>var(--color-marca)</code> na folha gerada. Você pode até usar a variável direto numa regra sua.
+O assunto tem aula própria, com todos os tipos de valor e as armadilhas de nome: quando o site crescer,
+vale ler <a href="cores-da-marca.html">Cores da Marca</a> e, mais adiante, o
+<code>@theme</code> completo.</p>
+
+<h2>8. O que não vai no arquivo de entrada</h2>
+
+<p>Três coisas não pertencem a ele, e todas aparecem no começo. A primeira é <code>@tailwind</code> no
+lugar do <code>@import</code>: sintaxe da versão 3, que na 4 não faz nada. A segunda é o CSS de uma
+página específica — o ajuste de uma tela, o espaçamento de um cartão. Isso mora no HTML, como classe.
+O arquivo de entrada é para o que vale no site inteiro.</p>
+
+<p>A terceira é o próprio arquivo de saída: não copie pedaços de <code>dist/estilo.css</code> para
+dentro da entrada. A saída é descartável e reescrita a cada build; o que você precisa dela é gerado
+automaticamente. Copiar é criar uma segunda fonte de verdade, que envelhece sem avisar.</p>
+
+<p>Existe um caso legítimo de CSS solto no arquivo de entrada: o reset fino e os estilos de base. Um
+<code>body</code> com fundo claro, uma fonte padrão, o <code>scroll-behavior</code> suave, a seleção de
+texto com a cor da marca. São regras globais, que valem para o site todo e não têm classe. A aula
+<a href="variaveis-de-tema.html">Variáveis de Tema</a> mostra como amarrar esses valores às variáveis,
+para que mudem junto com o resto.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que você quer</th><th>Onde escrever</th><th>Por quê</th></tr>
+<tr><td>a cor da marca</td><td>entrada, dentro de <code>@theme</code></td><td>vira família de utilitárias para o site todo</td></tr>
+<tr><td>o respiro de um cartão</td><td>HTML, como <code>p-4</code></td><td>é uma decisão daquela tela, não do projeto</td></tr>
+<tr><td>o estilo do botão principal</td><td>entrada, como <code>.botao</code> com <code>@apply</code></td><td>peça repetida e estável, merece um nome</td></tr>
+<tr><td>o fundo do <code>body</code></td><td>entrada, como regra comum</td><td>é global e não tem classe</td></tr>
+<tr><td>o arquivo que a página carrega</td><td>saída, gerada pela CLI</td><td>é resultado, não fonte</td></tr>
+</table>
+</div>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: "a folha saiu com uma linha só"</h3>
+<p>Você abriu a entrada no navegador achando que era a saída, ou ligou o arquivo errado no HTML. A folha
+de <code>src/</code> tem o <code>@import</code> e mais nada — é fonte. Confira o <code>href</code> do
+<code>link</code>: ele tem de apontar para <code>dist/</code>. Se o caminho estiver certo e a página
+continuar sem estilo, rode o build e recarregue sem cache.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: "minha classe do entrada não pega no HTML"</h3>
+<p>Duas causas comuns. A primeira é ordem: sua regra está antes do <code>@import</code>, então o
+Tailwind veio depois e o navegador aplicou outra coisa — ou o compilador recusou o arquivo. A segunda é
+especificidade: a utilitária está na camada de utilitárias e vence a sua regra comum. Se precisar mesmo
+que a sua regra vença, escreva-a depois e com o mesmo peso; se puder, resolva com utilitária e esqueça
+a classe própria.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: "o <code>@apply</code> não faz nada"</h3>
+<p>O <code>@apply</code> só funciona em arquivo que tem o <code>@import "tailwindcss"</code> no topo, ou
+que é importado por ele. Se você criou um CSS separado só com <code>@apply</code> e ligou esse arquivo
+direto na página, o navegador não conhece a diretiva e a ignora em silêncio. A cura é incluir o arquivo
+dentro da entrada, com <code>@import "./botoes.css";</code>, na ordem certa.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. Qual dos dois arquivos de CSS o HTML deve carregar?</p>
+<label><input type="radio" name="q1"> o de <code>dist</code>, que a CLI gerou</label>
+<label><input type="radio" name="q1"> o de <code>src</code>, que você escreveu</label>
+<label><input type="radio" name="q1"> os dois, na ordem alfabética</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Onde o <code>@import "tailwindcss";</code> deve
+ficar?</p>
+<label><input type="radio" name="q2"> no fim do arquivo, para vencer as outras regras</label>
+<label><input type="radio" name="q2"> dentro de <code>@theme</code></label>
+<label><input type="radio" name="q2"> no começo do arquivo, antes de qualquer regra sua</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. O que o <code>@apply</code> faz?</p>
+<label><input type="radio" name="q3"> baixa um plugin da comunidade</label>
+<label><input type="radio" name="q3"> copia as propriedades das utilitárias para dentro da regra que você escreveu</label>
+<label><input type="radio" name="q3"> aplica o CSS só no navegador, sem gerar arquivo</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a linha que faltava</h2>
+<p>O arquivo de entrada da Ana está vazio, e por isso o build não gera nada. Complete a primeira linha
+com a diretiva que traz o Tailwind para dentro do arquivo:</p>
+<div class="ex-code"><input aria-label="resposta 1" data-answer="@import 'tailwindcss';|@import 'tailwindcss'" placeholder="..."> </div>
+<p class="ex-dica">Dica: começa com arroba, usa a palavra inglesa para "trazer para dentro" e o nome do
+pacote entre aspas. As aspas simples e as duplas valem igual em CSS.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O CSS de entrada é o arquivo que você escreve e o compilador lê: pequeno por fora, poderoso por
+dentro. Sua primeira linha, <code>@import "tailwindcss";</code>, traz tema, base e a capacidade de gerar
+utilitárias. Depois dela cabem diretivas — <code>@source</code> para ampliar a varredura,
+<code>@theme</code> para declarar valores da casa, <code>@apply</code> para criar classes compostas — e
+também CSS comum, para o que é global e não tem classe.</p>
+
+<p>O que nunca vai para lá é o resultado do build: <code>dist</code> é saída, reescrita a cada execução.
+E o que nunca sai de lá é o <code>link</code> da página: o HTML carrega a saída, sempre. Uma vez
+entendida essa separação, os dois arquivos param de parecer duplicados e passam a ser o que são — a
+receita e o pão.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Entrada é fonte, escrita por você; saída é resultado, escrita pela CLI.</li>
+<li>O <code>link</code> da página aponta sempre para a saída.</li>
+<li><code>@import "tailwindcss";</code> vem antes de qualquer regra sua.</li>
+<li>Na versão 4 não existe <code>@tailwind base</code>: quem manda é o <code>@import</code>.</li>
+<li><code>@source</code> acrescenta pastas que a varredura não veria.</li>
+<li><code>@theme</code> transforma uma variável em família de utilitárias.</li>
+<li><code>@apply</code> é para peça repetida e estável, não para tudo.</li>
+<li>Suas regras comuns valem mais que as utilitárias: estão fora de camada.</li>
+<li>Para a utilitária vencer, escreva a regra em <code>@layer components</code>.</li>
+<li>CSS global sem classe cabe aqui; CSS de uma tela específica mora no HTML.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

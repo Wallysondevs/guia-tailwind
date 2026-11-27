@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Animações Prontas | Guia Tailwind</title>
+<meta name="description" content="As animações prontas do Tailwind na padaria da Ana: animate-spin no carregando, animate-pulse no esqueleto, animate-bounce no aviso e o animate-none para quem pediu calma.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Animações <span class="hl">Prontas</span></h1>
+<p class="intro">A encomenda da cliente demorou quatro segundos para chegar ao servidor, e nesse tempo
+nada na tela da Ana mudou. O botão continuou igual, sem pista de que algo estava acontecendo. A cliente
+apertou de novo — duas encomendas de pão de queijo. Foi aí que a Ana entendeu que faltava outra coisa
+além de transição: um movimento que <em>roda sozinho</em>, sem depender do mouse nem de uma mudança de
+valor. O Tailwind traz quatro desses prontos, com nome de verbo: girar, pulsar, piscar e quicar. Nesta
+aula ela aprende onde cada um serve, como montar um indicador de carregamento com borda e por que a
+animação mais bonita é a que também sabe parar.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A diferença entre transição e animação, em uma frase que você não esquece.</li>
+  <li>O que é um <code>@keyframes</code> e por que ele é o roteiro do movimento.</li>
+  <li>As quatro prontas: <code>animate-spin</code>, <code>animate-pulse</code>,
+  <code>animate-ping</code> e <code>animate-bounce</code>.</li>
+  <li>Como montar um indicador de carregamento com <code>border</code> e <code>animate-spin</code>.</li>
+  <li>O esqueleto de carregamento com <code>animate-pulse</code>, que é a animação mais útil do grupo.</li>
+  <li>Por que <code>duration-</code> não muda a velocidade de uma animação.</li>
+  <li>Como usar o valor livre <code>animate-[...]</code> para mudar tempo e repetição.</li>
+  <li>O que fazer para quem pediu menos movimento no sistema.</li>
+</ul>
+</div>
+
+<h2>1. A cena: quatro segundos de silêncio</h2>
+
+<p>O formulário de encomenda da padaria era bonito e honesto: o visitante escolhia o pão, o horário, o
+nome e apertava “Enviar”. O que ele não sabia era que o servidor da padaria demorava alguns segundos
+para responder. Nesse intervalo, a tela ficava parada. Não havia nada errado com o código; havia uma
+ausência de sinal.</p>
+
+<p>Para quem monta site, esse silêncio parece detalhe. Para quem usa, ele é um convite ao clique duplo.
+A cliente da Ana clicou duas vezes — e duas encomendas foram registradas. Bom para a padaria, ruim para
+a cozinha. O conserto não é impedir o clique com JavaScript (embora isso ajude); é mostrar que algo
+está acontecendo.</p>
+
+<p>Todos os sinais possíveis têm a mesma natureza: um desenho que se move sozinho. Não é reação ao
+mouse, não é resposta a um clique. Ele começa quando o elemento aparece e continua até o elemento ir
+embora. No CSS, esse tipo de movimento tem nome: animação. E o Tailwind entrega algumas prontas,
+justamente as mais usadas.</p>
+
+<h2>2. Transição e animação não são a mesma coisa</h2>
+
+<p>Você já sabe que transição precisa de uma mudança para acontecer: um valor antigo, um valor novo e
+um tempo no meio. Sem o clique ou o mouse, ela fica quieta, esperando. A animação é o contrário: ela
+roda por conta própria, do começo ao fim do roteiro, quantas vezes você mandar — inclusive
+infinitamente.</p>
+
+<p>Uma forma de guardar a diferença: a transição é um <em>mensageiro</em> entre dois estados; a animação
+é um <em>roteiro</em> que pode ter começo, meio e fim, com quantos passos você quiser. A transição só
+sabe ir de A até B em linha reta (mesmo que com curva); a animação sabe ir de A até B, voltar, piscar,
+girar 360 graus e parar onde quiser.</p>
+
+<p>Isso tem uma consequência prática que resolve o problema da Ana: como a animação não depende de
+mudança, ela é a ferramenta certa para “estou trabalhando”, “carregando”, “novo”, “atenção aqui”. São
+estados que duram enquanto o elemento está na tela, e não enquanto o mouse está em cima.</p>
+
+<dl class="anatomy">
+<dt>animação</dt>
+<dd>Uma sequência de estados desenhada pelo navegador ao longo do tempo, que roda sozinha e pode se
+repetir.</dd>
+<dt>keyframes</dt>
+<dd>O roteiro: uma lista de paradas (<code>0%</code>, <code>50%</code>, <code>100%</code>) com as
+propriedades de cada uma.</dd>
+<dt>duração da animação</dt>
+<dd>Quanto tempo um ciclo leva. Nas prontas do Tailwind, 1 s ou 2 s; não é a mesma coisa que
+<code>duration-</code>.</dd>
+<dt>iteração</dt>
+<dd>Quantas vezes o roteiro se repete. <code>infinite</code> quer dizer “para sempre”.</dd>
+<dt>esqueleto</dt>
+<dd>A versão cinzenta e pulsante do conteúdo, mostrada enquanto os dados não chegam.</dd>
+</dl>
+
+<p>Uma palavra sobre a palavra: “animação” no CSS não tem nada de desenho animado. É só o nome do
+mecanismo que percorre um roteiro de estilos. O que faz o movimento bonito é o roteiro e o tempo, e é
+por isso que as quatro prontas funcionam tão bem: alguém já pensou nos dois por você.</p>
+
+<h2>3. As quatro animações prontas</h2>
+
+<p>O Tailwind v4 traz quatro utilidades de animação, e todas começam com <code>animate-</code>:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que ela faz</th><th>Onde costuma servir</th></tr>
+<tr><td><code>animate-spin</code></td><td>gira 360 graus em 1 s, sem parar</td><td>indicador de carregamento, ícone de recarregar</td></tr>
+<tr><td><code>animate-pulse</code></td><td>fica mais transparente e volta, em 2 s</td><td>esqueleto de carregamento, bloco “carregando dados”</td></tr>
+<tr><td><code>animate-ping</code></td><td>cresce e desaparece, em 1 s</td><td>ponto de notificação, “tem coisa nova aqui”</td></tr>
+<tr><td><code>animate-bounce</code></td><td>quica para cima e para baixo, em 1 s</td><td>seta que aponta para baixo, aviso de “role a página”</td></tr>
+<tr><td><code>animate-none</code></td><td>desliga qualquer animação</td><td>parar um efeito de propósito, acessibilidade</td></tr>
+</table>
+</div>
+
+<p>Repare que são quatro <em>sensações</em>, não quatro efeitos técnicos. Girar comunica espera contínua.
+Pulsar comunica “isto ainda vai chegar”. Piscar comunica novidade. Quicar comunica direção. Escolher a
+animação é escolher a frase que o elemento diz sem texto.</p>
+
+<p>E existe o valor livre, entre colchetes, quando as quatro não bastam:
+<code>animate-[spin_3s_linear_infinite]</code>. Os sublinhados viram espaços, e aí você monta a
+declaração inteira do CSS — nome, tempo, curva e repetição. É a válvula de escape para quem já entendeu
+o suficiente e quer um giro mais lento, por exemplo.</p>
+
+<h2>4. O carregando: animate-spin</h2>
+
+<p>O indicador clássico é uma bolinha com borda em que um dos lados tem cor diferente. Girando, ela
+parece um arco que persegue a si mesmo. O truque é todo de borda: quatro lados de 4 px, três deles em
+âmbar claro e o de cima em âmbar escuro. Some <code>rounded-full</code> para arredondar tudo em círculo
+e <code>animate-spin</code> para girar.</p>
+
+<div class="trytailwind" data-goal="rule:animation: var(--animate-spin);;css:#alvo|animation=1s linear infinite spin">
+  <p class="try-task">A bolinha está montada, com a borda de cima mais escura, mas não gira. Acrescente
+  <code>animate-spin</code>.</p>
+  <pre class="html">&lt;div class="rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;div class="flex items-center gap-3"&gt;
+    &lt;div id="alvo" class="size-8 rounded-full border-4 border-amber-200 border-t-amber-600"&gt;&lt;/div&gt;
+    &lt;p class="text-sm text-stone-600"&gt;Enviando sua encomenda…&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+width: 32px
+height: 32px
+border-radius: 3.35544e+07px
+border-width: 4px
+border-color: oklch(0.666 0.179 58.318) oklch(0.924 0.12 95.746) oklch(0.924 0.12 95.746)
+border-top-color: oklch(0.666 0.179 58.318)
+</pre>
+  <pre class="solucao">&lt;div class="rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;div class="flex items-center gap-3"&gt;
+    &lt;div id="alvo" class="size-8 rounded-full border-4 border-amber-200 border-t-amber-600 animate-spin"&gt;&lt;/div&gt;
+    &lt;p class="text-sm text-stone-600"&gt;Enviando sua encomenda…&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>animation: 1s linear infinite spin</code>. Leia assim: um
+segundo por volta, velocidade constante, repetindo sem fim, usando o roteiro chamado
+<code>spin</code>. A meta desta caixa confere as duas coisas — a regra gerada e esse valor computado —
+porque animação é uma das propriedades em que a medida de repouso é confiável: a animação já está
+rodando quando a medição acontece.</p>
+
+<p>Um detalhe que faz diferença no mundo real: o texto “Enviando sua encomenda…” ao lado do giro. A
+animação comunica espera, mas não diz o que está sendo esperado, e quem usa leitor de tela não vê o
+giro. Texto e movimento juntos é o padrão que funciona para todo mundo.</p>
+
+<p>Se o indicador for usado em um botão, vale lembrar do estado de carregamento completo: o botão com
+<code>disabled</code> e as classes de <code>disabled:</code> da aula de
+<a href="active-e-disabled.html">active e disabled</a>, mais o texto trocado. A animação é o enfeite
+que confirma; o botão desligado é o que realmente impede a encomenda duplicada.</p>
+
+<h2>5. O esqueleto: animate-pulse</h2>
+
+<p>Existe uma animação que vale mais do que parece: o <code>animate-pulse</code>. Ele alterna a
+opacidade entre cheio e meio, em dois segundos, sem parar. Sozinho, num bloco cinza, ele imita a
+respiração de um conteúdo que está chegando. É a base do que se chama de <em>esqueleto de
+carregamento</em>: em vez de uma tela vazia, o visitante vê a forma do conteúdo que vai aparecer.</p>
+
+<div class="trytailwind" data-goal="rule:animation: var(--animate-pulse);;css:#alvo|animation=2s cubic-bezier(0.4, 0, 0.6, 1) infinite pulse">
+  <p class="try-task">Enquanto o cardápio não carrega, o bloco cinza deve “respirar”. Acrescente
+  <code>animate-pulse</code> ao bloco.</p>
+  <pre class="html">&lt;div class="w-64 rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;div id="alvo" class="h-4 w-40 rounded bg-stone-200"&gt;&lt;/div&gt;
+  &lt;div class="mt-2 h-3 w-24 rounded bg-stone-200"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+width: 160px
+height: 16px
+background-color: oklch(0.923 0.003 48.717)
+border-radius: 4px
+</pre>
+  <pre class="solucao">&lt;div class="w-64 rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;div id="alvo" class="h-4 w-40 rounded bg-stone-200 animate-pulse"&gt;&lt;/div&gt;
+  &lt;div class="mt-2 h-3 w-24 rounded bg-stone-200"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>animation: 2s cubic-bezier(0.4, 0, 0.6, 1) infinite pulse</code>: dois segundos
+por ciclo, uma curva suave nas duas pontas, repetindo para sempre. Na prévia, o bloco de cima respira e
+o de baixo fica parado — que é exatamente o erro que muita gente comete. Em um esqueleto, <strong>todos
+os blocos pulsar juntos</strong>: se cada um tiver a sua animação começando num instante diferente, o
+resultado parece uma árvore de natal piscando.</p>
+
+<p>A regra prática é simples: um contêiner com <code>animate-pulse</code>, e os blocos cinzas dentro,
+sem animação própria. O pulso é da caixa, não dos filhos. E o esqueleto deve durar pouco: se os dados
+demoram mais de cinco segundos, o problema é o servidor, e nenhuma animação conserta.</p>
+
+<p>O esqueleto também é mais honesto que o giro. O giro diz “espere”. O esqueleto diz “espere, e veja
+aqui a forma do que vem”. Para o cardápio da padaria, com foto, título e preço, o esqueleto evita o
+solavanco de a página crescer de repente quando os dados chegam.</p>
+
+<h2>6. Piscar e quicar</h2>
+
+<p>As duas que sobram são as mais expressivas e as mais perigosas. O <code>animate-ping</code> cresce e
+desaparece: um ponto âmbar no canto do ícone de encomendas, com uma camada que se expande e some,
+chama o olho como nada mais na tela. É a animação da notificação. O <code>animate-bounce</code> quica
+verticalmente e serve para indicar direção: uma seta para baixo no fim da capa, pedindo que o visitante
+role a página.</p>
+
+<p>As duas têm o mesmo defeito: cansam. Um ponto que pisca para sempre em cada item do menu deixa de
+avisar e passa a irritar. A regra que a Ana adotou é a mesma das transições, com um acréscimo: animação
+de chamar atenção deve ser <strong>rara, temporária ou interativa</strong>. Rara porque um só ponto
+piscando é um aviso e dez são um alarme. Temporária porque o aviso de “novo” pode sumir depois que o
+visitante visita a página. Interativa porque a seta que quica pode parar no primeiro gesto de
+rolagem.</p>
+
+<p>O caso mais comum de uso do <code>animate-ping</code> é o par de pontos: um ponto parado, sólido, e
+outro atrás dele, com a mesma cor e <code>animate-ping</code>, criando a onda que se espalha. São dois
+elementos sobrepostos, o de trás com <code>absolute</code> e o da frente com <code>relative</code> — o
+mesmo raciocínio de camadas da aula de <a href="camadas-z.html">camadas</a>. Com
+<code>animate-bounce</code>, o par natural é uma seta e um texto curto do lado, porque seta sozinha não
+diz o que fazer.</p>
+
+<h2>7. O CSS que o Tailwind gera</h2>
+
+<p>As classes de animação são curtas por fora e compridas por dentro. Esta é a saída real do compilador
+para duas delas:</p>
+
+<pre class="term">.animate-spin {
+  animation: var(--animate-spin);
+}
+.animate-pulse {
+  animation: var(--animate-pulse);
+}</pre>
+
+<p>Só isso. O valor de verdade mora em variáveis do tema, que o Tailwind define na base do CSS:
+<code>--animate-spin: spin 1s linear infinite</code> e
+<code>--animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite</code>. Essa separação é o que
+permite trocar a animação de um projeto inteiro mexendo em um lugar só, e é o mesmo padrão das cores
+(<code>--color-amber-500</code>) e das curvas de transição (<code>--ease-out</code>).</p>
+
+<p>E os roteiros, os <code>@keyframes</code>, o Tailwind também gera — mas só os que a página usa, o que
+economiza arquivo. Estes são os dois primeiros, exatamente como saem do compilador:</p>
+
+<pre class="term">@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}</pre>
+
+<p>O roteiro do giro tem uma parada só: o fim, com 360 graus. Como o começo é o estado natural do
+elemento (zero grau), o navegador entende “gire uma volta” e repete. Já o pulso tem uma parada no meio
+do caminho, com opacidade 0,5 — e como não há parada no fim, ele volta ao valor natural, criando a
+respiração. Ler <code>@keyframes</code> é isso: procurar as paradas e ver o que muda em cada uma.</p>
+
+<p>Aqui vale o alerta que evita muita confusão: os <code>@keyframes</code> do Tailwind usam
+<code>transform</code> e <code>opacity</code> de propósito, porque são as duas propriedades mais baratas
+de animar. Você vai ver <code>transform: rotate(360deg)</code> onde talvez esperasse <code>rotate</code>
+— é a forma clássica, e funciona igual. O que importa é que o navegador não precise refazer o layout a
+cada quadro.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que você quer mudar</th><th>Como fazer</th><th>Cuidado</th></tr>
+<tr><td>a velocidade do giro</td><td><code>animate-[spin_3s_linear_infinite]</code></td><td><code>duration-700</code> não mexe em animação</td></tr>
+<tr><td>quantas vezes repete</td><td><code>animate-[pulse_2s_ease-in-out_3]</code></td><td>sem <code>infinite</code>, roda uma vez só</td></tr>
+<tr><td>a cor do pulso</td><td>mude o <code>bg-</code> do bloco</td><td>não existe classe para cor de keyframe</td></tr>
+<tr><td>o atraso para começar</td><td>valor livre, ou estado aplicado depois</td><td><code>delay-</code> é só de transição</td></tr>
+<tr><td>parar a animação</td><td><code>animate-none</code></td><td>serve para variantes como <code>motion-reduce:</code></td></tr>
+</table>
+</div>
+
+<p>Essa tabela resume uma confusão muito comum: <code>duration-</code>, <code>delay-</code> e
+<code>ease-</code> são classes de <strong>transição</strong>. Se você escrever
+<code>animate-spin duration-1000</code>, o giro continua em um segundo e o que muda é a duração de uma
+transição que talvez nem exista. Para mudar a animação, o caminho é o valor livre entre colchetes.</p>
+
+<h2>8. Animar menos, para quem pediu</h2>
+
+<p>Você já viu o <code>motion-reduce:</code> na aula de <a href="transicoes.html">transições</a>. Com
+animações ele é ainda mais importante, porque o movimento aqui é contínuo: um giro infinito ou um ponto
+piscando não é um detalhe de acabamento, é uma fonte de desconforto para quem tem sensibilidade a
+movimento. A solução é a mesma: uma classe que desliga o efeito quando o sistema pede.</p>
+
+<div class="trytailwind" data-goal="rule:@media (prefers-reduced-motion: reduce);;rule:animation: none">
+  <p class="try-task">A seta quica para sempre, e o movimento contínuo incomoda quem pediu menos
+  animação no sistema. Acrescente <code>motion-reduce:animate-none</code> à seta.</p>
+  <pre class="html">&lt;div class="rounded-xl border border-stone-200 bg-white p-4 text-center"&gt;
+  &lt;p class="text-sm font-semibold text-amber-900"&gt;Sua encomenda está pronta!&lt;/p&gt;
+  &lt;span id="alvo" class="mt-2 inline-block text-2xl animate-bounce"&gt;↓&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: inline-block
+font-size: 24px
+line-height: 32px
+animation: 1s infinite bounce
+margin-top: 8px
+</pre>
+  <pre class="solucao">&lt;div class="rounded-xl border border-stone-200 bg-white p-4 text-center"&gt;
+  &lt;p class="text-sm font-semibold text-amber-900"&gt;Sua encomenda está pronta!&lt;/p&gt;
+  &lt;span id="alvo" class="mt-2 inline-block text-2xl animate-bounce motion-reduce:animate-none"&gt;↓&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel continua mostrando o <code>animation: 1s infinite bounce</code>, porque a media query não
+vale no navegador de quem não configurou nada. A prova está no CSS gerado, e é o que a meta confere: um
+bloco <code>@media (prefers-reduced-motion: reduce)</code> com <code>animation: none</code> dentro. Para
+quem pediu calma, a seta fica parada e o texto continua dizendo tudo o que importa.</p>
+
+<p>Existe também o prefixo contrário, <code>motion-safe:</code>, que aplica a animação só em quem
+<em>não</em> pediu redução. As duas abordagens funcionam; a diferença é onde fica a decisão. Com
+<code>motion-reduce:animate-none</code>, o site nasce animado e desliga para quem precisa. Com
+<code>motion-safe:animate-bounce</code>, ele nasce parado e liga para quem aguenta. A segunda é mais
+segura por princípio — nada se move sem permissão — e a primeira é mais comum em projetos que já
+nasceram com movimento.</p>
+
+<p>Um último cuidado que vale mais que qualquer classe: nunca use animação para dizer algo que o texto
+não diz. Se a única pista de “carregando” for o giro, quem não vê o giro fica sem informação. Se a única
+pista de “novo” for o ponto piscando, quem não vê movimento perde o aviso. A regra do guia é a mesma de
+sempre: movimento confirma, texto informa.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o esqueleto que piscava em descompasso</h3>
+<p>A Ana aplicou <code>animate-pulse</code> em cada bloco de texto do cardápio, um por um. Funcionou e
+ficou exagerado: cada bloco virou uma animação própria, e os que apareciam depois — porque a lista
+carregava em partes — entravam fora de compasso, criando aquele efeito de luzes de natal. O conserto foi
+mover a classe para o contêiner: um pulso só, todos os blocos junto. Menos classes, menos animações
+rodando ao mesmo tempo e um resultado bem mais calmo.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o giro que ficou no botão para sempre</h3>
+<p>Ao terminar o carregamento, a Ana escondeu o texto “Enviando” e esqueceu o giro. O botão continuou
+girando depois de a encomenda chegar, e a cliente, na dúvida, esperou mais dois minutos. Animação de
+espera precisa sair da tela quando a espera acaba, e isso quase sempre é trabalho de JavaScript — trocar
+uma classe ou esconder um bloco. O CSS faz o movimento; quem sabe que terminou é o código da página.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a seta que quicava fora do campo de visão</h3>
+<p>A seta do fim da capa quicava, mas ficava abaixo da dobra e ninguém a via. Quando a Ana subiu a seta,
+veio o segundo problema: ela quicava tanto que parecia um erro de renderização. A solução foi mais
+discreta — <code>animate-bounce</code> num espaço maior, ou simplesmente uma transição de
+<code>translate-y-1</code> no hover da seção. Nem todo convite precisa ser um pulo.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. Qual é a diferença central entre transição e
+animação?</p>
+<label><input type="radio" name="q1"> a transição precisa de uma mudança de valor; a animação roda
+sozinha</label>
+<label><input type="radio" name="q1"> a animação só funciona no hover</label>
+<label><input type="radio" name="q1"> a transição é sempre mais rápida</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual animação é a base de um esqueleto de
+carregamento?</p>
+<label><input type="radio" name="q2"> <code>animate-spin</code></label>
+<label><input type="radio" name="q2"> <code>animate-bounce</code></label>
+<label><input type="radio" name="q2"> <code>animate-pulse</code></label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. O que <code>duration-1000</code> faz em um elemento
+com <code>animate-spin</code>?</p>
+<label><input type="radio" name="q3"> deixa o giro dez vezes mais lento</label>
+<label><input type="radio" name="q3"> nada no giro: <code>duration-</code> é de transição</label>
+<label><input type="radio" name="q3"> para a animação depois de um segundo</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o carregando do cardápio</h2>
+<p>Enquanto o cardápio chega, a bolinha precisa girar. Complete a classe que liga a animação pronta:</p>
+<div class="ex-code">&lt;div class="size-8 rounded-full border-4 border-amber-200 border-t-amber-600 <input aria-label="resposta 1" data-answer="animate-spin" placeholder="...">"&gt;&lt;/div&gt;</div>
+<p class="ex-dica">Dica: o prefixo é <code>animate-</code> e o verbo, em inglês, é o que a bolinha faz.
+É uma palavra, sem número.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Transição é o mensageiro entre dois valores; animação é um roteiro que roda sozinho. O Tailwind traz
+quatro prontas — <code>animate-spin</code>, <code>animate-pulse</code>, <code>animate-ping</code> e
+<code>animate-bounce</code> — e cada uma diz uma frase: espera, carregando, novidade, direção. O CSS
+gerado é de uma linha, apontando para uma variável do tema; os <code>@keyframes</code> vêm só para as
+animações que a página usa e animam <code>transform</code> e <code>opacity</code>, que são baratos.</p>
+
+<p>Para o trabalho do dia a dia: use <code>animate-spin</code> com borda para indicar espera (sempre
+com texto ao lado), <code>animate-pulse</code> no contêiner do esqueleto para todos os blocos pulsarem
+juntos, e as duas expressivas com moderação. Lembre que <code>duration-</code> não muda animação — para
+isso existe o valor livre <code>animate-[...]</code> — e que
+<code>motion-reduce:animate-none</code> é o que permite o site ser bonito sem ser incômodo.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Transição precisa de mudança; animação roda sozinha, em ciclo.</li>
+<li><code>@keyframes</code> é o roteiro; <code>animation</code> é a execução.</li>
+<li>Quatro prontas: <code>spin</code> (1 s), <code>pulse</code> (2 s), <code>ping</code> (1 s),
+<code>bounce</code> (1 s).</li>
+<li>O spinner é uma borda redonda com um lado de outra cor, girando.</li>
+<li>No esqueleto, a classe vai no contêiner: todos os blocos respiram juntos.</li>
+<li><code>animate-none</code> desliga; é o par do <code>motion-reduce:</code>.</li>
+<li><code>duration-</code>, <code>delay-</code> e <code>ease-</code> são de transição, não de
+animação.</li>
+<li>Para mudar tempo ou repetição: <code>animate-[spin_3s_linear_infinite]</code>.</li>
+<li>Animação de espera deve sair da tela quando a espera acaba — isso é JavaScript.</li>
+<li>Movimento confirma, texto informa: nunca dependa só do movimento.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

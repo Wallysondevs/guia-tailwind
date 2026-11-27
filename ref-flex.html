@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flexbox | Guia Tailwind</title>
+<meta name="description" content="Referência de Flexbox no Tailwind v4: direção, wrap, justify-content, align-items, self, flex-1, grow, shrink, basis, order e gap, com o CSS gerado e o que não funciona.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Flexbox</span></h1>
+
+<p class="intro">A Ana tem uma linha simples para resolver: o nome do pedido de um lado, o horário do
+outro. Ela já tentou com <code>float</code>, já tentou com espaços, já tentou com uma tabela — e
+sempre ficou torto em alguma largura de tela. Flexbox resolve isso em três palavras, mas tem uma
+família de classes grande o suficiente para confundir. Esta página é a consulta: o que cada classe
+faz, qual valor de CSS ela gera, quando usar cada uma e — o mais importante — o que não funciona,
+porque no flex as coisas falham em silêncio com uma frequência irritante.</p>
+
+<h2>1. O que o flex resolve</h2>
+
+<p>Em um contêiner comum, os filhos se empilham de cima para baixo e cada um ocupa a largura toda.
+O <code>display: flex</code> muda isso: os filhos passam a ser <strong>itens</strong> de uma linha, e
+o contêiner ganha o poder de distribuí-los. É a diferença entre uma lista de blocos e uma fila de
+coisas que se ajustam.</p>
+
+<p>Toda a confusão do flex vem de dois eixos. O <strong>eixo principal</strong> é a direção em que os
+itens correm — horizontal por padrão, vertical quando você escreve <code>flex-col</code>. O
+<strong>eixo cruzado</strong> é o perpendicular. As classes de distribuição
+(<code>justify-*</code>) agem no principal; as de alinhamento (<code>items-*</code>) agem no cruzado.
+Se você troca a direção, os dois eixos trocam de lugar e as mesmas classes passam a ter outro efeito
+visual. Quase todo bug de flex é isso.</p>
+
+<dl class="anatomy">
+<dt>contêiner</dt>
+<dd>O elemento que recebe <code>flex</code>. Só ele aceita <code>justify-*</code>,
+<code>items-*</code>, <code>gap-*</code> e <code>flex-wrap</code>.</dd>
+<dt>item</dt>
+<dd>Cada filho direto do contêiner. Só ele aceita <code>flex-1</code>, <code>grow</code>,
+<code>shrink-0</code>, <code>basis-*</code>, <code>self-*</code> e <code>order-*</code>.</dd>
+<dt>eixo principal</dt>
+<dd>A direção da fila. Em <code>flex-row</code> é horizontal; em <code>flex-col</code> é vertical.
+<code>justify-*</code> trabalha aqui.</dd>
+<dt>eixo cruzado</dt>
+<dd>O perpendicular. <code>items-*</code> trabalha aqui, e é onde nasce o "centralizar na
+vertical".</dd>
+<dt>espaço livre</dt>
+<dd>O que sobra depois que os itens ocupam o que precisam. Sem espaço livre, nenhuma distribuição
+funciona — e nada muda na tela.</dd>
+</dl>
+
+<p>Duas regras de ouro, antes de qualquer tabela. Primeira: <strong>as classes do contêiner não fazem
+nada nos itens</strong>, e vice-versa. <code>justify-between</code> em um item é ignorado pelo
+navegador. Segunda: <strong>a maioria das classes de distribuição só tem efeito quando sobra
+espaço</strong>. Se um item ocupa a largura toda, não há o que distribuir, e o resultado é idêntico a
+não ter classe nenhuma. É por isso que o painel das caixas às vezes fica vazio ou parece
+indiferente.</p>
+
+<h2>2. Ligar o flex e escolher a direção</h2>
+
+<p>A primeira decisão é a direção, e ela muda o significado de todo o resto. A segunda é o
+comportamento quando os itens não cabem: quebrar para a linha de baixo ou espremer. As duas coisas
+cabem em duas classes.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>CSS gerado</th><th>Efeito</th></tr>
+<tr><td><code>flex</code></td><td><code>display: flex</code></td><td>vira contêiner; filhos lado a lado</td></tr>
+<tr><td><code>inline-flex</code></td><td><code>display: inline-flex</code></td><td>igual, mas ocupa só o necessário</td></tr>
+<tr><td><code>flex-row</code></td><td><code>flex-direction: row</code></td><td>da esquerda para a direita (padrão)</td></tr>
+<tr><td><code>flex-row-reverse</code></td><td><code>flex-direction: row-reverse</code></td><td>inverte a ordem visual</td></tr>
+<tr><td><code>flex-col</code></td><td><code>flex-direction: column</code></td><td>empilha na vertical</td></tr>
+<tr><td><code>flex-col-reverse</code></td><td><code>flex-direction: column-reverse</code></td><td>empilha de baixo para cima</td></tr>
+<tr><td><code>flex-wrap</code></td><td><code>flex-wrap: wrap</code></td><td>quebra para a linha seguinte</td></tr>
+<tr><td><code>flex-nowrap</code></td><td><code>flex-wrap: nowrap</code></td><td>não quebra; é o padrão</td></tr>
+<tr><td><code>flex-wrap-reverse</code></td><td><code>flex-wrap: wrap-reverse</code></td><td>quebra para cima</td></tr>
+</table>
+</div>
+
+<p>O padrão <code>flex</code> já vem em linha e sem quebra. Isso significa que, se você não disse
+nada, os itens vão se espremer em vez de descer — e vão vazar do contêiner se não puderem encolher.
+Em uma tela de 375 px, uma barra com cinco botões sem <code>flex-wrap</code> é a receita mais comum de
+rolagem horizontal indesejada. Ponha <code>flex-wrap</code> ou esconda o que não é essencial.</p>
+
+<p><code>flex-col</code> merece um aviso: ele não é "flex vertical porque sim". É a escolha certa
+para cartão com rodapé, lista de mensagens, formulário — tudo que é uma pilha. E é a razão pela qual
+<code>justify-between</code> em uma coluna distribui no vertical. Muita gente acha que
+<code>justify-between</code> "só funciona na horizontal" e escreve gambiarra com margem; bastava ter
+trocado a direção.</p>
+
+<p><code>inline-flex</code> tem um uso que vale decorar: etiqueta que precisa ficar dentro de uma
+frase ou de uma célula de tabela sem quebrar a linha do texto. Um <code>span</code> com
+<code>inline-flex items-center gap-1</code> alinha ícone e palavra perfeitamente e continua se
+comportando como texto na frase. Com <code>flex</code> normal, o elemento vira bloco e a frase quebra
+no meio.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|flex-direction=row;;css:#alvo|justify-content=space-between">
+  <p class="try-task">O cartão do pedido está empilhado. Deixe o nome e o horário na mesma linha, um
+  em cada ponta. Duas classes do contêiner resolvem.</p>
+  <pre class="html">&lt;div id="alvo" class="flex flex-col gap-2 bg-amber-100 p-4"&gt;
+  &lt;p class="font-semibold"&gt;Pedido 128&lt;/p&gt;
+  &lt;p class="text-sm"&gt;Retirada às 16h&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+padding: 16px
+gap: 8px
+flex-direction: column
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex flex-row items-center justify-between gap-2 bg-amber-100 p-4"&gt;
+  &lt;p class="font-semibold"&gt;Pedido 128&lt;/p&gt;
+  &lt;p class="text-sm"&gt;Retirada às 16h&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A solução também usa <code>items-center</code>, e vale entender por quê: sem ele, os dois textos
+ficam alinhados pelo topo e a diferença de tamanho aparece como desalinhamento. Como a direção é
+linha, <code>items-center</code> centraliza na vertical — exatamente o que se quer em uma linha de
+texto. Esse par, <code>justify-between</code> e <code>items-center</code>, é o "cabeçalho de cartão"
+mais usado da web.</p>
+
+<h2>3. Distribuir no eixo principal: justify-*</h2>
+
+<p>Estas classes decidem onde fica o espaço livre no eixo principal. Todas precisam de espaço livre
+para ter efeito, e todas viram um valor de <code>justify-content</code>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor de justify-content</th><th>Resultado</th><th>Uso típico</th></tr>
+<tr><td><code>justify-start</code></td><td><code>flex-start</code></td><td>tudo no começo</td><td>o padrão de leitura</td></tr>
+<tr><td><code>justify-end</code></td><td><code>flex-end</code></td><td>tudo no fim</td><td>botões alinhados à direita</td></tr>
+<tr><td><code>justify-center</code></td><td><code>center</code></td><td>tudo no meio</td><td>menu curto, ícone com texto</td></tr>
+<tr><td><code>justify-between</code></td><td><code>space-between</code></td><td>primeiro e último nas pontas</td><td>cabeçalho, preço e nome</td></tr>
+<tr><td><code>justify-around</code></td><td><code>space-around</code></td><td>espaço igual em volta de cada item</td><td>menos comum; pontas com metade</td></tr>
+<tr><td><code>justify-evenly</code></td><td><code>space-evenly</code></td><td>espaço igual entre e nas pontas</td><td>fileira de ícones</td></tr>
+<tr><td><code>justify-stretch</code></td><td><code>stretch</code></td><td>itens esticam para preencher</td><td>raro em flex</td></tr>
+<tr><td><code>justify-normal</code></td><td><code>normal</code></td><td>volta ao comportamento inicial</td><td>desfazer uma classe do pai</td></tr>
+</table>
+</div>
+
+<p><code>space-between</code> é o campeão de uso e o que mais surpreende: com um item só, ele fica na
+ponta esquerda, porque não há com quem dividir o espaço. Com dois itens, eles vão para as pontas. Com
+três, o do meio fica no centro exato. Se você quer que dois botões fiquem juntos à direita, o caminho
+não é <code>justify-between</code>: é <code>justify-end</code> com <code>gap</code>, ou
+<code>ml-auto</code> no primeiro botão.</p>
+
+<p><code>space-around</code> e <code>space-evenly</code> parecem iguais e não são. Em
+<code>space-around</code>, cada item ganha metade do espaço de um lado e metade do outro, então as
+pontas ficam com metade do espaço interno. Em <code>space-evenly</code>, os espaços são todos iguais,
+inclusive nas pontas. Se em uma fileira de ícones a margem das pontas parece menor,
+<code>evenly</code> é a correção.</p>
+
+<p>Uma dúvida que aparece sempre: e se eu precisar de dois grupos na mesma linha, um à esquerda e
+outro à direita? O caminho mais limpo é <code>justify-between</code> com dois
+<code>div</code> filhos, cada um com o seu próprio <code>flex gap-2</code> dentro. Flex dentro de flex
+é normal e barato — o layout não fica mais lento por isso. O que não funciona é tentar distribuir
+cinco itens alternando <code>mr-auto</code> em um e <code>ml-auto</code> no outro: você acaba com
+margens que brigam quando a tela encolhe.</p>
+
+<h2>4. Alinhar no eixo cruzado: items, self e content</h2>
+
+<p>Se <code>justify</code> distribui na direção da fila, <code>items</code> alinha na perpendicular.
+Em uma linha, isso é a vertical: é o que permite centralizar um ícone com um texto, ou esticar um
+cartão para acompanhar o vizinho mais alto.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Onde vai</th><th>Valor</th><th>Efeito</th></tr>
+<tr><td><code>items-start</code></td><td>contêiner</td><td><code>flex-start</code></td><td>todos pelo topo</td></tr>
+<tr><td><code>items-end</code></td><td>contêiner</td><td><code>flex-end</code></td><td>todos pela base</td></tr>
+<tr><td><code>items-center</code></td><td>contêiner</td><td><code>center</code></td><td>centralizados na vertical</td></tr>
+<tr><td><code>items-baseline</code></td><td>contêiner</td><td><code>baseline</code></td><td>alinha pela base das letras</td></tr>
+<tr><td><code>items-stretch</code></td><td>contêiner</td><td><code>stretch</code></td><td>todos com a mesma altura (padrão)</td></tr>
+<tr><td><code>self-auto</code></td><td>item</td><td><code>auto</code></td><td>segue o contêiner (padrão)</td></tr>
+<tr><td><code>self-start</code></td><td>item</td><td><code>flex-start</code></td><td>este item pelo topo</td></tr>
+<tr><td><code>self-end</code></td><td>item</td><td><code>flex-end</code></td><td>este item pela base</td></tr>
+<tr><td><code>self-center</code></td><td>item</td><td><code>center</code></td><td>só este centralizado</td></tr>
+<tr><td><code>self-stretch</code></td><td>item</td><td><code>stretch</code></td><td>só este esticado</td></tr>
+<tr><td><code>self-baseline</code></td><td>item</td><td><code>baseline</code></td><td>só este pela base da letra</td></tr>
+<tr><td><code>content-center</code></td><td>contêiner com wrap</td><td><code>align-content</code></td><td>distribui as linhas quebradas</td></tr>
+<tr><td><code>content-between</code></td><td>contêiner com wrap</td><td><code>space-between</code></td><td>primeira e última linha nas pontas</td></tr>
+</table>
+</div>
+
+<p>O detalhe que resolve 80% dos sustos: o padrão é <code>items-stretch</code>, mas
+<code>stretch</code> só tem efeito visível se o contêiner tiver altura maior que o conteúdo. Em uma
+linha de texto sem altura definida, todos os itens já têm a mesma altura e <code>items-stretch</code>
+não muda nada. Quando você define <code>h-40</code> no contêiner, a diferença aparece de imediato.</p>
+
+<p><code>items-baseline</code> é o alinhamento mais elegante e o menos conhecido. Ele alinha os itens
+pela linha de base do texto, e não pela caixa. Em uma linha onde um preço é <code>text-3xl</code> e a
+unidade é <code>text-sm</code>, o alinhamento por centro deixa a unidade flutuando no meio da altura;
+com <code>items-baseline</code>, ela encosta na base do número, que é como se escreve preço em
+cardápio.</p>
+
+<p>Já <code>content-*</code> é outra coisa e confunde por causa do nome. Ele age nas
+<em>linhas</em> de um contêiner com <code>flex-wrap</code>: distribui o bloco de linhas dentro da
+altura disponível. Sem <code>flex-wrap</code>, não há múltiplas linhas e a classe não tem o que
+fazer. Se você quer alinhar itens, é <code>items-*</code>; se quer alinhar o conjunto de linhas, é
+<code>content-*</code>.</p>
+
+<h2>5. Crescer, encolher e a base</h2>
+
+<p>Aqui está o coração do flex e a origem da maior parte dos layouts que "não obedecem". Cada item
+tem três números: quanto ele cresce, quanto ele encolhe e qual é o tamanho de partida
+(<code>basis</code>). As classes do Tailwind cobrem as combinações mais úteis.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>CSS gerado</th><th>Vira</th><th>Efeito</th></tr>
+<tr><td><code>flex-1</code></td><td><code>flex: 1</code></td><td><code>1 1 0%</code></td><td>divide o espaço igualmente, ignorando o conteúdo</td></tr>
+<tr><td><code>flex-auto</code></td><td><code>flex: auto</code></td><td><code>1 1 auto</code></td><td>cresce, mas parte do tamanho do conteúdo</td></tr>
+<tr><td><code>flex-initial</code></td><td><code>flex: 0 auto</code></td><td><code>0 1 auto</code></td><td>não cresce; encolhe se precisar</td></tr>
+<tr><td><code>flex-none</code></td><td><code>flex: none</code></td><td><code>0 0 auto</code></td><td>tamanho do conteúdo, sem crescer nem encolher</td></tr>
+<tr><td><code>grow</code></td><td><code>flex-grow: 1</code></td><td>cresce</td><td>só o crescer, mantendo o resto</td></tr>
+<tr><td><code>grow-0</code></td><td><code>flex-grow: 0</code></td><td>não cresce</td><td>é o padrão; serve para desfazer</td></tr>
+<tr><td><code>grow-[2]</code></td><td><code>flex-grow: 2</code></td><td>cresce o dobro</td><td>proporção entre dois itens</td></tr>
+<tr><td><code>shrink</code></td><td><code>flex-shrink: 1</code></td><td>encolhe</td><td>padrão; serve para desfazer</td></tr>
+<tr><td><code>shrink-0</code></td><td><code>flex-shrink: 0</code></td><td>não encolhe</td><td>ícone e avatar que não podem espremer</td></tr>
+<tr><td><code>basis-1/3</code></td><td><code>flex-basis: calc(1 / 3 * 100%)</code></td><td>33,33%</td><td>largura de partida em fração</td></tr>
+<tr><td><code>basis-16</code></td><td><code>flex-basis: calc(var(--spacing) * 16)</code></td><td>64 px</td><td>largura de partida na escala de espaço</td></tr>
+<tr><td><code>basis-full</code></td><td><code>flex-basis: 100%</code></td><td>largura toda</td><td>forçar uma linha só para ele</td></tr>
+<tr><td><code>basis-auto</code></td><td><code>flex-basis: auto</code></td><td>tamanho do conteúdo</td><td>é o padrão</td></tr>
+<tr><td><code>order-1</code></td><td><code>order: 1</code></td><td>ordem 1</td><td>reordenar sem mexer no HTML</td></tr>
+<tr><td><code>order-first</code></td><td><code>order: -9999</code></td><td>primeiro</td><td>trazer um item para a frente</td></tr>
+<tr><td><code>order-last</code></td><td><code>order: 9999</code></td><td>último</td><td>mandar um item para o fim</td></tr>
+</table>
+</div>
+
+<p>A diferença entre <code>flex-1</code> e <code>flex-auto</code> decide metade dos layouts. Os dois
+crescem; o que muda é a base. <code>flex-1</code> parte de zero, então todos os itens com essa classe
+ficam com a mesma largura, não importa o texto dentro. <code>flex-auto</code> parte do tamanho do
+conteúdo, então um item com texto longo fica maior que um com texto curto, e o espaço extra é
+dividido a partir daí. Em uma barra de busca com um botão, <code>flex-1</code> no campo é o certo: o
+campo come o que sobra e o botão mantém o tamanho.</p>
+
+<pre class="term">.flex-1 {
+  flex: 1;
+}
+.flex-auto {
+  flex: auto;
+}
+.flex-none {
+  flex: none;
+}</pre>
+
+<p>Repare que o CSS escreve a forma curta e o navegador expande. <code>flex: 1</code> vira
+<code>1 1 0%</code>: cresce 1, encolhe 1, base 0%. <code>flex: auto</code> vira
+<code>1 1 auto</code>: cresce 1, encolhe 1, base automática. <code>flex: none</code> vira
+<code>0 0 auto</code>: não cresce, não encolhe, tamanho do conteúdo. Quando o painel mostra a versão
+expandida, ele está sendo mais útil do que o código — é ali que você vê a base e entende o
+comportamento.</p>
+
+<div class="trytailwind" data-goal="css:.preco|flex-grow=1;;css:.preco|flex-basis=0%">
+  <p class="try-task">O bloco do preço está do tamanho do texto. Faça ele ocupar todo o espaço que
+  sobra na linha, com uma classe no próprio item.</p>
+  <pre class="html">&lt;div id="alvo" class="flex gap-2"&gt;
+  &lt;div class="preco p-2 bg-amber-100"&gt;R$ 6,00&lt;/div&gt;
+  &lt;div class="p-2 bg-amber-50"&gt;Pão de queijo&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+gap: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex gap-2"&gt;
+  &lt;div class="preco flex-1 p-2 bg-amber-100"&gt;R$ 6,00&lt;/div&gt;
+  &lt;div class="p-2 bg-amber-50"&gt;Pão de queijo&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A conferência desta caixa olha o CSS computado do próprio item: <code>flex-grow: 1</code> e
+<code>flex-basis: 0%</code>. Esses dois números juntos são a explicação do "divide por igual": crescer
+com base zero significa que todo o espaço é repartido, e não só o que sobra depois do conteúdo. Com
+<code>flex-auto</code>, o valor seria <code>flex-basis: auto</code> e o texto continuaria mandando no
+tamanho.</p>
+
+<h2>6. Ordem, gap e margem automática</h2>
+
+<p><code>order-*</code> muda a ordem visual sem tocar no HTML. Isso é útil quando o layout responde a
+breakpoint — a imagem que aparece depois no celular e antes no computador — e é perigoso quando vira
+hábito, porque a ordem de leitura para quem usa teclado continua sendo a do HTML. Use com parcimônia,
+e prefira reorganizar o HTML quando a diferença é permanente.</p>
+
+<p><code>gap-*</code> é o jeito certo de separar itens de flex. Ele coloca espaço só <em>entre</em>
+os itens, nunca nas pontas, e não interfere no tamanho de cada um. Antes do gap, a solução era margem
+no item e uma regra para o último, ou margem negativa no contêiner — duas gambiarras que o gap
+eliminou. Como a escala é a mesma de padding, <code>gap-4</code> são 16 px entre os itens.</p>
+
+<p>A margem automática continua sendo útil em um caso específico: empurrar um item para o outro lado
+sozinho. <code>ml-auto</code> no último item de uma linha empurra ele para a direita, e isso funciona
+mesmo quando há mais itens no meio. É a alternativa a <code>justify-between</code> quando você quer
+"tudo à esquerda, menos este". O mesmo truque vale na vertical com <code>mt-auto</code>: em um cartão
+<code>flex-col</code>, o rodapé desce para o fim mesmo que o conteúdo mude de tamanho.</p>
+
+<p>Um exemplo para guardar, o cabeçalho clássico: <code>flex items-center gap-4</code>, com o logo
+primeiro, os links no meio e o botão com <code>ml-auto</code>. Não precisa de
+<code>justify-between</code>, não precisa de espaçador, não precisa de posicionamento absoluto. E,
+quando a tela encolhe, basta <code>hidden md:flex</code> nos links para o menu sumir sem quebrar o
+resto.</p>
+
+<p>Para uma fileira de cartões que quebra sozinha, o padrão que sobrevive a qualquer tela é
+<code>flex flex-wrap gap-4</code> com os cartões em <code>basis-64 grow</code>. O
+<code>basis-64</code> diz "no mínimo 256 px de largura de partida" e o <code>grow</code> diz "se
+sobrar espaço, estique". Em 640 px cabem dois por linha; em 1280 px cabem quatro ou cinco, todos com
+a mesma largura porque o crescimento é proporcional. É flex fazendo o que faz de melhor: uma dimensão
+que se adapta.</p>
+
+<h2>7. Flex ou grid? Quando o flex não é a resposta</h2>
+
+<p>Flex é para uma dimensão. Ele distribui em uma linha (ou uma coluna) e trata a outra direção como
+consequência. Isso resolve barra, cartão, lista, cabeçalho, rodapé e centralização. Não resolve
+galeria com colunas alinhadas em linhas e colunas ao mesmo tempo — e forçar isso com
+<code>flex-wrap</code> e <code>basis-1/3</code> produz o clássico "a última linha fica desalinhada"
+quando um item tem altura diferente.</p>
+
+<p>O sintoma é fácil de reconhecer: se você precisa que a segunda linha comece exatamente embaixo da
+primeira, com as mesmas colunas, o caminho é <code>grid</code>, não <code>flex</code>. Se você precisa
+que os itens se ajustem ao conteúdo e quebrem quando não couberem, o caminho é flex com
+<code>wrap</code>. A página de <a href="ref-grid.html">Grid</a> cobre o outro lado dessa
+decisão.</p>
+
+<pre class="term">.justify-between {
+  justify-content: space-between;
+}
+.items-center {
+  align-items: center;
+}</pre>
+
+<p>Outro caso em que o flex atrapalha: quando o conteúdo precisa ocupar altura igual em uma coluna.
+<code>items-stretch</code> faz isso na perpendicular da linha, o que é ótimo para cartões lado a lado.
+Mas se o contêiner é <code>flex-col</code>, o stretch age na largura, e a altura de cada item volta a
+ser a do conteúdo. Para "todos os cartões com a mesma altura em uma grade", grid com
+<code>items-stretch</code> é mais direto.</p>
+
+<p>E há o caso do elemento que precisa ficar no centro exato da tela, sozinho. Aí o par
+<code>flex min-h-screen items-center justify-center</code> é o atalho mais lembrado do flex, e
+funciona: <code>min-h-screen</code> garante altura, <code>items-center</code> centraliza na vertical e
+<code>justify-center</code> na horizontal. Duas direções, um contêiner — e é exatamente para isso que
+o flex serve.</p>
+
+<h2>8. O que não funciona</h2>
+
+<p>Todos os casos abaixo foram testados no motor do guia. A maioria não gera erro: gera silêncio, que
+é pior.</p>
+
+<ul>
+<li><strong><code>justify-between</code> em um item.</strong> As classes de distribuição pertencem ao
+contêiner. Escritas no filho, são ignoradas pelo navegador.</li>
+<li><strong><code>flex-1</code> no contêiner.</strong> O mesmo ao contrário: crescer e encolher são
+propriedades de item, não de contêiner.</li>
+<li><strong>Distribuir sem espaço livre.</strong> <code>justify-center</code> em um contêiner com um
+único item que ocupa a largura toda não centraliza nada, porque não sobra espaço.</li>
+<li><strong><code>items-center</code> sem altura.</strong> Em uma linha de texto sem altura definida,
+a classe não tem o que centralizar. Defina <code>h-*</code>, <code>min-h-*</code> ou deixe o vizinho
+mais alto criar a altura.</li>
+<li><strong><code>content-*</code> sem <code>flex-wrap</code>.</strong> Sem múltiplas linhas, não há
+linhas para distribuir.</li>
+<li><strong><code>truncate</code> em filho de flex.</strong> O item prefere crescer a cortar. Falta
+<code>min-w-0</code> no filho flexível para permitir que ele encolha abaixo do conteúdo.</li>
+<li><strong><code>flex-wrap</code> com <code>basis-1/3</code> e <code>gap</code>.</strong> Três
+terços mais dois gaps passam de 100%, e o terceiro item desce sozinho. Use
+<code>basis-[calc(33.333%-0.5rem)]</code> ou mude para grid.</li>
+<li><strong><code>order-*</code> achando que muda a leitura.</strong> Muda o desenho, não a ordem do
+teclado nem do leitor de tela.</li>
+<li><strong>Contêiner com <code>display: flex</code> e filho com <code>w-full</code>.</strong> A
+largura total força a linha a transbordar; o comportamento desejado é <code>flex-1</code>.</li>
+</ul>
+
+<p>Duas falhas de digitação que custam tempo: <code>flexbox</code> não é classe (é
+<code>flex</code>), e <code>justify-betwen</code> com um "e" a menos não gera nada. Também não existe
+<code>justify-space-between</code>: o nome da classe encurta o valor do CSS.</p>
+
+<h2>9. Resumo</h2>
+
+<p>Flex é uma fila com dois eixos. <code>flex</code> liga a fila, <code>flex-col</code> muda a direção,
+<code>flex-wrap</code> permite quebrar. O eixo principal é o da direção e é governado por
+<code>justify-*</code>; o cruzado é o perpendicular e é governado por <code>items-*</code> no
+contêiner e <code>self-*</code> no item. Trocar a direção troca o significado dos dois, e é aí que a
+maioria dos bugs nasce.</p>
+
+<p>Nos itens, três números decidem tudo: crescer, encolher e a base. <code>flex-1</code> é
+<code>1 1 0%</code> e divide o espaço por igual; <code>flex-auto</code> é <code>1 1 auto</code> e
+respeita o conteúdo; <code>flex-none</code> é <code>0 0 auto</code> e congela o tamanho. Para separar
+itens, <code>gap</code> é sempre a primeira escolha; <code>ml-auto</code> e <code>mt-auto</code>
+resolvem "empurrar este item para longe".</p>
+
+<p>E a decisão que economiza retrabalho: uma dimensão é flex, duas são grid. Se as linhas precisam
+começar alinhadas em colunas, o flex vai te obrigar a gambiarra. Se o conteúdo precisa se ajustar e
+quebrar, o grid vai te obrigar a definir colunas que não existem. Escolher certo no começo é o que
+faz o layout parar de brigar.</p>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

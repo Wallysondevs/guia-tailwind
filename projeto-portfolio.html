@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfólio | Guia Tailwind</title>
+<meta name="description" content="O portfólio da confeiteira montado por partes: a coluna larga, o topo curto, o mosaico com destaque, a foto em 4/5, a legenda por cima e a ficha do projeto.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Portfólio</span></h1>
+<p class="intro">A Cláudia faz bolos de casamento no bairro e é cliente da padaria desde sempre: compra
+a farinha, o açúcar e o pão de cada dia. Ela viu a loja da Ana no ar e pediu uma página igual para
+mostrar os trabalhos dela. É o primeiro freela da Ana, e ela começa com uma verdade simples: portfólio
+não convence com texto, convence com foto. O trabalho da página é dar palco para as fotos, dizer em
+duas linhas de quem é aquele trabalho e deixar o contato a um toque de distância. Nesta aula ela monta
+esse palco por partes: a coluna larga, o topo curto, o mosaico com um destaque, a foto em pé, a legenda
+por cima e a ficha do projeto.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que um portfólio precisa provar e o que ele pode calar.</li>
+  <li>Por que a galeria pode ser mais larga que a coluna de texto.</li>
+  <li>Um topo curto: nome, uma frase e dois links.</li>
+  <li>O mosaico em uma, duas e três colunas, com uma peça em destaque.</li>
+  <li><code>col-span-2</code> e o que ele faz com a grade.</li>
+  <li>Proporção de foto com <code>aspect-[4/5]</code> e recorte com <code>object-cover</code>.</li>
+  <li>A legenda por cima da imagem, com fundo escuro para o texto não sumir.</li>
+  <li>A ficha do projeto: quatro linhas que dão credibilidade.</li>
+  <li>A faixa de contato com um único caminho.</li>
+</ul>
+</div>
+
+<h2>1. A cena: uma página que prova antes de falar</h2>
+
+<p>O Instagram da Cláudia funciona, mas o link da bio leva para um site esquisito que ela montou há
+anos: fundo rosa, carrossel automático, texto em amarelo. Quem chega não entende o que ela faz em
+vinte segundos, e é isso que decide se a conversa continua. A pergunta “você faz bolo de casamento?”
+chega quatro vezes por semana — a resposta está nas fotos, mas as fotos estão escondidas.</p>
+
+<p>Um portfólio tem três tarefas e nenhuma a mais. A primeira é <strong>provar</strong>: mostrar o
+trabalho, grande, nítido, com espaço em volta. A segunda é <strong>situar</strong>: dizer de quem era o
+bolo, para que ocasião, com que técnica — uma foto bonita sem contexto é decoração. A terceira é
+<strong>abrir a porta</strong>: um caminho claro para pedir orçamento. Tudo o que não serve a essas
+três tarefas atrapalha.</p>
+
+<p>Isso decide o HTML antes de qualquer classe. As fotos são o conteúdo, então cada trabalho é um
+bloco com imagem, uma etiqueta (“casamento”, “aniversário”), um título e uma frase de contexto. O
+texto de apresentação fica curto; o contato, visível no fim e no topo. E o desenho todo é feito de
+grade — a ferramenta certa para alinhar muitas peças de tamanhos diferentes.</p>
+
+<pre class="file" data-file="portfolio.html">&lt;header class="mx-auto max-w-5xl px-4 py-12"&gt;…nome, frase, links…&lt;/header&gt;
+&lt;main&gt;
+  &lt;section class="mx-auto max-w-5xl px-4"&gt;…mosaico de trabalhos…&lt;/section&gt;
+  &lt;section class="mx-auto max-w-3xl px-4 py-12"&gt;…ficha e depoimento…&lt;/section&gt;
+  &lt;section class="mx-auto max-w-5xl px-4 pb-12"&gt;…faixa de contato…&lt;/section&gt;
+&lt;/main&gt;</pre>
+
+<p>Repare que existem duas larguras no esqueleto: <code>max-w-5xl</code> para a galeria e
+<code>max-w-3xl</code> para o texto. Não é indecisão — é papel diferente. Falaremos disso na próxima
+seção, porque é a decisão que mais muda o resultado.</p>
+
+<h2>2. O casco: uma coluna mais larga que a do texto</h2>
+
+<p>Na loja e na tela de login, o casco era uma coluna estreita: 384 px no cartão, 1.152 px na página.
+No portfólio, a lógica muda, porque o conteúdo principal são imagens. Foto quer espaço; texto quer
+medida. Se você usar a mesma largura para as duas coisas, ou as fotos ficam pequenas, ou as linhas de
+texto ficam compridas demais.</p>
+
+<p>A solução é ter duas medidas e usá-las com disciplina. A galeria fica em
+<code>mx-auto max-w-5xl px-4</code>: 64 rem, 1.024 px, espaço para três fotos confortáveis. Os blocos
+de leitura — apresentação, ficha, depoimento — ficam em <code>max-w-3xl</code> ou
+<code>max-w-prose</code>, porque linha de texto acima de 75 caracteres cansa. O
+<code>px-4</code> continua em todas as faixas, para nada encostar na borda do celular.</p>
+
+<p>Essa mistura parece detalhe e é o que separa um portfólio amador de um profissional. Em site
+amador, tudo ocupa a largura toda; em site profissional, cada tipo de conteúdo tem a medida que
+merece. Você não precisa de mais classes para isso: precisa de duas ou três larguras escolhidas e
+repetidas.</p>
+
+<p>Uma consequência prática: quando o texto é mais estreito que a galeria, ele fica alinhado à
+esquerda, na mesma margem das fotos, e não centralizado. Centralizar texto dentro de bloco largo é o
+que dá aquele ar de convite de casamento — bonito em convite, ruim em página que precisa ser lida.
+Mantenha a margem esquerda comum e o olho encontra o começo de cada bloco sem esforço.</p>
+
+<h2>3. O topo: três linhas, dois links</h2>
+
+<p>O topo do portfólio tem três linhas e dois links. Nome grande, uma frase que diz o que a Cláudia
+faz, e dois caminhos: “ver os trabalhos” (que rola a página) e “pedir orçamento” (que abre o e-mail).
+Nada de menu com seis itens: um portfólio de uma pessoa não tem seis assuntos.</p>
+
+<pre class="file" data-file="portfolio.html">&lt;header class="mx-auto max-w-5xl px-4 pb-10 pt-16"&gt;
+  &lt;p class="text-sm font-medium uppercase tracking-widest text-amber-700"&gt;Confeitaria artesanal&lt;/p&gt;
+  &lt;h1 class="mt-3 max-w-2xl text-4xl font-bold tracking-tight text-stone-900 text-balance sm:text-5xl"&gt;
+    Bolos de casamento feitos à mão, um por semana
+  &lt;/h1&gt;
+  &lt;p class="mt-4 max-w-xl text-lg text-stone-600"&gt;
+    Massa de baunilha, recheio de frutas da estação e acabamento em pasta americana. Entrego montado.
+  &lt;/p&gt;
+  &lt;div class="mt-6 flex flex-wrap gap-3"&gt;
+    &lt;a href="#trabalhos" class="rounded-lg bg-stone-900 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-700"&gt;Ver os trabalhos&lt;/a&gt;
+    &lt;a href="#" class="rounded-lg border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-800 hover:border-stone-400"&gt;Pedir orçamento&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/header&gt;</pre>
+
+<p>As classes de texto desse bloco têm três decisões. <code>text-4xl</code> no celular e
+<code>sm:text-5xl</code> no tablet em diante: título de portfólio pode ser grande, desde que caiba em
+duas linhas no celular. <code>tracking-tight</code> aperta o espaço entre as letras — em corpo grande,
+o espaçamento padrão parece frouxo e o título perde força. E <code>text-balance</code> distribui as
+palavras para que a última linha não fique com uma palavra sozinha.</p>
+
+<pre class="term">.text-4xl {
+  font-size: var(--text-4xl);
+  line-height: var(--tw-leading, var(--text-4xl--line-height));
+}
+.tracking-tight {
+  --tw-tracking: var(--tracking-tight);
+  letter-spacing: var(--tracking-tight);
+}
+.text-balance {
+  text-wrap: balance;
+}</pre>
+
+<p>O <code>text-balance</code> é o tipo de classe que ninguém procura e todo mundo nota quando falta.
+Em um título de duas linhas, o navegador quebra onde couber, e a última linha pode ficar com “semana”
+sozinha, boiando. Com <code>text-wrap: balance</code>, ele divide as palavras em partes parecidas. É
+para títulos curtos: em um parágrafo longo, o resultado é imprevisível.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>Classes</th><th>O que resolve</th></tr>
+<tr><td>Etiqueta do topo</td><td><code>text-sm uppercase tracking-widest text-amber-700</code></td><td>diz o ramo em uma linha, sem competir com o título</td></tr>
+<tr><td>Título</td><td><code>text-4xl sm:text-5xl font-bold tracking-tight text-balance</code></td><td>hierarquia, força e quebra equilibrada</td></tr>
+<tr><td>Frase de apoio</td><td><code>max-w-xl text-lg text-stone-600</code></td><td>contexto rápido, com medida de leitura</td></tr>
+<tr><td>Dois links</td><td><code>flex flex-wrap gap-3</code> + <code>rounded-lg px-4 py-2</code></td><td>duas ações lado a lado, quebrando linha se faltar espaço</td></tr>
+</table>
+</div>
+
+<p>Repare no <code>flex-wrap</code> dos botões: no celular, dois botões lado a lado às vezes não
+cabem; com <code>flex-wrap</code>, o segundo desce em vez de espremer o primeiro. É a diferença entre
+um topo que se adapta e um topo que transborda.</p>
+
+<h2>4. O mosaico: o destaque vale mais que a simetria</h2>
+
+<p>A galeria é o coração da página. Ela precisa de três coisas: espaço entre as fotos, um número de
+colunas que caiba na tela e, se possível, um ritmo — nem tudo do mesmo tamanho. Grade perfeitamente
+simétrica parece catálogo; um item maior dá opinião, e portfólio é opinião.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Tela</th><th>Colunas</th><th>Classes</th></tr>
+<tr><td>Celular</td><td>uma</td><td>sem prefixo: a grade em uma coluna é o padrão</td></tr>
+<tr><td>Tablet (768 px)</td><td>duas ou três, com um item em destaque</td><td><code>sm:grid-cols-3</code> no pai e <code>sm:col-span-2</code> no destaque</td></tr>
+<tr><td>Computador (1.024 px)</td><td>três, ou quatro para muitos trabalhos</td><td><code>lg:grid-cols-3</code> ou <code>lg:grid-cols-4</code></td></tr>
+</table>
+</div>
+
+<dl class="anatomy">
+<dt>grade</dt>
+<dd>O pai com <code>grid gap-3 sm:grid-cols-3</code>. O <code>gap-3</code> é menor que o
+<code>gap-4</code> de uma lista de produtos: foto grande precisa de menos respiro para parecer
+conjunto.</dd>
+<dt>destaque</dt>
+<dd>O primeiro item com <code>sm:col-span-2</code>. Ele ocupa duas das três colunas e vira o assunto
+principal da linha.</dd>
+<dt>foto</dt>
+<dd>Uma caixa com <code>overflow-hidden rounded-xl</code>. O arredondamento é do bloco, não da
+imagem: assim o canto recorta a foto em vez de aparecer um pedaço branco.</dd>
+<dt>etiqueta</dt>
+<dd><code>absolute top-3 left-3 rounded-full bg-white/90 px-2 py-0.5 text-xs font-medium</code>: diz o
+tipo de trabalho sem ocupar espaço.</dd>
+</dl>
+
+<div class="trytailwind" data-largura="768" data-goal="rule:grid-column: span 2 / span 2;;largura:768;;css:#alvo|grid-column=span 2 / span 2">
+  <p class="try-task">A prévia está com 768 px e a grade já tem três colunas. A peça de destaque ocupa
+  apenas uma. Faça ela valer por duas, a partir de 640 px: acrescente <code>sm:col-span-2</code> ao
+  <code>&lt;article id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;div class="grid gap-3 sm:grid-cols-3"&gt;
+  &lt;article id="alvo" class="rounded-xl bg-amber-100 p-4"&gt;Bolo de casamento&lt;/article&gt;
+  &lt;article class="rounded-xl bg-amber-100 p-4"&gt;Torta de limão&lt;/article&gt;
+  &lt;article class="rounded-xl bg-amber-100 p-4"&gt;Pão de mel&lt;/article&gt;
+  &lt;article class="rounded-xl bg-amber-100 p-4"&gt;Bolacha de nata&lt;/article&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div class="grid gap-3 sm:grid-cols-3"&gt;
+  &lt;article id="alvo" class="rounded-xl bg-amber-100 p-4 sm:col-span-2"&gt;Bolo de casamento&lt;/article&gt;
+  &lt;article class="rounded-xl bg-amber-100 p-4"&gt;Torta de limão&lt;/article&gt;
+  &lt;article class="rounded-xl bg-amber-100 p-4"&gt;Pão de mel&lt;/article&gt;
+  &lt;article class="rounded-xl bg-amber-100 p-4"&gt;Bolacha de nata&lt;/article&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>grid-column: span 2 / span 2</code>, e o CSS gerado é uma linha dentro do
+breakpoint de 640 px:</p>
+
+<pre class="term">@media (width >= 40rem) {
+  .sm\:col-span-2 {
+    grid-column: span 2 / span 2;
+  }
+}</pre>
+
+<p>“Span 2” quer dizer “ocupe duas colunas”. Como a grade tem três a partir de 640 px, o destaque fica
+com dois terços da largura e o segundo item divide a linha com ele. No celular, onde a grade tem uma
+coluna, o <code>sm:col-span-2</code> nem entra — e é isso que se quer. Uma regra a menos para
+desfazer.</p>
+
+<p>Atenção à conta: se a grade tem três colunas e você dá <code>col-span-2</code> a dois itens, o
+segundo “não cabe” na mesma linha e a grade abre um buraco. Em grade, o navegador nunca encolhe uma
+peça para caber: ele empurra para a linha seguinte e deixa o espaço vazio. Se um buraco aparecer, é
+porque a soma dos <code>col-span</code> daquela linha passou do número de colunas. A aula de
+<a href="colunas-e-linhas.html">colunas e linhas</a> explora esse comportamento com calma.</p>
+
+<h2>5. A foto: proporção e recorte</h2>
+
+<p>As fotos da Cláudia chegam de tamanhos diferentes: uma de celular em pé, outra de máquina na
+horizontal. Jogadas na grade, cada uma traz a altura original e o mosaico vira escada — o texto de
+baixo de cada card fica em alturas diferentes. A solução é impor uma proporção à caixa e deixar a
+imagem se ajustar dentro dela.</p>
+
+<p>Quadrado (<code>aspect-square</code>) serve para produto, que é fotografado em cima da mesa. Bolo de
+casamento é alto: três andares, laço em cima. A proporção 4/5 — quatro de largura para cinco de altura
+— é a que mais combina, e ela existe como valor arbitrário: <code>aspect-[4/5]</code>, com colchetes.
+O Tailwind gera a regra na hora — a aula de <a href="aspect-ratio.html">proporção</a> mostra a ideia
+por trás.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|aspect-ratio=4 / 5">
+  <p class="try-task">A caixa da foto está quadrada e corta o topo do bolo. Troque a proporção por
+  quatro de largura para cinco de altura: troque <code>aspect-square</code> por
+  <code>aspect-[4/5]</code> no <code>&lt;div id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;article class="max-w-xs overflow-hidden rounded-xl"&gt;
+  &lt;div id="alvo" class="aspect-square bg-amber-200"&gt;
+    &lt;p class="p-4 text-sm text-amber-900"&gt;Bolo de três andares&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/article&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.924 0.12 95.746)
+aspect-ratio: 1 / 1
+</pre>
+  <pre class="solucao">&lt;article class="max-w-xs overflow-hidden rounded-xl"&gt;
+  &lt;div id="alvo" class="aspect-[4/5] bg-amber-200"&gt;
+    &lt;p class="p-4 text-sm text-amber-900"&gt;Bolo de três andares&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/article&gt;</pre>
+</div>
+
+<p>No painel, a linha muda de <code>aspect-ratio: 1 / 1</code> para <code>aspect-ratio: 4 / 5</code>.
+O que isso significa na prática: a altura deixa de acompanhar o conteúdo e passa a ser calculada pela
+largura. Se a coluna tem 320 px, a caixa tem 400 px de altura, sempre — independentemente da foto.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Proporção</th><th>Classe</th><th>Onde serve</th></tr>
+<tr><td>1 / 1</td><td><code>aspect-square</code></td><td>produto, foto de perfil, bolo visto de cima</td></tr>
+<tr><td>4 / 5</td><td><code>aspect-[4/5]</code></td><td>bolo em pé, retrato, foto de celular na vertical</td></tr>
+<tr><td>4 / 3</td><td><code>aspect-[4/3]</code></td><td>ambiente, mesa posta, foto na horizontal</td></tr>
+<tr><td>16 / 9</td><td><code>aspect-video</code></td><td>vídeo, capa de artigo, faixa de abertura</td></tr>
+</table>
+</div>
+
+<pre class="term">.aspect-\[4\/5\] {
+  aspect-ratio: 4/5;
+}
+.object-cover {
+  object-fit: cover;
+}</pre>
+
+<p>Dentro da caixa, a <code>&lt;img&gt;</code> precisa de <code>h-full w-full object-cover</code>. O
+<code>h-full w-full</code> faz a imagem ocupar todo o espaço; o <code>object-cover</code> corta o
+excesso em vez de esticar. E o <code>overflow-hidden</code> no pai é o que garante que o corte
+aconteça dentro do canto arredondado. Sem ele, a foto passa por cima do arredondamento e aparece uma
+ponta quadrada.</p>
+
+<p>Um cuidado de conteúdo: <code>object-cover</code> corta. Se o laço do bolo estiver no topo da foto,
+a proporção 4/5 pode cortar justamente o laço. Ajuste com <code>object-top</code> ou
+<code>object-center</code> — os três valores mais usados para dizer qual parte da imagem fica visível.
+Quem fotografa para portfólio aprende rápido a deixar o assunto no centro.</p>
+
+<h2>6. A legenda por cima da foto</h2>
+
+<p>Legenda abaixo da foto é o padrão e funciona: título, contexto, fim. Legenda por cima tem outro
+efeito — a foto vira capa e o texto mora dentro dela. Para portfólio, o segundo jeito dá um ar mais
+editorial e economiza altura no celular. O preço é o contraste: texto branco sobre bolo branco
+desaparece.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|position=absolute;;css:#alvo|bottom=0px;;texto:Bolo de casamento">
+  <p class="try-task">A legenda está embaixo da foto, empurrando o card. Cole-a no rodapé da imagem:
+  acrescente <code>absolute inset-x-0 bottom-0</code> e troque o fundo para
+  <code>bg-stone-900/70</code> no <code>&lt;div id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;article class="relative max-w-xs overflow-hidden rounded-xl"&gt;
+  &lt;div class="aspect-[4/5] bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div id="alvo" class="bg-stone-900 p-3 text-sm text-white"&gt;Bolo de casamento&lt;/div&gt;
+&lt;/article&gt;</pre>
+  <pre class="out">
+padding: 12px
+background-color: oklch(0.216 0.006 56.043)
+color: rgb(255, 255, 255)
+font-size: 14px
+line-height: 20px
+</pre>
+  <pre class="solucao">&lt;article class="relative max-w-xs overflow-hidden rounded-xl"&gt;
+  &lt;div class="aspect-[4/5] bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div id="alvo" class="absolute inset-x-0 bottom-0 bg-stone-900/70 p-3 text-sm text-white"&gt;Bolo de casamento&lt;/div&gt;
+&lt;/article&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>position: absolute</code>, <code>bottom: 0px</code> e
+<code>inset-inline: 0px</code> — que é o “esticar de ponta a ponta na horizontal”. A legenda sai do
+fluxo e passa a flutuar sobre a imagem, presa no rodapé dela. Como o card tem
+<code>overflow-hidden</code>, a legenda respeita o canto arredondado sozinha, sem precisar de
+<code>rounded-b-xl</code>.</p>
+
+<p>O <code>bg-stone-900/70</code> é a parte que salva a leitura: a barra escura translúcida garante
+contraste sobre qualquer foto, clara ou escura. Chame isso de véu. Sem ele, texto branco sobre foto
+clara é ilegível na rua, no sol — e a maior parte dos acessos a um portfólio de bolo acontece na rua,
+no sol.</p>
+
+<p>Uma alternativa elegante é o gradiente em vez da barra:
+<code>bg-gradient-to-t from-stone-900/80 to-transparent p-4</code>. O texto fica legível e a transição
+para a foto é suave. Custa mais uma classe de gradiente e dá um resultado mais sofisticado — vale
+quando a foto tem área livre embaixo.</p>
+
+<p>Duas notas de acessibilidade. Primeiro, a legenda deve continuar dentro do mesmo bloco da imagem no
+HTML: quem lê com leitor de tela ouve a legenda logo depois da foto, na ordem certa. Segundo, se a
+informação principal estiver na imagem (o bolo em si), a legenda precisa dizer o que é — “Bolo de
+casamento, três andares, pasta americana” vale mais que “foto 1”.</p>
+
+<h2>7. A ficha do projeto: quatro linhas que dão credibilidade</h2>
+
+<p>Uma foto bonita prova que a Cláudia sabe fazer bolo. Uma ficha curta prova que ela sabe
+<em>trabalhar</em>: entrega no prazo, negocia tamanho, resolve imprevisto. É a parte sem graça do
+portfólio e a que fecha orçamento.</p>
+
+<dl class="anatomy">
+<dt>cliente</dt>
+<dd>Quem encomendou, com o tipo de evento: “Casamento no salão da praça”. Contexto, sem expor nome de
+pessoa sem permissão.</dd>
+<dt>ocasião</dt>
+<dd>O que era: 120 convidados, três andares, mesa de doces.</dd>
+<dt>técnica</dt>
+<dd>O que a Cláudia fez de difícil: pasta americana, flores de açúcar, recheio de frutas da estação.</dd>
+<dt>tempo</dt>
+<dd>Quanto levou e com quanta antecedência foi encomendado. É o dado que o próximo cliente quer
+saber.</dd>
+</dl>
+
+<p>No HTML, a ficha é uma lista de definições: <code>&lt;dl&gt;</code> com pares
+<code>&lt;dt&gt;</code>/<code>&lt;dd&gt;</code>. Cada linha vira um <code>&lt;div&gt;</code> com
+<code>flex items-center justify-between gap-4 border-b border-stone-200 py-3</code>: o termo à
+esquerda, o valor à direita, uma linha fina separando. A última linha fica sem borda — ou você usa
+<code>divide-y divide-stone-200</code> no pai, que aplica a borda entre os filhos e nunca na sobra, o
+que é exatamente o que se quer em lista — assunto de <a href="divisores.html">divisores</a>.</p>
+
+<p>O <code>dt</code> fica em <code>text-sm text-stone-500</code> e o <code>dd</code> em
+<code>text-sm font-medium text-stone-900</code>. Essa diferença de peso e cor é o que faz o olho
+separar rótulo de informação sem precisar de dois tamanhos de fonte. É o mesmo par que você usa em
+formulário, invertido.</p>
+
+<p>Para os números do portfólio — 48 bolos no ano, 12 casamentos, 6 anos de forno — a mesma lógica com
+outro tamanho: <code>text-3xl font-bold text-stone-900</code> no número e
+<code>text-sm text-stone-500</code> na legenda. Três números em uma linha com
+<code>grid grid-cols-3 gap-4</code>, e no celular continuam cabendo, porque são curtos. Só não invente
+número: portfólio com estatística falsa é o tipo de mentira que o cliente confere.</p>
+
+<h2>8. O contato: um caminho, não cinco</h2>
+
+<p>O fim da página é uma faixa escura com uma frase e um botão. Escura porque o resto da página é
+claro: a mudança de cor marca “aqui acaba o trabalho, aqui começa a conversa”. Uma frase, um botão, um
+e-mail à vista.</p>
+
+<pre class="file" data-file="portfolio.html">&lt;section class="rounded-2xl bg-stone-900 p-8 text-white"&gt;
+  &lt;p class="text-sm font-medium uppercase tracking-widest text-amber-300"&gt;Encomendas&lt;/p&gt;
+  &lt;h2 class="mt-2 max-w-lg text-2xl font-semibold text-balance"&gt;Quer um bolo para uma data especial?&lt;/h2&gt;
+  &lt;p class="mt-3 max-w-prose text-stone-300"&gt;Conte a ocasião, o número de convidados e a data. Respondo em um dia útil.&lt;/p&gt;
+  &lt;a href="#" class="mt-6 inline-block rounded-lg bg-amber-300 px-5 py-2.5 font-semibold text-stone-900 hover:bg-amber-200"&gt;
+    Pedir orçamento
+  &lt;/a&gt;
+  &lt;p class="mt-4 text-sm text-stone-400"&gt;ou escreva para ana@notebook&lt;/p&gt;
+&lt;/section&gt;</pre>
+
+<p>Três decisões de cor nessa faixa. O fundo é <code>bg-stone-900</code>, quase preto. O texto de apoio
+é <code>text-stone-300</code>, e não branco puro: branco sobre preto cansa a vista em blocos grandes;
+o cinza claro lê melhor. E o botão é <code>bg-amber-300</code> com <code>text-stone-900</code> — âmbar
+claro com texto escuro, que é o inverso do botão da loja. Em fundo escuro, o botão claro salta mais que
+o botão colorido.</p>
+
+<p>Por que um botão só? Porque cada caminho a mais divide a atenção. Portfólio que oferece WhatsApp,
+Instagram, formulário, telefone e e-mail na mesma faixa faz o cliente escolher — e escolher é o
+trabalho que ele quer que você faça. Escolha você o caminho principal (o e-mail, aqui) e deixe os
+outros no rodapé, em texto pequeno.</p>
+
+<p>O rodapé fecha com <code>mt-12 border-t border-stone-200 pt-6 text-sm text-stone-500</code> e três
+informações: nome, cidade, ano. Nada de mapa, nada de newsletter. Quem chegou até aqui já viu o
+trabalho; o rodapé só confirma que a página acabou de propósito, e não por falta de conteúdo.</p>
+
+<h2>9. Três cenas, três consertos</h2>
+
+<div class="cenario">
+<h3>Cenário 1: as fotos de tamanhos diferentes e a grade em escada</h3>
+<p>A Cláudia mandou sete fotos: duas de celular em pé, três de máquina na horizontal, duas quadradas.
+Sem proporção imposta, cada card ficou com uma altura e o mosaico virou escada. O conserto é impor a
+proporção na <em>caixa</em> (<code>aspect-[4/5]</code>) e recortar a imagem dentro dela
+(<code>object-cover</code>). A partir daí, toda foto ocupa o mesmo retângulo, e a grade fica alinhada
+mesmo com originais diferentes.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a legenda que sumiu no bolo branco</h3>
+<p>A legenda “Bolo de casamento” era <code>text-white</code> direto sobre a foto. Na foto do bolo de
+pasta branca, o texto desapareceu. Faltava o véu: <code>bg-stone-900/70</code> ou um gradiente
+<code>from-stone-900/80</code>. Contraste não é preciosismo — é o que decide se a informação existe
+para quem está no sol com o celular na mão. Na dúvida, escureça o fundo do texto, nunca clareie a
+foto.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o mosaico de três colunas no celular</h3>
+<p>A Ana escreveu <code>grid-cols-3 gap-3</code> e achou ótimo no monitor. No celular, cada foto ficou
+com 100 px de largura e a legenda quebrou em quatro linhas. Faltou o pensamento mobile first: a base
+tem de ser uma coluna, e as três chegam no breakpoint —
+<code>grid gap-3 sm:grid-cols-2 lg:grid-cols-3</code>. O prefixo não é enfeite: é a promessa de que
+alguém testou a tela pequena.</p>
+</div>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Conferência</th><th>Como se vê</th><th>O que resolve</th></tr>
+<tr><td>As fotos têm a mesma altura?</td><td>olhe a linha da grade de longe</td><td><code>aspect-[4/5]</code> na caixa + <code>object-cover</code> na imagem</td></tr>
+<tr><td>A legenda é legível em qualquer foto?</td><td>teste com foto clara e escura</td><td>véu <code>bg-stone-900/70</code> ou gradiente</td></tr>
+<tr><td>Cabe em 375 px sem rolar de lado?</td><td>estreite a janela</td><td>base em uma coluna; prefixos só para crescer</td></tr>
+<tr><td>O contato está a um toque?</td><td>procure sem rolar</td><td>link no topo e faixa no fim, um caminho principal</td></tr>
+<tr><td>Os cantos estão limpos?</td><td>aproxime um card</td><td><code>overflow-hidden</code> no card, <code>rounded-xl</code> nele</td></tr>
+</table>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. Por que a foto ganha <code>aspect-[4/5]</code> na
+caixa, e não altura fixa?</p>
+<label><input type="radio" name="q1"> porque altura fixa não funciona em navegador</label>
+<label><input type="radio" name="q1"> porque o <code>aspect</code> deixa a foto mais nítida</label>
+<label><input type="radio" name="q1"> porque a altura passa a ser calculada pela largura da coluna, e a grade fica alinhada em qualquer tela</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">2. O que <code>sm:col-span-2</code> faz com a peça de
+destaque?</p>
+<label><input type="radio" name="q2"> dobra a altura dela</label>
+<label><input type="radio" name="q2"> faz ela ocupar duas colunas a partir de 640 px</label>
+<label><input type="radio" name="q2"> esconde a segunda peça da grade</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Qual é o papel do <code>overflow-hidden</code> no
+card da foto?</p>
+<label><input type="radio" name="q3"> recortar a imagem e a legenda dentro do canto arredondado</label>
+<label><input type="radio" name="q3"> impedir que a foto seja carregada duas vezes</label>
+<label><input type="radio" name="q3"> deixar a foto transparente</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o mosaico da Cláudia</h2>
+<p>No seu arquivo, a galeria precisa de três colunas a partir de 640 px, e a caixa da foto precisa da
+proporção em pé. Complete as duas classes que faltam.</p>
+<div class="ex-code">&lt;div class="grid gap-3 <input aria-label="resposta 1" data-answer="sm:grid-cols-3">"&gt;
+  &lt;div class="<input aria-label="resposta 2" data-answer="aspect-[4/5]"> overflow-hidden rounded-xl bg-amber-200"&gt;&lt;/div&gt;
+&lt;/div&gt;</div>
+<p class="ex-dica">Dica: três colunas no prefixo de 640 px é <code>sm:grid-cols-3</code>; a proporção
+em pé com colchetes é <code>aspect-[4/5]</code>. Se você escrever <code>aspect-4/5</code> sem os
+colchetes, a classe não existe e nada acontece.</p>
+</div>
+
+<h2>10. Resumo</h2>
+
+<p>Portfólio é uma página que prova, situa e abre a porta. O casco mistura duas medidas: a galeria em
+<code>max-w-5xl</code> e o texto em <code>max-w-3xl</code>, sempre com <code>mx-auto px-4</code>. O
+topo tem nome grande (<code>text-4xl sm:text-5xl tracking-tight text-balance</code>), uma frase de
+apoio e dois links.</p>
+
+<p>A galeria é uma grade com <code>gap-3</code> e prefixos crescentes; um item leva
+<code>sm:col-span-2</code> para dar ritmo. Cada foto vive em uma caixa com
+<code>aspect-[4/5] overflow-hidden rounded-xl</code> e a imagem usa
+<code>h-full w-full object-cover</code>. A legenda por cima é
+<code>absolute inset-x-0 bottom-0</code> com um véu escuro para o texto não sumir. A ficha do projeto
+usa quatro pares de <code>dt</code>/<code>dd</code>, e o contato é uma faixa escura com um botão só.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Foto quer espaço; texto quer medida — duas larguras no mesmo projeto.</li>
+<li>Topo curto: etiqueta, título, frase, dois links.</li>
+<li><code>text-balance</code> evita a última palavra sozinha em títulos.</li>
+<li>Mosaico: <code>grid gap-3 sm:grid-cols-3</code> e um item com <code>sm:col-span-2</code>.</li>
+<li>Proporção na caixa: <code>aspect-square</code>, <code>aspect-[4/5]</code>, <code>aspect-video</code>.</li>
+<li>Recorte na imagem: <code>h-full w-full object-cover</code> e <code>overflow-hidden</code> no card.</li>
+<li>Legenda sobre foto pede véu: <code>bg-stone-900/70</code> ou gradiente.</li>
+<li>Ficha do projeto em <code>dl</code> com linhas <code>flex justify-between border-b</code>.</li>
+<li>Faixa de contato: um caminho principal, os outros em texto pequeno.</li>
+<li>Se a soma dos <code>col-span</code> passar do número de colunas, a grade abre buraco.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

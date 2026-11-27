@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campo de Busca | Guia Tailwind</title>
+<meta name="description" content="O campo de busca da padaria: a lupa dentro do campo, o rótulo invisível, a lista de sugestões que flutua, o trecho destacado, os filtros e a contagem de resultados.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Campo de <span class="hl">Busca</span></h1>
+
+<p class="intro">A Ana colocou uma busca no site da padaria e ficou orgulhosa: um campo branco, uma
+lupa do lado, Enter para procurar. Na primeira semana, uma cliente perguntou por que "queijo" não
+achava o pão de queijo. A Ana testou e viu: a busca procurava a palavra inteira no nome do produto, e
+"queijo" aparecia como "Pão de queijo" — misturado com doze outros resultados, sem destaque, sem
+contagem, sem nada que dissesse "é este aqui". Nesta aula ela refaz o campo e tudo em volta: a lupa
+dentro do campo, o rótulo que ninguém vê, a lista de sugestões que flutua, o trecho que combina
+destacado e os filtros que estreitam o resultado.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Os três estados de uma busca e o que mostrar em cada um.</li>
+  <li>Como pôr a lupa dentro do campo sem o texto passar por cima dela.</li>
+  <li>O rótulo invisível com <code>sr-only</code> e por que ele não é opcional.</li>
+  <li>A lista de sugestões que flutua, com <code>absolute</code> e <code>max-h</code>.</li>
+  <li>Como destacar o trecho que combina sem quebrar o texto.</li>
+  <li>Os chips de filtro e o estado ativo.</li>
+  <li>A contagem de resultados anunciada pelo leitor de tela.</li>
+  <li>Como a busca se comporta no celular e o atalho de teclado no desktop.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o "queijo" que não achou nada</h2>
+
+<p>O campo da Ana era um <code>input</code> com borda cinza e um botão "Buscar" do lado. Funcionava
+tecnicamente: digitava, apertava Enter, a página recarregava com resultados. O problema era tudo o que
+vinha depois do Enter. Doze produtos numa lista corrida, todos com o mesmo peso visual, nenhum dizendo
+onde estava a palavra procurada. A cliente rolou, não achou, e foi embora.</p>
+
+<p>Busca é uma das poucas telas em que o usuário chega com pressa e sem paciência. Ele digita três
+letras e olha o que aparece. Se o que aparece não parece resposta, ele conclui que a loja não tem o
+produto — e a loja tem. Não é um problema de indexação: é de apresentação.</p>
+
+<p>Este caso tem uma diferença em relação aos outros: metade das decisões é de HTML e de
+acessibilidade, não de classe. Um campo de busca bonito sem rótulo é um campo que o leitor de tela
+anuncia como "campo de edição, em branco". Vamos fazer as duas partes.</p>
+
+<h2>2. A busca tem três estados</h2>
+
+<p>Antes de desenhar, a Ana desenhou os estados. É o exercício que mais economiza retrabalho em tela de
+busca: em vez de pensar "como fica o resultado", pense em todas as situações em que a tela pode estar.
+São três, e cada uma tem uma obrigação.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Estado</th><th>Quando acontece</th><th>O que a tela deve mostrar</th></tr>
+<tr><td>Repouso</td><td>ninguém digitou nada ainda</td><td>o campo vazio, com o exemplo no <code>placeholder</code> e, se quiser, os filtros</td></tr>
+<tr><td>Com resultados</td><td>a busca encontrou algo</td><td>a contagem, os filtros aplicados e a lista com o trecho destacado</td></tr>
+<tr><td>Sem resultados</td><td>a busca não encontrou nada</td><td>uma frase clara, o termo buscado e uma saída: limpar filtro ou sugerir algo próximo</td></tr>
+</table>
+</div>
+
+<p>Repare que "carregando" não está na lista: é um estado do meio, não um destino. Ele dura o tempo da
+resposta e não precisa de desenho próprio em busca pequena — a lista anterior continua na tela até a
+nova chegar. E "erro" existe, mas é raro e se trata como qualquer erro de página.</p>
+
+<p>Desenhar os três estados antes de escrever a primeira classe muda o HTML: você percebe que precisa
+de um lugar para a contagem, de um lugar para a mensagem de vazio e de um lugar para os filtros. Se
+você escrever só o caminho feliz, esses lugares acabam inventados na hora, fora do padrão.</p>
+
+<h2>3. O campo por dentro: a lupa mora nele</h2>
+
+<p>A lupa ao lado do campo é o desenho antigo. O desenho atual põe a lupa dentro do campo, à esquerda,
+porque assim o olho entende que aquilo é uma busca antes de ler o <code>placeholder</code>. Em CSS, isso
+é um ícone posicionado por cima do campo, e o campo com respiro à esquerda para o texto não passar por
+baixo do ícone.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding-left=40px;;rule:padding-left: calc(var(--spacing) * 10)">
+  <p class="try-task">A lupa está por cima do texto: quando alguém digita, as primeiras letras somem
+  atrás do ícone. Dê ao campo 40 px de respiro à esquerda, mantendo os outros lados como estão.</p>
+  <pre class="html">&lt;div class="relative w-72"&gt;
+  &lt;span aria-hidden="true" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"&gt;
+    &lt;svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5"&gt;&lt;circle cx="9" cy="9" r="6"&gt;&lt;/circle&gt;&lt;path d="m13.5 13.5 3.5 3.5"&gt;&lt;/path&gt;&lt;/svg&gt;
+  &lt;/span&gt;
+  &lt;input id="alvo" type="search" placeholder="Buscar no cardápio" class="w-full rounded-full border border-stone-300 py-2 pl-3 pr-4"&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+width: 288px
+border-radius: 3.35544e+07px
+border-width: 1px
+border-color: oklch(0.869 0.005 56.366)
+padding-block: 8px
+padding-right: 16px
+padding-left: 12px
+</pre>
+  <pre class="solucao">&lt;div class="relative w-72"&gt;
+  &lt;span aria-hidden="true" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"&gt;
+    &lt;svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5"&gt;&lt;circle cx="9" cy="9" r="6"&gt;&lt;/circle&gt;&lt;path d="m13.5 13.5 3.5 3.5"&gt;&lt;/path&gt;&lt;/svg&gt;
+  &lt;/span&gt;
+  &lt;input id="alvo" type="search" placeholder="Buscar no cardápio" class="w-full rounded-full border border-stone-300 py-2 pl-10 pr-4"&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Quatro peças fazem esse desenho funcionar, e nenhuma é opcional:</p>
+
+<dl class="anatomy">
+<dt>search</dt>
+<dd>A região da busca. No HTML, um <code>&lt;form role="search"&gt;</code> diz ao leitor de tela que
+aquele pedaço procura conteúdo.</dd>
+<dt>label</dt>
+<dd>O nome do campo. Pode estar invisível na tela, mas tem de existir no HTML — <code>placeholder</code>
+não é rótulo.</dd>
+<dt>combobox</dt>
+<dd>O papel do campo quando ele abre uma lista de sugestões. É o que faz o leitor de tela anunciar
+"lista de sugestões" em vez de "campo de texto".</dd>
+<dt>sugestão</dt>
+<dd>Cada linha da lista. Precisa de <code>role="option"</code> e de um estado, selecionado ou não.</dd>
+<dt>chip</dt>
+<dd>O filtro em forma de etiqueta clicável. Tem duas aparências: ativo e inativo.</dd>
+</dl>
+
+<p>O CSS do respiro é curto, e é o mesmo de qualquer <code>pl-</code>:</p>
+
+<pre class="term">.pl-10 {
+  padding-left: calc(var(--spacing) * 10);
+}</pre>
+
+<p>O painel também mostra um número esquisito: <code>border-radius: 3.35544e+07px</code>. Não é
+defeito. <code>rounded-full</code> gera <code>border-radius: calc(infinity * 1px)</code>, e o navegador
+representa o infinito com o maior número que ele guarda. É assim que a pílula fica perfeitamente
+arredondada em qualquer altura de campo — com um raio fixo de 9999 px, um campo mais alto que isso
+voltaria a ter canto reto.</p>
+
+<p>Dez passos de 0,25 rem dão 2,5 rem, ou 40 px — o tamanho do ícone (20 px) mais o espaço das bordas.
+Se você mudar o ícone para 24 px, o respiro acompanha: <code>pl-12</code>. Esse é o tipo de conta que
+a escala do Tailwind faz sozinha, e é por isso que ela é mais confortável que pixels soltos.</p>
+
+<h2>4. O rótulo que ninguém vê</h2>
+
+<p>Um campo de busca no topo da página costuma não ter rótulo visível: a lupa e o <code>placeholder</code>
+já dizem o suficiente para quem enxerga. Só que "já dizem" não vale para quem usa leitor de tela, e
+também não vale quando a pessoa começa a digitar e o <code>placeholder</code> desaparece.</p>
+
+<p>A solução é um <code>label</code> de verdade, escondido de forma acessível. O Tailwind tem uma classe
+só para isso, e o CSS que ela gera explica o truque:</p>
+
+<pre class="term">.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
+}</pre>
+
+<p>É um elemento de 1 px por 1 px, recortado fora da vista. Ele continua no HTML, continua sendo lido
+pelo leitor de tela e continua recebendo foco — as três coisas que <code>display: none</code> e
+<code>visibility: hidden</code> destroem. Nunca esconda rótulo com <code>hidden</code>: o campo fica
+sem nome.</p>
+
+<pre class="file" data-file="busca.html">&lt;form role="search" action="busca.html" class="relative w-full max-w-sm"&gt;
+  &lt;label for="q" class="sr-only"&gt;Buscar no cardápio&lt;/label&gt;
+  &lt;span aria-hidden="true" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"&gt;
+    &lt;svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5"&gt;&lt;circle cx="9" cy="9" r="6"&gt;&lt;/circle&gt;&lt;path d="m13.5 13.5 3.5 3.5"&gt;&lt;/path&gt;&lt;/svg&gt;
+  &lt;/span&gt;
+  &lt;input id="q" name="q" type="search" autocomplete="off" spellcheck="false"
+         placeholder="Buscar pão, bolo, café"
+         class="w-full rounded-full border border-stone-300 bg-white py-2 pl-10 pr-4 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"&gt;
+&lt;/form&gt;</pre>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Atributo</th><th>O que faz na prática</th></tr>
+<tr><td><code>type="search"</code></td><td>teclado com tecla de busca no celular, botão de limpar nativo e semântica correta</td></tr>
+<tr><td><code>name="q"</code></td><td>é o nome que o termo recebe quando a página é enviada; sem ele a busca chega vazia</td></tr>
+<tr><td><code>autocomplete="off"</code></td><td>impede o navegador de sugerir o que a pessoa digitou em outro site</td></tr>
+<tr><td><code>spellcheck="false"</code></td><td>tira o sublinhado vermelho de "pão de queijo" com nome de produto inventado</td></tr>
+<tr><td><code>autofocus</code></td><td>só na página de busca, nunca no topo do site: o teclado abriria sozinho no celular</td></tr>
+</table>
+</div>
+
+<p>O <code>focus:ring-2</code> com <code>focus:ring-amber-200</code> e <code>focus:border-amber-500</code>
+é o que faz o campo responder ao teclado. Você viu o anel em <a href="anel-e-foco.html">anel e foco</a>;
+em busca ele é ainda mais importante, porque o campo é o primeiro alvo do Tab.</p>
+
+<h2>5. A lista que flutua sobre a página</h2>
+
+<p>Enquanto a pessoa digita, a lista de sugestões aparece embaixo do campo, por cima do conteúdo. Ela
+não empurra a página: flutua. Para flutuar, precisa de duas coisas — o pai posicionado
+(<code>relative</code>) e a lista fora do fluxo (<code>absolute</code>), com a distância definida em
+relação ao pai.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|position=absolute;;css:#alvo|max-height=288px">
+  <p class="try-task">A lista de sugestões está empurrando o conteúdo da página para baixo. Faça-a
+  flutuar logo abaixo do campo, alinhada às duas bordas, com no máximo 288 px de altura e rolagem
+  própria.</p>
+  <pre class="html">&lt;div class="relative w-72"&gt;
+  &lt;input type="search" placeholder="pão" class="w-full rounded-full border px-4 py-2"&gt;
+  &lt;ul id="alvo" class="mt-1 rounded-xl border border-stone-200 bg-white p-2"&gt;
+    &lt;li class="rounded-lg px-2 py-1.5"&gt;Pão de queijo&lt;/li&gt;
+    &lt;li class="rounded-lg px-2 py-1.5"&gt;Pão francês&lt;/li&gt;
+    &lt;li class="rounded-lg px-2 py-1.5"&gt;Pão de mel&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: rgb(255, 255, 255)
+border-radius: 12px
+border-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+margin-top: 4px
+</pre>
+  <pre class="solucao">&lt;div class="relative w-72"&gt;
+  &lt;input type="search" placeholder="pão" class="w-full rounded-full border px-4 py-2"&gt;
+  &lt;ul id="alvo" class="absolute inset-x-0 top-full z-20 mt-2 max-h-72 overflow-y-auto rounded-xl border border-stone-200 bg-white p-2 shadow-lg"&gt;
+    &lt;li class="rounded-lg px-2 py-1.5"&gt;Pão de queijo&lt;/li&gt;
+    &lt;li class="rounded-lg px-2 py-1.5"&gt;Pão francês&lt;/li&gt;
+    &lt;li class="rounded-lg px-2 py-1.5"&gt;Pão de mel&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Cada classe tem um motivo. <code>inset-x-0</code> estica a lista entre as duas bordas do pai — em vez
+de repetir <code>left-0 right-0</code>. <code>top-full</code> encosta a lista no pé do campo, sem
+adivinhar a altura dele. <code>z-20</code> garante que ela fique por cima dos cartões que vierem
+depois. <code>mt-2</code> abre 8 px para o campo respirar. E <code>max-h-72 overflow-y-auto</code>
+resolve o caso de vinte sugestões: a lista para em 288 px e rola por dentro.</p>
+
+<p>O <code>shadow-lg</code> não é enfeite: uma lista branca flutuando sobre uma página branca precisa de
+uma sombra para se destacar do fundo. É o mesmo raciocínio do cartão do formulário, com uma sombra mais
+forte, porque aqui a lista está literalmente por cima.</p>
+
+<p>Falta o que o CSS não resolve: o pai precisa ser <code>relative</code>. Sem isso, o
+<code>absolute</code> se posiciona em relação à página inteira e a lista aparece no canto superior
+esquerdo, longe do campo. É o erro mais comum com posicionamento, e a aula de
+<a href="posicionamento.html">posicionamento</a> mostra o porquê.</p>
+
+<h2>6. O trecho que combina, destacado</h2>
+
+<p>Doze resultados com a mesma aparência é o mesmo que nenhum. O olho precisa encontrar a palavra que
+digitou, e para isso ela é marcada. A marcação certa é a tag <code>&lt;mark&gt;</code>: ela existe
+desde sempre, tem significado ("isto é relevante por causa da busca") e o navegador já pinta de
+amarelo por padrão.</p>
+
+<pre class="file" data-file="busca.html">&lt;li class="rounded-lg px-2 py-1.5 hover:bg-amber-50"&gt;
+  &lt;a href="#" class="block"&gt;
+    Pão de &lt;mark class="rounded bg-amber-200 px-0.5 text-stone-900"&gt;queijo&lt;/mark&gt;
+  &lt;/a&gt;
+&lt;/li&gt;</pre>
+
+<p>Três decisões pequenas: <code>bg-amber-200</code> troca o amarelo padrão do navegador por um tom da
+paleta da padaria; <code>px-0.5</code> dá 2 px de respiro para a marca não encostar na letra vizinha;
+e <code>text-stone-900</code> garante contraste, porque amarelo claro com texto cinza claro some. O
+<code>rounded</code> é gosto, não regra — mas combina com o resto da página.</p>
+
+<p>Um cuidado de implementação: destaque só a primeira ocorrência, ou todas as que couberem no texto
+visível. Marcar cada letra separadamente quebra a palavra em vários pedaços e o leitor de tela lê
+"pão de q-u-e-i-j-o". E nunca destaque com <code>background</code> apenas: se o contraste cair, a
+palavra desaparece. Amarelo claro com texto escuro é a combinação segura.</p>
+
+<h2>7. Os filtros e a contagem</h2>
+
+<p>Depois dos resultados, a pergunta seguinte é sempre a mesma: "só pão?" Os filtros respondem isso antes
+de a pessoa perguntar. São chips — etiquetas clicáveis —, e o que os torna legíveis é o contraste entre
+o ativo e o inativo.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-amber-600);;rule:color: var(--color-white)">
+  <p class="try-task">O chip "Pães" está selecionado, mas parece igual aos outros. Pinte o fundo de
+  âmbar escuro e o texto de branco, sem mexer no tamanho.</p>
+  <pre class="html">&lt;div class="flex flex-wrap gap-2"&gt;
+  &lt;button id="alvo" class="rounded-full border border-stone-300 bg-white px-3 py-1 text-sm text-stone-700"&gt;Pães&lt;/button&gt;
+  &lt;button class="rounded-full border border-stone-300 bg-white px-3 py-1 text-sm text-stone-700"&gt;Bolos&lt;/button&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: rgb(255, 255, 255)
+color: oklch(0.374 0.01 67.558)
+font-size: 14px
+line-height: 20px
+border-radius: 3.35544e+07px
+border-width: 1px
+border-color: oklch(0.869 0.005 56.366)
+padding-inline: 12px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;div class="flex flex-wrap gap-2"&gt;
+  &lt;button id="alvo" class="rounded-full border border-transparent bg-amber-600 px-3 py-1 text-sm text-white"&gt;Pães&lt;/button&gt;
+  &lt;button class="rounded-full border border-stone-300 bg-white px-3 py-1 text-sm text-stone-700"&gt;Bolos&lt;/button&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>border-transparent</code> é o detalhe que salva o alinhamento: o chip ativo continua com 1 px
+de borda, só que invisível. Sem isso, ele fica 2 px menor que os vizinhos e a linha de chips treme.
+Sempre que trocar cor por cor, verifique se a espessura da borda se mantém.</p>
+
+<p>A contagem fica acima da lista, discreta, e serve a dois públicos. Para quem vê, é orientação: "12
+resultados". Para quem não vê, é anúncio: com <code>role="status"</code>, o leitor de tela lê a
+contagem nova quando ela muda, sem a pessoa precisar procurar.</p>
+
+<pre class="file" data-file="busca.html">&lt;div class="flex flex-wrap items-center justify-between gap-3"&gt;
+  &lt;p role="status" class="text-sm text-stone-500"&gt;12 resultados para “queijo”&lt;/p&gt;
+  &lt;button type="button" class="text-sm font-medium text-amber-700 hover:underline"&gt;Limpar filtros&lt;/button&gt;
+&lt;/div&gt;</pre>
+
+<p>O botão "Limpar filtros" é a saída de emergência. Toda tela filtrada precisa de uma forma de voltar
+ao começo, e ela tem de estar visível — não escondida num menu. É a diferença entre uma busca que
+ajuda e uma busca que prende.</p>
+
+<h2>8. A busca no celular e o atalho no desktop</h2>
+
+<p>No celular, o campo no topo da página é pequeno e o teclado ocupa metade da tela. Duas decisões
+resolvem: o campo ocupa a largura toda e, quando recebe foco, a busca cresce para uma tela inteira.</p>
+
+<pre class="file" data-file="busca.html">&lt;div class="fixed inset-0 z-50 bg-white p-4 md:hidden"&gt;
+  &lt;form role="search" class="flex items-center gap-2"&gt;
+    &lt;label for="q-mobile" class="sr-only"&gt;Buscar no cardápio&lt;/label&gt;
+    &lt;input id="q-mobile" type="search" placeholder="Buscar pão, bolo, café"
+           class="w-full rounded-full border border-stone-300 px-4 py-3 text-base"&gt;
+    &lt;button type="button" class="rounded-full px-3 py-2 text-sm font-medium text-stone-600"&gt;Cancelar&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/div&gt;</pre>
+
+<p>O <code>text-base</code> não é preferência: campos com fonte menor que 16 px fazem o iPhone dar zoom
+quando recebem foco, e a página fica deslocada. <code>py-3</code> dá altura suficiente para o dedo — a
+área de toque confortável tem pelo menos 44 px. E <code>md:hidden</code> garante que essa tela cheia
+só exista onde faz sentido; no computador ela nunca aparece.</p>
+
+<p>No desktop, o mesmo campo ganha um atalho. Quem busca com frequência não quer tirar a mão do
+teclado, e uma dica visual no canto do campo ensina o atalho sem texto explicativo:</p>
+
+<pre class="file" data-file="busca.html">&lt;kbd class="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border border-stone-300 bg-stone-100 px-1.5 py-0.5 text-xs text-stone-500 sm:inline"&gt;
+  ⌘K
+&lt;/kbd&gt;</pre>
+
+<p><code>kbd</code> é a tag de tecla, e ela já diz ao leitor de tela que ali está um comando. O
+<code>hidden sm:inline</code> esconde a dica no celular, onde não existe teclado físico. E o
+<code>pointer-events-none</code> evita que a dica roube o clique de quem quer focar o campo — detalhe
+que parece bobo até o dia em que o campo não abre.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a lista que sumia atrás do rodapé</h3>
+<p>A lista de sugestões aparecia, mas ficava escondida atrás do cartão seguinte. Faltava
+<code>z-20</code> na lista e sobrava um <code>transform</code> no cartão de baixo, que criava uma
+camada nova. A correção foi uma classe. Quando um elemento flutuante some, o problema quase sempre é
+camada, não posição — a aula de <a href="camadas-z.html">camadas com z</a> tem o mapa completo.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o campo que abria o teclado sozinho</h3>
+<p>A Ana pôs <code>autofocus</code> no campo do topo do site. No celular, a página abria com o teclado
+cobrindo metade da tela e o cliente não via o cardápio. O atributo saiu do topo e ficou só na página de
+busca, onde a pessoa já veio para digitar. Foco automático é conveniência no lugar certo e obstáculo no
+lugar errado.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o X nativo que ninguém viu</h3>
+<p>O campo com <code>type="search"</code> ganha um X de limpar no Chrome e no Safari. A Ana tinha posto
+o próprio botão de limpar ao lado e os dois apareciam juntos. A solução foi esconder o nativo com
+<code>[&amp;::-webkit-search-cancel-button]:hidden</code> e manter o botão dela, que funciona também no
+Firefox. Duplicar controle é pior que não ter nenhum.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. Por que o rótulo do campo de busca usa
+<code>sr-only</code> em vez de <code>hidden</code>?</p>
+<label><input type="radio" name="b1"> porque <code>sr-only</code> esconde na tela e mantém o rótulo para o leitor de tela</label>
+<label><input type="radio" name="b1"> porque <code>hidden</code> não funciona em <code>label</code></label>
+<label><input type="radio" name="b1"> porque <code>sr-only</code> deixa o texto visível só no celular</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que faz a lista de sugestões flutuar sobre o
+conteúdo, em vez de empurrá-lo?</p>
+<label><input type="radio" name="b2"> <code>z-20</code> na lista</label>
+<label><input type="radio" name="b2"> <code>shadow-lg</code> na lista</label>
+<label><input type="radio" name="b2"> <code>absolute</code> na lista e <code>relative</code> no pai</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Por que o chip ativo leva <code>border-transparent</code>?</p>
+<label><input type="radio" name="b3"> para ficar com a borda invisível e parecer mais moderno</label>
+<label><input type="radio" name="b3"> para manter a mesma espessura de borda dos vizinhos e não desalinhar</label>
+<label><input type="radio" name="b3"> para o navegador não desenhar a borda no modo escuro</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o nome invisível do campo</h2>
+<p>Complete o rótulo do campo de busca: ele não aparece na tela, mas o leitor de tela lê "Buscar no
+cardápio". Qual classe faz esse esconde-mas-não-some?</p>
+<div class="ex-code">&lt;label for="q" class="<input aria-label="resposta 1" data-answer="sr-only" placeholder="...">"&gt;Buscar no cardápio&lt;/label&gt;</div>
+<p class="ex-dica">Dica: são duas letras no começo, de <em>screen reader</em>, e um hífen. Não é
+<code>hidden</code>: esse apagaria o rótulo para todo mundo.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Busca é um campo com uma lista pendurada e três estados para desenhar. O campo tem
+<code>type="search"</code>, um <code>label</code> com <code>sr-only</code>, a lupa posicionada com
+<code>absolute</code> dentro de um pai <code>relative</code> e respiro à esquerda com
+<code>pl-10</code>. A lista flutua com <code>absolute inset-x-0 top-full z-20 mt-2 max-h-72
+overflow-y-auto</code> e uma sombra que a separa do fundo.</p>
+
+<p>O resultado ganha destaque no trecho que combina, com <code>&lt;mark&gt;</code> e fundo claro; os
+filtros viram chips com um estado ativo bem diferente; a contagem aparece com <code>role="status"</code>
+para ser anunciada. No celular, a busca ocupa a tela com <code>fixed inset-0</code>, fonte de 16 px e
+alvo grande; no desktop, um <code>kbd</code> discreto ensina o atalho.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Três estados: repouso, com resultados, sem resultados.</li>
+<li><code>type="search"</code> dá teclado certo, X nativo e semântica.</li>
+<li>Lupa dentro do campo: pai <code>relative</code>, ícone <code>absolute</code>, campo com
+<code>pl-10</code>.</li>
+<li><code>sr-only</code> esconde sem apagar; <code>hidden</code> apaga para todo mundo.</li>
+<li>Lista de sugestões: <code>absolute inset-x-0 top-full z-20 max-h-72 overflow-y-auto</code>.</li>
+<li>Destaque com <code>&lt;mark&gt;</code>, fundo claro e texto escuro.</li>
+<li>Chip ativo: <code>bg-amber-600 text-white border-transparent</code>.</li>
+<li>Contagem com <code>role="status"</code>; sempre uma forma de limpar os filtros.</li>
+<li>Celular: <code>fixed inset-0</code>, <code>text-base</code> e alvo de 44 px.</li>
+<li>Sem resultados é tela desenhada, não acidente — e é o assunto de <a href="caso-vazio.html">estado vazio</a>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transformações | Guia Tailwind</title>
+<meta name="description" content="As transformações do Tailwind explicadas do zero: por que girar um selo não empurra o texto, as três propriedades do CSS v4, a origem do giro e o skew da faixa.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>As <span class="hl">Transformações</span></h1>
+<p class="intro">A Ana queria uma coisa simples: a etiqueta “PÃO QUENTE” inclinada, como se alguém
+tivesse colado o papel torto na vitrine. Tentou margem, tentou posicionamento, tentou espaçamento — e o
+que conseguiu foi empurrar o título, abrir um buraco no cartão e quebrar a linha do preço. Nada disso
+girava a etiqueta. Nesta aula ela conhece o grupo de classes que desenha o elemento de outro jeito
+<em>sem mexer no espaço que ele ocupa</em>: as transformações. São quatro operações — mover, girar,
+escalar e entortar — e entender por que elas não bagunçam o layout é o que separa quem sofre de quem
+resolve em uma linha.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é transformar e em que momento o navegador aplica a transformação.</li>
+  <li>Por que o elemento transformado não empurra os vizinhos nem muda o layout.</li>
+  <li>A família: mover, girar, escalar e entortar.</li>
+  <li>As propriedades <code>translate</code>, <code>rotate</code>, <code>scale</code> e o
+  <code>transform</code> do v4.</li>
+  <li>Como as quatro se combinam no mesmo elemento e em que ordem são aplicadas.</li>
+  <li>O ponto de apoio do giro: <code>transform-origin</code> e as classes <code>origin-</code>.</li>
+  <li><code>skew</code> e o <code>transform-gpu</code>.</li>
+  <li>O que a transformação faz de efeito colateral: camadas e elementos inline.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a etiqueta que não queria ficar torta</h2>
+
+<p>Era uma etiqueta de papel, como as que a padaria cola no vidro da vitrine. A Ana já tinha o cartão do
+pão pronto: fundo âmbar claro, título grande, preço embaixo. Faltava o charme. Ela queria o selo
+“PÃO QUENTE” atravessado, uns três graus, com aquele ar de coisa feita à mão.</p>
+
+<p>A primeira tentativa foi mover com margem. Margem empurra a caixa: a etiqueta desceu, o título
+desceu junto, e a linha do preço ficou torta de um jeito que não era charme nenhum. A segunda foi
+posicionamento absoluto. A etiqueta saiu do fluxo, mas continuou reta — posicionar não gira. A terceira
+foi aumentar o espaço interno, e aí ela entendeu que estava tentando resolver com as ferramentas erradas.
+Nenhuma daquelas classes mexe no <em>desenho</em> da caixa; todas mexem no <em>tamanho e no lugar</em>
+dela.</p>
+
+<p>Girar exige outro tipo de operação. Em vez de dizer onde a caixa fica, você diz como ela é
+<strong>desenhada</strong>: pegue o desenho pronto e incline, gire, aumente ou desloque. O navegador tem
+essa operação há mais de uma década; o Tailwind dá a ela um conjunto de classes curtas. E o efeito colateral mais
+útil é justamente o que a Ana precisava: o desenho muda, o espaço reservado não.</p>
+
+<h2>2. Transformar é desenhar de outro jeito</h2>
+
+<p>O navegador monta a página em etapas. Primeiro ele calcula o tamanho e a posição de cada caixa — essa
+etapa é o layout, e é onde margem, espaçamento, largura e grid trabalham. Depois ele pinta as cores.
+Depois, no fim, ele pode aplicar uma operação no desenho já pronto: é aí que entra a transformação.</p>
+
+<p>Essa ordem explica tudo o que você precisa saber. Como a transformação acontece <em>depois</em> do
+layout, ela não informa ninguém de que o elemento mudou. O texto de baixo continua na posição calculada,
+o espaço reservado continua do mesmo tamanho, o vizinho não se mexe. A etiqueta girada pode até
+transbordar o cartão e passar por cima do título — e nada no resto da página se ajusta para evitar
+isso.</p>
+
+<p>É a diferença entre empurrar a mesa e virar a toalha. Margem, espaçamento e tamanho empurram a mesa:
+todo mundo em volta se reorganiza. Transformação vira a toalha: o móvel está no mesmo lugar, e o desenho
+mudou. Quem precisa de espaço novo usa layout; quem precisa de outro desenho usa transformação.</p>
+
+<dl class="anatomy">
+<dt>transformação</dt>
+<dd>Uma operação aplicada ao desenho do elemento depois que o layout já foi calculado: mover, girar,
+escalar ou entortar.</dd>
+<dt>translate</dt>
+<dd>Deslocar o desenho sem alterar o espaço reservado. É a operação da aula
+<a href="translate.html">O translate</a>.</dd>
+<dt>rotate</dt>
+<dd>Girar o desenho em torno de um ponto de apoio, em graus. Tem aprofundamento na aula
+<a href="escala-e-rotacao.html">Escala e Rotação</a>.</dd>
+<dt>scale</dt>
+<dd>Aumentar ou diminuir o desenho em porcentagem: 105% é um pouco maior, 95% um pouco menor. Também na
+aula de escala e rotação.</dd>
+<dt>skew</dt>
+<dd>Entortar: o lado de cima desliza para um lado e o de baixo fica, como um retângulo que virou
+paralelogramo.</dd>
+</dl>
+
+<p>Um aviso de vocabulário para não travar na leitura do DevTools: no CSS antigo, tudo isso era uma
+propriedade só, chamada <code>transform</code>, com as operações em fila. No Tailwind v4, três delas
+viraram propriedades independentes — <code>translate</code>, <code>rotate</code> e
+<code>scale</code> — e o <code>transform</code> ficou para o que sobra, como o <code>skew</code>. Você
+não precisa decorar isso; precisa reconhecer quando aparecer no painel.</p>
+
+<h2>3. A família em uma tabela</h2>
+
+<p>Quatro operações, quatro sensações diferentes. Esta é a lista que vale colar ao lado do monitor no
+começo:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Operação</th><th>Classe</th><th>Para que serve</th></tr>
+<tr><td>mover</td><td><code>translate-x-4</code>, <code>-translate-y-1</code></td><td>levantar o cartão no hover, centralizar com porcentagem</td></tr>
+<tr><td>girar</td><td><code>rotate-3</code>, <code>-rotate-6</code></td><td>selo, etiqueta, ícone de seta, sinal de “mais”</td></tr>
+<tr><td>escalar</td><td><code>scale-105</code>, <code>scale-95</code></td><td>destaque do produto, foto que cresce, botão apertado</td></tr>
+<tr><td>entortar</td><td><code>skew-x-6</code>, <code>-skew-y-3</code></td><td>faixa de promoção, efeito retrô, fundo inclinado</td></tr>
+</table>
+</div>
+
+<p>Você não precisa aprender as quatro hoje com o mesmo peso. Girar e escalar ganham uma aula inteira
+logo adiante, com todos os valores; mover também. O objetivo desta página é entender o grupo e o que ele
+faz de diferente — depois as aulas específicas são só detalhamento.</p>
+
+<p>Uma coisa que vale perceber já: nenhuma dessas classes tem número em pixels na escala de espaço. Os
+graus e as porcentagens são o valor real. <code>rotate-3</code> são três graus,
+<code>scale-105</code> são 105% do tamanho, e <code>translate-y-1</code> usa a escala de espaço (4 px,
+no caso). Cada família tem a sua própria lógica, e é normal levar um tempo até parar de confundir.</p>
+
+<h2>4. O CSS que o Tailwind v4 gera</h2>
+
+<p>Esta é a saída real do compilador para as três classes de um selo girado, aumentado e levantado:</p>
+
+<pre class="term">.-translate-y-1 {
+  --tw-translate-y: calc(var(--spacing) * -1);
+  translate: var(--tw-translate-x) var(--tw-translate-y);
+}
+.scale-110 {
+  --tw-scale-x: 110%;
+  --tw-scale-y: 110%;
+  --tw-scale-z: 110%;
+  scale: var(--tw-scale-x) var(--tw-scale-y);
+}
+.rotate-3 {
+  rotate: 3deg;
+}</pre>
+
+<p>Repare que cada classe escreve em uma propriedade diferente: <code>translate</code>,
+<code>scale</code>, <code>rotate</code>. É por isso que elas convivem sem brigar — o mesmo motivo pelo
+qual <code>p-4</code> e <code>bg-amber-100</code> convivem. Não existe “a última transformação vence”:
+existem quatro propriedades separadas, e cada uma faz a sua parte.</p>
+
+<p>O padrão das variáveis (<code>--tw-translate-y</code>, <code>--tw-scale-x</code>) existe para que
+você consiga mexer em um eixo só. <code>scale-x-50</code> muda apenas a largura do desenho; a altura
+continua 100%. Já <code>scale-110</code> escreve os três eixos — sim, até o <code>z</code>, que é
+invisível nesta página mas faz diferença em efeitos 3D.</p>
+
+<p>E o <code>skew</code>, que ficou de fora das três propriedades novas, continua usando
+<code>transform</code> com uma fila de variáveis: <code>transform: var(--tw-rotate-x, ) ... </code> e
+assim por diante. Esses <code>var(..., )</code> com o segundo valor vazio são um truque: se a variável
+não existir, o pedaço simplesmente desaparece da fila, sem quebrar o resto. É feio de ler e engenhoso de
+funcionar.</p>
+
+<p>Para não se perder entre o nome da classe e o nome da propriedade, esta é a tradução completa. A
+última coluna é o que você vai ler no painel da caixa ou na aba <em>Computed</em> do navegador:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Propriedade no CSS</th><th>O painel mostra</th></tr>
+<tr><td><code>rotate-3</code></td><td><code>rotate</code></td><td><code>rotate: 3deg</code></td></tr>
+<tr><td><code>scale-110</code></td><td><code>scale</code></td><td><code>scale: 1.1</code></td></tr>
+<tr><td><code>-translate-y-1</code></td><td><code>translate</code></td><td><code>translate: 0px -4px</code></td></tr>
+<tr><td><code>skew-x-6</code></td><td><code>transform</code></td><td><code>transform: matrix(...)</code></td></tr>
+<tr><td><code>origin-top-left</code></td><td><code>transform-origin</code></td><td><code>transform-origin: 0px 0px</code></td></tr>
+<tr><td><code>transform-gpu</code></td><td><code>transform</code></td><td><code>transform: matrix(1, 0, 0, 1, 0, 0)</code></td></tr>
+</table>
+</div>
+
+<p>O <code>1.1</code> na terceira linha é o mesmo que 110%: o navegador converte a porcentagem em
+número ao responder. A matriz das duas últimas linhas é a forma como o navegador guarda qualquer
+transformação — inclusive as que não mudam nada na aparência, como a do <code>transform-gpu</code>, que
+existe só para criar a camada.</p>
+
+<h2>5. Combinando as quatro no mesmo elemento</h2>
+
+<p>Um selo de padaria é o exemplo perfeito de combinação: ele precisa estar um pouco maior que o
+normal, girado em três graus e levantado um degrau para não encostar no texto. Três classes, três
+propriedades, um desenho só.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|rotate=3deg;;css:#alvo|scale=1.1;;css:#alvo|translate=0px -4px">
+  <p class="try-task">O selo já está girado em três graus. Deixe-o também 10% maior
+  (<code>scale-110</code>) e levantado 4 px (<code>-translate-y-1</code>).</p>
+  <pre class="html">&lt;div class="rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;span id="alvo" class="inline-block rotate-3 rounded bg-amber-500 px-3 py-1 text-sm font-semibold text-white"&gt;PÃO QUENTE&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: inline-block
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+font-size: 14px
+font-weight: 600
+line-height: 20px
+border-radius: 4px
+padding-inline: 12px
+padding-block: 4px
+rotate: 3deg
+</pre>
+  <pre class="solucao">&lt;div class="rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;span id="alvo" class="inline-block rotate-3 scale-110 -translate-y-1 rounded bg-amber-500 px-3 py-1 text-sm font-semibold text-white"&gt;PÃO QUENTE&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra três linhas — <code>rotate: 3deg</code>,
+<code>scale: 1.1</code> e <code>translate: 0px -4px</code> — e nenhuma linha de margem, largura ou
+posição. É a prova visual do que a seção 2 explicou: o espaço reservado não mudou. Repare também que o
+texto de dentro do cartão ficou no lugar; se você tivesse usado margem negativa para “levantar” o selo,
+tudo teria subido junto.</p>
+
+<p>Quando várias operações convivem, o navegador aplica sempre na mesma ordem: primeiro
+<code>translate</code>, depois <code>rotate</code>, depois <code>scale</code>, e por último o
+<code>transform</code> do skew. A ordem importa de verdade. Girar e depois mover é diferente de mover e
+depois girar: no primeiro caso, o deslocamento acompanha a rotação; no segundo, ele acontece no eixo da
+página. Como a ordem é fixa, você não controla isso com a ordem das classes — e é bom que seja assim,
+porque o resultado é previsível.</p>
+
+<p>Uma consequência prática: se o seu selo precisa parecer “levantado na diagonal”, o
+<code>-translate-y-1</code> vai deslocar no eixo vertical da página, mesmo com a etiqueta girada. Se ele
+precisasse andar no eixo da própria etiqueta, seria outro tipo de conta — e o caminho mais simples é
+girar o contêiner e deixar o filho reto.</p>
+
+<h2>6. O ponto de apoio: origin</h2>
+
+<p>Todo giro e toda escala acontecem em torno de um ponto. Por padrão, esse ponto é o centro do
+elemento: gire 180 graus e a caixa continua no mesmo lugar, virada. Mas dá para escolher outro ponto com
+as classes <code>origin-</code> — <code>origin-top-left</code>, <code>origin-bottom</code>,
+<code>origin-right</code>, entre outras.</p>
+
+<p>Pense numa etiqueta colada no canto de um cartaz. Ela não gira em torno do próprio centro: gira em
+torno do canto onde o durex está. Se você girar pelo centro, a ponta colada anda — e a etiqueta
+“descola”. Essa é a diferença que o <code>origin</code> faz, e é o tipo de detalhe que parece pequeno
+até você ver as duas versões lado a lado.</p>
+
+<div class="trytailwind" data-goal="rule:transform-origin: 0 0;;css:#alvo|rotate=12deg">
+  <p class="try-task">Este selo gira em torno do próprio centro e “descola” do canto do cartão. Faça o
+  giro acontecer a partir do canto de cima à esquerda com <code>origin-top-left</code>.</p>
+  <pre class="html">&lt;div class="relative h-32 rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;span id="alvo" class="absolute left-0 top-0 rotate-12 rounded bg-amber-500 px-3 py-1 text-sm font-semibold text-white"&gt;PROMOÇÃO&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+position: absolute
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+font-size: 14px
+font-weight: 600
+line-height: 20px
+border-radius: 4px
+left: 0px
+padding-inline: 12px
+padding-block: 4px
+rotate: 12deg
+top: 0px
+</pre>
+  <pre class="solucao">&lt;div class="relative h-32 rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;span id="alvo" class="absolute left-0 top-0 rotate-12 origin-top-left rounded bg-amber-500 px-3 py-1 text-sm font-semibold text-white"&gt;PROMOÇÃO&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>No painel, o antes mostra o giro e nenhuma linha de origem; depois aparece
+<code>transform-origin: 0px 0px</code> — canto superior esquerdo, em coordenadas relativas ao próprio
+elemento. A meta desta caixa confere no CSS gerado (<code>transform-origin: 0 0</code>) em vez do valor
+computado, porque os pixels da origem dependem do tamanho do elemento: num selo mais largo, o centro
+muda de lugar, mas o canto continua sendo o canto.</p>
+
+<p>Duas coisas que valem saber sobre a origem. Primeira: ela também vale para o <code>scale</code> —
+escalar a partir do canto faz o elemento crescer para a direita e para baixo, e essa é a diferença entre
+uma foto que “abre” saindo do canto e uma que cresce simétrica. Segunda: ela <em>não</em> afeta o
+<code>translate</code>. Deslocar não tem ponto de apoio; é só andar.</p>
+
+<h2>7. Entortar: skew e o transform-gpu</h2>
+
+<p>O <code>skew</code> é o primo menos usado da família e o mais divertido. Ele inclina os eixos: o lado
+de cima do retângulo desliza para a direita e o de baixo fica parado, e o resultado é um paralelogramo.
+<code>skew-x-6</code> entorta no eixo horizontal; <code>skew-y-6</code>, no vertical. É a operação das
+faixas de promoção e dos rótulos com cara de anos 80.</p>
+
+<div class="trytailwind" data-goal="rule:--tw-skew-x: skewX(6deg);;rule:transform: var(--tw-rotate-x">
+  <p class="try-task">A faixa de promoção está reta demais. Entorte com <code>skew-x-6</code> — e repare
+  que o texto entorta junto: é o desenho inteiro que inclina.</p>
+  <pre class="html">&lt;div class="rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;span id="alvo" class="inline-block rounded bg-amber-500 px-4 py-1 text-sm font-semibold text-white"&gt;10% OFF no pão de queijo&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: inline-block
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+font-size: 14px
+font-weight: 600
+line-height: 20px
+border-radius: 4px
+padding-inline: 16px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;div class="rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;span id="alvo" class="inline-block skew-x-6 rounded bg-amber-500 px-4 py-1 text-sm font-semibold text-white"&gt;10% OFF no pão de queijo&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra o resultado em forma de matriz (<code>matrix(1, 0, 0.105104, 1, 0, 0)</code>), que é
+como o navegador representa uma transformação. Não é para calcular nada: 0,105104 é a tangente de 6
+graus, e o número existe porque a conta é feita em radianos lá dentro. A meta confere o CSS gerado,
+onde aparece a origem disso tudo: <code>--tw-skew-x: skewX(6deg)</code> dentro de um
+<code>transform</code> maior.</p>
+
+<p>Quando a transformação parece tremer ou serrilhada durante uma animação, existe uma classe que
+costuma ajudar: <code>transform-gpu</code>. Ela pede ao navegador que trate o elemento como uma camada
+própria, desenhada pela placa de vídeo. O CSS que ela gera é curioso —
+<code>transform: translateZ(0) ...</code> — e o <code>translateZ(0)</code> está ali só para forçar a
+camada. Use em elementos que se mexem muito, não em tudo: cada camada extra consome memória.</p>
+
+<h2>8. Transição, camadas e o resto da página</h2>
+
+<p>Transformação combina com transição como pão combina com manteiga, e o casamento tem uma classe
+própria. Esta é a saída real de <code>transition-transform</code> ao lado de <code>origin-top-left</code>:</p>
+
+<pre class="term">.transition-transform {
+  transition-property: transform, translate, scale, rotate;
+  transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+  transition-duration: var(--tw-duration, var(--default-transition-duration));
+}
+.origin-top-left {
+  transform-origin: 0 0;
+}</pre>
+
+<p>A primeira linha é o detalhe importante: ela inclui as três propriedades individuais
+(<code>translate</code>, <code>scale</code>, <code>rotate</code>) além do <code>transform</code>
+clássico. Se você usar <code>transition-colors</code> e depois animar um <code>scale</code>, o
+crescimento vai saltar de uma vez — não porque o Tailwind errou, mas porque a lista não incluía as
+transformações. É o mesmo raciocínio da aula de transições, aplicado a este grupo.</p>
+
+<p>Agora os efeitos colaterais, que são dois e valem a pena conhecer antes de se assustar. O primeiro:
+todo elemento transformado cria uma <strong>camada</strong> própria. Isso muda a disputa de z-index e,
+mais importante, faz com que filhos com <code>position: fixed</code> passem a se posicionar em relação a
+ele, e não à janela. Se um aviso “sempre visível” sumir depois que você pôs um <code>scale</code> num
+contêiner, o culpado é este. A <a href="posicionamento.html">aula de posicionamento</a> e a de
+<a href="camadas-z.html">camadas</a> tratam do assunto com calma.</p>
+
+<p>O segundo: transformação em elemento <code>inline</code> costuma não aparecer. Um
+<code>&lt;span&gt;</code> sem classe de display é uma caixinha de texto que não aceita largura, altura
+nem transformação — mesmo com a classe no lugar. O conserto é <code>inline-block</code>, que dá ao span
+uma caixa própria. Você viu isso na <a href="w-e-h.html">aula de largura e altura</a>; aqui o sintoma é
+o mesmo, com uma roupagem nova: a classe está certa e o desenho não muda.</p>
+
+<p>Uma última combinação que vale guardar: transformação não é herdada. Se você aplicar
+<code>rotate-3</code> no cartão, o texto de dentro não gira separado — ele gira junto, como parte do
+desenho do cartão. E se você aplicar <code>scale</code> no cartão, a sombra e a borda escalam também,
+inclusive a espessura da borda. Por isso, para destacar só a foto, a classe vai na foto.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o cartão que empurrava a lista</h3>
+<p>Para dar destaque ao pão do dia, a Ana aumentou o cartão com <code>scale-105</code> no hover. Deu
+certo: o cartão cresceu sem mexer nos vizinhos. Depois ela decidiu que o destaque deveria ser permanente
+e trocou a classe por <code>p-6</code>. Pronto: a grade inteira se reorganizou e dois cartões desceram de
+linha. A lição é fina e vale repetir: transformação muda o desenho; espaçamento muda o mundo em volta.
+Escolha qual dos dois você quer antes de escolher a classe.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a foto que saiu do lugar</h3>
+<p>Ela girou a foto do pão em <code>-rotate-2</code> para dar um ar de polaroide e a foto passou por cima
+da borda do cartão, cobrindo o preço. Não era bug: girar não pede licença nem reorganiza nada, e o
+desenho pode transbordar. A solução foi acrescentar <code>overflow-hidden</code> no contêiner — a
+<a href="overflow.html">aula de overflow</a> explica a diferença entre cortar e deixar vazar — ou
+simplesmente girar menos. Esse tipo de decisão é visual: rode, olhe, ajuste.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o selo que sumiu no celular</h3>
+<p>O selo girava no notebook e não girava no celular. A causa era boba: no celular o texto quebrava em
+duas linhas, o <code>span</code> continuava inline em um dos casos e a transformação simplesmente não
+aparecia. Acrescentar <code>inline-block</code> resolveu nos dois aparelhos. Sintoma parecido acontece
+com <code>skew</code> dentro de tabelas e parágrafos: se o elemento é inline, transformação não pega.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. Por que girar um selo não empurra o texto de
+baixo?</p>
+<label><input type="radio" name="q1"> porque o Tailwind recalcula o layout automaticamente</label>
+<label><input type="radio" name="q1"> porque o giro só vale em elementos com posição absoluta</label>
+<label><input type="radio" name="q1"> porque a transformação é aplicada ao desenho, depois do layout</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. Qual classe muda o ponto em torno do qual o giro
+acontece?</p>
+<label><input type="radio" name="q2"> <code>origin-top-left</code></label>
+<label><input type="radio" name="q2"> <code>rotate-top-left</code></label>
+<label><input type="radio" name="q2"> <code>translate-top-left</code></label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. O que <code>skew-x-6</code> faz?</p>
+<label><input type="radio" name="q3"> gira o elemento seis graus para a direita</label>
+<label><input type="radio" name="q3"> entorta o elemento seis graus no eixo horizontal</label>
+<label><input type="radio" name="q3"> aumenta o elemento em 6%</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o selo do canto</h2>
+<p>A etiqueta “ÚLTIMAS UNIDADES” fica no canto do cartão, e precisa girar a partir dali, não do próprio
+centro. Complete a classe que muda o ponto de apoio:</p>
+<div class="ex-code">&lt;span class="absolute left-0 top-0 rotate-12 <input aria-label="resposta 1" data-answer="origin-top-left" placeholder="..."> rounded bg-amber-500 px-2 py-1 text-xs text-white"&gt;ÚLTIMAS UNIDADES&lt;/span&gt;</div>
+<p class="ex-dica">Dica: são três pedaços ligados por hífen — a ideia de origem, a borda de cima e a
+borda da esquerda. E é a mesma lógica de <code>top-left</code> que aparece nas classes de gradiente e de
+arredondamento.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Transformar é desenhar de outro jeito um elemento que já tem lugar e tamanho. Por isso girar, escalar
+ou entortar não empurra ninguém e não muda o layout — e por isso também pode transbordar e cobrir
+vizinhos. O grupo tem quatro operações: mover, girar, escalar e entortar. No Tailwind v4, as três
+primeiras usam as propriedades individuais <code>translate</code>, <code>rotate</code> e
+<code>scale</code>; o skew continua no <code>transform</code>, com as variáveis <code>--tw-skew-</code>.</p>
+
+<p>Elas se combinam porque cada uma cuida de uma propriedade, e a ordem de aplicação é sempre a mesma:
+mover, girar, escalar, entortar. O ponto de apoio de giros e escalas vem das classes <code>origin-</code>,
+e vale lembrar de dois efeitos colaterais: todo elemento transformado vira uma camada (o que afeta
+<code>z-index</code> e filhos fixos) e transformação não pega em elemento inline sem
+<code>inline-block</code>.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Transformação vem depois do layout: o espaço reservado não muda.</li>
+<li>Mover, girar, escalar e entortar: quatro operações, quatro classes.</li>
+<li><code>translate</code>, <code>rotate</code> e <code>scale</code> são propriedades separadas no v4.</li>
+<li>Classes diferentes se somam; a ordem de aplicação é fixa, não é a ordem em que você escreve.</li>
+<li><code>origin-*</code> escolhe o ponto do giro e da escala, não do deslocamento.</li>
+<li><code>skew-x-6</code> entorta no eixo horizontal e entorta o texto junto.</li>
+<li><code>transform-gpu</code> força uma camada própria — use onde há movimento, não em tudo.</li>
+<li><code>transition-transform</code> anima as quatro propriedades; <code>transition-colors</code> não.</li>
+<li>Elemento transformado vira camada: mexe com <code>z-index</code> e com filhos de posição fixa.</li>
+<li>Se a transformação não aparece, veja se o elemento é inline.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

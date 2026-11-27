@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tela de Checkout | Guia Tailwind</title>
+<meta name="description" content="A tela de checkout da padaria: duas colunas com resumo grudado, o caminho em três passos, as linhas do pedido, a conta que fecha, o cupom e a barra de total no celular.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Tela de <span class="hl">Checkout</span></h1>
+
+<p class="intro">A Ana montou o pedido online da padaria e acompanhou o funil: quarenta pessoas
+colocaram pão no carrinho, trinta e uma chegaram à tela de pagamento e treze desistiram ali. Treze
+pedidos perdidos numa tela que não tinha nada de errado — só não mostrava quanto ia custar, não dizia
+em que passo a pessoa estava e escondia o botão de pagar embaixo de três rolagens. Nesta aula ela monta
+o checkout inteiro: as duas colunas com o resumo que acompanha, o caminho em três passos, a conta
+aberta linha por linha, o cupom, as opções de pagamento e a barra que mantém o total à vista no
+celular.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que o checkout tem duas colunas e qual delas manda.</li>
+  <li>O resumo que fica grudado na rolagem com <code>sticky</code>, e o <code>items-start</code> que faz isso funcionar.</li>
+  <li>O indicador de passos com número, estado atual e <code>aria-current</code>.</li>
+  <li>As linhas do pedido: item, quantidade, preço e o divisor entre elas.</li>
+  <li>A conta que fecha: subtotal, entrega, desconto e total, com <code>tabular-nums</code>.</li>
+  <li>O cupom em uma linha e a mensagem que confirma ou nega.</li>
+  <li>As opções de pagamento que respondem ao clique com <code>peer-checked</code>.</li>
+  <li>A barra de total fixa no celular, e o respiro que impede ela de cobrir o conteúdo.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o carrinho que esvazia no último passo</h2>
+
+<p>O checkout da Ana era uma página só, com tudo empilhado: campos de endereço, campos de cartão,
+lista de itens e, no fim, um botão laranja escrito "Finalizar". Cumpria a função. No celular, era uma
+rolagem de quatro telas até o botão — e a pessoa não sabia quanto ia pagar até chegar lá.</p>
+
+<p>Checkout é a tela mais cara do site. Cada desistência é uma venda perdida e um cliente que talvez
+não volte. E as causas raramente são técnicas: são dúvida (quanto custa?), desconfiança (esse site é
+seguro?) e cansaço (quantos passos faltam?). As classes desta aula existem para responder essas três
+perguntas antes que a pessoa as faça.</p>
+
+<p>Uma decisão de escopo antes de começar: este checkout é de <strong>retirada na padaria</strong>, sem
+frete, com pagamento na entrega ou Pix. É de propósito — o desenho de uma tela muda quando o número de
+variáveis muda, e começar simples permite entender cada peça. Depois você acrescenta frete e cartão
+como quem acrescenta um campo.</p>
+
+<h2>2. Duas colunas: o formulário e o resumo</h2>
+
+<p>A estrutura é a mesma do formulário de contato, com uma diferença de proporção. Aqui as duas
+colunas não são iguais: o formulário precisa de espaço para os campos, e o resumo precisa de pouco —
+só o suficiente para os valores respirarem. Uma grade com largura fixa na segunda coluna resolve:
+<code>md:grid-cols-[1fr_18rem]</code>.</p>
+
+<div class="trytailwind" data-goal="rule:grid-template-columns: 1fr 18rem;;largura:768" data-largura="768">
+  <p class="try-task">A prévia está com 768 px e as duas colunas ainda estão empilhadas. A partir de
+  768 px, deixe o formulário com o espaço que sobra e o resumo com 18 rem fixos.</p>
+  <pre class="html">&lt;div id="alvo" class="grid gap-8"&gt;
+  &lt;form class="rounded-2xl border bg-white p-6"&gt;Entrega e pagamento&lt;/form&gt;
+  &lt;aside class="rounded-2xl border bg-white p-5"&gt;Resumo do pedido&lt;/aside&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+gap: 32px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid gap-8 md:grid-cols-[1fr_18rem]"&gt;
+  &lt;form class="rounded-2xl border bg-white p-6"&gt;Entrega e pagamento&lt;/form&gt;
+  &lt;aside class="rounded-2xl border bg-white p-5"&gt;Resumo do pedido&lt;/aside&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O valor entre colchetes é o que o Tailwind chama de valor arbitrário: quando a escala não tem o
+número que você quer, você escreve o CSS ali dentro. A regra gerada é literal:</p>
+
+<pre class="term">@media (width >= 48rem) {
+  .md\:grid-cols-\[1fr_18rem\] {
+    grid-template-columns: 1fr 18rem;
+  }
+}</pre>
+
+<p><code>48rem</code> são 768 px, o ponto em que o <code>md:</code> liga. A primeira coluna usa
+<code>1fr</code>, que significa "o que sobrar": ela cresce e encolhe conforme a tela. A segunda tem
+tamanho fixo, porque um resumo de 288 px é sempre legível e nunca precisa de mais. Se as duas fossem
+<code>1fr</code>, o resumo ficaria largo demais no monitor grande e os valores se perderiam no meio do
+branco.</p>
+
+<dl class="anatomy">
+<dt>resumo</dt>
+<dd>A coluna estreita com o que a pessoa está comprando e quanto vai pagar. É a resposta à dúvida
+número um de qualquer checkout.</dd>
+<dt>passo</dt>
+<dd>Cada etapa do caminho, com número e nome. Um deles é o atual, e o HTML diz isso com
+<code>aria-current="step"</code>.</dd>
+<dt>linha do pedido</dt>
+<dd>Um item comprado: nome, detalhe e preço. Repete quantas vezes for preciso, sem borda própria —
+quem desenha o divisor é o pai.</dd>
+<dt>total</dt>
+<dd>A linha que fecha a conta. Única com borda em cima e peso maior: é a conclusão do resumo.</dd>
+<dt>ação final</dt>
+<dd>O botão de pagar. No desktop fica no fim do resumo; no celular, na barra fixa do pé.</dd>
+</dl>
+
+<p>Por que <code>md:</code> e não <code>lg:</code>? Porque o ponto de virada tem de ser o lugar em
+que as duas colunas passam a caber de verdade. A partir de 768 px, com 16 px de margem em cada lado,
+o resumo fica com 288 px e o formulário com os 416 px que sobram — o suficiente para dois campos de
+meia largura caberem lado a lado. Num checkout com resumo maior ou mais campos, o ponto sobe para
+<code>lg:</code> e o desenho é o mesmo. O que não se faz é escolher breakpoint por hábito: escolha
+medindo o que precisa caber.</p>
+
+<p>Por que não usar <code>md:grid-cols-3</code> com o formulário ocupando duas colunas? Funciona, e é o
+que muita gente faz. A diferença aparece na tela média: com três colunas iguais, o formulário perde
+proporção e o resumo fica largo. Com <code>1fr</code> mais largura fixa, o resumo mantém o tamanho em
+qualquer monitor — que é o comportamento que você quer de um painel de valores.</p>
+
+<h2>3. O resumo que acompanha a rolagem</h2>
+
+<p>O formulário é comprido; o resumo é curto. Se o resumo ficar no topo da coluna, ele sai da tela
+assim que a pessoa começa a preencher o endereço — e a pergunta "quanto vai custar?" volta. A solução é
+o <code>sticky</code>: o resumo acompanha a rolagem até o fim da coluna.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|position=sticky;;css:#alvo|top=24px" data-largura="768">
+  <p class="try-task">O resumo está no topo da coluna e some quando a pessoa rola até o pagamento. Faça
+  ele acompanhar a rolagem, parando 24 px abaixo do topo da tela, a partir de 768 px.</p>
+  <pre class="html">&lt;div class="grid gap-8 md:grid-cols-[1fr_18rem]"&gt;
+  &lt;form class="rounded-2xl border bg-white p-6"&gt;Passos do pedido&lt;/form&gt;
+  &lt;aside id="alvo" class="rounded-2xl border bg-white p-5"&gt;Resumo do pedido&lt;/aside&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 20px
+background-color: rgb(255, 255, 255)
+border-radius: 16px
+border-width: 1px
+</pre>
+  <pre class="solucao">&lt;div class="grid gap-8 md:grid-cols-[1fr_18rem]"&gt;
+  &lt;form class="rounded-2xl border bg-white p-6"&gt;Passos do pedido&lt;/form&gt;
+  &lt;aside id="alvo" class="rounded-2xl border bg-white p-5 md:sticky md:top-6"&gt;Resumo do pedido&lt;/aside&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Duas classes, e uma condição escondida: <code>sticky</code> só funciona se o elemento tiver um
+ancestral com espaço para ele se mover e se o pai não tiver <code>align-items: stretch</code>. Numa
+grade, o padrão é justamente esticar os filhos na altura da linha — e um filho esticado ocupa a coluna
+inteira, não sobra espaço para grudar. É por isso que a grade do checkout leva
+<code>items-start</code>:</p>
+
+<pre class="file" data-file="checkout.html">&lt;div class="mt-8 grid items-start gap-8 md:grid-cols-[1fr_18rem]"&gt;</pre>
+
+<p>O <code>md:top-6</code> é o respiro do topo: sem ele, o resumo gruda na borda da janela, encostado na
+barra do navegador. Com 24 px, ele parece pousado. E o <code>md:</code> é essencial: no celular, uma
+coluna só, o resumo é curto e não há o que acompanhar — sticky em tela pequena só atrapalha.</p>
+
+<p>Um aviso que economiza uma tarde: <code>sticky</code> não funciona dentro de um ancestral com
+<code>overflow: hidden</code> ou <code>auto</code>. Se o resumo não gruda, procure um
+<code>overflow-hidden</code> em algum pai — é a causa em nove de dez casos.</p>
+
+<h2>4. O caminho em três passos</h2>
+
+<p>Quem preenche um checkout quer saber onde está e quanto falta. Um indicador de passos responde as
+duas perguntas em uma linha. Três passos bastam para uma compra: entrega, pagamento e confirmação.</p>
+
+<pre class="file" data-file="checkout.html">&lt;ol class="flex flex-wrap items-center gap-2 text-sm"&gt;
+  &lt;li class="flex items-center gap-2 font-medium text-amber-700" aria-current="step"&gt;
+    &lt;span class="flex h-7 w-7 items-center justify-center rounded-full bg-amber-600 text-xs font-bold text-white"&gt;1&lt;/span&gt;
+    Entrega
+  &lt;/li&gt;
+  &lt;li class="flex items-center gap-2 text-stone-400"&gt;
+    &lt;span class="flex h-7 w-7 items-center justify-center rounded-full border border-stone-300 text-xs font-bold"&gt;2&lt;/span&gt;
+    Pagamento
+  &lt;/li&gt;
+  &lt;li class="flex items-center gap-2 text-stone-400"&gt;
+    &lt;span class="flex h-7 w-7 items-center justify-center rounded-full border border-stone-300 text-xs font-bold"&gt;3&lt;/span&gt;
+    Confirmação
+    &lt;/li&gt;
+&lt;/ol&gt;</pre>
+
+<p>O passo atual é o único com fundo cheio, texto na cor da marca e <code>aria-current="step"</code>.
+Esse atributo é o que faz o leitor de tela anunciar "etapa atual" em vez de ler três itens iguais. Os
+outros dois ficam em cinza claro, com borda no lugar do fundo — mesma forma, peso diferente.</p>
+
+<p>O <code>flex-wrap</code> é para o celular: se os três nomes não couberem, eles quebram em duas
+linhas em vez de vazar para fora. E o número tem <code>h-7 w-7</code> com <code>items-center
+justify-center</code>, o mesmo padrão do círculo do estado vazio: quadrado do mesmo tamanho nos dois
+eixos, conteúdo centralizado.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Passo</th><th>A pergunta que ele responde</th><th>O que a tela pede</th></tr>
+<tr><td>Entrega</td><td>onde e quando eu recebo?</td><td>nome, telefone e horário de retirada</td></tr>
+<tr><td>Pagamento</td><td>como eu pago?</td><td>as opções, com a escolhida destacada</td></tr>
+<tr><td>Confirmação</td><td>deu certo?</td><td>o resumo final e o número do pedido</td></tr>
+</table>
+</div>
+
+<p>Três é o número certo para quase todo comércio pequeno. Com cinco passos, a pessoa sente que está
+preenchendo uma ficha; com um só, ela sente que vai errar. E não invente passo que não tem pergunta:
+"revisão" costuma ser o passo em que as pessoas fecham a aba.</p>
+
+<h2>5. As linhas do pedido</h2>
+
+<p>O resumo precisa lembrar o que a pessoa comprou, não só quanto. Uma linha por item, com nome,
+detalhe e preço. O divisor entre elas vem do pai, com <code>divide-y</code>, e não de uma borda em cada
+filho — a última linha não deve ter linha embaixo.</p>
+
+<pre class="file" data-file="checkout.html">&lt;ul class="divide-y divide-stone-200"&gt;
+  &lt;li class="flex items-start justify-between gap-3 py-3"&gt;
+    &lt;div&gt;
+      &lt;p class="font-medium text-stone-900"&gt;Pão de queijo&lt;/p&gt;
+      &lt;p class="text-sm text-stone-500"&gt;2 dúzias · retirada às 16h&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;p class="tabular-nums text-stone-900"&gt;R$ 36,00&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li class="flex items-start justify-between gap-3 py-3"&gt;
+    &lt;div&gt;
+      &lt;p class="font-medium text-stone-900"&gt;Bolo de fubá&lt;/p&gt;
+      &lt;p class="text-sm text-stone-500"&gt;1 unidade · retirada às 16h&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;p class="tabular-nums text-stone-900"&gt;R$ 36,00&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;</pre>
+
+<p>Três detalhes de desenho: o nome fica em cima e escuro, o detalhe embaixo e cinza — a mesma
+hierarquia do cartão do celular na aula de <a href="caso-tabela.html">tabela de dados</a>. O preço fica
+à direita, com <code>tabular-nums</code>, para as casas decimais se alinharem entre as linhas. E o
+<code>gap-3</code> garante que, num nome comprido, o preço não encoste no texto.</p>
+
+<p>O <code>items-start</code> no <code>flex</code> é o que mantém o preço alinhado com a primeira linha
+do item, e não no meio do bloco. Sem ele, um nome de duas linhas empurraria o valor para baixo e a
+coluna de preços perderia o ritmo.</p>
+
+<p>Se o item tem foto, ela entra com <code>h-12 w-12 rounded-lg object-cover</code> antes do texto. Se
+não tem, não invente um retângulo cinza: nome e detalhe já identificam. Foto de produto em checkout
+ajuda a confirmar; retângulo cinza só ocupa espaço.</p>
+
+<h2>6. A conta que fecha</h2>
+
+<p>Aqui é onde a pessoa decide. A conta precisa estar aberta — não só o total, mas de onde ele veio.
+Quatro linhas, sempre na mesma ordem: subtotal, entrega, desconto, total.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Linha</th><th>De onde vem</th><th>Como aparece</th></tr>
+<tr><td>Subtotal</td><td>a soma dos itens</td><td><code>text-stone-600</code>, sem destaque</td></tr>
+<tr><td>Entrega</td><td>retirada na loja ou taxa</td><td>"Grátis" em <code>text-green-700</code> quando for zero</td></tr>
+<tr><td>Desconto</td><td>cupom aplicado</td><td>valor negativo, também em verde</td></tr>
+<tr><td>Total</td><td>a conta fechada</td><td><code>border-t</code>, <code>font-semibold</code> e <code>text-lg</code></td></tr>
+</table>
+</div>
+
+<pre class="file" data-file="checkout.html">&lt;dl class="mt-4 space-y-1 text-sm"&gt;
+  &lt;div class="flex justify-between"&gt;
+    &lt;dt class="text-stone-600"&gt;Subtotal&lt;/dt&gt;
+    &lt;dd class="tabular-nums"&gt;R$ 72,00&lt;/dd&gt;
+  &lt;/div&gt;
+  &lt;div class="flex justify-between"&gt;
+    &lt;dt class="text-stone-600"&gt;Entrega&lt;/dt&gt;
+    &lt;dd class="font-medium text-green-700"&gt;Grátis&lt;/dd&gt;
+  &lt;/div&gt;
+  &lt;div class="flex justify-between"&gt;
+    &lt;dt class="text-stone-600"&gt;Cupom PADARIA10&lt;/dt&gt;
+    &lt;dd class="tabular-nums text-green-700"&gt;− R$ 8,60&lt;/dd&gt;
+  &lt;/div&gt;
+  &lt;div class="flex justify-between border-t border-stone-200 pt-3 text-base font-semibold text-stone-900"&gt;
+    &lt;dt&gt;Total&lt;/dt&gt;
+    &lt;dd class="tabular-nums"&gt;R$ 63,40&lt;/dd&gt;
+  &lt;/div&gt;
+&lt;/dl&gt;</pre>
+
+<p>A linha do total é a única que muda de peso e de tamanho: <code>border-t</code> separa,
+<code>font-semibold</code> e <code>text-lg</code> destacam. Se todas as linhas tiverem o mesmo peso, o
+total se perde; se só o total existir, a pessoa desconfia do valor. Conta aberta é confiança.</p>
+
+<p>O sinal de menos no desconto é o caractere tipográfico <code>−</code>, não o hífen do teclado: ele
+alinha melhor com os números e não quebra a linha. E "Grátis" em vez de "R$ 0,00" é a diferença entre
+um valor que a pessoa lê e um valor que ela precisa interpretar.</p>
+
+<h2>7. O cupom e a forma de pagamento</h2>
+
+<p>O cupom é uma linha, não uma seção. Campo e botão lado a lado, com <code>gap-2</code>, e a mensagem
+logo abaixo — verde quando aplica, vermelha quando não. Nada de abrir um modal para digitar seis
+letras.</p>
+
+<pre class="file" data-file="checkout.html">&lt;div class="flex gap-2"&gt;
+  &lt;label for="cupom" class="sr-only"&gt;Código do cupom&lt;/label&gt;
+  &lt;input id="cupom" name="cupom" placeholder="CUPOM" class="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm uppercase"&gt;
+  &lt;button type="button" class="rounded-lg border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"&gt;Aplicar&lt;/button&gt;
+&lt;/div&gt;
+&lt;p class="mt-2 text-sm text-green-700" role="status"&gt;Cupom aplicado: − R$ 8,60&lt;/p&gt;</pre>
+
+<p>O <code>sr-only</code> no rótulo é o mesmo da busca: o campo precisa de nome para o leitor de tela,
+mesmo sem texto visível. O <code>uppercase</code> deixa o código em caixa alta enquanto a pessoa digita,
+o que combina com a maioria dos cupons e evita a dúvida "tem que ser maiúsculo?". E o
+<code>role="status"</code> na mensagem faz o leitor anunciar o resultado sem a pessoa procurar.</p>
+
+<p>A forma de pagamento é a parte que mais precisa de resposta visual. Rádio comum é pequeno e difícil
+de acertar no celular; o padrão é transformar cada opção num cartão clicável. O <code>input</code>
+continua ali — escondido com <code>sr-only</code> —, e o cartão ao lado reage com
+<code>peer-checked:</code>.</p>
+
+<pre class="file" data-file="checkout.html">&lt;label class="block"&gt;
+  &lt;input type="radio" name="pagamento" value="pix" class="peer sr-only" checked&gt;
+  &lt;span class="flex items-center justify-between rounded-xl border-2 border-stone-200 p-4 peer-checked:border-amber-600 peer-checked:bg-amber-50 peer-focus-visible:ring-2 peer-focus-visible:ring-amber-300"&gt;
+    &lt;span&gt;
+      &lt;span class="block font-medium text-stone-900"&gt;Pix&lt;/span&gt;
+      &lt;span class="block text-sm text-stone-500"&gt;Aprovação na hora&lt;/span&gt;
+    &lt;/span&gt;
+    &lt;span class="text-sm font-medium text-amber-700"&gt;− 5%&lt;/span&gt;
+  &lt;/span&gt;
+&lt;/label&gt;</pre>
+
+<p>A classe <code>peer</code> no <code>input</code> marca quem manda no estado; o
+<code>peer-checked:</code> no <code>span</code> é quem obedece. O seletor gerado explica a relação:</p>
+
+<pre class="term">:is(:where(.peer):checked ~ .peer-checked\:border-amber-600) {
+  border-color: var(--color-amber-600);
+}</pre>
+
+<p>O <code>~</code> exige que os dois sejam irmãos e que o <code>input</code> venha antes. Como os dois
+estão dentro do <code>label</code>, clicar em qualquer ponto do cartão marca o rádio — o
+<code>label</code> faz isso de graça, sem JavaScript. E o <code>peer-focus-visible:ring-2</code>
+devolve o anel de foco que o <code>sr-only</code> escondeu: sem ele, quem navega por teclado não vê
+onde está.</p>
+
+<p>Escolha a opção de uma vez por todas: cartão de opção com <code>peer</code>, ou rádio nativo visível.
+O que não funciona é esconder o rádio e não dar nenhum retorno visual — a pessoa clica, nada muda, e ela
+conclui que a tela travou.</p>
+
+<h2>8. No celular: o total sempre à vista</h2>
+
+<p>No computador, o resumo acompanha a rolagem. No celular, ele fica depois do formulário, e a pessoa
+preenche tudo sem ver o valor. A solução é uma barra fixa no pé da tela, com o total e o botão de
+pagar, que só existe nas telas pequenas.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|position=fixed;;css:#alvo|bottom=0px" data-largura="375">
+  <p class="try-task">A prévia está com 375 px. Grude esta barra de total no pé da tela, ocupando a
+  largura toda e encostando na base.</p>
+  <pre class="html">&lt;div id="alvo" class="mt-6 border-t border-stone-200 bg-white p-4 md:hidden"&gt;
+  &lt;p class="flex justify-between font-semibold"&gt;&lt;span&gt;Total&lt;/span&gt;&lt;span&gt;R$ 63,40&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+border-top-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+margin-top: 24px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white p-4 md:hidden"&gt;
+  &lt;p class="flex justify-between font-semibold"&gt;&lt;span&gt;Total&lt;/span&gt;&lt;span&gt;R$ 63,40&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p><code>fixed</code> tira a barra do fluxo e a prende na janela; <code>inset-x-0</code> estica de borda
+a borda; <code>bottom-0</code> encosta na base; <code>z-40</code> garante que ela fique por cima do
+conteúdo. O <code>md:hidden</code> é a metade que muita gente esquece: sem ele, a barra continua no
+computador, cobrindo o rodapé.</p>
+
+<p>E um detalhe que separa a barra que funciona da que esconde conteúdo: a página precisa de respiro
+embaixo, do tamanho da barra. Sem isso, o último campo fica atrás dela e a pessoa não consegue
+preencher.</p>
+
+<pre class="file" data-file="checkout.html">&lt;div class="mx-auto max-w-5xl px-4 py-10 pb-28 md:pb-10"&gt;</pre>
+
+<p>O <code>pb-28</code> dá 112 px de espaço no pé — mais que a altura da barra, para o último campo
+ficar visível mesmo com o teclado aberto. No desktop, <code>md:pb-10</code> devolve o respiro normal.
+Se você quiser cobrir o "entalhe" dos celulares com barra inferior, some
+<code>pb-[env(safe-area-inset-bottom)]</code> à barra; é uma linha e evita que o botão fique atrás do
+gesto do sistema.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o resumo que não grudava</h3>
+<p>O <code>md:sticky md:top-6</code> estava no resumo, e nada acontecia. O culpado era
+<code>overflow-hidden</code> na caixa de fora, posto ali para arredondar os cantos do cartão. Com
+<code>overflow-hidden</code>, o navegador cria uma área de rolagem própria e o <code>sticky</code> se
+prende a ela, que tem a altura do conteúdo. A correção foi tirar o <code>overflow-hidden</code> e
+arredondar cada cartão individualmente.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o desconto que ninguém viu</h3>
+<p>O cupom aplicava certinho, mas a mensagem era um texto cinza de 12 px abaixo do campo. Metade dos
+clientes clicava em "Aplicar" duas ou três vezes, achando que não tinha funcionado. A Ana trocou por
+texto verde de 14 px com <code>role="status"</code> e mostrou o valor descontado na linha da conta.
+Quando o desconto aparece no total, a pessoa confia no cupom.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a barra que cobria o último campo</h3>
+<p>No celular, a barra fixa do total cobria o campo de observação. A pessoa digitava às cegas. Faltava
+o <code>pb-28</code> na página. O sintoma é sempre o mesmo: o conteúdo existe, está no DOM, mas o dedo
+não chega nele. Sempre que houver elemento <code>fixed</code>, pergunte quem paga o espaço que ele
+ocupa — e a resposta é o <code>padding</code> do contêiner.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Por que a grade do checkout leva
+<code>items-start</code>?</p>
+<label><input type="radio" name="c1"> para os cartões ficarem alinhados ao topo da página</label>
+<label><input type="radio" name="c1"> porque, esticado na altura da coluna, o resumo não tem espaço para grudar</label>
+<label><input type="radio" name="c1"> para o <code>gap</code> funcionar nas duas colunas</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que faz o cartão de pagamento reagir ao clique?</p>
+<label><input type="radio" name="c2"> a classe <code>active:</code> no <code>span</code></label>
+<label><input type="radio" name="c2"> o <code>hover:</code> no <code>label</code></label>
+<label><input type="radio" name="c2"> o <code>peer</code> no <code>input</code> e <code>peer-checked:</code> no <code>span</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Para que serve o <code>pb-28</code> na página, quando há
+barra fixa no pé?</p>
+<label><input type="radio" name="c3"> para o último conteúdo não ficar escondido atrás da barra</label>
+<label><input type="radio" name="c3"> para a barra ficar mais alta no celular</label>
+<label><input type="radio" name="c3"> para o rodapé do site desaparecer no computador</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o resumo que acompanha</h2>
+<p>O resumo do pedido precisa acompanhar a rolagem a partir de 768 px, parando 24 px abaixo do topo.
+Complete a classe que faz ele grudar.</p>
+<div class="ex-code">&lt;aside class="rounded-2xl border bg-white p-5 <input aria-label="resposta 1" data-answer="md:sticky" placeholder="..."> md:top-6"&gt;</div>
+<p class="ex-dica">Dica: é a variante de breakpoint grande mais a propriedade de posição que gruda. Não
+esqueça que a grade precisa de <code>items-start</code> para sobrar espaço.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Checkout é duas colunas com trabalhos diferentes: o formulário, que cresce, e o resumo, que fica com
+largura fixa — <code>md:grid-cols-[1fr_18rem]</code> — e acompanha a rolagem com
+<code>md:sticky md:top-6</code>. Para o <code>sticky</code> funcionar, a grade leva
+<code>items-start</code> e nenhum ancestral pode ter <code>overflow-hidden</code>.</p>
+
+<p>O caminho tem três passos, com o atual em <code>aria-current="step"</code>. As linhas do pedido usam
+<code>divide-y</code> e <code>tabular-nums</code>; a conta abre em subtotal, entrega, desconto e total,
+com a última linha em <code>border-t font-semibold text-lg</code>. O cupom é uma linha com
+<code>role="status"</code>, e o pagamento usa cartões com <code>peer</code> e
+<code>peer-checked:</code>. No celular, a barra fixa mantém o total à vista e a página ganha
+<code>pb-28</code> para ninguém ficar escondido atrás dela.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Duas colunas: formulário em <code>1fr</code>, resumo em <code>18rem</code>.</li>
+<li>Resumo grudado: <code>md:sticky md:top-6</code> + <code>items-start</code> na grade.</li>
+<li><code>overflow-hidden</code> em qualquer pai quebra o <code>sticky</code>.</li>
+<li>Passos: três, com <code>aria-current="step"</code> no atual.</li>
+<li>Itens: <code>divide-y</code> no pai, preço em <code>tabular-nums</code> à direita.</li>
+<li>Conta aberta: subtotal, entrega, desconto e total; só o total muda de peso.</li>
+<li>Cupom: uma linha, rótulo <code>sr-only</code> e mensagem com <code>role="status"</code>.</li>
+<li>Pagamento: <code>peer</code> no rádio escondido, <code>peer-checked:</code> no cartão, anel no foco.</li>
+<li>Barra fixa no celular: <code>fixed inset-x-0 bottom-0 z-40 md:hidden</code>.</li>
+<li>Quem ocupa espaço fixo cobra <code>padding</code> do contêiner: <code>pb-28</code>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

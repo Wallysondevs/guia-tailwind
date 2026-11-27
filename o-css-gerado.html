@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O CSS Gerado | Guia Tailwind</title>
+<meta name="description" content="Como ler o CSS que o Tailwind gera: as camadas theme, base e utilities, as variáveis em oklch, o reset, uma regra por classe e por que a ordem decide empates.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>O CSS <span class="hl">Gerado</span></h1>
+<p class="intro">A Ana abriu o arquivo de saída para conferir uma classe e levou um susto: 184 linhas
+para cinco classes. Antes de fechar a janela e desistir, ela resolveu ler com calma — e descobriu que o
+arquivo tem três partes bem diferentes, que quase nada ali muda a cada build e que a parte grande e
+chata é justamente a que nunca precisa ser tocada. Nesta aula ela aprende a ler o CSS gerado como quem
+lê um extrato de banco: procurando o que importa, sabendo o que ignorar.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>As três camadas que aparecem em todo arquivo gerado: tema, base e utilitárias.</li>
+  <li>Por que as cores saem em <code>oklch()</code> e os valores em variáveis.</li>
+  <li>O que é o reset (preflight) e por que o navegador parece "zerado".</li>
+  <li>Por que existe uma regra por classe, e não uma por elemento.</li>
+  <li>Quem ganha quando duas classes mexem na mesma propriedade.</li>
+  <li>Como o arquivo escreve condições de tela e de estado.</li>
+  <li>Por que o tamanho dele cresce com nomes diferentes, não com elementos.</li>
+</ul>
+</div>
+
+<h2>1. A cena: 184 linhas para cinco classes</h2>
+
+<p>O cartão da padaria usa cinco classes: <code>p-4</code>, <code>bg-amber-100</code>,
+<code>text-amber-900</code>, <code>rounded-lg</code> e <code>md:p-8</code>. A Ana esperava cinco blocos
+no arquivo de saída. Encontrou um comentário de versão, três camadas, dezenas de regras de reset,
+variáveis de fonte, de cor e de espaço, e só no fim os cinco blocos que ela reconhecia.</p>
+
+<p>A primeira reação é achar que o Tailwind está exagerando. A segunda, mais útil, é entender o
+contrato: o arquivo gerado tem uma parte fixa, que vem do próprio Tailwind e é igual em qualquer
+projeto, e uma parte variável, que depende das classes usadas. A parte fixa é grande; a variável é
+pequena. Quem sabe separar as duas lê o arquivo em segundos.</p>
+
+<p>Nesta aula, a referência é um arquivo real, gerado pelo mesmo motor que roda nas caixas do guia. Ele
+tem 184 linhas e 5.086 bytes para esse cartão de cinco classes. Guarde os números: eles voltam na aula
+de produção, quando o assunto for deixar o arquivo menor.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Parte do arquivo</th><th>Onde começa</th><th>Para que serve</th><th>Muda a cada projeto?</th></tr>
+<tr><td>cabeçalho</td><td>primeira linha</td><td>diz a versão do Tailwind que gerou</td><td>só a versão</td></tr>
+<tr><td>tema</td><td><code>@layer theme</code></td><td>declara as variáveis de cor, espaço, fonte e raio</td><td>só as que você usa</td></tr>
+<tr><td>base</td><td><code>@layer base</code></td><td>zera margens, padroniza fontes e formulários</td><td>não</td></tr>
+<tr><td>utilitárias</td><td><code>@layer utilities</code></td><td>uma regra para cada classe usada no projeto</td><td>sim, é a sua parte</td></tr>
+</table>
+</div>
+
+<p>O cabeçalho é uma linha só, entre comentários, e serve para você conferir a versão depois de um
+build:</p>
+
+<pre class="term" data-title="primeira linha de dist/estilo.css">/*! tailwindcss v4.3.5 | MIT License | https://tailwindcss.com */</pre>
+
+<p>O ponto de exclamação depois da barra é um detalhe de CSS: comentários que começam com
+<code>/*!</code> não são removidos pelos minificadores. É assim que a versão sobrevive até o arquivo
+publicado — e é por ela que você descobre, num site antigo, que o Tailwind de lá é da versão 3.</p>
+
+<h2>2. As três camadas, e a linha que as ordena</h2>
+
+<p>Logo depois do cabeçalho vem a linha mais importante do arquivo, e é fácil passar por ela:</p>
+
+<pre class="term" data-title="trecho de dist/estilo.css">@layer theme, base, components, utilities;</pre>
+
+<p>Ela declara quatro camadas e fixa a ordem: tema, base, componentes, utilitárias. No CSS, camada é um
+grupo de regras com prioridade combinada de antemão: em um empate de peso, valem as regras da camada
+declarada por último. Como as utilitárias vêm por último, elas vencem o reset e qualquer estilo de
+componente. É isso que faz <code>p-4</code> funcionar sem <code>!important</code> e sem seletor
+comprido.</p>
+
+<p>Repare que a linha de declaração não tem chaves: é só a lista, na ordem. Cada camada é preenchida
+depois, em blocos separados. Essa separação existe para que a ordem seja decidida uma vez, no começo do
+arquivo, e não dependa do lugar em que cada regra foi escrita. Quando você adiciona uma regra sua em
+<code>@layer components</code>, ela entra na posição combinada, não no fim do arquivo.</p>
+
+<p>E há uma consequência que já apareceu na aula do CSS de entrada: regra sua escrita <em>fora</em> de
+camada vence todas as camadas. Por isso é tão fácil criar um conflito sem perceber. O arquivo gerado
+mostra a hierarquia com clareza; vale voltar a ele quando um estilo teimar em não pegar.</p>
+
+<dl class="anatomy">
+<dt>camada</dt>
+<dd>Um grupo de regras com prioridade combinada. A lista do começo do arquivo diz a ordem em que
+elas são avaliadas.</dd>
+<dt>variável</dt>
+<dd>Um valor com nome, escrito <code>--nome: valor</code>, usado com <code>var(--nome)</code>. Trocar
+a variável troca tudo o que aponta para ela.</dd>
+<dt>reset</dt>
+<dd>O conjunto de regras que apaga as decisões do navegador: margens, tamanhos de título, estilo de
+lista. No Tailwind, chama-se preflight e mora na camada base.</dd>
+<dt>utilitária</dt>
+<dd>Uma classe que mexe em uma propriedade só. Cada uma vira um bloco dentro de
+<code>@layer utilities</code>.</dd>
+<dt>oklch</dt>
+<dd>A forma de escrever cor usada pelo Tailwind: claridade, croma e matiz. Mais previsível de ajustar
+que o bom e velho hexadecimal.</dd>
+</dl>
+
+<h2>3. O bloco do tema: variáveis com nomes do catálogo</h2>
+
+<p>A camada <code>theme</code> é a primeira a ser preenchida, e ela vira um bloco de variáveis CSS
+ligadas ao elemento raiz:</p>
+
+<pre class="term" data-title="trecho de dist/estilo.css">@layer theme {
+  :root, :host {
+    --color-amber-100: oklch(96.2% 0.059 95.617);
+    --color-amber-900: oklch(41.4% 0.112 45.904);
+    --spacing: 0.25rem;
+    --radius-lg: 0.5rem;
+  }
+}</pre>
+
+<p>O seletor <code>:root, :host</code> quer dizer "o elemento raiz do documento e o elemento raiz de um
+componente isolado". Na prática, as variáveis ficam disponíveis para o arquivo inteiro, e qualquer
+regra pode usá-las. O Tailwind declara ali só o que o projeto realmente usou: se nenhuma classe de
+vermelho aparece no HTML, não há variável de vermelho. Isso é parte do mistério do tamanho.</p>
+
+<p>As cores vêm em <code>oklch()</code>, que é um jeito moderno de escrever cor com três números:
+claridade (de 0 a 100%), croma (a intensidade) e matiz (o ângulo na roda de cores). O
+<code>oklch(96.2% 0.059 95.617)</code> é um âmbar bem claro. Você não precisa calcular nada disso para
+usar o Tailwind: a cor aparece no painel de CSS computado e o navegador desenha. Saber ler ajuda quando
+você compara dois tons e quer entender por que um é mais claro que o outro — o primeiro número manda.</p>
+
+<p>Dois valores merecem atenção especial. <code>--spacing: 0.25rem</code> é a unidade da escala de
+espaço: toda classe <code>p-</code>, <code>m-</code>, <code>gap-</code> e <code>w-</code> multiplica
+esse valor. <code>--radius-lg: 0.5rem</code> é o raio de 8 px usado por <code>rounded-lg</code>. Mudar
+qualquer um dos dois no CSS de entrada muda o arquivo inteiro na próxima geração — e é por isso que o
+Tailwind guarda esses números em variáveis em vez de repeti-los em cada regra.</p>
+
+<h2>4. O reset: a camada base e o navegador "zerado"</h2>
+
+<p>A camada <code>base</code> é a maior em número de linhas e a menos interessante para o dia a dia:
+é o reset que o Tailwind chama de preflight. Ele zera margens e paddings de todos os elementos, coloca
+<code>box-sizing: border-box</code> em tudo, padroniza a fonte de títulos e de código, tira o estilo
+padrão de listas, normaliza botões e campos de formulário.</p>
+
+<pre class="term" data-title="trecho de dist/estilo.css">@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+}</pre>
+
+<p>Essas duas regras explicam dois sustos clássicos. O primeiro: um <code>h1</code> sem classe nenhuma
+aparece do mesmo tamanho do texto normal, porque o reset herda o tamanho do pai e o peso normal. Não é
+bug — é o reset deixando o desenho inteiro para você. O segundo: parágrafos não têm mais margem
+automática entre si, então dois <code>p</code> ficam colados até você usar <code>mt-4</code> ou
+<code>space-y-4</code>.</p>
+
+<p>Também por causa do reset, o painel de CSS computado não mostra nada quando uma classe define um
+valor que já é o padrão. Um <code>div</code> sem classe já tem margem zero; um <code>m-0</code> não
+muda nada e o painel fica vazio. Isso costuma confundir quem espera ver a propriedade listada. O painel
+mostra o que mudou, não tudo o que existe.</p>
+
+<h2>5. A camada das utilitárias: uma regra por nome</h2>
+
+<p>Agora a parte que é sua. No fim do arquivo, dentro de <code>@layer utilities</code>, vem um bloco
+para cada classe que apareceu no projeto:</p>
+
+<pre class="term" data-title="trecho de dist/estilo.css">@layer utilities {
+  .rounded-lg {
+    border-radius: var(--radius-lg);
+  }
+  .bg-amber-100 {
+    background-color: var(--color-amber-100);
+  }
+  .p-4 {
+    padding: calc(var(--spacing) * 4);
+  }
+  .text-amber-900 {
+    color: var(--color-amber-900);
+  }
+  @media (width >= 48rem) {
+    .md\:p-8 {
+      padding: calc(var(--spacing) * 8);
+    }
+  }
+}</pre>
+
+<p>Três coisas para observar. Primeiro, cada classe aparece uma vez, mesmo que esteja em cinquenta
+elementos do site: a regra é do nome, não do elemento. Segundo, os valores são contas com variáveis,
+nunca números soltos: <code>calc(var(--spacing) * 4)</code> e não <code>16px</code>. Terceiro, a ordem
+dos blocos não é alfabética nem a ordem do seu HTML: é a ordem interna do Tailwind, agrupada por tipo de
+propriedade.</p>
+
+<p>É essa ordem que decide os empates. Duas classes da mesma propriedade no mesmo elemento não brigam
+por quem foi escrita primeiro no <code>class</code>; brigam pela posição no arquivo. Como
+<code>p-6</code> é gerado depois de <code>p-2</code>, o <code>p-6</code> vence — mesmo que você escreva
+<code>class="p-6 p-2"</code>. Vale testar, porque é o tipo de coisa que só entra na cabeça quando se vê:</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=8px;;rule:padding: calc(var(--spacing) * 2)">
+  <p class="try-task">O cartão tem duas classes de respiro ao mesmo tempo e o painel mostra 24 px.
+  Deixe 8 px — e repare que inverter a ordem das classes no HTML não teria resolvido.</p>
+  <pre class="html">&lt;div id="alvo" class="p-6 p-2 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 24px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-2 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>O painel de regras mostraria os dois blocos, <code>.p-2</code> e <code>.p-6</code>, e a conta seria
+feita pelo navegador na hora de aplicar: o último bloco que casa com o elemento ganha. A lição que fica
+não é decorar a ordem, é não empilhar duas classes da mesma família no mesmo elemento. Uma propriedade,
+uma classe.</p>
+
+<p>A leitura das cores no arquivo tem a mesma lógica de economia. Se o texto está em âmbar escuro, o
+bloco mostra a variável, e a variável está no tema. Trocar de tom é trocar de classe; o arquivo gerado
+inteiro se ajusta sozinho:</p>
+
+<div class="trytailwind" data-goal="rule:color: var(--color-amber-900);;rule:background-color: var(--color-amber-100)">
+  <p class="try-task">A etiqueta está com o texto em âmbar 700, que fica fraco sobre o fundo claro.
+  Passe o texto para o âmbar 900 e veja, na saída, que a regra aponta para outra variável.</p>
+  <pre class="html" data-saida="css">&lt;span id="alvo" class="bg-amber-100 text-amber-700 px-2 py-1"&gt;Pão do dia&lt;/span&gt;</pre>
+  <pre class="out">
+.bg-amber-100 {
+  background-color: var(--color-amber-100);
+}
+.px-2 {
+  padding-inline: calc(var(--spacing) * 2);
+}
+.py-1 {
+  padding-block: var(--spacing);
+}
+.text-amber-700 {
+  color: var(--color-amber-700);
+}
+</pre>
+  <pre class="solucao">&lt;span id="alvo" class="bg-amber-100 text-amber-900 px-2 py-1"&gt;Pão do dia&lt;/span&gt;</pre>
+</div>
+
+<h2>6. Condições: <code>@media</code> e o dois-pontos no seletor</h2>
+
+<p>Quando a classe tem uma condição, o bloco ganha uma camada a mais. Uma classe de breakpoint vira um
+<code>@media</code> em volta; uma classe de estado vira um seletor com dois-pontos. No arquivo gerado,
+o nome da classe com dois-pontos aparece com uma barra invertida na frente, porque o CSS precisa
+escapar esse caractere:</p>
+
+<pre class="term" data-title="trecho de dist/estilo.css">@media (width >= 48rem) {
+  .md\:p-8 {
+    padding: calc(var(--spacing) * 8);
+  }
+}</pre>
+
+<p>A barra invertida não é erro de digitação: é escape. Sem ela, o CSS leria <code>:p-8</code> como uma
+pseudo-classe e a regra não funcionaria. Você nunca digita isso à mão — o Tailwind escreve —, mas
+precisa reconhecer quando abre o arquivo e procura a classe que usou no HTML: procure por
+<code>md\:p-8</code>, com a barra.</p>
+
+<p>Um segundo detalhe aparece nas classes de respiro horizontal. O Tailwind escreve
+<code>padding-inline</code> em vez de <code>padding-left</code> mais <code>padding-right</code>. São as
+propriedades lógicas: <code>inline</code> é o eixo do texto, que em português é horizontal;
+<code>block</code> é o eixo de cima para baixo. O navegador entende dos dois jeitos, e o painel de CSS
+computado resume tudo em <code>padding</code>. Quando você comparar o arquivo com a tela, essa diferença
+de nome vai aparecer — e não é problema.</p>
+
+<h2>7. O tamanho cresce com nomes, não com elementos</h2>
+
+<p>A pergunta que todo mundo faz: o arquivo vai ficar gigante? Ele cresce com o número de nomes de
+classe diferentes, não com o número de elementos. Três cartões iguais usam um bloco só; acrescentar o
+quarto cartão não muda um byte. Acrescentar uma classe nova muda.</p>
+
+<div class="trytailwind" data-goal="conta:.bg-amber-100=3;;rule:background-color: var(--color-amber-100)">
+  <p class="try-task">A vitrine tem três etiquetas, e a terceira está com um tom diferente por engano.
+  Deixe as três com o mesmo fundo — e observe que o CSS gerado continua com uma regra só.</p>
+  <pre class="html" data-saida="css">&lt;div id="alvo"&gt;
+  &lt;span class="bg-amber-100 px-2 py-1"&gt;Pão francês&lt;/span&gt;
+  &lt;span class="bg-amber-100 px-2 py-1"&gt;Broa&lt;/span&gt;
+  &lt;span class="bg-amber-50 px-2 py-1"&gt;Sonho&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+.bg-amber-50 {
+  background-color: var(--color-amber-50);
+}
+.bg-amber-100 {
+  background-color: var(--color-amber-100);
+}
+.px-2 {
+  padding-inline: calc(var(--spacing) * 2);
+}
+.py-1 {
+  padding-block: var(--spacing);
+}
+</pre>
+  <pre class="solucao">&lt;div id="alvo"&gt;
+  &lt;span class="bg-amber-100 px-2 py-1"&gt;Pão francês&lt;/span&gt;
+  &lt;span class="bg-amber-100 px-2 py-1"&gt;Broa&lt;/span&gt;
+  &lt;span class="bg-amber-100 px-2 py-1"&gt;Sonho&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Esse é o motivo pelo qual a folha de um site de vinte páginas costuma ter entre 10 e 30 mil bytes,
+enquanto uma biblioteca de componentes genérica passa de 100 mil. O Tailwind não traz o catálogo: traz
+só o que você usou. Quem paga a conta é o número de classes distintas, e é por isso que a aula
+<a href="build-de-producao.html">Build de Produção</a> consegue falar em arquivos de poucos kilobytes
+sem nenhum truque.</p>
+
+<p>Existe uma armadilha nesse mecanismo, e ela não tem a ver com o arquivo gerado, mas com o momento em
+que ele é gerado: uma classe montada em pedaços no JavaScript nunca aparece escrita por inteiro em
+arquivo nenhum, então não entra no CSS. O arquivo final fica com uma regra a menos e a página com um
+elemento sem estilo. A solução é escrever o nome completo em algum lugar — e o assunto tem aula própria
+mais adiante.</p>
+
+<h2>8. O que fazer — e não fazer — com esse arquivo</h2>
+
+<p>A regra de ouro é curta: o arquivo gerado não se edita. Ele é reescrito inteiro a cada build; sua
+edição dura até o próximo salvamento com o watch ligado. Se você precisa mudar um valor, mude na
+entrada ou no HTML, e gere de novo. Parece limitação, mas é o que mantém o projeto previsível: existe
+uma fonte de verdade, e ela é legível.</p>
+
+<p>Ler o arquivo, por outro lado, é uma das melhores formas de aprender. Quer saber o que
+<code>rounded-lg</code> faz? Abra o arquivo e procure o bloco. Quer saber se a classe está certa? Se o
+bloco não existe, o nome não foi reconhecido. Quer saber qual variável está por trás de uma cor? Está
+no tema. São respostas diretas, sem adivinhação.</p>
+
+<p>Duas coisas não fazer: não copiar pedaços dele para o CSS de entrada — isso cria uma segunda fonte de
+verdade que envelhece sem avisar — e não ligar a folha duas vezes na página, uma na versão antiga e
+outra na nova. Se o estilo parece "meio aplicado", com uma propriedade pegando e outra não, desconfie de
+duas folhas concorrentes ou de cache do navegador antes de suspeitar do Tailwind.</p>
+
+<p>Para conferir sem abrir o arquivo, você já conhece dois caminhos: o painel de CSS computado das
+caixas e a aba <em>Computed</em> do navegador. Os dois mostram o valor final, que é o que importa. O
+arquivo gerado mostra o valor declarado; a diferença entre os dois é exatamente o que o navegador fez
+com as contas.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sintoma no arquivo</th><th>O que costuma ser</th><th>O que fazer</th></tr>
+<tr><td>a classe não aparece</td><td>nome errado, build velho ou nome montado em pedaços</td><td>conferir, gerar de novo e escrever o nome inteiro</td></tr>
+<tr><td>a cor vem em <code>oklch()</code></td><td>é o formato padrão do Tailwind 4</td><td>nada: usar a classe e confiar no navegador</td></tr>
+<tr><td>a classe tem barra invertida</td><td>o nome tem dois-pontos (<code>md:</code>, <code>hover:</code>)</td><td>nada: é o escape que o CSS exige</td></tr>
+<tr><td>o padding aparece como <code>padding-inline</code></td><td>propriedade lógica usada por <code>px-</code></td><td>nada: é o equivalente a esquerda mais direita</td></tr>
+<tr><td>o arquivo tem milhares de linhas</td><td>reset, tema e falta de minificação</td><td>olhar só <code>@layer utilities</code> e minificar na produção</td></tr>
+</table>
+</div>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: "procurei a minha classe no arquivo e não achei"</h3>
+<p>Três suspeitos, na ordem. O nome está diferente do que você lembra — confira letra por letra, e
+lembre da barra invertida nas classes com dois-pontos. A classe existe no HTML, mas o build foi feito
+antes de você salvar. Ou o nome está montado em pedaços no código e nunca aparece inteiro. Nos dois
+primeiros casos, gerar de novo resolve; no terceiro, é preciso escrever o nome completo.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: "o arquivo tem 20 mil linhas e o site é pequeno"</h3>
+<p>Vinte mil linhas de CSS com o preflight e o tema não é sinal de projeto grande: é sinal de build
+sem minificação, ou de um arquivo que veio de uma biblioteca pronta e não do seu HTML. Confira o
+cabeçalho — a versão está lá —, procure quantos blocos existem dentro de <code>@layer utilities</code> e
+compare com o número de classes do seu site. Se a diferença for enorme, algum caminho de
+<code>@source</code> está puxando arquivos que não devia.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: "mudei o CSS gerado à mão e a mudança sumiu"</h3>
+<p>Aconteceu o previsto: o arquivo é reescrito a cada build. O conserto é levar a mudança para o lugar
+certo — o CSS de entrada, se ela vale para o site todo; o HTML, se é decisão de uma tela. Se a mudança
+era um valor que não existe no catálogo, o caminho é declarar esse valor no <code>@theme</code> e usar a
+classe nova, em vez de remendar a saída.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Em qual camada do arquivo gerado ficam as classes que
+você usa no HTML?</p>
+<label><input type="radio" name="q1"> na camada <code>theme</code></label>
+<label><input type="radio" name="q1"> na camada <code>utilities</code></label>
+<label><input type="radio" name="q1"> na camada <code>base</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Duas classes da mesma propriedade no mesmo elemento:
+quem vence?</p>
+<label><input type="radio" name="q2"> a que foi escrita primeiro no atributo <code>class</code></label>
+<label><input type="radio" name="q2"> a que tem o nome mais curto</label>
+<label><input type="radio" name="q2"> a cujo bloco está mais para o fim no arquivo gerado</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O arquivo gerado cresce quando você acrescenta o
+quê?</p>
+<label><input type="radio" name="q3"> nomes de classe diferentes no projeto</label>
+<label><input type="radio" name="q3"> elementos novos usando classes que já existem</label>
+<label><input type="radio" name="q3"> páginas novas com o mesmo HTML repetido</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: ler a regra</h2>
+<p>Esta é uma regra copiada do arquivo gerado. Complete com a variável que o Tailwind usou para o raio
+de borda:</p>
+<div class="ex-code">.rounded-lg { border-radius: var(<input aria-label="resposta 1" data-answer="--radius-lg" placeholder="...">); }</div>
+<p class="ex-dica">Dica: variáveis CSS começam com dois hífens. O nome junta o tipo do valor
+(<code>radius</code>) com o tamanho (<code>lg</code>), separados por hífen.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O CSS gerado tem uma parte fixa e uma parte sua. A fixa é o cabeçalho com a versão, a linha que
+ordena as camadas, o tema com as variáveis que o projeto usa e o reset da camada base. A sua é a camada
+de utilitárias: um bloco por classe diferente, com valores em variáveis e contas, na ordem interna do
+Tailwind — a ordem que decide os empates entre duas classes da mesma propriedade.</p>
+
+<p>Ler o arquivo é útil; editá-lo, nunca. Tudo o que ele contém nasce da entrada mais o HTML, e a
+próxima geração apaga qualquer remendo. O tamanho acompanha o número de nomes distintos, não o de
+elementos, e é por isso que um site inteiro pode caber em poucos kilobytes. Com essa leitura, a aula de
+produção deixa de ser um ritual e passa a ser uma conta: pegar o mesmo arquivo e deixá-lo menor.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>O cabeçalho com <code>/*!</code> guarda a versão e sobrevive à minificação.</li>
+<li><code>@layer theme, base, components, utilities;</code> fixa a ordem das camadas.</li>
+<li>O tema só declara as variáveis que o projeto realmente usou.</li>
+<li>Cores saem em <code>oklch()</code>: claridade, croma e matiz.</li>
+<li><code>--spacing: 0.25rem</code> é a unidade de toda a escala de espaço.</li>
+<li>A camada base é o reset: margens zeradas e títulos sem tamanho próprio.</li>
+<li>Um bloco por classe, uma vez, servindo todos os elementos que a usam.</li>
+<li>Empate entre duas classes: vale o bloco que está mais para o fim.</li>
+<li>Condições viram <code>@media</code>; classes com dois-pontos ganham barra invertida.</li>
+<li>O arquivo é reescrito a cada build: leia, não edite.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

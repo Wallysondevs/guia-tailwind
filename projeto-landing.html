@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Landing Page | Guia Tailwind</title>
+<meta name="description" content="Projeto de uma landing page de campanha com Tailwind: o esqueleto de três partes, o hero que centraliza, a faixa de prova, a grade de três cestas, o cabeçalho fixo e o rodapé.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Landing</span> Page</h1>
+<p class="intro">Faltam cinco dias para o Dia das Mães e a Ana tem quarenta cestas de café da manhã para
+vender. Ela não precisa de um site novo: precisa de uma página só, que explique a cesta, mostre o preço e
+leve a cliente ao botão de encomenda. No ano passado ela resolveu isso com um post no Instagram e uma
+lista de mensagens no caderno — e perdeu o controle de quem tinha pago. Nesta aula ela monta a página de
+campanha inteira: a casca de três partes, o hero que segura a primeira tela, a faixa de prova, a grade das
+três cestas, o cabeçalho fixo e o rodapé com endereço.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O esqueleto de uma página de campanha: <code>flex min-h-dvh flex-col</code> com o rodapé no fim.</li>
+  <li>Como o <code>flex-1</code> no <code>main</code> empurra o rodapé para baixo em página curta.</li>
+  <li>O hero centralizado, com promessa, prova e um botão só.</li>
+  <li>A faixa de números com <code>grid grid-cols-3 divide-x</code>.</li>
+  <li>A grade de cartões com <code>sm:grid-cols-2 lg:grid-cols-3</code> e o cartão em destaque.</li>
+  <li>Cabeçalho fixo com <code>sticky top-0 z-10</code> e fundo translúcido com <code>backdrop-blur</code>.</li>
+  <li>Rodapé com colunas, links e linha de crédito.</li>
+  <li>O ajuste para o celular, que é onde a campanha é vista primeiro.</li>
+</ul>
+</div>
+
+<h2>1. A cena: cinco dias e quarenta cestas</h2>
+
+<p>A cesta da Ana tem pão de fermentação, bolo de fubá, geleia, manteiga e um cartão escrito à mão. Custa
+cento e vinte reais e precisa ser encomendada com dois dias de antecedência. Essas três informações —
+o que vem, quanto custa, como encomendar — são a página. Todo o resto é apoio.</p>
+
+<p>A primeira tentativa foi uma página com sete seções: a história da padaria, a foto do forno, os cinco
+tipos de pão, um texto sobre fermentação, os depoimentos, a cesta e o contato. Bonita, completa e sem
+venda nenhuma: a pessoa chegava no fim sem saber o preço. Campanha tem uma diferença importante em
+relação a site institucional — ela pede <strong>uma</strong> ação, com prazo. Se a página oferece cinco
+caminhos, a cliente escolhe o mais fácil, que é fechar a aba.</p>
+
+<p>Então o plano é enxuto, e cabe em cinco blocos: um cabeçalho fixo com o nome e o botão de encomenda;
+um hero que ocupa a primeira tela com a promessa; uma faixa de três números que dá credibilidade; a grade
+com as três versões da cesta; e o rodapé com endereço, horário e telefone. Cada bloco se monta sozinho e
+se encaixa no fim. É assim que se faz página de verdade: peça por peça, com a página rodando desde a
+primeira peça.</p>
+
+<p>Antes de escrever a primeira classe, uma decisão que economiza tempo: a campanha vai ser lida no
+telefone, entre um aplicativo e outro. No monitor ela é um cartão de visita; no telefone, é a página
+inteira. Por isso todas as larguras vão ser elásticas, todas as grades vão empilhar, e o botão de
+encomenda vai aparecer pelo menos três vezes: no topo, no meio e no fim. Ninguém rola de volta para
+procurar o botão.</p>
+
+<h2>2. O esqueleto: cabeçalho, miolo e rodapé</h2>
+
+<p>Toda página tem três partes e o Tailwind precisa que elas se comportem como uma coluna de altura
+mínima igual à tela. A casca é <code>flex min-h-dvh flex-col</code> no <code>div</code> externo. O
+<code>flex-col</code> empilha as três partes, o <code>min-h-dvh</code> dá a altura mínima visível e o
+<code>flex-1</code> no <code>main</code> faz o miolo crescer para ocupar o espaço que sobrar.</p>
+
+<pre class="file" data-file="index.html">&lt;body class="bg-white text-slate-800"&gt;
+  &lt;div class="flex min-h-dvh flex-col"&gt;
+    &lt;header class="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur"&gt;…&lt;/header&gt;
+    &lt;main class="flex-1"&gt;…as seções da campanha…&lt;/main&gt;
+    &lt;footer class="border-t border-slate-200 bg-slate-900 px-6 py-12 text-slate-300"&gt;…&lt;/footer&gt;
+  &lt;/div&gt;
+&lt;/body&gt;</pre>
+
+<p>Por que isso importa? Sem o <code>flex-1</code>, uma página curta deixa o rodapé subindo no meio da
+tela, com um vazio branco embaixo — parece que a página quebrou. Com o <code>flex-1</code>, o miolo
+estica e o rodapé fica no lugar onde o leitor espera encontrá-lo: o fim. É um dos poucos casos em que
+vale usar flexbox no corpo inteiro da página em vez de grid; o grid também resolve, mas o flex é mais
+curto de escrever e de ler.</p>
+
+<pre class="term">.flex-col {
+  flex-direction: column;
+}
+.min-h-dvh {
+  min-height: 100dvh;
+}
+.flex-1 {
+  flex: 1 1 0%;
+}</pre>
+
+<p>O <code>100dvh</code> merece uma linha. <code>vh</code> conta a janela inteira, inclusive a parte que
+a barra do navegador cobre no telefone; <code>dvh</code> conta a altura visível de verdade, e ela muda
+quando a barra aparece. Em página que ocupa a tela, <code>min-h-dvh</code> evita o pulo. Se você já viu
+uma página "tremer" ao rolar no celular, era isso.</p>
+
+<p>Se você quiser ver esse mesmo desenho sendo montado com mais calma, a aula de
+<a href="layout-landing.html">Landing Page</a> percorre as mesmas peças uma por uma; aqui o trabalho é
+juntá-las em uma página só. Dentro do <code>main</code>, cada bloco é uma <code>section</code> com o mesmo
+par de classes:
+<code>px-6 py-16 md:py-24</code> na faixa e <code>mx-auto max-w-6xl</code> na caixa de dentro. A faixa
+pinta o fundo de borda a borda; a caixa limita o conteúdo a 1152 px. Essa repetição é o que faz a página
+parecer desenhada por uma pessoa só — e é a diferença entre uma campanha amadora e uma que parece de
+loja grande.</p>
+
+<h2>3. O hero: uma promessa, uma prova e um botão</h2>
+
+<p>O hero é a primeira tela. Ele tem de responder três perguntas em dois segundos: o que é isso, para
+quem é, e o que eu faço agora. Na prática, isso é um título grande, uma linha de apoio e um botão. A
+receita de centralização é a mesma do cartão de visita:
+<code>flex min-h-screen flex-col items-center justify-center text-center</code>, com
+<code>px-6 py-20</code> para o conteúdo não encostar nas bordas.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=flex;;css:#alvo|align-items=center;;css:#alvo|justify-content=center;;css:#alvo|text-align=center">
+  <p class="try-task">O hero está colado no topo e alinhado à esquerda. Faça-o ocupar a altura da tela,
+  empilhar o conteúdo, centralizar nos dois eixos e centralizar o texto:
+  <code>flex min-h-screen flex-col items-center justify-center text-center</code>.</p>
+  <pre class="html">&lt;section id="alvo" class="bg-amber-50 px-6 py-20"&gt;
+  &lt;p class="text-xs font-semibold uppercase tracking-wide text-amber-700"&gt;Dia das Mães&lt;/p&gt;
+  &lt;h2 class="mt-3 text-3xl font-semibold tracking-tight text-slate-900"&gt;Cesta de café da manhã&lt;/h2&gt;
+  &lt;p class="mt-4 max-w-xl text-slate-600"&gt;Pão quente, bolo de fubá e geleia da casa. Encomende até quinta.&lt;/p&gt;
+  &lt;a href="#cestas" class="mt-8 rounded-lg bg-slate-900 px-6 py-3 font-medium text-white"&gt;Ver as cestas&lt;/a&gt;
+&lt;/section&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.987 0.022 95.277)
+padding-inline: 24px
+padding-block: 80px
+</pre>
+  <pre class="solucao">&lt;section id="alvo" class="flex min-h-screen flex-col items-center justify-center bg-amber-50 px-6 py-20 text-center"&gt;
+  &lt;p class="text-xs font-semibold uppercase tracking-wide text-amber-700"&gt;Dia das Mães&lt;/p&gt;
+  &lt;h2 class="mt-3 text-3xl font-semibold tracking-tight text-slate-900"&gt;Cesta de café da manhã&lt;/h2&gt;
+  &lt;p class="mt-4 max-w-xl text-slate-600"&gt;Pão quente, bolo de fubá e geleia da casa. Encomende até quinta.&lt;/p&gt;
+  &lt;a href="#cestas" class="mt-8 rounded-lg bg-slate-900 px-6 py-3 font-medium text-white"&gt;Ver as cestas&lt;/a&gt;
+&lt;/section&gt;</pre>
+</div>
+
+<p>O <code>min-h-screen</code> no hero é uma escolha, não uma regra. Na campanha da Ana ele funciona
+porque o conteúdo é curto: cabe em uma tela sem aperto. Se o título tiver três linhas no telefone e o
+botão sair da primeira tela, o <code>min-h-screen</code> está trabalhando contra você — troque por
+<code>py-20</code> e deixe o conteúdo mandar. Lembre da máxima da aula de landing: altura de tela é uma
+promessa; o conteúdo é quem paga.</p>
+
+<p>Sobre a linha de apoio, um detalhe que muda a leitura: <code>max-w-xl</code> (576 px). Sem esse teto, a
+frase de apoio se estica na largura toda do hero e o olho não consegue voltar para o começo da linha. Em
+hero centralizado, todo parágrafo precisa de teto. E um botão só: quando há dois botões de peso igual, a
+pessoa não escolhe. O segundo caminho, se existir, é um link discreto, não um botão.</p>
+
+<h2>4. A faixa de prova: três números</h2>
+
+<p>Entre o hero e as cestas, a Ana quer três números que digam "essa padaria existe há tempo e alguém
+gosta dela": doze anos de forno, quarenta cestas por semana, 4,9 de nota. Três itens curtos, uma linha
+só, separados por divisores verticais: <code>grid grid-cols-3 divide-x divide-slate-200
+text-center</code>.</p>
+
+<pre class="file" data-file="index.html">&lt;section class="border-y border-slate-200 bg-white px-6 py-10"&gt;
+  &lt;dl class="mx-auto grid max-w-6xl grid-cols-3 divide-x divide-slate-200 text-center"&gt;
+    &lt;div class="px-4"&gt;
+      &lt;dd class="text-2xl font-semibold text-slate-900"&gt;12 anos&lt;/dd&gt;
+      &lt;dt class="mt-1 text-xs uppercase tracking-wide text-slate-500"&gt;de forno&lt;/dt&gt;
+    &lt;/div&gt;
+    &lt;div class="px-4"&gt;
+      &lt;dd class="text-2xl font-semibold text-slate-900"&gt;40&lt;/dd&gt;
+      &lt;dt class="mt-1 text-xs uppercase tracking-wide text-slate-500"&gt;cestas por semana&lt;/dt&gt;
+    &lt;/div&gt;
+    &lt;div class="px-4"&gt;
+      &lt;dd class="text-2xl font-semibold text-slate-900"&gt;4,9&lt;/dd&gt;
+      &lt;dt class="mt-1 text-xs uppercase tracking-wide text-slate-500"&gt;no Google&lt;/dt&gt;
+    &lt;/div&gt;
+  &lt;/dl&gt;
+&lt;/section&gt;</pre>
+
+<p>Repare na inversão do <code>dl</code>: aqui o número vem primeiro (<code>dd</code>) e o rótulo depois
+(<code>dt</code>), porque é assim que o olho lê um número grande. A ordem visual não muda o significado —
+o leitor de tela continua anunciando termo e descrição ligados. Semântica e desenho são coisas
+separadas, e é ótimo que sejam.</p>
+
+<dl class="anatomy">
+<dt>faixa</dt>
+<dd>A <code>section</code> com <code>px-6 py-16 md:py-24</code> e um fundo. Vai de borda a borda.</dd>
+<dt>caixa</dt>
+<dd>O <code>div</code> interno com <code>mx-auto max-w-6xl</code>. Limita e centraliza o conteúdo.</dd>
+<dt>rótulo</dt>
+<dd>Texto pequeno em maiúsculas: <code>text-xs uppercase tracking-wide text-amber-700</code>.</dd>
+<dt>título</dt>
+<dd>O maior texto da seção: <code>text-2xl font-semibold tracking-tight</code> ou
+<code>text-3xl</code> no hero.</dd>
+<dt>apoio</dt>
+<dd>Parágrafo com teto: <code>mt-4 max-w-xl text-slate-600</code>. Sem teto, não se lê.</dd>
+<dt>ação</dt>
+<dd>Um botão por seção, <code>rounded-lg bg-slate-900 px-6 py-3 text-white</code>.</dd>
+</dl>
+
+<p>Essa anatomia vale para todas as seções da página. Quando você terminar a campanha, cada faixa vai ter
+a mesma estrutura e só o conteúdo muda — é isso que dá a sensação de site "bem feito", e não uma
+quantidade maior de enfeites. Se você olhar de longe e as seções parecerem irmãs, o layout está
+coerente.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor</th><th>Onde entra</th></tr>
+<tr><td><code>grid</code></td><td>modo grade</td><td>a <code>dl</code> da faixa</td></tr>
+<tr><td><code>grid-cols-3</code></td><td>três colunas iguais</td><td>os três números</td></tr>
+<tr><td><code>divide-x</code></td><td>linha entre colunas</td><td>separar os números sem borda em volta</td></tr>
+<tr><td><code>divide-slate-200</code></td><td>cinza claro</td><td>a cor do divisor</td></tr>
+<tr><td><code>text-center</code></td><td>centralizado</td><td>número e rótulo alinhados</td></tr>
+<tr><td><code>border-y</code></td><td>1 px em cima e embaixo</td><td>fechar a faixa de prova</td></tr>
+</table>
+</div>
+
+<h2>5. As três cestas: a grade que vira coluna no celular</h2>
+
+<p>Agora o miolo da campanha: três cartões com as versões da cesta. A grade é
+<code>grid gap-6 sm:grid-cols-2 lg:grid-cols-3</code>. Lida da esquerda para a direita: no telefone uma
+coluna; a partir de 640 px duas colunas; a partir de 1024 px três. O <code>gap-6</code> dá 24 px entre os
+cartões — menor que o <code>gap-8</code> de uma landing espaçada, porque aqui os cartões precisam parecer
+um conjunto.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=grid;;rule:grid-template-columns: repeat(2, minmax(0, 1fr));;css:#alvo|gap=24px" data-largura="768">
+  <p class="try-task">Os três cartões estão em uma coluna. Ponha-os em duas colunas a partir de 640 px e em três a partir
+  de 1024 px, mantendo os 24 px de distância: acrescente <code>sm:grid-cols-2 lg:grid-cols-3</code>.</p>
+  <pre class="html">&lt;div class="bg-white px-6 py-8"&gt;
+  &lt;div id="alvo" class="mx-auto grid max-w-6xl gap-6"&gt;
+    &lt;div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"&gt;
+      &lt;p class="font-semibold text-slate-900"&gt;Cesta pequena&lt;/p&gt;
+      &lt;p class="mt-2 text-sm text-slate-600"&gt;Pão, bolo e geleia. Serve duas pessoas.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"&gt;
+      &lt;p class="font-semibold text-slate-900"&gt;Cesta média&lt;/p&gt;
+      &lt;p class="mt-2 text-sm text-slate-600"&gt;Pão, bolo, geleia e manteiga. Serve quatro.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"&gt;
+      &lt;p class="font-semibold text-slate-900"&gt;Cesta grande&lt;/p&gt;
+      &lt;p class="mt-2 text-sm text-slate-600"&gt;Tudo da média, mais suco e frutas. Serve seis.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+max-width: 1152px
+gap: 24px
+</pre>
+  <pre class="solucao">&lt;div class="bg-white px-6 py-8"&gt;
+  &lt;div id="alvo" class="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3"&gt;
+    &lt;div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"&gt;
+      &lt;p class="font-semibold text-slate-900"&gt;Cesta pequena&lt;/p&gt;
+      &lt;p class="mt-2 text-sm text-slate-600"&gt;Pão, bolo e geleia. Serve duas pessoas.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"&gt;
+      &lt;p class="font-semibold text-slate-900"&gt;Cesta média&lt;/p&gt;
+      &lt;p class="mt-2 text-sm text-slate-600"&gt;Pão, bolo, geleia e manteiga. Serve quatro.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"&gt;
+      &lt;p class="font-semibold text-slate-900"&gt;Cesta grande&lt;/p&gt;
+      &lt;p class="mt-2 text-sm text-slate-600"&gt;Tudo da média, mais suco e frutas. Serve seis.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Esta caixa tem <code>data-largura="768"</code>: a prévia é uma janela de 768 px. Nesse tamanho o
+<code>sm:</code> já vale e o <code>lg:</code> ainda não, então você vê duas colunas de cartões — e o
+Tailwind já gerou a regra das três colunas, que entra a partir de 1024 px na página de verdade. A lição
+difícil para quem começa: <strong>a classe não escolhe o resultado, a largura escolhe</strong>. Quando algo
+"não funciona" e o código está certo, confira em que tamanho você está olhando.</p>
+
+<p>O cartão em si tem cinco decisões: <code>rounded-2xl border border-slate-200 bg-white p-6 shadow-sm</code>
+para a superfície; <code>text-lg font-semibold</code> no nome; <code>mt-1 text-xs uppercase
+tracking-wide text-slate-500</code> no "serve quatro pessoas"; o preço em
+<code>mt-4 text-2xl font-semibold text-slate-900</code>; e o botão ocupando a largura toda do cartão com
+<code>mt-6 block w-full rounded-lg bg-slate-900 px-4 py-3 text-center font-medium text-white</code>. O
+<code>block w-full</code> é o que faz o link se comportar como botão de largura inteira — sem
+<code>block</code>, um <code>a</code> é inline e a largura não pega.</p>
+
+<p>Para destacar uma cesta, não invente um cartão diferente: use <code>ring-2 ring-amber-500</code> e um
+selo. O <code>ring</code> é desenhado por sombra, então não empurra o layout, e o cartão continua
+alinhado com os vizinhos. O selo é
+<code>inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800</code> com a
+palavra "mais pedida". Selo sem palavra não informa — e um cartão com fundo diferente e sem selo faz a
+pessoa achar que é erro de carregamento.</p>
+
+<p>Vale ver o CSS do anel, porque ele explica de onde vem essa fama de "não empurrar nada". O Tailwind
+não usa <code>border</code>: ele guarda uma sombra em uma variável e soma tudo em um único
+<code>box-shadow</code>. É por isso que dá para ter borda, anel e sombra no mesmo cartão sem que um
+apague o outro:</p>
+
+<pre class="term">.ring-2 {
+  --tw-ring-shadow: var(--tw-ring-inset, ) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+.ring-amber-500 {
+  --tw-ring-color: var(--color-amber-500);
+}</pre>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor</th><th>Onde entra</th></tr>
+<tr><td><code>grid gap-6</code></td><td>24 px</td><td>a grade das cestas</td></tr>
+<tr><td><code>sm:grid-cols-2</code></td><td>2 colunas ≥ 640 px</td><td>tablet</td></tr>
+<tr><td><code>lg:grid-cols-3</code></td><td>3 colunas ≥ 1024 px</td><td>desktop</td></tr>
+<tr><td><code>rounded-2xl border p-6</code></td><td>16 px, 1 px, 24 px</td><td>cada cartão</td></tr>
+<tr><td><code>block w-full</code></td><td>largura toda</td><td>o link que vira botão</td></tr>
+<tr><td><code>ring-2 ring-amber-500</code></td><td>anel de 2 px</td><td>cartão em destaque</td></tr>
+</table>
+</div>
+
+<h2>6. O cabeçalho fixo</h2>
+
+<p>Campanha longa precisa do botão à mão. O cabeçalho fixo resolve: ele fica no topo enquanto a página
+rola. As classes são <code>sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur</code>. O
+<code>sticky</code> é a posição; o <code>top-0</code> diz onde ele para; o <code>z-10</code> garante que
+ele fique por cima do conteúdo; o <code>bg-white/90</code> é branco com 90% de opacidade, e o
+<code>backdrop-blur</code> desfoca o que passa por baixo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|position=sticky;;css:#alvo|top=0px;;css:#alvo|z-index=10">
+  <p class="try-task">O cabeçalho rola junto com a página e some. Faça-o grudar no topo, acima do
+  conteúdo, com fundo translúcido e desfoque:
+  <code>sticky top-0 z-10 bg-white/90 backdrop-blur</code>.</p>
+  <pre class="html">&lt;div class="min-h-screen bg-slate-50"&gt;
+  &lt;header id="alvo" class="border-b border-slate-200 bg-white px-4 py-3"&gt;
+    &lt;p class="font-semibold text-slate-900"&gt;Padaria da Ana&lt;/p&gt;
+  &lt;/header&gt;
+  &lt;div class="space-y-3 p-4"&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Cesta de café da manhã, pão de fermentação e bolo de fubá.&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Encomendas até quinta, retirada na sexta de manhã.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: rgb(255, 255, 255)
+border-bottom-width: 1px
+border-color: oklch(0.929 0.013 255.508)
+padding-inline: 16px
+padding-block: 12px
+</pre>
+  <pre class="solucao">&lt;div class="min-h-screen bg-slate-50"&gt;
+  &lt;header id="alvo" class="sticky top-0 z-10 border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur"&gt;
+    &lt;p class="font-semibold text-slate-900"&gt;Padaria da Ana&lt;/p&gt;
+  &lt;/header&gt;
+  &lt;div class="space-y-3 p-4"&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Cesta de café da manhã, pão de fermentação e bolo de fubá.&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Encomendas até quinta, retirada na sexta de manhã.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>position: sticky</code>, <code>top: 0px</code> e <code>z-index: 10</code>. Três
+observações que evitam as armadilhas clássicas. Primeira: <code>sticky</code> precisa de duas coisas para
+funcionar — a posição e um deslocamento (<code>top-0</code>); sem o deslocamento, ele se comporta como um
+elemento comum. Segunda: <code>sticky</code> gruda dentro do pai; se o pai for baixo, o cabeçalho para de
+seguir quando o pai termina. Terceira: o <code>z-10</code> só é necessário quando algum outro elemento
+tem posição e pode passar por cima — mas é barato e evita surpresa.</p>
+
+<pre class="term">.sticky {
+  position: sticky;
+}
+.top-0 {
+  top: calc(var(--spacing) * 0);
+}
+.z-10 {
+  z-index: 10;
+}
+.backdrop-blur {
+  --tw-backdrop-blur: blur(8px);
+  backdrop-filter: var(--tw-backdrop-blur);
+}</pre>
+
+<p>O fundo translúcido é o detalhe que separa um cabeçalho bom de um bloco branco atravessado na
+leitura: com <code>bg-white/90</code> e o desfoque, o conteúdo continua visível por baixo, mas o texto do
+menu permanece legível. Se você usar <code>bg-transparent</code>, o texto do cabeçalho se mistura com o
+conteúdo que rola. Se usar <code>bg-white</code> puro, perde a sensação de camada — funciona, mas é menos
+elegante.</p>
+
+<p>Um cuidado com âncora, que aparece em toda campanha: se o cabeçalho é fixo, o título da seção de
+destino fica escondido atrás dele. A correção é <code>scroll-mt-20</code> na seção de destino, que
+empurra o ponto de parada 80 px para baixo. É a mesma ideia do <code>top-0</code>: alguém precisa saber a
+altura do cabeçalho, e o CSS só sabe se você contar.</p>
+
+<h2>7. O rodapé: endereço, horário e crédito</h2>
+
+<p>Rodapé de campanha tem duas funções: provar que a loja existe fora da internet e dar os últimos
+caminhos. O desenho é uma faixa escura com três colunas:
+<code>grid gap-8 sm:grid-cols-3</code> dentro de <code>mx-auto max-w-6xl</code>, e a faixa com
+<code>border-t border-slate-200 bg-slate-900 px-6 py-12 text-slate-300</code>.</p>
+
+<pre class="file" data-file="index.html">&lt;footer class="mt-16 border-t border-slate-200 bg-slate-900 px-6 py-12 text-slate-300"&gt;
+  &lt;div class="mx-auto max-w-6xl"&gt;
+    &lt;div class="grid gap-8 sm:grid-cols-3"&gt;
+      &lt;div&gt;
+        &lt;p class="text-sm font-semibold text-white"&gt;Padaria da Ana&lt;/p&gt;
+        &lt;p class="mt-2 text-sm"&gt;Rua das Flores, 12 — Centro&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div&gt;
+        &lt;p class="text-xs font-semibold uppercase tracking-wide text-slate-400"&gt;Horário&lt;/p&gt;
+        &lt;p class="mt-2 text-sm"&gt;Terça a sábado, 6h às 13h&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div&gt;
+        &lt;p class="text-xs font-semibold uppercase tracking-wide text-slate-400"&gt;Encomendas&lt;/p&gt;
+        &lt;a href="#encomenda" class="mt-2 inline-block text-sm text-amber-300 hover:text-amber-200"&gt;Pedir pelo WhatsApp&lt;/a&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;p class="mt-10 border-t border-white/10 pt-6 text-xs text-slate-400"&gt;Padaria da Ana — desde 2013. Fotos ilustrativas.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/footer&gt;</pre>
+
+<p>Três detalhes fazem a diferença aqui. O primeiro é a hierarquia de cor no fundo escuro: título em
+<code>text-white</code>, texto normal em <code>text-slate-300</code> e o crédito em
+<code>text-slate-400</code>. No escuro, a escala inverte — o que é "cinza claro" no branco fica "cinza
+escuro" no preto, e é fácil terminar com texto ilegível. O segundo é o <code>hover:text-amber-200</code>
+no link: link em rodapé escuro precisa de uma cor que já indique que é clicável. O terceiro é a linha
+final com <code>border-t border-white/10</code>: um divisor quase invisível que separa o crédito, sem
+gritar.</p>
+
+<dl class="anatomy">
+<dt>faixa</dt>
+<dd><code>bg-slate-900 px-6 py-12</code>: fundo escuro de borda a borda, com respiro vertical.</dd>
+<dt>caixa</dt>
+<dd><code>mx-auto max-w-6xl</code>: alinha o rodapé com as seções de cima.</dd>
+<dt>colunas</dt>
+<dd><code>grid gap-8 sm:grid-cols-3</code>: três blocos no desktop, empilhados no telefone.</dd>
+<dt>rótulo</dt>
+<dd><code>text-xs uppercase tracking-wide text-slate-400</code>: ajuda a escanear o rodapé.</dd>
+<dt>base</dt>
+<dd><code>mt-10 border-t border-white/10 pt-6 text-xs</code>: o crédito, separado por um fio.</dd>
+</dl>
+
+<p>A aula de <a href="container.html">O container</a> explica por que <code>mx-auto max-w-6xl</code>
+virou o padrão das seções deste guia. Uma coisa que quase ninguém faz e que vale ouro em campanha: repetir
+o endereço em texto, e não apenas
+dentro de um mapa embutido. Mapa embutido é pesado, some no modo de leitura e não é indexado. Quem procura
+"padaria perto de mim" precisa do endereço em texto, e quem chega de ônibus precisa do ponto de
+referência. O mapa, se existir, é um extra.</p>
+
+<h2>8. No celular: a ordem e o tamanho</h2>
+
+<p>A campanha é vista primeiro no telefone, e o telefone muda três decisões. A primeira é o tamanho do
+título: <code>text-4xl</code> (36 px) em um título de três palavras cabe no monitor e quebra em quatro
+linhas em um telefone de 360 px. A receita é <code>text-3xl sm:text-4xl</code> — menor no telefone, maior
+quando há largura. A segunda é o respiro das seções: <code>py-16 sm:py-24</code>, para a página não virar
+uma rolagem de dois metros. A terceira é o botão: no telefone ele ocupa a largura toda
+(<code>block w-full</code>) e no desktop pode ficar do tamanho do texto.</p>
+
+<pre class="file" data-file="index.html">&lt;section class="px-6 py-16 sm:py-24"&gt;
+  &lt;div class="mx-auto max-w-6xl"&gt;
+    &lt;h2 class="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl"&gt;O que vem na cesta&lt;/h2&gt;
+    &lt;p class="mt-4 max-w-xl text-slate-600"&gt;Pão de fermentação natural, bolo de fubá, geleia de laranja e manteiga da casa.&lt;/p&gt;
+    &lt;a href="#encomenda"
+       class="mt-8 block w-full rounded-lg bg-slate-900 px-6 py-3 text-center font-medium text-white
+              hover:bg-slate-700 sm:inline-block sm:w-auto"&gt;
+      Encomendar agora
+    &lt;/a&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</pre>
+
+<p>Repare na ordem das classes: <code>block w-full</code> primeiro, <code>sm:inline-block sm:w-auto</code>
+depois. É a assinatura do mobile first — a base vale para todos os tamanhos e o prefixo corrige para
+cima. Quem escreve ao contrário, pensando no desktop e "consertando" o celular com <code>max-sm:</code>,
+vive em uma batalha de exceções. O Tailwind foi desenhado para o outro caminho.</p>
+
+<p>E aqui entra o teste de 375 px, que é o que o conferidor deste guia faz em toda página: abrir no
+tamanho de um telefone pequeno e verificar se nada estoura para a direita. As três causas mais comuns de
+rolagem lateral são uma largura fixa (<code>w-96</code>, <code>min-w-[480px]</code>), uma imagem sem
+<code>max-w-full</code> e uma palavra comprida sem espaço para quebrar. Se aparecer uma barra horizontal na
+sua página, procure a largura fixa antes de qualquer outra coisa.</p>
+
+<h2>9. Três cenas, três consertos</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o rodapé flutua no meio da página</h3>
+<p>Em uma campanha com pouco conteúdo, o rodapé apareceu logo abaixo do hero, com um vazio branco embaixo
+— e a página parecia inacabada. Faltava o <code>flex-1</code> no <code>main</code>, dentro de uma casca
+com <code>flex min-h-dvh flex-col</code>. O <code>flex-1</code> faz o miolo esticar e empurra o rodapé
+para o fim da tela, mesmo quando há pouca coisa para mostrar.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o cabeçalho fixo cobre o título da seção</h3>
+<p>Ao clicar em "Ver as cestas", a página rolava até a seção e o título dela ficava escondido atrás do
+cabeçalho. O <code>id</code> estava certo; o que faltava era <code>scroll-mt-20</code> na seção de
+destino. Ele empurra o ponto de parada 80 px para baixo, exatamente a altura do cabeçalho. Se o cabeçalho
+muda de altura entre tamanhos, use <code>scroll-mt-16 md:scroll-mt-20</code>.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: as três cestas viram uma faixa apertada no tablet</h3>
+<p>Com <code>lg:grid-cols-3</code> só a partir de 1024 px, no tablet de 768 px os cartões ficam em duas
+colunas — mas o terceiro sozinho na segunda linha, com o botão esticado. Isso não é erro de CSS, é decisão
+de conteúdo: com três itens, duas colunas sempre deixam um órfão. As saídas são quatro colunas a partir de
+<code>md:</code> (se houver um quarto item) ou manter três colunas no tablet com cartões mais estreitos e
+<code>gap-4</code>. Escolha e saiba explicar a escolha.</p>
+</div>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>Classes</th><th>Por quê</th></tr>
+<tr><td>casca</td><td><code>flex min-h-dvh flex-col</code></td><td>rodapé sempre no fim</td></tr>
+<tr><td>miolo</td><td><code>flex-1</code></td><td>estica e empurra o rodapé</td></tr>
+<tr><td>seção</td><td><code>px-6 py-16 sm:py-24</code></td><td>ritmo vertical que não cansa</td></tr>
+<tr><td>caixa</td><td><code>mx-auto max-w-6xl</code></td><td>conteúdo centralizado e limitado</td></tr>
+<tr><td>grade</td><td><code>grid gap-6 sm:grid-cols-2 lg:grid-cols-3</code></td><td>três cestas que viram uma</td></tr>
+<tr><td>cabeçalho</td><td><code>sticky top-0 z-10 bg-white/90 backdrop-blur</code></td><td>botão ao alcance</td></tr>
+</table>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. Por que o <code>main</code> leva <code>flex-1</code> na
+casca <code>flex min-h-dvh flex-col</code>?</p>
+<label><input type="radio" name="l1"> para o conteúdo ficar centralizado na vertical</label>
+<label><input type="radio" name="l1"> para o cabeçalho não cobrir o título</label>
+<label><input type="radio" name="l1"> para o miolo esticar e o rodapé ficar no fim da tela</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. Com <code>sm:grid-cols-2 lg:grid-cols-3</code>, quantas
+colunas há em uma janela de 800 px?</p>
+<label><input type="radio" name="l2"> duas, porque <code>sm:</code> vale e <code>lg:</code> ainda não</label>
+<label><input type="radio" name="l2"> três, porque o último breakpoint sempre aparece</label>
+<label><input type="radio" name="l2"> uma, porque os prefixos se anulam no meio</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. O que o <code>sticky top-0</code> faz no
+cabeçalho?</p>
+<label><input type="radio" name="l3"> deixa o cabeçalho fixo no rodapé da página</label>
+<label><input type="radio" name="l3"> mantém o cabeçalho no topo enquanto o conteúdo rola</label>
+<label><input type="radio" name="l3"> esconde o cabeçalho ao rolar para baixo</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a casca da página</h2>
+<p>Complete a classe do <code>div</code> que envolve cabeçalho, miolo e rodapé para que ele seja uma
+coluna de altura mínima igual à tela.</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="flex min-h-dvh flex-col">"&gt;</div>
+<p class="ex-dica">Dica: são três classes: uma liga o flex, uma dá a altura mínima visível e uma diz que a
+direção é coluna. O <code>flex-1</code> não entra aqui — ele vai no <code>main</code>, não na casca.</p>
+</div>
+
+<h2>10. Resumo</h2>
+
+<p>Uma landing page de campanha é uma casca e cinco blocos. A casca é
+<code>flex min-h-dvh flex-col</code>, com <code>flex-1</code> no <code>main</code> para o rodapé ficar no
+fim. O hero centraliza com <code>flex min-h-screen flex-col items-center justify-center text-center</code>
+e traz uma promessa, uma linha de apoio com teto (<code>max-w-xl</code>) e um botão só. A faixa de prova
+usa <code>grid grid-cols-3 divide-x divide-slate-200 text-center</code>, e as cestas vão em
+<code>grid gap-6 sm:grid-cols-2 lg:grid-cols-3</code>.</p>
+
+<p>O cabeçalho é <code>sticky top-0 z-10 bg-white/90 backdrop-blur</code>, e cada seção de destino precisa
+de <code>scroll-mt-20</code> para o título não nascer escondido. O rodapé escuro usa
+<code>bg-slate-900 px-6 py-12 text-slate-300</code> com três colunas e uma linha de crédito separada por
+<code>border-t border-white/10</code>. No telefone, tudo isso continua de pé porque a base é escrita
+primeiro e os prefixos só corrigem para cima.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Casca: <code>flex min-h-dvh flex-col</code>; miolo: <code>flex-1</code>.</li>
+<li>Cada seção: <code>px-6 py-16 sm:py-24</code> na faixa e <code>mx-auto max-w-6xl</code> na caixa.</li>
+<li>Hero: <code>flex min-h-screen flex-col items-center justify-center text-center</code>.</li>
+<li>Parágrafo em hero precisa de teto: <code>max-w-xl</code>.</li>
+<li>Prova social em três números: <code>grid grid-cols-3 divide-x</code>.</li>
+<li>Cestas: <code>grid gap-6 sm:grid-cols-2 lg:grid-cols-3</code> (640 px e 1024 px).</li>
+<li>Cartão em destaque: <code>ring-2 ring-amber-500</code> + selo com texto.</li>
+<li>Link que vira botão de largura inteira: <code>block w-full text-center</code> no próprio link.</li>
+<li>Cabeçalho fixo: <code>sticky top-0 z-10 bg-white/90 backdrop-blur</code>.</li>
+<li>Âncora com cabeçalho fixo pede <code>scroll-mt-20</code> na seção de destino.</li>
+<li>Rodapé escuro: <code>bg-slate-900 text-slate-300</code>, crédito em <code>text-slate-400</code>.</li>
+<li>Mobile first: base sem prefixo, ajuste com <code>sm:</code> e <code>lg:</code>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

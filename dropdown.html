@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu Suspenso | Guia Tailwind</title>
+<meta name="description" content="Como fazer um menu suspenso com Tailwind: o pai relative, o painel absolute, o right-0 mt-2, os itens com hover, o hidden que abre e fecha e os atributos aria.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Menu <span class="hl">Suspenso</span></h1>
+<p class="intro">Na ficha de cada pão, a Ana quer um botão "Mais opções" que abre uma listinha com
+editar, duplicar e arquivar. Ela escreveu a lista logo abaixo do botão e o painel da padaria virou uma
+escada: o botão, a lista empurrando o preço para baixo, e o texto todo torto. Nesta aula ela aprende o
+par que resolve qualquer menu suspenso — um pai <code>relative</code> e um filho
+<code>absolute</code> — e monta o menu inteiro, do item com <code>hover</code> até o
+<code>aria-expanded</code> que conta ao leitor de tela se ele está aberto.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que o menu precisa de um pai com <code>relative</code> e um filho com <code>absolute</code>.</li>
+  <li>Como encostar o painel na direita do botão com <code>right-0</code> e dar o respiro de <code>mt-2</code>.</li>
+  <li>O que <code>w-56</code> resolve e por que não usar <code>w-full</code> aqui.</li>
+  <li>Transformar cada item num alvo de clique confortável com <code>block w-full px-3 py-2</code>.</li>
+  <li>O <code>hover:bg-amber-50</code> e o porquê de ele só valer onde existe mouse.</li>
+  <li>Fechar por padrão com <code>hidden</code> e abrir com o mínimo de JavaScript.</li>
+  <li>Animar a entrada com <code>origin-top-right</code>, <code>scale-95</code> e <code>transition</code>.</li>
+  <li>Os três defeitos clássicos: menu cortado, menu atrás de outro elemento e menu fora da tela no celular.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a lista que empurra o preço</h2>
+
+<p>A Ana começou pelo caminho natural: escreveu a lista de opções dentro do cartão do pão, logo depois
+do botão. O HTML ficou mais ou menos assim:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="cartao"&gt;
+  &lt;h3&gt;Pão de fermentação natural&lt;/h3&gt;
+  &lt;p&gt;R$ 18,00&lt;/p&gt;
+  &lt;button type="button"&gt;Mais opções&lt;/button&gt;
+  &lt;div class="menu"&gt;
+    &lt;p&gt;Editar ficha&lt;/p&gt;
+    &lt;p&gt;Duplicar&lt;/p&gt;
+    &lt;p&gt;Arquivar&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<p>O resultado é previsível: a lista ocupa o lugar dela no texto, empurra tudo que vem depois e o
+cartão fica com o dobro da altura. Pior: como ela está sempre visível, não existe a sensação de menu.
+Um menu suspenso precisa de duas coisas ao mesmo tempo — estar fora do fluxo (para não empurrar nada)
+e saber a qual elemento pertence (para aparecer colado no botão certo).</p>
+
+<p>Essas duas coisas são resolvidas por duas classes em dois elementos diferentes. É a parte que mais
+confunde quem começa, então vale repetir: <strong>a posição é uma conversa entre pai e filho</strong>.
+O pai ganha <code>relative</code> e vira o ponto de referência. O filho ganha <code>absolute</code> e
+é posicionado em relação a esse pai. Se você puser <code>absolute</code> no filho e esquecer o
+<code>relative</code> no pai, o filho vai se posicionar em relação à página inteira — e o menu aparece
+no lugar errado, às vezes lá em cima, longe do botão.</p>
+
+<h2>2. O pai relative e o filho absolute</h2>
+
+<p><code>relative</code> é <code>position: relative</code>. Sozinha, ela quase não muda nada: o
+elemento continua na fila, ocupando o lugar dele. O que ela faz de importante é virar <em>referência
+de posicionamento</em> para os filhos que forem absolutos. É como colocar uma etiqueta invisível na
+caixa dizendo "as coordenadas de dentro são minhas".</p>
+
+<p><code>absolute</code> é <code>position: absolute</code>. Ela tira o elemento da fila — ele deixa de
+empurrar os vizinhos — e o posiciona em relação ao ancestral mais próximo que tenha
+<code>position</code> diferente de <code>static</code>. Sem ninguém assim na árvore, a referência passa
+a ser a página. É a mesma família de classes da aula de
+<a href="posicionamento.html">Posicionamento</a>, com um uso muito específico.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|position=absolute;;css:#alvo|right=0px;;rule:margin-top: calc(var(--spacing) * 2)">
+  <p class="try-task">O menu está no fluxo e empurra o texto. Ponha-o fora do fluxo, encostado na
+  direita do botão e 8 px abaixo: <code>absolute right-0 mt-2</code>.</p>
+  <pre class="html">&lt;div class="bg-white p-4"&gt;
+  &lt;p class="mb-2 text-sm font-semibold text-slate-700"&gt;Ficha do pão&lt;/p&gt;
+  &lt;div class="relative inline-block"&gt;
+    &lt;button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700"&gt;Mais opções&lt;/button&gt;
+    &lt;div id="alvo" class="w-56 rounded-lg border border-slate-200 bg-white p-1 shadow-lg"&gt;
+      &lt;p class="px-3 py-2 text-sm"&gt;Editar ficha&lt;/p&gt;
+      &lt;p class="px-3 py-2 text-sm"&gt;Duplicar&lt;/p&gt;
+      &lt;p class="px-3 py-2 text-sm"&gt;Arquivar&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;p class="mt-4 text-sm text-slate-600"&gt;Pão de fermentação natural, feito às 5h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 4px
+background-color: rgb(255, 255, 255)
+border-radius: 8px
+box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px
+border-width: 1px
+border-color: oklch(0.929 0.013 255.508)
+</pre>
+  <pre class="solucao">&lt;div class="bg-white p-4"&gt;
+  &lt;p class="mb-2 text-sm font-semibold text-slate-700"&gt;Ficha do pão&lt;/p&gt;
+  &lt;div class="relative inline-block"&gt;
+    &lt;button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700"&gt;Mais opções&lt;/button&gt;
+    &lt;div id="alvo" class="absolute right-0 mt-2 w-56 rounded-lg border border-slate-200 bg-white p-1 shadow-lg"&gt;
+      &lt;p class="px-3 py-2 text-sm"&gt;Editar ficha&lt;/p&gt;
+      &lt;p class="px-3 py-2 text-sm"&gt;Duplicar&lt;/p&gt;
+      &lt;p class="px-3 py-2 text-sm"&gt;Arquivar&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;p class="mt-4 text-sm text-slate-600"&gt;Pão de fermentação natural, feito às 5h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel do menu cobre o texto em vez de empurrá-lo. Isso já é o comportamento
+certo: menu suspenso flutua. Repare também que o texto de baixo continua no mesmo lugar — sinal de que
+o menu saiu da fila de verdade.</p>
+
+<h2>3. Ancorar no canto certo</h2>
+
+<p>Um painel absoluto sem coordenadas fica parado no canto superior esquerdo do pai, exatamente em cima
+do botão. Daí a necessidade de dizer para onde ele vai. As quatro classes de canto são
+<code>top-</code>, <code>right-</code>, <code>bottom-</code> e <code>left-</code>, e cada uma aceita
+a escala de espaço: <code>right-0</code> encosta na borda direita, <code>left-2</code> deixa 8 px,
+<code>top-full</code> desce exatamente a altura do pai.</p>
+
+<p>No nosso caso, <code>right-0</code> alinha a borda direita do menu com a borda direita do botão.
+É o alinhamento que parece natural quando o gatilho está à direita da tela. Se o botão estiver à
+esquerda, use <code>left-0</code>. Esse detalhe é o que faz o menu parecer preso ao botão em vez de
+solto no ar.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>CSS gerado</th><th>Efeito no menu</th></tr>
+<tr><td><code>absolute</code></td><td><code>position: absolute</code></td><td>sai do fluxo, posiciona pelo pai</td></tr>
+<tr><td><code>right-0</code></td><td><code>right: 0px</code></td><td>alinha a direita do menu com a do pai</td></tr>
+<tr><td><code>mt-2</code></td><td><code>margin-top: calc(var(--spacing) * 2)</code></td><td>8 px de ar entre botão e menu</td></tr>
+<tr><td><code>w-56</code></td><td><code>width: calc(var(--spacing) * 56)</code></td><td>224 px de largura fixa</td></tr>
+<tr><td><code>z-50</code></td><td><code>z-index: 50</code></td><td>garante o menu na frente do conteúdo</td></tr>
+</table>
+</div>
+
+<p>O <code>mt-2</code> é sutil e importante. Sem ele, o menu encosta no botão e os dois parecem um
+bloco só. Com 8 px de ar, o olho entende que o menu "saiu" do botão. E o <code>mt-2</code> funciona
+mesmo no elemento absoluto: margem empurra a posição calculada, então o menu desce 8 px a partir do
+ponto de referência.</p>
+
+<h2>4. O painel: largura, borda, canto e sombra</h2>
+
+<p>O miolo do menu é um cartão pequeno. <code>w-56</code> dá 224 px de largura fixa — o suficiente para
+"Editar ficha" e "Duplicar" caberem numa linha, sem esticar demais. Largura fixa aqui é melhor que
+<code>w-full</code> porque o menu não deve acompanhar a largura do botão: se o botão for estreito, o
+menu fica ilegível.</p>
+
+<p>O resto é acabamento: <code>rounded-lg</code> arredonda em 8 px, <code>border border-slate-200</code>
+desenha uma linha cinza clara, <code>bg-white</code> pinta o fundo e <code>shadow-lg</code> descola o
+painel da página. O <code>p-1</code> é o detalhe que quase todo mundo esquece: 4 px de respiro interno
+para os itens não encostarem na borda. Sem ele, o primeiro item fica grudado no canto arredondado e
+parece erro de recorte.</p>
+
+<pre class="term">.absolute {
+  position: absolute;
+}
+.right-0 {
+  right: 0px;
+}
+.mt-2 {
+  margin-top: calc(var(--spacing) * 2);
+}
+.w-56 {
+  width: calc(var(--spacing) * 56);
+}</pre>
+
+<p>Note que <code>w-56</code> não é 56 px. A escala de largura usa o mesmo multiplicador do
+espaçamento: 56 × 4 px = 224 px. A aula de <a href="w-e-h.html">Largura e Altura</a> tem a tabela
+completa, mas os valores que aparecem em menus são poucos: <code>w-48</code> (192 px),
+<code>w-56</code> (224 px) e <code>w-64</code> (256 px).</p>
+
+<h2>5. Cada item é um alvo de clique</h2>
+
+<p>Dentro do painel, cada opção precisa ser fácil de acertar com o mouse e com o dedo. Um
+<code>&lt;p&gt;</code> com texto não é clicável, não recebe foco e não pode ser ativado pelo teclado.
+O certo é um <code>&lt;button&gt;</code> — ou um <code>&lt;a&gt;</code>, se a opção leva a outra página.
+E ele precisa de quatro classes para virar item de menu: <code>block w-full px-3 py-2 text-left</code>.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=block;;css:#alvo|border-radius=6px;;rule:background-color: var(--color-amber-50)">
+  <p class="try-task">O item é um botão estreito, com o texto no centro e sem resposta ao mouse.
+  Deixe-o ocupando a linha inteira, com o texto à esquerda, cantos de 6 px e fundo âmbar claro no
+  hover: <code>block w-full text-left rounded-md hover:bg-amber-50</code>.</p>
+  <pre class="html">&lt;div class="w-56 rounded-lg border border-slate-200 bg-white p-1"&gt;
+  &lt;button id="alvo" type="button" class="px-3 py-2 text-sm"&gt;Editar ficha&lt;/button&gt;
+  &lt;p class="px-3 py-2 text-sm text-slate-500"&gt;Duplicar&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+font-size: 14px
+line-height: 20px
+padding-inline: 12px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;div class="w-56 rounded-lg border border-slate-200 bg-white p-1"&gt;
+  &lt;button id="alvo" type="button" class="block w-full rounded-md px-3 py-2 text-left text-sm hover:bg-amber-50"&gt;Editar ficha&lt;/button&gt;
+  &lt;p class="px-3 py-2 text-sm text-slate-500"&gt;Duplicar&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Cada classe resolve um problema. <code>block</code> tira o botão do comportamento de linha e o
+deixa ocupar a largura toda. <code>w-full</code> garante os 100% mesmo se o pai for flex.
+<code>text-left</code> desfaz a centralização padrão do botão — sem ela, o texto fica no meio e o menu
+parece desalinhado. <code>px-3 py-2</code> dá 12 px nas laterais e 8 px em cima e embaixo, o que deixa
+o alvo com uns 36 px de altura: confortável no dedo.</p>
+
+<p>O <code>rounded-md</code> é o que faz o destaque do hover parecer um retângulo arredondado dentro do
+painel, em vez de uma faixa encostada nas bordas. E <code>hover:bg-amber-50</code> só pinta no mouse —
+não é uma cor fixa. O CSS gerado mostra o cuidado extra do Tailwind:</p>
+
+<pre class="term">@media (hover: hover) {
+  .hover\:bg-amber-50:hover {
+    background-color: var(--color-amber-50);
+  }
+}</pre>
+
+<p>O <code>@media (hover: hover)</code> significa: só aplique em aparelhos que têm mouse de verdade.
+Num celular, o <code>:hover</code> costuma ficar "grudado" depois do toque, e o item fica destacado
+para sempre. O Tailwind resolve isso de fábrica — você escreve <code>hover:</code> e ele protege o
+celular para você. É o mesmo mecanismo da aula de <a href="hover.html">O hover</a>, agora com uma
+consequência prática que dá para ver.</p>
+
+<h2>6. Fechar por padrão e abrir no clique</h2>
+
+<p>Um menu nasce fechado. No HTML, fechado é a classe <code>hidden</code> no painel e
+<code>aria-expanded="false"</code> no botão. Abrir é remover o <code>hidden</code> e trocar o atributo
+para <code>true</code>. Nada mais muda: sem recriar elemento, sem esconder o botão.</p>
+
+<div class="trytailwind" data-goal="conta:#alvo.hidden=1;;conta:[aria-expanded='false']=1;;rule:transform-origin: 100% 0;;rule:transition-duration: 150ms">
+  <p class="try-task">O menu abre sempre aberto. Deixe-o fechado por padrão e pronto para animar:
+  acrescente <code>hidden origin-top-right transition duration-150</code> ao painel e mude o
+  <code>aria-expanded</code> do botão para <code>"false"</code>.</p>
+  <pre class="html">&lt;div class="relative inline-block p-4"&gt;
+  &lt;button type="button" aria-expanded="true" class="rounded-lg border border-slate-300 px-4 py-2 text-sm"&gt;Mais opções&lt;/button&gt;
+  &lt;div id="alvo" class="absolute right-0 mt-2 w-56 rounded-lg border border-slate-200 bg-white p-1 shadow-lg"&gt;
+    &lt;p class="px-3 py-2 text-sm"&gt;Editar ficha&lt;/p&gt;
+    &lt;p class="px-3 py-2 text-sm"&gt;Duplicar&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+position: absolute
+width: 224px
+padding: 4px
+background-color: rgb(255, 255, 255)
+border-radius: 8px
+box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px
+border-width: 1px
+border-color: oklch(0.929 0.013 255.508)
+margin-top: 8px
+right: 0px
+</pre>
+  <pre class="solucao">&lt;div class="relative inline-block p-4"&gt;
+  &lt;button type="button" aria-expanded="false" class="rounded-lg border border-slate-300 px-4 py-2 text-sm"&gt;Mais opções&lt;/button&gt;
+  &lt;div id="alvo" class="hidden absolute right-0 mt-2 w-56 origin-top-right rounded-lg border border-slate-200 bg-white p-1 shadow-lg transition duration-150"&gt;
+    &lt;p class="px-3 py-2 text-sm"&gt;Editar ficha&lt;/p&gt;
+    &lt;p class="px-3 py-2 text-sm"&gt;Duplicar&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>hidden</code> é o estado. O <code>transition duration-150</code> é a promessa de que, quando
+o estado mudar, a mudança vai levar 150 milissegundos em vez de ser um piscar. E
+<code>origin-top-right</code> define de onde a animação cresce: do canto de cima à direita, que é o
+canto colado no botão. É esse detalhe que faz o menu parecer sair do botão, e não aparecer no meio do
+nada.</p>
+
+<p>Agora vem o JavaScript. <strong>Este bloco é JavaScript</strong>, e mora num arquivo
+<code>script.js</code> carregado no fim do <code>body</code>. São três ouvintes: o clique no botão
+alterna o estado, o clique fora fecha, e o Esc fecha devolvendo o foco ao botão.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="relative inline-block"&gt;
+  &lt;button type="button" id="botao-menu" aria-expanded="false" aria-haspopup="menu" aria-controls="menu"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm"&gt;Mais opções&lt;/button&gt;
+  &lt;div id="menu" role="menu" class="hidden absolute right-0 mt-2 w-56 origin-top-right rounded-lg border border-slate-200 bg-white p-1 shadow-lg transition duration-150"&gt;
+    &lt;button type="button" role="menuitem" class="block w-full rounded-md px-3 py-2 text-left text-sm hover:bg-amber-50"&gt;Editar ficha&lt;/button&gt;
+    &lt;button type="button" role="menuitem" class="block w-full rounded-md px-3 py-2 text-left text-sm hover:bg-amber-50"&gt;Duplicar&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<pre class="file" data-file="script.js">const botao = document.querySelector("#botao-menu");
+const menu = document.querySelector("#menu");
+
+botao.addEventListener("click", () =&gt; {
+  const aberto = botao.getAttribute("aria-expanded") === "true";
+  botao.setAttribute("aria-expanded", String(!aberto));
+  menu.classList.toggle("hidden");
+});
+
+document.addEventListener("click", (evento) =&gt; {
+  if (!menu.contains(evento.target) &amp;&amp; !botao.contains(evento.target)) {
+    menu.classList.add("hidden");
+    botao.setAttribute("aria-expanded", "false");
+  }
+});
+
+document.addEventListener("keydown", (evento) =&gt; {
+  if (evento.key === "Escape") {
+    menu.classList.add("hidden");
+    botao.setAttribute("aria-expanded", "false");
+    botao.focus();
+  }
+});</pre>
+
+<p>O <code>contains</code> do segundo ouvinte é o que evita o clássico "clico no item e ele fecha antes
+de funcionar". O ouvinte está no documento inteiro, então todo clique passa por ele; a condição
+pergunta: o clique foi dentro do menu ou dentro do botão? Se não foi em nenhum dos dois, fecha. O
+<code>focus()</code> do terceiro devolve o teclado ao botão depois do Esc, para a pessoa não ficar
+perdida no fim da página.</p>
+
+<h2>7. Animar sem quebrar</h2>
+
+<p>Existe um jeito de animar menu que usa <code>opacity</code> e <code>scale</code> em vez de
+<code>hidden</code>: o painel fica sempre no DOM, com <code>opacity-0 scale-95 pointer-events-none</code>,
+e vira <code>opacity-100 scale-100 pointer-events-auto</code> quando abre. A vantagem é que a transição
+roda de verdade, porque o elemento continua sendo desenhado. A desvantagem é que ele continua na
+árvore de acessibilidade e recebendo Tab — a não ser que você lembre de <code>invisible</code> ou
+<code>aria-hidden</code>.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="invisible absolute right-0 mt-2 w-56 origin-top-right scale-95 rounded-lg border border-slate-200 bg-white p-1 opacity-0 shadow-lg transition duration-150"&gt;
+  &lt;!-- itens do menu --&gt;
+&lt;/div&gt;</pre>
+
+<p>Para quem está começando, a recomendação é simples: use <code>hidden</code> e deixe a animação para
+depois. Um menu que abre e fecha na hora funciona perfeitamente; um menu animado que recebe foco
+escondido atrapalha quem usa teclado. Se quiser o meio-termo seguro, use
+<code>hidden</code> mais <code>origin-top-right</code> no painel e anime com JavaScript quando tiver
+certeza do que está fazendo.</p>
+
+<p>O <code>scale-95</code> encolhe o painel em 5%, o <code>origin-top-right</code> mantém o canto de
+cima à direita parado, e o <code>transition</code> avisa quais propriedades devem ser animadas. Juntas,
+elas produzem aquele efeito de menu que "cresce" a partir do botão. Sem o <code>origin-top-right</code>,
+o menu cresce do centro e parece descolar do gatilho.</p>
+
+<h2>8. Quem não usa mouse</h2>
+
+<p>Um menu bonito que só responde ao clique do mouse exclui muita gente. Quem navega por teclado
+precisa de três coisas: alcançar o botão com Tab, abrir com Enter ou Espaço (isso o
+<code>&lt;button&gt;</code> já faz de graça), e andar entre os itens com as setas. Se os itens são
+<code>&lt;button&gt;</code> comuns, o Tab já resolve — não é o padrão ARIA, mas funciona. O padrão
+completo pede setas e <code>tabindex="-1"</code>, e é assunto para quando o básico estiver sólido.</p>
+
+<dl class="anatomy">
+<dt>gatilho</dt>
+<dd>O <code>&lt;button&gt;</code> que abre o menu. Precisa de <code>aria-expanded</code> e
+<code>aria-haspopup="menu"</code>.</dd>
+<dt>painel</dt>
+<dd>A caixa <code>absolute</code> com <code>w-56</code> e <code>shadow-lg</code>. É o menu em si;
+nasce com <code>hidden</code>.</dd>
+<dt>item</dt>
+<dd>Cada opção, com <code>block w-full px-3 py-2 text-left</code>. Deve ser botão ou link, nunca
+um <code>p</code>.</dd>
+<dt>aria-expanded</dt>
+<dd>Atributo no gatilho que vale <code>"true"</code> ou <code>"false"</code>. É o que o leitor de tela
+anuncia como "expandido" ou "recolhido".</dd>
+<dt>aria-haspopup</dt>
+<dd>Avisa que o botão abre um menu. Vai junto com o <code>aria-expanded</code>.</dd>
+<dt>role="menu"</dt>
+<dd>Diz que o painel é um menu de comandos. Os filhos ganham <code>role="menuitem"</code>.</dd>
+</dl>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Estado</th><th>No painel</th><th>No botão</th></tr>
+<tr><td>fechado</td><td><code>hidden</code></td><td><code>aria-expanded="false"</code></td></tr>
+<tr><td>aberto</td><td>sem <code>hidden</code></td><td><code>aria-expanded="true"</code></td></tr>
+<tr><td>abrindo</td><td><code>transition duration-150</code></td><td>—</td></tr>
+<tr><td>item em foco</td><td><code>focus-visible:bg-amber-50</code></td><td>—</td></tr>
+<tr><td>item sob o mouse</td><td><code>hover:bg-amber-50</code></td><td>—</td></tr>
+<tr><td>item escolhido</td><td><code>bg-amber-100 font-medium</code></td><td>—</td></tr>
+</table>
+</div>
+
+<p>Repare que o estado "item em foco" é diferente de "item sob o mouse". Quem usa teclado não tem
+mouse, então precisa de uma marca visual própria: <code>focus-visible:bg-amber-50</code>. Sem ela, a
+pessoa aperta Tab, o foco anda pelos itens e nada aparece na tela — ela está navegando às cegas. A aula
+de <a href="focus.html">O focus</a> explica a diferença entre <code>focus</code> e
+<code>focus-visible</code> com calma.</p>
+
+<h2>9. Quando o menu quebra: três cenas</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o menu é cortado pelo cartão</h3>
+<p>A Ana montou o menu dentro do cartão do pão e ele apareceu pela metade, cortado embaixo. O culpado
+era um <code>overflow-hidden</code> no cartão, colocado para arredondar a imagem. Elemento absoluto é
+cortado pelo primeiro ancestral que esconde o excesso. As saídas são três: tirar o
+<code>overflow-hidden</code> do pai e arredondar só a imagem; pôr o menu fora do cartão, como irmão
+dele; ou usar <code>fixed</code> com JavaScript calculando a posição. A primeira é a mais simples e
+resolve a maioria dos casos.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o menu aparece atrás do cartão vizinho</h3>
+<p>Em outro lugar, o menu abria certo mas ficava atrás do cartão de baixo. Ordem de pintura de novo: o
+cartão seguinte vem depois no HTML e ganha a disputa. A correção é <code>z-50</code> no painel — ou no
+pai, se o menu inteiro precisar subir. Cuidado com o efeito colateral: se o pai tiver
+<code>transform</code>, <code>filter</code> ou <code>opacity</code> menor que 1, ele cria um contexto
+de camadas próprio e o <code>z-50</code> fica preso ali dentro. Nesse caso, o número maior precisa
+estar no ancestral.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: no celular o menu sai da tela</h3>
+<p>O botão "Mais opções" ficava no canto direito, e o menu de 224 px, ancorado com
+<code>right-0</code>, funcionava no monitor. No celular de 375 px, o painel começava antes da borda
+esquerda e a página ganhava rolagem lateral. Duas correções possíveis: trocar para
+<code>left-0 right-auto</code> em telas pequenas e voltar ao <code>right-0</code> a partir de
+<code>sm:</code>, ou deixar o menu ocupar a largura do pai com <code>w-full sm:w-56</code>. Em menus
+grandes, a solução de verdade é outra interface: uma gaveta que sobe do rodapé, que ocupa a tela toda
+e não tem como sair do lugar.</p>
+</div>
+
+<p>As três cenas têm a mesma lição: menu suspenso é geometria. Onde está o pai, quem esconde o
+excesso, quem vem depois no HTML e qual é a largura disponível. Quando o menu aparece no lugar errado,
+o inspetor do navegador mostra a resposta em segundos — selecione o painel e veja qual elemento está
+destacado como referência dele.</p>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. O que acontece se você puser <code>absolute</code> no menu e esquecer o <code>relative</code> no pai?</p>
+<label><input type="radio" name="d1"> o menu se posiciona em relação à página, longe do botão</label>
+<label><input type="radio" name="d1"> o menu desaparece, porque <code>absolute</code> exige um pai</label>
+<label><input type="radio" name="d1"> nada muda: o <code>relative</code> é opcional</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que o item do menu leva <code>text-left</code>?</p>
+<label><input type="radio" name="d2"> para o texto ficar em negrito</label>
+<label><input type="radio" name="d2"> para o item ocupar a largura toda do painel</label>
+<label><input type="radio" name="d2"> porque botão centraliza o texto por padrão, e o menu alinha à esquerda</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Qual combinação representa o menu fechado?</p>
+<label><input type="radio" name="d3"> painel sem classe e botão com <code>aria-expanded="true"</code></label>
+<label><input type="radio" name="d3"> painel com <code>hidden</code> e botão com <code>aria-expanded="false"</code></label>
+<label><input type="radio" name="d3"> painel com <code>opacity-0</code> e botão sem atributo</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o menu do pão</h2>
+<p>Complete o painel do menu com as classes de posicionamento que faltam: ele precisa sair do fluxo,
+encostar na direita do botão e descer 8 px.</p>
+<div class="ex-code">&lt;div id="menu" class="<input aria-label="resposta 1" data-answer="absolute right-0 mt-2|right-0 absolute mt-2|mt-2 absolute right-0"> w-56 rounded-lg border border-slate-200 bg-white p-1 shadow-lg"&gt;</div>
+<p class="ex-dica">Dica: são três classes. Uma tira do fluxo, uma escolhe o canto e uma dá o respiro
+de 8 px — o mesmo <code>mt-2</code> que você usaria em qualquer margem.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Menu suspenso é um pai <code>relative</code> e um filho <code>absolute</code>. O pai vira a
+referência; o filho sai do fluxo e aparece colado nele. As coordenadas dizem o canto
+(<code>right-0</code> ou <code>left-0</code>) e as margens dão o respiro (<code>mt-2</code>). A largura
+é fixa e curta, <code>w-56</code>, para o texto caber sem esticar.</p>
+
+<p>Dentro, cada opção é um <code>&lt;button&gt;</code> com <code>block w-full px-3 py-2 text-left</code>
+e um destaque de <code>hover:bg-amber-50</code>. O menu nasce com <code>hidden</code> e com
+<code>aria-expanded="false"</code> no gatilho; o JavaScript alterna os dois. Se quiser animar, o trio é
+<code>origin-top-right transition duration-150</code> — e a animação não substitui o estado: quem
+esconde de verdade é o <code>hidden</code>.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>relative</code> no pai é o que dá sentido ao <code>absolute</code> do filho.</li>
+<li><code>absolute</code> tira do fluxo; por isso o menu não empurra mais o preço.</li>
+<li><code>right-0</code> alinha à direita do pai; <code>left-0</code> à esquerda.</li>
+<li><code>mt-2</code> = 8 px de ar entre o botão e o painel.</li>
+<li><code>w-56</code> = 224 px; menu não deve esticar junto com o botão.</li>
+<li><code>p-1</code> no painel evita item grudado na borda arredondada.</li>
+<li><code>block w-full text-left</code> transforma o botão em linha inteira de menu.</li>
+<li><code>rounded-md</code> dá 6 px de canto ao destaque do item.</li>
+<li><code>hover:</code> só vale onde há mouse — o Tailwind já protege o celular.</li>
+<li><code>hidden</code> + <code>aria-expanded</code> são o estado fechado; o JavaScript alterna os dois.</li>
+<li><code>origin-top-right</code> faz a animação crescer do canto colado no botão.</li>
+<li>Menu cortado? Olhe o <code>overflow</code> do pai. Menu atrás? Olhe o <code>z-index</code> e os contextos de camada.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

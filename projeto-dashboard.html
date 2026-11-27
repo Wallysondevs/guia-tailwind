@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel de Controle | Guia Tailwind</title>
+<meta name="description" content="Projeto de um painel de controle com Tailwind: a casca com menu lateral, os quatro números do dia, a tabela de pedidos, os selos de status e o painel à noite no tema escuro.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Painel de <span class="hl">Controle</span></h1>
+<p class="intro">A Ana fecha a padaria às duas da tarde e só então abre o caderno para somar o dia: quantas
+encomendas saíram, quanto entrou de dinheiro, quantas cestas ainda estão pendentes. Ela faz isso em um
+caderno de capa dura e erra a soma com frequência. O que ela quer é uma tela única, que ela consiga abrir
+no balcão pelo celular e no escritório pelo computador, com os números do dia, a lista de pedidos e o
+status de cada um. Nesta aula ela monta esse painel inteiro: a casca com menu lateral, o topo com as
+ações, os quatro cartões de número, a tabela de pedidos, os selos de status e a versão para a noite.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A casca de um painel: menu lateral fixo e conteúdo elástico com <code>flex</code>.</li>
+  <li>Por que o conteúdo leva <code>min-w-0</code> e o menu leva <code>shrink-0</code>.</li>
+  <li>Um topo de página com título e ações: <code>flex flex-wrap items-center justify-between gap-4</code>.</li>
+  <li>A grade de números com <code>sm:grid-cols-2 lg:grid-cols-4</code>.</li>
+  <li>Tabela de pedidos que rola no celular em vez de estourar a página.</li>
+  <li>Números alinhados com <code>tabular-nums</code> e <code>text-right</code>.</li>
+  <li>Selos de status com cor e palavra, nunca só com cor.</li>
+  <li>O tema escuro com <code>dark:</code> para o painel aberto à noite.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o caderno de capa dura</h2>
+
+<p>O caderno da Ana tem uma página por dia. Colunas desenhadas com régua: cliente, itens, valor, pago ou
+não. Funciona há anos e tem dois problemas. O primeiro é a soma: três encomendas e meia, e ela refaz a
+conta no dedo. O segundo é o horário: ela só vê o dia quando o dia acabou, então não sabe que a cesta da
+Dona Marli ainda não foi paga enquanto ainda dá tempo de ligar.</p>
+
+<p>Um painel de controle resolve os dois porque ele responde perguntas, não mostra dados. "Quanto entrou
+hoje?" é uma pergunta; o número grande no alto responde. "Tem algo pendente?" é outra; a lista de pedidos
+com selo de status responde. A diferença entre painel e relatório é essa: o relatório é para ler depois, o
+painel é para decidir agora.</p>
+
+<p>É por isso que painel tem uma anatomia própria, diferente de site e de landing page. Primeiro uma
+moldura fixa (o menu), que fica parada enquanto o conteúdo rola. Depois um topo com o título e as ações.
+Depois os números em cartões, lado a lado, para comparação imediata. Depois o detalhe: a tabela. O olho do
+usuário de painel faz sempre o mesmo caminho — número, número, número, linha da tabela. Se a sua tela
+obriga a rolar para ver o essencial, ela está errada.</p>
+
+<p>A página que vamos montar tem, então, quatro áreas: o menu lateral com cinco links, o topo com título e
+dois botões, a grade de quatro números e a tabela de pedidos do dia. São peças independentes que se
+encaixam na casca. É o mesmo método das aulas anteriores: um pedaço de cada vez, com a página rodando
+desde o primeiro.</p>
+
+<h2>2. A casca: menu lateral e conteúdo</h2>
+
+<p>A casca de painel é uma linha com duas colunas desiguais: menu de 240 px e conteúdo ocupando o resto.
+Com flexbox, isso é <code>flex</code> no pai, <code>w-60 shrink-0</code> no menu e
+<code>min-w-0 flex-1</code> no conteúdo. As três classes do conteúdo são o coração da aula, e cada uma
+resolve um problema diferente.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=flex;;css:.lateral|width=240px;;css:.conteudo|min-width=0px">
+  <p class="try-task">O menu e o conteúdo estão empilhados: um em cima do outro. Ponha os dois lado a lado
+  com <code>flex</code> na moldura, <code>w-60 shrink-0</code> no menu e <code>min-w-0 flex-1</code> no
+  conteúdo.</p>
+  <pre class="html">&lt;div id="alvo" class="min-h-screen bg-slate-100"&gt;
+  &lt;aside class="lateral border-r border-slate-200 bg-white p-4"&gt;
+    &lt;p class="text-sm font-semibold text-slate-900"&gt;Padaria da Ana&lt;/p&gt;
+  &lt;/aside&gt;
+  &lt;main class="conteudo flex-1 p-6"&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Pedidos do dia 12 de maio&lt;/p&gt;
+  &lt;/main&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+min-height: 150px
+background-color: oklch(0.968 0.007 247.896)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex min-h-screen bg-slate-100"&gt;
+  &lt;aside class="lateral w-60 shrink-0 border-r border-slate-200 bg-white p-4"&gt;
+    &lt;p class="text-sm font-semibold text-slate-900"&gt;Padaria da Ana&lt;/p&gt;
+  &lt;/aside&gt;
+  &lt;main class="conteudo min-w-0 flex-1 p-6"&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Pedidos do dia 12 de maio&lt;/p&gt;
+  &lt;/main&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>w-60</code> são 240 px de largura. O <code>shrink-0</code> impede que o menu encolha quando falta
+espaço — sem ele, ao abrir em uma tela estreita, o menu viraria uma tira de 40 px com as palavras
+espremidas. E o <code>min-w-0</code> no conteúdo é o mais importante dos três, justamente porque ninguém
+descobre sozinho.</p>
+
+<p>Todo filho de um flex tem, por padrão, uma largura mínima automática: ele nunca fica menor que o
+conteúdo dele. Parece razoável e é a causa de metade dos layouts estourados da internet. Se a tabela de
+pedidos é larga, o conteúdo se recusa a encolher, empurra o menu para fora da tela e a página ganha
+rolagem lateral. O <code>min-w-0</code> desliga essa teimosia: diz que o conteúdo pode encolher, e a
+tabela passa a rolar dentro do próprio espaço.</p>
+
+<pre class="term">.w-60 {
+  width: calc(var(--spacing) * 60);
+}
+.shrink-0 {
+  flex-shrink: 0;
+}
+.flex-1 {
+  flex: 1 1 0%;
+}
+.min-w-0 {
+  min-width: 0;
+}</pre>
+
+<p>Vale ler o <code>flex-1</code> com calma, porque a abreviação esconde três decisões:
+<code>flex: 1 1 0%</code> quer dizer "pode crescer, pode encolher, e o tamanho de partida é zero". É o
+tamanho de partida zero que faz o conteúdo dividir o espaço igualmente com os irmãos em vez de partir do
+tamanho do texto. Em painel, isso dá o comportamento que se espera: o menu tem largura fixa e o resto é
+do conteúdo.</p>
+
+<h2>3. O topo: título e ações na mesma linha</h2>
+
+<p>O topo do painel tem duas informações em pontos opostos: à esquerda, onde você está ("Pedidos do dia");
+à direita, o que dá para fazer ("atualizar", "novo pedido"). O par que resolve é
+<code>flex flex-wrap items-center justify-between gap-4</code>. O <code>justify-between</code> empurra os
+dois grupos para os cantos, o <code>items-center</code> alinha verticalmente, o <code>gap-4</code> impede
+que se encostem e o <code>flex-wrap</code> deixa os botões caírem para a linha de baixo quando não couber
+tudo.</p>
+
+<pre class="file" data-file="painel.html">&lt;header class="flex flex-wrap items-center justify-between gap-4"&gt;
+  &lt;div&gt;
+    &lt;h2 class="text-2xl font-semibold tracking-tight text-slate-900"&gt;Pedidos do dia&lt;/h2&gt;
+    &lt;p class="mt-1 text-sm text-slate-500"&gt;Sexta, 12 de maio — 18 encomendas&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="flex gap-2"&gt;
+    &lt;button type="button"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700
+                   transition hover:bg-slate-100"&gt;Atualizar&lt;/button&gt;
+    &lt;button type="button"
+            class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white
+                   transition hover:bg-slate-700"&gt;Novo pedido&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/header&gt;</pre>
+
+<p>O <code>flex-wrap</code> é o detalhe que separa um topo que aguenta o telefone de um que estoura. Sem
+ele, os dois grupos disputam a mesma linha e o botão sai pela direita. Com ele, quando não há espaço, o
+segundo grupo desce inteiro — que é o comportamento desejado. Nunca use <code>flex-wrap</code> em uma
+linha de botões que precisam ficar alinhados lado a lado; ele é para grupos, não para irmãos.</p>
+
+<p>Sobre o peso dos dois botões: um é secundário (borda e texto escuro, sem fundo) e o outro é primário
+(fundo escuro e texto claro). Essa hierarquia é a mesma do cartão de visita e da landing page, e ela
+existe para que a pessoa saiba qual é a ação principal antes de ler. Se os dois tiverem o mesmo peso, o
+painel parece uma prova de múltipla escolha.</p>
+
+<h2>4. Os quatro números do dia</h2>
+
+<p>O bloco mais importante do painel são quatro cartões com um número grande cada: encomendas do dia,
+valor recebido, cestas pendentes, ticket médio. Quatro cartões em uma linha no monitor, dois no tablet, um
+no telefone. A receita é <code>grid gap-4 sm:grid-cols-2 lg:grid-cols-4</code>.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=grid;;rule:grid-template-columns: repeat(2, minmax(0, 1fr));;css:#alvo|gap=16px" data-largura="768">
+  <p class="try-task">Os quatro números estão em uma coluna. Ponha-os em duas colunas a partir de 640 px e em quatro a
+  partir de 1024 px, mantendo os 16 px de distância: acrescente <code>sm:grid-cols-2 lg:grid-cols-4</code>.</p>
+  <pre class="html">&lt;div class="bg-slate-100 p-6"&gt;
+  &lt;div id="alvo" class="grid gap-4"&gt;
+    &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+      &lt;p class="text-xs uppercase tracking-wide text-slate-500"&gt;Encomendas&lt;/p&gt;
+      &lt;p class="mt-1 text-2xl font-semibold text-slate-900"&gt;18&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+      &lt;p class="text-xs uppercase tracking-wide text-slate-500"&gt;Recebido&lt;/p&gt;
+      &lt;p class="mt-1 text-2xl font-semibold text-slate-900"&gt;R$ 1.840&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+      &lt;p class="text-xs uppercase tracking-wide text-slate-500"&gt;Pendentes&lt;/p&gt;
+      &lt;p class="mt-1 text-2xl font-semibold text-slate-900"&gt;3&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+      &lt;p class="text-xs uppercase tracking-wide text-slate-500"&gt;Ticket médio&lt;/p&gt;
+      &lt;p class="mt-1 text-2xl font-semibold text-slate-900"&gt;R$ 102&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+gap: 16px
+</pre>
+  <pre class="solucao">&lt;div class="bg-slate-100 p-6"&gt;
+  &lt;div id="alvo" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"&gt;
+    &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+      &lt;p class="text-xs uppercase tracking-wide text-slate-500"&gt;Encomendas&lt;/p&gt;
+      &lt;p class="mt-1 text-2xl font-semibold text-slate-900"&gt;18&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+      &lt;p class="text-xs uppercase tracking-wide text-slate-500"&gt;Recebido&lt;/p&gt;
+      &lt;p class="mt-1 text-2xl font-semibold text-slate-900"&gt;R$ 1.840&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+      &lt;p class="text-xs uppercase tracking-wide text-slate-500"&gt;Pendentes&lt;/p&gt;
+      &lt;p class="mt-1 text-2xl font-semibold text-slate-900"&gt;3&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="rounded-xl border border-slate-200 bg-white p-4"&gt;
+      &lt;p class="text-xs uppercase tracking-wide text-slate-500"&gt;Ticket médio&lt;/p&gt;
+      &lt;p class="mt-1 text-2xl font-semibold text-slate-900"&gt;R$ 102&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A prévia desta caixa tem 768 px de largura, então você vê dois cartões por linha — o <code>sm:</code>
+está valendo e o <code>lg:</code> ainda não. Na página de verdade, a partir de 1024 px, entram os quatro lado
+a lado, porque a regra já está gerada. É o mesmo código, três desenhos: um, dois e quatro.</p>
+
+<p>Por que não <code>grid-cols-4</code> direto? Porque no telefone de 360 px cada cartão ficaria com 82 px
+e o número "R$ 1.840" quebraria em duas linhas. Painel é lido em pé, no balcão, muitas vezes com uma mão
+só. Quatro colunas no celular não são um painel denso: são um painel ilegível. O caminho é o de sempre —
+uma coluna na base, e os prefixos acrescentam colunas quando há espaço.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor</th><th>Onde entra</th></tr>
+<tr><td><code>grid gap-4</code></td><td>16 px</td><td>a grade dos cartões</td></tr>
+<tr><td><code>sm:grid-cols-2</code></td><td>2 colunas ≥ 640 px</td><td>tablet</td></tr>
+<tr><td><code>lg:grid-cols-4</code></td><td>4 colunas ≥ 1024 px</td><td>monitor do escritório</td></tr>
+<tr><td><code>rounded-xl border p-4</code></td><td>12 px, 1 px, 16 px</td><td>cada cartão de número</td></tr>
+<tr><td><code>text-2xl font-semibold</code></td><td>24 px</td><td>o número grande</td></tr>
+<tr><td><code>text-xs uppercase</code></td><td>12 px</td><td>o rótulo do número</td></tr>
+</table>
+</div>
+
+<p>Uma tentação comum é pintar os quatro cartões de cores diferentes. Não faça: quatro cores fortes
+disputam a atenção e o painel vira um semáforo. Cartão branco, rótulo cinza, número escuro — e a cor
+aparece só onde há algo a dizer, como o "3" de pendentes em <code>text-amber-700</code>. Cor em painel é
+sinal, não decoração.</p>
+
+<h2>5. A tabela de pedidos</h2>
+
+<p>A tabela é a parte mais densa e a que mais quebra no celular. O desenho que funciona tem três camadas:
+um contêiner que rola (<code>overflow-x-auto</code>), uma tabela que ocupa a largura
+(<code>w-full text-left text-sm</code>) e linhas separadas por uma linha fina, com
+<code>divide-y</code> no <code>tbody</code>. Tudo dentro de uma superfície só:
+<code>rounded-xl border border-slate-200 bg-white</code>.</p>
+
+<pre class="file" data-file="painel.html">&lt;div class="mt-8 overflow-x-auto rounded-xl border border-slate-200 bg-white"&gt;
+  &lt;table class="w-full text-left text-sm"&gt;
+    &lt;thead class="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500"&gt;
+      &lt;tr&gt;
+        &lt;th class="px-4 py-3 font-medium"&gt;Cliente&lt;/th&gt;
+        &lt;th class="px-4 py-3 font-medium"&gt;Pedido&lt;/th&gt;
+        &lt;th class="px-4 py-3 text-right font-medium"&gt;Valor&lt;/th&gt;
+        &lt;th class="px-4 py-3 font-medium"&gt;Status&lt;/th&gt;
+      &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody class="divide-y divide-slate-100"&gt;
+      &lt;tr class="transition hover:bg-slate-50"&gt;
+        &lt;td class="px-4 py-3 font-medium text-slate-900"&gt;Dona Marli&lt;/td&gt;
+        &lt;td class="px-4 py-3 text-slate-600"&gt;Cesta grande&lt;/td&gt;
+        &lt;td class="px-4 py-3 text-right tabular-nums text-slate-900"&gt;R$ 120,00&lt;/td&gt;
+        &lt;td class="px-4 py-3"&gt;&lt;span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800"&gt;Pendente&lt;/span&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/tbody&gt;
+  &lt;/table&gt;
+&lt;/div&gt;</pre>
+
+<p>Dois detalhes fazem essa tabela parecer profissional e não amadora. O primeiro é
+<code>tabular-nums</code> nas células de valor: ele troca os algarismos de largura variável por algarismos
+de largura fixa, e os números passam a alinhar na vertical como em um extrato bancário. Sem isso, "R$
+120,00" e "R$ 1.840,00" ficam com o último dígito em posições diferentes, e a coluna parece torta. O
+segundo é <code>text-right</code> nos valores: número se alinha à direita, texto à esquerda. É a regra mais
+antiga de tabela e a que mais se esquece.</p>
+
+<dl class="anatomy">
+<dt>cabeçalho</dt>
+<dd><code>thead</code> com <code>text-xs uppercase tracking-wide text-slate-500</code>: rótulos discretos,
+porque o dado é que importa.</dd>
+<dt>linha</dt>
+<dd><code>tr</code> com <code>hover:bg-slate-50</code>: um fundo levíssimo ao passar o mouse ajuda a
+seguir a linha com o olho.</dd>
+<dt>divisor</dt>
+<dd><code>divide-y divide-slate-100</code> no <code>tbody</code>: uma linha entre pedidos, nenhuma no
+fim.</dd>
+<dt>célula numérica</dt>
+<dd><code>text-right tabular-nums</code>: algarismos de largura fixa, alinhados à direita.</dd>
+<dt>rolagem</dt>
+<dd><code>overflow-x-auto</code> no contêiner: no telefone a tabela rola dentro da caixa em vez de
+estourar a página.</dd>
+</dl>
+
+<p>A aula de <a href="tabelas.html">Tabelas</a> traz o resto das classes de tabela — cabeçalho fixo,
+colunas que somem no celular e alinhamento por tipo de dado. O <code>overflow-x-auto</code> merece uma
+explicação honesta: ele não deixa a tabela bonita no celular,
+ele deixa a página inteira funcional. A alternativa é esconder colunas com
+<code>hidden sm:table-cell</code> na célula e no cabeçalho correspondente, o que funciona bem quando a
+coluna é secundária — "pedido", por exemplo, pode sumir no telefone. Decida com base no que a Ana precisa
+ver no balcão: nome, valor e status, nessa ordem.</p>
+
+<pre class="term">.overflow-x-auto {
+  overflow-x: auto;
+}
+.tabular-nums {
+  --tw-numeric-spacing: tabular-nums;
+  font-variant-numeric: var(--tw-ordinal, ) var(--tw-slashed-zero, ) var(--tw-numeric-figure, ) var(--tw-numeric-spacing, );
+}
+@media (hover: hover) {
+  .hover\:bg-slate-50:hover {
+    background-color: var(--color-slate-50);
+  }
+}</pre>
+
+<p>Repare no <code>@media (hover: hover)</code> em volta do <code>hover:</code>. O Tailwind só aplica o
+estado de mouse quando o aparelho realmente tem mouse — em telefone, o toque não deixa a linha "presa"
+com o fundo cinza depois do toque. É um detalhe que você não precisa escrever e que evita um bug clássico
+de interface no celular.</p>
+
+<h2>6. Os selos de status</h2>
+
+<p>Status é a informação que a Ana mais consulta, e ela precisa ser lida de longe. O desenho é uma pílula
+pequena com fundo claro e texto escuro da mesma família:
+<code>inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium
+text-emerald-800</code>. Troque a família para o estado: <code>emerald</code> para pago,
+<code>amber</code> para pendente, <code>rose</code> para cancelado.</p>
+
+<pre class="file" data-file="painel.html">&lt;span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-800"&gt;Pago&lt;/span&gt;
+&lt;span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800"&gt;Pendente&lt;/span&gt;
+&lt;span class="rounded-full bg-rose-100 px-2.5 py-1 text-xs font-medium text-rose-800"&gt;Cancelado&lt;/span&gt;</pre>
+
+<p>O par 100/800 não é sorte. O tom 100 de uma família é claro o bastante para o fundo não competir, e o
+800 é escuro o bastante para o texto passar no contraste. Se você usar <code>bg-emerald-500
+text-white</code>, o selo fica gritante no meio da tabela e o branco sobre verde médio quase sempre falha
+no contraste. Selo é etiqueta, não botão.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Status</th><th>Classes do selo</th><th>Quando usar</th></tr>
+<tr><td>Pago</td><td><code>bg-emerald-100 text-emerald-800</code></td><td>pedido quitado, sem pendência</td></tr>
+<tr><td>Pendente</td><td><code>bg-amber-100 text-amber-800</code></td><td>aguardando pagamento até a retirada</td></tr>
+<tr><td>Cancelado</td><td><code>bg-rose-100 text-rose-800</code></td><td>desistiu ou não retirou no prazo</td></tr>
+<tr><td>Entregue</td><td><code>bg-slate-100 text-slate-700</code></td><td>histórico: já saiu, nada a fazer</td></tr>
+<tr><td>Pronto</td><td><code>bg-sky-100 text-sky-800</code></td><td>embalado, esperando a cliente chegar</td></tr>
+</table>
+</div>
+
+<dl class="anatomy">
+<dt>fundo</dt>
+<dd><code>bg-emerald-100</code>: o tom mais claro da família, para o selo não competir com o dado.</dd>
+<dt>texto</dt>
+<dd><code>text-emerald-800</code>: escuro o suficiente para ler no papel e na tela.</dd>
+<dt>forma</dt>
+<dd><code>rounded-full</code>: pílula, que o olho reconhece como etiqueta e não como etiqueta clicável.</dd>
+<dt>tamanho</dt>
+<dd><code>px-2.5 py-1 text-xs</code>: pequeno, mas com respiro para não virar uma mancha.</dd>
+<dt>palavra</dt>
+<dd>O texto dentro é obrigatório: cor sozinha não informa quem não distingue verde de âmbar.</dd>
+</dl>
+
+<p>Uma armadilha de painel: usar seis tons para seis status. A pessoa que abre a tela todo dia decora
+três; seis ela confere um por um, e o painel fica mais lento que o caderno. Escolha no máximo quatro
+estados e reaproveite as famílias. E nunca mude só a cor para indicar "cancelado": além do texto, vale um
+riscado no valor (<code>line-through</code>) ou uma linha mais apagada — dois sinais chegam mais rápido que
+um.</p>
+
+<h2>7. O painel à noite: o tema escuro</h2>
+
+<p>A Ana fecha a padaria às duas e faz as contas à noite, na mesa da cozinha, com a luz baixa. Tela branca
+naquela hora incomoda — e é a razão prática de existir o tema escuro, muito antes de qualquer moda. No
+Tailwind, o tema escuro por classe usa o prefixo <code>dark:</code>: você escreve a versão clara e, logo
+depois, a versão escura da mesma propriedade.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-slate-900);;rule:color: var(--color-slate-100);;escuro:1" data-tema="escuro">
+  <p class="try-task">A prévia está no tema escuro e o cartão continua branco, ofuscando. Acrescente as
+  versões escuras: <code>dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl border border-slate-200 bg-white p-4 text-slate-900"&gt;
+  &lt;p class="text-xs uppercase tracking-wide"&gt;Recebido hoje&lt;/p&gt;
+  &lt;p class="mt-1 text-2xl font-semibold"&gt;R$ 1.840&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+color: oklch(0.208 0.042 265.755)
+border-radius: 12px
+border-width: 1px
+border-color: oklch(0.929 0.013 255.508)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-xl border border-slate-200 bg-white p-4 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"&gt;
+  &lt;p class="text-xs uppercase tracking-wide"&gt;Recebido hoje&lt;/p&gt;
+  &lt;p class="mt-1 text-2xl font-semibold"&gt;R$ 1.840&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Três coisas a observar. Primeira: a classe clara não sai de perto da escura. Manter as duas no mesmo
+elemento é o que permite ler o cartão inteiro em uma olhada — e é assim que se evita o clássico "o texto
+ficou branco no fundo branco". Segunda: no escuro, a escala de cor se inverte. O que era
+<code>slate-900</code> no texto vira <code>slate-100</code>, e o que era <code>slate-200</code> na borda
+vira <code>slate-700</code>. Terceira: o <code>dark:</code> não escolhe sozinho — ele responde a uma
+classe no <code>html</code> (ou à preferência do sistema, conforme a configuração do projeto). Neste guia,
+a prévia da caixa já vem no escuro.</p>
+
+<pre class="term">.dark\:bg-slate-900:where(.dark, .dark *) {
+  background-color: var(--color-slate-900);
+}
+.dark\:text-slate-100:where(.dark, .dark *) {
+  color: var(--color-slate-100);
+}</pre>
+
+<p>O seletor <code>:where(.dark, .dark *)</code> diz "aplique quando existir a classe <code>dark</code> em
+um ancestral — inclusive no próprio elemento". É o que faz a página inteira trocar de tema quando o
+<code>html</code> ganha a classe. Você não precisa escrever isso: o prefixo faz. Mas vale saber que o tema
+escuro é uma decisão de <em>uma</em> classe na raiz, não de trinta elementos alterados à mão. A aula de
+<a href="dark-mode.html">Dark Mode</a> cobre as duas formas de ligar o tema — pela classe no
+<code>html</code> e pela preferência do sistema.</p>
+
+<h2>8. No celular: o menu e a tabela</h2>
+
+<p>Em 375 px não há espaço para menu lateral de 240 px. Duas soluções honestas existem: esconder o menu e
+mostrar um botão que o abre, ou transformar o menu em uma faixa horizontal no topo. A primeira é a certa
+para painel com muitos itens; a segunda serve quando são poucos, como os cinco da Ana. A faixa é
+<code>flex gap-2 overflow-x-auto p-2 lg:w-60 lg:flex-col</code>.</p>
+
+<pre class="file" data-file="painel.html">&lt;div class="flex min-h-screen flex-col bg-slate-100 lg:flex-row"&gt;
+  &lt;aside class="flex gap-2 overflow-x-auto border-b border-slate-200 bg-white p-2
+                lg:w-60 lg:shrink-0 lg:flex-col lg:border-b-0 lg:border-r lg:p-4"&gt;
+    &lt;a href="#pedidos" class="whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-100"&gt;Pedidos&lt;/a&gt;
+    &lt;a href="#caixa" class="whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-100"&gt;Caixa&lt;/a&gt;
+  &lt;/aside&gt;
+  &lt;main class="min-w-0 flex-1 p-4 lg:p-6"&gt;…&lt;/main&gt;
+&lt;/div&gt;</pre>
+
+<p>Repare que quase todas as classes do menu têm um prefixo <code>lg:</code>. A base é o telefone: faixa
+horizontal, com <code>overflow-x-auto</code> para os cinco links rolarem de lado, e
+<code>whitespace-nowrap</code> para nenhum rótulo quebrar em duas linhas. A partir de 1024 px, o
+<code>lg:flex-col</code> empilha os links e o <code>lg:w-60</code> devolve os 240 px. É o mobile first
+aplicado à casca inteira: a mesma marcação, dois desenhos.</p>
+
+<p>O <code>whitespace-nowrap</code> é uma daquelas classes que resolvem um problema que você nem sabia
+nomear. Em uma faixa horizontal, um link com duas palavras pode quebrar em duas linhas e a faixa fica com
+altura irregular. O <code>whitespace-nowrap</code> proíbe a quebra: o texto fica em uma linha só e a faixa
+ganha rolagem em vez de virar escada. Use sempre em navegação horizontal curta — abas, filtros, chips.</p>
+
+<h2>9. Três cenas, três consertos</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a tabela empurrou o menu para fora da tela</h3>
+<p>Ao abrir o painel em um notebook pequeno, o menu de 240 px encolheu, a tabela criou rolagem lateral na
+página inteira e o botão de "novo pedido" saiu da vista. Faltavam duas classes: <code>min-w-0</code> no
+<code>main</code> e <code>overflow-x-auto</code> no contêiner da tabela. Com as duas, a tabela rola dentro
+da própria caixa e a casca fica intacta.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: os valores da coluna parecem tortos</h3>
+<p>Números com algarismos de largura variável — o "1" ocupa menos espaço que o "8" — fazem a coluna
+dançar. A correção é <code>tabular-nums</code> na célula (e no cabeçalho da coluna, se ele for numérico),
+junto com <code>text-right</code>. Em painel financeiro, isso não é refinamento: é o que permite comparar
+duas linhas sem ler os dois valores inteiros.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o painel no escuro ficou ilegível</h3>
+<p>Ela acrescentou <code>dark:bg-slate-900</code> no cartão e esqueceu o texto, que continuou
+<code>text-slate-900</code>. Resultado: texto quase preto em fundo quase preto. A regra prática é trocar o
+par inteiro, nunca uma propriedade só: fundo, texto e borda. E se o cartão tem um selo, o selo também
+precisa da versão escura — <code>dark:bg-emerald-900 dark:text-emerald-100</code>, por exemplo.</p>
+</div>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>Classes</th><th>Por quê</th></tr>
+<tr><td>casca</td><td><code>flex min-h-screen</code></td><td>menu e conteúdo lado a lado</td></tr>
+<tr><td>menu</td><td><code>w-60 shrink-0 border-r</code></td><td>240 px que não encolhem</td></tr>
+<tr><td>conteúdo</td><td><code>min-w-0 flex-1 p-6</code></td><td>pode encolher e ocupa o resto</td></tr>
+<tr><td>números</td><td><code>grid gap-4 sm:grid-cols-2 lg:grid-cols-4</code></td><td>quatro cartões que viram um</td></tr>
+<tr><td>tabela</td><td><code>overflow-x-auto</code> + <code>w-full text-left text-sm</code></td><td>rola em vez de estourar</td></tr>
+<tr><td>valor</td><td><code>text-right tabular-nums</code></td><td>coluna de números alinhada</td></tr>
+</table>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Para que serve o <code>min-w-0</code> no conteúdo do
+painel?</p>
+<label><input type="radio" name="p1"> para o conteúdo começar sem margem</label>
+<label><input type="radio" name="p1"> para o conteúdo poder encolher e a tabela rolar dentro dele</label>
+<label><input type="radio" name="p1"> para o menu ficar com 240 px</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que o <code>tabular-nums</code> faz em uma coluna de
+valores?</p>
+<label><input type="radio" name="p2"> deixa os números em negrito</label>
+<label><input type="radio" name="p2"> alinha os números à esquerda</label>
+<label><input type="radio" name="p2"> usa algarismos de largura fixa, para as casas decimais baterem</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que o <code>shrink-0</code> faz no menu
+lateral?</p>
+<label><input type="radio" name="p3"> impede o menu de encolher quando falta espaço</label>
+<label><input type="radio" name="p3"> impede o menu de rolar junto com a página</label>
+<label><input type="radio" name="p3"> faz o menu ocupar a largura toda no telefone</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o conteúdo do painel</h2>
+<p>Complete a classe do <code>main</code> para ele poder encolher, ocupar todo o espaço que sobra ao lado
+do menu de 240 px e ter 24 px de respiro interno.</p>
+<div class="ex-code">&lt;main class="<input aria-label="resposta 1" data-answer="min-w-0 flex-1 p-6"> bg-slate-100"&gt;</div>
+<p class="ex-dica">Dica: três classes. A primeira desliga a largura mínima automática, a segunda manda
+crescer e encolher, a terceira é o respiro. Sem a primeira, a tabela larga vai empurrar tudo.</p>
+</div>
+
+<h2>10. Resumo</h2>
+
+<p>Painel é uma casca com duas colunas e conteúdo que se adapta. A casca é <code>flex min-h-screen</code>,
+o menu é <code>w-60 shrink-0</code> e o conteúdo é <code>min-w-0 flex-1 p-6</code> — o
+<code>min-w-0</code> é o que impede a tabela de empurrar o layout. O topo usa
+<code>flex flex-wrap items-center justify-between gap-4</code> com um botão primário e um secundário, e os
+números do dia vão em <code>grid gap-4 sm:grid-cols-2 lg:grid-cols-4</code>.</p>
+
+<p>A tabela vive dentro de <code>overflow-x-auto rounded-xl border border-slate-200 bg-white</code>, com
+<code>w-full text-left text-sm</code> e <code>divide-y divide-slate-100</code> no <code>tbody</code>. Os
+valores levam <code>text-right tabular-nums</code>. Os selos de status usam o par 100/800 da mesma família
+e sempre com palavra dentro. No escuro, cada propriedade trocada ganha sua versão
+<code>dark:</code> — fundo, texto e borda juntos.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Casca: <code>flex min-h-screen</code>; menu <code>w-60 shrink-0</code>; conteúdo
+<code>min-w-0 flex-1</code>.</li>
+<li><code>min-w-0</code> desliga a largura mínima automática do filho flex.</li>
+<li><code>flex: 1 1 0%</code> é o que o <code>flex-1</code> escreve: cresce, encolhe, parte do zero.</li>
+<li>Topo: <code>flex flex-wrap items-center justify-between gap-4</code>.</li>
+<li>Números: <code>grid gap-4 sm:grid-cols-2 lg:grid-cols-4</code>.</li>
+<li>Tabela que rola: <code>overflow-x-auto</code> no contêiner, <code>w-full</code> na tabela.</li>
+<li>Valores: <code>text-right tabular-nums</code>; texto: <code>text-left</code>.</li>
+<li>Selos: <code>rounded-full bg-*-100 px-2.5 py-1 text-xs text-*-800</code>, com palavra dentro.</li>
+<li>Escuro: troque o par inteiro — <code>dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700</code>.</li>
+<li><code>hover:</code> só vale em aparelho com mouse; o Tailwind já cuida disso.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

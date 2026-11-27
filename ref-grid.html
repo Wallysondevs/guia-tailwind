@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grid | Guia Tailwind</title>
+<meta name="description" content="Referência de Grid no Tailwind v4: grid-cols de 1 a 12, col-span, row-span, fluxo automático, alinhamento, gap, breakpoints e o que não funciona.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Grid</span></h1>
+
+<p class="intro">A Ana precisava de uma grade de verdade: três pães por linha no computador, um por
+linha no celular, e a foto da semana ocupando a largura toda. Ela tentou com flex e
+<code>basis-1/3</code>, e o resultado foi aquela terceira coluna que desce sozinha quando o texto de
+um cartão fica maior. Grid resolve isso porque pensa em colunas de verdade, não em itens que se
+ajustam. Esta página é a consulta: quantas colunas, como ocupar mais de uma célula, como alinhar
+dentro da célula, como o fluxo automático decide as linhas e o que não funciona.</p>
+
+<h2>1. Grid em uma frase</h2>
+
+<p>Flex distribui itens em uma linha; grid define uma <strong>grade</strong> com colunas e linhas e
+coloca cada item dentro dela. A diferença parece pequena e não é: no grid, a segunda linha começa
+exatamente embaixo da primeira, sempre, independente do tamanho do conteúdo. É o que permite
+galeria, painel, calendário, formulário de duas colunas e layout de página inteira com cabeçalho,
+coluna lateral e rodapé.</p>
+
+<p>O vocabulário é curto e vale fixar, porque as classes usam essas palavras: <em>trilha</em> é uma
+coluna ou uma linha; <em>célula</em> é o cruzamento; <em>span</em> é ocupar mais de uma célula. E há
+uma diferença conceitual importante em relação ao flex: no grid, o espaçamento entre células
+(<code>gap</code>) é contado antes de dividir o espaço, então as contas fecham. No flex, ele é
+somado depois, e é por isso que <code>basis-1/3</code> com gap estoura.</p>
+
+<dl class="anatomy">
+<dt>trilha</dt>
+<dd>Uma faixa da grade: <code>grid-cols-3</code> cria três trilhas de coluna e
+<code>grid-rows-2</code> duas de linha.</dd>
+<dt>célula</dt>
+<dd>O cruzamento de uma coluna com uma linha. É onde um item cai quando você não diz nada.</dd>
+<dt>span</dt>
+<dd>Quantas células o item ocupa: <code>col-span-2</code> atravessa duas colunas.</dd>
+<dt>fr</dt>
+<dd>A unidade de fração do espaço livre. <code>1fr</code> é "uma parte"; <code>2fr</code> é o
+dobro de uma parte.</dd>
+<dt>fluxo automático</dt>
+<dd>Como o navegador preenche a grade quando você não posiciona os itens. Muda com
+<code>grid-flow-*</code>.</dd>
+<dt>linha implícita</dt>
+<dd>Linha que nasce sozinha quando há mais itens que células definidas. O tamanho dela vem de
+<code>auto-rows-*</code>.</dd>
+</dl>
+
+<p>Uma observação sobre a unidade <code>fr</code>: o Tailwind não escreve <code>1fr</code> puro nas
+colunas, e sim <code>minmax(0, 1fr)</code>. O zero ali é o mínimo da trilha, e existe por um motivo
+prático: com <code>1fr</code> puro, o mínimo implícito é o tamanho do conteúdo, e uma palavra longa
+ou uma imagem larga faz a coluna crescer além do que você pediu. Com <code>minmax(0, 1fr)</code>, a
+trilha pode encolher até zero e o conteúdo precisa se virar. As duas formas parecem iguais no CSS e
+são bem diferentes na tela.</p>
+
+<h2>2. Definir as colunas</h2>
+
+<p>A classe <code>grid-cols-*</code> é a porta de entrada. O Tailwind traz de 1 a 12, mais
+<code>none</code>, <code>subgrid</code> e o valor arbitrário entre colchetes. Todas geram a mesma
+estrutura, mudando só o número de trilhas.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>CSS gerado</th><th>Quando usar</th></tr>
+<tr><td><code>grid-cols-1</code></td><td><code>repeat(1, minmax(0, 1fr))</code></td><td>celular; também para desfazer</td></tr>
+<tr><td><code>grid-cols-2</code></td><td><code>repeat(2, minmax(0, 1fr))</code></td><td>par de cartões, formulário de duas colunas</td></tr>
+<tr><td><code>grid-cols-3</code></td><td><code>repeat(3, minmax(0, 1fr))</code></td><td>galeria de produtos no computador</td></tr>
+<tr><td><code>grid-cols-4</code></td><td><code>repeat(4, minmax(0, 1fr))</code></td><td>painel de números, ícones</td></tr>
+<tr><td><code>grid-cols-5</code></td><td><code>repeat(5, minmax(0, 1fr))</code></td><td>calendário de dias úteis</td></tr>
+<tr><td><code>grid-cols-6</code></td><td><code>repeat(6, minmax(0, 1fr))</code></td><td>base para spans variados</td></tr>
+<tr><td><code>grid-cols-7</code></td><td><code>repeat(7, minmax(0, 1fr))</code></td><td>semana completa</td></tr>
+<tr><td><code>grid-cols-8</code></td><td><code>repeat(8, minmax(0, 1fr))</code></td><td>raro; base de 8 para spans</td></tr>
+<tr><td><code>grid-cols-9</code></td><td><code>repeat(9, minmax(0, 1fr))</code></td><td>raro</td></tr>
+<tr><td><code>grid-cols-10</code></td><td><code>repeat(10, minmax(0, 1fr))</code></td><td>raro</td></tr>
+<tr><td><code>grid-cols-11</code></td><td><code>repeat(11, minmax(0, 1fr))</code></td><td>raro</td></tr>
+<tr><td><code>grid-cols-12</code></td><td><code>repeat(12, minmax(0, 1fr))</code></td><td>layout de página com spans</td></tr>
+<tr><td><code>grid-cols-none</code></td><td><code>grid-template-columns: none</code></td><td>voltar ao fluxo de coluna única</td></tr>
+<tr><td><code>grid-cols-subgrid</code></td><td><code>grid-template-columns: subgrid</code></td><td>herdar as colunas do grid pai</td></tr>
+<tr><td><code>grid-cols-[200px_1fr]</code></td><td><code>grid-template-columns: 200px 1fr</code></td><td>coluna lateral de largura fixa</td></tr>
+</table>
+</div>
+
+<p><code>grid-cols-subgrid</code> é a classe que resolve um problema antigo: alinhar o conteúdo de
+dentro de um cartão com a grade de fora. Ela faz o filho herdar as colunas do pai em vez de criar as
+suas, então um título que começa na coluna 2 do cartão começa na coluna 2 da página. Hoje funciona
+nos navegadores atuais e é a diferença entre uma grade que parece desenhada e uma que parece
+encaixada à força. Se o navegador não suportar, a classe é ignorada e o layout volta ao normal — o
+que é uma degradação aceitável.</p>
+
+<p>A escolha do número é uma decisão de layout, não uma escada. Você não precisa passar por
+<code>grid-cols-2</code> para chegar em <code>grid-cols-3</code>, e o 12 não é obrigatório: ele é uma
+convenção herdada de sistemas de grade antigos, útil quando você precisa de <code>col-span-4</code>
+dois terços e <code>col-span-8</code> um terço. Para uma galeria de três colunas iguais,
+<code>grid-cols-3</code> é mais simples e mais legível que <code>grid-cols-12</code> com
+<code>col-span-4</code> em cada filho.</p>
+
+<p>O valor arbitrário entre colchetes é a saída para as grades mistas: não há nome pronto para
+"uma coluna de 200 px e o resto elástico", mas <code>grid-cols-[200px_1fr]</code> cria exatamente
+isso — o esqueleto de qualquer página com menu lateral. O sublinhado faz o papel de espaço entre os valores. Para repetir
+com tamanhos diferentes, use <code>grid-cols-[1fr_2fr_1fr]</code>.</p>
+
+<div class="trytailwind" data-goal="rule:grid-template-columns: repeat(3, minmax(0, 1fr));;css:#alvo|gap=16px">
+  <p class="try-task">A grade está com uma coluna só. Deixe três colunas iguais, mantendo 16 px de
+  espaço entre elas.</p>
+  <pre class="html">&lt;div id="alvo" class="grid grid-cols-1 gap-4"&gt;
+  &lt;div class="bg-amber-100 p-4"&gt;Francês&lt;/div&gt;
+  &lt;div class="bg-amber-100 p-4"&gt;Queijo&lt;/div&gt;
+  &lt;div class="bg-amber-100 p-4"&gt;Doce&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+gap: 16px
+grid-template-columns: 616px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid grid-cols-3 gap-4"&gt;
+  &lt;div class="bg-amber-100 p-4"&gt;Francês&lt;/div&gt;
+  &lt;div class="bg-amber-100 p-4"&gt;Queijo&lt;/div&gt;
+  &lt;div class="bg-amber-100 p-4"&gt;Doce&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>grid-template-columns: 205.328px 205.328px 205.328px</code>
+na prévia de 640 px — três colunas iguais, cada uma com um terço do espaço que sobrou depois do gap.
+Se você diminuir a prévia, os três valores mudam juntos; é isso que "elástico" quer dizer. E se um
+dos cartões tiver uma palavra comprida, ela não vai empurrar a coluna, porque o mínimo é zero.</p>
+
+<h2>3. Ocupar mais de uma célula</h2>
+
+<p>Com as colunas definidas, o próximo passo é furar a grade de propósito: um cartão que ocupa duas
+colunas, uma imagem que atravessa a largura toda, um bloco que pula a primeira coluna. Tudo isso é
+feito no item, não no contêiner.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>CSS gerado</th><th>Efeito</th></tr>
+<tr><td><code>col-span-2</code></td><td><code>grid-column: span 2 / span 2</code></td><td>ocupa duas colunas</td></tr>
+<tr><td><code>col-span-3</code></td><td><code>grid-column: span 3 / span 3</code></td><td>ocupa três colunas</td></tr>
+<tr><td><code>col-span-6</code></td><td><code>grid-column: span 6 / span 6</code></td><td>metade de uma grade de 12</td></tr>
+<tr><td><code>col-span-full</code></td><td><code>grid-column: 1 / -1</code></td><td>da primeira à última coluna</td></tr>
+<tr><td><code>row-span-2</code></td><td><code>grid-row: span 2 / span 2</code></td><td>ocupa duas linhas</td></tr>
+<tr><td><code>row-span-3</code></td><td><code>grid-row: span 3 / span 3</code></td><td>ocupa três linhas</td></tr>
+<tr><td><code>row-span-full</code></td><td><code>grid-row: 1 / -1</code></td><td>todas as linhas</td></tr>
+<tr><td><code>col-start-2</code></td><td><code>grid-column-start: 2</code></td><td>começa na coluna 2</td></tr>
+<tr><td><code>col-end-3</code></td><td><code>grid-column-end: 3</code></td><td>termina antes da coluna 3</td></tr>
+<tr><td><code>row-start-2</code></td><td><code>grid-row-start: 2</code></td><td>começa na linha 2</td></tr>
+<tr><td><code>-col-start-1</code></td><td><code>grid-column-start: -1</code></td><td>conta do fim para o começo</td></tr>
+</table>
+</div>
+
+<p><code>col-span-full</code> é o atalho mais útil da lista e o mais confundido. Ele vira
+<code>grid-column: 1 / -1</code>, que significa "da primeira linha de grade até a última", sem você
+precisar saber quantas colunas existem. É a classe certa para a foto de destaque que ocupa a largura
+toda, para a linha de "nenhum resultado encontrado" e para o rodapé de um formulário em duas
+colunas. Ela sobrevive a mudanças no número de colunas — <code>col-span-3</code> não.</p>
+
+<p>As classes <code>col-start-*</code> e <code>col-end-*</code> são a versão explícita: em vez de
+"ocupe duas colunas", você diz "comece na 2 e termine antes da 4". O efeito é o mesmo, e a diferença
+aparece quando o número de colunas muda por breakpoint. Com <code>col-span-2</code>, o item sempre
+ocupa duas colunas, sejam elas quais forem. Com <code>col-start-2 col-end-4</code>, ele fica preso
+àquelas posições — útil em layout de revista e perigoso em layout responsivo.</p>
+
+<div class="trytailwind" data-goal="css:.destaque|grid-column=span 2 / span 2;;rule:grid-column: span 2 / span 2">
+  <p class="try-task">O cartão de destaque está em uma coluna só. Faça ele atravessar as duas colunas
+  da grade, com uma classe no próprio cartão.</p>
+  <pre class="html">&lt;div id="alvo" class="grid grid-cols-2 gap-4"&gt;
+  &lt;div class="destaque bg-amber-200 p-4"&gt;Pão do dia&lt;/div&gt;
+  &lt;div class="bg-amber-100 p-4"&gt;Francês&lt;/div&gt;
+  &lt;div class="bg-amber-100 p-4"&gt;Queijo&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+gap: 16px
+grid-template-columns: 300px 300px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid grid-cols-2 gap-4"&gt;
+  &lt;div class="destaque col-span-2 bg-amber-200 p-4"&gt;Pão do dia&lt;/div&gt;
+  &lt;div class="bg-amber-100 p-4"&gt;Francês&lt;/div&gt;
+  &lt;div class="bg-amber-100 p-4"&gt;Queijo&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<pre class="term">.col-span-2 {
+  grid-column: span 2 / span 2;
+}
+.col-span-full {
+  grid-column: 1 / -1;
+}</pre>
+
+<p>A conferência desta caixa lê o CSS computado do próprio cartão, e o valor é
+<code>grid-column: span 2 / span 2</code>. A repetição não é erro: a forma curta do CSS aceita início
+e fim, e o Tailwind escreve os dois com <code>span</code> para deixar claro que o item não está preso
+a uma posição fixa, e sim esticado por duas trilhas. Quando o item
+atravessa a grade, os outros se reorganizam sozinhos — o segundo cartão desce para a linha seguinte,
+e você não precisa mexer em nada.</p>
+
+<h2>4. Linhas, fluxo e linhas implícitas</h2>
+
+<p>Na maioria dos layouts você define só as colunas e deixa as linhas nascerem conforme os itens. Isso
+é o fluxo automático, e ele tem três controles: para onde o fluxo vai, qual o tamanho das linhas que
+nascem e quais linhas você quer definir de antemão.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>CSS gerado</th><th>Para que serve</th></tr>
+<tr><td><code>grid-rows-1</code></td><td><code>repeat(1, minmax(0, 1fr))</code></td><td>uma linha que divide a altura</td></tr>
+<tr><td><code>grid-rows-2</code></td><td><code>repeat(2, minmax(0, 1fr))</code></td><td>duas linhas iguais</td></tr>
+<tr><td><code>grid-rows-3</code></td><td><code>repeat(3, minmax(0, 1fr))</code></td><td>três linhas iguais</td></tr>
+<tr><td><code>grid-rows-6</code></td><td><code>repeat(6, minmax(0, 1fr))</code></td><td>base para spans verticais</td></tr>
+<tr><td><code>grid-rows-12</code></td><td><code>repeat(12, minmax(0, 1fr))</code></td><td>layout de página completo</td></tr>
+<tr><td><code>grid-flow-row</code></td><td><code>grid-auto-flow: row</code></td><td>preenche em linha (padrão)</td></tr>
+<tr><td><code>grid-flow-col</code></td><td><code>grid-auto-flow: column</code></td><td>preenche em coluna</td></tr>
+<tr><td><code>grid-flow-dense</code></td><td><code>grid-auto-flow: dense</code></td><td>preenche buracos com itens menores</td></tr>
+<tr><td><code>auto-rows-min</code></td><td><code>grid-auto-rows: min-content</code></td><td>linha do tamanho do conteúdo</td></tr>
+<tr><td><code>auto-rows-max</code></td><td><code>grid-auto-rows: max-content</code></td><td>linha do maior conteúdo</td></tr>
+<tr><td><code>auto-rows-fr</code></td><td><code>grid-auto-rows: minmax(0, 1fr)</code></td><td>todas as linhas com a mesma altura</td></tr>
+<tr><td><code>auto-rows-[80px]</code></td><td><code>grid-auto-rows: 80px</code></td><td>calendário com célula fixa</td></tr>
+<tr><td><code>auto-cols-fr</code></td><td><code>grid-auto-columns: minmax(0, 1fr)</code></td><td>colunas implícitas iguais</td></tr>
+</table>
+</div>
+
+<p>O caso mais frequente é <code>auto-rows-fr</code>. Por padrão, cada linha tem a altura do seu
+conteúdo, então uma galeria com um cartão de texto curto e outro de texto longo fica com linhas
+desiguais — e a grade perde a graça. Com <code>auto-rows-fr</code>, todas as linhas implícitas recebem
+a mesma fração de altura e os cartões ficam alinhados. É o equivalente vertical do
+<code>minmax(0, 1fr)</code> das colunas.</p>
+
+<p><code>grid-flow-col</code> inverte o sentido do preenchimento: em vez de encher a linha e descer,
+o navegador enche a coluna e anda para a direita. Isso é útil em uma lista de etiquetas que precisa
+crescer em colunas, e desastroso quando você não percebe, porque a ordem de leitura na tela deixa de
+ser a ordem do HTML. Já <code>grid-flow-dense</code> faz o navegador voltar para preencher buracos
+deixados por itens maiores. O resultado visual fica mais compacto, mas a ordem visual passa a
+divergir da ordem do documento — o que atrapalha quem navega por teclado. Use com consciência.</p>
+
+<p>Um uso esperto de <code>auto-cols</code> é a faixa que rola na horizontal, como um carrossel de
+ofertas: <code>grid grid-flow-col auto-cols-[minmax(240px,1fr)] gap-4 overflow-x-auto</code>. O
+<code>grid-flow-col</code> manda preencher em coluna, o <code>auto-cols</code> dá a largura mínima de
+cada uma e o <code>overflow-x-auto</code> deixa a pessoa arrastar. Sem o valor mínimo, todas as
+colunas ficam com a largura de uma fração e o texto espreme; com ele, cada cartão tem 240 px e o
+excedente rola.</p>
+
+<p>Uma armadilha de iniciante: definir <code>grid-rows-3</code> achando que vai criar três linhas
+para três cartões. Se você não definiu altura no contêiner, as três trilhas de <code>1fr</code> se
+repartem na altura que o conteúdo já ocupa, e o resultado é idêntico a não ter classe. Altura em grid
+precisa de <code>h-*</code>, <code>min-h-*</code> ou de um pai com altura definida.</p>
+
+<h2>5. Alinhar itens e o conjunto</h2>
+
+<p>Grid tem dois níveis de alinhamento e isso confunde. O primeiro é o item dentro da sua célula:
+<code>justify-items</code> (horizontal) e <code>align-items</code> (vertical). O segundo é o conjunto
+de trilhas dentro do contêiner, quando sobra espaço: <code>justify-content</code> e
+<code>align-content</code>. As classes com <code>self</code> no fim são a exceção de um item
+só.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Nível</th><th>Valor aplicado</th></tr>
+<tr><td><code>justify-items-start</code></td><td>contêiner, eixo horizontal</td><td>itens à esquerda da célula</td></tr>
+<tr><td><code>justify-items-center</code></td><td>contêiner, eixo horizontal</td><td>itens centrados na célula</td></tr>
+<tr><td><code>justify-items-end</code></td><td>contêiner, eixo horizontal</td><td>itens à direita da célula</td></tr>
+<tr><td><code>justify-items-stretch</code></td><td>contêiner, eixo horizontal</td><td>itens ocupam a célula toda (padrão)</td></tr>
+<tr><td><code>items-start</code></td><td>contêiner, eixo vertical</td><td>pelo topo da célula</td></tr>
+<tr><td><code>items-center</code></td><td>contêiner, eixo vertical</td><td>centro vertical da célula</td></tr>
+<tr><td><code>items-end</code></td><td>contêiner, eixo vertical</td><td>pela base da célula</td></tr>
+<tr><td><code>items-stretch</code></td><td>contêiner, eixo vertical</td><td>cartões da mesma altura (padrão)</td></tr>
+<tr><td><code>content-start</code></td><td>conjunto de trilhas</td><td>trilhas no início</td></tr>
+<tr><td><code>content-center</code></td><td>conjunto de trilhas</td><td>trilhas no centro</td></tr>
+<tr><td><code>content-between</code></td><td>conjunto de trilhas</td><td>trilhas distribuídas nas pontas</td></tr>
+<tr><td><code>place-items-center</code></td><td>contêiner, os dois eixos</td><td>centraliza item na célula</td></tr>
+<tr><td><code>justify-self-end</code></td><td>item</td><td>só este item à direita</td></tr>
+<tr><td><code>place-self-start</code></td><td>item</td><td>só este item no canto superior esquerdo</td></tr>
+</table>
+</div>
+
+<p>O padrão é <code>stretch</code> nos dois eixos, e é por isso que os cartões de uma galeria nascem
+todos com a mesma altura. Muita gente acha que isso é mágica do grid; é só o valor inicial.
+<code>place-items-center</code> é o atalho mais usado quando você quer centralizar um único elemento
+em uma célula grande — uma imagem em um quadrado, um ícone em um círculo. Ele aplica
+<code>align-items: center</code> e <code>justify-items: center</code> de uma vez, e por isso aparece
+tanto em exemplos.</p>
+
+<p>Cuidado com a diferença entre <code>items-center</code> e <code>content-center</code>. O primeiro
+centraliza o item dentro da célula; o segundo centraliza o conjunto de trilhas dentro do contêiner.
+Em um grid que ocupa toda a altura do contêiner, o segundo não tem efeito, porque as trilhas já
+preenchem tudo. Em um grid de duas linhas em um contêiner alto, só o segundo muda alguma coisa.</p>
+
+<h2>6. Gap, breakpoints e a armadilha do 12</h2>
+
+<p><code>gap-*</code> no grid funciona como no flex: espaço só entre as células, nunca nas bordas. A
+escala é a mesma de padding, então <code>gap-4</code> são 16 px. E existe a versão por eixo:
+<code>gap-x-*</code> para colunas e <code>gap-y-*</code> para linhas. Em uma galeria, uma combinação
+comum é <code>gap-x-4 gap-y-8</code> — pouco espaço entre colunas e bastante entre linhas, porque
+cada linha é um assunto.</p>
+
+<p>A diferença crucial em relação ao flex: no grid, o gap entra na conta das trilhas. Com
+<code>grid-cols-3 gap-4</code>, o navegador reserva 32 px de gap e divide o resto em três. Com
+<code>flex</code> e <code>basis-1/3</code>, cada item pede um terço da largura total e o gap é
+somado depois, totalizando 100% mais 32 px — e o terceiro item desce. Isso não é detalhe: é a razão
+pela qual a grade de três colunas funciona com duas classes no grid e vira gambiarra no flex.</p>
+
+<p>O responsivo é mobile-first, ou seja, a classe sem prefixo vale para todas as telas e os prefixos
+sobrescrevem a partir do breakpoint. O padrão da galeria é
+<code>grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3</code>: uma coluna no celular, duas a
+partir de 640 px, três a partir de 1024 px. Note que <code>sm:</code> e <code>lg:</code> brigam com
+a mesma propriedade, então ambas são necessárias — remover o <code>sm:</code> deixaria a tela média com
+uma coluna. A aula de <a href="breakpoints.html">breakpoints</a> traz a lista dos cinco prefixos.</p>
+
+<p>A armadilha do 12 é querer usar a grade de 12 colunas para tudo. Um layout de
+<code>grid-cols-12</code> com <code>col-span-4</code> em três cartões funciona e é equivalente a
+<code>grid-cols-3</code>. Mas quando aparece um item <code>col-span-5</code>, você passa a ter uma
+grade de 12 com buracos, e o próximo cartão começa no meio de uma linha. Se a grade é para cartões
+iguais, use 3. Se é para a estrutura da página — cabeçalho, lateral, conteúdo, rodapé — aí o 12
+brilha.</p>
+
+<h2>7. Grid ou flex?</h2>
+
+<p>A pergunta volta toda semana, e a resposta curta é: uma dimensão é flex, duas são grid. Se o
+conteúdo precisa começar exatamente na coluna 2 da segunda linha, é grid. Se os itens só precisam
+ficar lado a lado e quebrar quando não couberem, é flex com <code>wrap</code>.</p>
+
+<pre class="term">.grid {
+  display: grid;
+}
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}</pre>
+
+<p>Há casos em que os dois funcionam e a diferença é de manutenção. Uma barra de navegação é flex,
+porque o conteúdo decide a largura de cada item. Uma grade de produtos é grid, porque as colunas
+devem ter a mesma largura mesmo quando um nome tem três linhas. Um cardápio com nome, preço e
+descrição pode ser grid com duas colunas, sendo a segunda alinhada à direita — e aí
+<code>justify-self-end</code> no preço substitui um <code>ml-auto</code> que só funcionaria em
+flex.</p>
+
+<p>A página de <a href="ref-flex.html">Flexbox</a> cobre o outro lado: direção, distribuição no eixo e
+os três números de cada item. As duas se leem melhor juntas do que separadas.</p>
+
+<p>Também vale saber que grid e flex convivem. Um layout de página pode ser
+<code>grid grid-cols-[240px_1fr]</code> com a barra lateral em <code>flex flex-col</code> e o
+conteúdo em <code>grid grid-cols-2</code>. Cada peça usa a ferramenta certa, e ninguém precisa
+escolher UM sistema para o site inteiro.</p>
+
+<h2>8. O que não funciona</h2>
+
+<p>Testado no motor do guia, como todo o resto. As falhas de grid são especializadas: quase sempre
+é uma classe no elemento errado.</p>
+
+<ul>
+<li><strong><code>col-span-2</code> sem <code>grid</code> no pai.</strong> Sem grade, a classe não
+tem em que se apoiar e nada acontece. O mesmo para <code>grid-cols-3</code> sem
+<code>grid</code>.</li>
+<li><strong><code>grid-cols-3</code> em um contêiner flex.</strong> As duas propriedades brigam: o
+<code>display: flex</code> do pai ignora as colunas da grade.</li>
+<li><strong><code>grid-rows-3</code> sem altura no contêiner.</strong> As linhas se repartem na
+altura do conteúdo e o efeito é nenhum.</li>
+<li><strong><code>col-span-13</code>.</strong> A escala vai até 12; para atravessar tudo, use
+<code>col-span-full</code>.</li>
+<li><strong>Contar com a ordem visual do <code>dense</code>.</strong> Ela diverge da ordem do
+documento, e quem usa teclado ou leitor de tela navega na ordem do HTML.</li>
+<li><strong>Item com largura fixa maior que a célula.</strong> <code>w-96</code> dentro de uma
+coluna de 200 px transborda. A célula respeita o conteúdo, não o contrário.</li>
+<li><strong>Conteúdo que não encolhe.</strong> Um texto sem <code>min-w-0</code> no item impede a
+trilha de encolher; o grid não faz mágica com conteúdo que se recusa a caber.</li>
+<li><strong>Dois <code>grid-cols-*</code> no mesmo elemento.</strong> Não somam: vence a que o
+Tailwind gerou por último. Para variar por tela, use prefixo de breakpoint.</li>
+</ul>
+
+<p>Duas confusões de nome: <code>grid-columns-3</code> não existe (é <code>grid-cols-3</code>) e
+<code>col-span-1</code> também não — o padrão já é uma coluna. Já <code>gap-4</code> e
+<code>grid-gap-4</code> são a mesma ideia, mas só o primeiro existe: o prefixo <code>grid-</code> caiu
+quando o gap passou a valer também para flex.</p>
+
+<h2>9. Resumo</h2>
+
+<p>Grid é a ferramenta de duas dimensões. <code>grid</code> liga a grade, <code>grid-cols-N</code>
+define as colunas, <code>gap-*</code> separa as células, e <code>grid-rows-*</code> define linhas
+quando a altura importa. As colunas nascem como <code>repeat(N, minmax(0, 1fr))</code>, e o zero no
+mínimo é o que impede o conteúdo de esticar a trilha.</p>
+
+<p>No item, <code>col-span-*</code> e <code>row-span-*</code> ocupam mais de uma célula;
+<code>col-span-full</code> atravessa a grade inteira sem você precisar saber o número de colunas. O
+alinhamento tem dois níveis: <code>justify-items</code> e <code>align-items</code> para o item dentro
+da célula, <code>justify-content</code> e <code>align-content</code> para o conjunto de trilhas. O
+padrão é <code>stretch</code>, e é ele que faz os cartões de uma galeria nascerem com a mesma
+altura.</p>
+
+<p>Diferença prática em relação ao flex: no grid o gap entra na conta, então
+<code>grid-cols-3 gap-4</code> fecha em 100% sem gambiarra. No responsivo, o padrão é
+<code>grid-cols-1</code> no celular e <code>sm:grid-cols-2 lg:grid-cols-3</code> adiante. E a
+decisão entre os dois sistemas é simples: duas dimensões alinhadas são grid, uma dimensão que se
+ajusta é flex.</p>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

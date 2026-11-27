@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modal | Guia Tailwind</title>
+<meta name="description" content="Como montar um modal com Tailwind: a camada fixed inset-0, o fundo escurecido, o painel centralizado com max-w-md, o hidden que abre e fecha e o CSS de cada classe.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Modal</span></h1>
+<p class="intro">A Ana quer mostrar a ficha completa de um pão sem tirar a cliente da página de compra. A
+ideia é aquela janela que aparece por cima de tudo, escurece o resto e some quando a pessoa fecha.
+Ela já viu isso em todo site grande, mas quando foi escrever, a caixa apareceu empurrando o conteúdo
+para baixo, com o texto da página misturado atrás. Nesta aula ela monta o modal em três pedaços —
+a camada, o centro e o painel — e entende por que cada classe existe, sem decorar receita.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que o modal precisa de <code>fixed</code> e não de <code>absolute</code>.</li>
+  <li>O que <code>inset-0</code> faz e por que ele substitui quatro propriedades.</li>
+  <li>Como a camada escura (<code>bg-black/50</code>) deixa o resto da página em segundo plano.</li>
+  <li>Centralizar o painel com <code>flex items-center justify-center</code>.</li>
+  <li>Dar largura, respiro e cantos ao painel com <code>max-w-md</code>, <code>p-6</code> e <code>rounded-2xl</code>.</li>
+  <li>O <code>hidden</code> que fecha o modal e o mínimo de JavaScript para abrir e fechar.</li>
+  <li>Os atributos <code>role</code>, <code>aria-modal</code> e <code>aria-labelledby</code>, que fazem o leitor de tela entender a janela.</li>
+  <li>As três armadilhas clássicas: camada atrás do cabeçalho, fundo que rola e painel maior que o celular.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a caixa que empurra a página</h2>
+
+<p>A Ana começou pelo jeito mais óbvio. Escreveu uma caixa com a ficha do pão e escondeu com
+<code>hidden</code>. Quando a cliente clicava no botão, o JavaScript tirava o <code>hidden</code> e a
+caixa aparecia. Só que ela aparecia <em>no meio do texto</em>: empurrava as fotos para baixo, abria
+um buraco no layout e o conteúdo da padaria continuava visível em volta, como se nada tivesse
+acontecido.</p>
+
+<p>O problema não é de cor nem de tamanho. É de <strong>fluxo</strong>. No HTML, todo elemento ocupa
+um lugar na fila: um depois do outro, de cima para baixo. Enquanto a caixa está na fila, ela empurra
+quem vem depois. Um modal não pode estar na fila — ele precisa sair dela e flutuar por cima, como um
+papel apoiado sobre a mesa. Quem tira um elemento da fila é a propriedade <code>position</code>, e o
+Tailwind tem uma classe para cada valor dela.</p>
+
+<p>Nesta aula a gente monta o modal em três camadas, na ordem em que o navegador as desenha. Primeiro
+a camada que cobre a tela e escurece o fundo. Depois o alinhamento que põe o painel no meio dela. Por
+último o painel em si, com respiro, cantos e sombra. Cada pedaço é um <code>div</code>, e o resultado
+final é uma caixa que parece flutuar — porque, tecnicamente, ela está fora do fluxo.</p>
+
+<h2>2. Sair do fluxo: a classe fixed</h2>
+
+<p><code>fixed</code> é a classe de <code>position: fixed</code>. Ela faz duas coisas ao mesmo tempo:
+tira o elemento da fila (ele deixa de empurrar os vizinhos) e o prende à <strong>janela do
+navegador</strong>, não à página. Se você rolar a página, o elemento fixo não sai do lugar. É
+exatamente o comportamento de um modal: ele fica parado enquanto o conteúdo atrás rola.</p>
+
+<p>Existe uma alternativa que confunde muita gente: <code>absolute</code>. Ela também tira do fluxo,
+mas prende o elemento ao <em>ancestral posicionado</em> mais próximo — ou seja, à caixa onde ele está
+dentro. Se aquele ancestral estiver no meio da página, o modal aparece no meio da página e rola junto.
+Para uma janela que precisa cobrir a tela inteira, <code>fixed</code> é a escolha certa. A aula de
+<a href="posicionamento.html">Posicionamento</a> mostra os dois lado a lado.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|position=fixed;;rule:inset: 0px;;rule:z-index: 50">
+  <p class="try-task">A camada do modal está no fluxo e só cobre a largura do texto. Troque a
+  classe dela para <code>fixed inset-0 z-50</code> e clique em Rodar.</p>
+  <pre class="html">&lt;div class="bg-amber-50 p-4"&gt;
+  &lt;p class="font-semibold text-slate-800"&gt;Padaria da Ana&lt;/p&gt;
+  &lt;p class="text-sm text-slate-600"&gt;Pão quentinho às 6h.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id="alvo" class="relative bg-black/50 p-4"&gt;
+  &lt;div class="mx-auto max-w-sm rounded-xl bg-white p-6 text-slate-800"&gt;
+    &lt;p class="font-semibold"&gt;Ficha do pão&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Fermentação de 12 horas.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+position: relative
+padding: 16px
+background-color: oklab(0 0 0 / 0.5)
+</pre>
+  <pre class="solucao">&lt;div class="bg-amber-50 p-4"&gt;
+  &lt;p class="font-semibold text-slate-800"&gt;Padaria da Ana&lt;/p&gt;
+  &lt;p class="text-sm text-slate-600"&gt;Pão quentinho às 6h.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id="alvo" class="fixed inset-0 z-50 bg-black/50 p-4"&gt;
+  &lt;div class="mx-auto max-w-sm rounded-xl bg-white p-6 text-slate-800"&gt;
+    &lt;p class="font-semibold"&gt;Ficha do pão&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Fermentação de 12 horas.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Rode e compare. Antes, o cinza ocupava só a faixa do texto. Depois, ele cobre a prévia inteira e o
+painel branco fica por cima. O painel continua branco porque está dentro da camada: o cinza é o fundo
+dela, e o branco é o fundo do filho. É a mesma ideia de uma caixa dentro de outra que você já viu na
+aula de <a href="p-e-m.html">Padding e Margin</a>, só que agora com uma camada flutuando.</p>
+
+<h2>3. inset-0: colar nas quatro bordas</h2>
+
+<p>Uma camada com <code>fixed</code> e nada mais tem o tamanho do próprio conteúdo. Para ela cobrir a
+tela, é preciso dizer onde começa e onde termina. O jeito antigo seria escrever quatro propriedades:
+<code>top: 0</code>, <code>right: 0</code>, <code>bottom: 0</code>, <code>left: 0</code>. O Tailwind
+juntou as quatro em <code>inset-0</code>, com valor zero em todos os lados.</p>
+
+<p>Pense em <code>inset</code> como a distância entre o elemento e a borda do objeto ao qual ele está
+preso. Preso à janela (por causa do <code>fixed</code>) e com distância zero nos quatro lados, o
+elemento é obrigado a esticar até as quatro bordas. Daí o efeito de cortina. Se você trocar por
+<code>inset-4</code>, a camada fica com 16 px de folga em volta e aparece uma moldura da página atrás
+— bom para alguns casos, estranho para um modal.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>CSS gerado</th><th>Quando usar</th></tr>
+<tr><td><code>inset-0</code></td><td><code>inset: 0px</code></td><td>cortina que cobre tudo (modal, menu de tela cheia)</td></tr>
+<tr><td><code>inset-x-0</code></td><td><code>inset-inline: 0px</code></td><td>faixa que encosta nas laterais, altura livre</td></tr>
+<tr><td><code>inset-y-0</code></td><td><code>inset-block: 0px</code></td><td>gaveta lateral que ocupa a altura toda</td></tr>
+<tr><td><code>top-0</code></td><td><code>top: 0px</code></td><td>só a borda de cima (cabeçalho fixo)</td></tr>
+<tr><td><code>inset-4</code></td><td><code>inset: calc(var(--spacing) * 4)</code></td><td>camada com respiro em volta</td></tr>
+</table>
+</div>
+
+<p>Repare que <code>inset-x-0</code> usa <code>inset-inline</code>, que é a versão que respeita a
+direção do texto. Em português é esquerda e direita; em árabe seria o contrário. O Tailwind usa
+propriedades lógicas sempre que pode, e você ganha isso de graça.</p>
+
+<h2>4. Ficar por cima: z-50 e o fundo escurecido</h2>
+
+<p>Agora a camada cobre a tela, mas o cabeçalho da padaria continua aparecendo por cima dela. Isso é
+ordem de pintura: quando dois elementos se sobrepõem, o navegador desenha na ordem do código, e quem
+vem depois fica na frente. Se o cabeçalho estiver com <code>z-40</code>, uma camada sem
+<code>z-index</code> perde a briga. A classe <code>z-50</code> põe a camada acima dele.</p>
+
+<p>Essa é a aula de <a href="camadas-z.html">Camadas com z</a> aplicada a um caso real: dentro de um
+mesmo contexto, o número maior fica na frente. <code>z-50</code> não é mágico, é só um número alto o
+bastante para ganhar de <code>z-40</code> do cabeçalho e de <code>z-10</code> de um selo. Se amanhã
+aparecer um terceiro elemento disputando, a resposta não é subir para mil: é organizar os números em
+degraus — 10, 20, 30, 40, 50 — e saber o que cada degrau significa no seu projeto.</p>
+
+<p>O fundo é <code>bg-black/50</code>: preto com 50% de opacidade. A barra e o número são a sintaxe de
+opacidade do Tailwind v4. Em vez de escolher um cinza pronto, você pega o preto e deixa metade dele
+transparente, então o conteúdo de trás continua visível, só que apagado. Se quiser um efeito de vidro
+embaçado, some <code>backdrop-blur-sm</code> — ele desfoca o que está atrás da camada, não o que está
+na frente.</p>
+
+<pre class="term">.fixed {
+  position: fixed;
+}
+.inset-0 {
+  inset: 0px;
+}
+.z-50 {
+  z-index: 50;
+}
+.bg-black\/50 {
+  background-color: color-mix(in oklab, var(--color-black) 50%, transparent);
+}</pre>
+
+<p>Esse último seletor tem uma barra invertida no nome — <code>.bg-black\/50</code> — porque a barra
+não pode aparecer crua dentro de um seletor CSS. É detalhe de motor, não de HTML: no seu
+<code>class</code> você escreve <code>bg-black/50</code> normalmente.</p>
+
+<h2>5. Centralizar o painel no meio da cortina</h2>
+
+<p>Com a camada pronta, o painel está encostado no canto de cima. O jeito mais curto de centralizar é
+transformar a própria camada num contêiner flex e pedir alinhamento nos dois eixos:
+<code>flex items-center justify-center</code>. <code>items-center</code> centraliza na vertical (o eixo
+de cruzamento) e <code>justify-center</code> na horizontal. É a mesma dupla da aula de
+<a href="alinhamento-flex.html">Alinhamento no Flex</a>, agora com um uso muito específico.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=flex;;css:#alvo|align-items=center;;css:#alvo|justify-content=center">
+  <p class="try-task">A camada já cobre tudo, mas o painel está colado no canto. Acrescente
+  <code>flex items-center justify-center</code> à camada.</p>
+  <pre class="html">&lt;div id="alvo" class="fixed inset-0 z-50 bg-black/50 p-4"&gt;
+  &lt;div class="mx-auto max-w-sm rounded-xl bg-white p-6 text-slate-800"&gt;
+    &lt;p class="font-semibold"&gt;Ficha do pão&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Fermentação de 12 horas.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+position: fixed
+padding: 16px
+background-color: oklab(0 0 0 / 0.5)
+z-index: 50
+inset: 0px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"&gt;
+  &lt;div class="mx-auto max-w-sm rounded-xl bg-white p-6 text-slate-800"&gt;
+    &lt;p class="font-semibold"&gt;Ficha do pão&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Fermentação de 12 horas.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>p-4</code> na camada não é enfeite. Sem ele, num celular estreito o painel encosta nas
+bordas da tela e o texto fica sem respiro. Com 16 px de folga em volta, o painel nunca cola. É por
+isso que a receita completa costuma ser <code>fixed inset-0 flex items-center justify-center p-4</code>:
+a camada faz quatro trabalhos e cada classe cuida de um.</p>
+
+<p>Existe um segundo caminho, mais antigo, que você vai encontrar por aí: dar
+<code>top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2</code> ao painel. Funciona, mas exige três
+classes e quebra quando o conteúdo é mais alto que a tela. O flex resolve os dois casos e é o que os
+projetos novos usam.</p>
+
+<h2>6. O painel: largura, respiro, canto e sombra</h2>
+
+<p>O painel é a única parte que a Ana quer que a cliente leia. Ele precisa de quatro coisas: uma
+largura máxima confortável, respiro interno, cantos arredondados e sombra para se destacar da cortina.
+No Tailwind isso é <code>w-full max-w-md rounded-2xl bg-white p-6 shadow-xl</code>.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|max-width=448px;;css:#alvo|padding=24px;;css:#alvo|border-radius=16px">
+  <p class="try-task">O painel está apertado e sem canto. Deixe-o com no máximo 448 px de largura,
+  24 px de respiro e cantos de 16 px: <code>max-w-md rounded-2xl p-6</code>.</p>
+  <pre class="html">&lt;div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"&gt;
+  &lt;div id="alvo" class="w-full rounded-lg bg-white p-2 text-slate-800"&gt;
+    &lt;p class="font-semibold"&gt;Ficha do pão&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Fermentação de 12 horas, farinha integral e uma pitada de sal.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+width: 365.094px
+padding: 8px
+background-color: rgb(255, 255, 255)
+color: oklch(0.279 0.041 260.031)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"&gt;
+  &lt;div id="alvo" class="w-full max-w-md rounded-2xl bg-white p-6 text-slate-800 shadow-xl"&gt;
+    &lt;p class="font-semibold"&gt;Ficha do pão&lt;/p&gt;
+    &lt;p class="text-sm text-slate-600"&gt;Fermentação de 12 horas, farinha integral e uma pitada de sal.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A dupla <code>w-full max-w-md</code> é o padrão de qualquer modal. <code>w-full</code> diz "ocupe o
+que couber"; <code>max-w-md</code> diz "mas não passe de 448 px". Juntas, elas resolvem o celular e o
+monitor sem nenhum breakpoint: no telefone o painel usa a largura toda menos a folga do
+<code>p-4</code>, no monitor ele para em 448 px e fica centralizado. Se você usar só
+<code>w-full</code>, o painel vira uma faixa de 1200 px no monitor e o texto fica impossível de ler.</p>
+
+<p>O <code>p-6</code> dá 24 px de respiro interno, o mesmo de um cartão grande. O
+<code>rounded-2xl</code> arredonda em 16 px. O <code>shadow-xl</code> é o que separa visualmente o
+painel da cortina: sem sombra, um branco sobre um cinza parece colado; com sombra, parece flutuando.
+São quatro decisões pequenas que, juntas, fazem a janela parecer profissional.</p>
+
+<pre class="term">.max-w-md {
+  max-width: var(--container-md);
+}
+.rounded-2xl {
+  border-radius: var(--radius-2xl);
+}
+.p-6 {
+  padding: calc(var(--spacing) * 6);
+}</pre>
+
+<p>Repare que a largura vem de <code>--container-md</code>, não de um número solto. Cada tamanho de
+contêiner do Tailwind é uma variável — <code>--container-sm</code>, <code>--container-md</code>,
+<code>--container-lg</code> — e é por isso que <code>max-w-md</code> aceita ser redefinido uma vez no
+projeto inteiro. Se a padaria quiser modais mais largos, muda a variável e todos os modais crescem
+juntos.</p>
+
+<h2>7. Abrir e fechar: o hidden e o mínimo de JavaScript</h2>
+
+<p>Um modal fechado é um modal com <code>display: none</code>. No Tailwind, essa é a classe
+<code>hidden</code>. A receita é simples: o modal nasce com <code>hidden</code> na lista de classes e o
+JavaScript só remove essa palavra quando a cliente clica em "Ver ficha". Fechar é o contrário:
+acrescentar <code>hidden</code> de volta. Nenhuma outra classe muda, nada é recriado.</p>
+
+<p>Aqui entra a parte que não é CSS. <strong>Este bloco é JavaScript</strong> — a linguagem que dá
+comportamento à página. Ele não mora no HTML, e sim num arquivo <code>script.js</code> carregado no
+fim do <code>body</code>. Leia com calma: são três ouvintes de evento, e cada um faz uma coisa.</p>
+
+<pre class="file" data-file="index.html">&lt;button type="button" data-abrir&gt;Ver ficha do pão&lt;/button&gt;
+
+&lt;div id="modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+     role="dialog" aria-modal="true" aria-labelledby="titulo-modal"&gt;
+  &lt;div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"&gt;
+    &lt;h2 id="titulo-modal" class="text-xl font-semibold"&gt;Ficha do pão&lt;/h2&gt;
+    &lt;p class="mt-2 text-slate-600"&gt;Fermentação de 12 horas.&lt;/p&gt;
+    &lt;button type="button" data-fechar class="mt-6 rounded-lg bg-amber-500 px-4 py-2"&gt;Fechar&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<pre class="file" data-file="script.js">const modal = document.querySelector("#modal");
+
+document.querySelector("[data-abrir]").addEventListener("click", () =&gt; {
+  modal.classList.remove("hidden");
+});
+
+document.querySelector("[data-fechar]").addEventListener("click", () =&gt; {
+  modal.classList.add("hidden");
+});
+
+modal.addEventListener("click", (evento) =&gt; {
+  if (evento.target === modal) modal.classList.add("hidden");
+});
+
+document.addEventListener("keydown", (evento) =&gt; {
+  if (evento.key === "Escape") modal.classList.add("hidden");
+});</pre>
+
+<p>O primeiro trecho tira o <code>hidden</code> do modal. O segundo devolve, quando alguém clica no
+botão Fechar. O terceiro é o truque mais gostoso: clicar no fundo escuro fecha. Ele só funciona porque
+o alvo do clique é comparado com o próprio modal — se o clique foi no painel branco, o alvo é outro e
+nada acontece. O quarto escuta a tecla Esc no documento inteiro e fecha.</p>
+
+<p>Não existe mágica de CSS para "abrir no clique" sem JavaScript, e é importante saber disso para não
+perder tempo procurando. O que existe são truques com <code>&lt;details&gt;</code> e com
+<code>checkbox</code>, que funcionam para menus simples mas não dão o controle de foco que um modal
+precisa. Para uma janela de verdade, o caminho é esse aí: HTML com <code>hidden</code>, CSS cuidando
+da aparência, JavaScript cuidando do estado.</p>
+
+<h2>8. Acessibilidade: quem não vê a tela</h2>
+
+<p>Um leitor de tela navega pelo HTML como quem lê um sumário. Para ele, uma
+<code>div</code> colorida por cima do texto não é uma janela: é só mais um bloco no meio da página.
+Quem avisa que ali dentro existe um diálogo são os atributos ARIA. Eles não mudam nada visualmente,
+mas mudam toda a experiência de quem usa teclado e leitor de tela.</p>
+
+<dl class="anatomy">
+<dt>camada (overlay)</dt>
+<dd>A <code>div</code> com <code>fixed inset-0</code> e fundo semitransparente. Cobre a página,
+escurece o resto e captura o clique de fora.</dd>
+<dt>painel</dt>
+<dd>A caixa branca com <code>max-w-md</code> e <code>p-6</code>. É o conteúdo do modal e o que a
+cliente realmente lê.</dd>
+<dt>role="dialog"</dt>
+<dd>Atributo que diz ao leitor de tela: isto é uma janela de diálogo, não conteúdo comum. Vai no
+elemento que envolve o painel.</dd>
+<dt>aria-modal="true"</dt>
+<dd>Avisa que o resto da página está inativo enquanto a janela está aberta. Sem ele, o leitor de tela
+continua anunciando o conteúdo de trás.</dd>
+<dt>aria-labelledby</dt>
+<dd>Aponta para o <code>id</code> do título do modal. É o nome que o leitor de tela fala ao abrir:
+"Ficha do pão, diálogo".</dd>
+<dt>foco</dt>
+<dd>O lugar onde o teclado está. Ao abrir o modal, o foco deve ir para dentro dele; ao fechar, deve
+voltar para o botão que o abriu.</dd>
+</dl>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Atributo</th><th>Onde vai</th><th>O que resolve</th></tr>
+<tr><td><code>role="dialog"</code></td><td>na camada que envolve o painel</td><td>anuncia a janela, em vez de um bloco qualquer</td></tr>
+<tr><td><code>aria-modal="true"</code></td><td>junto com o <code>role</code></td><td>diz que o conteúdo de trás está inativo</td></tr>
+<tr><td><code>aria-labelledby="…"</code></td><td>na camada, apontando para o título</td><td>dá nome à janela</td></tr>
+<tr><td><code>aria-label="…"</code></td><td>na camada, quando não há título</td><td>nome no lugar do <code>aria-labelledby</code></td></tr>
+<tr><td><code>tabindex="-1"</code></td><td>no painel</td><td>permite mandar o foco para ele por código</td></tr>
+<tr><td><code>hidden</code></td><td>na camada, quando fechado</td><td>tira a janela da leitura e do teclado</td></tr>
+</table>
+</div>
+
+<p>O <code>hidden</code> faz mais do que esconder: um elemento com <code>display: none</code> sai da
+árvore de acessibilidade e não recebe foco. É por isso que ele é a forma certa de fechar o modal, e
+não <code>opacity-0</code>. Com opacidade zero, a caixa fica invisível mas continua lá, o teclado
+entra nela e o leitor de tela a lê — um fantasma que atrapalha todo mundo.</p>
+
+<p>O trabalho de foco é o mais detalhado e vale a pena: ao abrir, mande o foco para o primeiro botão
+ou para o painel; ao fechar, devolva para o botão que abriu. E deixe a tecla Tab circular só dentro do
+modal enquanto ele estiver aberto. Isso tem nome — armadilha de foco — e é o que impede a cliente de
+"entrar" no conteúdo escurecido sem perceber. Comece com o Esc e o retorno do foco; o resto vem com a
+prática.</p>
+
+<h2>9. Quando o modal quebra: três cenas</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a janela aparece atrás do cabeçalho</h3>
+<p>A Ana usou <code>fixed inset-0 bg-black/50</code> e o modal apareceu, mas o cabeçalho laranja da
+padaria continuava por cima do fundo escuro, e o botão de fechar ficava escondido atrás dele. Não era
+bug do navegador: o cabeçalho tinha <code>sticky top-0 z-40</code> e a camada não tinha
+<code>z-index</code> nenhum. Ordem de pintura é sempre uma disputa de números dentro do mesmo
+contexto. A correção é dar <code>z-50</code> à camada e manter o cabeçalho em <code>z-40</code>. Se
+mesmo assim não resolver, procure um <code>transform</code> ou <code>filter</code> em algum ancestral:
+eles criam um contexto novo e prendem o <code>z-index</code> dentro dele.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o fundo rola junto com o modal</h3>
+<p>No celular, ela arrastava o dedo sobre o fundo escuro e a página de trás rolava, o que dá aquela
+sensação de coisa quebrada. Um <code>div</code> fixo não trava a rolagem do documento. A solução é
+colocar <code>overflow-hidden</code> no <code>body</code> enquanto o modal está aberto — uma linha no
+JavaScript, ao lado do <code>classList.remove</code> — e tirar ao fechar. No Tailwind a classe existe;
+o que não existe é alguém aplicando sozinho. É o JavaScript que alterna as duas coisas: a visibilidade
+do modal e a trava da rolagem.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: no celular o painel é maior que a tela</h3>
+<p>A ficha do pão cresceu, ganhou tabela de ingredientes e virou uma janela mais alta que o telefone.
+Com <code>items-center</code>, o topo do painel sai para fora da tela e o botão de fechar desaparece.
+O ajuste é limitar a altura e deixar o miolo rolar: <code>max-h-[90vh] overflow-y-auto</code> no
+painel, e <code>items-start</code> ou <code>items-center</code> com <code>p-4</code> na camada. Os
+colchetes são o valor livre do Tailwind — 90% da altura da janela, um número que não está na escala
+mas tem motivo claro. Em telas pequenas, prefira <code>items-start sm:items-center</code> para o
+painel começar no topo.</p>
+</div>
+
+<p>As três cenas têm a mesma raiz: o modal é uma peça de <em>camadas</em>, e camadas só funcionam
+quando você sabe qual elemento está preso a quê. Vale abrir o inspetor do navegador e olhar a aba de
+camadas quando algo some — quase sempre o culpado é um <code>z-index</code> ou um contexto criado sem
+querer.</p>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual conjunto faz uma camada cobrir a janela inteira?</p>
+<label><input type="radio" name="m1"> <code>absolute inset-0 w-full h-full</code></label>
+<label><input type="radio" name="m1"> <code>fixed inset-0 z-50</code></label>
+<label><input type="radio" name="m1"> <code>sticky top-0 w-screen</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que <code>opacity-0</code> não serve para fechar um modal?</p>
+<label><input type="radio" name="m2"> porque o Tailwind não gera essa classe em modais</label>
+<label><input type="radio" name="m2"> porque ela apaga também o fundo escuro</label>
+<label><input type="radio" name="m2"> porque o elemento continua na página, recebendo foco e sendo lido</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Onde vai o <code>aria-labelledby</code>?</p>
+<label><input type="radio" name="m3"> no elemento com <code>role="dialog"</code>, apontando para o <code>id</code> do título</label>
+<label><input type="radio" name="m3"> no botão que abre o modal</label>
+<label><input type="radio" name="m3"> no <code>body</code>, para valer na página toda</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a ficha do pão</h2>
+<p>Complete a camada do modal com as classes que faltam: ela precisa sair do fluxo, cobrir a janela,
+ficar acima do cabeçalho e começar escondida.</p>
+<div class="ex-code">&lt;div id="modal" class="<input aria-label="resposta 1" data-answer="hidden fixed inset-0 z-50|fixed inset-0 z-50 hidden"> flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true"&gt;</div>
+<p class="ex-dica">Dica: são quatro classes, e a ordem entre elas não importa. Duas cuidam da posição,
+uma da camada e uma do estado inicial.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Um modal é feito de três <code>div</code>s e um punhado de classes. A camada leva
+<code>fixed inset-0 z-50 bg-black/50</code>: sai do fluxo, cobre a janela, ganha do cabeçalho e
+escurece o resto. O alinhamento vai na mesma camada, com <code>flex items-center justify-center p-4</code>.
+O painel leva <code>w-full max-w-md rounded-2xl bg-white p-6 shadow-xl</code> e é a única parte que
+precisa ser legível.</p>
+
+<p>O estado fechado é a classe <code>hidden</code>, e quem alterna é o JavaScript: remover para abrir,
+acrescentar para fechar, e mais três detalhes que separam um modal amador de um bom — Esc fecha,
+clique fora fecha, e o foco volta para o botão de origem. No caminho, os atributos
+<code>role="dialog"</code>, <code>aria-modal="true"</code> e <code>aria-labelledby</code> fazem a
+janela existir para quem usa leitor de tela.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>fixed</code> prende à janela; <code>absolute</code> prende ao ancestral posicionado.</li>
+<li><code>inset-0</code> cola nas quatro bordas — é o que transforma a camada em cortina.</li>
+<li><code>z-50</code> ganha de <code>z-40</code> do cabeçalho; organize os números em degraus.</li>
+<li><code>bg-black/50</code> é preto com metade de opacidade; <code>backdrop-blur-sm</code> embaça o fundo.</li>
+<li><code>flex items-center justify-center</code> na camada centraliza o painel nos dois eixos.</li>
+<li><code>w-full max-w-md</code> resolve celular e monitor sem breakpoint.</li>
+<li><code>p-6</code> e <code>rounded-2xl</code> dão respiro e canto ao painel; <code>shadow-xl</code> o descola do fundo.</li>
+<li><code>hidden</code> é o estado fechado — <code>display: none</code>, fora do foco e da leitura.</li>
+<li>O JavaScript só acrescenta e remove <code>hidden</code>; a aparência continua sendo CSS.</li>
+<li><code>role="dialog"</code> + <code>aria-modal="true"</code> + <code>aria-labelledby</code> =
+janela anunciada e nomeada.</li>
+<li>Trave a rolagem do <code>body</code> com <code>overflow-hidden</code> enquanto o modal estiver aberto.</li>
+<li>Painel alto demais: <code>max-h-[90vh] overflow-y-auto</code> e <code>items-start</code> no celular.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Página de Blog | Guia Tailwind</title>
+<meta name="description" content="A página de blog da padaria: coluna de leitura com largura confortável, manchete em duas colunas, lista de posts com linha de crédito e barra lateral na grade.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Página de <span class="hl">Blog</span></h1>
+<p class="intro">A Ana resolveu escrever no site da padaria. Toda semana ela publica uma receita, um
+aviso de feriado, uma história do forno. Escreveu o primeiro texto, abriu no navegador e levou um susto:
+a linha atravessa a tela inteira, de ponta a ponta, e o olho se perde no caminho. Embaixo do texto não
+tem nada — nem o nome do dia, nem a foto, nem um lugar para as categorias. Nesta aula ela monta a
+página de blog de verdade: uma coluna de leitura com largura de gente, uma manchete em duas colunas,
+uma lista de posts com a linha de crédito e uma barra lateral que só aparece quando há espaço.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Quais zonas uma página de blog tem e em que ordem elas se empilham.</li>
+  <li>Como dar à leitura uma largura confortável com <code>max-w-2xl</code> e <code>max-w-prose</code>.</li>
+  <li>Por que <code>mx-auto</code> sozinho não centraliza nada.</li>
+  <li>A manchete com miniatura fixa e texto elástico: <code>sm:grid-cols-[220px_1fr]</code>.</li>
+  <li>A linha de crédito (dia, autor, tempo de leitura) alinhada com <code>gap-x</code> e <code>gap-y</code>.</li>
+  <li>Como a página inteira vira uma grade de três colunas com <code>md:grid-cols-3</code>.</li>
+  <li>O <code>col-span-2</code> que faz o artigo ocupar duas dessas colunas.</li>
+  <li>Os tropeços de quem monta o primeiro blog.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a linha que atravessa a tela</h2>
+
+<p>O primeiro post da Ana chamava “O pão de fermentação natural” e tinha uns dez parágrafos. O HTML era
+o mais honesto possível:</p>
+
+<pre class="file" data-file="post.html">&lt;article&gt;
+  &lt;h1&gt;O pão de fermentação natural&lt;/h1&gt;
+  &lt;p&gt;A massa descansa doze horas na geladeira…&lt;/p&gt;
+  &lt;p&gt;No dia seguinte, o forno já está quente às seis…&lt;/p&gt;
+&lt;/article&gt;</pre>
+
+<p>No monitor da loja, cada linha do parágrafo ficou com quase 180 caracteres. O olho lê até o meio,
+volta para o começo da linha seguinte e erra o pulo — a sensação é de estar lendo numa esteira. Não é
+impressão: é a mesma razão pela qual jornal, revista e livro não usam a largura toda do papel. Quem lê
+precisa de uma coluna estreita o bastante para o olho voltar sem esforço.</p>
+
+<p>E o problema não acaba na largura. Falta tudo o que faz uma página de blog parecer uma página de
+blog: o dia da publicação, quem escreveu, quanto tempo leva a leitura, uma foto que dá vontade de
+clicar, um lugar para as categorias. A Ana tem o conteúdo e não tem a página. É o contrário do que ela
+imaginava que fosse acontecer.</p>
+
+<h2>2. As zonas de uma página de blog</h2>
+
+<p>Antes de escrever qualquer classe, vale desenhar o esqueleto no papel. Uma página de blog tem cinco
+zonas, e cada uma tem um trabalho:</p>
+
+<dl class="anatomy">
+<dt>cabeçalho</dt>
+<dd>A faixa do topo, com o nome do blog e alguns links. Repete em todas as páginas do site.</dd>
+<dt>manchete</dt>
+<dd>O post em destaque, com foto grande e título chamativo. É o primeiro que o olho encontra.</dd>
+<dt>coluna de leitura</dt>
+<dd>A faixa estreita onde o texto corre. Largura limitada, centralizada na página, com respiro nas
+bordas.</dd>
+<dt>linha de crédito</dt>
+<dd>O dia, o autor e o tempo de leitura, em letra menor e cor mais fraca: informação de apoio, não
+concorrência com o título.</dd>
+<dt>barra lateral</dt>
+<dd>A coluna estreita ao lado do texto, com categorias, busca ou um resumo “sobre a padaria”. Só
+aparece quando há largura para ela.</dd>
+</dl>
+
+<p>Repare que nenhuma dessas zonas é uma classe do Tailwind. São decisões de desenho — e o Tailwind só
+escreve o que você decidiu. Quem pula essa etapa passa a tarde tentando fazer um <code>div</code>
+virar três coisas ao mesmo tempo.</p>
+
+<p>A tabela abaixo é o mapa da aula inteira. Daqui para frente, cada seção pega uma linha dela e
+explica as classes com calma:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Zona</th><th>Classes típicas</th><th>Largura</th></tr>
+<tr><td>Cabeçalho</td><td><code>border-b</code>, <code>mx-auto max-w-5xl</code>, <code>flex</code></td><td>faixa inteira</td></tr>
+<tr><td>Manchete</td><td><code>bg-amber-50</code>, <code>py-10</code>, <code>sm:grid-cols-[220px_1fr]</code></td><td>faixa inteira</td></tr>
+<tr><td>Coluna de leitura</td><td><code>mx-auto max-w-2xl px-4</code></td><td>672 px no máximo</td></tr>
+<tr><td>Linha de crédito</td><td><code>flex flex-wrap</code>, <code>gap-x-3 gap-y-1</code>, <code>text-sm</code></td><td>a da coluna</td></tr>
+<tr><td>Barra lateral</td><td><code>md:grid-cols-3</code> na página, <code>md:col-span-2</code> no artigo</td><td>1/3 da página</td></tr>
+</table>
+</div>
+
+<h2>3. A medida da leitura</h2>
+
+<p>A coluna de leitura é o coração da página, então começamos por ela. A receita tem duas partes: um
+teto de largura e a centralização. O Tailwind traz uma medida feita para texto, que não usa
+<code>rem</code> nem <code>px</code>:</p>
+
+<pre class="term">.max-w-prose {
+  max-width: 65ch;
+}
+.mx-auto {
+  margin-inline: auto;
+}</pre>
+
+<p><code>ch</code> é a largura do caractere “0” na fonte em uso. Sessenta e cinco deles dão mais ou menos
+sessenta e cinco letras por linha — o número que tipógrafos chegaram por experiência e que ninguém
+precisa reinventar. Como a unidade acompanha a fonte, se a leitora aumentar o texto do navegador, a
+coluna cresce junto e a contagem de letras continua a mesma. É elegante por isso.</p>
+
+<div class="trytailwind" data-goal="rule:max-width: var(--container-2xl);;rule:margin-inline: auto">
+  <p class="try-task">O texto do post vai de ponta a ponta. Dê a ele o teto de 42 rem
+  (<code>max-w-2xl</code>) e centralize a coluna na página (<code>mx-auto</code>): duas classes no
+  <code>&lt;article id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;article id="alvo" class="px-4"&gt;
+  &lt;h2 class="text-2xl font-bold text-stone-900"&gt;O pão de fermentação natural&lt;/h2&gt;
+  &lt;p class="mt-4 text-stone-700"&gt;A massa descansa doze horas na geladeira e chega ao forno às seis da manhã, quando o cheiro já toma conta da rua. O segredo não é a farinha cara: é o tempo.&lt;/p&gt;
+&lt;/article&gt;</pre>
+  <pre class="out">
+padding-inline: 16px
+</pre>
+  <pre class="solucao">&lt;article id="alvo" class="mx-auto max-w-2xl px-4"&gt;
+  &lt;h2 class="text-2xl font-bold text-stone-900"&gt;O pão de fermentação natural&lt;/h2&gt;
+  &lt;p class="mt-4 text-stone-700"&gt;A massa descansa doze horas na geladeira e chega ao forno às seis da manhã, quando o cheiro já toma conta da rua. O segredo não é a farinha cara: é o tempo.&lt;/p&gt;
+&lt;/article&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra o teto de 672 px e a margem automática dos dois lados. <code>42
+rem</code> é outra conta: 42 × 16 = 672 px. As duas medidas existem porque servem a coisas diferentes —
+<code>max-w-2xl</code> dá uma coluna de tamanho previsível para fotos e títulos combinarem;
+<code>max-w-prose</code> dá uma coluna que acompanha a fonte. Para um bloco de texto puro, fique com
+<code>max-w-prose</code>; para um bloco que também tem imagem e subtítulo, prefira a escala normal, que
+não encolhe quando a pessoa aumenta a fonte do texto.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Largura</th><th>Serve para</th></tr>
+<tr><td><code>max-w-xl</code></td><td>36 rem = 576 px</td><td>texto bem estreito, cartão de aviso</td></tr>
+<tr><td><code>max-w-2xl</code></td><td>42 rem = 672 px</td><td>o padrão de post de blog</td></tr>
+<tr><td><code>max-w-3xl</code></td><td>48 rem = 768 px</td><td>post com foto grande no meio</td></tr>
+<tr><td><code>max-w-prose</code></td><td>65 caracteres</td><td>só parágrafos, medida tipográfica</td></tr>
+<tr><td><code>max-w-none</code></td><td>sem teto</td><td>tabela larga, nunca texto corrido</td></tr>
+</table>
+</div>
+
+<p>E o teste que vale mais que a tabela: leia o texto em voz alta. Se você precisar mover a cabeça para
+acompanhar a linha, a coluna está larga demais. Se as quebras de linha parecerem um telegrama, está
+estreita.</p>
+
+<h2>4. Centralizar sem grudar na borda</h2>
+
+<p>O <code>mx-auto</code> tem uma fama que não merece. Muita gente escreve <code>mx-auto</code> no
+elemento e não vê nada acontecer — e a explicação é simples: a margem automática só tem espaço para
+distribuir quando o elemento é mais estreito que o pai. Num bloco de largura automática, ele ocupa
+100% do pai, não sobra nada dos lados, e a margem automática vale zero. Por isso a dupla aparece sempre
+junta: o <code>max-w</code> cria a sobra e o <code>mx-auto</code> reparte a sobra igualmente entre os
+dois lados.</p>
+
+<p>O terceiro nome da dupla é o respiro. Sem <code>px-4</code>, no celular o texto encosta no vidro da
+tela: a coluna ocupa toda a largura disponível e a primeira letra fica no limite. O
+<code>px-4</code> garante 16 px de cada lado, sempre. É por isso que a solução da caixa anterior tinha
+<code>mx-auto max-w-2xl px-4</code> e não só as duas primeiras classes.</p>
+
+<pre class="file" data-file="post.html">&lt;main class="mx-auto max-w-2xl px-4 py-10"&gt;
+  &lt;article&gt;…&lt;/article&gt;
+&lt;/main&gt;</pre>
+
+<p>Esse <code>main</code> é a espinha do blog: centralizado, com teto, com respiro e com
+<code>py-10</code> para o texto não começar colado no cabeçalho. Tudo o que for conteúdo de leitura vai
+dentro dele — e tudo o que for largura total (a faixa colorida do topo, a manchete com foto sangrando
+até a borda) fica fora. Essa separação entre “faixa larga” e “coluna de leitura” é o que dá ritmo à
+página: a vista descansa nas faixas e volta para a coluna quando volta a ler.</p>
+
+<h2>5. O topo: cabeçalho e a faixa da manchete</h2>
+
+<p>Com a coluna pronta, o resto da página se organiza em volta dela. O cabeçalho é uma faixa de largura
+total com o nome do blog de um lado e os links do outro; a manchete é outra faixa, também larga, com
+fundo claro para separar do texto:</p>
+
+<pre class="file" data-file="blog.html">&lt;header class="border-b border-stone-200 bg-white"&gt;
+  &lt;div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4"&gt;
+    &lt;p class="font-bold text-stone-900"&gt;Do Forno&lt;/p&gt;
+    &lt;nav class="hidden gap-4 text-sm text-stone-600 sm:flex"&gt;
+      &lt;a href="#"&gt;Receitas&lt;/a&gt;
+      &lt;a href="#"&gt;A padaria&lt;/a&gt;
+    &lt;/nav&gt;
+  &lt;/div&gt;
+&lt;/header&gt;
+
+&lt;section class="border-b border-stone-200 bg-amber-50"&gt;
+  &lt;div class="mx-auto max-w-5xl px-4 py-10"&gt;
+    &lt;p class="text-sm font-medium text-amber-700"&gt;Destaque da semana&lt;/p&gt;
+    &lt;h2 class="mt-2 text-3xl font-bold text-stone-900"&gt;Pão de fermentação natural&lt;/h2&gt;
+    &lt;p class="mt-2 max-w-2xl text-stone-700"&gt;Doze horas de geladeira e um forno a 250 graus.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</pre>
+
+<p>Repare no <code>max-w-5xl</code> do cabeçalho: ele é mais largo que a coluna de leitura, porque
+cabeçalho não é texto corrido. E repare no <code>hidden sm:flex</code> dos links: no celular eles
+desaparecem e o topo fica só com o nome do blog. Não é preguiça — é a decisão que a maioria dos sites
+toma, porque dois links pequenos num telefone viram alvos de 20 px que ninguém acerta com o dedo. Numa
+página de verdade, no lugar deles entraria um botão de menu; a estrutura é a mesma.</p>
+
+<p>A manchete tem um detalhe de ritmo que vale notar: <code>py-10</code> na faixa e
+<code>max-w-2xl</code> na chamada. O respiro é da faixa, a medida é do texto. Misturar os dois — pôr o
+respiro no texto e a largura na faixa — é o caminho mais curto para uma faixa que parece apertada.</p>
+
+<h2>6. A manchete em duas colunas</h2>
+
+<p>Quando o post em destaque tem foto, a manchete ganha duas colunas: a miniatura à esquerda, o título e
+a chamada à direita. E aqui aparece um recurso que as aulas de grade só tocaram de leve: colunas de
+tamanhos diferentes, escritas na hora.</p>
+
+<div class="trytailwind" data-goal="rule:grid-template-columns: 220px 1fr;;rule:@media (width &gt;= 40rem)">
+  <p class="try-task">A foto está empilhada em cima do título. A partir de 640 px, ponha a foto numa
+  coluna fixa de 220 px e o texto na coluna que sobra: acrescente
+  <code>sm:grid-cols-[220px_1fr]</code> ao <code>&lt;div id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="grid gap-6"&gt;
+  &lt;div class="h-40 rounded-xl bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div&gt;
+    &lt;p class="text-sm font-medium text-amber-700"&gt;Destaque&lt;/p&gt;
+    &lt;h3 class="mt-1 text-2xl font-bold text-stone-900"&gt;Pão de fermentação natural&lt;/h3&gt;
+    &lt;p class="mt-2 text-stone-700"&gt;Doze horas de geladeira e um forno a 250 graus.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+gap: 24px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid gap-6 sm:grid-cols-[220px_1fr]"&gt;
+  &lt;div class="h-40 rounded-xl bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div&gt;
+    &lt;p class="text-sm font-medium text-amber-700"&gt;Destaque&lt;/p&gt;
+    &lt;h3 class="mt-1 text-2xl font-bold text-stone-900"&gt;Pão de fermentação natural&lt;/h3&gt;
+    &lt;p class="mt-2 text-stone-700"&gt;Doze horas de geladeira e um forno a 250 graus.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Os colchetes são a porta dos valores fora da escala. Dentro deles vai o valor de
+<code>grid-template-columns</code> como você escreveria em CSS, com uma troca: o espaço vira
+<em>underline</em>. Por isso <code>[220px_1fr]</code> e não <code>[220px 1fr]</code> — o espaço
+encerraria o nome da classe. A leitura é “uma coluna de 220 px e outra que fica com o resto”.</p>
+
+<p>Por que 220 px fixos na foto? Porque miniatura tem tamanho natural: uma foto de 220 px fica nítida
+em qualquer tela e o título ao lado nunca fica espremido. Se a coluna fosse
+<code>1fr 1fr</code>, as duas metades cresceriam juntas no monitor grande e a foto viraria um painel
+desproporcional. Já o texto precisa do contrário: quanto mais largura, melhor — e é o
+<code>1fr</code> que dá isso. Fixo onde tem medida, elástico onde tem conteúdo.</p>
+
+<p>Repare também no que o <code>sm:</code> fez: no celular, as duas colunas viram uma e a foto fica em
+cima, como capa. Isso é bom — foto grande no telefone é convite ao toque. Se você preferir esconder a
+miniatura no celular, <code>hidden sm:block</code> nela resolve; o texto fica sozinho e a manchete
+perde peso, ganha rapidez.</p>
+
+<h2>7. A lista de posts e a linha de crédito</h2>
+
+<p>Abaixo da manchete vem a lista: cada post com título, um resumo de duas ou três linhas e a linha de
+crédito. O espaçamento entre os posts é maior que o espaçamento dentro deles, e essa diferença é o que
+faz a lista parecer organizada:</p>
+
+<pre class="file" data-file="blog.html">&lt;div class="grid gap-10"&gt;
+  &lt;article class="grid gap-2"&gt;
+    &lt;h3 class="text-xl font-semibold text-stone-900"&gt;Broa de milho da vó&lt;/h3&gt;
+    &lt;p class="line-clamp-3 text-stone-700"&gt;A receita que a Ana guardou num caderno…&lt;/p&gt;
+    &lt;p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-stone-500"&gt;
+      &lt;time datetime="2025-03-11"&gt;11 de março&lt;/time&gt;
+      &lt;span&gt;·&lt;/span&gt;
+      &lt;span&gt;Ana&lt;/span&gt;
+      &lt;span&gt;·&lt;/span&gt;
+      &lt;span&gt;3 min de leitura&lt;/span&gt;
+    &lt;/p&gt;
+  &lt;/article&gt;
+&lt;/div&gt;</pre>
+
+<p>Aqui aparecem duas ideias que já foram vistas em outras aulas, agora em serviço do layout.
+<code>gap-10</code> no pai separa os posts; <code>gap-2</code> em cada post separa título, resumo e
+crédito. E o <code>line-clamp-3</code> no resumo corta o texto em três linhas com reticências, o que
+mantém todos os posts da lista com a mesma altura — sem ele, um resumo de duas linhas e outro de oito
+deixam a coluna serrilhada e as linhas de crédito desalinhadas.</p>
+
+<p>Na linha de crédito, <code>gap-x-3</code> é o espaço horizontal entre os itens e <code>gap-y-1</code>
+o vertical. Parece detalhe de luxo, mas é o que segura a linha no celular: quando os três pedaços não
+cabem lado a lado, eles quebram para a linha de baixo com 4 px entre elas, em vez de colar um no outro.
+O separador “·” é texto comum, e o <code>flex-wrap</code> permite que ele vá junto com o vizinho.</p>
+
+<p>Sobre a cor: a linha de crédito é informação de apoio. Por isso <code>text-sm</code> (menor) e
+<code>text-stone-500</code> (mais fraca que o título). Se ela tiver o mesmo peso do título, o olho não
+sabe o que ler primeiro — e a hierarquia é justamente o que faz uma lista ser uma lista.</p>
+
+<h2>8. A página inteira em três colunas</h2>
+
+<p>Falta a barra lateral com as categorias. Ela só pode existir quando há largura sobrando, então a
+página inteira passa a ser uma grade de três colunas: o artigo ocupa duas, a lateral ocupa uma.</p>
+
+<div class="trytailwind" data-largura="768" data-goal="rule:@media (width &gt;= 48rem);;rule:grid-template-columns: repeat(3, minmax(0, 1fr));;rule:grid-column: span 2 / span 2;;largura:768">
+  <p class="try-task">A prévia está com 768 px. A lateral está embaixo do artigo. A partir de 768 px,
+  faça a página uma grade de três colunas (<code>md:grid-cols-3</code> no bloco de fora) e deixe o
+  artigo ocupar duas delas (<code>md:col-span-2</code> no <code>&lt;article&gt;</code>).</p>
+  <pre class="html">&lt;div id="alvo" class="grid gap-8"&gt;
+  &lt;article class="grid gap-3"&gt;
+    &lt;h2 class="text-2xl font-bold text-stone-900"&gt;Pão de fermentação natural&lt;/h2&gt;
+    &lt;p class="text-stone-700"&gt;A massa descansa doze horas na geladeira. O segredo não é a farinha cara: é o tempo.&lt;/p&gt;
+  &lt;/article&gt;
+  &lt;aside class="grid gap-2 rounded-xl bg-stone-100 p-4"&gt;
+    &lt;p class="text-sm font-semibold text-stone-900"&gt;Categorias&lt;/p&gt;
+    &lt;a href="#" class="text-sm text-stone-600"&gt;Receitas&lt;/a&gt;
+    &lt;a href="#" class="text-sm text-stone-600"&gt;Avisos&lt;/a&gt;
+  &lt;/aside&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+gap: 32px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid gap-8 md:grid-cols-3"&gt;
+  &lt;article class="grid gap-3 md:col-span-2"&gt;
+    &lt;h2 class="text-2xl font-bold text-stone-900"&gt;Pão de fermentação natural&lt;/h2&gt;
+    &lt;p class="text-stone-700"&gt;A massa descansa doze horas na geladeira. O segredo não é a farinha cara: é o tempo.&lt;/p&gt;
+  &lt;/article&gt;
+  &lt;aside class="grid gap-2 rounded-xl bg-stone-100 p-4"&gt;
+    &lt;p class="text-sm font-semibold text-stone-900"&gt;Categorias&lt;/p&gt;
+    &lt;a href="#" class="text-sm text-stone-600"&gt;Receitas&lt;/a&gt;
+    &lt;a href="#" class="text-sm text-stone-600"&gt;Avisos&lt;/a&gt;
+  &lt;/aside&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS gerado deixa o mecanismo às claras:</p>
+
+<pre class="term">@media (width &gt;= 48rem) {
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .md\:col-span-2 {
+    grid-column: span 2 / span 2;
+  }
+}</pre>
+
+<p>São duas decisões separadas, e é aí que a maioria erra. <code>md:grid-cols-3</code> diz quantas
+colunas a grade tem; <code>md:col-span-2</code> diz quantas o filho atravessa. Só a primeira deixa o
+artigo espremido em um terço da página — parece que a lateral cresceu, mas o que aconteceu é que ninguém
+mandou o artigo ocupar mais espaço. Só a segunda não faz nada, porque não existe terceira coluna para
+atravessar.</p>
+
+<p>Dá para conseguir o mesmo com <code>md:grid-cols-[2fr_1fr]</code>, e é uma escolha legítima: a
+diferença aparece quando a página cresce. Com <code>col-span-2</code>, o artigo e a lateral herdam a
+mesma grade do resto da página, o que facilita acrescentar uma terceira zona depois (um bloco de
+“últimos posts” embaixo, ocupando as três colunas com <code>col-span-3</code>). Com
+<code>2fr 1fr</code>, cada mudança de estrutura exige reescrever as colunas.</p>
+
+<p>Na barra lateral, vale um <code>sticky top-6</code> quando as categorias são poucas e o texto é
+longo: a coluna acompanha a rolagem e não some no primeiro parágrafo. É a mesma classe da aula de
+posicionamento, e aqui ela brilha.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: no celular, a miniatura come a tela</h3>
+<p>A manchete ficou perfeita no computador: 220 px de foto e o texto ao lado. No celular, a foto ocupou
+a largura toda com 160 px de altura e o título foi empurrado para baixo da dobra — quem abriu o link não
+viu o título. A causa é que a altura da foto é fixa (<code>h-40</code>) e a largura, não: no celular ela
+vira uma faixa panorâmica. Duas saídas: trocar a altura por proporção, com
+<code>aspect-[4/3]</code>, que mantém a foto com forma de foto em qualquer largura; ou esconder a
+miniatura no celular com <code>hidden sm:block</code>, deixando título e chamada ocuparem o lugar. As
+duas são boas — só não deixe a foto decidir o layout por você.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o texto centralizado que encosta na borda</h3>
+<p>A Ana copiou <code>mx-auto max-w-2xl</code> de um exemplo e, no celular, o texto ficou grudado no
+vidro. Não havia erro na cópia: faltava o <code>px-4</code>. Quando a tela é mais estreita que o teto,
+o <code>max-w-2xl</code> deixa de valer (a largura disponível é menor) e o bloco ocupa 100% do pai. Sem
+respiro lateral, a primeira e a última letra ficam no limite. A regra que evita o retrabalho: sempre que
+houver <code>mx-auto max-w-…</code>, escreva o <code>px-4</code> na mesma linha.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a barra lateral que não aparece</h3>
+<p>A dúvida chegou com print e tudo: “escrevi <code>md:grid-cols-3</code> e <code>md:col-span-2</code> e
+a lateral continua embaixo do artigo”. Nove entre dez vezes, a janela estava com menos de 768 px — a
+prévia do editor, uma janela encostada no lado da tela, o navegador com zoom alto. O prefixo
+<code>md:</code> é um acordo com a largura: abaixo dela, as classes não existem. Antes de mexer no
+código, alargue a janela e confira na barra do painel quantos pixels o navegador está reportando. Se o
+número for menor que 768, o CSS está certo e o problema é de régua.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. O que <code>mx-auto max-w-2xl</code> faz num
+<code>article</code>?</p>
+<label><input type="radio" name="q1"> limita a largura a 672 px e reparte a sobra igualmente dos dois lados</label>
+<label><input type="radio" name="q1"> aumenta a fonte do texto até caber em 672 px</label>
+<label><input type="radio" name="q1"> centraliza o texto dentro de cada parágrafo</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Quando o <code>mx-auto</code> não muda nada na
+tela?</p>
+<label><input type="radio" name="q2"> quando o elemento tem <code>px-4</code></label>
+<label><input type="radio" name="q2"> quando o elemento é um <code>article</code></label>
+<label><input type="radio" name="q2"> quando o elemento já ocupa 100% da largura do pai</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Na grade de três colunas, como o artigo passa a
+ocupar duas?</p>
+<label><input type="radio" name="q3"> com <code>md:grid-cols-2</code> nele</label>
+<label><input type="radio" name="q3"> com <code>md:col-span-2</code> nele</label>
+<label><input type="radio" name="q3"> com <code>md:row-span-2</code> nele</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a coluna de leitura</h2>
+<p>Este é o bloco que envolve o texto de um post. Complete a classe que centraliza a coluna na página,
+sabendo que ela já tem teto (<code>max-w-2xl</code>) e respiro (<code>px-4</code>).</p>
+<div class="ex-code">&lt;article class="<input aria-label="resposta 1" data-answer="mx-auto" placeholder="..."> max-w-2xl px-4"&gt;</div>
+<p class="ex-dica">Dica: sem teto, a margem automática não tem sobra para repartir. Com teto, ela
+centraliza. A classe é a mesma que se usa em qualquer bloco de largura limitada.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Uma página de blog é uma coluna estreita cercada de faixas largas. A coluna recebe
+<code>mx-auto max-w-2xl px-4</code>: o teto de 672 px, a margem automática que reparte a sobra e o
+respiro que salva o celular. Para texto puro, <code>max-w-prose</code> faz a mesma coisa com a medida
+tipográfica de 65 caracteres, que acompanha o tamanho da fonte.</p>
+
+<p>Em volta dela, cada zona tem a sua regra. O cabeçalho e a manchete usam <code>max-w-5xl</code>,
+porque faixa larga não é texto corrido. A manchete com foto usa uma grade de duas colunas escritas na
+hora — <code>sm:grid-cols-[220px_1fr]</code> — com a miniatura fixa e o texto elástico. A lista de posts
+separa com <code>gap-10</code> entre itens e <code>gap-2</code> dentro deles, e o <code>line-clamp-3</code>
+no resumo mantém todos com a mesma altura. A linha de crédito usa <code>gap-x-3</code> e
+<code>gap-y-1</code> para quebrar sem colar.</p>
+
+<p>Quando há espaço, a página inteira vira <code>md:grid-cols-3</code> e o artigo atravessa duas colunas
+com <code>md:col-span-2</code>; a lateral fica com a terceira. São duas classes com trabalhos
+diferentes, e esquecer a segunda é o erro mais comum: sem ela, o artigo fica espremido e parece que a
+lateral é que cresceu.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Coluna de leitura: <code>mx-auto max-w-2xl px-4</code>. Os três juntos, nessa ordem.</li>
+<li><code>max-w-prose</code> = <code>65ch</code>: a medida acompanha o tamanho da fonte.</li>
+<li><code>mx-auto</code> só centraliza quando existe sobra — ou seja, com um teto de largura.</li>
+<li>Faixas largas (topo, manchete) usam <code>max-w-5xl</code>; texto corrido usa <code>max-w-2xl</code>.</li>
+<li><code>[220px_1fr]</code>: colchetes para valor fora da escala, underline no lugar do espaço.</li>
+<li>Grade: <code>grid-cols-n</code> diz quantas colunas; <code>col-span-n</code> diz quantas o filho usa.</li>
+<li><code>gap-10</code> entre posts, <code>gap-2</code> dentro de cada post: ritmos diferentes.</li>
+<li><code>gap-x</code> e <code>gap-y</code> separam na horizontal e na vertical quando a linha quebra.</li>
+<li>Prefixo <code>md:</code> vale a partir de 768 px — confira a largura da janela antes de acusar o CSS.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blog | Guia Tailwind</title>
+<meta name="description" content="Projeto da capa de um blog com Tailwind: o post em destaque em duas colunas, a grade de posts com line-clamp, os chips de categoria, a coluna lateral e a paginação.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Blog</span></h1>
+<p class="intro">A Ana escreve no caderno desde que abriu a padaria: o que deu certo, o que queimou, a
+receita que a cliente pediu. Um dia percebeu que aquilo era conteúdo — e que conteúdo parado no caderno não
+traz ninguém. Ela quer um blog dentro do site, começando pela capa: o post em destaque, a lista dos últimos
+textos, as categorias e um lugar para a pessoa deixar o e-mail. Nesta aula ela monta essa capa inteira, do
+cabeçalho ao botão de próxima página, usando o que os níveis 1 e 2 do guia já ensinaram.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A capa de um blog: cabeçalho curto, destaque, grade de posts e paginação.</li>
+  <li>O post em destaque em duas colunas com <code>md:grid-cols-2 md:items-center</code>.</li>
+  <li>Cartões de post iguais usando <code>line-clamp-3</code> no resumo.</li>
+  <li>O truque do <code>group</code> com <code>group-hover:</code> na imagem e no título.</li>
+  <li>Chips de categoria com <code>flex flex-wrap gap-2</code>.</li>
+  <li>O layout de conteúdo com lateral: <code>lg:grid-cols-3</code> e <code>lg:col-span-2</code>.</li>
+  <li>Paginação simples com <code>flex items-center justify-between</code>.</li>
+  <li>Por que cada post é um <code>article</code> com <code>time</code> e link no título.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o caderno virou blog</h2>
+
+<p>O caderno da Ana tem dezenove páginas escritas. Nelas estão coisas que valem ouro para quem compra pão:
+por que o pão de fermentação natural dura mais, como guardar a broa, o que fazer com o pão de ontem, por que
+o forno a lenha muda a casca. Nada disso está no site, e o site tem três páginas que ninguém visita duas
+vezes.</p>
+
+<p>Blog resolve um problema diferente de landing page. Landing pede uma ação agora; blog constrói
+confiança no longo prazo e traz gente pelo buscador. Isso muda o desenho. Página de campanha é uma coluna
+única com um caminho; capa de blog é uma <strong>lista</strong> — muitas portas de entrada, cada uma levando
+a um texto. E a pessoa que chega quer saber rápido se ali tem algo para ela, então o que importa é o título,
+a categoria e a data.</p>
+
+<p>Existe uma consequência prática dessa diferença: no blog, os cartões precisam parecer iguais. Se um
+cartão tem resumo de duas linhas e o vizinho de cinco, a grade fica torta e o olho não consegue varrer a
+lista. Todo o trabalho de cartão de post é o de manter a altura sob controle — e há uma classe no Tailwind
+que resolve isso em uma palavra, o <code>line-clamp</code>.</p>
+
+<p>A capa que vamos montar tem seis peças: o cabeçalho com título e descrição, o post em destaque, a linha
+de categorias, a grade de posts, a coluna lateral com a autora e o e-mail, e a paginação. Na ordem em que a
+pessoa lê: quem é isso, o que tem de novo, sobre o que fala, o que mais existe, quem escreve, e para onde
+ir depois.</p>
+
+<h2>2. O cabeçalho da capa: curto e centralizado</h2>
+
+<p>Capa de blog não precisa de hero gigante. Precisa de um cabeçalho de três linhas: título, uma frase
+explicando o que se publica ali e nada mais. O desenho é
+<code>mx-auto max-w-2xl px-6 py-12 text-center</code> com o título em
+<code>text-3xl font-semibold tracking-tight</code> e a descrição em <code>mt-3 text-slate-600</code>.</p>
+
+<pre class="file" data-file="blog.html">&lt;header class="mx-auto max-w-2xl px-6 py-12 text-center"&gt;
+  &lt;p class="text-xs font-semibold uppercase tracking-wide text-amber-700"&gt;Caderno da padaria&lt;/p&gt;
+  &lt;h2 class="mt-3 text-3xl font-semibold tracking-tight text-slate-900"&gt;Histórias do forno&lt;/h2&gt;
+  &lt;p class="mt-3 text-slate-600"&gt;Receitas testadas, bastidores da produção e respostas para as dúvidas que chegam no balcão.&lt;/p&gt;
+&lt;/header&gt;</pre>
+
+<p>O <code>text-center</code> no cabeçalho é uma exceção deliberada: o resto da página é alinhado à
+esquerda, porque texto de leitura à esquerda é mais confortável. Centralizar só o cabeçalho cria um respiro
+visual entre a navegação do site e a lista de posts, e dá ao blog um ar de capa de revista. Se você
+centralizar os cartões também, a lista vira um casamento — ninguém sabe onde cada resumo começa.</p>
+
+<pre class="term">.mx-auto {
+  margin-inline: auto;
+}
+.max-w-2xl {
+  max-width: var(--container-2xl);
+}
+.text-center {
+  text-align: center;
+}
+.tracking-tight {
+  --tw-tracking: var(--tracking-tight);
+  letter-spacing: var(--tracking-tight);
+}</pre>
+
+<p>Vale notar que a página do blog tem o <code>h1</code> do site e este <code>h2</code> aqui. Em um blog de
+verdade, o título do blog é o <code>h1</code> da capa e cada título de post é <code>h2</code> (ou
+<code>h3</code>, se estiver dentro de uma seção). Essa hierarquia não muda a aparência — as classes cuidam
+disso — mas muda a navegação por leitor de tela e a leitura do buscador. É de graça e quase ninguém faz.</p>
+
+<h2>3. O post em destaque: duas colunas, uma história</h2>
+
+<p>Toda capa de blog tem um post que merece mais espaço. O desenho clássico é uma faixa em duas colunas:
+imagem de um lado, texto do outro, alinhados pelo centro vertical. As classes são
+<code>grid gap-8 md:grid-cols-2 md:items-center</code>, e o <code>md:items-center</code> é o que faz o texto
+ficar no meio da altura da imagem em vez de colado no topo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=grid;;rule:grid-template-columns: repeat(2, minmax(0, 1fr));;css:#alvo|align-items=center" data-largura="768">
+  <p class="try-task">A imagem está em cima e o texto embaixo, colado no topo. Ponha os dois lado a lado a partir de 768 px,
+  com 32 px de distância e alinhados pelo centro: acrescente <code>md:grid-cols-2 md:items-center</code>.</p>
+  <pre class="html">&lt;article class="bg-white px-6 py-8"&gt;
+  &lt;div id="alvo" class="mx-auto grid max-w-4xl gap-8"&gt;
+    &lt;div class="aspect-video rounded-2xl bg-amber-200"&gt;&lt;/div&gt;
+    &lt;div&gt;
+      &lt;p class="text-xs font-semibold uppercase tracking-wide text-amber-700"&gt;Bastidores&lt;/p&gt;
+      &lt;p class="mt-2 text-2xl font-semibold text-slate-900"&gt;Doze horas de fermentação&lt;/p&gt;
+      &lt;p class="mt-2 text-sm text-slate-600"&gt;O que acontece com a massa enquanto a padaria dorme.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/article&gt;</pre>
+  <pre class="out">
+display: grid
+max-width: 896px
+gap: 32px
+</pre>
+  <pre class="solucao">&lt;article class="bg-white px-6 py-8"&gt;
+  &lt;div id="alvo" class="mx-auto grid max-w-4xl gap-8 md:grid-cols-2 md:items-center"&gt;
+    &lt;div class="aspect-video rounded-2xl bg-amber-200"&gt;&lt;/div&gt;
+    &lt;div&gt;
+      &lt;p class="text-xs font-semibold uppercase tracking-wide text-amber-700"&gt;Bastidores&lt;/p&gt;
+      &lt;p class="mt-2 text-2xl font-semibold text-slate-900"&gt;Doze horas de fermentação&lt;/p&gt;
+      &lt;p class="mt-2 text-sm text-slate-600"&gt;O que acontece com a massa enquanto a padaria dorme.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/article&gt;</pre>
+</div>
+
+<p>Aqui a "imagem" é um <code>div</code> com <code>aspect-video rounded-2xl bg-amber-200</code>, para você
+ver a proporção sem depender de arquivo. No projeto de verdade, troque por
+<code>&lt;img class="aspect-video w-full rounded-2xl object-cover" alt="..."&gt;</code> — as
+<code>aspect-video</code> e <code>rounded-2xl</code> continuam valendo. Em blog, imagem de cartão é sempre
+16:9 com <code>object-cover</code>: é o formato que combina com foto de celular e com banco de imagens.</p>
+
+<p>Uma decisão de conteúdo que muda o layout: o destaque precisa de um resumo curto. Título, duas linhas de
+resumo, uma linha de meta (categoria, data, tempo de leitura) e pronto. Se você escrever quatro parágrafos
+no destaque, ele deixa de ser destaque e vira o próprio post — e aí ninguém clica, porque já leu.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor</th><th>Onde entra</th></tr>
+<tr><td><code>grid gap-8</code></td><td>32 px</td><td>a grade do destaque</td></tr>
+<tr><td><code>md:grid-cols-2</code></td><td>2 colunas ≥ 768 px</td><td>imagem e texto lado a lado</td></tr>
+<tr><td><code>md:items-center</code></td><td>centraliza na vertical</td><td>texto no meio da imagem</td></tr>
+<tr><td><code>max-w-4xl</code></td><td>896 px</td><td>teto da faixa de destaque</td></tr>
+<tr><td><code>aspect-video</code></td><td>16:9</td><td>a caixa da imagem</td></tr>
+<tr><td><code>text-2xl</code></td><td>24 px</td><td>o título do destaque</td></tr>
+</table>
+</div>
+
+<h2>4. A grade de posts: cartões iguais de propósito</h2>
+
+<p>Abaixo do destaque vêm os últimos posts: três ou seis cartões em duas colunas no desktop, uma no
+telefone. A grade é <code>grid gap-8 sm:grid-cols-2</code>. Cada cartão é um <code>article</code> com
+imagem, categoria, título, resumo e uma linha de meta. O segredo para a grade não ficar torta é o resumo ter
+altura previsível — e é aí que entra o <code>line-clamp-3</code>.</p>
+
+<pre class="file" data-file="blog.html">&lt;article class="group"&gt;
+  &lt;a href="#post-pao" class="block"&gt;
+    &lt;img src="pao.jpg" alt="Pão de fermentação natural cortado ao meio"
+         class="aspect-video w-full rounded-xl object-cover transition group-hover:opacity-90"&gt;
+    &lt;p class="mt-4 text-xs font-semibold uppercase tracking-wide text-amber-700"&gt;Receitas&lt;/p&gt;
+    &lt;h3 class="mt-2 text-lg font-semibold text-slate-900 transition group-hover:text-amber-700"&gt;
+      Pão de fermentação natural em casa
+    &lt;/h3&gt;
+    &lt;p class="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-600"&gt;
+      Você não precisa de forno a lenha para fazer um pão de casca boa. Precisa de tempo, de uma tigela
+      grande e de paciência para esperar a massa crescer duas vezes.
+    &lt;/p&gt;
+    &lt;p class="mt-4 flex items-center gap-3 text-xs text-slate-500"&gt;
+      &lt;time datetime="2026-05-12"&gt;12 de maio&lt;/time&gt;
+      &lt;span aria-hidden="true"&gt;·&lt;/span&gt;
+      &lt;span&gt;6 min de leitura&lt;/span&gt;
+    &lt;/p&gt;
+  &lt;/a&gt;
+&lt;/article&gt;</pre>
+
+<p>O <code>line-clamp-3</code> corta o texto em três linhas e coloca reticências, sem você precisar
+controlar o tamanho de cada resumo — a aula de <a href="quebrar-linhas.html">Quebrar e Cortar Texto</a>
+mostra as outras medidas e o <code>truncate</code> de uma linha só. O CSS gerado mostra que ele faz quatro coisas de uma vez — e é um bom
+exemplo de classe que economiza um bloco de código:</p>
+
+<pre class="term">.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}</pre>
+
+<p>O <code>group</code> no <code>article</code> e os <code>group-hover:</code> nos filhos são o outro
+truque — e têm aula própria em <a href="group-hover.html">O group-hover</a>. O <code>group</code> marca o cartão inteiro como referência; quando o mouse passa em qualquer ponto
+dele, o <code>group-hover:opacity-90</code> da imagem e o <code>group-hover:text-amber-700</code> do título
+acontecem juntos. O resultado é o cartão reagindo como um objeto único, e não como três links separados. Em
+cartão de blog inteiro clicável, isso não é enfeite: é o aviso de que aquilo é um alvo só.</p>
+
+<dl class="anatomy">
+<dt>imagem</dt>
+<dd><code>aspect-video w-full rounded-xl object-cover</code>: proporção fixa, canto, recorte.</dd>
+<dt>categoria</dt>
+<dd><code>text-xs font-semibold uppercase tracking-wide text-amber-700</code>: a etiqueta que orienta.</dd>
+<dt>título</dt>
+<dd><code>text-lg font-semibold</code>: o maior texto do cartão, com <code>group-hover:text-amber-700</code>.</dd>
+<dt>resumo</dt>
+<dd><code>line-clamp-3 text-sm leading-relaxed</code>: três linhas, sempre, com entrelinha folgada.</dd>
+<dt>meta</dt>
+<dd><code>flex items-center gap-3 text-xs text-slate-500</code> com <code>time</code> de verdade.</dd>
+</dl>
+
+<p>Note que o <code>a</code> envolve o cartão todo — imagem, título e resumo. Isso é bom para o toque (a
+área clicável é grande) e é bom para leitor de tela (um link, não quatro). O que não se faz é aninhar outro
+link dentro: se precisar de "ler mais", ele é texto, não link. Dois links para o mesmo destino na mesma
+área confundem quem navega por tabulação.</p>
+
+<h2>5. As categorias: chips que quebram linha</h2>
+
+<p>Cinco categorias em uma faixa: receitas, bastidores, pão, doces e encomendas. Elas precisam caber na
+mesma linha no monitor e quebrar sozinhas no telefone. A receita é <code>flex flex-wrap gap-2</code> no pai e
+<code>rounded-full bg-slate-100 px-3 py-1 text-sm</code> em cada chip, com
+<code>hover:bg-amber-100 hover:text-amber-900</code> para indicar que são clicáveis.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=flex;;css:#alvo|flex-wrap=wrap;;css:#alvo|gap=8px">
+  <p class="try-task">Os chips estão todos espremidos na mesma linha e quebram no meio da palavra quando falta espaço.
+  Deixe-os descer para a linha de baixo: acrescente <code>flex-wrap</code>.</p>
+  <pre class="html">&lt;div class="bg-white px-6 py-6"&gt;
+  &lt;div id="alvo" class="flex gap-2"&gt;
+    &lt;a href="#receitas" class="inline-block rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700"&gt;Receitas&lt;/a&gt;
+    &lt;a href="#bastidores" class="inline-block rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700"&gt;Bastidores&lt;/a&gt;
+    &lt;a href="#pao" class="inline-block rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700"&gt;Pão&lt;/a&gt;
+    &lt;a href="#doces" class="inline-block rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700"&gt;Doces&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+gap: 8px
+</pre>
+  <pre class="solucao">&lt;div class="bg-white px-6 py-6"&gt;
+  &lt;div id="alvo" class="flex flex-wrap gap-2"&gt;
+    &lt;a href="#receitas" class="inline-block rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700"&gt;Receitas&lt;/a&gt;
+    &lt;a href="#bastidores" class="inline-block rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700"&gt;Bastidores&lt;/a&gt;
+    &lt;a href="#pao" class="inline-block rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700"&gt;Pão&lt;/a&gt;
+    &lt;a href="#doces" class="inline-block rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700"&gt;Doces&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>flex-wrap</code> é o que faz o conjunto se comportar como texto: os chips ficam lado a lado
+enquanto couber e descem para a linha seguinte quando não couber. Sem ele, o flex tenta espremer todos na
+mesma linha, e os rótulos quebram no meio da palavra. Com ele e sem <code>gap</code>, os chips colam um no
+outro — o <code>gap-2</code> é o que separa.</p>
+
+<p>Um detalhe de estado: em uma faixa de filtros, é comum marcar o chip ativo com
+<code>bg-amber-100 text-amber-900</code> e o resto com <code>bg-slate-100 text-slate-700</code>. A cor diz
+onde você está, mas o texto precisa continuar legível — e, de novo, a diferença não pode ser só a cor. Uma
+borda (<code>ring-1 ring-amber-300</code>) no chip ativo dá o segundo sinal.</p>
+
+<h2>6. A coluna lateral: autora e e-mail</h2>
+
+<p>Em telas grandes, a capa do blog ganha uma coluna à direita com duas coisas: quem escreve e como
+receber os posts. O layout é <code>grid gap-12 lg:grid-cols-3</code>, com o conteúdo principal ocupando duas
+colunas (<code>lg:col-span-2</code>) e a lateral uma. No telefone, tudo empilha na ordem do HTML: posts
+primeiro, lateral depois — porque quem chega no telefone quer o conteúdo, não a biografia.</p>
+
+<p>O <code>lg:col-span-2</code> faz o bloco principal atravessar duas colunas da grade de três — sem ele,
+conteúdo e lateral ficariam com um terço cada, sobrando um terço vazio à direita. Se você inspecionar o
+bloco no navegador, a aba <em>Computed</em> mostra <code>grid-column: span 2 / span 2</code>, que é
+exatamente "ocupe duas colunas, comece na primeira disponível". É a mesma lógica do
+<code>flex-grow</code> em flexbox: alguém ocupa mais, alguém ocupa menos.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=flex;;css:#alvo|flex-direction=row;;css:#alvo|gap=8px" data-largura="768">
+  <p class="try-task">No telefone o campo e o botão devem ficar um embaixo do outro; a partir de 640 px, lado a lado.
+  O empilhamento já está lá: acrescente <code>sm:flex-row</code>.</p>
+  <pre class="html">&lt;div class="mx-auto max-w-sm rounded-xl border border-slate-200 bg-white p-4"&gt;
+  &lt;p class="text-sm font-semibold text-slate-900"&gt;Receba os posts&lt;/p&gt;
+  &lt;div id="alvo" class="mt-2 flex flex-col gap-2"&gt;
+    &lt;input type="email" placeholder="seu@email.com"
+           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"&gt;
+    &lt;button type="button"
+            class="w-full rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white"&gt;Assinar&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+gap: 8px
+flex-direction: column
+margin-top: 8px
+</pre>
+  <pre class="solucao">&lt;div class="mx-auto max-w-sm rounded-xl border border-slate-200 bg-white p-4"&gt;
+  &lt;p class="text-sm font-semibold text-slate-900"&gt;Receba os posts&lt;/p&gt;
+  &lt;div id="alvo" class="mt-2 flex flex-col gap-2 sm:flex-row"&gt;
+    &lt;input type="email" placeholder="seu@email.com"
+           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"&gt;
+    &lt;button type="button"
+            class="w-full rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white"&gt;Assinar&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>flex-col</code> empilha campo e botão e o <code>sm:flex-row</code> os coloca lado a lado a partir
+de 640 px. Como as duas peças têm <code>w-full</code>, elas dividem a linha em partes iguais — e no telefone
+cada uma ocupa a largura toda, que é o que o dedo precisa. Uma armadilha: quando o botão fica ao lado do
+campo, ele costuma ficar alto demais ou baixo demais; por isso os dois levam o mesmo
+<code>px-3 py-2 text-sm</code>. Igualdade de altura, aqui, vem da igualdade de respiro.</p>
+
+<p>Na lateral, o cartão da autora tem <code>rounded-xl bg-slate-50 p-4</code>, um avatar de iniciais
+<code>h-10 w-10 rounded-full bg-amber-700 text-sm font-semibold text-amber-50</code> e duas linhas de texto.
+Abaixo, a caixa de e-mail: <code>mt-4 rounded-xl border border-slate-200 p-4</code> com um
+<code>input type="email"</code> de <code>w-full rounded-lg border border-slate-300 px-3 py-2 text-sm</code>
+e um botão <code>mt-2 w-full rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white</code>.</p>
+
+<dl class="anatomy">
+<dt>principal</dt>
+<dd><code>lg:col-span-2</code> dentro de <code>lg:grid-cols-3</code>: duas colunas de três.</dd>
+<dt>lateral</dt>
+<dd>Um <code>aside</code> com <code>rounded-xl bg-slate-50 p-4</code>: superfície própria, sem borda.</dd>
+<dt>avatar</dt>
+<dd><code>h-10 w-10 rounded-full bg-amber-700 text-amber-50</code>: a mesma receita do cartão de visita.</dd>
+<dt>campo</dt>
+<dd><code>w-full rounded-lg border border-slate-300 px-3 py-2 text-sm</code>: largura toda, toque fácil.</dd>
+<dt>ação</dt>
+<dd><code>mt-2 w-full rounded-lg bg-slate-900 px-3 py-2 text-white</code>: um botão só, largura toda.</dd>
+</dl>
+
+<p>Sobre o formulário, uma observação que evita reclamação de cliente: sem um <code>label</code>, quem usa
+leitor de tela ouve só "campo de edição" e não sabe o que digitar ali. Se o desenho não pede rótulo visível,
+use um <code>label</code> com <code>sr-only</code> ou um <code>aria-label</code> no campo. E deixe o
+<code>type="email"</code>: ele muda o teclado do telefone e valida o endereço antes de enviar.</p>
+
+<h2>7. A paginação e o fim da lista</h2>
+
+<p>Dezenove textos não cabem em uma página. Depois da grade vem a paginação: anterior, "página 1 de 4",
+próxima. O desenho é <code>flex items-center justify-between border-t border-slate-200 pt-6</code>, com os
+links em <code>rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium</code>.</p>
+
+<pre class="file" data-file="blog.html">&lt;nav class="mt-12 flex items-center justify-between border-t border-slate-200 pt-6" aria-label="Paginação"&gt;
+  &lt;a href="#pagina-anterior" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-400"&gt;
+    Anterior
+  &lt;/a&gt;
+  &lt;p class="text-sm text-slate-500"&gt;Página 1 de 4&lt;/p&gt;
+  &lt;a href="#pagina-2" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"&gt;
+    Próxima
+  &lt;/a&gt;
+&lt;/nav&gt;</pre>
+
+<p>Duas decisões que parecem pequenas e são visíveis. A primeira: na primeira página, "Anterior" existe mas
+está apagado (<code>text-slate-400</code>). Isso é melhor que esconder o botão, porque a pessoa vê que o
+caminho existe e entende que está no começo. A segunda: o contador no meio dá contexto — sem ele, a pessoa
+não sabe se há mais três páginas ou quarenta.</p>
+
+<p>O CSS dessas classes é curto e mostra duas coisas que você vai usar muito. O <code>justify-between</code>
+empurra um item para cada ponta, deixando o espaço do meio para o contador. E o <code>border-t</code> não é
+um <code>border</code> incompleto: ele escreve o estilo e a largura do lado de cima em duas linhas, e nada
+nos outros lados:</p>
+
+<pre class="term">.flex {
+  display: flex;
+}
+.items-center {
+  align-items: center;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.border-t {
+  border-top-style: var(--tw-border-style);
+  border-top-width: 1px;
+}
+.w-fit {
+  width: fit-content;
+}</pre>
+
+<p>A primeira linha do <code>border-t</code> merece atenção: sem <code>border-top-style: solid</code>, uma
+largura de borda não desenha nada. É o motivo pelo qual dizer no CSS "border-width: 1px" às vezes não
+aparece — falta o estilo. O Tailwind guarda esse estilo na variável <code>--tw-border-style</code>, que vale
+<code>solid</code> por padrão, e por isso a classe funciona sozinha.</p>
+
+<p>Se o blog tem poucos posts, paginação é ruído: prefira um botão "ver todos" no fim da grade, com
+<code>mx-auto mt-12 block w-fit rounded-lg border border-slate-300 px-6 py-3 text-sm font-medium</code>. O
+<code>w-fit</code> faz o bloco ocupar só o próprio texto — é o par do <code>w-full</code> e resolve aquele
+botão que fica com a largura toda sem precisar.</p>
+
+<h2>8. No celular: a ordem é a decisão</h2>
+
+<p>A capa do blog é lida no telefone entre um café e outro, e ali a ordem do HTML é a ordem da tela. Isso
+obriga a uma escolha que no desktop não aparece: o que vem primeiro, o destaque ou as categorias? A resposta
+depende do que a pessoa veio buscar. Quem já conhece o blog quer as categorias no topo; quem chegou de um
+link quer o post. Para a padaria, que publica pouco e recebe muita gente nova, o destaque primeiro é a
+escolha certa.</p>
+
+<p>Três ajustes resolvem o resto. O primeiro é o tamanho do título do destaque:
+<code>text-xl sm:text-2xl lg:text-3xl</code>, para não quebrar em cinco linhas no telefone. O segundo é o
+respiro entre as faixas: <code>py-10 sm:py-16</code>. O terceiro é a imagem do destaque —
+<code>aspect-video</code> em 16:9 fica com 200 px de altura no telefone, o que é bom; se você usar
+<code>aspect-square</code>, ela vira uma parede de 360 px e empurra todo o texto para fora da tela.</p>
+
+<pre class="file" data-file="blog.html">&lt;section class="mx-auto max-w-6xl px-6 py-10 sm:py-16"&gt;
+  &lt;div class="grid gap-10 lg:grid-cols-3"&gt;
+    &lt;div class="space-y-10 lg:col-span-2"&gt;
+      &lt;article class="grid gap-6 md:grid-cols-2 md:items-center"&gt;…destaque…&lt;/article&gt;
+      &lt;div class="grid gap-8 sm:grid-cols-2"&gt;…cartões…&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;aside class="space-y-6"&gt;…autora e e-mail…&lt;/aside&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</pre>
+
+<p>Repare que a grade de cartões usa <code>sm:grid-cols-2</code> mesmo dentro de uma coluna que já é
+estreita no desktop. É de propósito: dois cartões de 280 px são confortáveis; três seriam apertados. Em
+blog, o número de colunas segue a largura do cartão, não a da tela. A pergunta certa é sempre "cabe o título
+em duas linhas?", e não "quantas colunas cabem aqui?".</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que muda</th><th>No telefone</th><th>A partir de 640 px</th></tr>
+<tr><td>título do destaque</td><td><code>text-xl</code></td><td><code>sm:text-2xl</code></td></tr>
+<tr><td>respiro das faixas</td><td><code>py-10</code></td><td><code>sm:py-16</code></td></tr>
+<tr><td>grade de posts</td><td>uma coluna</td><td><code>sm:grid-cols-2</code></td></tr>
+<tr><td>imagem do destaque</td><td><code>aspect-video</code></td><td>igual: a proporção não muda</td></tr>
+<tr><td>coluna lateral</td><td>empilhada no fim</td><td>continua no fim até <code>lg:</code></td></tr>
+</table>
+</div>
+
+<h2>9. Três cenas, três consertos</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a grade parece uma escada</h3>
+<p>Um resumo tinha duas linhas, outro cinco, e os cartões ficaram com alturas diferentes — a grade parecia
+degraus. A correção é <code>line-clamp-3</code> em todos os resumos: três linhas sempre, com reticências no
+fim. Se o resumo for curto de propósito, o espaço vazio embaixo é o preço; a alternativa é
+<code>min-h-16</code> no resumo, que dá o mesmo efeito com menos palavras.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o cartão inteiro é clicável, mas nada indica</h3>
+<p>O link envolvia o cartão, mas o mouse passava e nada acontecia: a pessoa não descobria que aquilo era um
+alvo. O conserto foi <code>group</code> no <code>article</code>, <code>group-hover:text-amber-700</code> no
+título e <code>group-hover:opacity-90</code> na imagem. Em cartão clicável, algum sinal de mouse é
+obrigatório — sem ele, o índice de clique cai e ninguém sabe por quê.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a lateral aparece antes dos posts no telefone</h3>
+<p>Ela tinha escrito a lateral no HTML antes do conteúdo e, no telefone, a biografia da autora ocupava a
+primeira tela. A solução mais simples é mover o <code>aside</code> para depois do conteúdo no HTML — a ordem
+certa para o celular é a ordem do documento. O <code>order-</code> do flexbox resolve visualmente, mas
+bagunça a navegação por teclado; em blog, não vale a troca.</p>
+</div>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>Classes</th><th>Por quê</th></tr>
+<tr><td>cabeçalho</td><td><code>mx-auto max-w-2xl px-6 py-12 text-center</code></td><td>três linhas e um respiro</td></tr>
+<tr><td>destaque</td><td><code>grid gap-8 md:grid-cols-2 md:items-center</code></td><td>imagem e texto lado a lado</td></tr>
+<tr><td>grade</td><td><code>grid gap-8 sm:grid-cols-2</code></td><td>cartões iguais, dois por linha</td></tr>
+<tr><td>resumo</td><td><code>line-clamp-3 text-sm leading-relaxed</code></td><td>altura previsível</td></tr>
+<tr><td>chips</td><td><code>flex flex-wrap gap-2</code></td><td>categorias que quebram linha</td></tr>
+<tr><td>layout</td><td><code>grid gap-12 lg:grid-cols-3</code> + <code>lg:col-span-2</code></td><td>conteúdo largo, lateral estreita</td></tr>
+</table>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que o <code>line-clamp-3</code> faz no resumo do
+post?</p>
+<label><input type="radio" name="b1"> deixa o texto com três colunas</label>
+<label><input type="radio" name="b1"> corta o texto em três linhas, com reticências no fim</label>
+<label><input type="radio" name="b1"> aumenta a entrelinha em três vezes</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Para que serve o <code>group</code> no
+<code>article</code>?</p>
+<label><input type="radio" name="b2"> para agrupar os cartões em uma grade</label>
+<label><input type="radio" name="b2"> para o cartão virar um link</label>
+<label><input type="radio" name="b2"> para o <code>group-hover:</code> dos filhos reagir ao mouse no
+cartão inteiro</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Em <code>lg:grid-cols-3</code> com
+<code>lg:col-span-2</code> no conteúdo, quanto sobra para a lateral?</p>
+<label><input type="radio" name="b3"> uma coluna de três</label>
+<label><input type="radio" name="b3"> duas colunas de três</label>
+<label><input type="radio" name="b3"> a largura que sobrar do texto, sem coluna definida</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a faixa de categorias</h2>
+<p>Complete a classe do <code>div</code> das categorias para os chips ficarem lado a lado, quebrarem linha
+quando faltar espaço e terem 8 px entre eles.</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="flex flex-wrap gap-2">"&gt;</div>
+<p class="ex-dica">Dica: são três classes. Uma liga o flex, uma permite a quebra e a terceira cuida da
+distância. Sem a segunda, os chips tentam caber espremidos na mesma linha.</p>
+</div>
+
+<h2>10. Resumo</h2>
+
+<p>A capa de um blog é uma lista de portas de entrada. O cabeçalho é
+<code>mx-auto max-w-2xl px-6 py-12 text-center</code> com título e uma frase. O destaque usa
+<code>grid gap-8 md:grid-cols-2 md:items-center</code>; a grade de posts usa
+<code>grid gap-8 sm:grid-cols-2</code>; e os resumos levam <code>line-clamp-3</code> para que todos os
+cartões tenham a mesma altura. Categorias são chips em <code>flex flex-wrap gap-2</code>.</p>
+
+<p>Em telas grandes, o layout vira <code>grid gap-12 lg:grid-cols-3</code> com o conteúdo em
+<code>lg:col-span-2</code> e a lateral em uma coluna: autora, e-mail e, se precisar, os mais lidos. A
+paginação é <code>flex items-center justify-between border-t border-slate-200 pt-6</code>. E a regra que
+vale mais que qualquer classe: a ordem do HTML é a ordem do celular, então escreva na ordem em que o leitor
+do telefone deve encontrar as coisas.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Cabeçalho da capa: <code>mx-auto max-w-2xl px-6 py-12 text-center</code>.</li>
+<li>Destaque: <code>grid gap-8 md:grid-cols-2 md:items-center</code>.</li>
+<li>Grade de posts: <code>grid gap-8 sm:grid-cols-2</code>.</li>
+<li><code>line-clamp-3</code> corta em três linhas e mantém a grade alinhada.</li>
+<li><code>group</code> + <code>group-hover:</code> faz o cartão reagir inteiro ao mouse.</li>
+<li>Chips: <code>flex flex-wrap gap-2</code> + <code>rounded-full px-3 py-1 text-sm</code>.</li>
+<li>Conteúdo com lateral: <code>lg:grid-cols-3</code> + <code>lg:col-span-2</code>.</li>
+<li>Paginação: <code>flex items-center justify-between border-t pt-6</code>.</li>
+<li>Botão do tamanho do texto: <code>w-fit</code>; largura toda: <code>w-full</code>.</li>
+<li>Cada post é um <code>article</code>, com <code>time</code> de verdade e o link no título.</li>
+<li>A ordem do HTML é a ordem do celular — resolva no documento, não com <code>order-</code>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

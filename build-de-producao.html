@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build de Produção | Guia Tailwind</title>
+<meta name="description" content="O build de produção do Tailwind: o que o --minify faz, o que não muda, o checklist antes de publicar, cache com nome versionado e o build automático.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Build de <span class="hl">Produção</span></h1>
+<p class="intro">A padaria vai ganhar endereço na internet na segunda-feira, e a Ana percebeu que nunca
+pensou no assunto "publicar". A folha que ela gera no dia a dia é confortável de ler, com espaços e
+comentários, e não é essa que o visitante deve baixar. Nesta aula ela separa os dois momentos — o build
+de desenvolvimento e o build de produção —, aprende o que a opção <code>--minify</code> faz de verdade,
+monta o checklist que evita publicar besteira e entende por que o navegador de quem já visitou o site
+insiste em mostrar a versão velha.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que diferencia o build de desenvolvimento do build de produção.</li>
+  <li>O que <code>--minify</code> faz e o que ele não faz.</li>
+  <li>Por que a aparência não muda quando o arquivo encolhe.</li>
+  <li>O checklist de conferência antes de publicar.</li>
+  <li>Como o cache do navegador atrapalha e como o nome do arquivo resolve.</li>
+  <li>Como montar o build automático num servidor, com <code>npm ci</code>.</li>
+  <li>O que fazer quando o site publicado fica sem estilo.</li>
+</ul>
+</div>
+
+<h2>1. A cena: segunda-feira é a publicação</h2>
+
+<p>O site da Ana tem três páginas, uma folha gerada e um problema novo: publicar não é copiar a pasta
+inteira. Se ela copiar tudo, vão junto o <code>node_modules</code>, os arquivos de origem e a folha
+cheia de espaços. Se copiar só o HTML, a página chega sem estilo. No meio disso, existe uma decisão que
+ela nunca teve de tomar: qual versão do CSS é a que o visitante recebe.</p>
+
+<p>A resposta é que existem dois builds, com objetivos diferentes, e os dois usam o mesmo comando.
+Durante o desenvolvimento, o objetivo é você conseguir ler o que foi gerado e entender o que aconteceu.
+Na produção, o objetivo é o visitante baixar o menor arquivo possível, o mais rápido possível. São
+prioridades opostas — legibilidade contra tamanho — e é por isso que existe uma opção para virar a
+chave.</p>
+
+<p>Nada disso muda o que você escreve. O HTML continua com as mesmas classes, o CSS de entrada continua
+igual, e o resultado na tela tem de ser idêntico. O build de produção é uma etapa de acabamento: pega o
+mesmo conteúdo e o entrega no formato mais econômico. Se a aparência mudar, alguma coisa saiu do
+esperado.</p>
+
+<h2>2. Duas folhas, dois trabalhos</h2>
+
+<p>Vale colocar os dois builds lado a lado, porque a diferença é pequena na lista e grande na prática:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Assunto</th><th>Build de desenvolvimento</th><th>Build de produção</th></tr>
+<tr><td>comando</td><td><code>npm run dev</code>, com <code>--watch</code></td><td><code>npm run build</code>, com <code>--minify</code></td></tr>
+<tr><td>arquivo</td><td>grande, indentado, com comentários</td><td>uma linha por regra, sem espaço sobrando</td></tr>
+<tr><td>quando roda</td><td>a cada salvamento, o dia inteiro</td><td>uma vez, antes de cada publicação</td></tr>
+<tr><td>quem lê</td><td>você, procurando uma classe</td><td>o navegador de quem visita</td></tr>
+<tr><td>objetivo</td><td>entender e depurar</td><td>baixar rápido</td></tr>
+</table>
+</div>
+
+<dl class="anatomy">
+<dt>minificar</dt>
+<dd>Escrever o mesmo CSS com o mínimo de caracteres: sem espaços, sem comentários, com valores na
+forma mais curta.</dd>
+<dt>artefato</dt>
+<dd>O arquivo que a publicação entrega ao navegador: a folha gerada, as páginas, as imagens. O que
+fica no seu computador e nunca vai ao ar não é artefato.</dd>
+<dt>cache</dt>
+<dd>A cópia que o navegador guarda de um arquivo já baixado. Enquanto ela vale, o servidor nem é
+consultado.</dd>
+<dt>nome versionado</dt>
+<dd>Um pedaço do conteúdo no nome do arquivo, como <code>estilo.3f2a.css</code>. Conteúdo novo, nome
+novo, download garantido.</dd>
+<dt>ambiente</dt>
+<dd>Onde o projeto está rodando: desenvolvimento, na sua máquina, ou produção, no servidor que o
+público acessa.</dd>
+</dl>
+
+<p>O mais comum é ter as duas coisas no <code>package.json</code>, cada uma com seu script. O
+<code>dev</code> fica rodando enquanto você trabalha; o <code>build</code> é chamado na hora de
+publicar. Como os dois escrevem no mesmo arquivo de saída, o último que roda manda — e é aí que nasce um
+erro clássico: publicar sem perceber que a última geração foi a de desenvolvimento, cheia de
+espaços.</p>
+
+<p>Se preferir separar de vez, use dois arquivos de saída: <code>dist/estilo.css</code> para o dia a dia
+e <code>dist/estilo.min.css</code> para a produção. O custo é ter dois <code>link</code> diferentes no
+HTML, o que é chato de manter. Para o site da padaria, o caminho mais simples é um arquivo só, gerado de
+novo com <code>--minify</code> imediatamente antes de publicar.</p>
+
+<h2>3. O que <code>--minify</code> faz de verdade</h2>
+
+<p>A opção <code>--minify</code> (ou <code>-m</code>) pede ao gerador que escreva o CSS em formato
+compacto. Na prática, ela faz quatro coisas: tira os espaços e as quebras de linha que só servem para
+leitura humana, remove os comentários que não são de licença, encurta valores quando há uma forma mais
+curta de escrever o mesmo (<code>0.5rem</code> pode virar <code>.5rem</code>) e junta regras que podem
+ser declaradas de uma vez.</p>
+
+<pre class="term" data-cwd="~/padaria">$ npx @tailwindcss/cli -i src/entrada.css -o dist/estilo.css --minify
+$ ls -lh dist/estilo.css
+-rw-r--r-- 1 ana ana 3,6K nov 27 09:14 estilo.css</pre>
+
+<p>No projeto da Ana, a folha de desenvolvimento tem cerca de 14 KB; com <code>--minify</code>, fica em
+torno de 3,6 KB. A diferença parece pequena em números absolutos, e é — para um site de três páginas com
+vinte visitantes por dia. Mas o hábito importa: em um site com cinquenta páginas e muitos acessos, os
+mesmos 70% de economia aparecem na conta do servidor e no tempo de carregamento de quem está no 4G.</p>
+
+<p>O que <code>--minify</code> <strong>não</strong> faz: não remove classes que você não usa (isso já
+acontece sempre, por desenho), não troca o nome das classes, não mexe nas variáveis do tema e não
+"otimiza" a sua lógica. Ele só escreve o mesmo CSS de forma mais curta. Se alguém prometer que
+minificar resolve um problema de seletor, desconfie: são assuntos diferentes.</p>
+
+<h2>4. O que não muda: a aparência</h2>
+
+<p>Esta é a parte tranquilizadora. Minificar é uma transformação de texto, não de regra: as mesmas
+classes, os mesmos valores, a mesma ordem de camadas. O navegador não sabe se o arquivo foi escrito com
+espaços ou sem; ele lê a mesma estrutura. Se a tela mudou depois de minificar, o problema não é a
+minificação — é outra folha, um arquivo velho ou um erro de caminho.</p>
+
+<p>Por isso, a conferência de produção é sempre a mesma: abrir as três páginas, olhar o resultado e
+comparar o CSS computado de dois ou três elementos que você conhece bem. Quando os valores batem, o
+build está certo. Quando não batem, o painel diz qual propriedade ficou de fora — e o culpado costuma
+ser uma classe que não foi encontrada na varredura.</p>
+
+<p>Vale treinar essa comparação na caixa abaixo. A missão é escrever a folha com menos regras
+possíveis, sem mudar o resultado: em vez de duas classes de respiro (horizontal e vertical), uma só
+classe que cuida dos quatro lados.</p>
+
+<div class="trytailwind" data-goal="rule:padding: calc(var(--spacing) * 4);;css:#alvo|padding=16px">
+  <p class="try-task">O cartão usa <code>px-4 py-4</code>, que gera duas regras para o mesmo resultado.
+  Troque por uma única classe de respiro que dê 16 px nos quatro lados — menos CSS, mesma aparência.</p>
+  <pre class="html">&lt;div id="alvo" class="px-4 py-4 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.962 0.059 95.617)
+padding-inline: 16px
+padding-block: 16px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>Antes, o painel trazia as duas propriedades separadas, <code>padding-inline</code> e
+<code>padding-block</code>; depois da missão, ele resume tudo em <code>padding: 16px</code>, vindo de
+uma regra só. Esse é o tipo de economia que não exige ferramenta nenhuma: vem de conhecer as classes e
+preferir a que resolve tudo de uma vez. Em um site grande, escolhas como essa valem mais que qualquer
+opção de build.</p>
+
+<h2>5. O fluxo de publicação, em ordem</h2>
+
+<p>Publicar tem uma sequência, e a ordem evita metade dos problemas. Primeiro, pare o modo de
+desenvolvimento: um <code>--watch</code> ligado pode sobrescrever a folha de produção segundos depois de
+você gerá-la. Segundo, rode o build de produção e confira o tamanho do arquivo. Terceiro, abra as
+páginas no navegador em modo local, inclusive na largura de um celular. Quarto, copie para o servidor
+apenas o que o visitante precisa: as páginas, a folha gerada e as imagens.</p>
+
+<p>O que nunca vai para o servidor: <code>node_modules</code>, o CSS de entrada, o
+<code>package.json</code>, os arquivos de exemplo e a pasta de rascunhos. Nada disso é usado pelo
+navegador, e alguns desses arquivos contam detalhes do seu projeto que não interessam ao público. A
+regra prática é pensar no servidor como uma vitrine: entra o que o cliente vê.</p>
+
+<p>Uma atenção especial ao caminho do <code>link</code>. No seu computador, o HTML e a pasta
+<code>dist</code> estão lado a lado, e <code>href="dist/estilo.css"</code> funciona. No servidor, a
+estrutura pode ser outra: se você copiou só o conteúdo de <code>dist</code>, o caminho vira
+<code>href="estilo.css"</code>. Caminho errado é a causa número um de "subi o site e ficou sem
+estilo" — e o sintoma é uma página cinza e sem espaçamento, igual à de quando falta o
+<code>@import</code>.</p>
+
+<h2>6. O checklist antes de publicar</h2>
+
+<p>A lista é curta de propósito, para ser usada de verdade. Cinco conferências resolvem quase tudo:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Conferência</th><th>Como fazer</th><th>O que significa se falhar</th></tr>
+<tr><td>o build rodou com <code>--minify</code></td><td>olhar o tamanho do arquivo gerado</td><td>a folha publicada está grande à toa</td></tr>
+<tr><td>a folha é a nova</td><td>abrir o arquivo e procurar uma classe que você acabou de usar</td><td>o build não rodou ou rodou noutra pasta</td></tr>
+<tr><td>a página funciona sem servidor local</td><td>abrir o HTML direto no navegador</td><td>algum caminho está absoluto demais</td></tr>
+<tr><td>o celular está ok</td><td>diminuir a janela até 375 px</td><td>alguma classe de breakpoint não foi gerada</td></tr>
+<tr><td>não sobrou lixo</td><td>procurar marcações de teste no HTML</td><td>uma cor de depuração foi ao ar</td></tr>
+</table>
+</div>
+
+<p>A quinta conferência merece um exemplo, porque é a mais esquecida. Durante o desenvolvimento é comum
+pintar um bloco de vermelho para achar onde ele está, ou deixar um texto de teste. Nada disso pode ir
+para a produção — não porque quebre o site, mas porque o visitante vê. A caixa abaixo faz essa limpeza
+de um jeito que você pode conferir: a meta conta os elementos com a classe de teste e exige zero.</p>
+
+<p>Existe um caso em que a classe nunca vai aparecer no arquivo, e ele engana muita gente: quando o
+nome não existe no catálogo do Tailwind. O gerador não tenta adivinhar o parente mais próximo e não
+avisa — ele simplesmente não escreve regra nenhuma para um nome que não conhece. Uma classe inventada,
+como <code>texto-ambar</code>, atravessa o build inteira sem deixar rastro e chega ao ar sem efeito.</p>
+
+<div class="trytailwind" data-goal="rule:color: var(--color-amber-900)">
+  <p class="try-task">A etiqueta foi publicada com <code>texto-ambar</code>, um nome que não existe: a
+  folha saiu sem regra de cor e o texto ficou preto. Troque pela utilitária que pinta a letra em âmbar
+  escuro.</p>
+  <pre class="html" data-saida="css">&lt;span id="alvo" class="bg-amber-100 texto-ambar px-2 py-1"&gt;Pão do dia&lt;/span&gt;</pre>
+  <pre class="out">
+.bg-amber-100 {
+  background-color: var(--color-amber-100);
+}
+.px-2 {
+  padding-inline: calc(var(--spacing) * 2);
+}
+.py-1 {
+  padding-block: var(--spacing);
+}
+</pre>
+  <pre class="solucao">&lt;span id="alvo" class="bg-amber-100 text-amber-900 px-2 py-1"&gt;Pão do dia&lt;/span&gt;</pre>
+</div>
+
+<div class="trytailwind" data-goal="conta:.bg-red-500=0;;conta:.bg-amber-100=2">
+  <p class="try-task">A vitrine foi publicada com uma marcação de teste: um bloco com fundo vermelho,
+  que existe só para achar a seção. Tire esse bloco e deixe as duas etiquetas de verdade com o fundo da
+  marca.</p>
+  <pre class="html" data-saida="css">&lt;div id="alvo"&gt;
+  &lt;p class="bg-red-500 px-2 py-1"&gt;teste&lt;/p&gt;
+  &lt;span class="bg-amber-100 px-2 py-1"&gt;Pão francês&lt;/span&gt;
+  &lt;span class="bg-amber-100 px-2 py-1"&gt;Broa&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+.bg-amber-100 {
+  background-color: var(--color-amber-100);
+}
+.bg-red-500 {
+  background-color: var(--color-red-500);
+}
+.px-2 {
+  padding-inline: calc(var(--spacing) * 2);
+}
+.py-1 {
+  padding-block: var(--spacing);
+}
+</pre>
+  <pre class="solucao">&lt;div id="alvo"&gt;
+  &lt;span class="bg-amber-100 px-2 py-1"&gt;Pão francês&lt;/span&gt;
+  &lt;span class="bg-amber-100 px-2 py-1"&gt;Broa&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Repare que o <code>data-goal</code> conta elementos, não regras: <code>conta:.bg-red-500=0</code> quer
+dizer "nenhum elemento com essa classe". É um jeito de conferir ausência — o que, no CSS, é a coisa mais
+difícil de verificar a olho nu. Na sua página, o equivalente é usar a busca do editor e procurar a
+palavra que você sabe que é de teste.</p>
+
+<h2>7. Cache: por que o visitante insiste na versão velha</h2>
+
+<p>O navegador guarda arquivos para não baixar tudo de novo. Isso é ótimo para o visitante e péssimo no
+dia da publicação: quem já entrou no site continua com o CSS antigo por horas, e o seu conserto parece
+não ter funcionado. Recarregar com <code>Ctrl</code> + <code>Shift</code> + <code>R</code> resolve no
+seu computador; o visitante não vai fazer isso.</p>
+
+<p>A solução usada no mundo inteiro é trocar o nome do arquivo a cada publicação: em vez de
+<code>estilo.css</code>, um <code>estilo.3f2a.css</code>, em que o pedaço do meio muda quando o conteúdo
+muda. Como o endereço é novo, o navegador é obrigado a baixar. Com isso, você pode dizer ao servidor para
+guardar o CSS "para sempre" e o HTML "por cinco minutos" — o HTML muda mais e precisa ser fresco.</p>
+
+<p>Para um site estático e pequeno, o caminho manual é esse: renomeie a folha com a data ou um número
+curto, atualize o <code>link</code> nas três páginas e publique. É chato, e é a versão honesta do
+processo para quem ainda não usa uma ferramenta de build. Quando o projeto crescer, um passo de
+automação faz o renomeio sozinho — e o conceito continua o mesmo.</p>
+
+<p>Quem manda nessa história é o cabeçalho de cache que o servidor envia junto com o arquivo. Ele
+diz, em segundos, por quanto tempo o navegador pode reaproveitar a cópia. Duas políticas convivem bem:
+arquivos com nome versionado podem ser guardados por um ano, porque o nome muda quando o conteúdo muda;
+o HTML, que aponta para os nomes novos, vale poucos minutos. Assim o visitante baixa o HTML fresquinho,
+descobre o nome novo do CSS e baixa só o que mudou.</p>
+
+<p>Se você publica num serviço que não deixa mexer nesses cabeçalhos, não se preocupe: o nome versionado
+já resolve o pior caso. O que não dá para fazer é confiar só no bom senso do navegador. Ele faz o que o
+servidor mandou, e o padrão costuma ser guardar por mais tempo do que você gostaria.</p>
+
+<h2>8. Build automático, no servidor</h2>
+
+<p>Quem publica com frequência para de rodar o build na mão. O servidor (ou um serviço de publicação)
+recebe os arquivos-fonte, roda dois comandos e publica o resultado. O primeiro é
+<code>npm ci</code>, que instala exatamente as versões do <code>package-lock.json</code> — releia a aula
+<a href="instalando-com-npm.html">Instalando com npm</a> se esse comando ainda não estiver claro. O
+segundo é o script de build que você já usa.</p>
+
+<pre class="term" data-cwd="~/padaria">$ npm ci
+added 12 packages in 2s
+$ npm run build
+$ ls dist
+estilo.css</pre>
+
+<p>Para que isso funcione, o que vai para o servidor é o projeto, não o resultado: HTML, CSS de entrada,
+<code>package.json</code> e <code>package-lock.json</code>. A pasta <code>node_modules</code> é recriada
+pelo <code>npm ci</code>, e a pasta <code>dist</code> é recriada pelo build. Copiar qualquer uma das duas
+é trazer lixo e risco de versão diferente.</p>
+
+<p>Um cuidado que vale ouro: o build automático tem de rodar com <code>--minify</code> e tem de falhar
+alto quando algo der errado. É para isso que serve o código de saída que você viu na aula da CLI: se o
+comando terminar com zero, o servidor publica; se terminar com outro número, a publicação para e alguém
+olha. Build silencioso que falha é pior que build nenhum.</p>
+
+<p>Vale uma palavra sobre reprodutibilidade, que assusta pelo nome e é simples: o mesmo código de
+entrada tem de produzir o mesmo arquivo de saída, em qualquer máquina, em qualquer dia. O
+<code>package-lock.json</code> cuida da parte das versões; a varredura cuidada dos arquivos cuida do
+resto. Quando o build automático gera um arquivo com tamanho muito diferente do seu, é sinal de que ele
+está vendo outros arquivos — quase sempre porque roda numa pasta mais acima e varre o que não devia.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: "o site no ar está sem estilo"</h3>
+<p>O sintoma é uma página cinza, com tudo colado. Confira primeiro o <code>link</code> da página
+publicada: ele aponta para um caminho que existe no servidor? Abra o endereço da folha no navegador — se
+der erro, é caminho; se aparecer o CSS, o problema é a página estar guardada em cache. Depois, confira se
+a folha publicada é a de produção, e não uma cópia antiga de <code>src</code>.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: "publiquei a correção e o cliente não vê"</h3>
+<p>Cache. O navegador do cliente guardou a folha com o nome antigo. A cura definitiva é o nome
+versionado: mude o arquivo de nome, atualize o <code>link</code> e o download é inevitável. Enquanto isso
+não acontece, o paliativo é pedir para recarregar sem cache — o que funciona para você e não para quem
+está na fila comprando pão.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: "a folha de produção ficou maior que a de desenvolvimento"</h3>
+<p>Acontece quando o build de produção roda em outro lugar, com outros arquivos por perto. Suspeite de um
+<code>@source</code> apontando para uma pasta enorme, de um build rodado na pasta do usuário (que varre
+tudo) ou de duas folhas ligadas na mesma página. Compare o número de blocos dentro de
+<code>@layer utilities</code> com o número de classes do seu site: a diferença mostra de onde vem o
+excesso.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que <code>--minify</code> muda no resultado da
+página?</p>
+<label><input type="radio" name="q1"> muda as cores, porque encurta os valores</label>
+<label><input type="radio" name="q1"> nada: só a forma como o CSS está escrito</label>
+<label><input type="radio" name="q1"> remove as classes que não estão em uso</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que renomear a folha a cada publicação resolve o
+cache?</p>
+<label><input type="radio" name="q2"> porque o navegador ignora arquivos com nome comprido</label>
+<label><input type="radio" name="q2"> porque o servidor passa a comprimir o arquivo</label>
+<label><input type="radio" name="q2"> porque o endereço novo obriga o navegador a baixar de novo</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que vai para o servidor de publicação?</p>
+<label><input type="radio" name="q3"> as páginas, a folha gerada e as imagens</label>
+<label><input type="radio" name="q3"> o projeto inteiro, com <code>node_modules</code></label>
+<label><input type="radio" name="q3"> só o CSS de entrada e o <code>package.json</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: completar o build</h2>
+<p>É hora de publicar. Complete o comando com a opção que escreve a folha em formato compacto:</p>
+<div class="ex-code">$ npx @tailwindcss/cli -i src/entrada.css -o dist/estilo.css <input aria-label="resposta 1" data-answer="--minify|-m" placeholder="..."></div>
+<p class="ex-dica">Dica: são duas opções no repertório da CLI, uma com quatro letras e uma com duas.
+A mesma ideia de "deixar menor" que a gente usa na cozinha para a porção que vai na vitrine.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O build de produção é o mesmo gerador com outra prioridade: em vez de legibilidade, tamanho. A opção
+<code>--minify</code> tira espaços, comentários e valores redundantes, e o resultado é
+indistinguível na tela. O fluxo é parar o <code>--watch</code>, rodar o build compacto, conferir tamanho
+e caminho, abrir as páginas no computador e no tamanho de celular e copiar para o servidor só o que o
+visitante usa.</p>
+
+<p>Duas ideias sustentam a publicação sem sustos. A primeira é que o servidor recebe fonte, não
+resultado: <code>npm ci</code> e o build recriam <code>node_modules</code> e <code>dist</code>. A segunda
+é que o nome do arquivo é a chave do cache: mudou o conteúdo, muda o nome, e o navegador de quem já
+visitou o site é obrigado a buscar o novo. Com essas duas, "publiquei e não apareceu" deixa de ser
+mistério.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Desenvolvimento quer legibilidade; produção quer tamanho.</li>
+<li><code>--minify</code> compacta o texto; não remove classe nem muda valor.</li>
+<li>Mesma aparência é o teste: se mudou, o problema é outro.</li>
+<li>Pare o <code>--watch</code> antes de gerar a folha de produção.</li>
+<li>Menos regras com o mesmo resultado também é otimização: prefira <code>p-4</code> a
+<code>px-4 py-4</code>.</li>
+<li>Ao servidor vão páginas, folha gerada e imagens; nada de fonte nem <code>node_modules</code>.</li>
+<li>Renomear a folha a cada publicação vence o cache do visitante.</li>
+<li>Build automático: <code>npm ci</code>, depois o script, e falhar alto se der erro.</li>
+<li>Site sem estilo no ar quase sempre é caminho errado no <code>link</code>.</li>
+<li>Cliente que não vê a correção quase sempre é cache.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Animações | Guia Tailwind</title>
+<meta name="description" content="Referência de animação no Tailwind v4: transições, duração, curva, transformações, animate-spin, pulse e bounce, keyframes com @theme e movimento reduzido.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Animações</span></h1>
+<p class="intro">O site da Ana já está bonito e já funciona no celular. Falta o que dá a sensação de vida:
+o botão que escurece devagar em vez de piscar, o cartão que cresce um dedinho quando o mouse passa, o
+pãozinho que gira enquanto a encomenda é enviada. Ela tentou colocar a animação e o resultado ficou seco
+— mudou de cor de uma vez, sem transição —, e no celular o efeito nem apareceu. Esta página é a consulta
+das animações no Tailwind v4: o que cada classe realmente escreve no CSS, os valores de duração e curva,
+as transformações, as quatro animações prontas, os keyframes próprios e o respeito a quem pediu menos
+movimento.</p>
+
+<h2>1. O vocabulário: transição e animação não são a mesma coisa</h2>
+
+<p>Quase todo efeito deste guia é uma <strong>transição</strong>: um valor muda e o navegador leva um
+tempo para ir do valor antigo ao novo. "Muda" quase sempre quer dizer que uma variante entrou em ação —
+o mouse passou, o campo recebeu foco, a classe trocou. A transição não decide o que muda; ela só suaviza
+a troca. Por isso uma transição sozinha não faz nada: precisa de um estado de partida e de um estado de
+chegada.</p>
+
+<p>Uma <strong>animação</strong>, no sentido do CSS, é outra peça: um conjunto de quadros nomeado
+(<code>@keyframes</code>) que roda sozinho, às vezes em laço infinito, sem depender de interação. O
+Tailwind traz quatro animações prontas e um jeito de criar as suas. As duas coisas se combinam — um
+cartão pode ter animação de entrada e transição no hover —, mas convém não confundir os nomes, porque
+as classes são diferentes e os erros também.</p>
+
+<p>Existe um motivo prático para começar pelas transições: elas são baratas e quase sempre suficientes.
+Um botão que escurece em 150 milissegundos parece mais caro do que um botão que muda de cor de uma vez.
+Já uma animação infinita é um relógio rodando na página: consome bateria, distrai da leitura e precisa
+de justificativa. A pergunta certa antes de animar não é "como", é "por quê" — e a resposta saudável
+quase sempre é "para mostrar que algo reagiu ao que a pessoa fez".</p>
+
+<dl class="anatomy">
+<dt>transição</dt>
+<dd>A suavização da troca de um valor. Precisa de um estado inicial e de um gatilho:
+<code>hover:</code>, <code>focus:</code>, troca de classe.</dd>
+<dt>duração</dt>
+<dd>Quanto tempo a troca leva: <code>duration-300</code> são 300 ms. Sem duração, a troca é
+instantânea.</dd>
+<dt>curva</dt>
+<dd>A velocidade ao longo do tempo: <code>ease-out</code> começa rápido e freia no fim. Muda muito a
+sensação.</dd>
+<dt>keyframes</dt>
+<dd>Os quadros de uma animação, nomeados no CSS com <code>@keyframes</code>. Define o que acontece em
+cada momento.</dd>
+<dt>transformação</dt>
+<dd>Mudar tamanho, ângulo e posição sem mexer no layout: <code>scale</code>, <code>rotate</code>,
+<code>translate</code>.</dd>
+</dl>
+
+<h2>2. A família transition-*</h2>
+
+<p>A palavra <code>transition</code> sozinha anima um conjunto grande de propriedades — cores, sombra,
+transformação, opacidade e mais algumas. As variantes com sufixo animam um grupo pequeno, e são a
+escolha melhor quase sempre: quanto menos propriedades o navegador vigia, menos trabalho ele faz e menos
+surpresa você tem. Esta tabela é a lista real do que cada uma cobre; a aula
+<a href="transicoes.html">Transições</a> ensina a montar a primeira.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que anima</th><th>Quando usar</th></tr>
+<tr><td><code>transition</code></td><td>cores, fundo, borda, sombra, transformação, opacidade, filtro e mais</td><td>o coringa, quando o elemento muda de várias maneiras</td></tr>
+<tr><td><code>transition-colors</code></td><td>cor, fundo, borda, contorno, decoração de texto, <code>fill</code>, <code>stroke</code></td><td>botão e link que só trocam de cor</td></tr>
+<tr><td><code>transition-opacity</code></td><td><code>opacity</code></td><td>aparecer e sumir suavemente</td></tr>
+<tr><td><code>transition-shadow</code></td><td><code>box-shadow</code></td><td>cartão que ganha sombra no hover</td></tr>
+<tr><td><code>transition-transform</code></td><td><code>transform</code>, <code>translate</code>, <code>scale</code>, <code>rotate</code></td><td>crescer, girar, deslocar — o caso do cartão</td></tr>
+<tr><td><code>transition-all</code></td><td><code>all</code></td><td>evite: anima até o que você não pediu</td></tr>
+<tr><td><code>transition-none</code></td><td>nada</td><td>desligar a transição num ponto, como em <code>motion-reduce:</code></td></tr>
+<tr><td><code>transition-[height]</code></td><td>só <code>height</code></td><td>propriedade específica, escrita entre colchetes</td></tr>
+</table>
+</div>
+
+<p>Repare no que a lista longa inclui e que ninguém espera: <code>display</code>,
+<code>content-visibility</code>, <code>overlay</code> e <code>pointer-events</code>. No Tailwind v4,
+<code>transition</code> já prepara a transição de <code>display</code>, usada quando um elemento passa
+de <code>hidden</code> para <code>block</code>. Isso não faz o sumiço ser suave por si só, mas permite
+combinar com <code>opacity</code> e ganhar um fade honesto. É um dos detalhes que explicam por que o
+<code>pre.out</code> das caixas às vezes mostra uma linha enorme.</p>
+
+<pre class="term">.transition-colors {
+  transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;
+  transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+  transition-duration: var(--tw-duration, var(--default-transition-duration));
+}
+.duration-300 {
+  --tw-duration: 300ms;
+  transition-duration: 300ms;
+}
+.ease-out {
+  --tw-ease: var(--ease-out);
+  transition-timing-function: var(--ease-out);
+}</pre>
+
+<p>Esse trecho é a chave de quase todo bug de transição. A classe de transição aponta para duas variáveis
+— <code>--tw-duration</code> e <code>--tw-ease</code> —, que valem o padrão do tema (150 ms e
+<code>cubic-bezier(0.4, 0, 0.2, 1)</code>) enquanto ninguém as define. <code>duration-300</code> define
+<code>--tw-duration</code> em 300 ms e, de quebra, escreve <code>transition-duration</code> direto.
+<code>ease-out</code> define <code>--tw-ease</code> com o valor de <code>--ease-out</code>, que é
+<code>cubic-bezier(0, 0, 0.2, 1)</code>. Resultado: você precisa das três classes juntas para a
+transição fazer sentido, e escrever <code>duration-300</code> sem <code>transition-colors</code> não
+faz nada, porque ninguém está vigiando a propriedade.</p>
+
+<h2>3. Duração, atraso e curva</h2>
+
+<p>Duração no Tailwind v4 é número livre: <code>duration-300</code> são 300 ms, <code>duration-75</code>
+são 75 ms, <code>duration-1000</code> é um segundo. O mesmo vale para o atraso,
+<code>delay-150</code>. Os valores que aparecem nos projetos são poucos, e a tabela abaixo é o
+suficiente para não errar a mão. A curva aceita os quatro nomes de sempre e qualquer
+<code>cubic-bezier</code> entre colchetes.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor no CSS</th><th>Sensação</th></tr>
+<tr><td><code>duration-75</code></td><td><code>75ms</code></td><td>quase instantâneo; bom para afundar botão</td></tr>
+<tr><td><code>duration-150</code></td><td><code>150ms</code></td><td>o padrão do Tailwind; cor de link e botão</td></tr>
+<tr><td><code>duration-200</code></td><td><code>200ms</code></td><td>cartão que ganha sombra</td></tr>
+<tr><td><code>duration-300</code></td><td><code>300ms</code></td><td>o mais usado em transformação</td></tr>
+<tr><td><code>duration-500</code></td><td><code>500ms</code></td><td>movimento maior, painel que abre</td></tr>
+<tr><td><code>duration-[400ms]</code></td><td><code>400ms</code></td><td>valor fora da escala</td></tr>
+<tr><td><code>delay-0</code></td><td><code>0ms</code></td><td>sem atraso, o mais seguro</td></tr>
+<tr><td><code>delay-150</code></td><td><code>150ms</code></td><td>escalonar itens de uma lista</td></tr>
+<tr><td><code>delay-300</code></td><td><code>300ms</code></td><td>esperar o menu fechar antes de outro efeito</td></tr>
+<tr><td><code>ease-linear</code></td><td><code>linear</code></td><td>velocidade constante: giro de carregador</td></tr>
+<tr><td><code>ease-in</code></td><td><code>cubic-bezier(0.4, 0, 1, 1)</code></td><td>começa devagar: sair da tela</td></tr>
+<tr><td><code>ease-out</code></td><td><code>cubic-bezier(0, 0, 0.2, 1)</code></td><td>termina devagar: entrar na tela</td></tr>
+<tr><td><code>ease-in-out</code></td><td><code>cubic-bezier(0.4, 0, 0.2, 1)</code></td><td>simétrica: abrir e fechar</td></tr>
+</table>
+</div>
+
+<p>Uma regra de bolso que funciona: o que aparece usa <code>ease-out</code>, o que desaparece usa
+<code>ease-in</code>, e o que fica no meio usa <code>ease-in-out</code>. O motivo é a física que a gente
+espera — as coisas desaceleram quando chegam. E uma regra de bom senso: acima de 500 ms o efeito deixa
+de ser resposta e passa a ser espera. Se o seu cartão leva meio segundo para crescer, a pessoa já
+clicou duas vezes antes de ele terminar.</p>
+
+<p>Sobre o atraso, cuidado com a armadilha do mouse nervoso. <code>delay-300</code> numa transição de
+hover significa que, ao tirar o mouse, o elemento espera 300 ms para voltar — e o <code>delay</code>
+vale também na volta. O efeito de "atrasado e travado" que muita gente relata vem daí. Se precisa de
+atraso só na entrada, o caminho é escrever o atraso na classe do estado
+(<code>hover:delay-100</code>) e zero no repouso (<code>delay-0</code>).</p>
+
+<h2>4. Transformações: crescer, girar, deslocar</h2>
+
+<p>Transformação é a família que muda a aparência sem mexer no espaço ocupado. O cartão cresce 5% e os
+vizinhos não se movem; o ícone gira 180 graus e o texto continua no lugar. É por isso que transformar é
+barato: o navegador não precisa recalcular o layout da página inteira, só redesenhar aquele pedaço. No
+Tailwind v4, cada eixo virou uma propriedade própria (<code>scale</code>, <code>rotate</code>,
+<code>translate</code>) em vez de um <code>transform</code> gigante com tudo dentro.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que o navegador aplica</th><th>Uso típico</th></tr>
+<tr><td><code>scale-105</code></td><td><code>scale: 1.05</code></td><td>cartão que cresce de leve no hover</td></tr>
+<tr><td><code>scale-95</code></td><td><code>scale: 0.95</code></td><td>botão que afunda no clique</td></tr>
+<tr><td><code>scale-0</code></td><td><code>scale: 0%</code></td><td>ponto que nasce do nada</td></tr>
+<tr><td><code>rotate-45</code></td><td><code>rotate: 45deg</code></td><td>seta do menu que aponta para cima</td></tr>
+<tr><td><code>-rotate-90</code></td><td><code>rotate: calc(90deg * -1)</code></td><td>seta que volta, girando ao contrário</td></tr>
+<tr><td><code>translate-x-2</code></td><td><code>translate: 8px</code></td><td>empurrão leve para a direita</td></tr>
+<tr><td><code>translate-y-1/2</code></td><td><code>translate: 0 calc(1/2 * 100%)</code></td><td>centralizar com <code>top-1/2</code></td></tr>
+<tr><td><code>skew-x-6</code></td><td><code>transform: skewX(6deg)</code></td><td>etiqueta inclinada de promoção</td></tr>
+<tr><td><code>origin-center</code></td><td><code>transform-origin: center</code></td><td>giro em volta do próprio centro</td></tr>
+<tr><td><code>origin-top-left</code></td><td><code>transform-origin: 0px 0px</code></td><td>crescer a partir do canto</td></tr>
+<tr><td><code>transform-none</code></td><td><code>transform: none</code></td><td>cancelar tudo num breakpoint</td></tr>
+</table>
+</div>
+
+<p>Duas observações de quem já apanhou. Primeiro, <code>translate</code> não é <code>transform</code>:
+<code>translate-x-2</code> escreve na propriedade <code>translate</code>, e
+<code>translate-y-1/2</code> usa <code>calc(1 / 2 * 100%)</code> — porcentagem relativa ao próprio
+elemento, o que é ótimo para centralizar. Segundo, <code>scale</code> e <code>rotate</code> também são
+propriedades separadas, então <code>scale-105</code> e <code>rotate-45</code> no mesmo elemento
+convivem sem briga, e a ordem no HTML não muda nada. Já <code>skew-x-6</code> continua usando
+<code>transform</code>: você vê isso no painel, que mostra um <code>matrix(...)</code> em vez de um
+ângulo legível.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|transition-duration=0.3s;;rule:.hover\:scale-105:hover;;rule:transition-property: transform, translate, scale, rotate">
+  <p class="try-task">O cartão de destaque não reage ao mouse. Faça-o crescer 5% em 300 ms, suavizando
+  só a transformação: acrescente <code>transition-transform duration-300</code> e
+  <code>hover:scale-105</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl bg-amber-50 p-4"&gt;
+  &lt;p class="text-lg font-semibold"&gt;Pão do dia&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h30.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-xl bg-amber-50 p-4 transition-transform duration-300 hover:scale-105"&gt;
+  &lt;p class="text-lg font-semibold"&gt;Pão do dia&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h30.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar a solução, o painel passa a mostrar <code>transition-property</code>,
+<code>transition-duration: 0.3s</code> e a curva padrão. Nenhuma linha de <code>scale</code> aparece,
+porque o mouse não está em cima — o valor só existe no estado de hover. Para ver com os olhos, passe o
+mouse na prévia: o cartão cresce e volta. Repare que ele cresce a partir do centro, que é o
+<code>transform-origin</code> padrão de todo elemento.</p>
+
+<h2>5. As quatro animações prontas</h2>
+
+<p>O Tailwind traz quatro animações com nome, e um valor real por trás de cada uma. Saber o valor evita
+a frustração de achar que <code>animate-bounce</code> "não funciona": ele funciona, mas pula num ritmo
+de um segundo que às vezes não combina com o seu texto. Todas são infinitas por definição; quem quiser
+uma vez só precisa de keyframes próprios (seção 6).</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Animação real</th><th>O que se vê</th><th>Onde serve</th></tr>
+<tr><td><code>animate-spin</code></td><td><code>1s linear infinite spin</code></td><td>giro completo e constante</td><td>carregador, botão "enviando"</td></tr>
+<tr><td><code>animate-ping</code></td><td><code>1s cubic-bezier(0, 0, 0.2, 1) infinite ping</code></td><td>um círculo que cresce e some</td><td>bolinha de notificação, "ao vivo"</td></tr>
+<tr><td><code>animate-pulse</code></td><td><code>2s cubic-bezier(0.4, 0, 0.6, 1) infinite pulse</code></td><td>opacidade cheia e pela metade</td><td>esqueleto de carregamento, "assando"</td></tr>
+<tr><td><code>animate-bounce</code></td><td><code>1s infinite bounce</code></td><td>sobe e desce, com pausa no chão</td><td>seta que indica "role para ver"</td></tr>
+<tr><td><code>animate-none</code></td><td><code>animation: none</code></td><td>nada</td><td>desligar em <code>motion-reduce:</code></td></tr>
+</table>
+</div>
+
+<p>O CSS que o Tailwind escreve para elas é curiosamente curto, porque o valor mora numa variável do
+tema: <code>animation: var(--animate-spin)</code>. Os <code>@keyframes</code> correspondentes também são
+gerados, com o nome que aparece no fim do atalho. Isso significa que você pode trocar o valor sem
+inventar classe nova — basta redefinir <code>--animate-spin</code> no seu <code>@theme</code> — e que
+duas animações no mesmo elemento brigam pela mesma propriedade: vence a que estiver por último no CSS,
+não a que você escreveu por último no HTML.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|animation-duration=1s;;rule:animation: var(--animate-spin);;rule:.animate-spin">
+  <p class="try-task">O carregador da encomenda está pulsando e parece travado. Troque por um giro
+  constante: saia de <code>animate-pulse</code> e use <code>animate-spin</code> no pãozinho.</p>
+  <pre class="html">&lt;div id="alvo" class="inline-block h-10 w-10 animate-pulse rounded-full bg-amber-400"&gt;&lt;/div&gt;</pre>
+  <pre class="out">
+display: inline-block
+width: 40px
+height: 40px
+background-color: oklch(0.828 0.189 84.429)
+border-radius: 3.35544e+07px
+animation: 2s cubic-bezier(0.4, 0, 0.6, 1) infinite pulse
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="inline-block h-10 w-10 animate-spin rounded-full bg-amber-400"&gt;&lt;/div&gt;</pre>
+</div>
+
+<p>A missão confere a duração computada: 1 s para o giro, 2 s para o pulso. É uma forma de provar que a
+classe pegou sem depender de olhar a tela. Se você digitar <code>animate-spn</code>, o painel continua
+mostrando 2 s e a missão reprova — que é exatamente o comportamento desejado, porque a classe errada não
+existe e o Tailwind não avisa nada.</p>
+
+<p>Uma última nota sobre <code>animate-ping</code>: ele é o único dos quatro que não combina com um
+elemento visível por muito tempo. O desenho é um círculo que cresce até desaparecer, pensado para chamar
+atenção por um instante. Usar <code>animate-ping</code> num bloco grande de texto deixa a página
+vibrando, e quem tem sensibilidade a movimento fecha a aba. Prefira aplicá-lo a um ponto pequeno, ao
+lado de um rótulo fixo.</p>
+
+<h2>6. Keyframes próprios com @theme</h2>
+
+<p>Quando nenhuma das quatro serve, você escreve a sua. No Tailwind v4, isso não pede arquivo de
+configuração: declara-se a animação e os quadros dentro de um bloco <code>@theme</code>, no mesmo CSS em
+que o Tailwind é importado. O nome escolhido vira classe — <code>--animate-entrar</code> cria
+<code>animate-entrar</code> —, e o resto do atalho (duração, curva, preenchimento) vai junto no valor.
+O passo a passo, com mais de um quadro, está em
+<a href="keyframes-proprios.html">Keyframes Próprios</a>.</p>
+
+<pre class="file" data-file="entrada.css">@import "tailwindcss";
+
+@theme {
+  --animate-entrar: entrar 400ms ease-out both;
+  @keyframes entrar {
+    from { opacity: 0; translate: 0 8px; }
+    to { opacity: 1; translate: 0 0; }
+  }
+}</pre>
+
+<p>O <code>both</code> no fim é o detalhe que quase todo mundo esquece. Ele diz ao navegador para aplicar
+o primeiro quadro antes de a animação começar e o último depois de ela terminar. Sem isso, o elemento
+pisca no lugar final antes de "entrar", porque durante o atraso ele fica no estado de repouso. A
+alternativa é <code>forwards</code> (só o último quadro fica) ou <code>backwards</code> (só o primeiro).
+Numa animação de entrada, <code>both</code> é o que você quer em nove de dez casos.</p>
+
+<pre class="term">.animate-entrar {
+  animation: var(--animate-entrar);
+}
+@keyframes entrar {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}</pre>
+
+<p>Repare que o CSS gerado separa as duas coisas: a classe só aponta para a variável, e os quadros ficam
+fora de qualquer camada, disponíveis para quem chamar pelo nome. Isso permite usar a mesma animação em
+outro elemento com duração diferente, escrevendo <code>animate-[entrar_700ms_ease-out_both]</code> — o
+valor entre colchetes é CSS cru, com sublinhados no lugar dos espaços. E permite também reaproveitar os
+quadros dentro de um <code>@media</code> próprio, se a ocasião pedir.</p>
+
+<p>Dá para viver sem <code>@theme</code>, escrevendo <code>@keyframes</code> num arquivo CSS comum e
+chamando com <code>animate-[nome_1s_ease-in-out_infinite]</code>. Funciona, e é o caminho quando a
+animação é usada uma vez só. A vantagem do <code>@theme</code> é o nome curto e a possibilidade de
+trocar o valor em um lugar só — que é a mesma vantagem das outras variáveis do tema, como cor e
+espaçamento.</p>
+
+<h2>7. Movimento com respeito</h2>
+
+<p>Existe gente que passa mal com animação: quem tem sensibilidade vestibular, quem está enjoado, quem
+simplesmente prefere a tela quieta. O sistema operacional permite pedir "reduzir movimento", e o
+navegador expõe isso como uma consulta de mídia. O Tailwind tem duas variantes para o caso:
+<code>motion-safe:</code> aplica só a quem <em>não</em> pediu redução, e <code>motion-reduce:</code>
+aplica só a quem pediu.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="animate-bounce motion-reduce:animate-none"&gt;Pão saindo do forno&lt;/div&gt;
+&lt;div class="transition-transform duration-300 motion-reduce:transition-none"&gt;Cartão&lt;/div&gt;</pre>
+
+<p>A forma mais segura de escrever é a do exemplo: deixa a animação normal e desliga com
+<code>motion-reduce:</code>. Assim quem não tem a preferência configurada vê o efeito completo, e quem
+tem vê a página parada, sem perder informação. A variante <code>motion-safe:</code> faz o contrário —
+esconde o efeito de todo mundo que não pediu explicitamente por movimento — e é mais indicada quando a
+animação é enfeite grande, do tipo que ocupa a tela.</p>
+
+<p>Vale saber que essa consulta não é do Tailwind: é do CSS, e o Tailwind só deu o nome. O texto gerado é
+<code>@media (prefers-reduced-motion: reduce)</code> para <code>motion-reduce:</code> e
+<code>@media (prefers-reduced-motion: no-preference)</code> para <code>motion-safe:</code>. Em toda
+página deste guia você pode testar: o Chromium tem a opção em <em>DevTools → Rendering → Emulate CSS
+media prefers-reduced-motion</em>.</p>
+
+<h2>8. As armadilhas e a revisão final</h2>
+
+<p>A primeira armadilha é a transição sem par. <code>transition-colors</code> sozinho não muda nada,
+porque nada mudou. <code>duration-300</code> sozinho também não, porque não há transição vigiando. E
+<code>hover:bg-amber-600</code> sem transição muda de uma vez — funciona, mas é seco. As três classes
+andam juntas: a propriedade, a duração e o gatilho.</p>
+
+<p>A segunda é animar o que muda o layout. <code>transition-all</code> numa caixa que ganha respiro
+anima <code>padding</code>, e cada quadro obriga o navegador a recalcular a posição de tudo em volta.
+Num cartão isolado ninguém nota; numa lista de cinquenta, o celular esquenta. O caminho barato é animar
+<code>transform</code> e <code>opacity</code>, que o navegador resolve na placa de vídeo. Se precisa
+mesmo animar altura, <code>max-height</code> de 0 a um valor grande costuma dar menos dor de cabeça do
+que <code>height: auto</code>, que não é animável.</p>
+
+<p>A terceira é o <code>display</code>. Elemento com <code>hidden</code> não tem como animar: ele não
+está sendo desenhado. Para um painel que abre e fecha, o padrão é manter o elemento no DOM, animar
+<code>opacity</code> e <code>scale</code>, e só então tirar do fluxo. O Tailwind v4 deu um passo nessa
+direção ao incluir <code>display</code> na lista de <code>transition</code>, mas a transição de
+<code>display</code> só funciona entre <code>none</code> e um valor visível, e o navegador troca o valor
+no começo ou no fim — não interpola como uma cor.</p>
+
+<p>A quarta é o hover no celular. Como visto na página de <a href="ref-estados.html">Estados e
+Variantes</a>, <code>hover:</code> vive dentro de <code>@media (hover: hover)</code> e simplesmente não
+existe no toque. Um efeito que só acontece no hover é um efeito que metade dos leitores da Ana nunca vai
+ver. Em botões, some <code>active:</code>; em cartões, some <code>focus-within:</code> para quem navega
+por teclado.</p>
+
+<p>A revisão final cabe em cinco perguntas. O efeito tem um estado de partida e um de chegada? A
+propriedade animada é a certa (cor, sombra, transformação, opacidade)? A duração está entre 150 e 300 ms?
+Existe <code>motion-reduce:</code> onde há laço infinito? E o efeito continua compreensível com a
+animação desligada? Se as cinco respostas forem sim, pode publicar. Se a terceira for "500 ms", vale
+testar de novo com 200 ms: na prática, quase sempre parece melhor.</p>
+
+<h2>9. Resumo</h2>
+
+<p>Transição suaviza uma troca e precisa de gatilho; animação roda quadros por conta própria. No
+Tailwind v4, a transição se escreve em três classes — <code>transition-colors</code>,
+<code>duration-300</code>, <code>ease-out</code> —, e a duração é número livre em milissegundos. A curva
+padrão é <code>cubic-bezier(0.4, 0, 0.2, 1)</code>; <code>ease-out</code> é
+<code>cubic-bezier(0, 0, 0.2, 1)</code>.</p>
+
+<ul>
+<li>Escolha a transição mais estreita possível; <code>transition-all</code> é a última opção.</li>
+<li><code>transition-transform</code> + <code>duration-300</code> + <code>hover:scale-105</code> é o
+efeito de cartão que não falha.</li>
+<li><code>scale</code>, <code>rotate</code> e <code>translate</code> são propriedades próprias no v4;
+<code>skew</code> ainda usa <code>transform</code>.</li>
+<li>Animações prontas: <code>animate-spin</code> 1 s linear, <code>animate-ping</code> 1 s,
+<code>animate-pulse</code> 2 s, <code>animate-bounce</code> 1 s — todas infinitas.</li>
+<li>Animação própria: <code>--animate-nome</code> e <code>@keyframes nome</code> dentro de
+<code>@theme</code>, com <code>both</code> para não piscar.</li>
+<li>Laço infinito sempre com <code>motion-reduce:animate-none</code>.</li>
+<li>Anime <code>transform</code> e <code>opacity</code>; altura e respiro custam caro.</li>
+</ul>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

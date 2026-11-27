@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formulário de Contato | Guia Tailwind</title>
+<meta name="description" content="O formulário de contato da padaria montado de ponta a ponta: o cartão, o ritmo dos campos, duas colunas no desktop, o botão desligado e a confirmação que tranquiliza.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Formulário de <span class="hl">Contato</span></h1>
+
+<p class="intro">A Ana colocou uma página de contato no site da padaria e ficou contente: três campos,
+um botão, pronto. Duas semanas depois ela abriu o relatório e viu quarenta visitas e duas mensagens.
+As quarenta pessoas queriam encomendar bolo, e trinta e oito desistiram no meio. O formulário
+funcionava; o problema era o desenho — campos compridos demais, tudo grudado, um botão cinza lá
+embaixo que ninguém encontrava. Nesta aula a Ana refaz a página inteira, não um campo de cada vez:
+a faixa de título, o cartão do formulário, a coluna de horários, a linha do botão, o aviso de erro e
+a confirmação de que a encomenda chegou.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Como dividir a página em faixas antes de escrever a primeira classe.</li>
+  <li>O cartão do formulário: borda, respiro e largura que confortam a leitura.</li>
+  <li>Dois níveis de espaço: entre um campo e outro, e entre rótulo e campo.</li>
+  <li>Como colocar nome e telefone na mesma linha só a partir do tamanho certo.</li>
+  <li>A linha de ação: botão principal, saída secundária e alinhamento.</li>
+  <li>O botão desligado que parece desligado, sem sumir da tela.</li>
+  <li>O painel verde do sucesso e o painel vermelho do erro, com o foco no lugar certo.</li>
+  <li>Os atributos que fazem o formulário funcionar de verdade: <code>name</code>, <code>type</code>,
+  <code>autocomplete</code> e <code>required</code>.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o formulário que ninguém terminou</h2>
+
+<p>O formulário da Ana era assim: um campo de nome ocupando a largura toda, um de telefone, um de
+mensagem, e o botão. Sem título, sem agrupamento, sem respiro. No celular, cada campo era uma faixa
+de 360 px de largura por 30 px de altura — parecia uma prova de escola. No computador era pior: os
+campos iam de ponta a ponta do monitor, e o olho precisava viajar meio metro para ir do rótulo ao
+fim do campo.</p>
+
+<p>Ela tentou resolver aumentando a fonte. Ficou pior. Depois tentou pintar tudo de âmbar, e a página
+virou um outdoor. O que faltava não era cor nem tamanho: era <strong>estrutura</strong>. Um formulário
+de contato é uma página pequena com três faixas — o que é isto, o que eu preencho, para onde vai —,
+e o Tailwind só vale a pena quando você decide isso antes de digitar a primeira classe.</p>
+
+<p>Este é o primeiro dos casos reais do guia, e por isso ele começa diferente das aulas anteriores:
+aqui quase nenhuma classe é nova. O trabalho é <em>escolher</em> e <em>combinar</em>. A pergunta que
+guia a aula toda é simples: um cliente apressado, no celular, com o filho no colo, consegue
+preencher isso sem pensar duas vezes?</p>
+
+<h2>2. Três faixas e uma página</h2>
+
+<p>Antes de qualquer classe, a Ana desenhou no papel. No topo, o título e uma frase dizendo para que
+serve o formulário. No meio, o cartão com os campos. À direita, no computador, a coluna com endereço
+e horário — informação que tira dúvida e evita o envio. No celular, essa coluna desce para o pé,
+porque ninguém quer ler horário antes de saber que existe um formulário ali.</p>
+
+<p>O desenho vira código quase direto. A caixa de fora centraliza e limita a largura; dentro dela, a
+grade de duas colunas:</p>
+
+<pre class="file" data-file="contato.html">&lt;div class="mx-auto max-w-4xl px-4 py-12"&gt;
+  &lt;h1 class="text-3xl font-bold text-stone-900"&gt;Encomendas&lt;/h1&gt;
+  &lt;p class="mt-2 text-stone-600"&gt;Conte o que você precisa e a gente responde.&lt;/p&gt;
+
+  &lt;div class="mt-8 grid gap-10 lg:grid-cols-[1fr_18rem]"&gt;
+    &lt;form class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8"&gt;
+      &lt;!-- os campos entram aqui --&gt;
+    &lt;/form&gt;
+
+    &lt;aside class="rounded-2xl bg-amber-50 p-6"&gt;
+      &lt;!-- endereço, horário, telefone --&gt;
+    &lt;/aside&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<p>Três decisões estão nesse pedaço. <code>mx-auto max-w-4xl</code> põe um teto de 56 rem na página e
+centraliza o que sobra — a receita de <a href="container.html">container</a>. A grade vira duas
+colunas só a partir de <code>lg</code>, porque em tela média a coluna de horários roubaria espaço dos
+campos. E <code>gap-10</code> separa formulário e coluna lateral sem margem em ninguém: o espaço é
+propriedade do pai, e o filho não precisa saber que existe.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Faixa</th><th>Classes que fazem o trabalho</th><th>Por que assim</th></tr>
+<tr><td>Título</td><td><code>text-3xl font-bold</code> + <code>mt-2</code> na frase</td><td>duas informações, duas alturas: o olho acha o assunto em um segundo</td></tr>
+<tr><td>Cartão do formulário</td><td><code>rounded-2xl border bg-white p-6 sm:p-8</code></td><td>fundo branco sobre página clara, borda discreta, respiro maior no desktop</td></tr>
+<tr><td>Coluna lateral</td><td><code>bg-amber-50 p-6</code></td><td>cor de marca sem competir com o botão, que é o único âmbar forte da tela</td></tr>
+<tr><td>Faixa de fora</td><td><code>max-w-4xl px-4 py-12</code></td><td>teto de leitura, respiro nas laterais no celular e ar em cima e embaixo</td></tr>
+</table>
+</div>
+
+<p>O <code>px-4</code> na faixa de fora parece detalhe e não é: sem ele, no celular o cartão encosta
+na borda da tela e o campo fica sem margem nenhuma. É o erro número um de quem está começando a
+montar página em vez de componente.</p>
+
+<h2>3. O cartão que segura os campos</h2>
+
+<p>Um formulário solto no meio de uma página clara se mistura com o fundo. O cartão resolve isso com
+duas classes que já apareceram em <a href="cards.html">cards</a>: fundo branco e borda. O
+<code>shadow-sm</code> entra como reforço, não como decoração — ele separa o cartão do fundo sem
+precisar de uma borda escura.</p>
+
+<pre class="file" data-file="contato.html">&lt;form class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8"&gt;</pre>
+
+<p>Repare no par <code>p-6 sm:p-8</code>. No celular, 24 px de respiro interno; no desktop, 32 px. O
+respiro cresce junto com a tela porque a leitura também cresce: um cartão de 600 px de largura com
+24 px de margem interna fica apertado, e o campo fica colado na borda do cartão. Esse é o tipo de
+ajuste que ninguém reclama e todo mundo sente.</p>
+
+<dl class="anatomy">
+<dt>faixa</dt>
+<dd>A caixa que limita a largura da página e centraliza. Uma por página, quase sempre com
+<code>max-w</code> e <code>px</code>.</dd>
+<dt>cartão</dt>
+<dd>A caixa branca que segura um assunto. Aqui é o formulário; no site todo é o mesmo padrão de
+borda, canto e sombra.</dd>
+<dt>linha de campo</dt>
+<dd>O par rótulo + campo. É a unidade que se repete; o espaço entre linhas é o que dá ritmo.</dd>
+<dt>linha de ação</dt>
+<dd>Onde ficam os botões. Uma linha só, com o principal à direita no desktop e inteiro no celular.</dd>
+<dt>status</dt>
+<dd>A região que anuncia o resultado do envio. Existe no HTML desde o começo, mesmo invisível, para
+o leitor de tela saber onde olhar.</dd>
+</dl>
+
+<p>Guarde a palavra <em>linha de campo</em>: é ela que se repete quatro, cinco vezes. Quando você
+percebe a repetição, para de pensar em campos isolados e passa a pensar em ritmo — que é o assunto
+da próxima seção.</p>
+
+<h2>4. O ritmo entre um campo e outro</h2>
+
+<p>Na primeira versão, os campos eram <code>div</code>s empilhadas sem espaço nenhum. O rótulo de um
+encostava no campo de cima, e o olho não sabia onde terminava um campo e começava o outro. A Ana
+tentou <code>mb-4</code> em cada div e funcionou, mas ela tinha que lembrar de pôr a margem em todos
+menos no último — e esqueceu no último, como todo mundo esquece.</p>
+
+<p>A solução é deixar o pai cuidar do espaço. Uma coluna flexível com <code>gap</code>:</p>
+
+<div class="trytailwind" data-goal="css:#alvo|gap=20px;;rule:gap: calc(var(--spacing) * 5)">
+  <p class="try-task">Os dois campos estão com 4 px de espaço entre si. Dê 20 px de respiro entre um
+  grupo e outro, mantendo a coluna.</p>
+  <pre class="html">&lt;form class="rounded-2xl border border-stone-200 bg-white p-6"&gt;
+  &lt;div id="alvo" class="flex flex-col gap-1"&gt;
+    &lt;div&gt;
+      &lt;label for="nome" class="block text-sm font-medium text-stone-700"&gt;Seu nome&lt;/label&gt;
+      &lt;input id="nome" class="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2"&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+      &lt;label for="fone" class="block text-sm font-medium text-stone-700"&gt;Telefone&lt;/label&gt;
+      &lt;input id="fone" class="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2"&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/form&gt;</pre>
+  <pre class="out">
+display: flex
+gap: 4px
+flex-direction: column
+</pre>
+  <pre class="solucao">&lt;form class="rounded-2xl border border-stone-200 bg-white p-6"&gt;
+  &lt;div id="alvo" class="flex flex-col gap-5"&gt;
+    &lt;div&gt;
+      &lt;label for="nome" class="block text-sm font-medium text-stone-700"&gt;Seu nome&lt;/label&gt;
+      &lt;input id="nome" class="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2"&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+      &lt;label for="fone" class="block text-sm font-medium text-stone-700"&gt;Telefone&lt;/label&gt;
+      &lt;input id="fone" class="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2"&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/form&gt;</pre>
+</div>
+
+<p>O CSS gerado é o de sempre, e vale ver a conta:</p>
+
+<pre class="term">.gap-5 {
+  gap: calc(var(--spacing) * 5);
+}</pre>
+
+<p>São 1,25 rem, ou 20 px. Com <code>gap</code>, o espaço entra <em>entre</em> as linhas e em nenhum
+lugar mais: a primeira linha não ganha margem acima, a última não ganha abaixo. O cartão mantém o
+respiro de 24 px que já tinha, sem soma esquisita.</p>
+
+<p>Mas há dois níveis de espaço num formulário, e é aqui que quase todo mundo se perde. O espaço
+<strong>entre linhas</strong> é o <code>gap-5</code> do pai. O espaço <strong>dentro da linha</strong>,
+entre o rótulo e o campo, é o <code>mt-1</code> do campo. Se você usar o mesmo valor nos dois, o
+formulário fica sem hierarquia: o rótulo parece pertencer ao campo de cima. A regra prática da Ana:
+20 px entre grupos, 4 px entre rótulo e campo.</p>
+
+<h2>5. Nome e telefone na mesma linha</h2>
+
+<p>Nome e telefone são curtos. Em uma coluna, cada um ocupa a largura inteira do cartão e o formulário
+fica comprido sem precisar. No computador, cabem lado a lado; no celular, não — dois campos de 150 px
+cada são um convite a digitar errado.</p>
+
+<p>Isso é exatamente o que a grade responsiva faz: uma coluna por padrão, duas a partir de
+<code>sm</code>. Você não escreve a versão do celular e depois a do desktop; você escreve a do celular
+e diz o que muda depois.</p>
+
+<div class="trytailwind" data-goal="rule:grid-template-columns: repeat(2, minmax(0, 1fr));;largura:768" data-largura="768">
+  <p class="try-task">A prévia está com 768 px. Deixe a grade com duas colunas a partir de 640 px,
+  para nome e telefone ficarem na mesma linha no computador.</p>
+  <pre class="html">&lt;div id="alvo" class="grid gap-5"&gt;
+  &lt;div class="campo"&gt;
+    &lt;label class="block text-sm font-medium text-stone-700"&gt;Seu nome&lt;/label&gt;
+    &lt;input class="mt-1 w-full rounded-lg border px-3 py-2"&gt;
+  &lt;/div&gt;
+  &lt;div class="campo"&gt;
+    &lt;label class="block text-sm font-medium text-stone-700"&gt;Telefone&lt;/label&gt;
+    &lt;input class="mt-1 w-full rounded-lg border px-3 py-2"&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+gap: 20px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid gap-5 sm:grid-cols-2"&gt;
+  &lt;div class="campo"&gt;
+    &lt;label class="block text-sm font-medium text-stone-700"&gt;Seu nome&lt;/label&gt;
+    &lt;input class="mt-1 w-full rounded-lg border px-3 py-2"&gt;
+  &lt;/div&gt;
+  &lt;div class="campo"&gt;
+    &lt;label class="block text-sm font-medium text-stone-700"&gt;Telefone&lt;/label&gt;
+    &lt;input class="mt-1 w-full rounded-lg border px-3 py-2"&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A regra que aparece no painel mora dentro de uma condição — e é bom ver a condição escrita:</p>
+
+<pre class="term">@media (width >= 40rem) {
+  .sm\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}</pre>
+
+<p><code>40rem</code> são 640 px, o ponto em que o prefixo <code>sm:</code> liga. O
+<code>minmax(0, 1fr)</code> não é enfeite: sem o zero, um campo com texto comprido dentro da célula
+pode empurrar a coluna e estourar a grade. O Tailwind já escreve isso por você, e é uma das razões
+para preferir a classe à regra na mão.</p>
+
+<p>Um cuidado de conteúdo: nome e telefone na mesma linha só funcionam se os rótulos tiverem o mesmo
+tamanho. "Seu nome" e "Telefone para contato com DDD" lado a lado desalinham os campos. Encurte o
+rótulo ou deixe o campo comprido sozinho.</p>
+
+<h2>6. A linha do botão</h2>
+
+<p>O botão de enviar é a única coisa que a pessoa precisa achar no fim do formulário. Na versão
+antiga, ele era cinza, pequeno e alinhado à esquerda, logo abaixo do último campo, sem espaço. Metade
+das pessoas que desistiram, desistiram ali.</p>
+
+<p>A linha de ação tem três decisões: onde o botão fica, de que tamanho ele é e o que acontece
+enquanto o formulário está incompleto. No desktop, o botão principal vai à direita, alinhado com a
+borda do cartão, e a saída secundária ("prefiro ligar") fica à esquerda, discreta. No celular, os dois
+ocupam a largura toda, na ordem inversa — o principal em cima, porque o polegar chega nele primeiro.</p>
+
+<pre class="file" data-file="contato.html">&lt;div class="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"&gt;
+  &lt;a href="index.html" class="rounded-lg px-4 py-2.5 text-center font-medium text-stone-600 hover:bg-stone-100"&gt;
+    Prefiro ligar
+  &lt;/a&gt;
+  &lt;button type="submit" class="w-full rounded-lg bg-amber-600 px-5 py-2.5 font-medium text-white hover:bg-amber-700 sm:w-auto"&gt;
+    Enviar encomenda
+  &lt;/button&gt;
+&lt;/div&gt;</pre>
+
+<p><code>flex-col-reverse</code> no celular e <code>sm:flex-row</code> no desktop resolvem a ordem sem
+duplicar HTML: no DOM o link vem primeiro (é o que o leitor de tela lê primeiro), e no celular ele
+aparece embaixo. É um truque pequeno e legítimo, desde que a ordem de leitura continue fazendo
+sentido — e continua: quem ouve a página ouve o link e depois o botão.</p>
+
+<p>Agora o estado desligado. Enquanto o formulário está vazio, o botão fica
+<code>disabled</code>, para ninguém enviar uma mensagem sem nome. Só que um botão desabilitado sem
+estilo continua com a mesma cor forte de antes: parece clicável, não responde ao clique, e a pessoa
+acha que o site quebrou. O Tailwind tem a variante <code>disabled:</code> justamente para isso.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|opacity=0.5;;css:#alvo|cursor=not-allowed">
+  <p class="try-task">Este botão está desligado, mas parece ligado. Deixe-o com 50% de opacidade e
+  com o cursor de proibido, sem tirar a cor de fundo.</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-lg bg-amber-600 px-5 py-2.5 font-medium text-white" disabled&gt;
+  Enviar encomenda
+&lt;/button&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.666 0.179 58.318)
+color: rgb(255, 255, 255)
+font-weight: 500
+border-radius: 8px
+padding-inline: 20px
+padding-block: 10px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-amber-600 px-5 py-2.5 font-medium text-white disabled:cursor-not-allowed disabled:opacity-50" disabled&gt;
+  Enviar encomenda
+&lt;/button&gt;</pre>
+</div>
+
+<p>Duas coisas acontecem no painel: a opacidade cai para metade e o cursor vira o sinal de proibido.
+Só que opacidade mexe no texto também, e um botão âmbar com texto branco a 50% fica com contraste
+baixo. A Ana resolveu trocando o texto: enquanto o botão está desligado, ele diz "Preencha o nome" em
+vez de "Enviar encomenda". A cor explica que não dá para clicar; o texto explica por quê.</p>
+
+<h2>7. O que aparece quando dá certo</h2>
+
+<p>Quem envia uma mensagem fica na dúvida: foi? A página recarregou e ficou igual. Sem resposta, a
+pessoa envia de novo, e a Ana recebe três pedidos iguais. O painel de confirmação não é gentileza, é
+parte do formulário.</p>
+
+<pre class="file" data-file="contato.html">&lt;div role="status" class="mt-6 flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4"&gt;
+  &lt;span aria-hidden="true" class="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-green-600 text-xs font-bold text-white"&gt;✓&lt;/span&gt;
+  &lt;div&gt;
+    &lt;p class="font-medium text-green-900"&gt;Encomenda recebida&lt;/p&gt;
+    &lt;p class="mt-1 text-sm text-green-800"&gt;Respondemos em até um dia útil, no telefone que você deixou.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<p>Três detalhes fazem esse painel funcionar. <code>role="status"</code> avisa o leitor de tela que
+aquele texto apareceu sozinho, sem a pessoa ter clicado nele — é o mesmo papel do
+<code>aria-live="polite"</code>, que você viu em <a href="alertas.html">alertas</a>. O
+<code>aria-hidden="true"</code> no círculo com o ✓ evita que o leitor anuncie "visto" ou "quadrado" no
+meio da frase. E o <code>flex items-start gap-3</code> mantém o ícone alinhado com a primeira linha,
+mesmo quando o texto ocupa duas.</p>
+
+<p>Falta uma coisa que nenhuma classe resolve: o foco. Se o painel aparece no lugar do formulário e o
+foco continua no botão que sumiu, quem navega pelo teclado fica perdido. Ponha
+<code>tabindex="-1"</code> no título do painel e leve o foco para lá com uma linha de JavaScript:</p>
+
+<pre class="file" data-file="contato.html">&lt;p class="font-medium text-green-900" tabindex="-1"&gt;Encomenda recebida&lt;/p&gt;</pre>
+
+<p>A regra é a mesma do erro: quando a página muda sozinha, o foco precisa acompanhar. Não é assunto
+de CSS, e é o tipo de detalhe que separa uma página bonita de uma página que funciona.</p>
+
+<h2>8. O que aparece quando falta algo</h2>
+
+<p>O navegador já sabe cobrar um campo obrigatório: com <code>required</code>, ele mostra um balão
+perto do campo e não deixa enviar. É útil e é insuficiente — o balão some quando a pessoa clica fora,
+e quem preencheu quatro campos quer saber quantos faltam de uma vez.</p>
+
+<p>A versão da Ana tem duas camadas. No topo do cartão, um resumo que aparece quando o envio falha;
+em cada campo com problema, uma borda vermelha e uma frase abaixo. As duas apontam para o mesmo
+lugar, e a pessoa não precisa adivinhar.</p>
+
+<pre class="file" data-file="contato.html">&lt;div role="alert" tabindex="-1" class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"&gt;
+  &lt;p class="font-medium"&gt;Faltou preencher dois campos.&lt;/p&gt;
+  &lt;ul class="mt-2 list-disc pl-5"&gt;
+    &lt;li&gt;&lt;a href="#nome" class="underline"&gt;O seu nome&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="#fone" class="underline"&gt;O telefone para contato&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;
+
+&lt;div&gt;
+  &lt;label for="nome" class="block text-sm font-medium text-stone-700"&gt;Seu nome&lt;/label&gt;
+  &lt;input id="nome" name="nome" aria-invalid="true" aria-describedby="erro-nome"
+         class="mt-1 w-full rounded-lg border border-red-500 px-3 py-2"&gt;
+  &lt;p id="erro-nome" class="mt-1 text-sm text-red-700"&gt;Escreva o seu nome para a gente saber com quem falar.&lt;/p&gt;
+&lt;/div&gt;</pre>
+
+<p>O resumo é a camada de cima e tem dois trabalhos. O primeiro é resumir: "faltou preencher dois
+campos" responde antes de a pessoa procurar. O segundo é levar até o campo — cada item é um link para
+o <code>id</code> daquele campo, e todos usam <code>underline</code>, porque link sem sublinhado dentro
+de um bloco vermelho vira adivinhação. O <code>tabindex="-1"</code> no resumo permite mandar o foco
+para lá quando o envio falha, e é o que faz o leitor de tela começar a leitura pelo aviso.</p>
+
+<p>A camada de baixo é a frase de cada campo: <code>border-red-500</code> na borda,
+<code>aria-invalid="true"</code> e <code>aria-describedby</code> apontando para o texto. Essa parte é a
+mesma da aula de <a href="rotulos-e-ajuda.html">rótulos e texto de ajuda</a>; o que muda aqui é o
+desenho do conjunto. Cor sozinha não é mensagem: por isso existem a frase no campo e a lista no topo,
+com o mesmo vocabulário nos dois lugares — se o resumo diz "telefone", a frase do campo diz "telefone",
+não "celular".</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Atributo</th><th>O que faz</th><th>Exemplo</th></tr>
+<tr><td><code>name</code></td><td>dá nome ao dado enviado; sem ele o servidor recebe vazio</td><td><code>name="telefone"</code></td></tr>
+<tr><td><code>type</code></td><td>escolhe o teclado e a validação do campo</td><td><code>type="tel"</code>, <code>type="email"</code></td></tr>
+<tr><td><code>autocomplete</code></td><td>deixa o navegador preencher sozinho, sem erro de digitação</td><td><code>autocomplete="name"</code></td></tr>
+<tr><td><code>required</code></td><td>marca o campo como obrigatório antes de qualquer script</td><td><code>required</code></td></tr>
+</table>
+</div>
+
+<p>Esses quatro atributos valem mais que qualquer classe desta aula. Um formulário bonito sem
+<code>name</code> chega vazio no e-mail; um formulário sem <code>autocomplete</code> faz o cliente
+digitar o próprio telefone no celular em que ele já está salvo. Você viu o papel de cada um em
+<a href="campos-de-formulario.html">campos de formulário</a>; aqui a novidade é que eles fazem parte
+do desenho da página, não de um campo isolado.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o formulário que chegava em branco</h3>
+<p>A Ana recebeu um e-mail com todos os campos vazios e passou uma tarde procurando erro no CSS. O
+problema era o HTML: nenhum <code>&lt;input&gt;</code> tinha <code>name</code>. Sem esse atributo, o
+navegador não tem como montar o pacote de dados e envia só o que existe — nada. A correção foi de
+trinta segundos, uma palavra por campo. O sintoma clássico é esse: a página parece certa, o envio
+acontece, e o conteúdo não chega.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o botão que ninguém percebeu que estava desligado</h3>
+<p>Numa segunda versão, o botão só ligava depois que os quatro campos estavam preenchidos. Só que ele
+continuava âmbar e forte, idêntico ao estado ligado. Os clientes clicavam, nada acontecia, e dois
+deles ligaram para a padaria reclamando que o site estava quebrado. A correção foi a da seção 6:
+<code>disabled:opacity-50</code>, cursor de proibido e um texto que explica o que falta. Botão
+desligado tem de parecer desligado — e dizer por quê.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a confirmação que ninguém viu</h3>
+<p>Depois de enviar, o painel verde aparecia no topo do formulário, fora da tela, porque a pessoa
+estava rolada até o botão. Metade dos clientes enviava de novo. A Ana passou a rolar até o painel
+(<code>scrollIntoView</code>) e a levar o foco para o título dele. O painel podia continuar onde
+estava: o que mudou foi o lugar para onde a página olha depois do clique.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. Onde vai o <code>gap-5</code> que separa as linhas
+de campo?</p>
+<label><input type="radio" name="f1"> em cada campo, junto com o <code>mt-1</code></label>
+<label><input type="radio" name="f1"> no <code>&lt;form&gt;</code>, que é o elemento mais externo</label>
+<label><input type="radio" name="f1"> na <code>div</code> que envolve as linhas, a coluna flexível</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">2. Por que <code>sm:grid-cols-2</code> e não
+<code>grid-cols-2</code>?</p>
+<label><input type="radio" name="f2"> porque <code>grid-cols-2</code> só aceita números pares</label>
+<label><input type="radio" name="f2"> porque no celular duas colunas deixariam os campos estreitos demais</label>
+<label><input type="radio" name="f2"> porque o <code>sm:</code> deixa a grade mais rápida de renderizar</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que um botão <code>disabled</code> precisa ter
+para não parecer quebrado?</p>
+<label><input type="radio" name="f3"> um estado visual próprio, como <code>disabled:opacity-50</code>, e um texto que explique</label>
+<label><input type="radio" name="f3"> a classe <code>hidden</code>, para ninguém clicar</label>
+<label><input type="radio" name="f3"> nada: o navegador já pinta botões desabilitados de cinza</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a largura do botão</h2>
+<p>No <a href="layout-login.html">formulário de login</a> a regra é a mesma: o botão ocupa a largura
+toda no celular e fica do tamanho do texto no computador. Qual classe falta para isso acontecer a
+partir de 640 px?</p>
+<div class="ex-code">&lt;button class="w-full rounded-lg bg-amber-600 px-5 py-2.5 <input aria-label="resposta 1" data-answer="sm:w-auto" placeholder="...">"&gt;Enviar&lt;/button&gt;</div>
+<p class="ex-dica">Dica: o valor <code>auto</code> devolve a largura ao conteúdo, e o prefixo é o
+mesmo breakpoint que você usou na grade. Escreva com o hífen.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Um formulário de contato é uma página pequena, e por isso ele se monta como página: uma faixa de
+fora com teto de largura e respiro nas laterais, um título que diz do que se trata, o cartão branco
+com os campos e, ao lado, a coluna com o que tira dúvida. As classes são as de sempre; o que muda é a
+ordem em que você decide — primeiro as faixas, depois o cartão, depois o ritmo.</p>
+
+<p>O ritmo tem dois níveis: <code>gap-5</code> na coluna que envolve as linhas e <code>mt-1</code>
+entre rótulo e campo. Nome e telefone vão para a mesma linha com <code>sm:grid-cols-2</code>, nunca
+antes disso. A linha de ação põe o botão inteiro no celular e do tamanho do texto no desktop, com
+<code>w-full sm:w-auto</code>, e o estado desligado usa <code>disabled:opacity-50</code> mais
+<code>disabled:cursor-not-allowed</code>. O sucesso aparece num painel com <code>role="status"</code>;
+o erro aparece num resumo com <code>role="alert"</code> e em cada campo com
+<code>aria-invalid</code> e <code>aria-describedby</code>.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Decida as faixas no papel antes da primeira classe.</li>
+<li><code>mx-auto max-w-4xl px-4</code> é o esqueleto de quase toda página de conteúdo.</li>
+<li>Cartão do formulário: <code>rounded-2xl border bg-white p-6 sm:p-8 shadow-sm</code>.</li>
+<li>Espaço entre linhas no pai (<code>gap-5</code>); espaço dentro da linha no campo (<code>mt-1</code>).</li>
+<li>Duas colunas só de <code>sm:</code> para cima: <code>grid gap-5 sm:grid-cols-2</code>.</li>
+<li>Ordem invertida no celular sem duplicar HTML: <code>flex-col-reverse sm:flex-row</code>.</li>
+<li>Botão: <code>w-full sm:w-auto</code>; desligado: <code>disabled:opacity-50</code> e
+<code>disabled:cursor-not-allowed</code>.</li>
+<li>Sucesso com <code>role="status"</code>; erro com <code>role="alert"</code>; foco vai para o aviso.</li>
+<li><code>name</code>, <code>type</code>, <code>autocomplete</code> e <code>required</code> não são
+opcionais — sem eles o formulário não funciona.</li>
+<li>Cor sozinha não avisa: sempre um texto junto.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

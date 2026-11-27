@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tela de Login | Guia Tailwind</title>
+<meta name="description" content="A tela de login da padaria feita do zero: centralizar o cartão na janela com grid, limitar a largura com max-w e dividir a tela em duas colunas no computador.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Tela de <span class="hl">Login</span></h1>
+<p class="intro">A Ana abriu a área de clientes do site da padaria: quem encomenda um bolo vai entrar ali
+para ver o pedido e o horário da retirada. O formulário está pronto — e-mail, senha, botão — e mesmo
+assim a página parece quebrada. O cartão nasceu colado no canto superior esquerdo da janela, como um
+bilhete grudado na parede; no monitor da loja sobra um deserto branco embaixo e à direita, e no
+celular da cliente o botão escapa para fora da tela. Nesta aula a Ana monta a tela de login de
+verdade: o cartão no meio, uma largura que não estica, os campos no ritmo certo e duas colunas
+quando sobra espaço.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que o navegador joga tudo no canto superior esquerdo.</li>
+  <li>A ler a tela como três caixas: a página, a área que centraliza e o cartão.</li>
+  <li>O trio que resolve 90% dos logins: <code>grid min-h-screen place-items-center</code>.</li>
+  <li>Como pôr um teto de largura no cartão com <code>w-full max-w-sm</code>.</li>
+  <li>O ritmo dos campos: <code>grid gap-4</code> dentro do formulário.</li>
+  <li>A linha do “lembrar de mim” com <code>flex flex-wrap items-center justify-between</code>.</li>
+  <li>A tela dividida em duas colunas no computador com <code>md:grid-cols-2</code>.</li>
+  <li>Os tropeços clássicos de quem centraliza pela primeira vez.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o formulário grudado no canto</h2>
+
+<p>A primeira versão da tela de login da Ana era só isto:</p>
+
+<pre class="file" data-file="login.html">&lt;main&gt;
+  &lt;h1&gt;Entrar&lt;/h1&gt;
+  &lt;label for="email"&gt;E-mail&lt;/label&gt;
+  &lt;input id="email" type="email"&gt;
+  &lt;label for="senha"&gt;Senha&lt;/label&gt;
+  &lt;input id="senha" type="password"&gt;
+  &lt;button type="submit"&gt;Entrar&lt;/button&gt;
+&lt;/main&gt;</pre>
+
+<p>Não há erro de digitação ali. O HTML está correto e o navegador desenha tudo. O que assusta é onde
+ele desenha. Duas coisas acontecem ao mesmo tempo, e as duas têm explicação.</p>
+
+<p>A primeira é a direção do fluxo. O navegador começa a escrever no canto superior esquerdo e vai
+descendo, como quem escreve numa folha. Se o conteúdo é curto, o resto da janela fica vazio — e não
+tem nada de errado nisso, é só o começo do papel. A segunda é o tipo de cada tag. Cada elemento do
+HTML nasce com um jeito de ocupar espaço: alguns são <strong>de bloco</strong>, como
+<code>&lt;div&gt;</code>, <code>&lt;p&gt;</code> e <code>&lt;h1&gt;</code>, e sempre começam numa
+linha nova, ocupando a largura toda do pai; outros são <strong>em linha</strong>, como
+<code>&lt;label&gt;</code>, <code>&lt;input&gt;</code> e <code>&lt;button&gt;</code>, e se
+encaixam um ao lado do outro, como palavras numa frase.</p>
+
+<p>É por isso que a tela da Ana parece uma frase comprida: o rótulo, o campo, o outro rótulo, o outro
+campo e o botão dividem a mesma linha até não caber mais, e só então a linha quebra. O cartão nem
+existe ainda — o que existe são pedaços soltos no canto da página. Antes de pintar, antes de
+arredondar, o trabalho é de arquitetura: decidir quais caixas existem e quem fica dentro de quem.</p>
+
+<h2>2. Três caixas, uma dentro da outra</h2>
+
+<p>Todo layout do guia se resolve pensando em caixas. A tela de login tem três, aninhadas:</p>
+
+<ul>
+<li><strong>A página.</strong> A caixa maior, do tamanho da janela do navegador. É ela que empurra o
+miolo para o meio.</li>
+<li><strong>A área que centraliza.</strong> Uma caixa intermediária que ocupa a página inteira e
+distribui o cartão no centro dela.</li>
+<li><strong>O cartão.</strong> O retângulo branco onde ficam o título, os campos e o botão.</li>
+</ul>
+
+<p>Parece exagero criar uma caixa só para centralizar, mas é o contrário: é o que deixa cada uma com
+uma responsabilidade. O cartão cuida do conteúdo. A área do meio cuida da posição. A página cuida de
+ocupar a tela. Quando alguém tenta fazer as três coisas no mesmo elemento, o CSS vira um nó — e o
+conserto de amanhã quebra o de hoje.</p>
+
+<dl class="anatomy">
+<dt>janela</dt>
+<dd>A área visível do navegador, sem as barras e sem as abas. As medidas <code>vh</code> e
+<code>vw</code> falam dela.</dd>
+<dt>contêiner</dt>
+<dd>A caixa que contém outras. Quem manda na posição dos filhos é o contêiner, não o filho.</dd>
+<dt>cartão</dt>
+<dd>O retângulo de conteúdo — aqui, o formulário de entrada. Tem largura máxima, respiro e fundo
+próprios.</dd>
+<dt>campo</dt>
+<dd>Cada <code>&lt;input&gt;</code> onde a cliente digita. É um elemento em linha: sem ajuda, ele não
+ocupa a linha inteira.</dd>
+<dt>área útil</dt>
+<dd>O espaço que sobra para o conteúdo depois dos respiros. É o que decide se o cartão cabe no
+celular.</dd>
+</dl>
+
+<p>Guarde a frase que resolve metade dos problemas desta aula: <strong>quem centraliza é o pai</strong>.
+Colocar <code>place-items-center</code> no cartão não centraliza o cartão — ele centraliza o conteúdo
+de dentro do cartão. Para mover o cartão, a classe vai na caixa de fora.</p>
+
+<h2>3. A página na altura da janela</h2>
+
+<p>O primeiro passo é fazer a caixa de fora ocupar a altura toda. Existe uma unidade de medida só para
+isso: <code>vh</code>, de <em>viewport height</em>. <code>100vh</code> é a altura da janela. A classe
+do Tailwind é <code>min-h-screen</code> e o CSS gerado é curto:</p>
+
+<pre class="term">.min-h-screen {
+  min-height: 100vh;
+}</pre>
+
+<p>Repare que é <code>min-height</code>, mínimo, e não <code>height</code>, altura fixa. A diferença é
+o que salva a tela de login em janelas baixas. Com <code>height: 100vh</code>, a caixa teria
+exatamente a altura da janela para sempre: se o cartão fosse mais alto que isso — num notebook
+pequeno, com o teclado do celular aberto, com fonte aumentada —, o conteúdo vazaria para fora ou seria
+cortado. Com <code>min-height</code>, a caixa tem <em>pelo menos</em> a altura da janela e cresce se
+precisar. É a diferença entre uma parede e um elástico.</p>
+
+<p>Um aviso honesto: no celular, <code>100vh</code> é medido com a barra de endereço escondida, então
+a página pode ficar uns pixels mais alta que a tela e aparecer uma rolagem de leve. O Tailwind v4 tem
+<code>min-h-dvh</code> para usar a altura dinâmica da janela. Nos computadores dá na mesma; no celular
+é um refinamento que você vai querer depois. Por hoje, <code>min-h-screen</code> resolve.</p>
+
+<h2>4. Centralizar com grid e place-items-center</h2>
+
+<p>Com a caixa do tamanho da tela, falta dizer onde o filho se encosta dentro dela. Duas classes
+fazem isso: <code>grid</code>, que transforma a caixa num contêiner de grade, e
+<code>place-items-center</code>, que manda o item para o centro da célula nos dois sentidos.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=grid;;rule:min-height: 100vh;;rule:place-items: center">
+  <p class="try-task">O cartão está parado no canto superior esquerdo. Dê ao bloco de fora a altura da
+  janela e leve o cartão para o meio, na horizontal e na vertical: acrescente <code>grid</code>,
+  <code>min-h-screen</code> e <code>place-items-center</code> ao <code>&lt;div id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-stone-100 p-4"&gt;
+  &lt;form class="w-full max-w-sm rounded-xl bg-white p-6 shadow"&gt;
+    &lt;p class="font-semibold text-stone-900"&gt;Entrar na área de clientes&lt;/p&gt;
+    &lt;p class="mt-1 text-sm text-stone-600"&gt;Suas encomendas ficam aqui.&lt;/p&gt;
+  &lt;/form&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.97 0.001 106.424)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid min-h-screen place-items-center bg-stone-100 p-4"&gt;
+  &lt;form class="w-full max-w-sm rounded-xl bg-white p-6 shadow"&gt;
+    &lt;p class="font-semibold text-stone-900"&gt;Entrar na área de clientes&lt;/p&gt;
+    &lt;p class="mt-1 text-sm text-stone-600"&gt;Suas encomendas ficam aqui.&lt;/p&gt;
+  &lt;/form&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel antes da missão mostra o cartão encostado no canto, com 16 px de respiro em volta — o
+<code>p-4</code> que já estava lá. Depois de rodar a solução, ele mostra <code>display: grid</code> e
+<code>place-items: center</code>: o cartão agora está no meio. A altura mínima é a única linha que
+parece estranha, porque o painel escreve <code>min-height: 150px</code> em vez de
+<code>100vh</code>. Não é erro: é a prova de que <code>vh</code> é sempre relativo à janela. A prévia
+desta caixa tem 150 px de altura, então <code>100vh</code> vale 150 px ali dentro. No site da Ana, a
+janela é a do navegador e o número é outro — a regra é a mesma. E repare no principal: nada mudou no
+cartão. Quem mudou foi o pai.</p>
+
+<p><code>place-items</code> é um atalho que junta duas propriedades: <code>align-items</code>, que
+alinha na vertical, e <code>justify-items</code>, que alinha na horizontal. Existe também
+<code>place-content-center</code>, parente próximo e diferente: ele centraliza as <em>colunas</em> da
+grade dentro da caixa, e não cada item dentro da sua célula. Com uma coluna só e um item só, os dois
+dão o mesmo resultado — quando a grade cresce, não dão mais. Se um dia o cartão parar no meio na
+horizontal e não na vertical, desconfie dessa troca.</p>
+
+<p>Quem vem do CSS antigo costuma resolver isso com <code>flex items-center justify-center</code>, e
+funciona igual. A grade tem uma vantagem discreta: ela já é uma grade, então no futuro acrescentar uma
+segunda área na tela (um painel de marca, uma lista de vantagens) é só declarar as colunas, sem trocar
+o contêiner.</p>
+
+<h2>5. O teto de largura: w-full + max-w-sm</h2>
+
+<p>Centralizado, o cartão revela o segundo problema. Ele tem <code>w-full</code>, ou seja, 100% da
+largura disponível — e no monitor da loja isso vira uma faixa de 1.500 pixels com um campo de e-mail
+minúsculo no meio. Falta um teto.</p>
+
+<div class="trytailwind" data-goal="rule:max-width: var(--container-sm);;rule:width: 100%">
+  <p class="try-task">O cartão está centralizado, mas estica até a borda e vira uma faixa larga
+  demais. Ponha um teto de 24 rem (384 px) na largura: acrescente <code>max-w-sm</code> ao
+  <code>&lt;form id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;div class="grid min-h-screen place-items-center bg-stone-100 p-4"&gt;
+  &lt;form id="alvo" class="w-full rounded-xl bg-white p-6 shadow"&gt;
+    &lt;p class="font-semibold text-stone-900"&gt;Entrar na área de clientes&lt;/p&gt;
+    &lt;input type="email" class="mt-4 w-full rounded-lg border border-stone-300 p-2" placeholder="ana@notebook"&gt;
+    &lt;button type="submit" class="mt-4 w-full rounded-lg bg-amber-600 p-2 font-semibold text-white"&gt;Entrar&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+width: 584px
+padding: 24px
+background-color: rgb(255, 255, 255)
+border-radius: 12px
+box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px
+</pre>
+  <pre class="solucao">&lt;div class="grid min-h-screen place-items-center bg-stone-100 p-4"&gt;
+  &lt;form id="alvo" class="w-full max-w-sm rounded-xl bg-white p-6 shadow"&gt;
+    &lt;p class="font-semibold text-stone-900"&gt;Entrar na área de clientes&lt;/p&gt;
+    &lt;input type="email" class="mt-4 w-full rounded-lg border border-stone-300 p-2" placeholder="ana@notebook"&gt;
+    &lt;button type="submit" class="mt-4 w-full rounded-lg bg-amber-600 p-2 font-semibold text-white"&gt;Entrar&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>As duas classes trabalham em dupla e a ordem delas no HTML não importa. <code>w-full</code> diz
+“comece com 100% da largura”; <code>max-w-sm</code> diz “mas nunca passe de 24 rem”. Em tela pequena,
+os 100% são menores que o teto e o cartão ocupa tudo. Em tela grande, o teto entra em ação e sobra
+espaço dos lados. Sem o <code>w-full</code>, o cartão encolheria até o tamanho do texto — porque um
+item de grade centralizado não estica sozinho. Sem o <code>max-w</code>, ele viraria a faixa. É o par
+que resolve.</p>
+
+<p>A escala de larguras máximas é a mesma de outros lugares do guia, só que em <code>max-w-</code>:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor</th><th>Onde costuma servir</th></tr>
+<tr><td><code>max-w-xs</code></td><td>20 rem = 320 px</td><td>cartão de login compacto, menu</td></tr>
+<tr><td><code>max-w-sm</code></td><td>24 rem = 384 px</td><td>o padrão de tela de login</td></tr>
+<tr><td><code>max-w-md</code></td><td>28 rem = 448 px</td><td>formulário de cadastro</td></tr>
+<tr><td><code>max-w-lg</code></td><td>32 rem = 512 px</td><td>cartão com foto ou resumo</td></tr>
+<tr><td><code>max-w-xl</code></td><td>36 rem = 576 px</td><td>modal, janela de confirmação</td></tr>
+<tr><td><code>max-w-2xl</code></td><td>42 rem = 672 px</td><td>texto corrido confortável</td></tr>
+</table>
+</div>
+
+<p>A conta do <code>rem</code> é a de sempre: 1 rem = 16 px, então 24 rem = 384 px. Se a pessoa
+aumentar a fonte do navegador, o cartão cresce junto — é por isso que o Tailwind mede em
+<code>rem</code> e não em pixels.</p>
+
+<p>Um detalhe de gosto que vale o comentário: 384 px é a largura em que um campo de e-mail cabe sem
+apertar e o olho percorre o formulário de cima para baixo sem virar a cabeça. Não é mágica, é
+leitura — a mesma razão pela qual uma linha de texto corrido não deve passar de uns 70 caracteres.</p>
+
+<h2>6. O respiro do cartão e o ritmo dos campos</h2>
+
+<p>Com o cartão no lugar certo, o trabalho passa a ser dentro dele. Três decisões, nesta ordem:
+o respiro de dentro, o empilhamento dos campos e a largura dos campos.</p>
+
+<p>O respiro vem de <code>p-6</code> (24 px em todos os lados) ou <code>p-8</code> (32 px) para um
+cartão maior. Sem ele, o texto do título encosta na borda branca e o formulário parece um recorte mal
+feito. Com ele, o cartão ganha ar e o olho entende que aquele conteúdo é um bloco.</p>
+
+<p>O empilhamento é o pulo do gato. Como <code>label</code>, <code>input</code> e <code>button</code>
+são elementos em linha, eles se encaixam lado a lado. A solução é agrupar cada campo com o seu rótulo
+numa caixa própria e empilhar as caixas:</p>
+
+<pre class="file" data-file="login.html">&lt;form class="grid w-full max-w-sm gap-4 rounded-xl bg-white p-6 shadow"&gt;
+  &lt;label class="grid gap-1"&gt;
+    &lt;span class="text-sm font-medium text-stone-700"&gt;E-mail&lt;/span&gt;
+    &lt;input type="email" class="w-full rounded-lg border border-stone-300 p-2"&gt;
+  &lt;/label&gt;
+  &lt;label class="grid gap-1"&gt;
+    &lt;span class="text-sm font-medium text-stone-700"&gt;Senha&lt;/span&gt;
+    &lt;input type="password" class="w-full rounded-lg border border-stone-300 p-2"&gt;
+  &lt;/label&gt;
+  &lt;button type="submit" class="w-full rounded-lg bg-amber-600 p-2 font-semibold text-white"&gt;Entrar&lt;/button&gt;
+&lt;/form&gt;</pre>
+
+<p>O <code>gap-4</code> no formulário dá 16 px entre um campo e o próximo; o
+<code>gap-1</code> dentro de cada <code>&lt;label&gt;</code> dá 4 px entre o rótulo e a caixinha de
+digitação. São dois ritmos diferentes de propósito: dentro do campo, o rótulo e a caixa formam uma
+coisa só; entre campos, o respiro é maior para separar assuntos.</p>
+
+<p>Por que <code>grid gap-4</code> e não <code>space-y-4</code>? Os dois empilham e espaçam. A
+diferença aparece no dia em que a Ana quiser dois campos na mesma linha — “cidade” e “CEP” lado a lado
+no cadastro. Com grade, basta trocar para <code>grid grid-cols-2 gap-4</code> e o espaçamento continua
+o mesmo. Com <code>space-y</code>, seria preciso desmontar e remontar. O <code>gap</code> é uma
+propriedade da grade; o <code>space-y</code> é um remendo de margens.</p>
+
+<p>E o <code>w-full</code> nos campos? Sem ele, um <code>&lt;input&gt;</code> tem largura padrão de
+uns 20 caracteres e não acompanha o cartão: fica um retângulo torto no meio do branco. O
+<code>w-full</code> manda o campo ocupar a linha que o pai deu — e o pai é o cartão, que já tem teto.
+A conta fecha.</p>
+
+<h2>7. A linha do “lembrar de mim”</h2>
+
+<p>Toda tela de login adulta tem uma linha com o “lembrar de mim” de um lado e o “esqueci a senha” do
+outro. É uma linha só, com dois grupos afastados:</p>
+
+<pre class="file" data-file="login.html">&lt;div class="flex flex-wrap items-center justify-between gap-3"&gt;
+  &lt;label class="flex items-center gap-2 text-sm text-stone-700"&gt;
+    &lt;input type="checkbox"&gt; Lembrar de mim
+  &lt;/label&gt;
+  &lt;a href="#" class="text-sm font-medium text-amber-700"&gt;Esqueci a senha&lt;/a&gt;
+&lt;/div&gt;</pre>
+
+<p><code>flex</code> põe os dois em linha. <code>items-center</code> alinha a caixinha de marcar com a
+altura do texto — sem ele, o quadradinho fica teimosamente mais alto. <code>justify-between</code>
+empurra um para cada ponta, e é essa classe que cria o “afastados sem espaço no meio” que dá o ar de
+formulário caprichado. O <code>gap-3</code> garante que, quando não houver espaço, os dois não se
+cole.</p>
+
+<p>O <code>flex-wrap</code> é o seguro. Num celular de 375 px, o texto “Lembrar de mim” e o link
+“Esqueci a senha” juntos passam da largura da linha; sem quebra, um deles vaza para fora do cartão e
+aparece a barra de rolagem horizontal. Com <code>flex-wrap</code>, o link desce para a linha de baixo e
+o <code>justify-between</code> continua funcionando. Repare que a caixa em linha do
+<code>&lt;label&gt;</code> é outra coisa: ela é <code>flex</code> para o quadradinho e o texto ficarem
+alinhados com 8 px de distância.</p>
+
+<p>Falta o botão. Nesta linha ele não entra: o botão “Entrar” é a ação principal e merece a largura
+toda, numa linha própria. <code>w-full</code> num botão dentro de uma grade não significa “100% da
+tela”, e sim “100% da coluna em que ele está” — que, aqui, é a largura do cartão menos o respiro.
+É o que faz o botão parecer um botão de verdade, e não uma etiqueta perdida.</p>
+
+<h2>8. Em tela grande, a tela dividida</h2>
+
+<p>Quando sobra espaço, a tela de login pode contar uma história. O padrão mais comum é dividir a
+janela em duas colunas: de um lado a marca, do outro o formulário. Na tela pequena, as duas colunas
+viram uma só, empilhadas.</p>
+
+<div class="trytailwind" data-largura="768" data-goal="rule:@media (width &gt;= 48rem);;rule:grid-template-columns: repeat(2, minmax(0, 1fr));;largura:768">
+  <p class="try-task">A prévia está com 768 px, largura de tablet. A faixa da marca ficou em cima do
+  formulário. Coloque as duas lado a lado a partir de 768 px: acrescente <code>md:grid-cols-2</code>
+  ao <code>&lt;div id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="grid min-h-screen bg-stone-100"&gt;
+  &lt;div class="grid place-items-center bg-amber-200 p-8"&gt;
+    &lt;p class="text-lg font-bold text-amber-900"&gt;Padaria Pão Quente&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="grid place-items-center p-4"&gt;
+    &lt;form class="w-full max-w-sm rounded-xl bg-white p-6 shadow"&gt;
+      &lt;p class="font-semibold text-stone-900"&gt;Entrar&lt;/p&gt;
+      &lt;input type="email" class="mt-4 w-full rounded-lg border border-stone-300 p-2" placeholder="ana@notebook"&gt;
+    &lt;/form&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+min-height: 150px
+background-color: oklch(0.97 0.001 106.424)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid min-h-screen bg-stone-100 md:grid-cols-2"&gt;
+  &lt;div class="grid place-items-center bg-amber-200 p-8"&gt;
+    &lt;p class="text-lg font-bold text-amber-900"&gt;Padaria Pão Quente&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="grid place-items-center p-4"&gt;
+    &lt;form class="w-full max-w-sm rounded-xl bg-white p-6 shadow"&gt;
+      &lt;p class="font-semibold text-stone-900"&gt;Entrar&lt;/p&gt;
+      &lt;input type="email" class="mt-4 w-full rounded-lg border border-stone-300 p-2" placeholder="ana@notebook"&gt;
+    &lt;/form&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>md:</code> é o prefixo de ponto de quebra: ele vale a partir de 768 px de largura. Antes
+disso, a classe não existe e a grade fica com a coluna única padrão. O CSS que o Tailwind gera mostra
+o mecanismo:</p>
+
+<pre class="term">@media (width &gt;= 48rem) {
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}</pre>
+
+<p>48 rem é o mesmo que 768 px, escrito na unidade que cresce com a fonte do leitor. O
+<code>repeat(2, minmax(0, 1fr))</code> é a receita de duas colunas iguais que dividem o espaço
+disponível — e o <code>minmax(0, 1fr)</code> está ali para impedir que um conteúdo teimoso (um e-mail
+comprido, um nome sem espaço) estoure a coluna. É o mesmo par que as aulas de grade já mostraram;
+aqui ele ganhou um prefixo e virou responsivo.</p>
+
+<p>Sobre a ordem: no HTML, a faixa da marca vem antes do formulário, e é assim que ela aparece no
+celular — em cima, como uma capa. Se a Ana preferir que no celular o formulário venha primeiro, troque
+a ordem no HTML e use <code>md:order-first</code> na marca. E se a faixa for só decoração, a solução
+mais econômica é escondê-la no celular com <code>hidden md:grid</code>, deixando a tela pequena com o
+formulário sozinho e centralizado.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<p>Antes das histórias, vale ter na mão a tabela de diagnóstico. Quando a tela de login não fica como
+você imaginou, quase sempre é um destes cinco casos — e o conserto é uma classe, não uma reescrita:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sintoma na tela</th><th>Causa mais comum</th><th>Conserto</th></tr>
+<tr><td>Cartão parado no canto superior esquerdo</td><td>falta a área que centraliza, ou a classe foi no filho</td><td><code>grid place-items-center</code> no pai</td></tr>
+<tr><td>Cartão em faixa larga no monitor</td><td>só <code>w-full</code>, sem teto</td><td>acrescentar <code>max-w-sm</code></td></tr>
+<tr><td>Página arrasta de lado no celular</td><td>largura fixa em pixels no cartão</td><td><code>w-full max-w-sm</code></td></tr>
+<tr><td>Rótulo, campo e botão na mesma linha</td><td><code>label</code> e <code>input</code> são elementos em linha</td><td><code>grid gap-4</code> no formulário</td></tr>
+<tr><td>Botão “Entrar” cortado em notebook baixo</td><td>falta respiro na caixa que centraliza</td><td><code>p-6</code> na caixa de fora</td></tr>
+</table>
+</div>
+
+<div class="cenario">
+<h3>Cenário 1: o cartão no meio, mas cortado no notebook</h3>
+<p>A Ana testou no monitor grande, ficou lindo, abriu no notebook de 13 polegadas e o cartão apareceu
+cortado embaixo — o botão “Entrar” ficava fora da tela. A causa não é o <code>min-h-screen</code>,
+que está certo; é a falta de respiro. Com a página inteira disponível e nenhum
+<code>p-</code> na caixa de fora, o cartão encosta nas bordas quando o conteúdo cresce. A correção é
+um <code>p-6</code> (ou <code>py-8</code>) na mesma caixa que tem o <code>grid</code>: o cartão passa a
+ter uma margem de segurança e, se ainda não couber, a página rola em vez de cortar. Fica a regra: área
+que centraliza merece respiro, mesmo quando parece que não precisa.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a barra de rolagem horizontal que só aparece no celular</h3>
+<p>No computador, perfeito. No celular, a página inteira podia ser arrastada para o lado. O culpado
+era <code>w-[400px]</code> no cartão: 400 px fixos não cabem numa tela de 375 px, e ainda somavam
+os 24 px de respiro de cada lado. Quem usa largura fixa está apostando que a tela do outro tem aquele
+tamanho. A troca é sempre a mesma dupla: <code>w-full</code> para acompanhar o que houver e
+<code>max-w-sm</code> para não esticar demais. O cartão passa a caber em qualquer aparelho, e no
+computador continua com 384 px.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: “coloquei place-items-center no cartão e nada mudou”</h3>
+<p>Aconteceu com a Ana e acontece com todo mundo: a classe foi no elemento errado. O
+<code>place-items</code> organiza os filhos dentro do contêiner; aplicado ao cartão, ele mexeria no
+título e nos campos de dentro do cartão, não na posição do cartão. O sintoma é traiçoeiro — às vezes
+nada muda, às vezes o texto desalinha. A pergunta que resolve em três segundos é “quem é o pai deste
+elemento?”. Se a intenção é mover o cartão, a classe vai na área que centraliza. Se a intenção é
+alinhar o texto do cartão, aí sim ela vai no cartão, e mesmo assim
+<code>text-center</code> costuma ser a escolha certa para texto.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Para centralizar o cartão de login na janela, onde
+vão as classes <code>grid min-h-screen place-items-center</code>?</p>
+<label><input type="radio" name="q1"> no <code>&lt;form&gt;</code> do cartão, junto com o respiro</label>
+<label><input type="radio" name="q1"> na caixa de fora, que contém o cartão</label>
+<label><input type="radio" name="q1"> no <code>&lt;body&gt;</code>, sempre, sem exceção</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que <code>w-full max-w-sm</code> faz no cartão?</p>
+<label><input type="radio" name="q2"> deixa a largura fixa em 384 px em qualquer tela</label>
+<label><input type="radio" name="q2"> centraliza o cartão na horizontal</label>
+<label><input type="radio" name="q2"> ocupa 100% da largura disponível, sem passar de 24 rem</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que <code>min-h-screen</code> e não
+<code>h-screen</code> na caixa que centraliza?</p>
+<label><input type="radio" name="q3"> porque a caixa pode crescer quando o conteúdo não couber na janela</label>
+<label><input type="radio" name="q3"> porque <code>h-screen</code> não existe no Tailwind</label>
+<label><input type="radio" name="q3"> porque <code>min-h-screen</code> também centraliza o conteúdo</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a área que centraliza</h2>
+<p>Este é o começo do formulário de login da Ana. Complete a classe do bloco de fora para que ele ocupe
+a altura da janela e leve o cartão para o meio, nos dois sentidos. Escreva a classe que alinha os itens
+no centro da célula.</p>
+<div class="ex-code">&lt;div class="grid min-h-screen <input aria-label="resposta 1" data-answer="place-items-center" placeholder="..."> bg-stone-100 p-4"&gt;</div>
+<p class="ex-dica">Dica: são três pedaços na classe: a grade, a altura e o alinhamento. O alinhamento
+que serve para os dois eixos de uma vez é o <code>place-items-</code> mais o centro.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Uma tela de login é uma caixa dentro de outra. A caixa de fora recebe <code>grid min-h-screen
+place-items-center</code> e passa a ocupar a altura da janela com o filho no meio, nos dois sentidos.
+O cartão recebe <code>w-full max-w-sm</code>: acompanha a tela pequena e para de crescer em 24 rem.
+Dentro dele, <code>p-6</code> dá o respiro, <code>grid gap-4</code> empilha os campos num ritmo só e
+<code>w-full</code> nos campos e no botão faz cada um ocupar a linha inteira.</p>
+
+<p>Para telas largas, <code>md:grid-cols-2</code> divide a janela em duas colunas — marca de um lado,
+formulário do outro — e o prefixo <code>md:</code> garante que no celular tudo volte a ser uma coluna.
+O CSS gerado mostra a media query, e é ela que faz a mágica: abaixo de 48 rem a classe simplesmente não
+existe.</p>
+
+<p>O hábito que evita 90% dos problemas é perguntar, antes de escrever qualquer classe de posição:
+“quem é o pai deste elemento?”. Quem centraliza é o pai. O filho, quando muito, se empurra com margem.
+Na tela de login, essa pergunta separa o cartão da área que centraliza — e é essa separação que
+transforma um formulário jogado no canto numa tela que a cliente entende.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>A página começa no canto superior esquerdo: centralizar é trabalho seu, não do navegador.</li>
+<li>Três caixas: página, área que centraliza e cartão. Cada uma com uma responsabilidade.</li>
+<li><code>min-h-screen</code> = <code>min-height: 100vh</code>; cresce junto com o conteúdo.</li>
+<li><code>grid</code> + <code>place-items-center</code> centralizam o filho nos dois eixos, e vão no pai.</li>
+<li><code>w-full max-w-sm</code>: 100% até o teto de 24 rem (384 px).</li>
+<li><code>grid gap-4</code> no formulário empilha os campos; <code>gap-1</code> cola rótulo e campo.</li>
+<li><code>justify-between</code> afasta os extremos; <code>flex-wrap</code> evita o vazamento no celular.</li>
+<li><code>md:grid-cols-2</code> divide a tela a partir de 768 px (48 rem).</li>
+<li>Nunca use largura fixa em pixel para o cartão: no celular ela estoura a tela.</li>
+<li>Classe de posição no elemento errado não avisa nada — confira quem é o pai.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

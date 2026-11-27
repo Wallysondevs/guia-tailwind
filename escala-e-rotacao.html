@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escala e Rotação | Guia Tailwind</title>
+<meta name="description" content="Os valores de escala e rotação do Tailwind na padaria da Ana: scale-105 no destaque, hover:scale-110 dentro da moldura, rotate-45 no ícone e o espelho com sinal negativo.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Escala e <span class="hl">Rotação</span></h1>
+<p class="intro">Dois pedidos chegaram à Ana na mesma tarde. O primeiro: o pão do dia precisa parecer
+maior que os outros cartões da vitrine, mas sem empurrar nada de lugar. O segundo: o selo “PROMOÇÃO”
+está inclinado para o lado errado, e a cliente jurou que ele “parece que vai cair”. Os dois problemas
+moram na mesma família de classes — a das transformações — e se resolvem com dois tipos de número:
+porcentagem, no caso do tamanho, e graus, no caso do giro. Nesta aula a Ana aprende os valores de
+<code>scale-</code> e <code>rotate-</code>, incluindo o sinal de menos que vira tudo do avesso (no bom
+sentido).</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A escala em porcentagem: por que <code>scale-105</code> é 105% e não 105 px.</li>
+  <li>Os valores que a escala do Tailwind oferece e para que serve cada faixa.</li>
+  <li>Escalar só um eixo com <code>scale-x-</code> e <code>scale-y-</code>.</li>
+  <li>O truque do espelho: <code>-scale-x-100</code> para virar setas e fotos.</li>
+  <li>Como deixar a imagem crescer dentro da moldura sem vazar, com <code>overflow-hidden</code>.</li>
+  <li>Rotação em graus, com os valores prontos e com colchetes para o ângulo que você quiser.</li>
+  <li>Por que <code>-rotate-6</code> gira para o outro lado — e como não errar o sinal.</li>
+  <li>O que dá errado: texto que aumenta junto, cartão que cobre o vizinho, ícone que fica borrado.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o destaque e o selo</h2>
+
+<p>A vitrine da padaria é uma grade de cartões do mesmo tamanho. A Ana queria que o pão do dia
+“saltasse” aos olhos, e a primeira ideia foi aumentar o espaçamento interno do cartão escolhido:
+<code>p-6</code> no lugar de <code>p-4</code>. O cartão ficou mais alto, a grade se reorganizou e o
+cartão vizinho desceu para a linha de baixo — um efeito colateral grande para um destaque.</p>
+
+<p>A segunda ideia foi mudar a largura. Pior ainda: a grade tem colunas iguais por definição, e mexer
+na largura de um filho faz o navegador redistribuir tudo. Foi quando ela lembrou da aula de
+<a href="transformacoes.html">transformações</a>: existe um jeito de desenhar o cartão maior sem pedir
+licença ao layout. É a escala.</p>
+
+<p>O selo tinha um problema parecido, do outro lado. Ele já estava girado — a classe tinha sido copiada
+de um exemplo — mas no sentido horário, e o resultado parecia que ia despencar do cartão. A correção é
+um sinal de menos na frente do número. Só isso. Mas para usar esse sinal com segurança vale entender
+como a rotação conta os graus, e é o que esta aula faz.</p>
+
+<h2>2. Escala é porcentagem</h2>
+
+<p>A escala responde a uma pergunta simples: “de quanto é o tamanho do desenho, comparado ao tamanho
+original?”. <code>scale-100</code> quer dizer 100%, ou seja, o tamanho normal. <code>scale-105</code>
+são 105% — cinco por cento maior. <code>scale-95</code> são 95%, um pouco menor. O número é a
+porcentagem sem o símbolo, e o CSS gerado escreve isso na cara: <code>--tw-scale-x: 105%</code>.</p>
+
+<p>Isso é diferente de largura. Um cartão com <code>w-64</code> tem 256 px de largura de verdade, e o
+layout conta com isso. Um cartão com <code>scale-105</code> continua declarando a largura original para
+o layout e é desenhado 5% maior por cima. A borda, o texto, a sombra e a imagem escalam juntos, como uma
+foto ampliada.</p>
+
+<p>A conta é fácil de fazer de cabeça, e ajuda a escolher o valor: 5% de um cartão de 320 px são 16 px.
+Ou seja, <code>scale-105</code> num cartão desse tamanho aumenta 8 px de cada lado — o suficiente para
+o olho notar a diferença e pequeno o bastante para não invadir o vizinho. Já num cartão de 120 px, os
+mesmos 5% são 6 px no total, quase invisíveis: aí o valor precisa subir para
+<code>scale-110</code>. Porcentagem é relativa, e o tamanho do elemento é metade da decisão.</p>
+
+<dl class="anatomy">
+<dt>escala</dt>
+<dd>O quanto o desenho é maior ou menor que o original, em porcentagem: 100 é o tamanho natural.</dd>
+<dt>porcentagem</dt>
+<dd>A unidade da escala. <code>scale-110</code> é 1,1; o navegador mostra o valor em número no painel.</dd>
+<dt>eixo</dt>
+<dd>Cada direção do plano: <code>x</code> é a horizontal, <code>y</code> a vertical. As classes com
+<code>-x</code> ou <code>-y</code> escalam só uma delas.</dd>
+<dt>espelhar</dt>
+<dd>Virar o desenho ao contrário com escala negativa: <code>-scale-x-100</code> inverte da esquerda para
+a direita.</dd>
+<dt>grau</dt>
+<dd>A unidade da rotação. Uma volta completa tem 360 graus; <code>rotate-45</code> é um oitavo de
+volta.</dd>
+</dl>
+
+<p>Um cuidado que vale desde já: escalar não é “aumentar a fonte”. Se o cartão recebe
+<code>scale-110</code>, o texto de dentro aumenta junto — e a fonte declarada continua sendo a mesma, sem
+ganhar legibilidade de verdade (o desenho é ampliado, não re-renderizado em tamanho maior). Por isso a
+escala serve para destaque visual de curta duração, e não para resolver tamanho de letra. Para isso
+existem <code>text-lg</code> e companhia.</p>
+
+<h2>3. Os valores da escala</h2>
+
+<p>A escala do Tailwind é curta e cobre tudo o que se usa no dia a dia:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Tamanho</th><th>Onde costuma servir</th></tr>
+<tr><td><code>scale-0</code></td><td>0%</td><td>sumir por completo (com transição, vira um encolhimento)</td></tr>
+<tr><td><code>scale-50</code></td><td>50%</td><td>miniatura, ícone decorativo</td></tr>
+<tr><td><code>scale-75</code></td><td>75%</td><td>prévia pequena de imagem</td></tr>
+<tr><td><code>scale-90</code></td><td>90%</td><td>botão que “afunda” ao ser apertado</td></tr>
+<tr><td><code>scale-95</code></td><td>95%</td><td>o clássico <code>active:scale-95</code></td></tr>
+<tr><td><code>scale-100</code></td><td>100%</td><td>o normal; útil para “voltar ao tamanho”</td></tr>
+<tr><td><code>scale-105</code></td><td>105%</td><td>destaque discreto de cartão</td></tr>
+<tr><td><code>scale-110</code></td><td>110%</td><td>foto que cresce no hover</td></tr>
+<tr><td><code>scale-125</code></td><td>125%</td><td>ícone que reage ao mouse</td></tr>
+<tr><td><code>scale-150</code></td><td>150%</td><td>efeito de zoom mais forte, uso raro</td></tr>
+</table>
+</div>
+
+<p>Acima de 110% o crescimento começa a incomodar em texto e em cartões, porque o desenho invade o
+espaço dos vizinhos. Em ícones e imagens, 125% ainda é elegante. E existe o valor livre, com colchetes:
+<code>scale-[1.02]</code> para um destaque quase imperceptível, ou <code>scale-[0.98]</code> para um
+encolhimento que ninguém identifica conscientemente, mas todo mundo sente.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|scale=1.05;;rule:--tw-scale-x: 105%">
+  <p class="try-task">O cartão do pão do dia precisa parecer maior que os vizinhos, sem mudar de
+  tamanho no layout. Troque <code>scale-100</code> por <code>scale-105</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="scale-100 rounded-xl border border-amber-300 bg-amber-50 p-4"&gt;
+  &lt;h3 class="font-semibold"&gt;Pão do dia&lt;/h3&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h30.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 12px
+border-width: 1px
+border-color: oklch(0.879 0.169 91.605)
+scale: 1
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="scale-105 rounded-xl border border-amber-300 bg-amber-50 p-4"&gt;
+  &lt;h3 class="font-semibold"&gt;Pão do dia&lt;/h3&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h30.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>scale: 1.05</code> e nenhuma linha de largura, altura ou
+margem. É a diferença que a aula de transformações explicou em teoria, agora com número: o layout
+continua achando que o cartão tem o tamanho original, e o desenho é 5% maior. O texto de baixo não se
+mexeu, e a borda engrossou proporcionalmente.</p>
+
+<h2>4. Um eixo de cada vez, e o espelho</h2>
+
+<p>Quando você precisa esticar só na horizontal ou só na vertical, existem as classes com eixo:
+<code>scale-x-110</code> alarga sem mudar a altura, <code>scale-y-90</code> achata. É assim que se faz
+uma barra de progresso “esticar” ou uma imagem “achatada” de propósito.</p>
+
+<p>E aí vem o truque que resolve uma porção de problemas de layout: <strong>escala negativa
+espelha</strong>. <code>-scale-x-100</code> desenha o elemento de ponta-cabeça na horizontal, sem mover
+nada de lugar. Precisa de uma seta apontando para a esquerda e só tem a de direita? Espelhe. A foto da
+fachada foi tirada do lado errado? Espelhe. Esta é a saída real do compilador para as três variações:</p>
+
+<pre class="term">.scale-105 {
+  --tw-scale-x: 105%;
+  --tw-scale-y: 105%;
+  --tw-scale-z: 105%;
+  scale: var(--tw-scale-x) var(--tw-scale-y);
+}
+.scale-x-50 {
+  --tw-scale-x: 50%;
+  scale: var(--tw-scale-x) var(--tw-scale-y);
+}
+.-scale-x-100 {
+  --tw-scale-x: calc(100% * -1);
+  scale: var(--tw-scale-x) var(--tw-scale-y);
+}</pre>
+
+<p>Repare em dois detalhes. Primeiro, <code>scale-105</code> escreve três variáveis (x, y e z), mas usa
+só duas na declaração <code>scale</code> — o eixo z fica guardado para quem trabalhar com perspectiva.
+Segundo, o valor negativo não é escrito como <code>-100%</code>: o Tailwind prefere
+<code>calc(100% * -1)</code>, que chega ao mesmo lugar sem ambiguidade de sinal.</p>
+
+<p>Um aviso de texto: espelhar inverte o desenho inteiro, inclusive as letras. Não use
+<code>-scale-x-100</code> num botão com texto — use num ícone, numa imagem, numa forma. Se o que você
+quer é só mudar a direção de uma seta dentro de um botão, a classe vai na seta, não no botão.</p>
+
+<h2>5. Crescer sem vazar: a moldura</h2>
+
+<p>Quando a imagem cresce no hover, ela cresce <em>por cima</em> do que estiver por perto. Dentro de um
+cartão, o resultado costuma ser a foto invadindo o título. A solução é a mesma de qualquer coisa que
+transborda: um contêiner com <code>overflow-hidden</code>, que corta o que passar da borda. A foto
+cresce, mas você só vê o pedaço que cabe na moldura — e o efeito fica com cara de zoom de cinema.</p>
+
+<div class="trytailwind" data-goal="rule:.hover\:scale-110:hover;;rule:--tw-scale-x: 110%">
+  <p class="try-task">A foto do pão deve crescer um pouco quando o mouse passa sobre ela, e voltar
+  suavemente. Acrescente <code>transition-transform</code> e <code>hover:scale-110</code> ao bloco
+  colorido dentro da moldura.</p>
+  <pre class="html">&lt;div class="w-64 overflow-hidden rounded-xl"&gt;
+  &lt;div id="alvo" class="h-32 w-full bg-gradient-to-br from-amber-200 to-amber-500"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+height: 128px
+background-image: linear-gradient(to right bottom, oklch(0.924 0.12 95.746) 0%, oklch(0.769 0.188 70.08) 100%)
+</pre>
+  <pre class="solucao">&lt;div class="w-64 overflow-hidden rounded-xl"&gt;
+  &lt;div id="alvo" class="h-32 w-full bg-gradient-to-br from-amber-200 to-amber-500 transition-transform hover:scale-110"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel desta caixa não mostra o tamanho aumentado, porque a medição é feita com o mouse longe — é
+o mesmo motivo da aula de <a href="hover.html">hover</a>. Ele mostra o que a classe de transição escreve
+(<code>transition-property: transform, translate, scale, rotate</code>). Para ver o crescimento, passe o
+mouse na prévia: o bloco âmbar aumenta e o corte da moldura segura as pontas.</p>
+
+<p>Duas escolhas fazem diferença nesse efeito. A primeira é a origem: por padrão a escala acontece a
+partir do centro, o que dá um zoom simétrico; com <code>origin-top</code> ou <code>origin-bottom</code>
+o crescimento sai de um lado e o efeito parece que a foto “sobe”. A segunda é o tempo: 300 ms a 500 ms é
+o confortável para foto. Em 150 ms o zoom fica nervoso.</p>
+
+<p>E um detalhe de bom senso: não ponha este efeito em vinte fotos da mesma página. Cada elemento
+escalado vira uma camada própria, e camadas custam memória da placa de vídeo. Em uma vitrine com trinta
+produtos, vale aplicar só nos que estão visíveis de cara ou reduzir o efeito a uma mudança de
+opacidade.</p>
+
+<p>Existe uma variação desse efeito que é ainda mais comum no comércio: a classe de escala mora no
+contêiner, e a foto responde ao mouse que está em qualquer lugar do cartão. Para isso, o cartão recebe
+<code>group</code> e a foto recebe <code>group-hover:scale-105</code> — a mecânica está na aula de
+<a href="group-hover.html">group-hover</a>. O resultado é mais generoso para quem visita: o alvo do mouse
+é o cartão inteiro, e não a foto de 12 cm de altura.</p>
+
+<h2>6. Rotação é graus, e o sentido importa</h2>
+
+<p>Rotação usa graus: 360 é uma volta completa, 180 é meia-volta, 90 é um quarto. O sinal positivo gira
+no sentido horário (como o ponteiro do relógio); o negativo gira no sentido contrário. As classes prontas
+são curtas e, como você já deve imaginar, o número delas é o ângulo de verdade.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Ângulo</th><th>Onde costuma servir</th></tr>
+<tr><td><code>rotate-1</code>, <code>rotate-2</code></td><td>1° e 2°</td><td>etiqueta levemente torta, quase reta</td></tr>
+<tr><td><code>rotate-3</code></td><td>3°</td><td>o “colado à mão” clássico</td></tr>
+<tr><td><code>rotate-6</code></td><td>6°</td><td>selo de promoção</td></tr>
+<tr><td><code>rotate-12</code></td><td>12°</td><td>faixa inclinada, cartão em perspectiva</td></tr>
+<tr><td><code>rotate-45</code></td><td>45°</td><td>o “+” que vira “×”, seta na diagonal</td></tr>
+<tr><td><code>rotate-90</code></td><td>90°</td><td>seta que aponta para o lado, ícone deitado</td></tr>
+<tr><td><code>rotate-180</code></td><td>180°</td><td>seta que aponta para o outro lado</td></tr>
+</table>
+</div>
+
+<p>Para qualquer outro ângulo, colchetes: <code>rotate-[17deg]</code> gira dezessete graus. É útil para
+efeitos que imitam papel rasgado ou adesivo colado torto, onde o ângulo “redondo” da escala denuncia o
+desenho. Use com parcimônia — a graça da escala é que ângulos repetidos parecem intencionais.</p>
+
+<p>O CSS gerado para três ângulos mostra que a rotação não tem mistério nenhum: é uma linha, com o grau
+escrito direto. Repare no seletor com colchetes escapados, que é como qualquer classe com colchete
+aparece no CSS:</p>
+
+<pre class="term">.rotate-6 {
+  rotate: 6deg;
+}
+.-rotate-6 {
+  rotate: calc(6deg * -1);
+}
+.rotate-\[17deg\] {
+  rotate: 17deg;
+}</pre>
+
+<p>É a mesma estrutura da escala, com um número só em vez de dois eixos. E é por isso que rotação
+combina tão bem com ícones: o elemento gira em torno do próprio centro, sem mudar de tamanho, sem mudar
+de lugar no layout e sem arrastar ninguém junto.</p>
+
+<h2>7. O sinal de menos</h2>
+
+<p>O selo da Ana estava em <code>rotate-6</code> e caía para a direita. Ela queria que caísse para a
+esquerda, e a tentação foi escrever algo como <code>rotate--6</code> ou <code>rotate-(-6)</code>. Nenhuma
+das duas existe. A forma certa é o sinal grudado no começo da classe, como você já viu em
+<code>-translate-y-1</code> e <code>-scale-x-100</code>: <code>-rotate-6</code>.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|rotate=-6deg;;rule:rotate: calc(6deg * -1)">
+  <p class="try-task">O selo está inclinado para a direita e parece que vai cair. Faça o giro de 6 graus
+  no sentido contrário, trocando <code>rotate-6</code> por <code>-rotate-6</code>.</p>
+  <pre class="html">&lt;div class="rounded-xl border border-stone-200 bg-white p-8"&gt;
+  &lt;span id="alvo" class="inline-block rotate-6 rounded bg-amber-500 px-3 py-1 text-sm font-semibold text-white"&gt;PROMOÇÃO&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: inline-block
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+font-size: 14px
+font-weight: 600
+line-height: 20px
+border-radius: 4px
+padding-inline: 12px
+padding-block: 4px
+rotate: 6deg
+</pre>
+  <pre class="solucao">&lt;div class="rounded-xl border border-stone-200 bg-white p-8"&gt;
+  &lt;span id="alvo" class="inline-block -rotate-6 rounded bg-amber-500 px-3 py-1 text-sm font-semibold text-white"&gt;PROMOÇÃO&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>No painel, o antes é <code>rotate: 6deg</code> e o depois é <code>rotate: -6deg</code>. No CSS
+gerado, o valor aparece como <code>rotate: calc(6deg * -1)</code> — a meta desta caixa confere o valor
+computado e o gerado, justamente para você ver que a forma de escrever muda e o número é o mesmo. O
+efeito no navegador é idêntico aos seis graus para a direita, virados do avesso; o Tailwind só escolheu
+a forma mais explícita de escrever o sinal.</p>
+
+<p>Aqui vai a lista dos valores negativos que existem, porque é uma fonte de erro silencioso:
+<code>-rotate-1</code>, <code>-rotate-2</code>, <code>-rotate-3</code>, <code>-rotate-6</code>,
+<code>-rotate-12</code>, <code>-rotate-45</code>, <code>-rotate-90</code> e <code>-rotate-180</code>. Se
+você precisa de <code>-17deg</code>, o caminho é o colchete com o sinal dentro:
+<code>rotate-[-17deg]</code>.</p>
+
+<h2>8. Escala, rotação e transição juntas</h2>
+
+<p>As duas operações combinam com transição do mesmo jeito que você aprendeu na aula de
+<a href="transicoes.html">transições</a>: escreva <code>transition-transform</code> e mude a escala ou a
+rotação em alguma variante. O que costuma dar errado é querer as duas coisas com o mesmo número de
+classe: <code>hover:scale-110 hover:rotate-3</code> funciona, porque são propriedades diferentes, e o
+Tailwind gera duas regras dentro do mesmo bloco de hover.</p>
+
+<p>Um padrão muito útil é o botão que encolhe ao ser apertado. Ele já existe nas aulas de estado:
+<code>active:scale-95</code>. A regra que faz esse efeito parecer bom é a mesma da escala em geral — a
+mudança é pequena (5% é o suficiente) e o tempo é curto (75 a 150 ms). Com
+<code>active:scale-75</code> o botão parece de borracha; com <code>scale-[0.98]</code> no colchete, o olho
+quase não vê.</p>
+
+<p>Outro padrão que aparece em cardápios é o “+” que vira “×” quando o item abre. Existe uma forma de
+fazer isso sem uma linha de JavaScript, usando o elemento <code>details</code> do HTML: o Tailwind tem a
+variante <code>open:</code>, que vale quando o elemento tem o atributo <code>open</code>. Mas atenção ao
+detalhe que pega todo mundo: ela se aplica ao <strong>próprio</strong> elemento aberto, não aos filhos.
+Ou seja, dá para mudar a cor de fundo do bloco de horários quando ele está aberto
+(<code>open:bg-amber-50</code>), mas girar o ícone de dentro pediria outra estratégia — e a mais simples
+é girar o próprio <code>summary</code>.</p>
+
+<p>Sobre qualidade de imagem: escalar um texto grande para 150% pode deixá-lo momentaneamente borrado
+durante a transição, porque o navegador está redesenhando a camada. No repouso ele volta a ficar nítido.
+Se a nitidez for crítica — um logo, por exemplo — prefira trocar o arquivo da imagem em vez de escalar.
+E se o movimento incomodar alguém, o <code>motion-reduce:</code> da aula de transições vale aqui também:
+<code>motion-reduce:transform-none</code> desliga o efeito de uma vez.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o cartão que cobriu o preço</h3>
+<p>O cartão destacado com <code>scale-105</code> ficou ótimo no meio da grade, mas no celular ele passou
+por cima da etiqueta do vizinho. Não era bug: escala desenha por cima e não pede espaço. A correção foi
+reduzir para <code>scale-[1.02]</code> em telas pequenas — ou aceitar que o destaque fica só na versão
+grande, com <code>md:scale-105</code>. É o mesmo raciocínio do espaçamento responsivo: a decisão muda com
+o tamanho da tela.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o ícone de seta que apontava para o lado errado</h3>
+<p>Ela tinha um único ícone de seta e precisava das duas direções no carrossel. Em vez de baixar outro
+arquivo, espelhou o que já existia com <code>-scale-x-100</code>. Funcionou de primeira, mas ela
+espelhou o botão inteiro e as letras ficaram invertidas. O conserto foi mover a classe para o ícone
+dentro do botão. Detalhe bobo, susto grande.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a foto que crescia e voltava sem suavidade</h3>
+<p>A escala no hover pegou, mas o crescimento era um salto. Faltava a transição — e não era
+<code>transition-colors</code>, que anima só cores. Com <code>transition-transform</code>, a foto passou a
+crescer e voltar suavemente. Ela também trocou a origem para <code>origin-center</code> depois de testar
+<code>origin-bottom</code>, porque a foto “subindo” parecia que ia escapar do cartão. Testar as duas
+levou menos de um minuto.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. O que <code>scale-110</code> faz com o layout?</p>
+<label><input type="radio" name="q1"> nada: o espaço reservado continua o do tamanho original</label>
+<label><input type="radio" name="q1"> aumenta o espaço reservado em 10%</label>
+<label><input type="radio" name="q1"> reorganiza a grade para caber o elemento maior</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual classe espelha um ícone na horizontal?</p>
+<label><input type="radio" name="q2"> <code>scale-x-100</code></label>
+<label><input type="radio" name="q2"> <code>rotate-180</code></label>
+<label><input type="radio" name="q2"> <code>-scale-x-100</code></label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Como se escreve um giro de 6 graus no sentido
+contrário?</p>
+<label><input type="radio" name="q3"> <code>rotate--6</code></label>
+<label><input type="radio" name="q3"> <code>-rotate-6</code></label>
+<label><input type="radio" name="q3"> <code>rotate-(-6)</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a seta do carrossel</h2>
+<p>O carrossel da vitrine tem uma seta apontando para a direita. A seta da esquerda deve ser a mesma
+imagem, só espelhada. Complete a classe:</p>
+<div class="ex-code">&lt;button class="rounded-full bg-amber-500 p-2 text-white"&gt;&lt;span class="inline-block <input aria-label="resposta 1" data-answer="-scale-x-100" placeholder="...">"&gt;→&lt;/span&gt;&lt;/button&gt;</div>
+<p class="ex-dica">Dica: escala com sinal negativo na horizontal, no valor total (100). O sinal vem
+antes do nome da classe, e o eixo vem depois do hífen.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Escala é porcentagem e rotação é grau, e nenhuma das duas mexe no layout: o desenho muda, o espaço
+reservado fica. <code>scale-105</code> desenha 5% maior a partir do centro, <code>scale-x-</code> e
+<code>scale-y-</code> mudam um eixo só, e valor negativo espelha. <code>rotate-45</code> gira no sentido
+horário; <code>-rotate-6</code> gira no contrário; colchetes aceitam qualquer ângulo, como
+<code>rotate-[17deg]</code>.</p>
+
+<p>Para o efeito ficar bom: use <code>transition-transform</code> para suavizar, mantenha os valores
+pequenos no texto (5% a 10%), corte o excesso com <code>overflow-hidden</code> quando a imagem crescer
+dentro de uma moldura e espelhe ícones em vez de baixar outro arquivo. E lembre que cada elemento
+escalado vira uma camada: efeito em tudo é efeito em nada.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>O número de <code>scale-</code> é porcentagem sem o símbolo: 105 = 105%.</li>
+<li>Escalar não altera o espaço reservado — por isso pode cobrir o vizinho.</li>
+<li><code>scale-x-</code> e <code>scale-y-</code> mudam um eixo só.</li>
+<li>Valor negativo espelha; a classe vai no ícone, nunca no texto.</li>
+<li>Foto que cresce precisa de <code>overflow-hidden</code> na moldura.</li>
+<li><code>origin-*</code> escolhe de onde o crescimento sai.</li>
+<li>Rotação positiva é no sentido horário; 360 graus é uma volta.</li>
+<li>O sinal de menos vai na frente da classe: <code>-rotate-6</code>, nunca <code>rotate--6</code>.</li>
+<li><code>rotate-[17deg]</code> aceita qualquer ângulo.</li>
+<li><code>transition-transform</code> é quem suaviza escala e rotação.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

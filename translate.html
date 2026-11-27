@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O translate | Guia Tailwind</title>
+<meta name="description" content="O translate do Tailwind na padaria da Ana: subir o cartão no hover com -translate-y-1, centralizar com porcentagem e deslocar sem tirar nada do lugar no layout.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>O <span class="hl">translate</span></h1>
+<p class="intro">A Ana queria três coisas que parecem iguais e não são. A primeira: o cartão que sobe um
+dedinho quando o mouse chega, sem empurrar a fileira. A segunda: o aviso “Pão quente” no centro exato da
+foto, alinhado ao meio de verdade. A terceira: a fita de “frete grátis” encostada na borda do cartão,
+meio para fora, como se estivesse colada por cima. As três se resolvem com a mesma classe: o
+<code>translate</code>, que desloca o desenho do elemento nos eixos horizontal e vertical — sem mexer no
+espaço que ele ocupa. Nas próximas seções, a Ana aprende os valores, os negativos, a porcentagem e o
+motivo pelo qual esse deslocamento é diferente de margem.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é deslocar e por que o espaço reservado fica onde estava.</li>
+  <li>Os valores em passos de 4 px: <code>translate-x-4</code>, <code>-translate-y-1</code>.</li>
+  <li>Os valores em porcentagem: <code>translate-x-1/2</code>, <code>translate-y-full</code>.</li>
+  <li>Como o “levantar do cartão” no hover é feito sem margem negativa.</li>
+  <li>A receita clássica de centralizar com <code>left-1/2</code> e <code>-translate-x-1/2</code>.</li>
+  <li>Como tirar algo da tela e trazer de volta com <code>translate-y-full</code>.</li>
+  <li>A diferença entre deslocar, dar margem e posicionar.</li>
+  <li>O cuidado com quem navega por teclado quando algo fica fora da vista.</li>
+</ul>
+</div>
+
+<h2>1. A cena: três deslocamentos</h2>
+
+<p>No celular, o menu da padaria precisa abrir de algum jeito. A Ana escolheu uma gaveta que entra pelo
+lado. A primeira tentativa foi animar a largura do bloco: funcionou, e ficou horrível — o conteúdo do
+site era espremido a cada quadro, o texto reflowava, o preço mudava de linha. A segunda foi animar
+<code>margin-left</code>, e o resultado foi o mesmo espetáculo, com o agravante de empurrar a página
+inteira.</p>
+
+<p>Foi quando ela percebeu o padrão: nos três problemas — o cartão que sobe, o aviso que fica no centro e
+a fita que sai da borda — o elemento precisa <strong>parecer deslocado</strong>, não
+<strong>ocupar outro lugar</strong>. O layout deve continuar achando que cada coisa está onde estava. O
+desenho é que muda.</p>
+
+<p>Essa diferença é o coração do <code>translate</code>. Ele é uma transformação: acontece depois do
+layout, no desenho já pronto. Por isso não empurra vizinho, não muda a grade e não faz o texto reflowar.
+E, como tudo que é transformação, ele tem um eixo, um valor e um sinal.</p>
+
+<h2>2. Deslocar: dois eixos, um sinal</h2>
+
+<p>O deslocamento acontece em dois eixos. <code>translate-x-</code> move na horizontal: positivo vai para
+a direita. <code>translate-y-</code> move na vertical: positivo vai para baixo. Não existe
+<code>translate-z</code> na escala comum, porque deslocar para longe da tela é coisa de efeito 3D — e
+dá para viver sem isso por muito tempo.</p>
+
+<p>O sinal de menos vem na frente da classe, como você viu em <code>-rotate-6</code>:
+<code>-translate-y-1</code> sobe 4 px. Esse detalhe é fonte de erro silencioso, porque
+<code>translate-y--1</code> não existe e não faz nada. Se a classe não tiver efeito, o primeiro lugar
+para olhar é o sinal.</p>
+
+<dl class="anatomy">
+<dt>deslocar</dt>
+<dd>Mover o desenho nos eixos x e y sem alterar o espaço reservado no layout.</dd>
+<dt>eixo</dt>
+<dd><code>x</code> é a horizontal, <code>y</code> a vertical. <code>translate-x-4</code> anda na
+horizontal; <code>-translate-y-1</code> sobe.</dd>
+<dt>escala de espaço</dt>
+<dd>Os passos de 4 px que você aprendeu com <code>p-</code>: <code>translate-4</code> são 16 px.</dd>
+<dt>porcentagem</dt>
+<dd>Valor relativo ao tamanho do próprio elemento: <code>translate-y-full</code> é 100% da altura
+dele.</dd>
+<dt>gaveta</dt>
+<dd>O painel que entra e sai da tela deslizando. É o uso mais comum de <code>translate</code> com
+porcentagem.</dd>
+</dl>
+
+<p>Como o valor em passos usa a mesma escala do espaçamento, a conta é a mesma: <code>translate-x-1</code>
+são 4 px, <code>translate-x-4</code> são 16 px, <code>translate-x-6</code> são 24 px. E, como sempre, o
+colchete aceita qualquer coisa: <code>translate-y-[6px]</code> sobe 6 px, <code>translate-x-[7.5rem]</code>
+anda 120 px.</p>
+
+<h2>3. Os valores na escala</h2>
+
+<p>A lista completa é longa, mas os degraus que aparecem no dia a dia são poucos:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Quanto desloca</th><th>Onde costuma servir</th></tr>
+<tr><td><code>translate-x-0</code></td><td>0 px</td><td>voltar ao lugar de origem</td></tr>
+<tr><td><code>translate-x-1</code></td><td>4 px</td><td>ajuste fino, ícone que recua um fio</td></tr>
+<tr><td><code>translate-x-2</code></td><td>8 px</td><td>selo que sai da borda, seta que avança no hover</td></tr>
+<tr><td><code>translate-x-4</code></td><td>16 px</td><td>deslocamento visível, ferramenta de exemplo</td></tr>
+<tr><td><code>-translate-y-1</code></td><td>−4 px (sobe)</td><td>o “levantar” do cartão no hover</td></tr>
+<tr><td><code>-translate-y-2</code></td><td>−8 px (sobe)</td><td>levantar mais, ícone que sobe</td></tr>
+<tr><td><code>translate-x-1/2</code></td><td>50% da própria largura</td><td>centralizar, encostar pelo meio</td></tr>
+<tr><td><code>translate-y-full</code></td><td>100% da própria altura</td><td>esconder a gaveta embaixo, fora da moldura</td></tr>
+<tr><td><code>-translate-x-full</code></td><td>−100% da largura</td><td>gaveta fora da tela pela esquerda</td></tr>
+</table>
+</div>
+
+<p>Repare nas duas famílias de valor. As classes com número pequeno usam a escala de espaço, em passos de
+4 px; as com fração (<code>1/2</code>, <code>1/3</code>, <code>2/3</code>) e <code>full</code> usam
+porcentagem. As duas convivem e servem a coisas diferentes: pixel para ajuste fino e porcentagem para
+movimentos proporcionais ao próprio elemento.</p>
+
+<p>E existe a forma sem eixo: <code>translate-4</code> desloca 16 px nos dois eixos de uma vez, o que é
+útil quase só para piada visual. No dia a dia, quase sempre você vai querer um eixo só — e é aí que a
+maioria dos efeitos bonitos mora.</p>
+
+<p>Quando as duas classes aparecem juntas, o painel mostra dois números, na ordem x e depois y:
+<code>translate: 16px 8px</code> quer dizer 16 px para a direita e 8 px para baixo. Se um dos eixos
+estiver em zero, o navegador só mostra o que não é zero — <code>translate: 8px</code> é o mesmo que
+“8 px na horizontal, 0 na vertical”. Ler essa linha é mais rápido do que abrir o DevTools, e vale
+acostumar o olho.</p>
+
+<h2>4. Porcentagem: relativa ao próprio elemento</h2>
+
+<p>Este é o conceito que destrava o resto da aula. Quando você escreve <code>translate-x-1/2</code>, os
+50% não são da tela nem do elemento pai: são da <strong>largura do próprio elemento</strong>. Num selo de
+80 px, são 40 px; num selo de 200 px, são 100 px. Ele anda metade de si mesmo.</p>
+
+<p>Já <code>translate-y-full</code> anda 100% da própria altura. É por isso que ele é a ferramenta
+perfeita para esconder coisas embaixo de uma moldura: um painel de 120 px de altura, deslocado em 100%,
+fica exatamente logo abaixo da sua origem, fora da área visível. Com <code>overflow-hidden</code> no pai,
+ninguém vê.</p>
+
+<p>A mesma lógica explica o truque de centralização que você vai ver na seção 6 — e explica por que ele
+funciona: <code>left-1/2</code> coloca a <em>borda esquerda</em> do elemento no meio do pai,
+<code>-translate-x-1/2</code> recua metade da largura do próprio elemento, e o resultado é o centro
+exato. Sem a porcentagem, esse recuo teria que ser calculado à mão para cada tamanho de conteúdo.</p>
+
+<h2>5. O cartão que sobe</h2>
+
+<p>Vamos ao primeiro pedido da Ana. Ela queria que o cartão do pão “levantasse” no hover. A tentativa
+com margem negativa (<code>hover:-mt-1</code>) empurra o layout: o cartão sobe, o de baixo sobe junto, a
+grade inteira recalcula. Com <code>translate</code>, o cartão sobe sozinho e os vizinhos nem sabem.</p>
+
+<div class="trytailwind" data-goal="rule:.hover\:-translate-y-1:hover;;rule:--tw-translate-y: calc(var(--spacing) * -1)">
+  <p class="try-task">O cartão deve subir 4 px quando o mouse chega, e voltar suavemente. Acrescente
+  <code>hover:-translate-y-1</code> ao cartão (a transição já está lá).</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl border border-stone-200 bg-white p-4 transition-transform hover:shadow-md"&gt;
+  &lt;h3 class="font-semibold"&gt;Pão do dia&lt;/h3&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h30.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+border-radius: 12px
+border-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+transition-property: transform, translate, scale, rotate
+transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1)
+transition-duration: 0.15s
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-xl border border-stone-200 bg-white p-4 transition-transform hover:-translate-y-1 hover:shadow-md"&gt;
+  &lt;h3 class="font-semibold"&gt;Pão do dia&lt;/h3&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h30.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Como o deslocamento só existe no hover, o painel continua mostrando o cartão no repouso — a mesma
+história da aula de <a href="hover.html">hover</a>. A meta confere o CSS gerado: a regra
+<code>.hover\:-translate-y-1:hover</code> e a variável <code>--tw-translate-y</code> lá dentro. Na
+prévia, o movimento é o que importa: repare que a sombra e o cartão sobem juntos, e o texto de baixo
+não se mexe.</p>
+
+<p>Dois números fazem esse efeito parecer bom. O deslocamento pequeno — 4 px, no máximo 8 — porque
+levantar muito parece que o cartão vai pular para fora da tela. E o tempo curto, entre 150 e 300 ms. Se
+o cartão subir 4 px em um segundo, a sensação é de coisa quebrada; em 150 ms, é de resposta imediata.</p>
+
+<h2>6. Centralizar de verdade</h2>
+
+<p>Centralizar um elemento dentro de outro é o problema mais antigo do CSS, e a Ana encontrou a versão
+moderna dele: um aviso que precisa ficar no meio da foto. A primeira tentativa foi <code>mx-auto</code>,
+que centraliza na horizontal mas não funciona dentro de um elemento posicionado. A segunda foi
+<code>text-center</code>, que centraliza texto, não caixas.</p>
+
+<p>A receita que funciona em qualquer tamanho de conteúdo é esta, e ela usa quatro classes: posicionar
+absoluto, colocar em 50% na horizontal e na vertical, e recuar metade do próprio tamanho nos dois
+eixos.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="relative h-48"&gt;
+  &lt;span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"&gt;Pão quente&lt;/span&gt;
+&lt;/div&gt;</pre>
+
+<div class="trytailwind" data-goal="css:#alvo|translate=-50% -50%;;css:#alvo|position=absolute">
+  <p class="try-task">O aviso está posicionado, mas aparece com o canto — e não o meio — no centro da
+  foto. Recue metade do próprio tamanho nos dois eixos: <code>-translate-x-1/2</code> e
+  <code>-translate-y-1/2</code>.</p>
+  <pre class="html">&lt;div class="relative h-48 rounded-xl bg-gradient-to-br from-amber-200 to-amber-500"&gt;
+  &lt;span id="alvo" class="absolute left-1/2 top-1/2 rounded bg-white px-3 py-1 text-sm font-semibold text-amber-900"&gt;Pão quente&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+position: absolute
+background-color: rgb(255, 255, 255)
+color: oklch(0.414 0.112 45.904)
+font-size: 14px
+font-weight: 600
+line-height: 20px
+border-radius: 4px
+left: 308px
+padding-inline: 12px
+padding-block: 4px
+top: 96px
+</pre>
+  <pre class="solucao">&lt;div class="relative h-48 rounded-xl bg-gradient-to-br from-amber-200 to-amber-500"&gt;
+  &lt;span id="alvo" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded bg-white px-3 py-1 text-sm font-semibold text-amber-900"&gt;Pão quente&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Estas são as regras que o Tailwind gera para a receita completa — quatro declarações, duas de
+posição e duas de deslocamento:</p>
+
+<pre class="term">.left-1\/2 {
+  left: calc(1 / 2 * 100%);
+}
+.top-1\/2 {
+  top: calc(1 / 2 * 100%);
+}
+.-translate-x-1\/2 {
+  --tw-translate-x: calc(calc(1 / 2 * 100%) * -1);
+  translate: var(--tw-translate-x) var(--tw-translate-y);
+}
+.-translate-y-1\/2 {
+  --tw-translate-y: calc(calc(1 / 2 * 100%) * -1);
+  translate: var(--tw-translate-x) var(--tw-translate-y);
+}</pre>
+
+<p>Leia a primeira dupla como “metade da largura do pai” e a segunda como “menos metade da largura do
+filho”. Uma conta com a outra quando o conteúdo tem tamanho diferente do previsto, e é por isso que o
+truque continua funcionando quando o texto do aviso muda de tamanho.</p>
+
+<p>O painel mostra a diferença em uma linha: <code>translate: -50% -50%</code>. Essa é a assinatura da
+centralização moderna. Antes dessas classes, o mesmo efeito exigia saber a largura e a altura do
+elemento e escrever metade dela em pixels — e o cálculo quebrava no dia em que o texto mudava.</p>
+
+<p>Existe uma alternativa mais nova para o mesmo problema, quando o pai tem uma caixa só: dar
+<code>grid place-items-center</code> ao pai. Aí o filho se centraliza sem posição absoluta e sem
+porcentagem, e a aula de <a href="grid.html">grid</a> mostra como. A receita com
+<code>translate</code> continua sendo a certa quando o centro é de um alvo sobreposto — um aviso em cima
+de uma foto, um ponto em cima de um mapa —, porque nesses casos o elemento precisa ser
+<code>absolute</code> de qualquer jeito.</p>
+
+<p>Vale guardar as duas armadilhas. A primeira: o pai precisa de <code>relative</code>. Sem isso, o
+filho absoluto se posiciona em relação à página inteira e o “centro” vira o centro da janela. A segunda:
+as duas classes de recuo precisam estar no mesmo elemento que tem <code>absolute</code>. Colocá-las num
+filho não move o pai, e é um erro que parece óbvio depois que a gente encontra.</p>
+
+<h2>7. Sair da tela e voltar</h2>
+
+<p>Com <code>full</code> e um pai com <code>overflow-hidden</code>, você esconde qualquer coisa embaixo
+ou ao lado — e o caminho de volta é só trocar a classe. É assim que se faz uma gaveta de menu que entra
+pela esquerda, num exemplo mínimo:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="overflow-hidden"&gt;
+  &lt;aside class="h-40 w-56 -translate-x-full transition-transform"&gt;menu&lt;/aside&gt;
+&lt;/div&gt;</pre>
+
+<p>O elemento está lá, ocupando o espaço dele no layout — deslocado 100% da própria largura para a
+esquerda, fora da vista. Quando você troca a classe por <code>translate-x-0</code> (ou apaga a classe negativa), ele
+desliza para dentro. Nada muda de tamanho, ninguém reflowa, a transição acontece sobre uma camada só.</p>
+
+<p>Esse padrão exige um aviso importante, e ele não é sobre CSS: <strong>elemento deslocado continua
+existindo</strong>. Ele recebe clique, aparece para leitores de tela e, principalmente, continua na ordem
+do teclado. Uma gaveta escondida com <code>-translate-x-full</code> que tenha um botão vai receber o
+foco do <kbd>Tab</kbd> mesmo invisível — e quem navega por teclado fica perdido num elemento que não vê.
+Para esconder de verdade, use <code>hidden</code> (aula de
+<a href="esconder-mostrar.html">esconder e mostrar</a>) e anime com JavaScript o momento de mostrar; ou
+aceite que o painel está fora da vista e cuide da ordem de foco com atenção.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|translate=8px">
+  <p class="try-task">A fita “FRETE GRÁTIS” está dentro do cartão. Faça o desenho dela sair 8 px para a
+  direita, encostando na borda, com <code>translate-x-2</code>.</p>
+  <pre class="html">&lt;div class="rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;span id="alvo" class="inline-block rounded bg-amber-500 px-2 py-1 text-xs font-semibold text-white"&gt;FRETE GRÁTIS&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: inline-block
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+font-size: 12px
+font-weight: 600
+line-height: 16px
+border-radius: 4px
+padding-inline: 8px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;div class="rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;span id="alvo" class="inline-block translate-x-2 rounded bg-amber-500 px-2 py-1 text-xs font-semibold text-white"&gt;FRETE GRÁTIS&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>translate: 8px</code> e nenhuma mudança de espaçamento — o que prova que a fita
+andou sem abrir buraco no cartão. Se você quisesse o mesmo efeito com margem, o espaço reservado
+aumentaria e o texto ao lado se mexeria. Aqui, o desenho sai e o mundo fica parado.</p>
+
+<h2>8. Deslocar, dar margem ou posicionar</h2>
+
+<p>Essas três ferramentas parecem fazer a mesma coisa no começo, e escolher errado custa caro. A
+diferença está em <em>o que</em> muda quando cada uma entra em cena:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Ferramenta</th><th>O que muda</th><th>Quando usar</th></tr>
+<tr><td><code>translate-x-4</code></td><td>só o desenho; o espaço e os vizinhos ficam</td><td>efeito visual, hover, elemento que pode sobrepor</td></tr>
+<tr><td><code>ml-4</code>, <code>mt-2</code></td><td>o espaço no layout; empurra o que vem depois</td><td>espaçamento real entre coisas</td></tr>
+<tr><td><code>absolute</code> + <code>left-4</code></td><td>tira do fluxo e posiciona em relação ao pai</td><td>selo no canto, aviso sobreposto a uma foto</td></tr>
+<tr><td><code>flex</code> + <code>gap-4</code></td><td>organiza vários itens de uma vez</td><td>listas, barras de navegação, grades</td></tr>
+</table>
+</div>
+
+<p>A regra de bolso que a Ana adotou: <strong>se o vizinho precisa saber, use espaçamento; se não
+precisa, use transformação</strong>. Espaço é acordo entre elementos; deslocamento é decisão de um
+elemento só. Misturar os dois é a origem da maioria dos layouts que “quase funcionam”.</p>
+
+<p>Sobre o CSS gerado, a diferença é bem clara. Esta é a saída real do compilador para três
+deslocamentos:</p>
+
+<pre class="term">.translate-x-4 {
+  --tw-translate-x: calc(var(--spacing) * 4);
+  translate: var(--tw-translate-x) var(--tw-translate-y);
+}
+.-translate-y-1 {
+  --tw-translate-y: calc(var(--spacing) * -1);
+  translate: var(--tw-translate-x) var(--tw-translate-y);
+}
+.translate-y-full {
+  --tw-translate-y: 100%;
+  translate: var(--tw-translate-x) var(--tw-translate-y);
+}</pre>
+
+<p>Todas as classes escrevem nas mesmas duas variáveis e terminam na mesma declaração
+<code>translate</code>. Isso quer dizer que <code>translate-x-4</code> e <code>translate-y-2</code> se
+combinam — cada uma cuida do seu eixo — mas duas classes do mesmo eixo brigam, como sempre: vale a
+última que o Tailwind gerou. Se você escrever <code>translate-x-4</code> e
+<code>-translate-x-1/2</code> no mesmo elemento, uma delas vai perder, e não será a que você escreveu
+por último.</p>
+
+<p>Outro detalhe: no Tailwind v4, <code>translate</code> é uma propriedade própria, separada do
+<code>transform</code>. Isso significa que ela convive com <code>rotate</code> e <code>scale</code> sem
+conflito e que <code>transition-transform</code> a inclui na lista
+(<code>transform, translate, scale, rotate</code>). A aula de <a href="transformacoes.html">transformações</a>
+mostra o quadro completo. E, como toda transformação, deslocar não funciona em elemento
+<code>inline</code> de verdade: se um <code>span</code> não anda, falta <code>inline-block</code>.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a seta que andava junto com o texto</h3>
+<p>No botão “Ver o cardápio”, a Ana quis que só a seta deslizasse no hover. Escreveu
+<code>hover:translate-x-1</code> no botão e o botão inteiro andou — texto, borda, fundo. O conserto foi
+mover a classe para o <code>span</code> da seta (com <code>inline-block</code>) e deixar o
+<code>group-hover</code> cuidar do disparo. Deslocar é decisão do elemento; o alvo do mouse pode ser
+outro.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o tooltip que não cabia</h3>
+<p>Para centralizar um balão de dica em cima de um ícone, ela usou <code>-translate-x-1/2</code> e
+<code>-translate-y-full</code> ao mesmo tempo. O balão ficou exatamente acima e centralizado, em
+qualquer tamanho de texto. Mas quando o balão era mais largo que a coluna, ele vazou pela esquerda da
+tela. A solução não foi CSS: foi encurtar o texto da dica e limitar a largura com
+<code>max-w-xs</code>.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a lista que tremia</h3>
+<p>Ela deu <code>hover:-translate-y-0.5</code> a cada item de uma lista de preços. O efeito era bonito,
+mas, como não havia <code>transition</code>, cada item pulava. Acrescentou
+<code>transition-transform duration-150</code> e o tremor virou movimento. A lição: deslocamento e
+transição são parceiros; sozinho, o deslocamento é um salto de 2 px que o olho lê como falha.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que <code>-translate-y-1</code> faz?</p>
+<label><input type="radio" name="q1"> diminui a altura do elemento em 4 px</label>
+<label><input type="radio" name="q1"> desloca o desenho 4 px para cima</label>
+<label><input type="radio" name="q1"> sobe o elemento e empurra os vizinhos para baixo</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. <code>translate-y-full</code> desloca quanto?</p>
+<label><input type="radio" name="q2"> a altura da tela</label>
+<label><input type="radio" name="q2"> 40 px, o maior degrau da escala</label>
+<label><input type="radio" name="q2"> 100% da altura do próprio elemento</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Para centralizar um elemento absoluto, o que o
+<code>-translate-x-1/2</code> faz?</p>
+<label><input type="radio" name="q1"> recua metade da largura do próprio elemento</label>
+<label><input type="radio" name="q1"> empurra o elemento para a esquerda do pai</label>
+<label><input type="radio" name="q1"> centraliza o texto dentro do elemento</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o selo do canto</h2>
+<p>O selo “NOVO” está no canto do cartão, mas precisa sair 4 px para fora da borda direita, como se
+estivesse colado por cima. Complete a classe:</p>
+<div class="ex-code">&lt;span class="absolute right-0 top-0 <input aria-label="resposta 1" data-answer="translate-x-1" placeholder="..."> rounded bg-amber-500 px-2 py-1 text-xs text-white"&gt;NOVO&lt;/span&gt;</div>
+<p class="ex-dica">Dica: eixo horizontal, um degrau da escala de espaço (4 px). Sem sinal de menos,
+porque o deslocamento é para a direita.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p><code>translate</code> desloca o desenho nos eixos x e y sem mexer no layout. Os valores pequenos
+usam a escala de espaço (4 px por degrau) e o sinal de menos vem na frente da classe:
+<code>-translate-y-1</code> sobe 4 px. As frações e o <code>full</code> usam porcentagem relativa ao
+próprio elemento, e é isso que faz a receita de centralização funcionar em qualquer tamanho:
+<code>absolute</code> + <code>left-1/2</code> + <code>top-1/2</code> + <code>-translate-x-1/2</code> +
+<code>-translate-y-1/2</code>.</p>
+
+<p>O deslocamento é a ferramenta certa para efeitos visuais — o cartão que sobe no hover, a fita que
+passa da borda, a gaveta que entra pela lateral — porque não empurra ninguém. Para espaço de verdade,
+margem e gap continuam sendo o caminho. E lembre que elemento deslocado continua existindo para o
+teclado e para os leitores de tela: se ele precisa estar invisível, o deslocamento ajuda, mas
+<code>hidden</code> é quem resolve.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>translate</code> move o desenho; o espaço reservado fica onde estava.</li>
+<li><code>translate-x-</code> é horizontal, <code>translate-y-</code> é vertical.</li>
+<li>O sinal de menos vai na frente: <code>-translate-y-1</code>, nunca <code>translate-y--1</code>.</li>
+<li>Números pequenos usam a escala de espaço: 1 = 4 px, 4 = 16 px.</li>
+<li>Frações e <code>full</code> são porcentagem do próprio elemento.</li>
+<li>Centralizar: <code>left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2</code>, com pai
+<code>relative</code>.</li>
+<li>Para esconder fora da vista, <code>-translate-x-full</code> com <code>overflow-hidden</code> no
+pai.</li>
+<li>O deslocamento não remove o elemento do teclado: invisível não é escondido.</li>
+<li>Espaço entre vizinhos é margem e gap; deslocamento é efeito.</li>
+<li><code>transition-transform</code> inclui <code>translate</code> na lista de propriedades.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

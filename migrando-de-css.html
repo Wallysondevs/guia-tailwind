@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Migrando de CSS Antigo | Guia Tailwind</title>
+<meta name="description" content="Migrar de CSS antigo para Tailwind sem quebrar o site: os dois CSS convivendo, tabela de tradução, a ponte com @apply, o CSS sem camada que vence e o style inline.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Migrando de <span class="hl">CSS Antigo</span></h1>
+<p class="intro">O site da Ana tem três anos e um arquivo chamado <code>estilo.css</code> com quase
+três mil linhas, escrito por ela mesma, uma regra por vez, na época em que ela estava aprendendo. O
+site funciona. Mexer nele dá medo. Agora que ela aprendeu Tailwind, quer migrar — e o primeiro
+impulso é o pior de todos: apagar o arquivo inteiro e reescrever tudo num fim de semana. Nesta aula
+ela faz o contrário do impulso: migra uma peça por vez, com os dois CSS convivendo, traduz regra por
+regra e só apaga o antigo quando não sobra nada apontando para ele. É mais devagar no começo e muito
+mais rápido no fim.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que os dois CSS podem viver juntos — e o que isso cobra em troca.</li>
+  <li>A ordem que funciona: inventário, tradução, remoção.</li>
+  <li>A tabela de tradução: de <code>font-weight: bold</code> para <code>font-bold</code>.</li>
+  <li>A ponte com <code>@apply</code>: mudar o CSS sem tocar no HTML.</li>
+  <li>O segundo passo: o HTML assume as classes e a regra antiga é apagada.</li>
+  <li>Por que o CSS sem camada vence as utilitárias, e como evitar a briga.</li>
+  <li>O que fazer com <code>style=""</code> inline e com <code>!important</code>.</li>
+  <li>O que <em>não</em> se migra, e como conferir que nada quebrou.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o arquivo de 2.874 linhas</h2>
+
+<p>O <code>estilo.css</code> da Ana começou pequeno. Uma regra para o corpo, outra para o menu, outra
+para o cartão. Três anos depois, ele tem 2.874 linhas, das quais ela reconhece umas duzentas. Tem
+<code>.botao</code>, <code>.botao2</code>, <code>.botao-novo</code> e <code>.botao-novo-2</code>. Tem
+três resets diferentes, um deles copiado de um tutorial e nunca entendido. Tem
+<code>!important</code> em quatro lugares, que ela pôs numa tarde de desespero e nunca tirou.</p>
+
+<pre class="term">$ wc -l estilo.css
+2874 estilo.css</pre>
+
+<p>Esse arquivo não é um fracasso: é o retrato de três anos de aprendizado. O problema não é o
+passado, é o futuro — cada mudança nova é uma aposta, porque ninguém sabe quais das 2.874 linhas
+dependem daquela que você vai mexer. Migrar para Tailwind resolve isso, desde que a migração não
+vire uma aposta ainda maior.</p>
+
+<p>A tentação do “fim de semana de reescrita” falha por um motivo prático: você não tem como saber o
+que o CSS antigo faz até apagá-lo. Aquele <code>margin-top: -2px</code> na linha 1.402 está lá por um
+motivo que a Ana não lembra, e apagar tudo de uma vez descobre cinco defeitos ao mesmo tempo, sem
+saber qual deles veio de onde. Migração boa é migração com rede.</p>
+
+<h2>2. Os dois CSS podem viver juntos</h2>
+
+<p>A primeira boa notícia: o navegador não tem opinião sobre de onde vem o CSS. Duas folhas de estilo
+convivem sem conflito de tecnologia — o Tailwind gera um arquivo <code>.css</code> como qualquer
+outro, e o antigo continua sendo um arquivo <code>.css</code>. Você pode ter os dois no
+<code>&lt;head&gt;</code> e migrar no seu ritmo:</p>
+
+<pre class="file" data-file="index.html">&lt;link rel="stylesheet" href="estilo-antigo.css"&gt;
+&lt;link rel="stylesheet" href="saida.css"&gt;</pre>
+
+<p>O que os dois dividem é o espaço: as mesmas propriedades, os mesmos elementos. Enquanto a página
+tiver as duas folhas, existe o risco de uma regra do arquivo antigo e uma classe do Tailwind quererem
+a mesma coisa — e aí vence quem o navegador decidir. É por isso que a migração precisa de ordem, e não
+só de coragem.</p>
+
+<p>A segunda boa notícia é que esse estado é temporário e mensurável. Dá para migrar página por
+página: a página de encomendas passa a usar só Tailwind, a vitrine continua no CSS antigo, e o site
+inteiro funciona durante todo o processo. O que você não pode é deixar o estado intermediário virar
+permanente: dois CSS carregados em todas as páginas é o dobro de peso, o dobro de confusão e a
+garantia de que daqui a um ano ninguém sabe qual dos dois manda. A aula
+<a href="otimizacao.html">Otimização</a> mostra a conta do peso; aqui a conta é de dívida.</p>
+
+<dl class="anatomy">
+<dt>CSS sem camada</dt>
+<dd>Regra escrita sem <code>@layer</code>, como todo CSS antigo. Ela ganha das regras que estão
+dentro de camadas.</dd>
+<dt>@layer base</dt>
+<dd>A primeira camada do Tailwind, onde ficam os estilos de base. Colocar ali o CSS antigo faz com
+que ele perca para as utilitárias.</dd>
+<dt>ponte</dt>
+<dd>O uso do <code>@apply</code> durante a migração: a regra antiga é traduzida, o HTML fica
+intacto.</dd>
+<dt>style inline</dt>
+<dd>O atributo <code>style=""</code> no elemento. Vence folhas de estilo e camadas; só perde para
+<code>!important</code>.</dd>
+<dt>regressão</dt>
+<dd>O que funcionava e parou de funcionar depois da mudança. Migração se mede por ausência de
+regressão.</dd>
+<dt>!important</dt>
+<dd>Marca de prioridade máxima numa declaração. Herança comum do CSS antigo e a maior pedra no
+caminho da migração.</dd>
+</dl>
+
+<h2>3. A ordem que funciona: inventário, tradução, remoção</h2>
+
+<p>Três etapas, sempre nesta ordem.</p>
+
+<p><strong>Inventário.</strong> Antes de traduzir qualquer coisa, descubra o que existe. Abra o
+arquivo antigo e conte quantas regras de cada tipo: layout (largura, grid, flex), tipografia (tamanho,
+peso, cor), componentes (botão, cartão, selo), estados (<code>:hover</code>,
+<code>:focus</code>), mídia (<code>@media</code>) e as regras de reset do começo. Esse mapa diz por
+onde começar — e o melhor lugar para começar é sempre o mais repetido.</p>
+
+<p><strong>Tradução.</strong> Regra por regra, descubra a classe equivalente. A tabela abaixo é o
+começo; vale manter a sua ao lado do arquivo, porque você vai consultá-la dezenas de vezes:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>CSS antigo</th><th>Tailwind</th><th>Observação</th></tr>
+<tr><td><code>padding: 16px</code></td><td><code>p-4</code></td><td>a escala é de 4 em 4 px</td></tr>
+<tr><td><code>border-radius: 8px</code></td><td><code>rounded-lg</code></td><td>o valor computado confirma</td></tr>
+<tr><td><code>font-weight: 700</code></td><td><code>font-bold</code></td><td><code>600</code> é <code>font-semibold</code></td></tr>
+<tr><td><code>display: flex; gap: 16px</code></td><td><code>flex gap-4</code></td><td>uma classe por propriedade</td></tr>
+<tr><td><code>background: #fef3c7</code></td><td><code>bg-amber-100</code></td><td>troque o hexadecimal pela paleta</td></tr>
+<tr><td><code>color: #b4532a</code></td><td><code>text-amber-700</code></td><td>o tom mais próximo, não o exato</td></tr>
+<tr><td><code>@media (min-width: 768px)</code></td><td><code>md:</code></td><td>na frente da classe</td></tr>
+<tr><td><code>.botao:hover</code></td><td><code>hover:</code> ou regra própria</td><td>depende de onde você está migrando</td></tr>
+</table>
+</div>
+
+<p><strong>Remoção.</strong> Só depois que a página inteira não usa mais uma regra, ela sai do arquivo
+antigo. Remover antes de traduzir é como trocar o piso com os móveis dentro. E remover é o passo que
+as pessoas esquecem: sem ele, você acaba com dois sistemas para sempre, que é pior do que o
+começo.</p>
+
+<p>Uma dica de ordem dentro da ordem: comece pelos <em>tokens</em>, não pelos componentes. Se o
+arquivo antigo tem <code>color: #b4532a</code> repetido em vinte regras, o primeiro trabalho é
+descobrir qual tom da paleta substitui aquele marrom, e usar sempre o mesmo. Assim, cada componente
+que você migra depois já nasce coerente, e a paleta deixa de ser uma coleção de acidentes.</p>
+
+<h2>4. Missão 1: a ponte com @apply</h2>
+
+<p>Aqui está o truque que torna a migração segura. Em vez de trocar o HTML e o CSS ao mesmo tempo,
+troque só o CSS, mantendo o nome da classe. O HTML continua com <code>class="botao"</code>; o que
+muda é o conteúdo da regra:</p>
+
+<pre class="file" data-file="estilo.css">/* antes */
+.botao {
+  background: #b4532a;
+  padding: 6px 10px;
+  border: 0;
+}
+
+/* depois */
+.botao {
+  @apply rounded-lg bg-amber-600 px-4 py-2 text-white;
+}</pre>
+
+<p>Como nada no HTML mudou, não há risco de esquecer um lugar. Tudo o que tinha
+<code>class="botao"</code> continua com a aparência nova, e você confere numa página de cada vez.
+Esse é o uso mais honesto do <code>@apply</code>: ponte de migração, não destino final.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding-left=16px;;rule:background-color: var(--color-amber-600)">
+  <p class="try-task">A regra antiga do botão usa hexadecimal e respiro de 6 px por 10 px. Traduza-a
+  para utilitárias dentro do <code>@apply</code>, mantendo o seletor <code>.botao</code> e o HTML
+  intactos: fundo <code>bg-amber-600</code>, respiro <code>px-4 py-2</code>, cantos
+  <code>rounded-lg</code> e texto branco.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+.botao { background: #b4532a; padding: 6px 10px; border: 0; }
+&lt;/style&gt;
+&lt;button id="alvo" class="botao"&gt;Comprar pão&lt;/button&gt;</pre>
+  <pre class="out">
+padding: 6px 10px
+background: rgb(180, 83, 42) none repeat scroll 0% 0% / auto padding-box border-box
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+.botao { @apply rounded-lg bg-amber-600 px-4 py-2 text-white; }
+&lt;/style&gt;
+&lt;button id="alvo" class="botao"&gt;Comprar pão&lt;/button&gt;</pre>
+</div>
+
+<p>O painel depois da tradução mostra <code>padding-inline: 16px</code> e
+<code>padding-block: 8px</code> — a mesma medida que você escreveria em CSS, só que escrita em
+degraus da escala. E o hexadecimal <code>#b4532a</code> virou <code>bg-amber-600</code>, que é o
+degrau mais próximo do marrom original. Essa troca de hex por degrau é uma decisão, não uma
+obrigação: você aceita um tom ligeiramente diferente em troca de coerência com o resto do site.
+Na maioria dos casos, é a melhor troca da migração.</p>
+
+<p>Se a regra antiga tiver dez propriedades, traduza as dez de uma vez, mesmo que o
+<code>@apply</code> fique comprido. Nesta etapa, comprido e fiel é melhor que curto e diferente:
+você quer ver o mesmo desenho na tela, com o CSS do Tailwind por baixo. Enxugar vem depois.</p>
+
+<h2>5. Missão 2: o HTML assume as classes</h2>
+
+<p>Passada a ponte, o segundo passo é real: as classes vão para o HTML e a regra antiga morre. Aqui o
+número de lugares importa — se <code>.botao</code> aparece em três páginas, são três edições, e é
+exatamente por isso que a ponte veio antes: com ela, você já sabe que a tradução está certa.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding-left=16px;;conta:.botao=0">
+  <p class="try-task">Agora tire o <code>.botao</code> do CSS e ponha as utilitárias no próprio
+  botão. A meta confere o respiro de 16 px e que não sobrou nenhum elemento com a classe
+  <code>botao</code>.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+.botao { background: #b4532a; padding: 6px 10px; border: 0; }
+&lt;/style&gt;
+&lt;button id="alvo" class="botao"&gt;Comprar pão&lt;/button&gt;</pre>
+  <pre class="out">
+padding: 6px 10px
+background: rgb(180, 83, 42) none repeat scroll 0% 0% / auto padding-box border-box
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-amber-600 px-4 py-2 text-white"&gt;Comprar pão&lt;/button&gt;</pre>
+</div>
+
+<p>Depois de rodar, o CSS antigo sumiu do exemplo e o botão continua igual — é isso que
+“migração sem regressão” quer dizer. Com a regra fora do arquivo, o <code>.botao</code> deixa de
+existir para sempre e ninguém pode reutilizá-lo por engano.</p>
+
+<p>Aqui vale uma decisão consciente: nem todo botão precisa de utilitárias no HTML. Se aquele botão
+aparece em vinte páginas, criar um componente com <code>@apply</code> (aula
+<a href="estilos-de-componente.html">Estilos de Componente</a>) é o destino certo. A diferença entre a
+ponte e o componente é a intenção: na ponte, a regra está ali para ser apagada; no componente, ela
+está ali para ficar, porque é o lugar onde o desenho mora.</p>
+
+<h2>6. O cuidado da camada: por que o CSS antigo vence</h2>
+
+<p>Esta é a parte que pega todo mundo de surpresa, e a única que pode fazer a migração “não
+funcionar”. As utilitárias do Tailwind moram numa camada de CSS (<code>@layer utilities</code>). O CSS
+antigo, escrito à mão, não está em camada nenhuma. E o CSS tem uma regra pouco intuitiva: <strong>o
+que está fora de camada vence o que está dentro</strong>, quando a especificidade é parecida.</p>
+
+<p>Na prática: você acrescenta <code>bg-amber-100</code> num cartão que ainda tem
+<code>.cartao { background: #fde68a }</code> no arquivo antigo, e o cartão continua amarelo. Não é
+bug; é a ordem do navegador. Duas saídas, e as duas são legítimas:</p>
+
+<p><strong>1. Migre a regra, não conviva com ela.</strong> Enquanto o elemento tem classe antiga, ele
+não deve receber utilitária da mesma propriedade. Esse é o caminho normal da migração: uma peça de
+cada vez.</p>
+
+<p><strong>2. Coloque o CSS antigo dentro de uma camada.</strong> Envolver o arquivo antigo (ou as
+regras que ficaram) em <code>@layer base</code> faz com que ele perca para as utilitárias, e você
+pode migrar com tranquilidade, ajustando uma coisa de cada vez:</p>
+
+<pre class="file" data-file="estilo-antigo.css">@layer base {
+  .cartao { background: #fde68a; padding: 8px; }
+}</pre>
+
+<p>Depois disso, um <code>bg-amber-100</code> no HTML ganha do <code>.cartao</code> antigo, e você
+consegue ver o que a migração está fazendo. O preço é que as regras antigas passam a perder também
+para as utilitárias de outras partes da página — o que, em migração, é exatamente o que você
+quer: o novo manda, o velho cede.</p>
+
+<pre class="term">.botao {
+  border-radius: var(--radius-lg);
+  background-color: var(--color-amber-600);
+  padding-inline: calc(var(--spacing) * 4);
+  padding-block: calc(var(--spacing) * 2);
+  color: var(--color-white);
+}</pre>
+
+<p>Esse é o CSS que a ponte produziu na missão 1. Repare que ele não tem nenhum hexadecimal: todas
+as cores e medidas passaram a vir das variáveis do tema. É esse detalhe que faz a migração valer a
+pena no fim — o site deixa de ter dezenove marrons diferentes e passa a ter um.</p>
+
+<h2>7. Missão 3: o style="" inline</h2>
+
+<p>Existe um terceiro tipo de CSS antigo, mais teimoso que a folha de estilo:
+<code>style="…"</code> escrito direto no elemento. Ele vence qualquer folha — inclusive as
+utilitárias, inclusive as camadas — porque é o que o navegador considera mais específico. Enquanto
+ele estiver ali, nenhuma classe de fundo vai conseguir mudar aquele fundo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=24px;;rule:background-color: var(--color-amber-100);;conta:[style]=0">
+  <p class="try-task">Este cartão carrega o respiro e o fundo no atributo <code>style</code>, e enquanto
+  eles estiverem ali nenhuma classe ganha nessas duas propriedades (o <code>rounded-lg</code>, que o
+  <code>style</code> não define, funciona normalmente). Apague o <code>style</code> e escreva as mesmas decisões em classes:
+  24 px de respiro (<code>p-6</code>) e fundo âmbar claro (<code>bg-amber-100</code>). A meta confere
+  o respiro, o fundo no CSS gerado e que não sobrou nenhum <code>style</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-lg" style="padding:24px;background:#fef3c7"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-lg bg-amber-100 p-6"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>Repare no detalhe da meta: <code>conta:[style]=0</code>. Só as classes não bastavam, porque o
+atributo continuaria vencendo e a tela não mudaria. Isso ilustra o motivo pelo qual migração de
+<code>style</code> inline é sempre em duas etapas — apagar e depois escrever — e nunca “acrescentar a
+classe e ver depois”.</p>
+
+<p>O mesmo raciocínio vale para o <code>!important</code> do arquivo antigo. Uma declaração
+<code>color: #6b7280 !important</code> ganha de <code>text-amber-900</code>, mesmo com a camada a
+favor do Tailwind. O Tailwind aceita <code>text-amber-900!</code> (no v4 o ponto de
+exclamação vai no fim da classe), e essa é uma saída de emergência útil em migração — mas cada <code>!important</code> novo é uma
+pergunta a menos que o próximo desenvolvedor consegue responder. A regra: use o
+<code>!</code> para desbloquear uma tela hoje, e anote para tirar.</p>
+
+<h2>8. O que não se migra (e como não quebrar nada)</h2>
+
+<p>Nem tudo deve virar classe. Cinco coisas costumam ficar onde estão, com motivos diferentes:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça do CSS antigo</th><th>Migrar?</th><th>Por quê</th></tr>
+<tr><td>reset e normalização</td><td>não</td><td>o Tailwind já traz o dele na camada <code>base</code></td></tr>
+<tr><td>terceiros (biblioteca, plugin)</td><td>não</td><td>você não é dono do arquivo e ele muda sozinho</td></tr>
+<tr><td><code>@keyframes</code> longos</td><td>talvez</td><td>vale quando viram <code>@theme</code>; senão, deixe em CSS</td></tr>
+<tr><td>estilos de impressão</td><td>depende</td><td>a variante <code>print:</code> cobre o simples; o resto fica</td></tr>
+<tr><td><code>font-face</code></td><td>sim</td><td>a fonte vira uma variável do tema</td></tr>
+</table>
+</div>
+
+<p>Ao lado do “o que migrar”, o “como conferir”. Uma migração sem conferência é uma aposta. Três
+checagens simples resolvem a maior parte:</p>
+
+<p><strong>Print de tela antes e depois.</strong> Tire uma captura da página antes de migrar e outra
+depois. O olho humano pega diferença de 2 px em duas imagens lado a lado, e não pega olhando a mesma
+página duas vezes em dias diferentes.</p>
+
+<p><strong>Uma página por vez.</strong> Migre a vitrine, confira, publique. Depois a lista de pães,
+confira, publique. Se algo quebrar, você sabe exatamente de onde veio. A pressa de migrar tudo junto
+é a maior fonte de defeito silencioso.</p>
+
+<p><strong>Procure o nome que morreu.</strong> Antes de apagar uma regra do arquivo antigo, procure o
+nome da classe em todos os arquivos do projeto. Se aparecer em algum HTML que você esqueceu, você
+descobriu o problema antes do cliente. No terminal, um <code>grep</code> pelo nome resolve:</p>
+
+<pre class="term">$ grep -rn "botao-antigo" --include=*.html .
+encomendas.html:24:    &lt;button class="botao-antigo"&gt;Comprar&lt;/button&gt;</pre>
+
+
+<p>Uma armadilha dessa busca: ela acha texto, não uso. Comentário de HTML também aparece, e código
+comentado não precisa de migração — mas também não precisa de classe. Aproveite a varredura para
+apagar o que está comentado e não volta nunca mais.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a migração que nunca termina</h3>
+<p>Dois anos depois, o site ainda tem as duas folhas de estilo: metade das páginas em Tailwind, metade
+no CSS antigo, e cada página nova copia classes antigas porque é mais rápido. O sintoma é conhecido: a
+migração parou no meio e virou o estado permanente. O antídoto é uma regra de trabalho, não de CSS:
+<strong>nenhuma página nova usa o CSS antigo</strong>. A partir do dia em que você começa, tudo o que
+é novo é utilitária; o antigo só pode encolher.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a classe nova não faz efeito nenhum</h3>
+<p>Você pôs <code>bg-white</code> no cartão, salvou, e nada. Nove entre dez vezes, o cartão ainda tem
+uma regra do CSS antigo mandando no fundo, ou um <code>style=""</code> esquecido no HTML, ou um
+<code>!important</code> herdado. O caminho de diagnóstico está na aula
+<a href="depuracao-de-css.html">Depurar o CSS</a>: o painel <em>Styles</em> do navegador mostra a
+regra vencedora, com o arquivo de onde ela veio. A resposta “veio de estilo-antigo.css, linha 402” é o
+fim da discussão.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o site ficou 2 px diferente (e ninguém sabe onde)</h3>
+<p>Ao trocar <code>margin: 7px</code> por <code>m-2</code> (8 px), a Ana ganhou 1 px de respiro e a
+grade desalinhou no terceiro cartão. Migração sempre tem esse tipo de arredondamento, porque a escala
+do Tailwind é discreta. A saída não é fugir da escala: é aceitar o degrau mais próximo e ajustar o
+desenho como um todo, em vez de manter um valor solto só para não mexer num pixel. Se algum valor
+realmente não puder mudar, existe a válvula dos colchetes — <code>m-[7px]</code> —, para ser usada com
+motivo escrito.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual é a ordem certa de uma migração?</p>
+<label><input type="radio" name="q1"> apagar o CSS antigo, escrever o novo e comparar no fim</label>
+<label><input type="radio" name="q1"> inventariar o que existe, traduzir regra por regra e remover o antigo</label>
+<label><input type="radio" name="q1"> começar pelas regras mais bonitas e deixar as feias para depois</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que a ponte com <code>@apply</code> é o primeiro
+passo mais seguro?</p>
+<label><input type="radio" name="q2"> porque deixa o CSS menor</label>
+<label><input type="radio" name="q2"> porque o <code>@apply</code> é mais rápido que as utilitárias</label>
+<label><input type="radio" name="q2"> porque o HTML não muda, então você confere a tradução numa página por vez</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Uma utilitária nova não ganha de uma regra do CSS
+antigo. Qual é a explicação mais provável?</p>
+<label><input type="radio" name="q3"> o CSS antigo está fora de camada, e o que está fora vence</label>
+<label><input type="radio" name="q3"> o Tailwind precisa de <code>!important</code> para funcionar</label>
+<label><input type="radio" name="q3"> a classe nova não existe no catálogo</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: traduzir a regra do preço</h2>
+<p>Este é o CSS antigo do preço na vitrine. Escreva o <code>@apply</code> que traduz a regra, usando a
+escala do Tailwind (o preço é grande e em negrito):</p>
+<div class="ex-code">.preco { @apply <input aria-label="resposta 1" data-answer="text-2xl font-bold|font-bold text-2xl" placeholder="..."> }</div>
+<p class="ex-dica">Dica: <code>font-size: 24px</code> é <code>text-2xl</code>, e
+<code>font-weight: 700</code> é <code>font-bold</code>. A ordem das duas classes não importa.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Migrar de CSS antigo não é reescrever: é substituir por partes, com os dois CSS convivendo e cada
+página funcionando durante o processo. A ordem é inventário, tradução e remoção. A ponte com
+<code>@apply</code> deixa o HTML intacto enquanto você confere a tradução; depois as classes vão para
+o HTML e a regra antiga é apagada. <code>style=""</code> inline e <code>!important</code> vencem
+qualquer utilitária e precisam sair — cada um a seu tempo.</p>
+
+<p>A armadilha técnica do caminho é a camada: CSS sem camada ganha das utilitárias, então ou você
+migra a regra, ou coloca o arquivo antigo em <code>@layer base</code> para ele ceder. E o cuidado
+final é o que separa migração de aposta: uma página por vez, print de tela antes e depois, e uma busca
+pelo nome da classe em todos os arquivos antes de apagá-la.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Os dois CSS convivem: o navegador não liga para a origem das regras.</li>
+<li>Ordem: inventário, tradução, remoção. Nunca remover antes de traduzir.</li>
+<li>Comece pelo que se repete: botão, cartão, preço.</li>
+<li>A ponte é <code>.botao { @apply … }</code> com o HTML intacto.</li>
+<li>Depois, as utilitárias vão para o HTML e a regra antiga morre.</li>
+<li>CSS sem camada vence utilitária; <code>@layer base</code> faz o antigo ceder.</li>
+<li><code>style=""</code> inline vence tudo: apague antes de tentar sobrescrever.</li>
+<li>Hexadecimal vira degrau da paleta: aceite o tom mais próximo.</li>
+<li>Nada de página nova com CSS antigo — senão a migração nunca termina.</li>
+<li>Confira com print de tela e <code>grep</code> pelo nome antes de apagar.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

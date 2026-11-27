@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentação | Guia Tailwind</title>
+<meta name="description" content="O manual da padaria montado por partes: o sumário que acompanha a rolagem, a coluna de leitura, a ficha técnica em bloco escuro, as tabelas e as âncoras.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Documentação</span></h1>
+<p class="intro">A padaria da Ana cresceu: agora tem a Bia no balcão e o seu Nilton no forno. E cresceu
+também o problema — as mesmas perguntas chegam no grupo do celular todo dia: quantos gramas de sal na
+massa de pão de queijo, quanto tempo a broa fica no forno, o que fazer quando acaba a farinha. A Ana
+decidiu escrever o manual da padaria em uma página. Documentação é o tipo de página mais lido e o
+menos amado, e ele tem regras próprias: ninguém lê de cima a baixo, todo mundo procura uma resposta e
+sai. Nesta aula ela monta esse manual por partes: o sumário, a coluna de leitura, as fichas, as
+tabelas, as notas e as âncoras.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que documentação se desenha para quem procura, e não para quem lê.</li>
+  <li>O layout de dois blocos: sumário fixo de um lado, texto do outro.</li>
+  <li><code>md:grid-cols-[16rem_1fr]</code> e o que significa o valor entre colchetes.</li>
+  <li>O sumário que acompanha a rolagem com <code>sticky top-8</code>.</li>
+  <li>A coluna de leitura confortável (<code>max-w-prose</code>) e o ritmo dos títulos.</li>
+  <li>O bloco de ficha técnica: fundo escuro, <code>font-mono</code> e rolagem lateral.</li>
+  <li>Tabelas de medida que não estouram no celular.</li>
+  <li>Notas e avisos com borda colorida — e quando cada cor serve.</li>
+  <li>Âncoras e o <code>scroll-mt</code> que impede o título de sumir atrás do topo.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o manual que ninguém lê inteiro</h2>
+
+<p>Quem abre um manual tem uma pergunta. O seu Nilton não quer saber a história da padaria: ele quer
+“broa, quantos minutos”. A Bia quer “fiado, pode ou não pode”. Ninguém lê documentação de cima a baixo,
+do mesmo jeito que ninguém lê a bula do remédio inteira — a pessoa procura uma palavra e para quando
+acha.</p>
+
+<p>Isso muda o desenho por completo. Uma página de venda convence; uma página de manual <em>encontra</em>.
+Então ela precisa de três coisas que a loja não tem: um sumário sempre à vista, títulos que sejam a
+própria pergunta e blocos de conteúdo reconhecíveis — a ficha com números, a tabela de medidas, o aviso
+do que dá errado.</p>
+
+<p>Também precisa de humildade no texto. “Adicione sal a gosto” não serve; “10 g de sal para cada quilo
+de farinha” serve. Em documentação, a frase boa é a que a pessoa consegue seguir sem perguntar de
+novo. É por isso que a Ana vai escrever o manual em blocos curtos, com número onde cabe número.</p>
+
+<pre class="file" data-file="manual.html">&lt;div class="mx-auto grid max-w-5xl gap-6 px-4 py-10 md:grid-cols-[16rem_1fr]"&gt;
+  &lt;nav aria-label="Sumário"&gt;…lista de seções…&lt;/nav&gt;
+  &lt;article class="min-w-0"&gt;
+    &lt;h1 class="text-3xl font-bold text-stone-900"&gt;Manual da padaria&lt;/h1&gt;
+    …seções, fichas, tabelas e notas…
+  &lt;/article&gt;
+&lt;/div&gt;</pre>
+
+<p>Dois blocos, uma linha de código. O <code>nav</code> ocupa a coluna estreita da esquerda e o
+<code>article</code> ocupa o resto. No celular, os dois se empilham: o sumário vira uma lista no topo e
+o texto vem embaixo. Essa é a estrutura de praticamente toda documentação da web — e não é por acaso
+que ela se repete desde os anos 2000.</p>
+
+<h2>2. O layout de dois blocos</h2>
+
+<p>A decisão de layout do manual é uma só: o sumário fica em uma coluna de largura fixa e o texto em
+uma coluna elástica. No Tailwind isso cabe em uma classe:
+<code>md:grid-cols-[16rem_1fr]</code>. Os colchetes pedem um valor que não está na escala; o
+<code>_</code> (sublinhado) ocupa o lugar do espaço, porque a classe inteira não pode ter espaço.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Bloco</th><th>Classes</th><th>Papel</th></tr>
+<tr><td>Grade geral</td><td><code>grid gap-6 md:grid-cols-[16rem_1fr]</code></td><td>duas colunas a partir de 768 px, empilhadas antes disso</td></tr>
+<tr><td>Sumário</td><td><code>text-sm</code> + links <code>block rounded-lg px-3 py-2</code></td><td>lista de seções, com item ativo destacado</td></tr>
+<tr><td>Texto</td><td><code>min-w-0</code> + <code>max-w-prose</code></td><td>coluna de leitura que pode encolher sem estourar a página</td></tr>
+</table>
+</div>
+
+<div class="trytailwind" data-largura="768" data-goal="rule:grid-template-columns: 16rem 1fr;;largura:768;;css:#alvo|display=grid">
+  <p class="try-task">A prévia está com 768 px e o sumário está empilhado em cima do texto, ocupando a
+  largura toda. Ponha os dois lado a lado, com 16 rem para o sumário e o resto para o texto:
+  acrescente <code>md:grid-cols-[16rem_1fr]</code> ao <code>&lt;div id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="grid gap-6"&gt;
+  &lt;nav class="rounded-lg border border-stone-200 p-4"&gt;
+    &lt;p class="text-sm font-medium text-stone-900"&gt;Sumário&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-stone-600"&gt;Ficha do pão&lt;/p&gt;
+    &lt;p class="text-sm text-stone-600"&gt;Tempo de forno&lt;/p&gt;
+  &lt;/nav&gt;
+  &lt;article class="min-w-0 rounded-lg border border-stone-200 p-4"&gt;
+    &lt;p class="text-sm text-stone-700"&gt;Um quilo de farinha, 600 ml de água e 10 g de sal.&lt;/p&gt;
+  &lt;/article&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+gap: 24px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid gap-6 md:grid-cols-[16rem_1fr]"&gt;
+  &lt;nav class="rounded-lg border border-stone-200 p-4"&gt;
+    &lt;p class="text-sm font-medium text-stone-900"&gt;Sumário&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-stone-600"&gt;Ficha do pão&lt;/p&gt;
+    &lt;p class="text-sm text-stone-600"&gt;Tempo de forno&lt;/p&gt;
+  &lt;/nav&gt;
+  &lt;article class="min-w-0 rounded-lg border border-stone-200 p-4"&gt;
+    &lt;p class="text-sm text-stone-700"&gt;Um quilo de farinha, 600 ml de água e 10 g de sal.&lt;/p&gt;
+  &lt;/article&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS gerado é curto e mostra o valor exato das duas colunas:</p>
+
+<pre class="term">@media (width >= 48rem) {
+  .md\:grid-cols-\[16rem_1fr\] {
+    grid-template-columns: 16rem 1fr;
+  }
+}</pre>
+
+<p><code>16rem</code> é 256 px — largura fixa, boa para nomes de seção curtos. <code>1fr</code> é “o
+resto”, a fração que sobra. O <code>48rem</code> do <code>@media</code> são os 768 px do breakpoint
+<code>md</code>. Se o monitor for mais largo, o texto cresce; o sumário, não. Esse
+comportamento é o que você quer em documentação: o índice é estável, a leitura se adapta.</p>
+
+<p>Repare no <code>min-w-0</code> no <code>article</code>. Parece um detalhe invisível e é a linha mais
+importante do layout. Filho de grade tem largura mínima automática, calculada pelo conteúdo: se dentro
+do artigo existe um bloco de código largo, essa largura mínima empurra a coluna do texto para além da
+tela e a página inteira passa a rolar de lado. <code>min-w-0</code> diz “pode encolher abaixo do
+conteúdo” — e aí o código rola dentro do próprio bloco, não na página.</p>
+
+<p>No celular, sem o prefixo, a grade tem uma coluna e o sumário aparece em cima. Muita gente esconde o
+sumário no celular com <code>hidden md:block</code>. Funciona, mas pense duas vezes: no celular, o
+sumário é justamente o que ajuda a pular para a seção certa. Melhor deixá-lo curto e visível do que
+sumido.</p>
+
+<h2>3. O sumário que acompanha a rolagem</h2>
+
+<p>O manual tem oito seções e o texto é longo. Se o sumário sobe junto com a rolagem, quem está no meio
+da página perde a navegação. A solução é <code>sticky top-8</code>: o sumário gruda a 32 px do topo da
+janela e fica ali enquanto o texto passa.</p>
+
+<dl class="anatomy">
+<dt>sticky</dt>
+<dd><code>position: sticky</code>. O elemento rola normalmente até encostar no limite definido por
+<code>top</code>, e então para e fica visível.</dd>
+<dt>top-8</dt>
+<dd><code>top: 32px</code>. O limite onde ele gruda. Sem essa classe, <code>sticky</code> não sabe
+onde parar e não faz nada.</dd>
+<dt>item ativo</dt>
+<dd><code>bg-amber-50 font-medium text-amber-900</code> na seção atual, com
+<code>aria-current="page"</code> no link. Cor e peso dizem onde a pessoa está.</dd>
+<dt>item comum</dt>
+<dd><code>block rounded-lg px-3 py-2 text-sm text-stone-600 hover:bg-stone-100</code>. O
+<code>block</code> faz a área clicável ocupar a linha inteira, não só o texto.</dd>
+<dt>separador</dt>
+<dd><code>mt-4 border-t border-stone-200 pt-4</code> entre grupos de seções. Separa sem gritar.</dd>
+</dl>
+
+<div class="trytailwind" data-goal="css:#alvo|position=sticky;;css:#alvo|top=32px">
+  <p class="try-task">O sumário sobe junto com o texto e some. Faça ele parar a 32 px do topo enquanto
+  a pessoa rola: acrescente <code>sticky top-8</code> ao <code>&lt;aside id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;div class="grid gap-6 md:grid-cols-[16rem_1fr]"&gt;
+  &lt;aside id="alvo" class="self-start rounded-lg border border-stone-200 p-4"&gt;
+    &lt;p class="text-sm font-medium text-stone-900"&gt;Sumário&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-stone-600"&gt;Ficha do pão&lt;/p&gt;
+    &lt;p class="text-sm text-stone-600"&gt;Tempo de forno&lt;/p&gt;
+  &lt;/aside&gt;
+  &lt;article class="min-w-0"&gt;
+    &lt;p class="text-sm text-stone-700"&gt;Um quilo de farinha, 600 ml de água e 10 g de sal.&lt;/p&gt;
+  &lt;/article&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+border-radius: 8px
+align-self: flex-start
+border-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+</pre>
+  <pre class="solucao">&lt;div class="grid gap-6 md:grid-cols-[16rem_1fr]"&gt;
+  &lt;aside id="alvo" class="sticky top-8 self-start rounded-lg border border-stone-200 p-4"&gt;
+    &lt;p class="text-sm font-medium text-stone-900"&gt;Sumário&lt;/p&gt;
+    &lt;p class="mt-2 text-sm text-stone-600"&gt;Ficha do pão&lt;/p&gt;
+    &lt;p class="text-sm text-stone-600"&gt;Tempo de forno&lt;/p&gt;
+  &lt;/aside&gt;
+  &lt;article class="min-w-0"&gt;
+    &lt;p class="text-sm text-stone-700"&gt;Um quilo de farinha, 600 ml de água e 10 g de sal.&lt;/p&gt;
+  &lt;/article&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>position: sticky</code> e <code>top: 32px</code>. O CSS é uma linha para cada
+coisa:</p>
+
+<pre class="term">.sticky {
+  position: sticky;
+}
+.top-8 {
+  top: calc(var(--spacing) * 8);
+}</pre>
+
+<p>Duas armadilhas do <code>sticky</code>. A primeira: ele precisa de espaço para rolar dentro do pai.
+O <code>aside</code> está em uma coluna de grade, e a coluna tem a altura do conteúdo — se o texto for
+curto, o sumário não tem para onde “deslizar” e parece quebrado. O conserto é o
+<code>self-start</code>: ele impede que o item estique na altura da linha e devolve ao <code>aside</code> a
+altura do próprio conteúdo, deixando o espaço da coluna livre para ele rolar.</p>
+
+<p>A segunda: qualquer ancestral com <code>overflow-hidden</code> (ou <code>overflow-auto</code>)
+desliga o <code>sticky</code>. Se você colou a regra do sumário e ele não gruda, procure um
+<code>overflow</code> em algum pai — é quase sempre isso.</p>
+
+<h2>4. A coluna de leitura</h2>
+
+<p>Texto de manual é lido aos pedaços, mas cada pedaço precisa ser confortável. A medida é a mesma de
+qualquer página de conteúdo: <code>max-w-prose</code>, que vale <code>65ch</code> — perto de 65
+caracteres por linha. Acima disso, o olho erra a volta; abaixo, a frase quebra toda hora e o texto
+parece picado.</p>
+
+<p>Três classes de texto sustentam o resto. <code>text-stone-700</code> para o corpo: preto puro em
+fundo branco é contraste demais para leitura longa e cansa. <code>leading-relaxed</code> para a
+entrelinha: 1,625 em vez do 1,5 padrão, o que dá ar entre as linhas. E <code>text-base</code> — 16 px —
+como base, com <code>text-sm</code> reservado para legendas e notas.</p>
+
+<p>Os títulos fazem o trabalho pesado. Em documentação, um <code>h2</code> por pergunta, escrito como a
+pessoa perguntaria: “Quanto tempo a broa fica no forno?” funciona melhor que “Processo de
+forneamento”. O estilo é <code>mt-10 text-2xl font-semibold text-stone-900</code>, com
+<code>mt-4</code> nos parágrafos seguintes. O <code>mt-10</code> no título é o que cria o ritmo de
+seções: espaço grande antes, pequeno depois.</p>
+
+<pre class="file" data-file="manual.html">&lt;article class="min-w-0 max-w-prose"&gt;
+  &lt;h2 id="forno" class="mt-10 scroll-mt-8 text-2xl font-semibold text-stone-900"&gt;
+    Quanto tempo a broa fica no forno?
+  &lt;/h2&gt;
+  &lt;p class="mt-4 text-stone-700 leading-relaxed"&gt;
+    Broa de fubá: 35 minutos a 180 °C, forma untada, sem abrir o forno nos primeiros 20.
+  &lt;/p&gt;
+&lt;/article&gt;</pre>
+
+<p>Se preferir não repetir <code>mt-4</code> em todo parágrafo, use <code>space-y-4</code> no
+<code>article</code>: ele aplica o espaço entre os filhos diretos, e você escreve menos. O efeito é o
+mesmo; a diferença aparece quando um bloco precisa de espaço diferente — aí você volta a controlar
+caso a caso.</p>
+
+<h2>5. As fichas técnicas</h2>
+
+<p>Metade do manual da padaria é número: gramas, minutos, graus, rendimento. Número solto no meio do
+parágrafo se perde. Número em bloco próprio vira consulta: a pessoa acha, copia, segue. O bloco de
+ficha técnica é escuro, monoespaçado e com rolagem própria.</p>
+
+<pre class="file" data-file="manual.html">&lt;div class="mt-6 overflow-x-auto rounded-lg bg-stone-900 p-4"&gt;
+  &lt;pre class="font-mono text-sm leading-relaxed text-stone-100"&gt;Pão de queijo — 1 receita (24 unidades)
+  polvilho azedo ....... 500 g
+  queijo minas ......... 250 g
+  ovo .................. 2
+  óleo ................. 100 ml
+  forno ................ 180 °C por 25 min&lt;/pre&gt;
+&lt;/div&gt;</pre>
+
+<dl class="anatomy">
+<dt>fundo</dt>
+<dd><code>bg-stone-900</code> com <code>rounded-lg</code>. O escuro separa a ficha da prosa; é o mesmo
+padrão de bloco de código usado em documentação de programação.</dd>
+<dt>letra</dt>
+<dd><code>font-mono</code> alinha as colunas de números, porque todo caractere tem a mesma largura.
+<code>text-sm</code> compensa a mono ser mais larga.</dd>
+<dt>cor do texto</dt>
+<dd><code>text-stone-100</code>. Sem ela, o texto herda o cinza escuro do corpo e desaparece no fundo
+escuro — o erro número um de quem pinta um bloco de preto.</dd>
+<dt>rolagem</dt>
+<dd><code>overflow-x-auto</code>. No celular, a ficha rola de lado dentro do bloco, em vez de empurrar
+a página inteira.</dd>
+</dl>
+
+<div class="trytailwind" data-goal="css:#alvo|overflow-x=auto;;css:#alvo|border-radius=8px">
+  <p class="try-task">A ficha está com uma linha longa e, no celular, ela empurra a página toda para o
+  lado. Dê rolagem própria ao bloco: acrescente <code>overflow-x-auto</code> ao
+  <code>&lt;div id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-lg bg-stone-900 p-4"&gt;
+  &lt;pre class="font-mono text-sm text-stone-100"&gt;Pão de queijo — 1 receita (24 unidades)
+  polvilho azedo ....... 500 g
+  queijo minas ......... 250 g
+  forno ................ 180 °C por 25 min&lt;/pre&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.216 0.006 56.043)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="overflow-x-auto rounded-lg bg-stone-900 p-4"&gt;
+  &lt;pre class="font-mono text-sm text-stone-100"&gt;Pão de queijo — 1 receita (24 unidades)
+  polvilho azedo ....... 500 g
+  queijo minas ......... 250 g
+  forno ................ 180 °C por 25 min&lt;/pre&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel confirma <code>overflow-x: auto</code> e o canto de 8 px. O que ele não mostra é o motivo de
+estarmos aqui: com a rolagem no bloco, uma linha de 60 caracteres cabe na tela do celular sem quebrar
+o alinhamento das colunas — e a página em volta continua parada. Sem ela, o navegador não tem outra
+saída: o texto monoespaçado não quebra em lugar bonito e a página ganha uma barra horizontal.</p>
+
+<p>O <code>overflow-x-auto</code> é o par natural do <code>min-w-0</code> da coluna de texto. Um diz
+“pode encolher”; o outro diz “o que não cabe, rola aqui dentro”. Juntos, resolvem a maior parte dos
+problemas de documentação com tabela e código.</p>
+
+<h2>6. As tabelas de medida</h2>
+
+<p>Quando a informação tem duas dimensões — produto e tempo, insumo e quantidade —, a tabela é mais
+rápida que o parágrafo. O cuidado é que tabela não é bloco de texto: ela tem alinhamento próprio e, no
+celular, precisa de rolagem.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Elemento</th><th>Classes</th><th>Por quê</th></tr>
+<tr><td><code>table</code></td><td><code>w-full text-sm</code></td><td>ocupa a coluna e usa um corpo menor que a prosa</td></tr>
+<tr><td><code>th</code></td><td><code>py-2 text-left font-medium text-stone-500</code></td><td>cabeçalho discreto; <code>text-left</code> porque o padrão do navegador é centralizado</td></tr>
+<tr><td><code>tbody</code></td><td><code>divide-y divide-stone-200</code></td><td>linha fina entre as linhas, sem borda sobrando no fim</td></tr>
+<tr><td><code>td</code></td><td><code>py-2 text-stone-800</code></td><td>mesmo respiro em todas as células</td></tr>
+<tr><td>números</td><td><code>text-right tabular-nums</code></td><td>algarismos de largura igual: as colunas de número ficam alinhadas</td></tr>
+</table>
+</div>
+
+<p>O <code>tabular-nums</code> é o detalhe que separa tabela amadora de tabela profissional. Em fontes
+comuns, o “1” é mais estreito que o “8”, e uma coluna de números fica torta. Com
+<code>font-variant-numeric: tabular-nums</code>, todos os algarismos ocupam a mesma largura, como em
+uma calculadora. Em tabela de preço e de medida, use sempre.</p>
+
+<p>No celular, a tabela é o elemento que mais estoura a tela. O conserto é o mesmo da ficha: um
+<code>&lt;div class="overflow-x-auto"&gt;</code> em volta. Existe também a opção de esconder colunas
+menos importantes com <code>hidden sm:table-cell</code>, mas isso exige escolher o que perde — e, em
+manual, o que perde costuma ser informação que alguém vai precisar.</p>
+
+<h2>7. Notas e avisos</h2>
+
+<p>Toda documentação de padaria tem duas frases que precisam de destaque: “o forno precisa estar
+preaquecido por 20 minutos” e “não use farinha vencida”. A primeira é dica, a segunda é risco. Duas
+cores, dois significados, e nunca os dois ao mesmo tempo no mesmo bloco.</p>
+
+<pre class="term">.border-l-4 {
+  border-left-style: var(--tw-border-style);
+  border-left-width: 4px;
+}
+.border-amber-400 {
+  border-color: var(--color-amber-400);
+}
+.bg-amber-50 {
+  background-color: var(--color-amber-50);
+}</pre>
+
+<p>O bloco de dica é <code>border-l-4 border-amber-400 bg-amber-50 p-4 text-sm text-amber-900</code>.
+A borda grossa à esquerda é o que dá o ar de “recado” sem precisar de ícone; o fundo claro mantém o
+texto legível; o canto direito arredondado (<code>rounded-r-lg</code>) suaviza o conjunto. Para o
+aviso de risco, troque âmbar por vermelho: <code>border-red-400 bg-red-50 text-red-900</code>.</p>
+
+<p>Duas regras de cor. A primeira: reservar o vermelho para o que realmente estraga o pão. Uma página
+com cinco blocos vermelhos ensina a ignorar todos. A segunda: o bloco de nota não substitui o texto —
+ele reforça. Se a informação só existe dentro da nota, ela vai ser perdida por quem lê rápido, e quem
+lê rápido é exatamente o público do manual.</p>
+
+<p>No HTML, o bloco pode ser um <code>&lt;aside&gt;</code> ou uma <code>&lt;div&gt;</code> com
+<code>role="note"</code>. O leitor de tela agradece: ele anuncia o bloco como observação, fora do
+fluxo da leitura principal.</p>
+
+<h2>8. Âncoras, atalhos e o título que não pode sumir</h2>
+
+<p>O sumário só funciona se cada link levar a um lugar exato. Isso é <code>id</code> no título e
+<code>href="#id"</code> no link. Simples. O problema aparece quando a página tem um topo fixo (ou
+quando o sumário gruda): a âncora leva o título para o alto da janela, e o topo fixo cobre justamente
+a linha do título. A pessoa clica em “Tempo de forno” e vê o parágrafo de cima.</p>
+
+<p>O conserto é <code>scroll-mt-8</code> no título — <code>scroll-margin-top: 32px</code>. Ele diz ao
+navegador para parar 32 px antes do alvo, deixando espaço para o que está fixo em cima. É a classe que
+ninguém conhece e que resolve um incômodo que todo mundo já sentiu.</p>
+
+<pre class="file" data-file="manual.html">&lt;h2 id="forno" class="scroll-mt-8 text-2xl font-semibold"&gt;Tempo de forno&lt;/h2&gt;
+…
+&lt;a href="#forno" class="text-sm font-medium text-amber-700 hover:underline"&gt;Tempo de forno&lt;/a&gt;</pre>
+
+<p>Para o “voltar ao topo”, três decisões: ele fica dentro do sumário (onde a pessoa já está olhando),
+é discreto (<code>text-sm text-stone-500 hover:text-stone-800</code>) e aponta para o
+<code>id</code> do título principal. E se você quiser que a rolagem entre as seções seja suave, coloque
+<code>scroll-smooth</code> no <code>html</code> — uma classe, o assunto da aula de
+<a href="scroll-suave.html">rolagem suave</a>.</p>
+
+<p>Um aviso: rolagem suave cansa em manual longo. Quem clica em cinco âncoras seguidas passa mais tempo
+vendo a página deslizar do que lendo. Use em páginas curtas ou deixe a rolagem instantânea; o navegador
+já respeita quem pediu menos animação no sistema.</p>
+
+<h2>9. Três cenas, três consertos</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o sumário que não gruda</h3>
+<p>A Ana colou <code>sticky top-8</code> no sumário e nada aconteceu. Duas causas prováveis. A primeira:
+algum ancestral com <code>overflow-hidden</code> — sticky não funciona dentro de um pai que recorta. A
+segunda: o item está esticado na altura da linha da grade, então não sobra espaço para ele rolar. O
+conserto é <code>self-start</code> no próprio sumário e uma olhada nos <code>overflow</code> acima
+dele.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a ficha que estoura a tela do celular</h3>
+<p>A ficha do pão de queijo tem linhas com 60 caracteres e não caberia em 375 px nem com letra de 10
+px. A primeira tentativa da Ana foi diminuir a fonte até caber — e o texto ficou ilegível no sol do
+balcão. O conserto é aceitar a rolagem: <code>overflow-x-auto</code> no bloco escuro, com o
+<code>min-w-0</code> na coluna para que a página não acompanhe. Rolar dentro do bloco é melhor do que
+espremer o conteúdo.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a âncora que para embaixo do topo</h3>
+<p>Quem clicava em “Tempo de forno” via o parágrafo anterior. O navegador alinhou o título com o topo
+da janela, e o topo fixo do manual cobriu a linha. O conserto é uma classe no próprio alvo:
+<code>scroll-mt-8</code>. Se o topo fixo for maior, aumente o número —
+<code>scroll-mt-16</code> — e teste clicando em cada link do sumário, no celular e no monitor.</p>
+</div>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Conferência</th><th>Como se vê</th><th>O que resolve</th></tr>
+<tr><td>Cada link do sumário leva ao lugar certo?</td><td>clique em todos</td><td><code>id</code> igual ao <code>href</code>, com <code>scroll-mt-8</code> no alvo</td></tr>
+<tr><td>O sumário acompanha a rolagem?</td><td>role até o meio da página</td><td><code>sticky top-8</code> + <code>self-start</code>, sem <code>overflow-hidden</code> em cima</td></tr>
+<tr><td>A página rola de lado no celular?</td><td>arraste para a direita em 375 px</td><td><code>min-w-0</code> na coluna de texto e <code>overflow-x-auto</code> nos blocos largos</td></tr>
+<tr><td>As colunas de número estão alinhadas?</td><td>olhe a tabela de medidas</td><td><code>text-right tabular-nums</code></td></tr>
+<tr><td>O texto é legível sem esforço?</td><td>leia um parágrafo inteiro</td><td><code>max-w-prose</code>, <code>leading-relaxed</code> e <code>text-stone-700</code></td></tr>
+</table>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual é a diferença entre <code>sticky</code> e
+<code>fixed</code>?</p>
+<label><input type="radio" name="q1"> nenhuma, os dois colam no topo</label>
+<label><input type="radio" name="q1"> o <code>fixed</code> sai do fluxo e fica sempre na mesma posição; o <code>sticky</code> rola com a página até o limite de <code>top</code> e só então para</label>
+<label><input type="radio" name="q1"> o <code>sticky</code> só funciona em celular</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Para que serve o <code>min-w-0</code> na coluna de
+texto?</p>
+<label><input type="radio" name="q2"> para o texto ficar menor</label>
+<label><input type="radio" name="q2"> para esconder o que passa da largura</label>
+<label><input type="radio" name="q2"> para permitir que a coluna encolha e o bloco largo role dentro dela, sem esticar a página</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que <code>scroll-mt-8</code> muda?</p>
+<label><input type="radio" name="q3"> o ponto onde a rolagem para ao chegar numa âncora, deixando espaço para o topo fixo</label>
+<label><input type="radio" name="q3"> a velocidade da rolagem suave</label>
+<label><input type="radio" name="q3"> a margem entre os parágrafos</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o manual da padaria</h2>
+<p>No seu arquivo, o sumário precisa ficar em uma coluna de 16 rem ao lado do texto, e a ficha precisa
+rolar dentro do próprio bloco. Complete as duas classes que faltam.</p>
+<div class="ex-code">&lt;div class="mx-auto grid max-w-5xl gap-6 px-4 py-10 <input aria-label="resposta 1" data-answer="md:grid-cols-[16rem_1fr]">"&gt;
+  &lt;nav aria-label="Sumário"&gt;…&lt;/nav&gt;
+  &lt;div class="mt-6 <input aria-label="resposta 2" data-answer="overflow-x-auto"> rounded-lg bg-stone-900 p-4"&gt;
+    &lt;pre&gt;…&lt;/pre&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</div>
+<p class="ex-dica">Dica: o valor entre colchetes usa <code>_</code> no lugar do espaço, porque a classe
+inteira não pode ter espaço. A classe da rolagem lateral é a mesma da aula de
+<a href="overflow.html">overflow</a>.</p>
+</div>
+
+<h2>10. Resumo</h2>
+
+<p>Documentação se desenha para quem procura, não para quem lê. O layout é de dois blocos:
+<code>grid gap-6 md:grid-cols-[16rem_1fr]</code>, com o sumário em <code>sticky top-8 self-start</code>
+e o texto em uma coluna com <code>min-w-0 max-w-prose</code>. Os títulos são perguntas, com
+<code>scroll-mt-8</code> para não sumirem atrás do topo.</p>
+
+<p>As fichas técnicas vivem em bloco escuro (<code>bg-stone-900 rounded-lg p-4</code>), com
+<code>font-mono text-sm text-stone-100</code> e <code>overflow-x-auto</code> para rolar dentro do
+próprio bloco. As tabelas usam <code>w-full text-sm</code>, <code>text-left</code> no cabeçalho,
+<code>tabular-nums</code> nos números e o mesmo <code>overflow-x-auto</code> em volta. As notas ganham
+<code>border-l-4</code> com fundo claro — âmbar para dica, vermelho para risco.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Manual se lê em pedaços: sumário visível, títulos que são perguntas.</li>
+<li>Duas colunas: <code>md:grid-cols-[16rem_1fr]</code>, e <code>_</code> no lugar do espaço.</li>
+<li><code>min-w-0</code> na coluna de texto evita que o conteúdo largo estique a página.</li>
+<li><code>sticky top-8</code> + <code>self-start</code> prende o sumário sem travar a rolagem.</li>
+<li><code>max-w-prose</code> é 65 caracteres: a medida de leitura confortável.</li>
+<li>Bloco de ficha: <code>bg-stone-900</code>, <code>font-mono</code>, <code>text-stone-100</code>.</li>
+<li><code>overflow-x-auto</code> faz a tabela e o código rolarem dentro do bloco.</li>
+<li><code>tabular-nums</code> alinha os algarismos das colunas de número.</li>
+<li>Notas com <code>border-l-4</code>; vermelho só para risco de verdade.</li>
+<li>Âncora + <code>scroll-mt-8</code> = o título aparece inteiro, não atrás do topo.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

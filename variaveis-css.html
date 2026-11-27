@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variáveis CSS | Guia Tailwind</title>
+<meta name="description" content="As variáveis que o Tailwind publica no CSS final: sobrescrever em tempo de execução, o @theme inline, variáveis com tipo no @property e como ler o valor no JavaScript.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Variáveis <span class="hl">CSS</span></h1>
+<p class="intro">A Ana abriu uma barraca na feira do bairro, com o mesmo pão, o mesmo café e o mesmo
+site. Só uma coisa muda: a barraca é verde, e o site é âmbar. Ela não quer manter dois sites, nem um
+segundo arquivo de CSS, nem recompilar nada quando trocar de lugar — quer o mesmo HTML pintado de outra
+cor. A resposta está numa camada que o Tailwind já entrega pronta e que quase ninguém abre: o bloco de
+variáveis que vai para o CSS final. Nesta aula a Ana descobre o que o compilador publica, como
+sobrescrever um valor sem tocar nas classes, por que às vezes a troca não pega, e como declarar uma
+variável com tipo para ela nunca chegar vazia.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O bloco <code>@layer theme</code> que o Tailwind escreve no CSS final, com <code>:root, :host</code>.</li>
+  <li>A diferença entre declarar uma variável no <code>@theme</code> e declará-la em <code>:root</code>.</li>
+  <li>Como sobrescrever uma cor do tema em uma parte do site, sem recompilar.</li>
+  <li>Por que a troca às vezes não pega — e o que <code>@theme inline</code> resolve.</li>
+  <li>Como a variável <code>--spacing</code> muda o respiro de um bloco inteiro.</li>
+  <li>O que <code>@property</code> acrescenta: tipo, valor inicial e herança.</li>
+  <li>Como usar uma variável em classe de tamanho, cor e respiro.</li>
+  <li>Como ler e escrever uma variável pelo JavaScript.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o mesmo site, outra cor</h2>
+
+<p>O site da Ana tem três páginas e uma cor só: o âmbar da padaria. Na feira, a barraca é verde, e ela
+não abre mão disso. As opções que passaram pela cabeça dela foram todas ruins. Copiar o site e trocar
+as cores, mantendo dois projetos: em um mês, um dos dois fica velho. Criar uma classe nova
+(<code>bg-verde</code>) e repetir tudo: o HTML dobra de tamanho. Recompilar o CSS com outra cor antes de
+abrir a barraca: funciona, mas depende de ela lembrar do passo e de ter um terminal à mão às seis da
+manhã.</p>
+
+<p>Existe um caminho mais simples, e ele parte de uma constatação: as classes do Tailwind não guardam
+cores, guardam <em>nomes de variáveis</em>. Quando o navegador desenha um <code>bg-amber-50</code>, ele
+não consulta o Tailwind; consulta uma variável chamada <code>--color-amber-50</code> que está declarada
+na página. Se essa variável puder ser trocada em um pedaço do documento, a mesma classe pinta uma coisa
+na padaria e outra na feira. Nenhum build, nenhum HTML duplicado.</p>
+
+<p>Só que essa conversa tem uma pegadinha no meio, e ela é o motivo desta aula existir: existem
+<strong>duas</strong> camadas de variáveis no Tailwind v4, uma que gera classes e outra que só guarda
+valores, e o jeito de escrever muda o resultado. Quem confunde as duas passa a tarde trocando um valor
+que não chega na tela.</p>
+
+<h2>2. O que o Tailwind deixa no CSS final</h2>
+
+<p>Vamos começar pelo que existe de verdade, sem promessa. Se você compilar um projeto pequeno — um
+cartão com <code>bg-marca</code> e <code>p-4</code> — e abrir o arquivo gerado, a primeira coisa que
+aparece, depois do comentário da licença, é a ordem das camadas. A segunda é esta:</p>
+
+<pre class="term">@layer theme {
+  :root, :host {
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --spacing: 0.25rem;
+    --color-marca: #b4532a;
+  }
+}</pre>
+
+<p>Leia de novo, devagar, porque é aqui que o assunto começa. O Tailwind não escreveu <code>#b4532a</code>
+dentro de cada regra que usa a cor da marca. Ele escreveu a cor <strong>uma vez</strong>, como variável,
+num bloco que vale para o documento inteiro. As regras das classes apontam para esse nome. E o valor
+continua sendo uma variável de CSS comum no navegador: dá para ler, dá para trocar em tempo de execução,
+dá para perguntar o valor pelo console.</p>
+
+<p>O seletor duplo <code>:root, :host</code> merece uma explicação curta. <code>:root</code> é o
+elemento raiz do documento, o <code>&lt;html&gt;</code>; declarar ali é o jeito de dizer “vale para a
+página toda”, porque tudo que está dentro herda. <code>:host</code> é o mesmo papel quando o CSS roda
+dentro de um componente isolado, como um web component — o Tailwind cobre os dois casos na mesma regra
+para não duplicar o bloco. Para você, hoje, os dois nomes significam “a raiz”.</p>
+
+<p>Um detalhe importante e fácil de perder: só entra nesse bloco o que o seu site usa ou declarou. A
+paleta inteira do Tailwind não vai para o arquivo. Num projeto com três cores, o <code>@layer theme</code>
+tem três cores. É por isso que o CSS gerado costuma ser pequeno, e é por isso que procurar uma variável
+que você nunca usou no arquivo gerado não dá em nada.</p>
+
+<dl class="anatomy">
+<dt>:root</dt>
+<dd>O elemento raiz da página, o <code>&lt;html&gt;</code>. Variável declarada aqui vale para o
+documento inteiro, por herança.</dd>
+<dt>:host</dt>
+<dd>O equivalente a <code>:root</code> quando o CSS roda dentro de um web component. O Tailwind declara
+as duas coisas na mesma regra.</dd>
+<dt>@layer theme</dt>
+<dd>A camada do CSS final onde o Tailwind publica as variáveis do tema. É a “prateleira pública” do
+projeto.</dd>
+<dt>@theme inline</dt>
+<dd>A variante do <code>@theme</code> em que a classe gerada aponta para a variável de origem, em vez de
+apontar para o nome do tema. É o que faz a troca em tempo de execução pegar.</dd>
+<dt>@property</dt>
+<dd>A regra que dá tipo, valor inicial e regra de herança a uma variável. Sem ela, a variável não tem
+tipo nem valor de fábrica.</dd>
+</dl>
+
+<h2>3. Duas prateleiras: @theme e :root</h2>
+
+<p>Todo mundo tropeça no mesmo lugar: declarar a variável no lugar errado. Há duas prateleiras, e elas
+servem a coisas diferentes.</p>
+
+<p>A primeira é o <code>@theme</code>. Tudo que entra ali vira uma variável no CSS final
+<em>e</em> uma família de classes. <code>--color-marca</code> no <code>@theme</code> cria
+<code>bg-marca</code>, <code>text-marca</code> e <code>border-marca</code>. É a prateleira do desenho:
+o lugar onde você diz “esta cor existe neste projeto”.</p>
+
+<p>A segunda é o <code>:root</code> comum, fora do <code>@theme</code>. Ali a variável só guarda um
+valor. Nenhuma classe nasce dela. Ela serve para o que não é do Tailwind: um valor que o seu próprio CSS
+usa, um número que o JavaScript vai ler, um dado que veio de outro sistema. Se você declarar
+<code>--color-marca</code> em <code>:root</code> e escrever <code>bg-marca</code> no HTML, nada
+acontece — a classe não existe, porque só o <code>@theme</code> fabrica classe.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Onde você declara</th><th>O que ganha</th><th>Quando é a escolha certa</th></tr>
+<tr><td><code>@theme { --color-x: … }</code></td><td>a variável no CSS final e as classes <code>bg-x</code>, <code>text-x</code>, <code>border-x</code></td><td>cor, fonte, sombra ou respiro que o desenho usa</td></tr>
+<tr><td><code>:root { --x: … }</code></td><td>só o valor, sem classe</td><td>valor para o seu CSS ou para o JavaScript</td></tr>
+<tr><td><code>@theme inline { --color-x: var(--y) }</code></td><td>as classes apontando para <code>--y</code></td><td>quando a cor muda em tempo de execução</td></tr>
+<tr><td><code>@property --x { … }</code></td><td>tipo, valor inicial e herança</td><td>variável própria, que precisa se comportar como valor de verdade</td></tr>
+</table>
+</div>
+
+<p>Guarde a assimetria, porque ela explica quase todo “não funcionou” deste assunto: <code>@theme</code>
+faz as duas coisas (variável e classe), <code>:root</code> faz uma só (variável). Quando a classe existe
+e não pinta, o problema é o valor; quando a cor está declarada e a classe não faz nada, o problema é a
+prateleira.</p>
+
+<h2>4. O caso que engana: variável que aponta para variável</h2>
+
+<p>Agora o miolo da aula. A Ana quer a cor da loja numa variável só, porque a feira usa outra. Então ela
+faz o que parece natural: declara <code>--cor-loja</code> na raiz e manda o tema apontar para ela.</p>
+
+<pre class="file" data-file="style.css">:root {
+  --cor-loja: #b4532a;
+}
+
+@theme {
+  --color-marca: var(--cor-loja);
+}</pre>
+
+<p>Funciona: o site fica âmbar. Aí chega o dia da feira e ela escreve, no bloco da barraca,
+<code>style="--cor-loja: #15803d"</code>. O texto fica verde, os títulos ficam verdes, e o botão continua
+marrom. Por quê?</p>
+
+<p>Porque <code>--color-marca</code> foi resolvida na raiz. Variável que aponta para variável é resolvida
+no elemento onde ela foi declarada: a raiz perguntou “quanto é <code>--cor-loja</code> aqui?” e recebeu o
+marrom. O que desce pela árvore é o resultado, não a receita. Quando a barraca troca
+<code>--cor-loja</code> lá embaixo, já é tarde: ninguém mais está lendo esse nome.</p>
+
+<p>A solução tem nome e é uma palavra: <code>inline</code>. Com <code>@theme inline</code>, o Tailwind
+escreve a classe apontando direto para a variável de origem — e aí a pergunta é feita no elemento que
+pinta, onde o verde já está valendo. Na caixa, o botão tem a cor da loja trocada no próprio elemento.
+Sua missão é fazer essa troca chegar ao fundo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|background-color=rgb(21, 128, 61);;rule:background-color: var(--cor-loja)">
+  <p class="try-task">Acrescente <code>inline</code> depois de <code>@theme</code> e rode: o fundo do
+  bloco deve passar de marrom para o verde declarado no <code>style</code> dele.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+:root {
+  --cor-loja: #b4532a;
+}
+
+@theme {
+  --color-marca: var(--cor-loja);
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="bg-marca p-4 text-white" style="--cor-loja: #15803d"&gt;
+  Barraca da Ana
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(180, 83, 42)
+color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+:root {
+  --cor-loja: #b4532a;
+}
+
+@theme inline {
+  --color-marca: var(--cor-loja);
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="bg-marca p-4 text-white" style="--cor-loja: #15803d"&gt;
+  Barraca da Ana
+&lt;/div&gt;</pre>
+</div>
+
+<p>Repare no que o painel mostra antes e depois. Antes, o fundo vem em <code>rgb(180, 83, 42)</code> — o
+marrom da raiz —, apesar do verde ali do lado. Depois, vem <code>rgb(21, 128, 61)</code>, o verde da
+barraca. A diferença entre os dois casos é uma palavra no CSS, e o CSS gerado conta a história em duas
+linhas:</p>
+
+<pre class="term">/* sem inline: a classe aponta para o nome do tema */
+.bg-marca { background-color: var(--color-marca); }
+
+/* com inline: a classe aponta para a variável de origem */
+.bg-marca { background-color: var(--cor-loja); }</pre>
+
+<p>Isso responde também uma dúvida de quem vem de projetos antigos: por que a documentação insiste em
+<code>inline</code> nos casos de tema por variável. Não é preferência de estilo; é a diferença entre
+congelar o valor na raiz e mantê-lo vivo até o elemento que pinta. Use <code>inline</code> quando o
+valor precisar mudar por escopo — tema por seção, por cliente, por horário. Use o <code>@theme</code>
+comum quando o valor for uma constante do projeto, que só muda quando você edita o CSS.</p>
+
+<h2>5. Mexendo na régua: a variável --spacing</h2>
+
+<p>Cor é o exemplo mais vistoso, mas o mesmo mecanismo vale para as outras escalas do tema, e a régua de
+espaço é a mais útil de todas. Você já sabe que <code>p-4</code> não vale “16 px”: vale quatro vezes a
+variável <code>--spacing</code>. Isso significa que dá para mudar a régua em um pedaço da página, sem
+tocar em nenhuma classe.</p>
+
+<p>Na caixa abaixo, o bloco é uma faixa promocional. A Ana quer que, só ali dentro, o espaçamento seja
+mais generoso. Em vez de reescrever todas as classes de <code>p-4</code> para <code>p-8</code>, ela
+declara <code>--spacing: 0.5rem</code> no elemento.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=32px">
+  <p class="try-task">Declare <code>--spacing: 0.5rem</code> no atributo <code>style</code> do bloco e
+  rode. O <code>p-4</code> continua escrito igual, mas o respiro deve dobrar, de 16 px para 32 px.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-50 p-4 text-amber-900"&gt;
+  &lt;p class="font-semibold"&gt;Promoção da feira&lt;/p&gt;
+  &lt;p class="text-sm"&gt;Pão de queijo a R$ 5 até as 10h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+color: oklch(0.414 0.112 45.904)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-amber-50 p-4 text-amber-900" style="--spacing: 0.5rem"&gt;
+  &lt;p class="font-semibold"&gt;Promoção da feira&lt;/p&gt;
+  &lt;p class="text-sm"&gt;Pão de queijo a R$ 5 até as 10h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel sai de <code>padding: 16px</code> e chega em <code>padding: 32px</code>, e a classe não mudou
+de nome. É a prova mais limpa de que a classe é só um apelido: por baixo, ela é uma conta que consulta
+uma variável na hora de aplicar.</p>
+
+<p>Esse poder pede uma advertência. Trocar <code>--spacing</code> na raiz muda o site inteiro de uma vez,
+e aí os tamanhos que você escolheu com cuidado — o respiro do cartão, o vão entre as colunas, a altura
+dos botões — perdem a referência que você tinha na cabeça. Um projeto que muda a régua global precisa
+rever todos os espaçamentos, e essa revisão é maior do que parece. A troca por bloco, como no exercício,
+é mais segura: fica óbvio no HTML de quem é aquele espaçamento, e o efeito não vaza para o resto.</p>
+
+<h2>6. @property: variável com tipo e valor de fábrica</h2>
+
+<p>Uma variável de CSS comum tem um comportamento que assusta: se ninguém declarou o nome, o
+<code>var()</code> não tem o que entregar e a propriedade é descartada em silêncio. O valor não vira zero,
+não vira preto, não vira nada — a declaração inteira some. Para o respiro, isso dá 0 px; para a cor,
+dá o valor herdado. O console fica limpo e o desenho fica torto.</p>
+
+<p>O CSS moderno resolve isso com <code>@property</code>: você descreve a variável antes de usá-la,
+dizendo qual é o tipo, se ela herda e qual é o valor inicial. Com isso, o navegador sabe o que fazer
+quando o nome aparece vazio, e passa a aceitar a variável em animações e transições, porque agora ela é
+um valor de verdade e não um texto solto.</p>
+
+<pre class="file" data-file="style.css">@property --respiro {
+  syntax: "&lt;length&gt;";
+  inherits: false;
+  initial-value: 24px;
+}</pre>
+
+<p>Três linhas e uma decisão cada. <code>syntax</code> é o tipo: <code>&lt;length&gt;</code> aceita
+comprimentos como <code>24px</code> ou <code>1.5rem</code>; um valor fora do tipo é recusado e o inicial
+entra no lugar. <code>inherits: false</code> diz que a variável não desce para os filhos — útil quando
+cada bloco deve ter o seu valor, sem pegar emprestado o do pai. E <code>initial-value</code> é o valor de
+fábrica: o que vale quando ninguém declarou nada.</p>
+
+<p>Na caixa abaixo, a classe usa <code>p-(--respiro)</code>, que vira
+<code>padding: var(--respiro)</code>. O bloco <code>@property</code> já está lá, com valor inicial
+<code>0px</code>, e é por isso que o cartão está sem respiro nenhum. Sua missão é dar um valor de fábrica
+de 24 px.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=24px">
+  <p class="try-task">Ninguém declara <code>--respiro</code> em lugar nenhum. Mude o
+  <code>initial-value</code> de <code>0px</code> para <code>24px</code> e rode: o cartão deve ganhar
+  24 px de respiro interno.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@property --respiro {
+  syntax: "&lt;length&gt;";
+  inherits: false;
+  initial-value: 0px;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="p-(--respiro) bg-amber-50 text-amber-900"&gt;
+  Pão quentinho, R$ 7
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.987 0.022 95.277)
+color: oklch(0.414 0.112 45.904)
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@property --respiro {
+  syntax: "&lt;length&gt;";
+  inherits: false;
+  initial-value: 24px;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="p-(--respiro) bg-amber-50 text-amber-900"&gt;
+  Pão quentinho, R$ 7
+&lt;/div&gt;</pre>
+</div>
+
+<p>Duas notas que só aparecem quando se testa de verdade. A primeira: escreva o valor inicial em
+<code>px</code>, não em <code>rem</code>. O navegador exige que o valor inicial não dependa de contexto, e
+<code>rem</code> depende do tamanho de fonte da raiz; na prática, <code>initial-value: 1.5rem</code> é
+recusado e o valor de fábrica não entra. Se você precisa de um valor relativo, calcule em pixel ou
+declare a variável explicitamente no elemento. A segunda: com <code>@property</code>, o painel passa a
+mostrar o respiro; sem ela, o mesmo HTML fica com 0 px e o painel não tem o que mostrar.</p>
+
+<h2>7. Variável dentro da classe: os parênteses</h2>
+
+<p>Até aqui, a variável veio pelo tema. E quando ela não tem classe nenhuma? O Tailwind atende com os
+parênteses: <code>p-(--respiro)</code>, <code>bg-(--cor-do-dia)</code>, <code>w-(--largura)</code>. A
+regra é geral: qualquer valor entre parênteses é um <code>var()</code> para o Tailwind. A forma longa,
+<code>p-[var(--respiro)]</code>, também funciona e faz exatamente a mesma coisa — os parênteses são o
+atalho.</p>
+
+<p>Existe um caso em que os parênteses sozinhos não bastam: quando a mesma classe aceita tipos diferentes.
+<code>text-(--tamanho)</code> tanto pode ser cor quanto tamanho de fonte, e o Tailwind não tem como
+adivinhar. A solução é dizer o tipo na frente, dentro dos parênteses, no formato
+<code>text-(length:--tamanho)</code>. É a única situação em que você escreve essa palavra extra.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você escreve</th><th>O Tailwind gera</th><th>Quando serve</th></tr>
+<tr><td><code>bg-(--cor-loja)</code></td><td><code>background-color: var(--cor-loja)</code></td><td>cor que vem de fora do tema</td></tr>
+<tr><td><code>p-(--respiro)</code></td><td><code>padding: var(--respiro)</code></td><td>respiro definido por bloco</td></tr>
+<tr><td><code>w-(--largura)</code></td><td><code>width: var(--largura)</code></td><td>largura calculada em outro lugar</td></tr>
+<tr><td><code>text-(length:--tamanho)</code></td><td><code>font-size: var(--tamanho)</code></td><td>tamanho de fonte, quando a classe é ambígua</td></tr>
+<tr><td><code>bg-(--cor-loja, #b4532a)</code></td><td><code>background-color: var(--cor-loja, #b4532a)</code></td><td>com reserva, se o nome faltar</td></tr>
+</table>
+</div>
+
+<p>Repare na última linha: o valor de reserva continua funcionando aqui, e é a defesa mais barata contra
+o silêncio de uma variável que não chegou. Você escreve o reserva uma vez e nunca mais precisa conferir
+se aquele bloco recebeu o tema.</p>
+
+<h2>8. Variável e JavaScript: a mesma ponte</h2>
+
+<p>Variável de CSS não é um recurso só de estilo: é o único lugar onde o desenho e o código compartilham
+um valor sem combinar strings. Três operações resolvem quase tudo, e valem a pena ficar na memória.</p>
+
+<p>Para ler o valor que está valendo em um elemento, use <code>getComputedStyle</code> e
+<code>getPropertyValue</code>. Para trocar, use <code>setProperty</code> — que é o que faz um botão de
+“trocar tema” funcionar. Para ler da raiz, pergunte ao <code>document.documentElement</code>:</p>
+
+<pre class="file" data-file="tema.js">const raiz = document.documentElement;
+const cor = getComputedStyle(raiz).getPropertyValue("--color-marca").trim();
+raiz.style.setProperty("--cor-loja", "#15803d");</pre>
+
+<p>A primeira linha guarda o <code>&lt;html&gt;</code>. A segunda pergunta ao navegador quanto vale
+<code>--color-marca</code> naquele momento — repare no <code>.trim()</code>, porque o valor volta com
+espaços sobrando. A terceira troca a variável, e tudo que aponta para ela se repinta no mesmo quadro, sem
+recarregar e sem recompilar.</p>
+
+<p>Onde isso é útil de verdade? Quando o valor precisa sair do CSS: desenhar um gráfico de vendas num
+canvas, montar um SVG cujas barras têm a cor da marca, gerar um PDF no navegador, ou sincronizar a cor de
+um mapa. Em todos esses casos, o JavaScript precisa do valor em texto, e a variável é a fonte da verdade.
+A alternativa seria repetir o hexadecimal em dois lugares, e aí um dia os dois discordam.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a filial que queria verde e ficou marrom</h3>
+<p>A Ana declarou <code>--cor-loja</code> no bloco da filial, e metade da página mudou, metade não. As
+partes que mudaram usavam <code>bg-(--cor-loja)</code>, que lê a variável no lugar do uso. As que não
+mudaram usavam <code>bg-marca</code>, que aponta para <code>--color-marca</code> resolvida na raiz. Duas
+soluções, escolha uma: trocar as classes para a forma com parênteses, ou declarar o par no
+<code>@theme inline</code>. A primeira deixa explícito de onde vem a cor; a segunda mantém os nomes
+bonitos. O que não dá é misturar as duas e esperar coerência.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a variável que sumiu no caminho</h3>
+<p>Ela escreveu <code>p-(--respiro)</code> e o cartão ficou sem respiro. Nenhum erro no console. Havia
+três suspeitos: a variável nunca foi declarada (o <code>var()</code> sem reserva é descartado); o nome
+estava escrito diferente no CSS e no HTML (variável diferencia maiúsculas e hífen); ou a declaração
+estava num irmão, e não num ancestral — variável desce pela árvore, não atravessa. O teste rápido é
+escrever <code>var(--respiro, red)</code> no lugar: se o vermelho aparece, o nome não chegou.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o tema que muda com o horário</h3>
+<p>Na feira, a Ana queria o site claro de manhã e escuro à noite, sem botão. Bastou uma linha de
+JavaScript trocando uma variável na raiz, e o resto do site acompanhou porque tudo apontava para ela. O
+trabalho de verdade não foi o JavaScript: foi garantir que nenhuma cor estivesse escrita em hexadecimal
+direto na classe, porque essa não acompanha nada. Variável é uma promessa que só vale se ninguém furar
+o caminho por fora.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual é a diferença entre declarar
+<code>--color-marca</code> no <code>@theme</code> e declará-la em <code>:root</code>?</p>
+<label><input type="radio" name="q1"> nenhuma: as duas formas criam <code>bg-marca</code></label>
+<label><input type="radio" name="q1"> o <code>@theme</code> cria a variável e as classes; o <code>:root</code> só cria a variável</label>
+<label><input type="radio" name="q1"> o <code>:root</code> vale só no tema escuro</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Você trocou <code>--cor-loja</code> num bloco e o
+<code>bg-marca</code> continuou com a cor antiga. Por quê?</p>
+<label><input type="radio" name="q2"> porque o navegador não aceita variáveis em <code>style</code></label>
+<label><input type="radio" name="q2"> porque faltou recompilar o CSS</label>
+<label><input type="radio" name="q2"> porque <code>--color-marca</code> foi resolvida na raiz; <code>@theme inline</code> faria a classe apontar para <code>--cor-loja</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que o <code>@property</code> acrescenta a uma
+variável?</p>
+<label><input type="radio" name="q3"> tipo, regra de herança e um valor inicial para quando ninguém declarar</label>
+<label><input type="radio" name="q3"> cria classes automáticas para a variável</label>
+<label><input type="radio" name="q3"> impede que a variável seja lida pelo JavaScript</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o verde da barraca</h2>
+<p>A cor da loja está em <code>--cor-loja</code> e o tema aponta para ela. Complete o bloco para que as
+classes do tema leiam o valor <em>no elemento que pinta</em>, e não na raiz:</p>
+<div class="ex-code">@theme <input aria-label="resposta 1" data-answer="inline" placeholder="..."> {
+  --color-marca: var(--cor-loja);
+}</div>
+<p class="ex-dica">Dica: é uma palavra só, escrita entre <code>@theme</code> e a chave de abertura. Sem
+ela, o navegador resolve <code>--cor-loja</code> na raiz e o valor desce já decidido.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O Tailwind publica o tema como variáveis de CSS de verdade: um bloco <code>@layer theme</code> com
+<code>:root, :host</code>, contendo só o que o projeto usa. As classes apontam para esses nomes, e é isso
+que permite trocar um valor em tempo de execução, sem recompilar e sem duplicar HTML. Declarar no
+<code>@theme</code> cria variável e classe; declarar em <code>:root</code> cria só a variável.</p>
+
+<p>A pegadinha é a variável que aponta para variável: sem <code>inline</code>, o valor é resolvido na
+raiz e a troca feita num bloco mais abaixo não chega. Com <code>@theme inline</code>, a classe aponta
+para a variável de origem e a troca pega. Para o seu próprio CSS, o <code>@property</code> dá tipo,
+herança e um valor inicial que o navegador usa quando ninguém declarou nada — e o valor inicial, esse,
+precisa ser absoluto, em pixel.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>O CSS final tem um <code>@layer theme</code> com <code>:root, :host</code> e as variáveis usadas.</li>
+<li><code>@theme</code> cria variável e classes; <code>:root</code> só cria a variável.</li>
+<li>Classe do Tailwind é apelido: por baixo ela chama <code>var(--nome)</code>.</li>
+<li>Variável que aponta para variável é resolvida onde foi declarada.</li>
+<li><code>@theme inline</code> faz a classe apontar para a variável de origem.</li>
+<li><code>--spacing</code> no elemento muda o respiro de todas as classes <code>p-</code> ali dentro.</li>
+<li><code>p-(--x)</code> é <code>padding: var(--x)</code>; <code>p-[var(--x)]</code> é o mesmo.</li>
+<li><code>text-(length:--x)</code> desempata quando a classe aceita tipos diferentes.</li>
+<li><code>@property</code> dá tipo, herança e <code>initial-value</code> — sempre em pixel.</li>
+<li><code>getPropertyValue</code> lê e <code>setProperty</code> grava; nada precisa recompilar.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

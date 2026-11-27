@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bordas e Sombras | Guia Tailwind</title>
+<meta name="description" content="Referência de bordas, raios e sombras no Tailwind v4: espessura, lados, estilos, a escala rounded, a escala shadow, anel, contorno, divisória e o que não funciona.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Bordas e <span class="hl">Sombras</span></h1>
+
+<p class="intro">O cartão da Ana estava tecnicamente pronto e visualmente sem graça. Faltava o
+acabamento: uma linha fina separando o cabeçalho, cantos arredondados na medida, uma sombra que
+sugerisse que aquele bloco está acima da página. É tudo a mesma família de classes — borda, raio,
+sombra, anel, contorno e divisória — e é onde os iniciantes mais exageram. Esta página é a consulta:
+quanto de cada coisa, qual valor o navegador aplica, como combinar sem empilhar três bordas no mesmo
+elemento e o que não funciona.</p>
+
+<h2>1. Quatro camadas de acabamento</h2>
+
+<p>Antes das escalas, vale separar as quatro coisas que costumam ser chamadas de "borda" na conversa.
+A <strong>borda</strong> ocupa espaço no layout e faz parte da caixa. O <strong>anel</strong>
+(<code>ring</code>) é uma sombra desenhada por fora, não ocupa espaço e não corta o conteúdo. O
+<strong>contorno</strong> (<code>outline</code>) é uma linha externa que também não ocupa espaço, e é
+o que o navegador usa no foco do teclado. A <strong>sombra</strong> é uma mancha desfocada que simula
+profundidade. Escolher a camada certa evita o efeito "três contornos" que aparece quando alguém
+combina as quatro sem perceber.</p>
+
+<p>A quinta peça é o <strong>raio</strong> (<code>rounded-*</code>): ele arredonda os cantos da caixa,
+e é o que mais muda a personalidade de um componente. Um cartão com 16 px de raio parece moderno e
+macio; o mesmo cartão com 2 px parece um sistema de 2010. Nada disso é gosto puro: raio grande combina
+com sombra suave, raio pequeno combina com borda dura. Misturar raio grande com borda de 2 px preta é
+o tipo de detalhe que faz a tela parecer montada por duas pessoas.</p>
+
+<dl class="anatomy">
+<dt>borda</dt>
+<dd>A linha da caixa. Precisa de três decisões: espessura (<code>border-2</code>), estilo
+(<code>border-dashed</code>) e cor (<code>border-amber-300</code>).</dd>
+<dt>raio</dt>
+<dd><code>rounded-lg</code> e afins. Aceita variação por canto: <code>rounded-t-lg</code>,
+<code>rounded-tl-md</code>.</dd>
+<dt>sombra</dt>
+<dd><code>shadow-md</code>. Cinco camadas empilhadas por variáveis, o que permite combinar com anel
+sem perder nenhuma.</dd>
+<dt>anel</dt>
+<dd><code>ring-2</code>. É uma <code>box-shadow</code> sólida por fora; o padrão da web para indicar
+foco sem mexer no layout.</dd>
+<dt>contorno</dt>
+<dd><code>outline</code>, <code>outline-2</code>, <code>outline-offset-2</code>. Não ocupa espaço e
+aceita deslocamento.</dd>
+<dt>divisória</dt>
+<dd><code>divide-y</code>. Borda entre filhos de um contêiner, sem precisar de classe em cada
+filho.</dd>
+</dl>
+
+<p>Um fato do Tailwind v4 que muda o comportamento de todo mundo que vem do v3: <strong>a cor padrão
+da borda é a cor do texto</strong> (<code>currentColor</code>), e não mais um cinza claro. Isso
+significa que <code>border</code> sozinho desenha uma linha preta em um texto escuro, o que assusta.
+É proposital: a borda acompanha a cor do conteúdo e some no tema escuro. Se você quer o cinza
+discreto, escreva <code>border border-slate-200</code> — e a página fica igual ao que você
+esperava.</p>
+
+<h2>2. Espessura e lados</h2>
+
+<p><code>border</code> sozinho já é a borda de 1 px nos quatro lados. Os números mudam a espessura, e
+as letras escolhem os lados. Todos os valores abaixo foram lidos no motor, e todos incluem o estilo
+<code>solid</code> automaticamente.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Propriedade gerada</th><th>Medida</th><th>Quando usar</th></tr>
+<tr><td><code>border</code></td><td><code>border-width</code></td><td>1 px nos quatro lados</td><td>borda padrão de cartão e campo</td></tr>
+<tr><td><code>border-0</code></td><td><code>border-width</code></td><td>0</td><td>tirar a borda de um componente</td></tr>
+<tr><td><code>border-2</code></td><td><code>border-width</code></td><td>2 px</td><td>destaque, item selecionado</td></tr>
+<tr><td><code>border-4</code></td><td><code>border-width</code></td><td>4 px</td><td>moldura de foto, cartão forte</td></tr>
+<tr><td><code>border-8</code></td><td><code>border-width</code></td><td>8 px</td><td>só como efeito gráfico</td></tr>
+<tr><td><code>border-x</code></td><td><code>border-inline-width</code></td><td>1 px à esquerda e à direita</td><td>coluna com separadores laterais</td></tr>
+<tr><td><code>border-x-2</code></td><td><code>border-inline-width</code></td><td>2 px nos lados</td><td>item de lista com destaque lateral</td></tr>
+<tr><td><code>border-y</code></td><td><code>border-block-width</code></td><td>1 px em cima e embaixo</td><td>linha de tabela, faixa</td></tr>
+<tr><td><code>border-t</code></td><td><code>border-top-width</code></td><td>1 px só no topo</td><td>separar o rodapé do cartão</td></tr>
+<tr><td><code>border-t-4</code></td><td><code>border-top-width</code></td><td>4 px só no topo</td><td>tarja colorida de status</td></tr>
+<tr><td><code>border-r</code></td><td><code>border-right-width</code></td><td>1 px à direita</td><td>divisória de coluna</td></tr>
+<tr><td><code>border-b</code></td><td><code>border-bottom-width</code></td><td>1 px embaixo</td><td>sublinhado de aba, cabeçalho de tabela</td></tr>
+<tr><td><code>border-l</code></td><td><code>border-left-width</code></td><td>1 px à esquerda</td><td>citação, aviso</td></tr>
+<tr><td><code>border-s-2</code></td><td><code>border-inline-start-width</code></td><td>2 px no começo da linha</td><td>igual a <code>border-l-2</code>, mas segue a direção</td></tr>
+<tr><td><code>border-e</code></td><td><code>border-inline-end-width</code></td><td>1 px no fim da linha</td><td>igual a <code>border-r</code></td></tr>
+</table>
+</div>
+
+<p>Repare que os atalhos <code>x</code> e <code>y</code> viram propriedades lógicas:
+<code>border-inline-width</code> e <code>border-block-width</code>. O efeito visual em português é o
+mesmo de esquerda/direita e cima/baixo, mas o CSS fica pronto para idiomas escritos da direita para a
+esquerda. Na prática, você usa <code>border-x</code> e não pensa mais nisso.</p>
+
+<p>A pergunta que sempre aparece: <code>border-l</code> ou <code>border-s</code>? Se o layout muda de
+direção — o que acontece quando o site é traduzido para árabe ou hebraico —, <code>border-s</code> é o
+certo, porque "começo da linha" continua sendo o começo. Se o layout é fixo em português, os dois dão
+o mesmo resultado e <code>border-l</code> é mais fácil de ler.</p>
+
+<p>Um detalhe de layout que pega muita gente: a borda ocupa espaço. O Tailwind aplica
+<code>box-sizing: border-box</code> em tudo, então a borda não aumenta a largura total do elemento —
+ela come o espaço do conteúdo. Em um cartão de 200 px com <code>border-4</code>, sobram 192 px para o
+conteúdo. Por isso borda grossa com padding pequeno deixa o texto colado: você precisa aumentar o
+padding junto.</p>
+
+<h2>3. Estilo e cor</h2>
+
+<p>O estilo é o que a borda parece: linha cheia, tracejada, pontilhada, dupla ou nenhuma. Só
+<code>solid</code> e <code>dashed</code> aparecem em projeto sério; <code>dotted</code> com 2 px vira
+uma fileira de pontinhos que ninguém consegue ver, e <code>double</code> precisa de pelo menos 3 px
+para mostrar as duas linhas.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor de border-style</th><th>Efeito</th><th>Observação</th></tr>
+<tr><td><code>border-solid</code></td><td><code>solid</code></td><td>linha cheia</td><td>é o padrão: raramente precisa escrever</td></tr>
+<tr><td><code>border-dashed</code></td><td><code>dashed</code></td><td>traço</td><td>área de envio de arquivo, cupom</td></tr>
+<tr><td><code>border-dotted</code></td><td><code>dotted</code></td><td>pontos</td><td>precisa de 2 px ou mais para aparecer</td></tr>
+<tr><td><code>border-double</code></td><td><code>double</code></td><td>duas linhas</td><td>precisa de 3 px ou mais</td></tr>
+<tr><td><code>border-none</code></td><td><code>none</code></td><td>sem linha</td><td>mais forte que <code>border-0</code></td></tr>
+<tr><td><code>border-amber-300</code></td><td><code>border-color</code></td><td>pinta a borda inteira</td><td>precisa de espessura junto</td></tr>
+<tr><td><code>border-t-red-500</code></td><td><code>border-top-color</code></td><td>pinta só um lado</td><td>funciona com qualquer lado</td></tr>
+<tr><td><code>border-current</code></td><td><code>border-color: currentColor</code></td><td>usa a cor do texto</td><td>é o padrão, mas explícito é mais claro</td></tr>
+</table>
+</div>
+
+<p>As cores de borda vêm todas da mesma <a href="ref-cores.html">paleta</a>: qualquer família e
+qualquer tom servem, e a lógica de claridade também vale aqui — borda escura separa com força, borda
+clara quase desaparece. A dupla <code>border</code> mais <code>border-{cor}</code> é a combinação mais
+comum do guia
+inteiro, e a ordem não importa. O que importa é nunca esquecer a espessura: sem
+<code>border</code>, <code>border-2</code> ou equivalente, a cor não tem onde aparecer e a tela não
+muda. Esse é o erro número um de quem está começando, e ele é silencioso — nenhum aviso, nenhum
+sublinhado vermelho no editor.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-width=2px;;rule:border-color: var(--color-amber-300)">
+  <p class="try-task">A borda do cartão está com 1 px e cinza. Deixe com 2 px e cor de âmbar claro,
+  mantendo o fundo e o respiro.</p>
+  <pre class="html">&lt;div id="alvo" class="border border-slate-200 bg-amber-50 p-4"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+border-width: 1px
+border-color: oklch(0.929 0.013 255.508)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="border-2 border-amber-300 bg-amber-50 p-4"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>Se você rodar a solução, o painel mostra <code>border-width: 2px</code> e o
+<code>border-color</code> em <code>oklch</code>. Repare que ele não mostra <code>border-style</code>:
+o estilo já era <code>solid</code> desde o começo, porque o Tailwind registra esse valor como padrão
+no navegador. É por isso que <code>border-2</code> sozinho já aparece como linha cheia, sem você
+precisar escrever <code>border-solid</code> em nenhum lugar.</p>
+
+<h2>4. Raio: a escala rounded</h2>
+
+<p>A escala de raio é curta e vai de 2 px a um valor praticamente infinito. Ela muda de nome na v4 em
+relação à v3 — o que era <code>rounded-sm</code> virou <code>rounded-xs</code>, e por aí vai. Se você
+copiar um componente antigo da internet, esse é o tipo de detalhe que faz o canto parecer errado por
+2 px.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor aplicado</th><th>Para que serve</th></tr>
+<tr><td><code>rounded-none</code></td><td>0</td><td>canto seco, estilo planilha</td></tr>
+<tr><td><code>rounded-xs</code></td><td>2 px</td><td>etiqueta discreta, campo compacto</td></tr>
+<tr><td><code>rounded-sm</code></td><td>4 px</td><td>botão pequeno, selo</td></tr>
+<tr><td><code>rounded</code></td><td>4 px</td><td>apelido antigo de <code>rounded-sm</code></td></tr>
+<tr><td><code>rounded-md</code></td><td>6 px</td><td>campo de formulário, botão</td></tr>
+<tr><td><code>rounded-lg</code></td><td>8 px</td><td>cartão, bloco de código</td></tr>
+<tr><td><code>rounded-xl</code></td><td>12 px</td><td>cartão moderno, caixa de diálogo</td></tr>
+<tr><td><code>rounded-2xl</code></td><td>16 px</td><td>cartão de destaque, imagem</td></tr>
+<tr><td><code>rounded-3xl</code></td><td>24 px</td><td>faixa de abertura, cartão grande</td></tr>
+<tr><td><code>rounded-4xl</code></td><td>32 px</td><td>estilo macio, quase pílula</td></tr>
+<tr><td><code>rounded-full</code></td><td>infinito</td><td>avatar, pílula, bolinha de status</td></tr>
+<tr><td><code>rounded-t-lg</code></td><td>8 px só no topo</td><td>aba, cabeçalho de painel</td></tr>
+<tr><td><code>rounded-b-lg</code></td><td>8 px só embaixo</td><td>rodapé de cartão</td></tr>
+<tr><td><code>rounded-s-lg</code></td><td>8 px no começo</td><td>item de lista, primeiro botão de um grupo</td></tr>
+<tr><td><code>rounded-tl-md</code></td><td>6 px no canto superior esquerdo</td><td>ajuste de um canto só</td></tr>
+<tr><td><code>rounded-[14px]</code></td><td>14 px</td><td>valor fora da escala</td></tr>
+</table>
+</div>
+
+<p><code>rounded-full</code> merece uma nota porque o valor assusta. O CSS gerado é
+<code>calc(infinity * 1px)</code>, e o navegador resolve para um número absurdo — é assim que se faz
+um raio maior que qualquer lado, transformando a caixa em pílula. Funciona em qualquer elemento: um
+avatar quadrado de 40 px vira círculo, uma etiqueta retangular vira cápsula. E <code>rounded</code>
+sem sufixo é um apelido mantido por compatibilidade: vale 4 px, o mesmo que
+<code>rounded-sm</code>.</p>
+
+<p>A combinação mais usada com raio não é de raio: é <code>overflow-hidden</code>. Uma imagem com
+<code>rounded-xl</code> só mostra os cantos arredondados se o raio estiver no elemento que corta — e
+uma imagem dentro de um <code>div</code> com raio continua quadrada, porque o raio do pai não corta o
+filho. Ponha <code>overflow-hidden</code> no pai (ou o raio na imagem) e o canto aparece. É a mesma
+família de problema que faz uma sombra desaparecer: o <code>overflow</code> do pai corta tudo que
+sai da caixa.</p>
+
+<h2>5. Sombras: a escala shadow</h2>
+
+<p>Sombra no Tailwind não é uma linha de CSS: é um conjunto de cinco variáveis empilhadas, o que
+permite sombra e anel conviverem no mesmo elemento sem uma sobrescrever a outra. A escala vai de
+quase nada a uma sombra de janela flutuante, e a diferença entre os degraus é menor do que parece —
+o que é bom, porque permite escolher por função.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Deslocamento e desfoque</th><th>Opacidade</th><th>Uso típico</th></tr>
+<tr><td><code>shadow-2xs</code></td><td>0 1px 0</td><td>5%</td><td>linha de separação discreta</td></tr>
+<tr><td><code>shadow-xs</code></td><td>0 1px 2px</td><td>5%</td><td>campo de formulário</td></tr>
+<tr><td><code>shadow-sm</code></td><td>0 1px 3px + 0 1px 2px</td><td>10%</td><td>cartão apoiado na página</td></tr>
+<tr><td><code>shadow</code></td><td>igual a <code>shadow-sm</code></td><td>10%</td><td>apelido do degrau anterior</td></tr>
+<tr><td><code>shadow-md</code></td><td>0 4px 6px + 0 2px 4px</td><td>10%</td><td>cartão em destaque, menu</td></tr>
+<tr><td><code>shadow-lg</code></td><td>0 10px 15px + 0 4px 6px</td><td>10%</td><td>menu flutuante, cartão elevado</td></tr>
+<tr><td><code>shadow-xl</code></td><td>0 20px 25px + 0 8px 10px</td><td>10%</td><td>caixa de diálogo</td></tr>
+<tr><td><code>shadow-2xl</code></td><td>0 25px 50px</td><td>25%</td><td>modal, elemento muito acima</td></tr>
+<tr><td><code>shadow-inner</code></td><td>inset 0 2px 4px</td><td>5%</td><td>campo afundado, área de texto</td></tr>
+<tr><td><code>shadow-none</code></td><td>tudo zerado</td><td>—</td><td>desfazer sombra herdada</td></tr>
+</table>
+</div>
+
+<p>O CSS de uma sombra explica por que ela se combina com anel. São duas camadas de variáveis
+independentes, e o <code>box-shadow</code> final soma todas:</p>
+
+<pre class="term">.shadow-lg {
+  --tw-shadow: 0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 4px 6px -4px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}</pre>
+
+<p>A leitura é direta: <code>--tw-shadow</code> guarda a sombra que você pediu; as outras quatro
+variáveis guardam sombras internas e anéis. Como o <code>box-shadow</code> final sempre repete as
+cinco, colocar um anel de foco em um cartão que já tem sombra não apaga a sombra. Na v3 isso era
+motivo de briga constante; na v4 funciona.</p>
+
+<p>A cor da sombra é uma classe separada, e ela só funciona junto com uma sombra. O padrão é preto a
+10%, e isso combina com quase tudo. Em fundo escuro, uma sombra preta é invisível: você precisa de
+<code>shadow-black/40</code> mais forte, ou de uma borda clara para separar o cartão do fundo. É um
+dos ajustes que mais muda a percepção de qualidade no tema escuro.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-radius=16px;;rule:--tw-shadow: 0 10px 15px -3px">
+  <p class="try-task">O cartão está com canto discreto e sombra fraca. Deixe o canto de 16 px e a
+  sombra grande, subindo dois degraus em cada escala.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-sm shadow-sm bg-white p-4"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+border-radius: 4px
+box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-2xl shadow-lg bg-white p-4"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>No painel, a sombra aparece como uma sequência longa de valores separados por vírgula, a maioria
+deles transparente. Não é bug: é a pilha de camadas. O que interessa são os últimos valores, que
+formam a sua sombra deslocada e desfocada. E note que <code>rounded-2xl</code> mostra <code>16px</code> — o raio é
+convertido de <code>rem</code> para pixel na hora de reportar, e essa é a única pista visual de que a
+conta foi feita.</p>
+
+<h2>6. Anel, contorno e divisória</h2>
+
+<p>Três formas de desenhar linha que não são borda. Escolher a certa resolve o problema clássico de
+foco em formulário, em que a borda muda de espessura e o layout inteiro pula um pixel.</p>
+
+<p>O <strong>anel</strong> é uma <code>box-shadow</code> sólida. Não ocupa espaço, então
+<code>ring-2</code> aparece sem empurrar nada. O padrão na v4 é 1 px de espessura e a cor do texto
+(<code>currentColor</code>), diferente da v3, em que era azul. O CSS mostra a conta:</p>
+
+<pre class="term">.ring-2 {
+  --tw-ring-shadow: var(--tw-ring-inset, ) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}</pre>
+
+<p><code>ring-inset</code> desenha o anel por dentro, o que evita que ele seja cortado por um pai com
+<code>overflow-hidden</code>. <code>ring-offset-2</code> cria um respiro entre a caixa e o anel, e
+precisa de uma cor de fundo coerente (<code>ring-offset-white</code> no claro) para não virar uma
+moldura cinza. Em formulário, o padrão moderno é
+<code>focus-visible:ring-2 focus-visible:ring-amber-500</code> — o anel só aparece quando o foco vem
+do teclado, e não a cada clique.</p>
+
+<p>O <strong>contorno</strong> é a linha que o navegador desenha no foco, e o Tailwind permite
+controlá-la em vez de removê-la. <code>outline-2</code> define 2 px,
+<code>outline-offset-2</code> afasta a linha da borda e <code>outline-amber-500</code> pinta. A
+vantagem sobre o anel é que o contorno acompanha o raio do canto em navegadores modernos e não
+interage com as variáveis de sombra — a desvantagem é que nem todo navegador antigo respeita o
+deslocamento. Nunca escreva <code>outline-none</code> sem colocar outra indicação de foco no lugar:
+quem navega por teclado perde a referência de onde está.</p>
+
+<p>A <strong>divisória</strong> é a solução para listas. <code>divide-y</code> desenha uma linha entre
+os filhos, sem precisar de <code>border-b</code> em cada um e sem deixar uma linha sobrando no último.
+O seletor por baixo é <code>&gt; :not(:last-child)</code>, então ela só pega filhos diretos.</p>
+
+<p>Uma consequência curiosa: o painel de uma caixa com <code>divide-y</code> não mostra borda nenhuma
+no contêiner, porque a linha vai para os filhos. Se você ver "nada mudou" em uma caixa assim, não é
+erro — é o comportamento correto. E se um dos filhos estiver envolvido por um <code>div</code>, a
+divisória pula ele, do mesmo jeito que acontece com <code>space-y</code>.</p>
+
+<h2>7. Combinações que funcionam</h2>
+
+<p>Acabamento é combinação, e há um punhado de receitas que sobrevivem a qualquer projeto. Elas
+existem porque resolvem a mesma pergunta: como separar este bloco do fundo sem exagerar.</p>
+
+<ul>
+<li><strong>Cartão discreto:</strong> <code>rounded-xl border border-slate-200 bg-white p-4</code> —
+borda em vez de sombra, o que deixa a página plana e elegante.</li>
+<li><strong>Cartão elevado:</strong> <code>rounded-xl bg-white p-4 shadow-md</code> — sem borda, a
+sombra faz a separação. Nunca os dois juntos com valores fortes.</li>
+<li><strong>Campo de formulário:</strong> <code>rounded-md border border-slate-300 px-3 py-2</code>,
+com <code>focus:border-amber-500 focus:ring-2 focus:ring-amber-200</code>.</li>
+<li><strong>Botão:</strong> <code>rounded-lg bg-amber-600 px-4 py-2 text-white shadow-sm</code>, e
+<code>hover:shadow-md</code> para dar a sensação de que ele sobe.</li>
+<li><strong>Etiqueta:</strong> <code>rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-900</code>
+— pílula, sem borda.</li>
+<li><strong>Área de envio de arquivo:</strong>
+<code>rounded-xl border-2 border-dashed border-slate-300 p-8 text-center</code>.</li>
+<li><strong>Item selecionado:</strong> <code>rounded-lg border-2 border-amber-500 bg-amber-50</code> —
+a borda grossa substitui a sombra.</li>
+<li><strong>Faixa de status:</strong> <code>border-t-4 border-amber-500 bg-amber-50 p-4</code> — tarja
+no topo, resto neutro.</li>
+</ul>
+
+<p>Uma regra de composição que evita 90% dos exageros: <strong>escolha uma camada de separação</strong>.
+Ou borda, ou sombra, ou fundo diferente. Usar as três ao mesmo tempo — borda cinza, sombra média e
+fundo levemente colorido — cria aquele visual de "cartão dentro de cartão" que ninguém consegue
+apontar o que está errado. A Ana chegou lá depois de três tentativas, e a versão final tinha só borda
+e fundo.</p>
+
+<p>Outra regra: o arredondamento e a sombra precisam rimar. Raio de 12 a 16 px pede sombra média e
+difusa; raio de 4 px pede sombra curta ou nenhuma. Uma caixa de canto seco com sombra esfumaçada
+parece um retângulo recortado; uma pílula com sombra dura parece um adesivo.</p>
+
+<h2>8. O que não funciona</h2>
+
+<p>Testado no motor, como o resto da página. As falhas aqui são quase sempre "a classe existe, mas
+falta a companheira".</p>
+
+<ul>
+<li><strong><code>border-amber-300</code> sem espessura.</strong> A cor é aplicada, mas não há linha
+para pintar. Sempre <code>border</code> ou <code>border-2</code> junto.</li>
+<li><strong><code>shadow-amber-500/40</code> sem sombra.</strong> A classe só define a cor; sem
+<code>shadow-lg</code> ou equivalente, não existe sombra para colorir.</li>
+<li><strong><code>divide-amber-300</code> sem <code>divide-y</code>.</strong> Mesma lógica: é a cor de
+uma linha que ainda não foi criada.</li>
+<li><strong><code>ring-2</code> achando que é borda.</strong> O anel é sombra: não ocupa espaço, não
+corta conteúdo e é cortado por <code>overflow-hidden</code> do pai.</li>
+<li><strong>Sombra dentro de <code>overflow-hidden</code>.</strong> A sombra é desenhada fora da caixa
+e o pai corta. Se o cartão precisa de sombra, o corte tem de ficar no filho.</li>
+<li><strong><code>rounded-xl</code> no pai e imagem quadrada dentro.</strong> O raio não atravessa o
+filho; use <code>overflow-hidden</code> no pai ou o raio na imagem.</li>
+<li><strong><code>border-8</code> com <code>p-2</code>.</strong> A borda come o espaço do conteúdo e o
+texto encosta na linha. Borda grossa pede padding maior.</li>
+<li><strong><code>border-dotted</code> com 1 px.</strong> O pontilhado fica invisível ou vira uma linha
+contínua; use 2 px ou mais.</li>
+<li><strong><code>outline-none</code> sem alternativa de foco.</strong> Remove a única pista de
+navegação por teclado. Troque por <code>ring-2</code>, não por nada.</li>
+<li><strong><code>rounded-full</code> em um elemento muito largo.</strong> Em uma faixa de 900 px, o
+raio infinito vira uma elipse achatada e estranha; pílula funciona até umas três vezes a altura.</li>
+</ul>
+
+<p>Duas confusões de nome: <code>border-radius-xl</code> não existe (é <code>rounded-xl</code>) e
+<code>shadow-lg</code> não aceita cor no mesmo nome — a cor é uma classe separada. E cuidado com a
+v4: <code>rounded-sm</code> e <code>rounded-xs</code> trocaram de tamanho em relação à v3, então um
+componente copiado de tutorial antigo pode ficar 2 px diferente do que você espera.</p>
+
+<h2>9. Resumo</h2>
+
+<p>Borda é <code>border-*</code> e precisa de três decisões: espessura, estilo e cor. Sem espessura,
+a cor não aparece; sem cor, a borda usa a cor do texto — que é o padrão da v4 e pega muita gente.
+Os lados se escolhem com <code>x</code>, <code>y</code>, <code>t</code>, <code>r</code>,
+<code>b</code>, <code>l</code> ou com as versões lógicas <code>s</code> e <code>e</code>. A borda
+ocupa espaço: borda grossa pede padding maior.</p>
+
+<p>Raio é <code>rounded-*</code>, de 2 px (<code>xs</code>) a 32 px (<code>4xl</code>), com
+<code>full</code> para pílula e avatar. Existe versão por canto e por lado. Para o raio aparecer em
+imagem ou filho, o pai precisa de <code>overflow-hidden</code> — e esse mesmo corte é o que apaga
+sombras.</p>
+
+<p>Sombra é <code>shadow-*</code>, de <code>2xs</code> a <code>2xl</code> mais <code>inner</code>, e
+é montada em cinco camadas de variáveis, o que permite combinar com anel sem perder nada. A cor é uma
+classe separada (<code>shadow-black/40</code>) e só vale junto com uma sombra. Anel e contorno são as
+linhas que não ocupam espaço: <code>ring</code> para foco e destaque, <code>outline</code> para o
+contorno nativo. Divisória é <code>divide-y</code>, entre filhos diretos.</p>
+
+<p>E a regra que resume tudo: escolha <em>uma</em> camada de separação por componente. Borda, sombra
+ou fundo — não as três. O acabamento bom é o que ninguém nota, e o acabamento ruim é o que faz a
+página parecer montada por três pessoas.</p>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

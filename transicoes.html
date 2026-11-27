@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transições | Guia Tailwind</title>
+<meta name="description" content="As transições do Tailwind na padaria da Ana: o que a classe transition liga, por que a cor salta sem ela e como escolher entre transition-colors, opacity e transform.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>As <span class="hl">Transições</span></h1>
+<p class="intro">O botão “Encomendar pão” da Ana já escurece quando o mouse chega — o
+<a href="hover.html">hover</a> está lá, funcionando. O problema é <em>como</em> ele escurece: a cor troca
+de um quadro para o outro, como se alguém tivesse apagado e acendido a luz. A filha dela descreveu
+assim: “mãe, parece que a tela piscou”. Nesta aula a Ana descobre que falta uma coisa só, e que essa
+coisa é uma classe chamada <code>transition</code>: ela não escolhe a cor nem o tempo de nada, só pede
+ao navegador que faça a troca devagar em vez de num salto. Depois de entender isso, tudo o que ela já
+sabe de hover, foco e cor passa a parecer feito por um profissional.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é uma transição e por que, sem ela, toda mudança de CSS é um salto.</li>
+  <li>O que a classe <code>transition</code> liga — e o que ela não é.</li>
+  <li>Como ler o CSS gerado, com as três propriedades que toda transição usa.</li>
+  <li>Por que o painel da caixa mostra a transição mesmo com o mouse longe.</li>
+  <li>A família de classes: <code>transition-colors</code>, <code>transition-shadow</code>,
+  <code>transition-transform</code> e a genérica.</li>
+  <li>Por que <code>transition-all</code> é tentador e costuma cobrar caro.</li>
+  <li>Quais propriedades valem animar e quais fazem a página engasgar.</li>
+  <li>Como respeitar quem pediu menos movimento no sistema (<code>motion-reduce:</code>).</li>
+</ul>
+</div>
+
+<h2>1. A cena: o botão que pisca</h2>
+
+<p>Vamos começar pelo que a Ana viu. O botão dela tem duas cores: âmbar 500 no repouso e âmbar 600 no
+hover. Quando o ponteiro encosta, o navegador recalcula o CSS do botão e aplica a regra do hover. Essa
+troca acontece <strong>entre dois quadros</strong> — os desenhos que a tela mostra, um atrás do outro. O
+olho humano não vê “meio âmbar 550”: vê a cor de antes e, dezesseis milésimos de segundo depois, a cor
+de depois.</p>
+
+<p>Na prática, o efeito é o mesmo de acender e apagar a luz. Funciona, avisa que o botão é clicável, mas
+fica seco. É por isso que a Ana estranhou: todo site grande que ela admira parece ter botões “macios”.
+Não é mágica, não é um plugin, não é JavaScript. É uma linha de CSS que diz ao navegador: “em vez de
+trocar o valor de uma vez, faça a troca aos poucos, durante tanto tempo”. Essa linha tem nome:
+transição.</p>
+
+<p>E tem um detalhe que vale ouro para quem está começando, porque explica metade das dúvidas desta
+aula: a transição <strong>não sabe para onde o valor vai</strong>. Ela não define a cor do hover nem o
+tamanho do botão. Ela só diz “se este valor mudar, chegue ao novo valor devagar”. Quem decide o destino
+continua sendo a classe de hover, a classe de foco, ou o JavaScript que troca uma classe. A transição é
+o mensageiro, não a mensagem.</p>
+
+<p>Guarde essa divisão de papéis, porque ela resolve o susto mais comum de todos: se você escrever só
+<code>transition</code>, sem nenhuma classe de hover, <strong>nada vai acontecer</strong>. Não há valor
+novo para onde ir. É como contratar um motorista e não dizer o endereço.</p>
+
+<h2>2. O que é, exatamente, uma transição</h2>
+
+<p>Quando o navegador aplica CSS, ele chega a um valor final e desenha. Uma transição é um intervalo
+entre o valor antigo e o valor novo: o navegador calcula valores intermediários, um para cada quadro, e
+os desenha em sequência. Se o fundo vai de âmbar 500 a âmbar 600 em 150 milissegundos, ele desenha
+umas nove cores diferentes nesse caminho, uma por quadro. O cérebro junta tudo e chama
+de “suave”.</p>
+
+<p>Para essa conta existir, o navegador precisa de quatro informações. Quais propriedades devem ir
+devagar; quanto tempo a viagem dura; com que curva ela acelera e freia; e, se for o caso, quanto tempo
+esperar antes de começar. São exatamente as quatro propriedades do CSS que você vai ver no painel:</p>
+
+<dl class="anatomy">
+<dt>transition-property</dt>
+<dd>A lista do que deve ir devagar: cor de fundo, cor da letra, sombra, opacidade, transformação. O que
+não estiver nessa lista troca de uma vez.</dd>
+<dt>transition-duration</dt>
+<dd>O tempo da viagem, em segundos ou milissegundos. O padrão do Tailwind é 150 milésimos de segundo —
+rápido o bastante para não atrasar, lento o bastante para o olho ver.</dd>
+<dt>transition-timing-function</dt>
+<dd>A curva: a viagem pode ser em velocidade constante ou começar devagar e acelerar. O padrão é
+<code>cubic-bezier(0.4, 0, 0.2, 1)</code>, uma curva que sai rápido e chega freando.</dd>
+<dt>transition-delay</dt>
+<dd>Uma espera antes de começar. Zero por padrão.</dd>
+<dt>transição</dt>
+<dd>O nome que se dá ao conjunto: o navegador indo de um valor a outro aos poucos, em vez de num
+salto.</dd>
+</dl>
+
+<p>Não é preciso decorar esses nomes agora. Eles aparecem porque <strong>a caixa desta aula os
+mostra</strong>, e a gente aprende a ler o que a ferramenta responde. O nome que importa nesta página é
+um só: <code>transition</code>, a classe que preenche as quatro informações de uma vez.</p>
+
+<p>Um aviso que poupa frustração: a transição só começa quando um valor <em>muda</em> depois que o
+elemento já está na tela. Ela não roda no carregamento da página. Se você quer que um cartão apareça
+deslizando, isso é animação, não transição — e tem uma aula própria mais adiante, a de
+<a href="animacoes-prontas.html">animações prontas</a>.</p>
+
+<h2>3. A classe transition</h2>
+
+<p>Antes de escrever, o retrato do problema. O botão da Ana está assim:</p>
+
+<pre class="file" data-file="index.html">&lt;button class="rounded-lg bg-amber-500 p-3 text-white hover:bg-amber-600"&gt;Encomendar pão&lt;/button&gt;</pre>
+
+<p>Funciona. Só não é macio. A correção é uma palavra no fim da lista de classes — e o lugar dela não
+importa, porque cada classe cuida da sua propriedade: <code>transition</code> só mexe no jeito de
+trocar valores. Ela não pinta, não espaça, não arredonda.</p>
+
+<div class="trytailwind" data-goal="rule:transition-property: color, background-color;;rule:transition-duration: var(--tw-duration, var(--default-transition-duration))">
+  <p class="try-task">O botão escurece de repente quando o mouse chega. Ligue a transição no próprio
+  botão: acrescente a classe <code>transition</code> e clique em Rodar.</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-lg bg-amber-500 p-3 text-white hover:bg-amber-600"&gt;Encomendar pão&lt;/button&gt;</pre>
+  <pre class="out">
+padding: 12px
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-amber-500 p-3 text-white hover:bg-amber-600 transition"&gt;Encomendar pão&lt;/button&gt;</pre>
+</div>
+
+<p>O painel desta caixa tem uma novidade em relação às aulas anteriores: ele mostra
+<code>transition-property</code>, <code>transition-timing-function</code> e
+<code>transition-duration</code>. Isso não é bug nem sorte. Diferente do <code>hover:</code>, que só vale
+enquanto o mouse está em cima, a classe <code>transition</code> vale <strong>no repouso</strong>: ela é
+uma instrução permanente, esperando qualquer mudança. O painel mede o repouso, então ele vê a
+instrução.</p>
+
+<p>Passe o mouse na prévia depois de rodar. A cor agora caminha. Tire o mouse: ela volta caminhando
+também, sem você escrever nada. Esse é o primeiro encanto das transições — <strong>a volta é
+grátis</strong>, porque a mesma regra vale para os dois sentidos. Você não programa a ida e a volta; você
+programa o intervalo.</p>
+
+<h2>4. O CSS que o Tailwind gera</h2>
+
+<p>Vale olhar a saída de verdade, porque ela é mais longa do que se espera e explica muita coisa:</p>
+
+<pre class="term">.transition {
+  transition-property: color, background-color, border-color, outline-color,
+    text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via,
+    --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate,
+    filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility,
+    overlay, pointer-events;
+  transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+  transition-duration: var(--tw-duration, var(--default-transition-duration));
+}</pre>
+
+<p>A primeira linha é a lista das propriedades que vão devagar. Ela é grande de propósito: inclui
+cores, sombra, opacidade e toda a família de transformações (<code>translate</code>,
+<code>scale</code>, <code>rotate</code>). Ou seja, a classe <code>transition</code> é uma escolha
+generosa — quase tudo que você já sabe usar vai animar.</p>
+
+<p>As duas linhas seguintes são as mais interessantes para quem quer entender o padrão do Tailwind v4.
+Em vez de escrever <code>150ms</code> na mão, ele escreve uma variável com valor de reserva:
+<code>var(--tw-duration, var(--default-transition-duration))</code>. Traduzindo: “use a duração que
+alguém definiu nesta página; se ninguém definiu, use a padrão”. É assim que a próxima aula consegue
+mudar o tempo com uma classe só — <code>duration-300</code> define <code>--tw-duration</code>, e a
+transição já estava pronta para obedecer.</p>
+
+<p>Passe o olho no <code>display</code>, que está na lista. Ele está ali para casos especiais: trocar
+<code>block</code> por <code>none</code> não vira um desaparecimento suave, porque o navegador não sabe
+desenhar “meio escondido”. O que anima bem é opacidade, cor, sombra e transformação. Guarde essa pista:
+se a sua transição parece não pegar em alguma propriedade, provavelmente é uma propriedade que o
+navegador não sabe interpolar, e não um erro de digitação.</p>
+
+<p>Um detalhe de leitura: repare que o CSS não fala em <code>:hover</code> em lugar nenhum. A regra do
+hover continua sendo gerada separadamente, dentro de <code>@media (hover: hover)</code>, como você viu na
+<a href="hover.html">aula do hover</a>. A transição não sabe que existe um estado — ela só percebe que um
+valor mudou. É essa separação que faz o mesmo <code>transition</code> servir para hover, foco, botão
+apertado e tema escuro ao mesmo tempo.</p>
+
+<h2>5. Escolher o alvo: transition-colors e as irmãs</h2>
+
+<p>A classe <code>transition</code> anima muita coisa. Quando o único efeito do elemento é uma troca de
+cor, animar dezenove propriedades é como acender a casa toda para ler um livro. O Tailwind tem versões
+enxutas, cada uma com uma lista curta:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que vai devagar</th><th>Onde costuma servir</th></tr>
+<tr><td><code>transition</code></td><td>a lista generosa: cores, sombra, opacidade, transformações</td><td>cartão e botão com vários efeitos</td></tr>
+<tr><td><code>transition-colors</code></td><td>só as cores (fundo, letra, borda, sublinhado)</td><td>link, botão de uma cor só, item de menu</td></tr>
+<tr><td><code>transition-opacity</code></td><td>só a transparência</td><td>aparecer e sumir com <code>opacity</code></td></tr>
+<tr><td><code>transition-shadow</code></td><td>só a sombra</td><td>cartão que “levanta”</td></tr>
+<tr><td><code>transition-transform</code></td><td>só as transformações (<code>scale</code>, <code>rotate</code>, <code>translate</code>)</td><td>foto que cresce, selo que gira</td></tr>
+<tr><td><code>transition-all</code></td><td>absolutamente tudo</td><td>quase nunca — veja a seção 6</td></tr>
+<tr><td><code>transition-none</code></td><td>nada: desliga qualquer transição</td><td>caso pontual e acessibilidade</td></tr>
+</table>
+</div>
+
+<p>O CSS gerado mostra a diferença em duas linhas de leitura. Esta é a saída real do compilador para
+<code>transition-colors</code>, ao lado da classe que desliga tudo:</p>
+
+<pre class="term">.transition-colors {
+  transition-property: color, background-color, border-color, outline-color,
+    text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via,
+    --tw-gradient-to;
+  transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+  transition-duration: var(--tw-duration, var(--default-transition-duration));
+}
+.transition-none {
+  transition-property: none;
+}</pre>
+
+<p>A lista parou em <code>--tw-gradient-to</code>: nada de <code>opacity</code>, nada de
+<code>box-shadow</code>, nada de <code>translate</code>. Se um dia o cartão ganhar uma sombra animada, a
+transição de cor não vai cuidar dela — e é bom que não cuide, porque aí você escolhe conscientemente
+acrescentar <code>transition-shadow</code> ou trocar pela classe genérica. Já
+<code>transition-none</code> é o interruptor: ele não anima nada e serve para calar uma transição que
+veio de outra classe, inclusive das variantes como <code>motion-reduce:</code> que você vai ver na seção
+8.</p>
+
+<p>Diferença prática entre <code>transition</code> e <code>transition-colors</code>? Pequena no desenho e
+grande na conta: com a lista curta, o navegador só observa quatro ou cinco propriedades em vez de
+dezenove. Num cartão só, ninguém percebe. Numa lista de cinquenta produtos em que cada item tem hover, a
+diferença aparece no celular de quem visita. Escolher a lista certa é o tipo de detalhe que separa
+“funciona” de “funciona bem”.</p>
+
+<div class="trytailwind" data-goal="rule:transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;">
+  <p class="try-task">Este cartão só muda de cor no mouse. Troque a <code>transition</code> genérica por
+  <code>transition-colors</code>, para animar somente as cores.</p>
+  <pre class="html">&lt;a id="alvo" class="block rounded-xl border border-stone-200 p-4 transition hover:border-amber-300 hover:bg-amber-50" href="#"&gt;
+  &lt;span class="font-semibold"&gt;Pão de fermentação natural&lt;/span&gt;
+  &lt;span class="block text-sm text-stone-600"&gt;Pronto às 7h. Reserve o seu.&lt;/span&gt;
+&lt;/a&gt;</pre>
+  <pre class="out">
+display: block
+padding: 16px
+border-radius: 12px
+border-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events
+transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1)
+transition-duration: 0.15s
+</pre>
+  <pre class="solucao">&lt;a id="alvo" class="block rounded-xl border border-stone-200 p-4 transition-colors hover:border-amber-300 hover:bg-amber-50" href="#"&gt;
+  &lt;span class="font-semibold"&gt;Pão de fermentação natural&lt;/span&gt;
+  &lt;span class="block text-sm text-stone-600"&gt;Pronto às 7h. Reserve o seu.&lt;/span&gt;
+&lt;/a&gt;</pre>
+</div>
+
+<p>Aqui o painel continua mostrando só a lista de propriedades da transição: ele não tem como mostrar a
+cor do hover, porque a medição é feita com o mouse longe. O que muda de fato está no tamanho da lista — e
+a meta desta caixa confere exatamente isso, procurando a lista completa do <code>transition-colors</code>
+no CSS gerado. Compare com a saída da caixa anterior: a lista termina em
+<code>--tw-gradient-to</code> e para ali.</p>
+
+<p>Uma armadilha de leitura antes de seguir: as classes <em>não se somam</em> quando disputam a mesma
+propriedade. Se você escrever <code>transition-colors</code> e <code>transition</code> no mesmo elemento,
+não existe uma transição “mais completa”: vale a última regra que o Tailwind colocou no CSS, e você não
+controla qual é. Regra prática: <strong>uma classe de transição por elemento</strong>.</p>
+
+<h2>6. transition-all: o atalho que cobra caro</h2>
+
+<p>Existe <code>transition-all</code>, e ele é generoso ao extremo: anima toda propriedade que mudar,
+inclusive as que você nem sabia que estavam mudando. Parece a escolha mais segura. É a mais arriscada.</p>
+
+<p>O problema é que <code>all</code> inclui largura, altura, margem e espaçamento. Se qualquer coisa
+mexer no tamanho do elemento — uma imagem que carrega e o layout se ajusta, uma barra de rolagem que
+aparece, uma fonte que termina de carregar — o navegador tenta animar essa mudança também. O resultado é
+um tremelique que ninguém consegue apontar de onde vem. Pior: cada uma dessas propriedades obriga o
+navegador a recalcular a posição de tudo na página, quadro após quadro. É o cenário em que a transição
+deixa de ser enfeite e passa a ser lentidão.</p>
+
+<p>Há ainda o efeito colateral visual: com <code>transition-all</code>, um ajuste de layout que deveria
+ser instantâneo (o texto de baixo subir porque a imagem encolheu) passa a acontecer em 150 ms, e o
+visitante vê a página “escorregando” sem motivo. Quando a Ana caiu nessa, o sintoma era curioso: o
+cabeçalho inteiro deslizava de dois em dois segundos, sem ninguém tocar no mouse. A causa eram duas
+fontes que carregavam em momentos diferentes, cada uma mudando a altura da linha.</p>
+
+<p>O jeito de escapar disso é o mesmo de sempre no Tailwind: escolha a lista. Se o efeito é cor, use
+<code>transition-colors</code>. Se é sombra, <code>transition-shadow</code>. Se é crescer ou girar, use
+<code>transition-transform</code>. Se o cartão mistura cor e sombra, a classe <code>transition</code>
+genérica já resolve — ela cobre as duas e deixa largura e margem de fora. <code>transition-all</code>
+fica reservado para o caso raro em que você realmente quer tudo, e sabe dizer por quê.</p>
+
+<h2>7. O que vale animar (e o que faz a página engasgar)</h2>
+
+<p>Esta é a parte que separa quem usa transição de quem entende transição. O navegador desenha a página
+em etapas: primeiro calcula o tamanho e a posição de cada caixa (o <em>layout</em>), depois pinta as
+cores, depois junta as camadas. Animar uma propriedade que mexe no layout obriga o navegador a refazer as
+três etapas em cada quadro. Animar cor ou transformação mexe só na última.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Grupo</th><th>Exemplos</th><th>Custo por quadro</th></tr>
+<tr><td>Transformação e opacidade</td><td><code>scale-105</code>, <code>-translate-y-1</code>, <code>rotate-3</code>, <code>opacity-90</code></td><td>baixo: o navegador só redesenha a camada</td></tr>
+<tr><td>Cores e sombra</td><td><code>bg-amber-600</code>, <code>text-amber-900</code>, <code>shadow-lg</code></td><td>médio: pinta de novo, sem refazer o layout</td></tr>
+<tr><td>Tamanho e espaço</td><td><code>w-64</code>, <code>h-40</code>, <code>p-6</code>, <code>m-4</code>, <code>gap-8</code></td><td>alto: refaz o layout inteiro, quadro após quadro</td></tr>
+</table>
+</div>
+
+<p>Não é uma proibição, é uma hierarquia. Animar a largura de uma barra de progresso de 0 a 100% uma vez,
+quando a página carrega, é aceitável. Animar o <code>p-4</code> de um cartão no hover não é: além do
+custo, o cartão cresce, empurra o vizinho, o mouse escorrega, o cartão encolhe e a tela treme. Se a
+vontade é “dar a sensação de que o cartão levantou”, o caminho é sombra ou
+<code>hover:-translate-y-1</code>, que desenham por cima do espaço reservado sem mexer em nada em
+volta.</p>
+
+<p>Existe um teste simples para saber em que grupo você está: pergunte “se este elemento mudar de tamanho,
+o resto da página se mexe?”. Se a resposta for sim, você está no grupo caro. Se for não, provavelmente
+está animando transformação, cor ou opacidade — e pode ir tranquilo.</p>
+
+<h2>8. Quem pediu menos movimento</h2>
+
+<p>Tem gente que sente enjoo com movimento na tela. Não é frescura: é uma condição real, e o sistema
+operacional permite pedir aos sites que reduzam animações. Esse pedido chega ao navegador como uma
+preferência chamada <code>prefers-reduced-motion</code>, e o CSS consegue perguntar por ela. O Tailwind
+expõe a pergunta como um prefixo: <code>motion-reduce:</code>.</p>
+
+<p>Isso significa que dá para deixar o site bonito para quem gosta de movimento <em>e</em> calmo para
+quem pediu calma, sem detectar nada em JavaScript e sem dois sites separados. O truque é acrescentar, no
+mesmo elemento, uma classe que desliga justamente a transição:</p>
+
+<div class="trytailwind" data-goal="rule:@media (prefers-reduced-motion: reduce);;rule:transition-property: none">
+  <p class="try-task">O cartão “levanta” no mouse. Para quem configurou o sistema com menos movimento, o
+  salto precisa ser seco: acrescente <code>motion-reduce:transition-none</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl border border-stone-200 bg-white p-4 transition-transform hover:-translate-y-1 hover:shadow-md"&gt;
+  &lt;h3 class="font-semibold"&gt;Pão do dia&lt;/h3&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h30.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+border-radius: 12px
+border-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+transition-property: transform, translate, scale, rotate
+transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1)
+transition-duration: 0.15s
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-xl border border-stone-200 bg-white p-4 transition-transform hover:-translate-y-1 hover:shadow-md motion-reduce:transition-none"&gt;
+  &lt;h3 class="font-semibold"&gt;Pão do dia&lt;/h3&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h30.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A meta desta caixa confere duas coisas no CSS gerado: que existe um bloco
+<code>@media (prefers-reduced-motion: reduce)</code> e que, dentro dele, a transição foi para
+<code>none</code>. É a assinatura do prefixo funcionando. No navegador de quem nunca mexeu nessa
+configuração, nada muda — a media query simplesmente não é verdadeira.</p>
+
+<p>Existe o prefixo contrário, <code>motion-safe:</code>, para o caso de você preferir construir o
+contrário: o elemento nasce sem movimento e só ganha animação em quem não pediu redução. As duas
+estratégias funcionam; escolha uma e mantenha na página inteira. O erro comum é achar que isso é
+“detalhe para o fim do projeto”. Não é: acrescentar depois exige visitar cada elemento que se mexe, e
+quem garante que você vai lembrar de todos?</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a transição que não acontecia</h3>
+<p>A Ana escreveu <code>transition</code> no cartão e <code>hover:bg-amber-50</code> no mesmo cartão, e
+nada mudou de suavidade. O motivo era outro: ela tinha colocado o cartão dentro de um contêiner com
+<code>transition</code> e esperava que o filho herdasse a suavidade. Transição não se herda. Ela vale
+para o elemento onde está escrita, e só para as propriedades <em>daquele</em> elemento. Se o efeito é no
+filho, a classe vai no filho — a mesma regra que vale para o <code>group-hover</code>, quando quem muda é
+o botão e o mouse está no cartão.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o tema escuro que ficou macio demais</h3>
+<p>Com <code>transition</code> no corpo inteiro, a troca de tema escuro virou um desfile: cada cartão, cada
+borda e cada texto mudando de cor em 150 ms, em tempos ligeiramente diferentes, porque cada elemento tem
+a sua regra. Ficou bonito por três segundos e cansativo para sempre. A correção foi tirar a transição do
+contêiner geral e deixá-la só nos elementos em que a mudança é pontual — botões, links e cartões
+clicáveis. Regra de bolso: <strong>transição combina com interação</strong>; mudanças globais de tema
+pedem troca seca.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a imagem que “carregava devagar”</h3>
+<p>Ela jurou que as fotos da vitrine estavam pesadas, porque apareciam esmaecendo. As fotos eram leves; o
+que acontecia era <code>transition</code> no contêiner da imagem combinado com um ajuste de layout que o
+navegador faz quando a imagem chega. A imagem entrava no lugar certo e o contêiner crescia em 150 ms.
+Tirar a transição de largura e altura resolveu o mistério. Foi também a primeira vez que ela viu, na
+prática, por que <code>transition-all</code> é uma armadilha: ele transforma qualquer ajuste de layout em
+espetáculo.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que a classe <code>transition</code> faz?</p>
+<label><input type="radio" name="q1"> escolhe a cor e o tempo do efeito de hover</label>
+<label><input type="radio" name="q1"> pede ao navegador que chegue ao novo valor aos poucos</label>
+<label><input type="radio" name="q1"> recarrega o CSS da página quando o mouse chega</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que <code>transition-all</code> costuma ser má
+ideia?</p>
+<label><input type="radio" name="q2"> porque não funciona em navegadores modernos</label>
+<label><input type="radio" name="q2"> porque desliga o hover do elemento</label>
+<label><input type="radio" name="q2"> porque anima também largura, altura e margem, refazendo o layout</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que o prefixo <code>motion-reduce:</code>
+acrescenta?</p>
+<label><input type="radio" name="q3"> uma regra que só vale para quem pediu menos movimento no sistema</label>
+<label><input type="radio" name="q3"> um atraso maior antes da transição começar</label>
+<label><input type="radio" name="q3"> um jeito de deixar a transição mais rápida no celular</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o cartão que levanta</h2>
+<p>No cartão de produto da padaria, a sombra cresce no hover e o cartão sobe um degrau. Complete a classe
+que liga a transição certa — a que anima somente sombra, escala e movimento, sem tocar em largura:</p>
+<div class="ex-code">&lt;div class="rounded-xl bg-white p-4 transition-<input aria-label="resposta 1" data-answer="transform" placeholder="..."> hover:-translate-y-1 hover:shadow-lg"&gt;Pão do dia&lt;/div&gt;</div>
+<p class="ex-dica">Dica: o pedaço que falta é o mesmo nome da família de classes que muda posição e
+tamanho sem mexer no layout. Uma palavra em inglês, sem hífen, colada no <code>transition-</code>.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Uma transição é o navegador indo de um valor a outro aos poucos. Ela não escolhe cor, tamanho nem
+destino: só diz “se este valor mudar, vá devagar”. A classe <code>transition</code> liga essa máquina com
+uma lista generosa de propriedades, 150 ms de duração e uma curva que sai rápido e chega freando — e,
+como ela vale no repouso, o painel da caixa consegue mostrá-la mesmo com o mouse longe.</p>
+
+<p>As versões enxutas (<code>transition-colors</code>, <code>transition-opacity</code>,
+<code>transition-shadow</code>, <code>transition-transform</code>) existem para não animar o que não
+muda. E a regra que resume a seção mais importante da aula: anime transformação, opacidade e cor; evite
+animar largura, altura, margem e espaçamento, porque aí o navegador refaz o layout em cada quadro. Para
+quem pediu menos movimento no sistema, <code>motion-reduce:transition-none</code> resolve com uma
+classe.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Transição não tem destino: ela só suaviza a troca de um valor que alguém mudou.</li>
+<li>Sem uma classe de hover (ou foco, ou clique), <code>transition</code> não faz nada visível.</li>
+<li>O CSS gerado tem três linhas: propriedade, curva e duração, as duas últimas com variáveis.</li>
+<li>O padrão é 150 ms; a curva é <code>cubic-bezier(0.4, 0, 0.2, 1)</code>.</li>
+<li>O painel mostra a transição no repouso porque a classe vale sempre; a cor do hover, não.</li>
+<li>Escolha a lista: <code>transition-colors</code> para cor, <code>-shadow</code> para sombra,
+<code>-transform</code> para movimento.</li>
+<li>Uma classe de transição por elemento; se houver duas, vence a que o Tailwind gerou por último.</li>
+<li><code>transition-all</code> anima até o que você não queria, e cobra em fluidez.</li>
+<li>Transição não roda no carregamento: para entrada, é animação.</li>
+<li><code>motion-reduce:transition-none</code> respeita quem pediu menos movimento.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

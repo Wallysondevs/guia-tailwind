@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estilos de Componente | Guia Tailwind</title>
+<meta name="description" content="Como transformar utilitárias repetidas em uma classe de componente com @apply no Tailwind v4: o papel do @layer components, os estados dentro da classe e quando vale a pena.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Estilos de <span class="hl">Componente</span></h1>
+<p class="intro">A Ana tem um botão que ela considera perfeito. Levou uma tarde para acertar o âmbar,
+o respiro e o arredondamento, e agora cola aquele botão em três páginas do site da padaria. Enquanto
+nada muda, tudo bem. Mas chega o dia em que o âmbar precisa ficar um tom mais escuro — e a Ana
+descobre que tem o mesmo botão escrito em três arquivos, com três cópias da mesma lista de classes.
+Nesta aula ela faz o que gente experiente faz nesse momento: dá um nome ao botão e escreve o estilo
+uma vez só, usando <code>@apply</code> dentro de um componente. É o primeiro passo para o HTML parar
+de repetir o que já foi decidido.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é um componente neste guia (e por que não tem nada a ver com JavaScript).</li>
+  <li>Onde a sua classe mora: no <code>&lt;style type="text/tailwindcss"&gt;</code> da página ou no
+  arquivo de entrada do projeto.</li>
+  <li>Como o <code>@apply</code> copia as declarações de uma utilitária para dentro da sua classe.</li>
+  <li>Por que a classe precisa ficar dentro de <code>@layer components</code>.</li>
+  <li>Como colocar <code>:hover</code> e <code>:focus-visible</code> no componente.</li>
+  <li>O critério dos três usos: quando vale criar a classe e quando é desperdício.</li>
+  <li>A diferença entre <code>@layer components</code> e <code>@utility</code>.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o botão que mora em três páginas</h2>
+
+<p>O site da Ana tem três páginas: a vitrine, a lista de pães e a página de encomendas. Em todas elas
+existe um botão amarelo com o texto “Comprar”. O HTML de cada um é este aqui, copiado e colado com
+carinho:</p>
+
+<pre class="file" data-file="encomendas.html">&lt;button class="rounded-lg bg-amber-500 px-4 py-2 font-semibold text-amber-950"&gt;Comprar&lt;/button&gt;</pre>
+
+<p>Cinco classes, todas úteis, nenhuma errada. O problema não é a qualidade do botão — é a
+quantidade de lugares onde a mesma decisão está escrita. Quando o âmbar precisa mudar, a Ana abre
+três arquivos, procura a linha, troca <code>bg-amber-500</code> por <code>bg-amber-600</code> e reza
+para não ter esquecido nenhum. Semana passada ela esqueceu: a página de encomendas ficou com o botão
+antigo por quatro dias, e ninguém percebeu, porque ninguém abre as três páginas lado a lado.</p>
+
+<p>Existe uma saída que não é “voltar ao CSS antigo” e não é “aceitar a repetição”. A saída é
+transformar esse conjunto de classes em uma peça com nome: uma classe de componente. O HTML fica
+assim:</p>
+
+<pre class="file" data-file="encomendas.html">&lt;button class="botao"&gt;Comprar&lt;/button&gt;</pre>
+
+<p>E o desenho do botão passa a viver em um lugar só. Se amanhã o âmbar mudar, muda ali — e as três
+páginas acompanham. O que você vai aprender nesta aula é justamente escrever esse “um lugar”, com as
+ferramentas do Tailwind, sem perder as vantagens das utilitárias.</p>
+
+<h2>2. O que é um componente (e o que não é)</h2>
+
+<p>Antes de escrever código, vale desmontar uma confusão. Em muitos lugares, “componente” quer dizer
+uma peça de programa — um arquivo JavaScript que desenha um pedaço da tela. Aqui não. Neste guia,
+componente é só isto: <strong>um conjunto de estilos que se repete e que ganha um nome</strong>. Pode
+ser um botão, um cartão, um selo de “novo”, um preço. A pergunta que define se algo é componente não
+é “que tecnologia usa?”, é “aparece mais de uma vez?”.</p>
+
+<p>No Tailwind existem três jeitos de desenhar a mesma peça, e a escolha entre eles é o coração desta
+aula:</p>
+
+<ul>
+<li><strong>Utilitárias no HTML.</strong> É o que a Ana fez. Cada elemento carrega a lista completa
+de classes. Vantagem: nada para nomear, nada para sincronizar, e o HTML mostra exatamente o que
+acontece. Desvantagem: a mesma lista se repete, e mudar o desenho é editar em vários lugares.</li>
+<li><strong>Classe de componente com <code>@apply</code>.</strong> Você escreve
+<code>.botao { @apply … }</code> uma vez e usa <code>class="botao"</code> em todo lugar. Vantagem: um
+lugar só para mudar. Desvantagem: você precisou inventar um nome, e nomes mentem — daqui a três meses
+ninguém lembra o que <code>.cartao2</code> faz.</li>
+<li><strong>Utilitária própria com <code>@utility</code>.</strong> Um degrau além: você cria uma
+utilitária nova, que aceita variantes (<code>md:selo</code>, <code>hover:selo</code>). Serve para o
+valor que falta no catálogo, não para juntar cinco utilitárias existentes.</li>
+</ul>
+
+<p>Não existe resposta certa universal. Existe um critério econômico, que a gente vai usar até o fim
+do guia: <strong>se a peça aparece uma vez, escreva utilitárias; se aparece três vezes ou mais, dê um
+nome</strong>. Uma vez só, a classe é trabalho sem retorno. Três vezes, cada mudança futura custa
+três edições e uma chance de esquecimento.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Jeito</th><th>Onde o estilo fica</th><th>Muda em um lugar?</th><th>Aceita <code>md:</code>?</th></tr>
+<tr><td>Utilitárias no HTML</td><td>no próprio elemento</td><td>não</td><td>sim</td></tr>
+<tr><td><code>@layer components</code></td><td>no arquivo CSS, com nome</td><td>sim</td><td>não</td></tr>
+<tr><td><code>@utility</code></td><td>no arquivo CSS, sem nome de classe</td><td>sim</td><td>sim</td></tr>
+</table>
+</div>
+
+<p>Guarde essa tabela: ela responde “onde eu escrevo isso?” para o resto da aula. E repare na
+segunda linha: a classe de componente <em>não</em> aceita prefixo de variante. Se você escrever
+<code>class="botao md:botao"</code>, o <code>md:botao</code> não gera nada — o Tailwind não sabe o que
+é uma variante de uma classe que não é utilitária. Isso vai voltar na seção 8.</p>
+
+<h2>3. Onde a classe mora: o &lt;style type="text/tailwindcss"&gt;</h2>
+
+<p>Nos exemplos deste guia, a classe de componente mora dentro da própria página, em um bloco
+<code>&lt;style&gt;</code> com um tipo especial:</p>
+
+<pre class="file" data-file="index.html">&lt;style type="text/tailwindcss"&gt;
+@layer components {
+  .botao {
+    @apply rounded-lg bg-amber-500 px-4 py-2;
+  }
+}
+&lt;/style&gt;</pre>
+
+<p>O atributo <code>type="text/tailwindcss"</code> é a chave. Sem ele, o navegador trata o bloco como
+CSS comum — e CSS comum não conhece <code>@apply</code>. O resultado é silencioso e cruel: a regra
+aparece na tela do editor, o navegador joga a linha do <code>@apply</code> fora e o botão fica sem
+estilo nenhum. Se algum dia uma classe sua “não fizer nada”, confira esse atributo antes de qualquer
+outra coisa.</p>
+
+<p>Num projeto de verdade, instalado com npm e com o processo de build rodando, não existe esse
+bloco na página. A classe mora no arquivo CSS de entrada, o mesmo que importa o Tailwind:</p>
+
+<pre class="file" data-file="entrada.css">@import "tailwindcss";
+
+@layer components {
+  .botao {
+    @apply rounded-lg bg-amber-500 px-4 py-2;
+  }
+}</pre>
+
+<p>A sintaxe é a mesma; muda o endereço. Na página do guia o bloco é compilado pelo motor que roda no
+navegador; no projeto, pelo processo de build. As duas rotas existem para você poder praticar aqui e
+depois repetir em casa sem susto. E, se ficar na dúvida sobre como o build funciona, a aula
+<a href="instalando-com-npm.html">Instalando com npm</a> mostra a instalação, e
+<a href="o-css-de-entrada.html">O CSS de Entrada</a> explica esse arquivo linha por linha.</p>
+
+<dl class="anatomy">
+<dt>seletor de classe</dt>
+<dd>O <code>.botao</code> com ponto na frente. É o nome que você inventou; vale para todo elemento
+com <code>class="botao"</code>.</dd>
+<dt>@apply</dt>
+<dd>Uma ordem para o Tailwind: “pegue as declarações destas utilitárias e copie para dentro desta
+regra”. Não é herança, não é vínculo; é cópia.</dd>
+<dt>@layer components</dt>
+<dd>A camada onde os estilos de conjunto devem morar. Ela fica antes de <em>utilities</em> na ordem
+do CSS, então uma utilitária escrita no HTML ainda ganha da sua classe.</dd>
+<dt>@utility</dt>
+<dd>A diretiva que cria uma utilitária nova, com nome e tudo, e que aceita variantes. Diferente da
+classe de componente, ela entra na camada das utilitárias.</dd>
+<dt>variante</dt>
+<dd>O prefixo que muda quando a classe vale: <code>hover:</code>, <code>md:</code>,
+<code>dark:</code>, <code>print:</code>. Cada uma delas é uma condição, não uma classe nova.</dd>
+</dl>
+
+<h2>4. A primeira classe de componente</h2>
+
+<p>Hora de escrever. A missão é pequena de propósito: o botão da Ana já está no bloco, mas sem
+arredondamento — e o arredondamento é justamente o que a deixa insatisfeita. Em vez de copiar a
+classe para cada botão, ela vai acrescentar <code>rounded-lg</code> na lista do <code>@apply</code>,
+uma vez, e ver o efeito nos dois botões da prévia.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-radius=8px;;conta:.botao=2">
+  <p class="try-task">O componente <code>.botao</code> já está definido, mas sem cantos arredondados.
+  Acrescente <code>rounded-lg</code> à lista do <code>@apply</code> e clique em Rodar: os dois botões
+  (o <code>#alvo</code> e o segundo, com a mesma classe) precisam ficar com cantos de 8 px.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@layer components {
+  .botao { @apply bg-amber-500 px-4 py-2 font-semibold text-amber-950; }
+}
+&lt;/style&gt;
+&lt;button id="alvo" class="botao"&gt;Comprar pão&lt;/button&gt;
+&lt;button class="botao"&gt;Ver a cesta&lt;/button&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.769 0.188 70.08)
+color: oklch(0.279 0.077 45.635)
+font-weight: 600
+padding-inline: 16px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@layer components {
+  .botao { @apply rounded-lg bg-amber-500 px-4 py-2 font-semibold text-amber-950; }
+}
+&lt;/style&gt;
+&lt;button id="alvo" class="botao"&gt;Comprar pão&lt;/button&gt;
+&lt;button class="botao"&gt;Ver a cesta&lt;/button&gt;</pre>
+</div>
+
+<p>Leia o painel depois de rodar: <code>border-radius: 8px</code>. Você não escreveu 8 px em lugar
+nenhum, escreveu <code>rounded-lg</code>; o Tailwind traduziu. E a segunda linha do painel é a
+resposta que interessa: o painel descreve só o <code>#alvo</code>, mas o segundo botão tem a mesma
+classe, então tem o mesmo raio. Uma edição, dois elementos. Numa página com doze botões, uma edição,
+doze elementos.</p>
+
+<p>Repare também no que <em>não</em> mudou. As classes no HTML continuam sendo só
+<code>botao</code>. O <code>rounded-lg</code> não apareceu no HTML: ele foi morar dentro da regra,
+junto com as outras quatro utilitárias. É esse o trato do componente — o HTML fica curto e a decisão
+fica centralizada. O preço é que, para saber o que o botão tem, agora você precisa olhar dois
+lugares: o HTML (que diz “é um botao”) e o CSS (que diz como um botao é).</p>
+
+<p>Se você digitar <code>rounded-lg</code> com dois “l” ou esquecer o hífen, o painel continua em
+branco do lado do raio, e a segunda linha da meta falha. O Tailwind não avisa quando uma classe não
+existe dentro do <code>@apply</code>... na verdade avisa no build, com um erro de “utilitária
+desconhecida”. No navegador, o efeito prático é o botão sair sem cantos — e o painel vazio é a sua
+pista.</p>
+
+<h2>5. O que o @apply faz por baixo</h2>
+
+<p>Vale desmistificar o <code>@apply</code>, porque ele é o suspeito de muitos mal-entendidos. Ele
+não cria um atalho, não importa as utilitárias e não deixa nada “vivo”. Ele copia as declarações para
+dentro da sua regra e pronto. O CSS que sai daquele componente é este:</p>
+
+<pre class="term">.botao {
+  border-radius: var(--radius-lg);
+  background-color: var(--color-amber-500);
+  padding-inline: calc(var(--spacing) * 4);
+  padding-block: calc(var(--spacing) * 2);
+  --tw-font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-semibold);
+}</pre>
+
+<p>É o mesmo CSS que as cinco utilitárias produziriam no HTML, só que com um seletor diferente. Duas
+consequências práticas saem daí. A primeira: o arquivo não fica menor por causa do componente; o que
+diminui é o <em>HTML</em>, que troca cinco nomes por um. A segunda: como é cópia, a sua classe é
+estática. Ela não reage a nada que o Tailwind não tenha colocado ali dentro na hora de escrever.</p>
+
+<p>Agora a parte que mais importa no dia a dia: por que dentro de <code>@layer components</code>? A
+resposta é ordem. O Tailwind organiza o CSS em camadas e a camada das utilitárias vem depois da
+camada dos componentes. Quem vem depois ganha quando o peso do seletor é o mesmo. Resultado prático:
+se num botão específico você precisar de outra cor, basta escrever a utilitária no HTML:</p>
+
+<pre class="file" data-file="encomendas.html">&lt;button class="botao bg-red-600"&gt;Cancelar encomenda&lt;/button&gt;</pre>
+
+<p>O <code>bg-red-600</code> vence o âmbar que está dentro do componente, e o botão sai vermelho sem
+que você crie um segundo componente nem mexa no primeiro. Se a mesma regra estivesse fora de camada,
+o contrário aconteceria: o componente venceria a utilitária e não haveria jeito de ajustar um caso
+sem <code>!important</code>. É por isso que a camada não é enfeite — é o que mantém a sua classe
+“sobrescrevível”. Esse mesmo mecanismo, visto do lado do problema, aparece na aula
+<a href="depuracao-de-css.html">Depurar o CSS</a>.</p>
+
+<h2>6. Estados dentro do componente</h2>
+
+<p>Um botão não é só a aparência parada: ele muda quando o mouse passa, quando recebe foco pelo
+teclado, quando está desabilitado. Num componente, esses estados entram como seletor de CSS —
+<code>:hover</code>, <code>:focus-visible</code>, <code>:disabled</code> — colados no nome da classe:</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-amber-600)">
+  <p class="try-task">O botão resolve o estado parado, mas no mouse não escurece. Crie uma regra
+  <code>.botao:hover</code> logo abaixo da existente, com <code>@apply bg-amber-600</code>, para o
+  âmbar ficar um degrau mais escuro quando o mouse passa.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@layer components {
+  .botao { @apply rounded-lg bg-amber-500 px-4 py-2 font-semibold text-amber-950; }
+}
+&lt;/style&gt;
+&lt;button id="alvo" class="botao"&gt;Comprar pão&lt;/button&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.769 0.188 70.08)
+color: oklch(0.279 0.077 45.635)
+font-weight: 600
+border-radius: 8px
+padding-inline: 16px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@layer components {
+  .botao { @apply rounded-lg bg-amber-500 px-4 py-2 font-semibold text-amber-950; }
+  .botao:hover { @apply bg-amber-600; }
+}
+&lt;/style&gt;
+&lt;button id="alvo" class="botao"&gt;Comprar pão&lt;/button&gt;</pre>
+</div>
+
+<p>O painel aqui não mostra valor computado, porque a prévia não está com o mouse em cima. Ele mostra
+as <em>regras geradas</em>, e é ali que se vê a linha
+<code>background-color: var(--color-amber-600)</code>. Isso não é um detalhe do guia: é assim que
+você confere estado no navegador de verdade também. No DevTools, o painel <em>Styles</em> tem um
+botão de forçar estado (<em>:hov</em> no Chrome) que finge o mouse em cima e deixa você ver a regra
+vencendo.</p>
+
+<p>Os estados que aparecem em quase todo botão são quatro, e cada um tem um seletor próprio. Vale
+conhecer a lista, porque escrever o seletor errado é o motivo mais comum de “o efeito não pega”:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Quando vale</th><th>Seletor</th><th>O que costuma entrar no <code>@apply</code></th></tr>
+<tr><td>mouse em cima</td><td><code>:hover</code></td><td><code>bg-amber-600</code>, <code>shadow-md</code></td></tr>
+<tr><td>foco pelo teclado</td><td><code>:focus-visible</code></td><td><code>outline-2</code>, <code>outline-offset-2</code></td></tr>
+<tr><td>apertando o botão</td><td><code>:active</code></td><td><code>translate-y-px</code>, <code>bg-amber-700</code></td></tr>
+<tr><td>campo desligado</td><td><code>:disabled</code></td><td><code>bg-neutral-200</code>, <code>text-neutral-500</code>, <code>cursor-not-allowed</code></td></tr>
+</table>
+</div>
+
+<p>Existe um segundo jeito de escrever o mesmo estado, e ele confunde muita gente: a variante
+<code>hover:</code> dentro do próprio <code>@apply</code>. Também funciona:</p>
+
+<pre class="file" data-file="entrada.css">.botao {
+  @apply rounded-lg bg-amber-500 px-4 py-2;
+  @apply hover:bg-amber-600;
+}</pre>
+
+<p>O resultado no CSS é uma regra aninhada, com a mesma condição que a variante usaria — inclusive o
+<code>@media (hover: hover)</code> que o Tailwind coloca para não disparar “hover” em tela de toque.
+Escolha um estilo e mantenha: nesta aula usei <code>.botao:hover</code>, que é mais fácil de ler em
+voz alta e funciona em qualquer versão. O que não vale é misturar os dois na mesma classe, porque aí
+duas regras dizem a mesma coisa e você vai passar meia hora perguntando qual está ganhando.</p>
+
+<p>Para o foco de teclado, o padrão é <code>:focus-visible</code> — que só aparece quando a pessoa
+navega por Tab, e não a cada clique. Um componente bem-feito tem os dois estados:</p>
+
+<pre class="file" data-file="entrada.css">.botao { @apply rounded-lg bg-amber-500 px-4 py-2 font-semibold text-amber-950; }
+.botao:hover { @apply bg-amber-600; }
+.botao:focus-visible { @apply outline-2 outline-offset-2 outline-amber-700; }</pre>
+
+<p>Repare que os três seletores compartilham a mesma ideia: a base, o mouse, o teclado. Se amanhã o
+botão virar quadrado, você troca <code>rounded-lg</code> em uma linha e os estados continuam
+coerentes. Esse é o ganho real do componente: não é digitar menos, é ter um lugar onde a decisão
+está escrita.</p>
+
+<h2>7. O critério: só entra no componente o que se repete</h2>
+
+<p>A tentação, depois de aprender <code>@apply</code>, é transformar tudo em classe. Não faça isso. A
+classe de componente cobra um preço: ela esconde o desenho, e quem lê o HTML passa a precisar de dois
+arquivos para entender uma tela. Só pague esse preço quando houver repetição de verdade.</p>
+
+<p>Vamos ver o caso em que vale. A Ana tem uma lista de pães, e cada item é um cartão com o mesmo
+desenho: cantos arredondados, fundo branco, 16 px de respiro. Três cartões, três cópias. A missão é
+dar um nome a esse conjunto e usá-lo nos três:</p>
+
+<div class="trytailwind" data-goal="conta:.cartao=3;;css:.cartao|padding=16px">
+  <p class="try-task">Os três cartões repetem as mesmas classes. O componente <code>.cartao</code> já
+  existe no bloco de estilo; use a classe <code>cartao</code> nos três <code>div</code> no lugar das
+  utilitárias. A meta confere que existem 3 elementos com essa classe e que o respiro é de 16 px.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@layer components {
+  .cartao { @apply rounded-xl bg-white p-4; }
+}
+&lt;/style&gt;
+&lt;div id="alvo" class="p-2"&gt;Pão francês&lt;/div&gt;
+&lt;div class="p-2"&gt;Pão de queijo&lt;/div&gt;
+&lt;div class="p-2"&gt;Bolo de fubá&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@layer components {
+  .cartao { @apply rounded-xl bg-white p-4; }
+}
+&lt;/style&gt;
+&lt;div id="alvo" class="cartao"&gt;Pão francês&lt;/div&gt;
+&lt;div class="cartao"&gt;Pão de queijo&lt;/div&gt;
+&lt;div class="cartao"&gt;Bolo de fubá&lt;/div&gt;</pre>
+</div>
+
+<p>Só que existe uma armadilha nesse exemplo, e ela aparece toda semana em projeto de verdade: o
+cartão do “Bolo de fubá” tem um selo de “últimas unidades” e o do “Pão de queijo” tem preço em
+destaque. Se você enfiar essas diferenças dentro de <code>.cartao</code>, todo cartão passa a ter
+selo. A regra é simples: <strong>o componente guarda o que é igual; o que é diferente fica no
+HTML</strong>, como utilitária.</p>
+
+<pre class="file" data-file="paes.html">&lt;div class="cartao"&gt;Bolo de fubá&lt;/div&gt;
+&lt;div class="cartao mt-4 border-2 border-amber-400"&gt;Bolo de fubá&lt;/div&gt;</pre>
+
+<p>Acrescentar uma utilitária a um elemento que já tem a classe do componente é o gesto mais comum do
+Tailwind, e funciona justamente porque a camada das utilitárias vem depois. Você não “quebra” o
+componente; você o ajusta naquele caso. E se o ajuste aparece em cinco lugares, aí sim ele vira parte
+do componente.</p>
+
+<p>O critério fica assim, em três perguntas: a peça aparece três vezes ou mais? As três cópias
+deveriam mudar juntas quando o desenho mudar? O nome que eu vou inventar diz algo que a próxima
+pessoa entende? Se a resposta for “sim, sim, sim”, crie o componente. Se alguma for “não”, fique com
+as utilitárias e economize um nome.</p>
+
+<h2>8. O @utility: quando a peça precisa aceitar variante</h2>
+
+<p>Falta uma peça no quebra-cabeça. A classe de componente não aceita variante: <code>md:botao</code>
+não gera CSS nenhum. Isso é limitação ou recurso? Depende do que você quer. Se a peça tem um
+comportamento diferente por tamanho de tela, você quer uma utilitária — e para criar uma utilitária
+própria existe o <code>@utility</code>:</p>
+
+<pre class="file" data-file="entrada.css">@utility selo {
+  @apply rounded-full bg-amber-100 px-2 text-xs font-semibold text-amber-900;
+}</pre>
+
+<p>Com isso, <code>selo</code> funciona como qualquer utilitária do catálogo, inclusive com prefixo.
+O CSS gerado quando você usa <code>class="md:selo"</code> mostra o Tailwind repetindo o bloco dentro
+da condição de largura:</p>
+
+<pre class="term">@media (width >= 48rem) {
+  .md\:selo {
+    border-radius: calc(infinity * 1px);
+    background-color: var(--color-amber-100);
+    padding-inline: calc(var(--spacing) * 2);
+    font-size: var(--text-xs);
+    line-height: var(--tw-leading, var(--text-xs--line-height));
+  }
+}</pre>
+
+<p>Três detalhes para não se perder. Primeiro: o nome que vem depois de <code>@utility</code> é um
+nome novo, e não pode repetir uma utilitária que já existe — <code>flex</code> não é um bom
+candidato. Segundo: o que você põe dentro é CSS de verdade: <code>@apply</code>, declarações soltas,
+variáveis, o que precisar. Terceiro: a diferença prática entre os dois é a variante. Componente é
+para o bloco que aparece igual em todo lugar; utilitária própria é para o valor que se combina com
+<code>hover:</code>, <code>md:</code>, <code>dark:</code>.</p>
+
+<p>Existe uma variação mais avançada, a <em>utilitária funcional</em>, em que o nome termina em
+<code>-*</code> e o valor sai de dentro da classe — <code>@utility tab-*</code> faria
+<code>tab-4</code> valer quatro espaços de tabulação. É recurso para quem está criando um sistema
+próprio de valores; para o dia a dia da padaria, um nome fixo resolve tudo.</p>
+
+<p>Na dúvida entre os dois, escolha o caminho mais chato: utilitárias no HTML. Componente é remédio
+para repetição, não vitamina. Um projeto com trinta classes de componente costuma ter o mesmo
+problema do CSS antigo, só que com nomes em inglês.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o componente que virou um monstro</h3>
+<p>Seis meses depois, <code>.botao</code> tem dezoito utilitárias dentro do <code>@apply</code>:
+quatro tamanhos de fonte, três cores de texto, um <code>md:</code> que não funciona, dois
+<code>!important</code>. Ninguém mexe com medo. O sinal de que o componente passou do ponto é
+justamente esse: quando ninguém sabe o que ele faz sem abrir o arquivo e ler dezoito linhas. O
+conserto é dividir: um <code>.botao</code> com o que todo botão tem (raio, respiro, peso da fonte) e
+as variações no HTML, como utilitárias — <code>class="botao bg-red-600"</code>. Componente bom tem
+cinco, no máximo oito utilitárias dentro.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: <code>.cartao</code> e <code>.cartao-destaque</code>, quase iguais</h3>
+<p>A Ana criou <code>.cartao</code> e depois <code>.cartao-destaque</code>, que é igual, mas com borda
+âmbar. Funciona, até a terceira variação (<code>.cartao-destaque-grande</code>) e a quarta. Aí ela
+tem quatro blocos com 90% do conteúdo repetido — a mesma dor do começo, disfarçada de organização.
+A alternativa é uma classe só e a diferença no HTML: <code>&lt;div class="cartao border-2
+border-amber-400"&gt;</code>. Antes de criar a segunda classe, pergunte se a diferença não cabe em uma
+ou duas utilitárias.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: “mudei o @apply e nada aconteceu”</h3>
+<p>Três causas, em ordem de frequência. (1) O bloco de estilo está sem
+<code>type="text/tailwindcss"</code>, então o navegador descartou o <code>@apply</code> e a regra
+inteira ficou pela metade. (2) Você escreveu uma utilitária que não existe, e o build reclamou de
+“utilitária desconhecida” — no navegador, o efeito é a classe sair sem aquela declaração. (3) A
+regra está fora de camada e algum CSS antigo da página venceu. Nas três, o caminho de diagnóstico é o
+mesmo: olhar o CSS gerado e procurar o nome da sua classe ali.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. O que o <code>@apply</code> faz, exatamente?</p>
+<label><input type="radio" name="q1"> cria um atalho que aponta para as utilitárias e muda junto com elas</label>
+<label><input type="radio" name="q1"> importa o arquivo do Tailwind para dentro da sua classe</label>
+<label><input type="radio" name="q1"> copia as declarações das utilitárias para dentro da sua regra</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. Por que a classe deve ficar em <code>@layer components</code>?</p>
+<label><input type="radio" name="q2"> porque a camada das utilitárias vem depois, e a utilitária escrita no HTML ainda vence</label>
+<label><input type="radio" name="q2"> porque fora de camada o navegador não reconhece a classe</label>
+<label><input type="radio" name="q2"> porque a camada deixa o arquivo mais leve</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Qual é a diferença entre <code>@layer components</code> e <code>@utility</code>?</p>
+<label><input type="radio" name="q3"> nenhuma: são dois nomes para a mesma coisa</label>
+<label><input type="radio" name="q3"> a utilitária própria aceita variantes como <code>md:</code> e <code>hover:</code></label>
+<label><input type="radio" name="q3"> a classe de componente funciona só no tema escuro</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o selo de “pão do dia”</h2>
+<p>A Ana quer um selo com cantos totalmente arredondados, fundo âmbar claro, respiro horizontal de
+8 px e texto bem pequeno. Complete o <code>@apply</code> com as três utilitárias que faltam:</p>
+<div class="ex-code">.selo { @apply <input aria-label="resposta 1" data-answer="rounded-full bg-amber-100 px-2 text-xs|rounded-full px-2 text-xs bg-amber-100|px-2 text-xs rounded-full bg-amber-100" placeholder="..."> }</div>
+<p class="ex-dica">Dica: “totalmente arredondado” é <code>rounded-full</code>; o respiro só na
+horizontal é <code>px-</code>; “bem pequeno” é <code>text-xs</code>. A ordem não importa, mas o nome
+de cada classe, sim.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Componente, neste guia, é um conjunto de estilos que se repete e ganha um nome. Você escreve esse
+nome em um bloco <code>&lt;style type="text/tailwindcss"&gt;</code> (nos exemplos) ou no arquivo de
+entrada do projeto, dentro de <code>@layer components</code>, e usa <code>@apply</code> para copiar
+as declarações das utilitárias. O CSS gerado é o mesmo das utilitárias; o que encolhe é o HTML, e o
+que melhora é a manutenção: um lugar para mudar.</p>
+
+<p>A camada importa. Em <code>components</code>, a utilitária escrita no HTML continua ganhando, e
+você pode ajustar um caso sem criar um segundo componente. Fora de camada, acontece o contrário — e é
+aí que a pessoa começa a espalhar <code>!important</code>. Os estados entram como seletor:
+<code>.botao:hover</code>, <code>.botao:focus-visible</code>. E quando a peça precisa aceitar
+<code>md:</code> ou <code>hover:</code> no nome, quem resolve é <code>@utility</code>, não
+<code>@layer components</code>.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Três cópias que mudam juntas: hora de criar a classe. Uma cópia: fique com as utilitárias.</li>
+<li><code>@apply</code> copia declarações; não cria vínculo com a utilitária original.</li>
+<li>Classe de componente mora em <code>@layer components</code> — é a camada que a deixa
+sobrescrevível.</li>
+<li>Sem <code>type="text/tailwindcss"</code>, o <code>@apply</code> do bloco na página é descartado.</li>
+<li>Estados: <code>.botao:hover</code>, <code>.botao:focus-visible</code>, <code>.botao:disabled</code>.</li>
+<li>Dentro do <code>@apply</code>, <code>hover:bg-amber-600</code> também funciona — escolha um estilo.</li>
+<li>Diferença entre peças iguais fica no HTML, como utilitária, não dentro do componente.</li>
+<li><code>md:botao</code> não gera nada: componente não aceita variante.</li>
+<li><code>@utility nome { … }</code> cria uma utilitária própria, e essa aceita variante.</li>
+<li>Componente com dezoito utilitárias dentro é o CSS antigo com outro nome.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

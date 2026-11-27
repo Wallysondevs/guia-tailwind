@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Erros Comuns | Guia Tailwind</title>
+<meta name="description" content="Os erros mais comuns no Tailwind v4 e como sair deles: classe digitada errada, build parado, conflito de utilitárias, flex que estoura e nomes do v3.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Erros <span class="hl">Comuns</span></h1>
+<p class="intro">A Ana já publicou três páginas da padaria e nesta altura do campeonato o CSS dela já
+falhou de todos os jeitos possíveis: a classe que ela jurava ter escrito não aparecia, o cartão ficava
+com o respiro errado, a imagem estourava a coluna e um tutorial mandava rodar um comando que o terminal
+não reconhecia. Nenhuma dessas falhas veio com mensagem de erro — e é isso que torna o Tailwind
+tranquilo de aprender e chato de depurar. Esta página é a lista dos tropeços em ordem de frequência, com
+o sintoma, a causa e o conserto.</p>
+
+<h2>1. Por que o erro é silencioso</h2>
+
+<p>O Tailwind não valida o seu HTML. Ele lê o texto, encontra nomes de classe que reconhece e escreve
+CSS para eles; o que ele não reconhece, ele ignora. Não existe aviso de "essa classe não existe", porque
+tecnicamente ela pode ser sua — definida num <code>&lt;style&gt;</code>, vinda de um plugin, escrita com
+<code>@utility</code>. O motor não tem como saber se o nome era para ser uma utilitária ou se é só uma
+palavra qualquer no atributo.</p>
+
+<p>Esse silêncio é uma escolha de projeto, e tem um lado bom: você nunca recebe um erro por causa de uma
+classe de terceiro. O lado ruim é que o diagnóstico fica com você, e a única testemunha confiável é o
+CSS computado no navegador. Todo o resto — achar que o arquivo salvou, achar que o build rodou, achar que
+a classe está certa — é palpite. O painel das caixas deste guia e a aba <em>Computed</em> do DevTools
+existem para trocar palpite por leitura.</p>
+
+<p>Vale combinar uma rotina de três perguntas, na ordem, e nunca fora dela. A classe está escrita
+exatamente como o catálogo pede? Então ela existe. O CSS gerado tem a regra? Se não tem, o build não
+rodou ou o arquivo não foi lido. A regra existe e mesmo assim a tela não mudou? Então há algo vencendo
+ela — style inline, CSS sem camada ou <code>!important</code>. Cada uma das seções seguintes cobre uma
+dessas três perguntas.</p>
+
+<dl class="anatomy">
+<dt>classe inexistente</dt>
+<dd>Um nome que o motor não reconhece. Não gera CSS, não gera erro, não aparece em lugar nenhum.</dd>
+<dt>conflito</dt>
+<dd>Duas classes que mexem na mesma propriedade. Vence a que estiver depois no CSS compilado, e não a
+que você escreveu depois no HTML.</dd>
+<dt>camada</dt>
+<dd>O agrupamento de regras que decide prioridade sem olhar especificidade: <code>theme</code>,
+<code>base</code>, <code>components</code>, <code>utilities</code>.</dd>
+<dt>cache</dt>
+<dd>A cópia do CSS que o navegador guardou. Um arquivo antigo em cache faz a página parecer que não
+atualizou.</dd>
+<dt>escape</dt>
+<dd>A barra invertida que protege dois-pontos e colchetes no nome da classe dentro do CSS:
+<code>.md\:flex</code>.</dd>
+</dl>
+
+<h2>2. Nomes que não existem</h2>
+
+<p>Esta é a categoria mais numerosa, e a mais fácil de resolver: quase sempre é um hífen no lugar errado,
+um número que não está na escala ou um sinônimo em inglês que o Tailwind não usa. A tabela reúne os
+tropeços que aparecem em toda turma, com o que o motor faz e o nome correto.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você escreveu</th><th>O que acontece</th><th>O certo</th></tr>
+<tr><td><code>p4</code></td><td>nada: sem hífen não é classe</td><td><code>p-4</code></td></tr>
+<tr><td><code>bg-amber600</code></td><td>nada: falta o hífen antes do tom</td><td><code>bg-amber-600</code></td></tr>
+<tr><td><code>md: block</code></td><td>duas classes, <code>md:</code> e <code>block</code>, ambas inválidas</td><td><code>md:block</code></td></tr>
+<tr><td><code>px-4 py-4</code> no lugar de <code>p-4</code></td><td>funciona, mas é redundante</td><td><code>p-4</code></td></tr>
+<tr><td><code>text-bold</code></td><td>nada: peso é <code>font-</code></td><td><code>font-bold</code></td></tr>
+<tr><td><code>flexbox</code></td><td>nada: display é <code>flex</code></td><td><code>flex</code></td></tr>
+<tr><td><code>center</code></td><td>nada: centralizar depende do caso</td><td><code>text-center</code> ou <code>mx-auto</code></td></tr>
+<tr><td><code>w-100</code></td><td>gera 400 px, porque <code>100</code> é degrau de espaço</td><td><code>w-full</code> para 100%</td></tr>
+<tr><td><code>mt-2.5</code></td><td>funciona: 10 px; decimal é permitido</td><td><code>mt-2.5</code> mesmo</td></tr>
+<tr><td><code>border-1</code></td><td>funciona no v4, mas o costume é <code>border</code></td><td><code>border</code></td></tr>
+<tr><td><code>p-4x</code></td><td>nada: sufixo inventado</td><td><code>p-4</code></td></tr>
+<tr><td><code>text-lg-</code></td><td>nada: hífen sobrando no fim</td><td><code>text-lg</code></td></tr>
+<tr><td><code>dark</code> sem dois-pontos</td><td>nada: variante precisa de dois-pontos</td><td><code>dark:bg-stone-900</code></td></tr>
+<tr><td><code>hover-bg-amber-600</code></td><td>nada: variante usa dois-pontos, não hífen</td><td><code>hover:bg-amber-600</code></td></tr>
+<tr><td><code>bg-[--cor]</code></td><td>gera CSS inválido; o navegador descarta</td><td><code>bg-(--cor)</code></td></tr>
+</table>
+</div>
+
+<p>Há um caso especial que não é erro de digitação: a classe existe, mas o valor que você quer não está
+na escala. <code>w-277</code> funciona (é degrau de espaço, 1108 px), <code>w-[277px]</code> é o que
+você quer. E há o caso oposto: a classe existe e faz algo diferente do que o nome sugere.
+<code>shadow-sm</code> no v4 é a sombra que no v3 se chamava <code>shadow</code> — a escala toda desceu
+um degrau, como mostra a seção 7.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=16px">
+  <p class="try-task">O cartão deveria ter 16 px de respiro interno, mas a classe foi digitada com um
+  "x" sobrando no fim. Corrija o nome e clique em Verificar: a missão lê o respiro computado.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-lg bg-amber-50 p-4x"&gt;
+  &lt;p&gt;Pão quentinho&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-lg bg-amber-50 p-4"&gt;
+  &lt;p&gt;Pão quentinho&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar o HTML inicial, o painel mostra <code>border-radius</code> e
+<code>background-color</code>, e nenhuma linha de <code>padding</code>. Essa ausência é o diagnóstico: a
+propriedade não foi tocada porque a classe não existe. Não é que o valor esteja errado — é que ninguém
+mandou o navegador mudá-lo. Guarde esse raciocínio: <strong>propriedade ausente do painel significa
+classe que não pegou</strong>, e quase sempre é nome.</p>
+
+<h2>3. O build que não rodou (ou rodou no lugar errado)</h2>
+
+<p>Se a classe está correta e mesmo assim não aparece, o problema saiu do HTML e foi para o processo.
+Três suspeitos, nesta ordem. Primeiro, o build não rodou depois da última mudança: o CSS gerado é uma
+fotografia do momento em que foi escrito, e classe nova não entra sozinha. Rode o comando de novo ou
+deixe o <code>--watch</code> ligado.</p>
+
+<p>Segundo, o build rodou e escreveu num arquivo que a página não carrega. Acontece muito em projeto
+copiado: o HTML aponta para <code>src/entrada.css</code> e a saída foi para
+<code>dist/estilo.css</code>. A aba <em>Network</em> do navegador mostra qual arquivo foi pedido e qual
+foi devolvido; um <code>404</code> ou um tamanho muito pequeno denuncia o problema em dois segundos.</p>
+
+<p>Terceiro, o navegador guardou a versão antiga em cache. O sintoma típico é a mudança aparecer em uma
+aba e não na outra. Recarregue com <code>Ctrl</code> e <code>Shift</code> e <code>R</code> (ou
+<code>Cmd</code> e <code>Shift</code> e <code>R</code>), e no DevTools desligue o cache enquanto
+trabalha. Em produção, o jeito de evitar é o servidor mandar um nome de arquivo com versão, como
+<code>estilo.3f2a.css</code>.</p>
+
+<p>Existe ainda um quarto caso, mais raro: o motor não enxerga o arquivo onde as classes estão. Ele
+procura a partir da pasta do CSS de entrada, respeitando o <code>.gitignore</code>. Uma página gerada
+por script numa pasta ignorada, ou um HTML guardado fora do projeto, fica invisível — e a resposta é
+<code>@source "../caminho";</code> no CSS de entrada. Se você usa classes montadas por concatenação em
+JavaScript, nenhum <code>@source</code> resolve: o nome precisa estar inteiro em algum lugar.</p>
+
+<h2>4. Conflito entre classes</h2>
+
+<p>Aqui o erro deixa de ser de digitação e passa a ser de expectativa. Duas classes que mexem na mesma
+propriedade não somam: uma vence. E quem decide não é a ordem em que você as escreveu no atributo
+<code>class</code>, e sim a ordem em que o Tailwind escreveu as regras no CSS. O caso clássico é
+<code>class="p-8 p-2"</code> num cartão que devia ficar apertado: a pessoa escreveu <code>p-2</code> por
+último e achou que tinha vencido.</p>
+
+<pre class="term">.p-2 {
+  padding: calc(var(--spacing) * 2);
+}
+.p-8 {
+  padding: calc(var(--spacing) * 8);
+}</pre>
+
+<p>O Tailwind ordena as utilitárias por família e por valor, então <code>p-8</code> sai depois de
+<code>p-2</code> e ganha. O resultado do exemplo é 32 px, e não 8 px. Não há nada de errado nisso: é a
+mesma cascata de sempre, só que sem um arquivo visível para conferir. A saída prática é não escrever
+duas classes da mesma família no mesmo elemento — e, quando precisar, saber que a resposta é
+<code>p-2!</code>, com o <code>!</code> no fim, que gera <code>!important</code>.</p>
+
+<p>O segundo tipo de conflito não é entre utilitárias, e sim entre a utilitária e outra coisa. Estilo
+inline ganha de tudo; CSS escrito à mão sem <code>@layer</code> ganha das camadas; e um
+<code>!important</code> antigo ganha de quem não tem. Quando a regra existe no CSS e a tela não muda,
+inspecione o elemento e olhe na aba <em>Styles</em> qual declaração está riscada — o risco se chama
+"sendo sobrescrito", e o motivo aparece ao lado.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sintoma</th><th>Causa</th><th>Conserto</th></tr>
+<tr><td>respiro menor do que o escrito</td><td>duas classes <code>p-*</code>; venceu a última do CSS</td><td>deixe uma só ou use <code>p-8!</code></td></tr>
+<tr><td>classe nova não aparece</td><td>o build não rodou</td><td><code>npm run dev</code> com <code>--watch</code></td></tr>
+<tr><td>mudança aparece em uma aba só</td><td>cache do navegador</td><td>recarregar sem cache</td></tr>
+<tr><td>classe do Tailwind ignorada</td><td><code>style=""</code> no elemento</td><td>remover o estilo inline</td></tr>
+<tr><td>CSS próprio não sobrescreve</td><td>utilitária está numa camada posterior</td><td><code>!</code> na classe ou <code>@layer base</code></td></tr>
+<tr><td>regra antiga sempre vence</td><td>CSS sem <code>@layer</code> ganha das camadas</td><td>envolver em <code>@layer base</code></td></tr>
+<tr><td>duas variantes brigam</td><td><code>focus:</code> e <code>hover:</code> na mesma propriedade</td><td>uma por propriedade, ou aceite a ordem</td></tr>
+</table>
+</div>
+
+<h2>5. Variantes que não pegam</h2>
+
+<p>Variante inválida é silenciosa do mesmo jeito que classe inválida. Os tropeços têm causas bem
+distintas, e vale reconhecer cada uma. O primeiro: <code>hover:</code> no celular. Como visto em
+<a href="ref-estados.html">Estados e Variantes</a>, o v4 embrulha o hover em
+<code>@media (hover: hover)</code>, então num aparelho de toque a regra nem existe. O efeito não está
+quebrado; ele está desligado por desenho.</p>
+
+<p>O segundo: <code>disabled:</code> num <code>div</code>. A pseudo-classe <code>:disabled</code> só
+existe em elementos de formulário, e um <code>div</code> com atributo <code>disabled</code> não é
+desabilitado para o navegador. Para um bloco, use <code>aria-disabled="true"</code> com
+<code>aria-disabled:opacity-50</code>, ou um <code>data-*</code> seu.</p>
+
+<p>O terceiro: <code>group-hover:</code> sem nenhum ancestral com <code>group</code>. O seletor gerado
+procura um <code>.group</code> acima; sem ele, a regra nunca casa. O quarto é o par
+<code>peer-*</code> com o campo <em>depois</em> do aviso no HTML: o combinador só olha para frente, e
+nada acontece. O quinto é <code>dark:</code> sem o tema configurado: se o seu projeto usa tema por
+classe, é preciso declarar a variante com <code>@custom-variant</code>; sem isso, <code>dark:</code>
+segue a preferência do sistema.</p>
+
+<p>O sexto é mais sutil e vale para qualquer variante: ela só existe se a classe inteira estiver no
+texto. <code>"hover:" + "bg-amber-600"</code> montado em JavaScript não gera nada, porque o compilador
+lê strings literais. Se você precisa alternar por código, alterne classes completas — ou, melhor,
+alterne um atributo e deixe a variante fazer o trabalho.</p>
+
+<h2>6. Os clássicos de layout</h2>
+
+<p>Estes não são erros do Tailwind: são comportamentos do CSS que aparecem no primeiro projeto e voltam
+sempre. Reconhecer pelo sintoma economiza meia hora de tentativa. A tabela é o resumo; os parágrafos
+abaixo explicam os três mais teimosos.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que você vê</th><th>A causa</th><th>O conserto</th></tr>
+<tr><td>texto longo estoura a linha do flex</td><td><code>min-width: auto</code> no item</td><td><code>min-w-0</code> no item</td></tr>
+<tr><td><code>h-full</code> não faz nada</td><td>o pai não tem altura definida</td><td>altura no pai, ou <code>h-dvh</code></td></tr>
+<tr><td><code>z-10</code> não sobe</td><td>o elemento é estático</td><td><code>relative</code> junto</td></tr>
+<tr><td><code>absolute</code> foge para o canto</td><td>nenhum ancestral posicionado</td><td><code>relative</code> no pai</td></tr>
+<tr><td>imagem estoura a coluna</td><td>largura natural do arquivo</td><td><code>max-w-full h-auto</code></td></tr>
+<tr><td>tabela estoura no celular</td><td>colunas demais para a largura</td><td><code>overflow-x-auto</code> no invólucro</td></tr>
+<tr><td><code>gap</code> não separa nada</td><td>o pai não é flex nem grid</td><td><code>flex</code> ou <code>grid</code> no pai</td></tr>
+<tr><td>margens entre irmãos colam</td><td>colapso de margem</td><td><code>gap</code> ou <code>space-y-*</code></td></tr>
+<tr><td>botão desalinhado com o texto</td><td><code>inline-flex</code> sem alinhamento</td><td><code>inline-flex items-center</code></td></tr>
+<tr><td>conteúdo cortado no topo</td><td>ancestral com <code>overflow-hidden</code></td><td>remover ou mover o overflow</td></tr>
+</table>
+</div>
+
+<p>O primeiro é o mais frequente: dentro de um flex, todo item tem <code>min-width: auto</code>, o que
+significa "nunca fique menor que o seu conteúdo". Um parágrafo com uma palavra comprida, ou um
+<code>pre</code>, define uma largura mínima grande e empurra tudo. <code>min-w-0</code> no item devolve
+o direito de encolher, e aí <code>truncate</code> ou <code>break-words</code> funcionam. É o mesmo
+motivo pelo qual uma tabela dentro de grid precisa de <code>min-w-0</code> no contêiner.</p>
+
+<p>O segundo é a altura em porcentagem. <code>h-full</code> é <code>height: 100%</code>, e porcentagem
+de altura só resolve quando o pai tem altura definida. Numa cadeia de <code>div</code> sem altura, o
+valor volta a <code>auto</code> e nada acontece. Se o objetivo é ocupar a tela, use <code>h-dvh</code> (a
+altura visível do navegador) ou <code>min-h-screen</code> no invólucro. Se o objetivo é herdar a altura
+de um pai que já tem, aí sim <code>h-full</code>.</p>
+
+<p>O terceiro é o <code>z-index</code> sem posição. <code>z-index</code> só vale em elemento
+posicionado (ou flex/grid item). <code>z-10</code> num <code>div</code> estático é ignorado, e a pessoa
+conclui que o Tailwind não gera a classe — quando gera. O mesmo raciocínio vale para
+<code>absolute</code>: ele se posiciona em relação ao ancestral posicionado mais próximo; sem nenhum, é
+o bloco da página, e o elemento "foge" para o canto.</p>
+
+<div class="trytailwind" data-largura="768" data-goal="largura:768;;css:#alvo|display=block;;rule:.md\:block">
+  <p class="try-task">A caixa de aviso sumiu em todas as telas: ficou só com <code>hidden</code>. Esta
+  prévia tem 768 px, então o <code>md:</code> vale — acrescente o par que a mostra a partir daí.</p>
+  <pre class="html">&lt;div id="alvo" class="hidden rounded-lg bg-amber-100 p-3 text-sm"&gt;
+  Encomendas para o dia seguinte até as 17h.
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: none
+padding: 12px
+background-color: oklch(0.962 0.059 95.617)
+font-size: 14px
+line-height: 20px
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="hidden rounded-lg bg-amber-100 p-3 text-sm md:block"&gt;
+  Encomendas para o dia seguinte até as 17h.
+&lt;/div&gt;</pre>
+</div>
+
+<p>Aqui o painel é a prova: antes, <code>display: none</code>; depois, <code>display: block</code>. Note
+que <code>md:block</code> não "desesconde" por mágica — ele escreve <code>display: block</code> dentro de
+uma consulta de largura, e essa regra vem depois da regra de <code>hidden</code> no CSS. É o mesmo
+princípio da seção 4, agora a favor do desenho.</p>
+
+<h2>7. Nomes que mudaram do v3 para o v4</h2>
+
+<p>Boa parte dos "erros" que aparecem em projeto novo é código de 2023 copiado para 2025. O v4 renomeou
+a escala de sombra e de raio, mudou a forma de declarar opacidade de cor, tirou as classes de opacidade
+separadas e mudou a posição do <code>!</code>. A tabela é a lista que mais aparece; todas as linhas foram
+conferidas no motor — quem está migrando de verdade encontra o roteiro em
+<a href="migrando-de-css.html">Migrando de CSS Antigo</a>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No v3</th><th>No v4</th><th>O que muda na prática</th></tr>
+<tr><td><code>@tailwind base;</code> etc.</td><td><code>@import "tailwindcss";</code></td><td>as três diretivas viraram uma</td></tr>
+<tr><td><code>tailwind.config.js</code></td><td><code>@theme { … }</code></td><td><code>@config</code> lê o arquivo antigo, se precisar</td></tr>
+<tr><td><code>bg-opacity-50</code></td><td><code>bg-black/50</code></td><td>a classe antiga não gera nada</td></tr>
+<tr><td><code>text-opacity-50</code></td><td><code>text-black/50</code></td><td>o mesmo para borda, anel e divisor</td></tr>
+<tr><td><code>shadow</code></td><td><code>shadow-sm</code></td><td>a escala desceu um nome</td></tr>
+<tr><td><code>shadow-sm</code></td><td><code>shadow-xs</code></td><td>quem copiou vê sombra mais forte</td></tr>
+<tr><td><code>rounded</code></td><td><code>rounded-sm</code></td><td>raio de 4 px agora tem sufixo</td></tr>
+<tr><td><code>rounded-sm</code></td><td><code>rounded-xs</code></td><td>o antigo <code>rounded-sm</code> era 2 px</td></tr>
+<tr><td><code>ring</code> com 3 px</td><td><code>ring</code> com 1 px</td><td>para o valor antigo, <code>ring-3</code></td></tr>
+<tr><td><code>outline-none</code></td><td><code>outline-hidden</code></td><td>o novo preserva o contorno no modo de alto contraste</td></tr>
+<tr><td><code>flex-shrink-0</code></td><td><code>shrink-0</code></td><td>o antigo ainda funciona</td></tr>
+<tr><td><code>overflow-ellipsis</code></td><td><code>text-ellipsis</code></td><td>o antigo ainda funciona</td></tr>
+<tr><td><code>!bg-red-500</code></td><td><code>bg-red-500!</code></td><td>o <code>!</code> foi para o fim</td></tr>
+<tr><td><code>bg-[--cor]</code></td><td><code>bg-(--cor)</code></td><td>variável CSS usa parênteses</td></tr>
+</table>
+</div>
+
+<p>O caso da opacidade de cor merece ver o CSS, porque explica a mudança de sintaxe. No v4 a cor com
+opacidade não usa mais uma variável separada: ela é misturada na hora, com <code>color-mix</code>, e há
+um <em>fallback</em> para navegador antigo:</p>
+
+<pre class="term">.bg-black\/50 {
+  background-color: color-mix(in srgb, #000 50%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in oklab, var(--color-black) 50%, transparent);
+  }
+}</pre>
+
+<p>Repare no <code>\/</code> no seletor: a barra também precisa de escape, como os dois-pontos. E repare
+que a cor vem de <code>--color-black</code>, então trocar a cor da marca no tema continua valendo. Quem
+tenta <code>bg-black bg-opacity-50</code> no v4 não recebe erro nenhum: recebe preto opaco, porque a
+segunda classe não existe.</p>
+
+<p>Sobre o <code>ring</code>, vale a explicação porque dói ver o layout: no v3 o anel padrão tinha 3 px e
+no v4 tem 1 px. Muita gente não percebe que o anel ficou fino, ou pior, escreve <code>ring-3</code>
+esperando o valor antigo e recebe 3 px de verdade — que agora é o dobro do padrão. Anel não ocupa espaço,
+então o desenho não quebra; mas o foco fica menos visível, e acessibilidade não é lugar para
+aproximação.</p>
+
+<h2>8. O roteiro de investigação em cinco minutos</h2>
+
+<p>Quando nada funciona, a tentação é trocar classes ao acaso. Um roteiro fixo é mais rápido. Primeiro
+minuto: abra o DevTools, selecione o elemento e olhe a aba <em>Computed</em>. Se a propriedade tem o
+valor que você quer, o problema é outro — talvez o elemento errado esteja selecionado, ou o estilo esteja
+sendo aplicado num filho. Se não tem, vá para o segundo minuto.</p>
+
+<p>Segundo minuto: procure o nome da classe no CSS gerado. No navegador, a aba <em>Sources</em> abre o
+arquivo; no terminal, um <code>grep</code> resolve. Se a classe não está lá, o build não a viu: rode de
+novo, confira o caminho da saída, confira o <code>@source</code>. Se está lá, o problema é de
+prioridade.</p>
+
+<p>Terceiro minuto: na aba <em>Styles</em>, veja qual regra ganhou. Declaração riscada é regra
+derrotada. O motivo aparece ao lado — outra regra, <code>!important</code>, estilo inline. A partir daí a
+decisão é simples: remova o que vence, ou escreva a sua regra com força suficiente.</p>
+
+<p>Quarto minuto: confira o elemento na tela, não no código. Um <code>div</code> a mais, um
+<code>class</code> colado no lugar errado, um fechamento de tag faltando — o HTML inválido faz o navegador
+reorganizar a árvore, e o seu estilo vai parar num elemento que você não tinha em mente. O testador de
+navegador deste guia verifica exatamente isso: tag escrita como exemplo na prosa, sem escape, abre um
+elemento de verdade e engole o resto da página.</p>
+
+<p>Quinto minuto: reduza. Apague metade das classes e veja o que acontece; se voltar a funcionar, o
+conflito está na metade apagada. É chato e é rápido. Depurar CSS é uma busca binária, não uma discussão
+com o computador — e o computador sempre tem razão sobre o que aplicou. Quando o CSS gerado for o
+suspeito, <a href="depuracao-de-css.html">Depurar o CSS</a> mostra como ler o arquivo por dentro.</p>
+
+<h2>9. Resumo</h2>
+
+<p>O Tailwind não valida nomes: classe que não existe é ignorada em silêncio. A rotina de diagnóstico é
+sempre a mesma — a classe está escrita certo, o CSS gerado tem a regra, e a regra ganhou a disputa? Cada
+pergunta elimina uma família de causas.</p>
+
+<ul>
+<li>Sem hífen, sem dois-pontos ou com sufixo inventado, a classe não existe: <code>p4</code>,
+<code>text-bold</code>, <code>p-4x</code>, <code>md: block</code>.</li>
+<li>Classe que não aparece na tela: build parado, saída no arquivo errado, cache do navegador ou arquivo
+fora do alcance do <code>@source</code>.</li>
+<li>Duas classes da mesma propriedade: vence a última no CSS compilado, não a última no HTML. Force com
+<code>p-2!</code>.</li>
+<li><code>style=""</code> vence tudo; CSS sem <code>@layer</code> vence as camadas do Tailwind.</li>
+<li>Variante que não pega: <code>hover:</code> no toque, <code>disabled:</code> em <code>div</code>,
+<code>group</code> ausente, <code>peer</code> depois do alvo.</li>
+<li>Layout: <code>min-w-0</code> para encolher no flex, altura definida para <code>h-full</code>,
+<code>relative</code> para <code>absolute</code> e <code>z-index</code>.</li>
+<li>v3 no v4: <code>shadow</code> virou <code>shadow-sm</code>, <code>bg-opacity-*</code> virou
+<code>bg-black/50</code>, <code>ring</code> agora é 1 px e o <code>!</code> vai no fim.</li>
+</ul>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

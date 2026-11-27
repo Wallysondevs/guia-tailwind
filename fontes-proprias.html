@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fontes Próprias | Guia Tailwind</title>
+<meta name="description" content="Fontes próprias no Tailwind 4: o token --font-*, a pilha de reserva, as famílias que todo mundo tem, herança no contêiner e números tabulares para preços.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Fontes <span class="hl">Próprias</span></h1>
+<p class="intro">A Ana mostrou o site para a designer que fez o cartão da padaria e ouviu a frase que
+todo mundo ouve: "essa letra não sou eu". No papel, o nome da padaria é uma serifada com cara de
+convite; na tela, é a mesma letra do banco, do e-mail e da planilha. Nesta aula ela escolhe a fonte do
+título, escreve a lista de reserva para o caso de a fonte não existir no computador da cliente, aplica
+a família num contêiner só e arruma os preços, que precisam de números alinhados. Nada de instalar
+programa: tudo mora no <code>@theme</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é uma família tipográfica — e por que você sempre escreve uma lista.</li>
+  <li>As fontes que existem em qualquer computador, sem baixar nada.</li>
+  <li>Como o token <code>--font-*</code> vira a classe <code>font-*</code>.</li>
+  <li>Por que aplicar a classe no contêiner economiza vinte repetições.</li>
+  <li>A diferença entre família, tamanho, espaço entre letras e altura da linha.</li>
+  <li>O que fazer quando a fonte é um arquivo <code>.woff2</code> e quanto isso pesa.</li>
+  <li>Como alinhar preços com <code>tabular-nums</code>.</li>
+  <li>O que fazer quando a letra aparece no seu computador e não no da cliente.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a letra do cartão não chegou no site</h2>
+
+<p>O cartão da padaria é bonito por muitos motivos, e um deles é a letra. O nome "Padaria da Ana"
+aparece numa serifada larga, com as hastes finas, que lembra carimbo antigo. O endereço e o telefone
+estão numa sem serifa pequena e discreta. É um contraste clássico: uma família para chamar atenção,
+outra para informar.</p>
+
+<p>No site, tudo isso virou uma coisa só. O navegador, quando você não diz nada, usa a fonte padrão do
+sistema — a mesma do e-mail, da planilha, do menu. É uma fonte boa, desenhada para ser neutra, e
+justamente por ser neutra não diz nada: o título "Pão quentinho" tem o mesmo peso visual do texto
+miúdo do rodapé.</p>
+
+<p>A Ana não precisa de uma fonte nova para resolver isso. Metade dos computadores do mundo tem uma
+serifada decente instalada, e o Tailwind já traz quatro famílias prontas. O que falta é
+<strong>escolher</strong> e <strong>declarar</strong>: escolher a família para cada papel (título,
+texto, preço) e declarar essa decisão uma vez, num lugar só, para que valha no site inteiro.</p>
+
+<p>E é aqui que a tipografia encontra a mesma ideia das aulas anteriores: um nome, um valor, muitos
+usos. Se a designer mudar de ideia na semana que vem, a Ana troca uma linha e o site inteiro muda de
+letra — sem tocar em nenhum arquivo HTML.</p>
+
+<h2>2. Família, pilha e reserva</h2>
+
+<p>Uma <em>família tipográfica</em> é um conjunto de letras desenhadas juntas: mesma altura, mesmo
+traço, mesmas proporções. Georgia é uma família; Helvetica é outra. Quando você escreve
+<code>font-family</code> no CSS, pede uma família — mas o computador do visitante pode não ter aquela
+instalada, e aí o navegador precisa de um plano B.</p>
+
+<p>Esse plano B é a <strong>pilha</strong>: uma lista de famílias, da preferida para a última opção. O
+navegador tenta a primeira; se não achar, tenta a segunda; se não achar nenhuma, usa uma palavra
+genérica no fim da lista, como <code>serif</code> ou <code>sans-serif</code>, que sempre existe porque
+aponta para a fonte padrão daquele tipo no sistema.</p>
+
+<pre class="file" data-file="src/style.css">.titulo {
+  font-family: Georgia, "Times New Roman", serif;
+}</pre>
+
+<p>Leia da esquerda para a direita como uma ordem de preferência. Georgia é a preferida; Times New
+Roman é a reserva, para quem não tem Georgia; e <code>serif</code> é a rede de segurança, que manda o
+navegador usar qualquer serifada que ele tenha. O nome genérico sempre fica no fim, sem aspas.</p>
+
+<p>As aspas existem por um motivo prático: nomes de família com espaço precisam delas, senão o
+navegador lê cada palavra como uma família diferente. <code>"Times New Roman"</code> é uma família;
+<code>Times New Roman</code> sem aspas é três nomes errados. Georgia, por ser uma palavra só, dispensa
+as aspas — e por isso aparece sem elas nos exemplos.</p>
+
+<dl class="anatomy">
+<dt>família</dt>
+<dd>Um conjunto de letras desenhado junto, como Georgia. Não confunda com "fonte" no sentido de
+arquivo: a família é o desenho.</dd>
+<dt>pilha</dt>
+<dd>A lista de famílias separadas por vírgula, da preferida à reserva. É o valor de
+<code>font-family</code>.</dd>
+<dt>serifa</dt>
+<dd>O pequeno pé no fim das hastes das letras. Times e Georgia têm; Helvetica e Arial não.</dd>
+<dt>peso</dt>
+<dd>A espessura: 400 é normal, 700 é negrito. No Tailwind, <code>font-semibold</code>,
+<code>font-bold</code>.</dd>
+<dt>woff2</dt>
+<dd>O formato de arquivo de fonte usado na web. É o que você baixa quando a família não existe no
+computador do visitante.</dd>
+</dl>
+
+<h2>3. As fontes que todo mundo tem</h2>
+
+<p>Antes de baixar qualquer arquivo, vale conhecer o que já está instalado. Estas famílias existem na
+prática total dos computadores e celulares, e com elas você faz um site inteiro sem gastar um
+quilobyte:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Família</th><th>Como escrever</th><th>Onde serve</th></tr>
+<tr><td>system-ui</td><td><code>system-ui, sans-serif</code></td><td>texto corrido e interface; é a mais rápida</td></tr>
+<tr><td>Georgia</td><td><code>Georgia, serif</code></td><td>título com cara de impresso, texto longo</td></tr>
+<tr><td>Times New Roman</td><td><code>"Times New Roman", serif</code></td><td>reserva da Georgia; jornal antigo</td></tr>
+<tr><td>Palatino</td><td><code>"Palatino Linotype", Palatino, serif</code></td><td>convite, menu de restaurante</td></tr>
+<tr><td>Trebuchet MS</td><td><code>"Trebuchet MS", sans-serif</code></td><td>interface com um toque humano</td></tr>
+<tr><td>Courier New</td><td><code>"Courier New", monospace</code></td><td>preços, códigos, recibos</td></tr>
+</table>
+</div>
+
+<p>Repare que a coluna do meio não tem invenção: são nomes que o sistema reconhece. Isso importa
+porque nome de família não se traduz nem se inventa — se você escrever <code>Georgia</code> com
+acento, ou <code>georgia</code> em minúscula, o navegador não acha e cai na reserva sem avisar. É o
+mesmo silêncio de sempre, agora na tipografia.</p>
+
+<p>Para a padaria, o par que resolve é Georgia no título e <code>system-ui</code> no texto. Não é
+sofisticado, e é honesto: carrega instantaneamente, funciona offline, não depende de servidor de
+terceiros e já dá à página a temperatura de papel que o cartão tem. Fonte baixada é para quando a
+identidade exige — e aí a conversa é outra, com licença e peso na balança.</p>
+
+<h2>4. O token --font-* e a classe que nasce dele</h2>
+
+<p>Declarar a família no <code>@theme</code> é o mesmo movimento que você fez com as cores: dá um nome
+ao valor, e o Tailwind cria a classe. O prefixo das famílias é <code>--font-</code>, e o que vem depois
+vira o nome da classe.</p>
+
+<pre class="file" data-file="src/style.css">@import "tailwindcss";
+
+@theme {
+  --font-titulo: Georgia, "Times New Roman", serif;
+}</pre>
+
+<p>Com esse bloco no CSS de entrada, <code>font-titulo</code> passa a existir como qualquer classe do
+Tailwind: aceita variante (<code>md:font-titulo</code>), funciona no tema escuro, e o CSS gerado é
+curto porque só aponta para a variável.</p>
+
+<pre class="term">@layer theme {
+  :root, :host {
+    --font-titulo: Georgia, "Times New Roman", serif;
+  }
+}
+
+.font-titulo {
+  font-family: var(--font-titulo);
+}</pre>
+
+<p>Se a classe não fizer nada, o diagnóstico é o da aula de <a href="arroba-theme.html">O @theme</a>: olhe o prefixo. Uma
+variável chamada <code>--fonte-titulo</code> não gera classe nenhuma, e o valor continua disponível em
+<code>var(--fonte-titulo)</code> — o que aumenta a confusão, porque a cor aparece no CSS e a classe não
+existe. Prefixo em inglês, sempre.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|font-family=Georgia, &quot;Times New Roman&quot;, serif;;rule:font-family: var(--font-titulo)">
+  <p class="try-task">O título do cartão pede uma serifada. Declare no <code>@theme</code> a família
+  <code>--font-titulo: Georgia, "Times New Roman", serif</code>; a classe <code>font-titulo</code> já
+  está no HTML.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+}
+&lt;/style&gt;
+
+&lt;h2 id="alvo" class="font-titulo text-2xl text-amber-900"&gt;Pão de queijo&lt;/h2&gt;</pre>
+  <pre class="out">
+color: oklch(0.414 0.112 45.904)
+font-size: 24px
+line-height: 32px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+  --font-titulo: Georgia, "Times New Roman", serif;
+}
+&lt;/style&gt;
+
+&lt;h2 id="alvo" class="font-titulo text-2xl text-amber-900"&gt;Pão de queijo&lt;/h2&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra a linha <code>font-family: Georgia, "Times New Roman", serif</code>
+— exatamente o que você declarou, com as aspas no lugar. É uma das vantagens de conferir o valor
+computado: você vê se as aspas e as vírgulas chegaram intactas, em vez de descobrir na casa da cliente
+que a reserva foi lida como três famílias erradas.</p>
+
+<h2>5. Uma classe no contêiner, não vinte nas tags</h2>
+
+<p>Família de fonte tem uma propriedade que as outras não têm: ela <strong>herda</strong>. Isso quer
+dizer que o filho de um elemento com <code>font-titulo</code> usa a mesma família, mesmo sem classe
+nenhuma. E o neto também. A herança é o motivo de você quase nunca precisar repetir a classe.</p>
+
+<p>A Ana fez o contrário no começo: colocou <code>font-titulo</code> no título, no subtítulo, na
+legenda do preço e no nome do pão. Quatro repetições para uma decisão só. Quando a designer trocou a
+família, ela mudou uma linha no tema e as quatro classes continuaram apontando para o token — mas
+quando resolveu que o texto do cartão também era serifado, teve de editar o HTML quatro vezes.</p>
+
+<p>O caminho certo é aplicar no contêiner. O cartão inteiro ganha a família, e cada tag dentro dele
+herda:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="card font-titulo"&gt;
+  &lt;h2&gt;Pão de queijo&lt;/h2&gt;
+  &lt;p&gt;Assado às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+
+<p>O mesmo raciocínio vale para o site inteiro: muitas vezes a classe vai no <code>&lt;body&gt;</code>,
+no Vite, ou no <code>&lt;div&gt;</code> que envolve tudo, no modo sem build. O Tailwind não tem uma
+"fonte do site" separada: o que existe é herança, e ela começa em quem tem a classe.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|font-family=Georgia, serif;;css:#texto|font-family=Georgia, serif;;rule:font-family: var(--font-titulo)">
+  <p class="try-task">A família já está no tema, mas o cartão não a usa. Ponha
+  <code>font-titulo</code> no cartão — uma classe só — e veja o título e o texto acompanharem por
+  herança.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --font-titulo: Georgia, serif;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="rounded-lg bg-amber-50 p-4"&gt;
+  &lt;h2 class="text-lg text-amber-900"&gt;Pão de queijo&lt;/h2&gt;
+  &lt;p id="texto" class="text-sm text-amber-800"&gt;Assado às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --font-titulo: Georgia, serif;
+}
+&lt;/style&gt;
+
+&lt;div id="alvo" class="font-titulo rounded-lg bg-amber-50 p-4"&gt;
+  &lt;h2 class="text-lg text-amber-900"&gt;Pão de queijo&lt;/h2&gt;
+  &lt;p id="texto" class="text-sm text-amber-800"&gt;Assado às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel descreve o cartão, que é o elemento com <code>id="alvo"</code>. A conferência da missão
+olha também o parágrafo de dentro: ele não tem classe de fonte e mesmo assim responde com Georgia,
+porque herdou. Se você escrevesse <code>font-sans</code> no parágrafo, ele voltaria à sem serifa —
+herança não é teimosia, é só a ausência de uma decisão mais específica.</p>
+
+<h2>6. Família não é tamanho: os prefixos vizinhos</h2>
+
+<p>O prefixo <code>--font-</code> cuida da família, e só dela. Tamanho, espaço entre letras e altura da
+linha moram em prateleiras diferentes, e confundir as três é o segundo erro mais comum de tipografia
+com Tailwind.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que você quer mudar</th><th>Prefixo no @theme</th><th>Classe</th></tr>
+<tr><td>a família (o desenho da letra)</td><td><code>--font-*</code></td><td><code>font-titulo</code></td></tr>
+<tr><td>o tamanho</td><td><code>--text-*</code></td><td><code>text-chamada</code></td></tr>
+<tr><td>o espaço entre as letras</td><td><code>--tracking-*</code></td><td><code>tracking-titulo</code></td></tr>
+<tr><td>a altura da linha</td><td><code>--leading-*</code></td><td><code>leading-solta</code></td></tr>
+<tr><td>o peso</td><td>não precisa de token</td><td><code>font-semibold</code></td></tr>
+</table>
+</div>
+
+<p>Quem começa costuma tentar <code>font-chamada</code> achando que está aumentando o texto e fica com
+uma família chamada "chamada" que não existe. Ou pior: declara <code>--font-chamada: 2rem</code> e
+depois estranha que o tamanho não mudou — o token existe, a classe existe, e o valor está errado para o
+que aquela prateleira faz.</p>
+
+<p>Um detalhe elegante do Tailwind 4: a prateleira de tamanho aceita valores companheiros, com dois
+hífens no fim do nome. <code>--text-chamada--line-height: 1.1</code> faz a classe
+<code>text-chamada</code> já trazer a altura de linha junto. É o mesmo truque que existe para
+font-weight e letter-spacing dentro de <code>--text-*</code>, e serve para que o par tamanho/entrelinha
+não se desfaça em cada uso.</p>
+
+<h2>7. Quando a fonte é um arquivo</h2>
+
+<p>Há casos em que a identidade exige mesmo o desenho original, e ele não está instalado em ninguém.
+Aí entra a <em>web font</em>: você baixa o arquivo <code>.woff2</code>, coloca na pasta do site e
+declara com <code>@font-face</code>. São duas peças: o arquivo e a declaração.</p>
+
+<pre class="file" data-file="src/style.css">@font-face {
+  font-family: "Padaria Titulo";
+  src: url("fontes/titulo-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@theme {
+  --font-titulo: "Padaria Titulo", Georgia, serif;
+}</pre>
+
+<p>O <code>@font-face</code> dá um nome ao arquivo — aqui, "Padaria Titulo" — e o
+<code>@theme</code> usa esse nome na ponta da pilha. Repare que a reserva continua ali: se o arquivo
+não carregar, Georgia entra em cena e o título fica serifado do mesmo jeito. Nunca declare uma família
+baixada sozinha, sem reserva.</p>
+
+<p>O <code>font-display: swap</code> merece uma frase. Sem ele, o navegador pode esconder o texto
+enquanto a fonte baixa — a página fica em branco por um instante, o que é pior do que mostrar a letra
+"errada" por meio segundo. Com <code>swap</code>, o texto aparece imediatamente na reserva e troca
+quando o arquivo chega.</p>
+
+<p>O problema da fonte baixada é o peso, e ele se acumula rápido. Cada peso é um arquivo, e cada
+arquivo é baixado por cada visitante:</p>
+
+<pre class="term">ana@notebook:~/padaria$ ls -lh src/fontes
+total 148K
+-rw-r--r-- 1 ana ana  62K nov 27 10:02 titulo-regular.woff2
+-rw-r--r-- 1 ana ana  58K nov 27 10:02 titulo-bold.woff2</pre>
+
+<p>Cento e vinte kilobytes para dois pesos de uma família, num site cujo CSS inteiro tem quatorze. Não é
+proibido — é uma escolha, e escolhas se justificam. Se a fonte é a marca, vale; se é enfeite, o par
+Georgia mais <code>system-ui</code> entrega quase o mesmo por zero. E lembre da licença: fonte baixada
+na internet sem verificar o contrato é problema jurídico, não técnico, e costuma chegar depois.</p>
+
+<h2>8. Números alinhados e letras espaçadas</h2>
+
+<p>Existe um detalhe de tipografia que faz diferença em qualquer tabela de preços, e quase ninguém
+lembra: em muitas fontes, cada dígito tem a sua largura, para que o texto corrido fique bonito. Em uma
+lista de preços, isso é ruim — as vírgulas e os algarismos dançam de linha para linha. A solução é uma
+propriedade do CSS exposta como classe no Tailwind: <code>tabular-nums</code>.</p>
+
+<p>Com ela, todos os dígitos passam a ocupar a mesma largura, e a coluna de preços alinha como numa
+tabela impressa. É o tipo de melhoria que ninguém elogia e todo mundo sente: a lista parece organizada
+sem que a pessoa saiba por quê.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|font-family=ui-monospace, monospace;;css:#alvo|font-variant-numeric=tabular-nums;;texto:R$ 4,50">
+  <p class="try-task">O preço precisa da família do token e de números alinhados. Acrescente
+  <code>font-preco</code> e <code>tabular-nums</code> ao preço.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --font-preco: ui-monospace, monospace;
+}
+&lt;/style&gt;
+
+&lt;p id="alvo" class="text-xl text-amber-900"&gt;R$ 4,50&lt;/p&gt;</pre>
+  <pre class="out">
+color: oklch(0.414 0.112 45.904)
+font-size: 20px
+line-height: 28px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --font-preco: ui-monospace, monospace;
+}
+&lt;/style&gt;
+
+&lt;p id="alvo" class="font-preco text-xl text-amber-900 tabular-nums"&gt;R$ 4,50&lt;/p&gt;</pre>
+</div>
+
+<p>A família monoespaçada é a escolha óbvia para preço porque todo caractere já tem a mesma largura —
+mas ela é larga e cara em texto corrido. Por isso a receita é combinar: monoespaçada no valor,
+<code>system-ui</code> na descrição, e <code>tabular-nums</code> em qualquer lugar onde números se
+alinharem em coluna, mesmo em fonte proporcional.</p>
+
+<p>O outro par que vale conhecer é o espaçamento entre letras. Título curto em caixa alta costuma pedir
+um respiro a mais, e isso é a prateleira <code>--tracking-*</code>:
+<code>--tracking-titulo: 0.06em</code> gera <code>tracking-titulo</code>. Use em título de duas ou três
+palavras; em texto corrido, o espaçamento extra atrapalha a leitura, porque o olho precisa de mais
+movimento para juntar as sílabas.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: no seu computador fica lindo, no da cliente não</h3>
+<p>Ela escolheu uma família exótica que tinha instalada desde um curso de design. Na máquina dela,
+perfeito; no notebook da cliente, o título saiu na sans do sistema. A causa é a pilha: se a primeira
+família não existe, o navegador vai para a próxima sem avisar. Duas saídas — declarar uma reserva que
+você conhece (Georgia, serif) ou baixar o arquivo e usar <code>@font-face</code>, aceitando o peso. O que
+não dá para fazer é confiar em fonte instalada que só existe no seu computador.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o título muda de forma na frente da pessoa</h3>
+<p>Com web font, o texto pode aparecer na reserva e trocar quando o arquivo chega — é o
+<code>font-display: swap</code> fazendo o trabalho dele. O efeito é um pulo na largura do título, que
+assusta quando a fonte baixada é muito diferente da reserva. Duas medidas ajudam: escolher uma reserva
+de proporções parecidas e reservar espaço para o título (com <code>min-h-</code>), para o conteúdo de
+baixo não pular.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a fonte certa deixou o site lento</h3>
+<p>A identidade nova pedia quatro pesos, e a Ana baixou os quatro. O site ficou bonito e o celular
+passou a esperar meio segundo a mais. A correção é sempre a mesma: use dois pesos (normal e um destaque),
+um arquivo por peso, e prefira o formato <code>woff2</code>. Se o desenho tiver muitos caracteres que
+você não usa, é possível gerar um arquivo só com o alfabeto português — o nome disso é subset, e vale
+perguntar a quem fez a fonte.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. Por que a pilha de fontes tem mais de uma família?</p>
+<label><input type="radio" name="q1"> para que o navegador tenha reserva se a primeira não existir</label>
+<label><input type="radio" name="q1"> para o Tailwind gerar uma classe por família</label>
+<label><input type="radio" name="q1"> porque o CSS exige pelo menos três nomes</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">2. O que <code>--font-titulo: Georgia, serif</code> no <code>@theme</code> gera?</p>
+<label><input type="radio" name="q2"> uma classe chamada <code>titulo</code></label>
+<label><input type="radio" name="q2"> a classe <code>font-titulo</code></label>
+<label><input type="radio" name="q2"> o tamanho do título em <code>rem</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">3. Qual prefixo aumenta o <em>tamanho</em> do texto?</p>
+<label><input type="radio" name="q3"> <code>--font-*</code></label>
+<label><input type="radio" name="q3"> <code>--tracking-*</code></label>
+<label><input type="radio" name="q3"> <code>--text-*</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a reserva da pilha</h2>
+<p>Complete a declaração do título com a palavra genérica que sempre existe, a última da pilha — a que
+manda o navegador usar qualquer serifada do sistema.</p>
+<div class="ex-code">@theme { --font-titulo: Georgia, <input aria-label="resposta 1" data-answer="serif" placeholder="...">; }</div>
+<p class="ex-dica">Dica: é uma palavra só, em inglês, sem aspas. Se você escrever
+<code>Georgia</code> sozinha, perde a rede de segurança e o título pode virar sans em máquina sem
+Georgia.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Família se declara com uma pilha: a preferida, uma reserva e a palavra genérica no fim. As fontes do
+sistema (Georgia, Trebuchet, Courier New, <code>system-ui</code>) cobrem a maioria dos casos sem baixar
+nada. No <code>@theme</code>, o prefixo <code>--font-*</code> gera a classe <code>font-*</code>, e
+pronto: a decisão passa a existir no site inteiro, com variante e tema funcionando.</p>
+
+<p>Como família herda, a classe vai no <code>contêiner</code> e não em cada tag — o cartão inteiro, ou o
+<code>body</code> do site. Tamanho, espaço entre letras e altura de linha são prateleiras vizinhas
+(<code>--text-*</code>, <code>--tracking-*</code>, <code>--leading-*</code>) e não se confundem com a
+família. Quando a identidade exige o arquivo original, entra o <code>@font-face</code> com
+<code>font-display: swap</code> e a reserva na ponta. E para preços, <code>tabular-nums</code>.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Família é desenho; a pilha é a lista, da preferida à reserva.</li>
+<li>Nome com espaço pede aspas; a palavra genérica (<code>serif</code>) fica no fim, sempre.</li>
+<li><code>--font-*</code> no <code>@theme</code> gera <code>font-*</code>; <code>--fonte-*</code> não gera nada.</li>
+<li>Família herda: uma classe no contêiner, não vinte nas tags.</li>
+<li><code>--text-*</code> é tamanho, <code>--tracking-*</code> é espaço entre letras.</li>
+<li><code>--text-chamada--line-height</code> leva o par tamanho/entrelinha junto.</li>
+<li>Web font pede <code>@font-face</code>, reserva na pilha e <code>font-display: swap</code>.</li>
+<li>Cada peso é um arquivo baixado: dois bastam, e o formato é <code>woff2</code>.</li>
+<li><code>tabular-nums</code> alinha preços em coluna.</li>
+<li>Fonte instalada só no seu computador não é decisão de projeto.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

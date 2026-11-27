@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loja | Guia Tailwind</title>
+<meta name="description" content="A página da loja da padaria montada por partes: o topo com carrinho, a faixa de abertura, a grade de produtos, o card com preço e botão, os estados e o responsivo.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Loja</span></h1>
+<p class="intro">A Ana vende pão por mensagem. Funciona: ela manda a foto da assadeira, alguém pergunta
+o preço, ela responde, combinam a retirada. O problema é o volume. Na sexta-feira são quarenta
+conversas parecidas, todas com as mesmas três perguntas — o que tem hoje, quanto custa, como compra.
+Uma loja resolve isso de uma vez: a página responde as três e a Ana só confirma o pedido. Nesta aula
+ela monta essa página por partes, e cada parte aparece funcionando numa caixa antes de entrar no
+lugar. Nada de instalar nada: só as classes dos níveis 1 e 2.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Como se planeja uma página inteira antes de escrever a primeira classe.</li>
+  <li>O casco de todas as faixas: <code>mx-auto max-w-6xl px-4</code> e o que cada pedaço faz.</li>
+  <li>O topo da loja: uma linha com três grupos e o menu que some no celular.</li>
+  <li>O selo do carrinho: <code>relative</code> no pai, <code>absolute</code> no filho.</li>
+  <li>A faixa de abertura com um título, uma frase e um botão.</li>
+  <li>A grade de produtos em uma, duas e três colunas, na ordem certa.</li>
+  <li>O card do produto: imagem quadrada, nome curto, preço e ação.</li>
+  <li>Os estados: mouse em cima, foco pelo teclado e produto esgotado.</li>
+  <li>Os três erros que fazem uma loja parecer amadora no celular.</li>
+</ul>
+</div>
+
+<h2>1. A planta da página</h2>
+
+<p>Antes de escrever a primeira classe, a Ana desenha a página no papel. É um retângulo dividido em
+quatro faixas horizontais: o <strong>topo</strong> (nome da padaria, menu, carrinho), a
+<strong>abertura</strong> (uma faixa com a frase do dia e um botão), a <strong>grade de
+produtos</strong> e o <strong>rodapé</strong> (endereço, horário, telefone). Só isso. Uma loja não é
+uma tela cheia de invenções: é uma pilha de faixas, cada uma com uma tarefa.</p>
+
+<p>Esse desenho economiza horas. Quem começa a escrever classes sem saber onde cada coisa mora acaba
+com cinco maneiras diferentes de fazer um título, e a página parece colagem. Com a planta na mão, a
+pergunta deixa de ser “que classe eu uso?” e passa a ser “que faixa eu estou montando agora?” — e a
+resposta fica óbvia.</p>
+
+<p>No HTML, cada faixa é uma tag que agrupa: <code>&lt;header&gt;</code> para o topo,
+<code>&lt;section&gt;</code> para a abertura, <code>&lt;main&gt;</code> para a grade,
+<code>&lt;footer&gt;</code> para o rodapé. Essas tags não desenham nada sozinhas — elas só dizem o
+que é cada pedaço. Quem desenha é a classe. A vantagem de usar a tag certa é que o leitor de tela (o
+programa que lê a página em voz alta para quem não vê) consegue pular de faixa em faixa.</p>
+
+<p>Dentro de cada faixa entra o mesmo casco, e é aqui que a loja começa a ficar boa:</p>
+
+<pre class="term">.mx-auto {
+  margin-inline: auto;
+}
+.max-w-6xl {
+  max-width: var(--container-6xl);
+}
+.px-4 {
+  padding-inline: calc(var(--spacing) * 4);
+}</pre>
+
+<p>Três decisões em três classes. <code>max-w-6xl</code> é o teto: 72 rem, ou 1.152 px. Sem teto, o
+texto de uma loja estica pela largura do monitor e o olho se perde ao voltar para a linha seguinte.
+<code>mx-auto</code> transforma o espaço que sobra em margem dos dois lados, e é isso que centraliza
+o bloco. <code>px-4</code> garante 16 px de respiro nas laterais: no celular, sem ele, o texto encosta
+na borda do vidro.</p>
+
+<p>Junte os três e você tem o que os designers chamam de <em>container</em>: uma coluna confortável,
+centralizada, que nunca fica mais larga do que deveria. Repare que o respiro é <code>px</code>
+(horizontal) e não <code>p</code> (todos os lados): quem cuida do espaço vertical de cada faixa é a
+própria faixa, com <code>py</code>.</p>
+
+<pre class="file" data-file="loja.html">&lt;body class="bg-stone-50 text-stone-800"&gt;
+  &lt;header class="sticky top-0 z-10 border-b border-stone-200 bg-white"&gt;
+    &lt;div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3"&gt;…&lt;/div&gt;
+  &lt;/header&gt;
+  &lt;section class="bg-amber-50 px-4 py-12"&gt;…&lt;/section&gt;
+  &lt;main class="mx-auto max-w-6xl px-4 py-10"&gt;…&lt;/main&gt;
+  &lt;footer class="border-t border-stone-200 bg-white px-4 py-8"&gt;…&lt;/footer&gt;
+&lt;/body&gt;</pre>
+
+<p>O <code>bg-stone-50</code> no <code>body</code> é o cinza quase branco do papel; o
+<code>bg-white</code> nas faixas faz o topo e o rodapé se destacarem do fundo sem precisar de sombra.
+E o <code>text-stone-800</code> na raiz define a cor de todo texto que não disser outra coisa — a cor
+desce pela árvore, do pai para os filhos, até alguém sobrescrever.</p>
+
+<p>Guarde a lógica que vale para a página inteira: <strong>primeiro a faixa, depois o casco, depois o
+conteúdo</strong>. Quem inverte a ordem passa a manhã ajustando <code>mt-</code> em elementos que
+deveriam estar dentro de um bloco.</p>
+
+<div class="cenario">
+<h3>Cenário 1: a faixa colorida que para no meio da tela</h3>
+<p>A Ana pintou a abertura de âmbar e colocou <code>bg-amber-50 max-w-6xl mx-auto</code> na mesma
+<code>&lt;section&gt;</code>. No monitor grande, o âmbar ficou com 1.152 px de largura e sobraram duas
+faixas brancas nas laterais — a cor não é do bloco, é da tela até a borda. A correção é separar os
+papéis: a <code>&lt;section&gt;</code> fica com o fundo e o respiro vertical, e uma
+<code>&lt;div&gt;</code> interna recebe o casco (<code>mx-auto max-w-6xl px-4</code>). Regra de bolso:
+<strong>fundo e teto nunca no mesmo elemento</strong>.</p>
+</div>
+
+<h2>2. O topo: três grupos em uma linha</h2>
+
+<p>O topo da loja tem três grupos e uma responsabilidade: deixar claro onde a pessoa está e como ela
+compra. À esquerda, o nome da padaria; no meio, o menu com as seções; à direita, o carrinho. No papel
+é uma linha só, e no HTML também: uma <code>&lt;div&gt;</code> com <code>flex</code>, três filhos e
+<code>justify-between</code> para empurrar as pontas.</p>
+
+<dl class="anatomy">
+<dt>flex</dt>
+<dd>Põe os filhos em uma linha. Sem ele, cada grupo vira um bloco empilhado e o topo fica com três
+andares.</dd>
+<dt>items-center</dt>
+<dd>Alinha os três pelo meio na vertical. Sem isso, o texto pequeno do menu sobe e o botão do
+carrinho desce.</dd>
+<dt>justify-between</dt>
+<dd>Cola o primeiro filho na esquerda, o último na direita e deixa o do meio no centro. É o que faz
+“nome · menu · carrinho” ficarem nos lugares certos.</dd>
+<dt>gap-4</dt>
+<dd>O respiro mínimo entre os grupos. Quando a tela aperta, é ele que impede o nome de encostar no
+menu.</dd>
+<dt>hidden md:flex</dt>
+<dd>No celular o menu inteiro desaparece; a partir de 768 px ele volta como linha. Duas classes, um
+comportamento.</dd>
+</dl>
+
+<p>O <code>border-b border-stone-200</code> desenha a linha de base do topo. É mais elegante que a
+sombra e diz a mesma coisa: “aqui termina a barra, aqui começa o conteúdo”. Se o topo precisar
+acompanhar a rolagem, <code>sticky top-0 z-10</code> resolve — <code>sticky</code> gruda o elemento
+no alto quando ele encosta na borda, e <code>z-10</code> garante que ele passe por cima das fotos dos
+pães em vez de sumir atrás delas.</p>
+
+<p>Um aviso de acessibilidade que também é de bom gosto: o nome da padaria é um link para a página
+inicial, e o menu tem <code>aria-label</code> dizendo “Menu principal”. Quem navega por leitor de tela
+ouve “Menu principal, link, Pães, link, Bolos”. Sem o rótulo, ouve só uma sequência de links soltos e
+não sabe para onde está indo.</p>
+
+<p>Repare que eu ainda não falei de cor de fundo do botão nem de tamanho de fonte do menu. Não é
+descuido: o topo precisa primeiro estar na linha certa. Cor e tamanho são ajuste fino, e ajuste fino
+em layout torto é trabalho perdido.</p>
+
+<h2>3. O selo do carrinho</h2>
+
+<p>O carrinho mostra a palavra e um número: três itens. Escrito em sequência, o número fica do lado do
+texto, dentro da linha, e o resultado parece um preço colado na palavra. O que a Ana quer é o
+contrário: o número como uma bolinha no canto superior direito, meio para fora, como nas lojas
+grandes.</p>
+
+<p>Isso se faz em duas partes. O elemento de referência — o link do carrinho — recebe
+<code>relative</code>. O selo recebe <code>absolute</code>. A partir daí, o selo deixa de ocupar lugar
+na linha e passa a ser posicionado em relação ao link, e não à página. É como colar um adesivo: o
+adesivo não empurra nada, ele fica por cima.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|position=absolute;;css:#alvo|height=20px;;rule:top: calc(var(--spacing) * -2)">
+  <p class="try-task">O número está empilhado depois da palavra, dentro da linha. Tire o selo do fluxo,
+  fixe-o em 20 × 20 px e cole-o no canto de cima à direita: acrescente
+  <code>absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center</code> e remova o
+  <code>px-2</code> do <code>&lt;span id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;header class="flex items-center justify-between border-b border-stone-200 bg-white p-4"&gt;
+  &lt;p class="text-lg font-bold text-stone-900"&gt;Pão Quente&lt;/p&gt;
+  &lt;a href="#" class="relative inline-flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium text-stone-700"&gt;
+    &lt;span&gt;Carrinho&lt;/span&gt;
+    &lt;span id="alvo" class="rounded-full bg-amber-600 px-2 text-xs text-white"&gt;3&lt;/span&gt;
+  &lt;/a&gt;
+&lt;/header&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.666 0.179 58.318)
+color: rgb(255, 255, 255)
+font-size: 12px
+line-height: 16px
+border-radius: 3.35544e+07px
+padding-inline: 8px
+</pre>
+  <pre class="solucao">&lt;header class="flex items-center justify-between border-b border-stone-200 bg-white p-4"&gt;
+  &lt;p class="text-lg font-bold text-stone-900"&gt;Pão Quente&lt;/p&gt;
+  &lt;a href="#" class="relative inline-flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium text-stone-700"&gt;
+    &lt;span&gt;Carrinho&lt;/span&gt;
+    &lt;span id="alvo" class="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-amber-600 text-xs font-semibold text-white"&gt;3&lt;/span&gt;
+  &lt;/a&gt;
+&lt;/header&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>position: absolute</code>, <code>top: -8px</code> e
+<code>height: 20px</code>. O valor negativo é o que faz o selo “sair” do canto: <code>-top-2</code> é
+menos 8 px, e é por isso que a bolinha parece montada em cima da borda. <code>h-5 w-5</code> fixa
+20 × 20 px — com <code>px-2</code> em vez de largura fixa, o selo cresce quando o número passa de
+nove, e aí vem o “12” entortando o desenho.</p>
+
+<p>Para centralizar o número dentro da bolinha, duas classes de flex fazem o serviço:
+<code>flex items-center justify-center</code>. É o mesmo par que você usou no topo, agora em escala
+de 20 px. E <code>rounded-full</code> arredonda até virar círculo, independentemente do tamanho — o
+valor é tão grande que sempre sobra.</p>
+
+<p>Duas armadilhas comuns. A primeira: esquecer o <code>relative</code> no pai. O selo então se
+posiciona em relação à página inteira e aparece no canto do navegador, não do carrinho. A segunda:
+um ancestral com <code>overflow-hidden</code> corta justamente a parte do selo que sai do retângulo —
+o selo existe, mas some. Se ele desapareceu, procure quem está recortando.</p>
+
+<h2>4. A faixa de abertura</h2>
+
+<p>A abertura tem uma frase e uma ação. Só isso. A Ana quer anunciar o pão quentinho das 6h e levar a
+pessoa para a grade de produtos. Tudo o que não ajuda nesse caminho atrapalha: carrossel, três botões
+diferentes, vídeo, contador. Uma faixa de abertura com duas decisões claras converte mais que uma com
+vinte.</p>
+
+<pre class="file" data-file="loja.html">&lt;section class="bg-amber-50 px-4 py-12 sm:py-16"&gt;
+  &lt;div class="mx-auto max-w-6xl"&gt;
+    &lt;h2 class="max-w-2xl text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl"&gt;
+      Pão quentinho saindo do forno às 6h
+    &lt;/h2&gt;
+    &lt;p class="mt-3 max-w-prose text-base text-stone-600"&gt;
+      Encomende até as 18h e retire na porta da padaria, sem fila.
+    &lt;/p&gt;
+    &lt;a href="#produtos" class="mt-6 inline-block rounded-lg bg-amber-600 px-4 py-2 font-semibold text-white hover:bg-amber-700"&gt;
+      Ver os pães de hoje
+    &lt;/a&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</pre>
+
+<p>Quatro decisões aparecem nesse trecho. Primeiro o respiro: <code>py-12</code> no celular e
+<code>sm:py-16</code> a partir de 640 px. Faixa de abertura com 48 px de altura de texto parece
+apertada no monitor e generosa no celular — daí o par. Segundo, o tamanho do título:
+<code>text-3xl</code> na base e <code>text-4xl</code> no breakpoint, porque 36 px em uma tela de 375
+px ocupa três linhas e cansa.</p>
+
+<p>Terceiro, a largura do texto. <code>max-w-2xl</code> no título e <code>max-w-prose</code> no
+parágrafo. <code>max-w-prose</code> é o teto de leitura confortável: mais ou menos 65 caracteres por
+linha. Acima disso o olho cansa de voltar; abaixo, a frase quebra demais e o ritmo se perde. Quarto, o
+botão: <code>inline-block</code> para que ele aceite respiro interno sem virar faixa,
+<code>px-4 py-2</code> para a área de toque, <code>rounded-lg</code> para os cantos e
+<code>hover:bg-amber-700</code> para responder ao mouse.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>Classes</th><th>O que resolve</th></tr>
+<tr><td>Título</td><td><code>text-3xl sm:text-4xl font-bold tracking-tight</code></td><td>hierarquia, com um tamanho por tela; <code>tracking-tight</code> aperta o espaço entre letras grandes</td></tr>
+<tr><td>Frase de apoio</td><td><code>mt-3 max-w-prose text-stone-600</code></td><td>largura de leitura e cor mais fraca que o título</td></tr>
+<tr><td>Botão</td><td><code>mt-6 inline-block rounded-lg bg-amber-600 px-4 py-2</code></td><td>ação única, com área de toque e cor da marca</td></tr>
+<tr><td>Faixa</td><td><code>bg-amber-50 px-4 py-12 sm:py-16</code></td><td>fundo suave e respiro que cresce com a tela</td></tr>
+</table>
+</div>
+
+<p>O fundo <code>bg-amber-50</code> é o âmbar quase branco: separa a abertura do resto sem gritar. Se
+a padaria tivesse uma foto bonita da vitrine, ela entraria como fundo com
+<code>bg-cover bg-center</code>, mas aí o texto precisaria de um véu escuro para manter o contraste —
+assunto da aula de <a href="contraste.html">contraste</a>.</p>
+
+<h2>5. A grade dos produtos</h2>
+
+<p>Agora a faixa que justifica a loja: os produtos. A Ana tem doze itens, cada um com nome, preço e um
+botão. Empilhados em uma coluna, o cliente rola três telas para ver tudo; em uma grade, vê oito de
+uma vez. E o número de colunas depende do espaço: uma no celular, duas no tablet, três no computador.</p>
+
+<p>Essa ordem — do menor para o maior — é a regra do Tailwind e se chama <em>mobile first</em>. As
+classes sem prefixo valem para todos os tamanhos; os prefixos <code>sm:</code>, <code>md:</code>,
+<code>lg:</code> só entram a partir da largura deles. A prévia desta caixa tem 768 px, então o
+<code>sm:</code> (640 px) já vale e o <code>lg:</code> (1.024 px) ainda não.</p>
+
+<div class="trytailwind" data-largura="768" data-goal="rule:grid-template-columns: repeat(2, minmax(0, 1fr));;largura:768;;css:#alvo|display=grid">
+  <p class="try-task">A prévia está com 768 px — largura de tablet. Os quatro produtos estão em uma
+  coluna só. Ponha dois por linha a partir de 640 px e três a partir de 1.024 px: acrescente
+  <code>sm:grid-cols-2 lg:grid-cols-3</code> ao <code>&lt;div id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="grid gap-4"&gt;
+  &lt;article class="rounded-xl bg-white p-4"&gt;Pão de queijo&lt;/article&gt;
+  &lt;article class="rounded-xl bg-white p-4"&gt;Bolo de fubá&lt;/article&gt;
+  &lt;article class="rounded-xl bg-white p-4"&gt;Café coado&lt;/article&gt;
+  &lt;article class="rounded-xl bg-white p-4"&gt;Sonho de creme&lt;/article&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+gap: 16px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"&gt;
+  &lt;article class="rounded-xl bg-white p-4"&gt;Pão de queijo&lt;/article&gt;
+  &lt;article class="rounded-xl bg-white p-4"&gt;Bolo de fubá&lt;/article&gt;
+  &lt;article class="rounded-xl bg-white p-4"&gt;Café coado&lt;/article&gt;
+  &lt;article class="rounded-xl bg-white p-4"&gt;Sonho de creme&lt;/article&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel confirma: <code>display: grid</code>, <code>gap: 16px</code> e
+<code>grid-template-columns: 364px 364px</code>. Esses 364 px não foram escritos por ninguém — são o
+resultado de <code>repeat(2, minmax(0, 1fr))</code>, que quer dizer “duas colunas iguais, dividindo o
+espaço que sobra”. É por isso que a grade se adapta a qualquer largura sem você recalcular nada.</p>
+
+<p>O <code>gap-4</code> é o respiro entre as células. Note que ele é do pai, não dos filhos: as
+crianças não sabem que estão em uma grade. Se você usar <code>space-y-4</code> no lugar, o espaço
+some quando a grade vira duas colunas, porque <code>space-y</code> só mexe na vertical. Em grade, o
+espaço se chama <code>gap</code>.</p>
+
+<p>Sobre a escolha entre <code>sm</code> e <code>md</code>: as duas funcionam, e não existe resposta
+certa. <code>sm</code> começa em 640 px, que é o celular deitado e o tablet em pé. Com
+<code>sm:grid-cols-2</code>, o celular na horizontal já mostra dois produtos — bom, porque sobra
+espaço. Com <code>md:</code>, ele continuaria em uma coluna até 768 px. A decisão é de desenho, não de
+código; o importante é a ordem crescente.</p>
+
+<h2>6. O card do produto</h2>
+
+<p>A célula da grade precisa de conteúdo com estrutura, e a estrutura é sempre a mesma: imagem, selo,
+nome, preço e ação. Isso é um <em>card</em>, e ele aparece em toda loja do mundo.</p>
+
+<dl class="anatomy">
+<dt>imagem</dt>
+<dd>Uma caixa com <code>aspect-square overflow-hidden rounded-lg</code>. O quadrado mantém todos os
+cards alinhados, mesmo quando a foto original é retangular.</dd>
+<dt>selo</dt>
+<dd>Uma etiqueta <code>absolute top-2 left-2</code> com “Novo” ou “Últimas unidades”. Usa o mesmo
+truque do carrinho: o card é <code>relative</code>, o selo é <code>absolute</code>.</dd>
+<dt>nome</dt>
+<dd><code>mt-3 font-semibold text-stone-900</code> e, se o nome for longo,
+<code>line-clamp-2</code>: corta em duas linhas com reticências em vez de empurrar o preço para baixo.</dd>
+<dt>preço</dt>
+<dd><code>text-lg font-bold text-stone-900</code>. Número grande, sempre no mesmo lugar em todos os
+cards.</dd>
+<dt>ação</dt>
+<dd>O botão <code>bg-amber-600 text-white</code> com <code>rounded-lg px-3 py-2</code>. É o único
+elemento clicável do card.</dd>
+</dl>
+
+<p>Duas dessas peças merecem uma explicação a mais, porque são as que mais aparecem em loja de
+verdade:</p>
+
+<pre class="term">.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+.object-cover {
+  object-fit: cover;
+}</pre>
+
+<p><code>aspect-ratio: 1 / 1</code> diz “a largura e a altura são iguais”: o navegador calcula a altura
+sozinho a partir da largura da coluna. Sem ele, cada foto traz a altura original e a grade vira escada.
+<code>object-fit: cover</code> é para a <code>&lt;img&gt;</code> dentro dessa caixa: ela preenche o
+quadrado cortando o excesso em vez de esticar o pão. Sem <code>object-cover</code>, o pão fica achatado
+ou espremido, e ninguém sabe dizer por quê.</p>
+
+<p>Falta a linha do preço. Empilhados, preço e botão fazem o card crescer e desalinham a grade.
+Lado a lado, o card fica compacto e o olho encontra o preço sempre no mesmo lugar.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=flex;;css:#alvo|justify-content=space-between;;texto:Adicionar">
+  <p class="try-task">O preço e o botão estão empilhados, um embaixo do outro. Ponha os dois na mesma
+  linha, com o preço à esquerda e o botão à direita: acrescente
+  <code>flex items-center justify-between gap-2</code> ao <code>&lt;div id="alvo"&gt;</code>.</p>
+  <pre class="html">&lt;article class="max-w-xs rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;div class="aspect-square rounded-lg bg-amber-100"&gt;&lt;/div&gt;
+  &lt;h3 class="mt-3 font-semibold text-stone-900"&gt;Bolo de fubá&lt;/h3&gt;
+  &lt;div id="alvo" class="mt-3"&gt;
+    &lt;p class="text-lg font-bold text-stone-900"&gt;R$ 18&lt;/p&gt;
+    &lt;button class="rounded-lg bg-amber-600 px-3 py-2 text-sm font-semibold text-white"&gt;Adicionar&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/article&gt;</pre>
+  <pre class="out">
+margin-top: 12px
+</pre>
+  <pre class="solucao">&lt;article class="max-w-xs rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;div class="aspect-square rounded-lg bg-amber-100"&gt;&lt;/div&gt;
+  &lt;h3 class="mt-3 font-semibold text-stone-900"&gt;Bolo de fubá&lt;/h3&gt;
+  &lt;div id="alvo" class="mt-3 flex items-center justify-between gap-2"&gt;
+    &lt;p class="text-lg font-bold text-stone-900"&gt;R$ 18&lt;/p&gt;
+    &lt;button class="rounded-lg bg-amber-600 px-3 py-2 text-sm font-semibold text-white"&gt;Adicionar&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/article&gt;</pre>
+</div>
+
+<p>O <code>justify-between</code> empurra o preço para a esquerda e o botão para a direita;
+<code>items-center</code> alinha os dois pelo meio, e o <code>gap-2</code> garante 8 px de distância
+quando o nome do produto for comprido e o botão chegar perto do preço. Sem o <code>gap</code>, em uma
+tela estreita, “R$ 18” e “Adicionar” se encostam e parecem uma palavra só.</p>
+
+<p>Se você quiser que o botão use toda a altura da linha, troque <code>items-center</code> por
+<code>items-stretch</code>. É de gosto: em loja, o botão do tamanho do preço parece mais firme. O que
+não dá é deixar alturas diferentes em cards vizinhos — é o que faz uma grade parecer torta mesmo
+quando cada card está “certo”.</p>
+
+<h2>7. Os estados: mouse, foco e esgotado</h2>
+
+<p>Uma loja não é uma foto: ela responde. São três respostas que o cliente percebe sem pensar. A
+primeira é o card reagindo ao mouse: <code>transition hover:shadow-md</code>. O <code>transition</code>
+faz a sombra aparecer em 150 ms em vez de num piscar; sem ele, o efeito parece um pisca-pisca.</p>
+
+<p>A segunda é o botão reagindo ao teclado. Quem navega com Tab precisa ver onde está: acrescente
+<code>focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700</code>.
+O <code>focus-visible</code> só desenha o contorno quando o foco veio do teclado, então o clique do
+mouse não deixa aquele anel estranho no botão. Já o <code>outline-offset-2</code> afasta o contorno 2
+px da borda, para ele não se confundir com o próprio botão.</p>
+
+<p>A terceira é o produto esgotado. No HTML, isso é o atributo <code>disabled</code> no
+<code>&lt;button&gt;</code>. No Tailwind, duas classes contam a história:
+<code>disabled:cursor-not-allowed disabled:opacity-60</code>. O texto muda para “Esgotado”, o botão
+fica apagado e o cursor avisa antes do clique. Nada pior que um botão que parece ativo e não faz
+nada.</p>
+
+<p>Existe ainda o <code>group-hover</code>, que faz o filho reagir ao mouse no pai: o card recebe
+<code>group</code> e o botão recebe <code>group-hover:bg-amber-700</code>. Assim o botão acende quando
+a pessoa passa o mouse em qualquer lugar do card, não só em cima dele. É o truque que dá a sensação de
+“o card inteiro é clicável”.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Estado</th><th>Como se escreve</th><th>O que o cliente percebe</th></tr>
+<tr><td>Mouse em cima</td><td><code>hover:shadow-md group-hover:bg-amber-700</code></td><td>o card levanta e o botão escurece: “isto responde”</td></tr>
+<tr><td>Teclado</td><td><code>focus-visible:outline-2 focus-visible:outline-offset-2</code></td><td>um contorno nítido em volta do botão, sem sumir ao clicar com o mouse</td></tr>
+<tr><td>Esgotado</td><td><code>disabled</code> + <code>disabled:opacity-60 disabled:cursor-not-allowed</code></td><td>botão apagado, cursor de proibido e o texto “Esgotado”</td></tr>
+<tr><td>Dedo no celular</td><td><code>active:bg-amber-800</code></td><td>um escurecer rápido no instante do toque, que é o único feedback possível ali</td></tr>
+</table>
+</div>
+
+<p>O <code>active:</code> é subestimado. No celular não há <code>hover</code> nem cursor: o único
+retorno visual que a pessoa recebe ao tocar é o <code>active</code>, que fica ligado enquanto o dedo
+está pressionando. Sem ele, o botão parece não ter recebido o toque — e a pessoa toca de novo.</p>
+
+<div class="cenario">
+<h3>Cenário 2: o efeito bonito que ninguém vê no celular</h3>
+<p>A Ana caprichou no <code>hover:shadow-lg</code> e no <code>group-hover</code>. No celular da amiga,
+o card parece morto. Faz sentido: no toque não existe mouse parado em cima — o <code>hover</code>
+acontece no instante do dedo e some. A regra prática é não esconder informação atrás de
+<code>hover</code>: o preço, o “Esgotado” e o nome do produto têm de estar visíveis sem interação. O
+efeito é enfeite, não conteúdo.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o card que cresce e desalinha a grade</h3>
+<p>Um produto tem nome de três linhas (“Bolo de fubá com goiabada e queijo”) e os outros, de uma. O
+resultado: as linhas da grade ficam com alturas diferentes e o botão do vizinho sobe. A solução é
+<code>h-full</code> no card, <code>flex flex-col</code> para organizar as peças na vertical e
+<code>mt-auto</code> no bloco do preço, empurrando-o para o fim. Com isso todos os preços ficam na
+mesma altura, mesmo com nomes de tamanhos diferentes.</p>
+</div>
+
+<h2>8. O responsivo, na ordem certa</h2>
+
+<p>O Tailwind aplica as variantes de baixo para cima: primeiro as classes sem prefixo, depois
+<code>sm:</code>, depois <code>md:</code>, depois <code>lg:</code>. Isso significa que
+<code>hidden md:flex</code> é lido como “escondido em todo lugar; linha a partir de 768 px”, e não
+como uma briga entre duas classes. O CSS gerado mostra a mecânica:</p>
+
+<pre class="term">.hidden {
+  display: none;
+}
+@media (width >= 48rem) {
+  .md\:flex {
+    display: flex;
+  }
+}</pre>
+
+<p>Repare no <code>48rem</code>: 48 × 16 px = 768 px. O Tailwind escreve os breakpoints em
+<code>rem</code> para que o zoom do navegador funcione como esperado — quem aumenta a fonte do sistema
+não vê a página “quebrada”, vê o layout mais largo. <code>sm</code> é 40 rem (640 px),
+<code>md</code> é 48 rem (768 px), <code>lg</code> é 64 rem (1.024 px) e <code>xl</code> é 80 rem
+(1.280 px).</p>
+
+<p>No topo da loja, o menu some no celular e volta como linha no tablet. No celular, no lugar dele,
+entra o carrinho e um botão de menu — que só funciona com JavaScript, e por isso fica para depois
+nesta página: o que o Tailwind faz é esconder e mostrar, não abrir e fechar. É o assunto de
+<a href="esconder-mostrar.html">esconder e mostrar</a>.</p>
+
+<p>Na grade, a ordem <code>grid</code> → <code>sm:grid-cols-2</code> → <code>lg:grid-cols-3</code>
+tem uma consequência prática: cada prefixo novo <strong>sobrescreve</strong> o anterior, e não se
+soma. Se você escrever <code>lg:grid-cols-3</code> sem o <code>sm:</code>, o tablet fica em uma
+coluna e só o computador ganha três. O layout “funciona”, mas o tablet fica com cards gigantes de
+600 px de largura. É o erro mais comum de quem está começando.</p>
+
+<p>Um detalhe que confunde: a ordem em que você escreve as classes no atributo não importa. O que vale
+é a ordem das regras no CSS gerado, que o Tailwind organiza por breakpoint. Por isso
+<code>class="md:flex hidden"</code> e <code>class="hidden md:flex"</code> desenham igual.</p>
+
+<h2>9. Conferindo a loja peça por peça</h2>
+
+<p>Antes de publicar, a Ana passa por cinco conferências. Elas não são teoria: cada uma resolve um
+problema que aparece em loja de verdade.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Conferência</th><th>Como se vê</th><th>O que resolve</th></tr>
+<tr><td>A página rola de lado no celular?</td><td>abra em 375 px e tente arrastar para a direita</td><td>algum elemento mais largo que a tela; procure <code>w-[…]</code>, tabela sem <code>overflow-x-auto</code> e imagem sem <code>max-w-full</code></td></tr>
+<tr><td>O preço encosta na borda?</td><td>olhe o card no celular</td><td><code>p-4</code> no card e <code>px-4</code> na faixa; falta de respiro é o erro mais visível</td></tr>
+<tr><td>O botão é fácil de tocar?</td><td>tente acertar com o polegar</td><td>altura mínima por volta de 44 px: <code>py-2</code> + <code>px-4</code> com texto pequeno chega lá</td></tr>
+<tr><td>Os cards têm a mesma altura?</td><td>olhe a linha da grade</td><td><code>h-full</code>, <code>flex flex-col</code> e <code>mt-auto</code> no preço</td></tr>
+<tr><td>O foco aparece no teclado?</td><td>aperte Tab e veja o contorno</td><td><code>focus-visible:outline-2</code> — sem isso o teclado fica invisível</td></tr>
+</table>
+</div>
+
+<p>A primeira conferência é a mais importante e a mais esquecida. Uma loja que rola de lado no celular
+perde a venda: o cliente não sabe se o site está quebrado ou se é assim mesmo. O teste é simples —
+abra a página em uma janela estreita e arraste para a direita. Se algo se move, há um elemento mais
+largo que a tela.</p>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O selo do carrinho está com <code>absolute</code>, mas
+apareceu no meio da palavra “Carrinho”. O que faltou?</p>
+<label><input type="radio" name="q1"> um <code>z-10</code> no selo</label>
+<label><input type="radio" name="q1"> o <code>relative</code> no link que envolve o selo</label>
+<label><input type="radio" name="q1"> um <code>overflow-hidden</code> no link</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. A prévia está com 768 px e a grade tem
+<code>sm:grid-cols-2 lg:grid-cols-3</code>. Quantas colunas aparecem?</p>
+<label><input type="radio" name="q2"> três, porque o <code>lg:</code> foi escrito por último</label>
+<label><input type="radio" name="q2"> uma, porque nenhum prefixo vale abaixo de 1.024 px</label>
+<label><input type="radio" name="q2"> duas, porque 768 px já passou de 640 px e ainda não chegou a 1.024 px</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que o <code>hover:shadow-md</code> não resolve
+sozinho a descoberta do produto no celular?</p>
+<label><input type="radio" name="q3"> porque no toque não existe mouse parado em cima: o estado só aparece no instante do dedo</label>
+<label><input type="radio" name="q3"> porque sombra não funciona em telas pequenas</label>
+<label><input type="radio" name="q3"> porque o <code>hover</code> só vale em navegadores antigos</label>
+</div>
+
+<p>Uma última observação sobre o papel do preço. Na loja da Ana, o preço aparece no card e no resumo
+do pedido. Se um dia ela mudar de R$ 18 para R$ 20, são dois lugares para editar — e é aí que nasce a
+ideia de variável, que o guia mostra no nível 3. Por enquanto, a regra é a mais simples: um preço, um
+lugar, para cada bloco.</p>
+
+<div class="exercise">
+<h2>Exercício: feche a página da loja</h2>
+<p>No seu arquivo, a grade precisa de duas colunas a partir de 640 px, e o selo do card precisa sair
+do fluxo para ficar no canto. Complete as duas classes que faltam.</p>
+<div class="ex-code">&lt;div class="grid gap-4 <input aria-label="resposta 1" data-answer="sm:grid-cols-2">"&gt;
+  &lt;span class="<input aria-label="resposta 2" data-answer="absolute"> top-2 left-2 rounded-full bg-amber-600 px-2 text-xs text-white"&gt;Novo&lt;/span&gt;
+&lt;/div&gt;</div>
+<p class="ex-dica">Dica: o prefixo de 640 px é <code>sm</code>, e a classe de colunas é
+<code>grid-cols-2</code>. A classe que tira do fluxo é a mesma do selo do carrinho.</p>
+</div>
+
+<h2>10. Resumo</h2>
+
+<p>Uma página de loja é uma pilha de faixas: topo, abertura, grade, rodapé. Cada faixa tem o mesmo
+casco — <code>mx-auto max-w-6xl px-4</code> — que dá teto, centraliza e garante respiro lateral. O topo
+é uma linha com três grupos (<code>flex items-center justify-between gap-4</code>), e o menu usa
+<code>hidden md:flex</code> para desaparecer no celular.</p>
+
+<p>O selo do carrinho ensina a dupla que você vai usar muitas vezes: <code>relative</code> no pai,
+<code>absolute</code> no filho, com coordenadas negativas para o selo sair do canto. A grade de
+produtos usa <code>grid gap-4</code> com os prefixos na ordem crescente, e o card tem imagem
+<code>aspect-square</code>, nome curto, preço e ação na mesma linha com
+<code>flex items-center justify-between</code>.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Plante a página em faixas antes de escrever classe.</li>
+<li><code>max-w-6xl mx-auto px-4</code> é o casco de toda faixa de conteúdo.</li>
+<li>Topo: <code>flex items-center justify-between gap-4</code>, menu com <code>hidden md:flex</code>.</li>
+<li>Selo: <code>relative</code> no pai, <code>absolute -top-2 -right-2</code> no selo.</li>
+<li>Grade: <code>grid gap-4</code> + <code>sm:grid-cols-2</code> + <code>lg:grid-cols-3</code>, nessa ordem.</li>
+<li>Card: <code>aspect-square</code> na imagem, <code>line-clamp-2</code> no nome, preço e botão na mesma linha.</li>
+<li>Estados: <code>hover:</code>, <code>focus-visible:</code> e <code>disabled:opacity-60</code>.</li>
+<li>Breakpoints: 40 rem (640), 48 rem (768), 64 rem (1.024) — a prévia manda.</li>
+<li>Nada de informação só no <code>hover</code>: no celular ele quase não existe.</li>
+<li>Uma página boa é cinco conferências, não vinte efeitos.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

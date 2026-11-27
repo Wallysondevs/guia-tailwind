@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sem Build | Guia Tailwind</title>
+<meta name="description" content="Tailwind sem build: o compilador rodando no navegador com @tailwindcss/browser, o style type text/tailwindcss, o que se ganha, o que se perde e quando salvar o CSS pronto.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Sem <span class="hl">Build</span></h1>
+<p class="intro">A cliente da Ana pediu uma coisa simples: "me manda o site por e-mail, eu abro com
+dois cliques". Sem terminal, sem instalar nada, sem pasta de projeto. A Ana já sabe que o Tailwind
+precisa de um passo que transforma as classes em CSS — e agora descobre que esse passo pode acontecer
+no navegador de quem abre a página, e não na máquina dela. É o modo <strong>sem build</strong>: uma
+página, um arquivo de script e um bloco de CSS com tipo especial. É também o modo que este guia usa
+em todas as caixas que você vem clicando.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é "build" e por que dá para viver sem ele.</li>
+  <li>O que o script <code>@tailwindcss/browser</code> faz, linha por linha.</li>
+  <li>Por que a tag de CSS precisa de <code>type="text/tailwindcss"</code>.</li>
+  <li>Como declarar tema e componente direto na página.</li>
+  <li>O preço: tamanho, tempo e o piscar da página sem estilo.</li>
+  <li>Como salvar o CSS compilado e ficar com um site estático de verdade.</li>
+  <li>Por que o endereço antigo <code>cdn.tailwindcss.com</code> não serve na versão 4.</li>
+  <li>Quando o modo sem build é a escolha certa — e quando é armadilha.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o site que precisa abrir com dois cliques</h2>
+
+<p>A padaria não tem servidor, não tem conta em nuvem e não tem quem entenda de terminal. Tem uma
+pasta com três páginas HTML e uma cliente que quer ver o resultado <em>hoje</em>, no notebook dela, na
+frente da Ana. O combinado é mandar um arquivo compactado; ela descompacta, dá dois cliques no
+<code>index.html</code> e o site abre.</p>
+
+<p>Se o CSS do Tailwind não existir nessa pasta, o que a cliente vê é HTML cru: títulos do tamanho do
+texto, listas com bolinhas, cartões sem cor. Não é "meio feio" — é irreconhecível. E não há nada que
+a Ana possa fazer no notebook da cliente: não dá para pedir que ela instale Node e rode
+<code>npm install</code> para ver um bolo de fubá.</p>
+
+<p>A saída tem nome e é o assunto desta aula. Em vez de compilar o CSS antes, a página carrega um
+programa que compila <strong>na hora</strong>, no navegador de quem abriu. A cliente baixa um
+JavaScript a mais junto com a página, e o Tailwind faz ali, na memória, o mesmo trabalho que faria no
+computador da Ana. O resultado na tela é idêntico.</p>
+
+<p>Esse guia faz exatamente isso. Cada caixa que você clicou até aqui monta uma página de verdade,
+carrega o compilador e gera o CSS do seu HTML. Não é uma simulação: é o Tailwind, o mesmo arquivo,
+rodando no seu navegador. Então você já viu o modo sem build funcionando umas cem vezes — agora vai
+entender o que estava acontecendo.</p>
+
+<h2>2. O que é build (e por que dá para viver sem)</h2>
+
+<p>Build é o passo que transforma o que você escreveu no que o navegador entende. No caso do Tailwind,
+é a tradução de <code>p-4</code> para <code>padding: calc(var(--spacing) * 4)</code>, e de todas as
+outras classes da página em um arquivo CSS. Esse passo pode acontecer em três momentos diferentes, e a
+diferença entre eles é a diferença entre os modos de usar a ferramenta:</p>
+
+<p>Antes de publicar, no seu computador — é o modo com build, com Vite ou com a CLI. A página publicada
+leva um CSS pronto, pequeno e igual para todos. Durante o desenvolvimento, a cada salvamento — também
+é o modo com build, só que automático. Ou depois de publicada, no navegador de quem visita — é o modo
+sem build, e é ele que dispensa terminal, Node e instalação.</p>
+
+<p>Repare que a palavra "sem build" não quer dizer "sem compilação". Quer dizer <strong>sem um passo
+de build na sua máquina</strong>. A compilação continua existindo; ela só mudou de lugar. Quem paga a
+conta é o visitante, e é essa troca que você precisa entender antes de escolher.</p>
+
+<dl class="anatomy">
+<dt>build</dt>
+<dd>O passo que compila e empacota antes de publicar. Pode ser um comando que você roda ou um servidor
+que roda sozinho a cada salvamento.</dd>
+<dt>compilador no navegador</dt>
+<dd>O Tailwind empacotado como JavaScript comum, que lê a página e injeta o CSS gerado. É o
+<code>@tailwindcss/browser</code>.</dd>
+<dt>CDN</dt>
+<dd>Um servidor que entrega arquivos públicos para o mundo. É de lá que vem o script, sem você baixar
+nada.</dd>
+<dt>CSS estático</dt>
+<dd>Um arquivo <code>.css</code> pronto, guardado na pasta do site. É o que o modo com build produz e o
+que o navegador só baixa, sem compilar nada.</dd>
+<dt>FOUC</dt>
+<dd>O piscar da página sem estilo, do inglês <em>flash of unstyled content</em>. Acontece quando o CSS
+chega depois do conteúdo.</dd>
+</dl>
+
+<h2>3. Caminho 1: o compilador no navegador</h2>
+
+<p>Tudo começa com uma linha no <code>&lt;head&gt;</code> da página. É um <code>&lt;script&gt;</code>
+como outro qualquer, apontando para o pacote oficial:</p>
+
+<pre class="file" data-file="index.html">&lt;script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"&gt;&lt;/script&gt;
+&lt;style type="text/tailwindcss"&gt;
+  @theme {
+    --color-marca: #b4532a;
+  }
+&lt;/style&gt;</pre>
+
+<p>Leia o endereço com calma, porque cada pedaço diz algo. <code>cdn.jsdelivr.net</code> é o CDN — o
+servidor de arquivos públicos. <code>/npm/</code> indica que o arquivo vem do registro do npm, o mesmo
+onde o <code>npm install</code> busca pacotes. <code>@tailwindcss/browser@4</code> é o nome do pacote
+com a versão maior fixada em 4: você recebe correções da versão 4, mas não é surpreendido por uma
+versão 5 no meio de um projeto.</p>
+
+<p>O que esse arquivo faz quando chega? Ele olha o documento inteiro, encontra as classes escritas no
+HTML, lê os blocos de tema que estiverem nas tags especiais e escreve uma folha de estilo nova dentro
+do <code>&lt;head&gt;</code>, com o CSS pronto. Tudo isso em menos de um segundo, sem rede depois do
+primeiro carregamento do script — porque o compilador já está ali, no seu navegador.</p>
+
+<p>A segunda parte do exemplo é a tag de CSS com <code>type="text/tailwindcss"</code>. Ela não é CSS
+comum: o navegador, sozinho, não sabe o que fazer com ela e a ignora. Quem lê é o compilador. É ali
+que você escreve o <code>@theme</code>, as classes com <code>@apply</code> e qualquer regra que
+dependa do Tailwind — a mesma coisa que ficaria no arquivo de entrada de um projeto com build.</p>
+
+<p>Junte as duas peças e você tem uma página que se veste sozinha. Nada de arquivo CSS para
+sincronizar, nada de comando para rodar, nada de pasta <code>dist</code>. Salve, abra, veja.</p>
+
+<h2>4. O type que muda tudo</h2>
+
+<p>O erro número um de quem começa no modo sem build é esquecer o <code>type</code>. A página tem o
+script, tem o <code>@theme</code> escrito bonitinho, e nada acontece. O motivo é que uma tag
+<code>&lt;style&gt;</code> sem tipo é CSS comum: o navegador tenta interpretar o conteúdo, encontra um
+<code>@theme</code> que não conhece, descarta em silêncio, e segue a vida.</p>
+
+<p>Repare no verbo: descarta <em>em silêncio</em>. Não há mensagem vermelha, não há aviso no console.
+O CSS inválido simplesmente não vale. É o mesmo comportamento das classes digitadas errado que você viu
+na primeira aula — e a mesma estratégia resolve: conferir o que o navegador realmente aplicou.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|background-color=rgb(180, 83, 42);;rule:background-color: var(--color-marca)">
+  <p class="try-task">O selo está transparente porque o navegador ignora o bloco de tema. Acrescente o
+  tipo que o compilador procura: <code>type="text/tailwindcss"</code> na tag <code>style</code>.</p>
+  <pre class="html">&lt;style&gt;
+@theme {
+  --color-marca: #b4532a;
+}
+&lt;/style&gt;
+
+&lt;span id="alvo" class="rounded-full bg-marca px-3 py-1 text-white"&gt;Feito hoje&lt;/span&gt;</pre>
+  <pre class="out">
+color: rgb(255, 255, 255)
+border-radius: 3.35544e+07px
+padding-inline: 12px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+}
+&lt;/style&gt;
+
+&lt;span id="alvo" class="rounded-full bg-marca px-3 py-1 text-white"&gt;Feito hoje&lt;/span&gt;</pre>
+</div>
+
+<p>Vale guardar a diferença entre as duas tags, porque elas parecem iguais e fazem coisas opostas. Uma
+<code>&lt;style&gt;</code> comum é lida pelo navegador e escrita por você em CSS puro. Uma
+<code>&lt;style type="text/tailwindcss"&gt;</code> é lida pelo compilador e aceita as construções do
+Tailwind, como <code>@theme</code> e <code>@apply</code>. Se você colocar
+<code>@apply</code> numa tag comum, o navegador descarta a regra inteira e o elemento fica sem estilo
+nenhum — não só sem o <code>@apply</code>.</p>
+
+<p>Existe ainda um terceiro caso: a tag com tipo mas sem o script na página. Aí o compilador não está
+lá para ler, e o resultado é o mesmo do começo — silêncio. As duas peças andam juntas, sempre: o
+script traz o compilador, a tag tipada traz o CSS.</p>
+
+<h2>5. Tema e componente direto na página</h2>
+
+<p>Com a tag tipada no lugar, tudo o que você aprendeu sobre <a href="arroba-theme.html">o <code>@theme</code></a> funciona. A diferença é que o bloco
+não mora num arquivo <code>src/style.css</code>: ele mora na própria página, entre as tags, muitas
+vezes no <code>&lt;head&gt;</code>, antes do conteúdo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=12px;;rule:background-color: var(--color-amber-100);;texto:Assado às 6h">
+  <p class="try-task">O aviso da padaria só tem uma borda. Complete a regra <code>.aviso</code> com
+  <code>@apply rounded-lg bg-amber-100 p-3 text-amber-900</code>.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+.aviso {
+  border: 1px solid #e7e5e4;
+}
+&lt;/style&gt;
+
+&lt;p id="alvo" class="aviso"&gt;Assado às 6h&lt;/p&gt;</pre>
+  <pre class="out">
+border: 1px solid rgb(231, 229, 228)
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+.aviso {
+  @apply rounded-lg bg-amber-100 p-3 text-amber-900;
+}
+&lt;/style&gt;
+
+&lt;p id="alvo" class="aviso"&gt;Assado às 6h&lt;/p&gt;</pre>
+</div>
+
+<p>O <code>@apply</code> é a ponte entre os dois mundos: ele pega classes do Tailwind e as escreve
+dentro de uma regra com nome. No modo sem build isso é especialmente útil, porque você não tem um
+arquivo CSS separado para organizar — então o <code>.aviso</code> resolve o problema de repetir seis
+classes em cada um dos quatro avisos da página.</p>
+
+<p>Um cuidado que vale desde já: o conteúdo da tag tipada é compilado junto com o resto, então cada
+regra que você escreve ali custa bytes na página. Não é lugar para colar uma biblioteca de componentes
+inteira; é lugar para o tema da padaria e três ou quatro classes com nome. Se a lista crescer, é sinal
+de que chegou a hora do modo com build — e não é vergonha nenhuma.</p>
+
+<p>Outra coisa que funciona sem build: as variantes. <code>md:p-6</code>, <code>hover:bg-amber-200</code>
+e <code>dark:bg-stone-900</code> são geradas na hora como qualquer outra classe. O que muda é que a
+variante <code>dark:</code> precisa estar declarada na página, porque no v4 ela não vem pronta — o
+script do guia declara, e no seu site você declara também, com uma linha de
+<code>@custom-variant</code>. Guarde o nome; ele tem aula própria mais adiante.</p>
+
+<h2>6. O preço: o que se perde</h2>
+
+<p>Nada é de graça, e o modo sem build cobra em três moedas. A primeira é o tamanho: o compilador é
+um arquivo grande, da ordem de centenas de quililobytes, e todo visitante o baixa junto com a página.
+Para uma demonstração, tudo bem. Para a vitrine da padaria, num celular em rede 3G, é peso que não se
+justifica.</p>
+
+<p>A segunda é o tempo. Com build, o CSS já chega pronto e a página aparece vestida no primeiro
+desenho da tela. Sem build, o navegador primeiro desenha o HTML cru, depois executa o script, depois
+gera o CSS, e só então a página se arruma. Esse intervalo é o FOUC, o piscar de que falamos. Em
+máquinas rápidas é quase invisível; em celular velho, dá tempo de ver o texto saltar de lugar.</p>
+
+<p>A terceira é o controle. Um erro de classe que o compilador não reconhece passa em silêncio, aqui
+como em qualquer modo, mas no modo sem build você não tem um passo de build para reclamar antes de
+publicar. Some-se a isso a dependência de rede: se o CDN estiver bloqueado na rede da cliente — e em
+rede de empresa isso acontece —, a página abre sem estilo nenhum e não há o que fazer do seu lado.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Ponto</th><th>Sem build (navegador)</th><th>Com build (Vite ou CLI)</th></tr>
+<tr><td>Quem compila</td><td>o navegador do visitante</td><td>o seu computador, antes de publicar</td></tr>
+<tr><td>Peso extra</td><td>centenas de kB de JavaScript</td><td>zero; só o CSS usado</td></tr>
+<tr><td>Primeira pintura</td><td>pode piscar sem estilo</td><td>já vem vestida</td></tr>
+<tr><td>Terminal</td><td>dispensa</td><td>obrigatório uma vez</td></tr>
+<tr><td>Ideal para</td><td>demonstração, protótipo, página única</td><td>site publicado, vários arquivos</td></tr>
+</table>
+</div>
+
+<p>Vale dizer o que <em>não</em> está na lista: a qualidade do CSS. O compilador do navegador é o mesmo
+motor do Vite, então o <code>padding: calc(var(--spacing) * 4)</code> que sai de lá é idêntico. Você
+não está usando uma versão inferior do Tailwind; está usando a mesma, em outro lugar e na hora errada
+para um site grande.</p>
+
+<h2>7. Caminho 2: o CSS compilado e salvo</h2>
+
+<p>Existe um meio-termo que resolve o problema da cliente da Ana sem peso nenhum na página: compilar
+uma vez, salvar o arquivo e publicar o CSS pronto. A página fica com um
+<code>&lt;link rel="stylesheet"&gt;</code> comum, como qualquer site dos anos 2000 — e ninguém precisa
+de Node para abrir.</p>
+
+<pre class="term">ana@notebook:~/padaria$ npx @tailwindcss/cli -i entrada.css -o site.css --minify
+
+≈ tailwindcss v4.3.5
+
+Done in 240ms</pre>
+
+<p>O comando lê o arquivo de entrada (aquele com <code>@import "tailwindcss"</code> e o
+<code>@theme</code>), varre os arquivos HTML do projeto e escreve o <code>site.css</code> pronto. O
+<code>npx</code> roda o pacote sem instalar de forma permanente; o <code>--minify</code> tira espaços e
+quebra de linha. Depois disso, a página só precisa de:</p>
+
+<pre class="file" data-file="index.html">&lt;link rel="stylesheet" href="site.css"&gt;</pre>
+
+<p>A pasta que vai no e-mail fica com dois arquivos, e nenhum deles é JavaScript de compilador:</p>
+
+<pre class="term">ana@notebook:~/entrega$ ls -lh
+total 32K
+-rw-r--r-- 1 ana ana  18K nov 27 09:41 index.html
+-rw-r--r-- 1 ana ana  14K nov 27 09:41 site.css</pre>
+
+<p>Pronto: site estático de verdade, sem JavaScript nenhum do Tailwind. A desvantagem é óbvia e não
+tem jeito: se a Ana criar uma classe nova no HTML, ela precisa rodar o comando de novo. É por isso que
+quem faz isso todo dia acaba indo para o <a href="vite.html">Vite</a>, que roda o comando sozinho a cada salvamento — mas para
+uma página que vai ser entregue hoje e não muda mais, o comando avulso resolve.</p>
+
+<p>Esse caminho também é a resposta para quem pergunta "posso usar o Tailwind só com um arquivo CSS
+pronto que achei na internet?". Pode, desde que o arquivo tenha sido gerado a partir das classes que
+<em>a sua</em> página usa. Um CSS de exemplo, feito para outra página, vai estar cheio de regras que
+você não usa e sem as que você usa. O Tailwind não adivinha: ele só gera o que encontra escrito.</p>
+
+<h2>8. Teste final: a página num arquivo só</h2>
+
+<p>Hora de juntar tudo no formato que a cliente da Ana vai receber: um HTML, uma tag de script e uma
+tag de CSS tipada, com o tema da padaria dentro. É o teste de verdade do modo sem build, porque não há
+nada fora do arquivo para dar errado.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|background-color=rgb(180, 83, 42);;css:#selo|background-color=rgb(246, 231, 224);;texto:Feito hoje">
+  <p class="try-task">A barra do topo e o selo estão sem cor. No bloco <code>@theme</code>, declare
+  <code>--color-marca: #b4532a</code> e <code>--color-marca-clara: #f6e7e0</code>; depois pinte a barra
+  com <code>bg-marca</code> e o selo com <code>bg-marca-clara</code>.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-trigo: #e7d8b8;
+}
+&lt;/style&gt;
+
+&lt;header id="alvo" class="p-4"&gt;
+  &lt;span id="selo" class="rounded-full px-3 py-1 text-xs"&gt;Feito hoje&lt;/span&gt;
+&lt;/header&gt;</pre>
+  <pre class="out">
+padding: 16px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+  --color-marca-clara: #f6e7e0;
+}
+&lt;/style&gt;
+
+&lt;header id="alvo" class="bg-marca p-4"&gt;
+  &lt;span id="selo" class="rounded-full bg-marca-clara px-3 py-1 text-xs"&gt;Feito hoje&lt;/span&gt;
+&lt;/header&gt;</pre>
+</div>
+
+<p>O painel mostra dois elementos ao mesmo tempo quando a missão pede, mas você já sabe ler: cada
+linha é uma propriedade que mudou de valor em relação a um elemento sem classe. Se a cor da barra
+aparecer e a do selo não, o problema é só no segundo token — provavelmente um hífen fora do lugar em
+<code>--color-marca-clara</code>.</p>
+
+<p>Agora a decisão de qual caminho usar, que é o que interessa depois da aula:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Situação</th><th>Caminho</th><th>Por quê</th></tr>
+<tr><td>Mostrar hoje, no notebook de alguém</td><td>script no navegador</td><td>um arquivo, sem terminal, sem instalação</td></tr>
+<tr><td>Página única que não muda mais</td><td>CSS salvo com a CLI</td><td>leve, estável, sem JavaScript</td></tr>
+<tr><td>Três páginas que você edita toda semana</td><td>Vite</td><td>recompila sozinho e gera o <code>dist</code></td></tr>
+<tr><td>Estudar e testar ideia</td><td>script no navegador</td><td>zero configuração; é o modo deste guia</td></tr>
+</table>
+</div>
+
+<p>Perceba que não existe resposta única, e que trocar de caminho é barato: o <code>@theme</code> é o
+mesmo, as classes são as mesmas, o <code>@apply</code> é o mesmo. O que muda é <em>quem</em> compila e
+<em>quando</em>. Quem entende essa frase não fica preso a tutorial nenhum.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: abriu com dois cliques e a página ficou sem estilo</h3>
+<p>Duas causas prováveis. A primeira já foi vista: falta o <code>type="text/tailwindcss"</code> na tag
+de CSS, e o navegador jogou o bloco fora. A segunda é o script carregado como módulo
+(<code>type="module"</code>) apontando para um arquivo local: aberto por <code>file://</code>, o
+navegador bloqueia o carregamento por segurança, e o compilador nunca chega. Use o script comum, do
+CDN, ou sirva a pasta por um endereço — o mesmo arquivo funciona nos dois casos, desde que o
+navegador possa buscá-lo.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a página pisca antes de ficar bonita</h3>
+<p>É o FOUC em ação: o HTML aparece primeiro, o CSS gerado chega alguns décimos depois. Para uma
+demonstração, avise a cliente; para um site publicado, resolva. O jeito definitivo é salvar o CSS com a
+CLI e linkar o arquivo pronto. Um paliativo honesto é esconder o conteúdo até o CSS chegar, mas isso
+troca o piscar por uma tela em branco — e tela em branco é pior para quem espera.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: na rede do cliente, o site abre sem estilo</h3>
+<p>Aconteceu na primeira visita à padaria: a rede do escritório bloqueava o CDN, o script não veio e a
+página abriu crua, no meio de uma reunião. A lição é não depender de um servidor de terceiros para o
+visual do site. Baixe o arquivo do compilador e coloque na pasta, ou compile o CSS e publique estático.
+Em qualquer um dos dois, o site passa a funcionar mesmo sem internet — que é o mínimo que se espera de
+uma página que abre com dois cliques.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual tag o compilador do navegador lê para achar o
+tema e o <code>@apply</code>?</p>
+<label><input type="radio" name="q1"> uma tag <code>style</code> comum, sem atributos</label>
+<label><input type="radio" name="q1"> <code>style type="text/tailwindcss"</code></label>
+<label><input type="radio" name="q1"> uma tag <code>script src="tema.css"</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. Qual é o custo principal de compilar no navegador?</p>
+<label><input type="radio" name="q2"> o visitante baixa o compilador e o CSS é gerado a cada visita</label>
+<label><input type="radio" name="q2"> o CSS gerado é de qualidade inferior ao do build</label>
+<label><input type="radio" name="q2"> as classes param de funcionar no tema escuro</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">3. Quando o modo sem build é a escolha certa?</p>
+<label><input type="radio" name="q3"> sempre; é o modo mais moderno</label>
+<label><input type="radio" name="q3"> nunca; site sem build não é site de verdade</label>
+<label><input type="radio" name="q3"> em demonstração, protótipo e página única que abre sem instalação</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o endereço do compilador</h2>
+<p>Complete a tag do script com o pacote oficial que roda o Tailwind no navegador, na versão 4.</p>
+<div class="ex-code">&lt;script src="https://cdn.jsdelivr.net/npm/<input aria-label="resposta 1" data-answer="@tailwindcss/browser@4" placeholder="...">"&gt;&lt;/script&gt;</div>
+<p class="ex-dica">Dica: começa com arroba, tem uma barra no meio e termina na versão maior. O
+<code>tailwindcss</code> sozinho é o compilador do build, não o do navegador.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Sem build não significa sem compilação: significa compilar no navegador do visitante, na hora de
+abrir a página. O compilador vem de um <code>&lt;script&gt;</code> apontando para
+<code>@tailwindcss/browser@4</code>, e o CSS do projeto vai numa tag
+<code>&lt;style type="text/tailwindcss"&gt;</code> — sem esse tipo, o navegador descarta o bloco em
+silêncio. Dentro dela funcionam o <code>@theme</code>, o <code>@apply</code> e as variantes.</p>
+
+<p>O preço é peso e tempo: centenas de kilobytes de JavaScript, um piscar antes do estilo aparecer e
+dependência de um CDN que pode estar bloqueado. Para demonstração, protótipo e página única é
+imbatível; para site publicado, o caminho é compilar uma vez — com a CLI, salvando um
+<code>site.css</code>, ou com o Vite, que faz isso a cada salvamento. O CSS gerado é o mesmo nos três
+caminhos, o que torna a troca barata e a decisão fácil.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>"Sem build" é sobre onde a compilação acontece, não sobre existir compilação.</li>
+<li>Script do CDN no <code>head</code> mais uma tag <code>style type="text/tailwindcss"</code>.</li>
+<li>Tag <code>style</code> sem tipo é CSS comum: o <code>@theme</code> é ignorado sem aviso.</li>
+<li>Tema, <code>@apply</code> e variantes funcionam dentro da tag tipada.</li>
+<li>Cada regra escrita na página é peso: tema e poucas classes, nada de biblioteca.</li>
+<li>O compilador custa centenas de kB e o CSS chega depois do conteúdo (FOUC).</li>
+<li>Site estático de verdade: compile com a CLI e linke o CSS pronto.</li>
+<li>O endereço antigo <code>cdn.tailwindcss.com</code> é da versão 3; na 4, use o pacote
+<code>browser</code>.</li>
+<li>CDN bloqueado na rede do cliente = página crua; prefira arquivo local para entregar.</li>
+<li>As caixas deste guia rodam exatamente assim: script mais tag tipada.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

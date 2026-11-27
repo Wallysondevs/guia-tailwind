@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tabela de Preços | Guia Tailwind</title>
+<meta name="description" content="Como montar uma tabela de preços com Tailwind: três planos em grid, o cartão com flex-col, o plano em destaque, o selo absoluto, o preço tabular e o botão no rodapé.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Tabela de <span class="hl">Preços</span></h1>
+<p class="intro">A Ana criou o Clube do Pão: três cestas mensais, com entregas toda sexta. Ela escreveu
+os três planos um embaixo do outro e o resultado ficou confuso — a cliente não conseguia comparar
+nada, o plano do meio não se destacava e os botões de assinar apareciam em alturas diferentes. Nesta
+aula ela monta uma tabela de preços de verdade: três cartões iguais lado a lado, um deles em destaque,
+com selo, preço alinhado e botão sempre no rodapé.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Os três planos em coluna com <code>grid gap-6 md:grid-cols-3</code>.</li>
+  <li>O cartão do plano com <code>flex flex-col rounded-2xl border p-6</code>.</li>
+  <li>Como destacar um plano com <code>border-2 border-amber-500</code> e <code>md:-mt-4</code>.</li>
+  <li>O selo "Mais escolhido" posicionado com <code>absolute -top-3 left-1/2 -translate-x-1/2</code>.</li>
+  <li>O preço grande com <code>text-4xl font-semibold tabular-nums</code> e a unidade discreta.</li>
+  <li>A lista de itens com <code>space-y-2</code>, marca de incluído e <code>line-through</code> no que não está.</li>
+  <li>O botão sempre no rodapé do cartão, com <code>mt-auto</code>.</li>
+  <li>O alternador de mês e ano com <code>peer-checked</code>.</li>
+</ul>
+</div>
+
+<h2>1. A cena: três planos que ninguém compara</h2>
+
+<p>A Ana escreveu os planos em sequência, cada um num <code>div</code> com borda. Como bloco ocupa a
+linha inteira, a cliente via um cartão enorme, rolava, via outro, rolava de novo. Comparar exigia
+memória. E o pior: o plano do meio, que ela queria vender mais, tinha exatamente o mesmo peso visual
+dos outros dois.</p>
+
+<p>Tabela de preços é o layout em que a comparação <em>é</em> o produto. A pessoa precisa ver os três
+ao mesmo tempo, entender o que muda e escolher. Isso impõe três decisões: os cartões ficam lado a
+lado, todos com a mesma estrutura interna, e um deles recebe destaque — porque três opções iguais
+geram paralisia, e uma levemente diferente dá o caminho.</p>
+
+<p>Nesta aula a gente monta na ordem em que o olho lê: primeiro a grade dos três planos, depois o
+cartão por dentro, depois o destaque, o selo, o preço, a lista de itens e o botão. No fim, aquele
+detalhe que toda tabela de preços tem: o alternador entre cobrança mensal e anual.</p>
+
+<h2>2. Três colunas iguais</h2>
+
+<p>O contêiner leva <code>grid gap-6 md:grid-cols-3</code>. No celular, uma coluna: os planos ficam
+empilhados na ordem do HTML, que é a ordem de preço do mais barato ao mais caro — uma boa ordem para
+quem rola. A partir de 768 px, três colunas iguais, e a comparação acontece de relance.</p>
+
+<div class="trytailwind" data-largura="768" data-goal="rule:grid-template-columns: repeat(3, minmax(0, 1fr));;rule:gap: calc(var(--spacing) * 6)">
+  <p class="try-task">Os três planos estão empilhados. Deixe-os lado a lado a partir de 768 px, com
+  24 px entre eles: <code>md:grid-cols-3 gap-6</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="grid gap-6 bg-slate-50 p-4"&gt;
+  &lt;div class="rounded-2xl border border-slate-200 bg-white p-6"&gt;
+    &lt;p class="text-sm font-medium text-slate-500"&gt;Essencial&lt;/p&gt;
+    &lt;p class="mt-2 text-3xl font-semibold tabular-nums text-slate-900"&gt;R$ 39&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-2xl border border-slate-200 bg-white p-6"&gt;
+    &lt;p class="text-sm font-medium text-slate-500"&gt;Família&lt;/p&gt;
+    &lt;p class="mt-2 text-3xl font-semibold tabular-nums text-slate-900"&gt;R$ 69&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-2xl border border-slate-200 bg-white p-6"&gt;
+    &lt;p class="text-sm font-medium text-slate-500"&gt;Presente&lt;/p&gt;
+    &lt;p class="mt-2 text-3xl font-semibold tabular-nums text-slate-900"&gt;R$ 99&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+padding: 16px
+gap: 24px
+background-color: oklch(0.984 0.003 247.858)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid gap-6 bg-slate-50 p-4 md:grid-cols-3"&gt;
+  &lt;div class="rounded-2xl border border-slate-200 bg-white p-6"&gt;
+    &lt;p class="text-sm font-medium text-slate-500"&gt;Essencial&lt;/p&gt;
+    &lt;p class="mt-2 text-3xl font-semibold tabular-nums text-slate-900"&gt;R$ 39&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-2xl border border-slate-200 bg-white p-6"&gt;
+    &lt;p class="text-sm font-medium text-slate-500"&gt;Família&lt;/p&gt;
+    &lt;p class="mt-2 text-3xl font-semibold tabular-nums text-slate-900"&gt;R$ 69&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="rounded-2xl border border-slate-200 bg-white p-6"&gt;
+    &lt;p class="text-sm font-medium text-slate-500"&gt;Presente&lt;/p&gt;
+    &lt;p class="mt-2 text-3xl font-semibold tabular-nums text-slate-900"&gt;R$ 99&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>gap-6</code> dá 24 px entre os cartões — mais que os 16 px de um painel, menos que os 32 px
+de uma landing. Numa tabela de preços, o espaço entre as colunas precisa ser grande o bastante para os
+cartões parecerem separados e pequeno o bastante para eles serem lidos como um conjunto. Vinte e
+quatro é o meio-termo que a maioria dos designers usa.</p>
+
+<p>Uma escolha importante: divida por igual. É tentador dar mais largura ao plano em destaque
+(<code>md:col-span-2</code>), mas isso quebra a comparação — os preços deixam de estar na mesma
+régua. O destaque de uma tabela de preços vem de cor, borda e posição, não de tamanho.</p>
+
+<pre class="term">.grid {
+  display: grid;
+}
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.gap-6 {
+  gap: calc(var(--spacing) * 6);
+}</pre>
+
+<p>O <code>minmax(0, 1fr)</code> permite que cada coluna encolha até zero, em vez de impor uma largura
+mínima. Isso importa aqui: um preço grande dentro de uma coluna estreita não deve empurrar a grade
+para fora da tela. Com <code>minmax(0, …)</code>, a coluna obedece e o texto se ajusta dentro dela.</p>
+
+
+<h2>3. O cartão do plano</h2>
+
+<p>Cada plano é um cartão com a mesma anatomia: nome, preço, descrição curta, lista de itens e botão.
+No Tailwind: <code>flex flex-col rounded-2xl border border-slate-200 bg-white p-6</code>. O
+<code>flex flex-col</code> é o que permite empurrar o botão para o rodapé depois; o
+<code>rounded-2xl</code> e o <code>p-6</code> dão o acabamento; a borda de 1 px separa o cartão do
+fundo.</p>
+
+<p>Por que borda e não sombra? Os dois funcionam, mas borda deixa os três cartões parecendo iguais e
+é só no destaque que você troca a cor e a espessura. Com sombra, o plano destacado precisa de uma
+sombra muito maior para se diferenciar, e o resultado fica pesado. A regra prática: borda para
+planos, sombra para o destaque, se você quiser reforçar.</p>
+
+<pre class="file" data-file="precos.html">&lt;div class="flex flex-col rounded-2xl border border-slate-200 bg-white p-6"&gt;
+  &lt;p class="text-sm font-medium uppercase tracking-wide text-slate-500"&gt;Essencial&lt;/p&gt;
+  &lt;p class="mt-4 text-4xl font-semibold tabular-nums text-slate-900"&gt;R$ 39&lt;/p&gt;
+  &lt;p class="mt-1 text-sm text-slate-500"&gt;por mês&lt;/p&gt;
+  &lt;p class="mt-4 text-sm text-slate-600"&gt;Quatro pães por semana, entrega na sexta.&lt;/p&gt;
+  &lt;ul class="mt-6 space-y-2 text-sm text-slate-600"&gt;
+    &lt;li&gt;Pão de fermentação natural&lt;/li&gt;
+    &lt;li&gt;Entrega na sexta&lt;/li&gt;
+  &lt;/ul&gt;
+  &lt;a href="#assinar" class="mt-6 rounded-xl bg-slate-900 px-4 py-3 text-center text-sm font-medium text-white"&gt;Assinar&lt;/a&gt;
+&lt;/div&gt;</pre>
+
+<p>Repare que o cartão não tem largura. Quem decide a largura é a coluna do grid, e o cartão se
+adapta. É a diferença entre escrever um componente de verdade e escrever três cópias com números
+diferentes: mude o <code>gap</code> ou o número de colunas e os três acompanham.</p>
+
+<h2>4. O plano em destaque</h2>
+
+<p>Destacar um plano é um trabalho de contraste, não de tamanho. Duas classes fazem quase tudo:
+<code>border-2 border-amber-500</code> troca a borda cinza de 1 px por uma âmbar de 2 px. E
+<code>md:-mt-4</code> sobe o cartão 16 px em relação aos vizinhos, criando aquele efeito de "este é o
+principal" que você vê em toda página de preços.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-width=2px;;rule:border-color: var(--color-amber-500);;rule:margin-top: calc(var(--spacing) * -4)">
+  <p class="try-task">O plano Família está igual aos outros. Destaque-o com borda âmbar de 2 px e
+  suba-o 16 px em relação aos vizinhos: <code>border-2 border-amber-500 md:-mt-4</code>.</p>
+  <pre class="html">&lt;div class="rounded-2xl border border-slate-200 bg-white p-6"&gt;
+  &lt;p id="alvo" class="rounded-2xl border border-slate-200 p-4"&gt;
+    &lt;span class="text-sm font-medium text-slate-500"&gt;Família&lt;/span&gt;
+    &lt;span class="ml-2 text-xl font-semibold tabular-nums"&gt;R$ 69&lt;/span&gt;
+  &lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+border-radius: 16px
+border-width: 1px
+border-color: oklch(0.929 0.013 255.508)
+</pre>
+  <pre class="solucao">&lt;div class="rounded-2xl border border-slate-200 bg-white p-6"&gt;
+  &lt;p id="alvo" class="rounded-2xl border-2 border-amber-500 p-4 md:-mt-4"&gt;
+    &lt;span class="text-sm font-medium text-slate-500"&gt;Família&lt;/span&gt;
+    &lt;span class="ml-2 text-xl font-semibold tabular-nums"&gt;R$ 69&lt;/span&gt;
+  &lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>-mt-4</code> é uma margem negativa: em vez de empurrar para baixo, ela puxa para cima. O
+Tailwind escreve <code>calc(var(--spacing) * -4)</code>, ou seja, −16 px. Usar margem negativa aqui é
+melhor que aumentar o cartão, porque os três continuam com a mesma largura e a mesma estrutura — só o
+destaque se mexe. E o prefixo <code>md:</code> garante que, no celular, os planos empilhados não
+fiquem com um deles deslocado.</p>
+
+<p>Duas alternativas que também funcionam: <code>ring-2 ring-amber-500</code> (um anel por fora da
+borda, que não ocupa espaço no layout) e <code>md:scale-105</code> (aumenta o cartão em 5%). O
+<code>ring</code> é mais previsível; o <code>scale</code> é mais dramático e pode borrar o texto em
+alguns navegadores. Se você usar <code>scale</code>, o cartão cresce nos quatro lados e pode encostar
+nos vizinhos — teste em tela pequena antes.</p>
+
+<h2>5. O selo "Mais escolhido"</h2>
+
+<p>O destaque precisa de uma explicação. O selo é uma pílula com o motivo: "Mais escolhido", "Melhor
+preço", "Novo". Ele fica pendurado na borda de cima do cartão, metade dentro e metade fora. Para isso,
+uma posição absoluta com três classes: <code>absolute -top-3 left-1/2 -translate-x-1/2</code>.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|position=absolute;;css:#alvo|top=-12px;;css:#alvo|translate=-50%">
+  <p class="try-task">O selo está dentro do cartão, como um texto qualquer. Pendure-o na borda de
+  cima, centralizado: <code>absolute -top-3 left-1/2 -translate-x-1/2</code>.</p>
+  <pre class="html">&lt;div class="relative rounded-2xl border-2 border-amber-500 bg-white p-6"&gt;
+  &lt;p id="alvo" class="mb-3 inline-block rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-white"&gt;Mais escolhido&lt;/p&gt;
+  &lt;p class="text-sm font-medium text-slate-500"&gt;Família&lt;/p&gt;
+  &lt;p class="mt-2 text-xl font-semibold tabular-nums"&gt;R$ 69&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: inline-block
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+font-size: 12px
+font-weight: 500
+line-height: 16px
+border-radius: 3.35544e+07px
+margin-bottom: 12px
+padding-inline: 12px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;div class="relative rounded-2xl border-2 border-amber-500 bg-white p-6"&gt;
+  &lt;p id="alvo" class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-white"&gt;Mais escolhido&lt;/p&gt;
+  &lt;p class="text-sm font-medium text-slate-500"&gt;Família&lt;/p&gt;
+  &lt;p class="mt-2 text-xl font-semibold tabular-nums"&gt;R$ 69&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Vamos por partes, porque esse trio de posicionamento aparece em todo lugar. O <code>absolute</code>
+tira o selo do fluxo e o posiciona em relação ao cartão, que tem <code>relative</code> — o mesmo par da
+aula de <a href="dropdown.html">Menu Suspenso</a>. O <code>-top-3</code> põe o topo do selo 12 px
+acima da borda do cartão, criando o efeito de meio para fora. O <code>left-1/2</code> encosta a borda
+esquerda do selo no meio do cartão; e o <code>-translate-x-1/2</code> puxa o selo para a esquerda na
+metade da largura dele mesmo, o que faz o centro do selo cair no centro do cartão.</p>
+
+<p>Sem o <code>-translate-x-1/2</code>, o selo fica deslocado para a direita, porque o
+<code>left-1/2</code> usa a borda esquerda como referência. É o erro mais comum desse padrão, e tem
+nome: centralizar um elemento de largura desconhecida. A regra é sempre a mesma — metade da posição,
+menos metade do próprio tamanho.</p>
+
+<pre class="term">.absolute {
+  position: absolute;
+}
+.-top-3 {
+  top: calc(var(--spacing) * -3);
+}
+.left-1\/2 {
+  left: calc(1 / 2 * 100%);
+}
+.-translate-x-1\/2 {
+  --tw-translate-x: calc(calc(1 / 2 * 100%) * -1);
+  translate: var(--tw-translate-x) var(--tw-translate-y);
+}</pre>
+
+<p>As barras invertidas nos seletores são o escape da barra do nome da classe — você escreve
+<code>left-1/2</code> no HTML normalmente. E o <code>translate</code> acumula em variáveis para que
+você possa combinar <code>-translate-x-1/2</code> com <code>-translate-y-1/2</code> sem que uma
+apague a outra.</p>
+
+<h2>6. O preço, e o que muda com mês e ano</h2>
+
+<p>O preço é o item mais importante do cartão e merece três decisões. A primeira: tamanho. O valor vai
+em <code>text-4xl font-semibold</code> e o resto do cartão fica em <code>text-sm</code>, o que cria
+uma diferença clara de hierarquia. A segunda: a unidade. "por mês" fica pequena e cinza, embaixo ou ao
+lado, com <code>text-sm text-slate-500</code>. A terceira: alinhamento. <code>tabular-nums</code>
+mantém os dígitos com a mesma largura, e quando você alterna entre R$ 39 e R$ 390 o número não pula de
+lado.</p>
+
+<p>Agora, o alternador. Toda tabela de preços moderna oferece mensal e anual, e o anual costuma vir com
+desconto. A forma mais simples de fazer isso sem JavaScript é com dois <code>input type="radio"</code>
+escondidos e o <code>peer-checked</code> do Tailwind, que você já viu na aula de
+<a href="peer.html">O peer</a>. A ideia: os radios ficam invisíveis no topo do bloco, um para "mês" e
+outro para "ano", e cada preço aparece conforme o radio que está marcado.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça do cartão</th><th>Classes de texto</th><th>Tamanho</th></tr>
+<tr><td>nome do plano</td><td><code>text-sm uppercase tracking-wide text-slate-500</code></td><td>14 px</td></tr>
+<tr><td>preço</td><td><code>text-4xl font-semibold tabular-nums</code></td><td>36 px</td></tr>
+<tr><td>unidade</td><td><code>text-sm text-slate-500</code></td><td>14 px</td></tr>
+<tr><td>descrição</td><td><code>text-sm text-slate-600</code></td><td>14 px</td></tr>
+<tr><td>item da lista</td><td><code>text-sm</code> e a marca separada</td><td>14 px</td></tr>
+<tr><td>botão</td><td><code>text-sm font-medium</code></td><td>14 px</td></tr>
+<tr><td>selo</td><td><code>text-xs font-medium</code></td><td>12 px</td></tr>
+</table>
+</div>
+
+<p>O padrão que aparece nessa tabela é simples: só o preço é grande. Todo o resto fica em
+<code>text-sm</code> e o selo em <code>text-xs</code>. Quando tudo chama atenção, nada chama — e numa
+tabela de preços a hierarquia é o que faz a pessoa achar o número sem procurar.</p>
+
+
+<pre class="file" data-file="precos.html">&lt;div class="mx-auto max-w-6xl"&gt;
+  &lt;div class="mb-8 text-center"&gt;
+    &lt;input type="radio" name="periodo" id="mensal" class="peer/mensal sr-only" checked&gt;
+    &lt;input type="radio" name="periodo" id="anual" class="peer/anual sr-only"&gt;
+    &lt;label for="mensal" class="cursor-pointer rounded-lg px-4 py-2 text-sm peer-checked/mensal:bg-slate-900 peer-checked/mensal:text-white"&gt;Mensal&lt;/label&gt;
+    &lt;label for="anual" class="cursor-pointer rounded-lg px-4 py-2 text-sm peer-checked/anual:bg-slate-900 peer-checked/anual:text-white"&gt;Anual&lt;/label&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<p>São três peças trabalhando juntas. O <code>sr-only</code> esconde o radio da tela mas o mantém
+acessível ao teclado e ao leitor de tela — muito melhor que <code>hidden</code>, que o tiraria da
+navegação. O <code>peer/mensal</code> dá um nome ao radio para que o irmão seguinte possa reagir a
+ele. E o <code>peer-checked/mensal:bg-slate-900</code> pinta o rótulo quando aquele radio está marcado.
+O mesmo vale para o anual, com o nome <code>anual</code>.</p>
+
+<p>Para os preços mudarem, cada valor ganha as duas versões e a classe que mostra uma ou outra:
+<code>peer-checked/mensal:block</code> no preço mensal e <code>peer-checked/anual:block</code> no
+anual, com <code>hidden</code> inicial. Funciona, é acessível e não tem uma linha de JavaScript. Se a
+tabela tiver muitos planos, o HTML fica repetitivo — aí vale considerar uma variável de CSS ou um
+pouco de JavaScript, mas só depois que o básico estiver de pé.</p>
+
+<h2>7. A lista de itens</h2>
+
+<p>A lista é o que convence. Cada item precisa ser curto, começando pelo que a pessoa ganha, e o
+conjunto precisa ter o mesmo número de linhas nos três planos — senão os botões ficam em alturas
+diferentes e a tabela parece torta. Use <code>space-y-2</code> na lista e <code>text-sm</code> nos
+itens.</p>
+
+<pre class="file" data-file="precos.html">&lt;ul class="mt-6 space-y-2 text-sm text-slate-600"&gt;
+  &lt;li class="flex items-start gap-2"&gt;
+    &lt;span class="mt-0.5 text-emerald-600"&gt;✓&lt;/span&gt;
+    &lt;span&gt;Quatro pães por semana&lt;/span&gt;
+  &lt;/li&gt;
+  &lt;li class="flex items-start gap-2"&gt;
+    &lt;span class="mt-0.5 text-emerald-600"&gt;✓&lt;/span&gt;
+    &lt;span&gt;Entrega na sexta&lt;/span&gt;
+  &lt;/li&gt;
+  &lt;li class="flex items-start gap-2 text-slate-400"&gt;
+    &lt;span class="mt-0.5"&gt;—&lt;/span&gt;
+    &lt;span class="line-through"&gt;Escolha do pão da semana&lt;/span&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;</pre>
+
+<p>O <code>flex items-start gap-2</code> em cada item mantém a marca alinhada com a primeira linha do
+texto, mesmo quando o item quebra em duas linhas. O <code>mt-0.5</code> na marca dá um ajuste fino de
+2 px para ela não ficar alta demais. E o que <em>não</em> está incluso entra com
+<code>text-slate-400 line-through</code>: mais claro e riscado, para o olho entender a ausência antes
+de ler.</p>
+
+<p>Não use apenas a cor para dizer o que está incluso — quem não diferencia verde de cinza perde a
+informação. A marca (✓ ou —) e o risco no texto carregam o significado; a cor só reforça.</p>
+
+<h2>8. O botão sempre no rodapé</h2>
+
+<p>Aqui é onde o <code>flex flex-col</code> do cartão paga o investimento — a anatomia do cartão é o
+assunto da aula de <a href="cards.html">Cards</a>, e numa tabela de preços ela ganha um motivo extra.
+Se os três planos têm listas de tamanhos diferentes, os botões ficam em alturas diferentes e a tabela
+inteira parece desalinhada. A solução é dar <code>mt-auto</code> ao botão: como o cartão é uma coluna
+flex, a margem automática consome toda a sobra de espaço acima dele e empurra o botão para o fim.</p>
+
+<pre class="file" data-file="precos.html">&lt;div class="flex flex-col rounded-2xl border border-slate-200 bg-white p-6"&gt;
+  &lt;p class="text-sm font-medium uppercase tracking-wide text-slate-500"&gt;Essencial&lt;/p&gt;
+  &lt;p class="mt-4 text-4xl font-semibold tabular-nums"&gt;R$ 39&lt;/p&gt;
+  &lt;ul class="mt-6 space-y-2 text-sm text-slate-600"&gt;…&lt;/ul&gt;
+  &lt;a href="#assinar" class="mt-auto rounded-xl bg-slate-900 px-4 py-3 pt-3 text-center text-sm font-medium text-white"&gt;Assinar&lt;/a&gt;
+&lt;/div&gt;</pre>
+
+<p>Cuidado com um detalhe: o <code>mt-auto</code> precisa de respiro para não colar na lista quando o
+cartão é justo. Se o texto terminar exatamente onde o botão começa, a margem automática vira zero. O
+truque é dar <code>pt-6</code> ao botão ou <code>pb-6</code> à lista, para existir um mínimo de ar
+mesmo no caso apertado. E mantenha o botão com a mesma altura nos três cartões: mesmo
+<code>px-4 py-3</code>, mesmo <code>text-sm</code>.</p>
+
+<dl class="anatomy">
+<dt>plano</dt>
+<dd>Cada cartão de preço, com <code>flex flex-col rounded-2xl border p-6</code>. A largura vem da
+coluna do grid.</dd>
+<dt>destaque</dt>
+<dd>O plano escolhido pela padaria, com <code>border-2 border-amber-500</code> e
+<code>md:-mt-4</code>.</dd>
+<dt>selo</dt>
+<dd>A pílula que explica o destaque, posicionada com <code>absolute -top-3 left-1/2
+-translate-x-1/2</code>.</dd>
+<dt>preço</dt>
+<dd>O valor em <code>text-4xl font-semibold tabular-nums</code>, com a unidade em
+<code>text-sm text-slate-500</code>.</dd>
+<dt>itens</dt>
+<dd>A lista <code>space-y-2</code> com marca de incluído; o que não entra fica
+<code>line-through text-slate-400</code>.</dd>
+<dt>rodapé</dt>
+<dd>O botão de assinar, com <code>mt-auto</code> para alinhar com os vizinhos.</dd>
+</dl>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Como destacar</th><th>Classe</th><th>Efeito e cuidado</th></tr>
+<tr><td>borda mais forte</td><td><code>border-2 border-amber-500</code></td><td>previsível, não muda o tamanho</td></tr>
+<tr><td>anel externo</td><td><code>ring-2 ring-amber-500</code></td><td>não ocupa espaço no layout</td></tr>
+<tr><td>subir o cartão</td><td><code>md:-mt-4</code></td><td>só a partir de 768 px, para não desalinhar no celular</td></tr>
+<tr><td>aumentar o cartão</td><td><code>md:scale-105</code></td><td>cresce nos quatro lados; pode encostar nos vizinhos</td></tr>
+<tr><td>explicar o destaque</td><td><code>absolute -top-3 left-1/2 -translate-x-1/2</code></td><td>precisa de <code>relative</code> no cartão</td></tr>
+<tr><td>reforçar com sombra</td><td><code>shadow-lg</code></td><td>use só no destaque; nos três fica pesado</td></tr>
+</table>
+</div>
+
+<h2>9. Quando a tabela quebra: três cenas</h2>
+
+<div class="cenario">
+<h3>Cenário 1: os botões ficam em alturas diferentes</h3>
+<p>A Ana montou os três cartões e o botão do plano mais barato ficou 40 px acima dos outros, porque a
+lista dele tinha um item a menos. Ela tentou dar altura fixa ao cartão (<code>h-96</code>) e o
+resultado quebrou no celular: texto cortado. A correção certa foi <code>flex flex-col</code> no cartão
+e <code>mt-auto</code> no botão. Sem altura fixa, o cartão acompanha o conteúdo, e o botão encosta no
+rodapé de cada um — todos na mesma linha.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o selo sai do lugar no celular</h3>
+<p>O selo com <code>-top-3</code> funcionava no desktop e, no celular, aparecia cortado pelo cartão de
+cima — porque no celular os planos ficam empilhados e o espaço entre eles é só o <code>gap</code>. Duas
+saídas: aumentar o espaço acima do cartão em destaque com <code>mt-6</code> no mobile e
+<code>md:mt-0</code>, ou transformar o selo em um bloco comum no celular
+(<code>static mb-3 md:absolute md:-top-3 md:left-1/2 md:-translate-x-1/2</code>). A segunda é mais
+trabalhosa e mais segura: cada tela recebe o desenho que faz sentido nela.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o preço anual não cabe na coluna</h3>
+<p>Ao alternar para anual, "R$ 390" com a unidade "por ano" quebrou em duas linhas no plano do meio, e
+os três cartões ficaram com alturas diferentes. O problema era o tamanho do texto, não a coluna: com
+<code>text-4xl</code> e três dígitos, o número ocupa quase toda a largura de 200 px. O ajuste foi
+<code>text-3xl sm:text-4xl</code> e a unidade numa linha própria com <code>block text-sm</code>. Em
+tabela de preços, sempre teste o maior valor que o plano pode ter — não o mais bonito.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual combinação põe os três planos lado a lado a partir de 768 px?</p>
+<label><input type="radio" name="v1"> <code>flex gap-6</code></label>
+<label><input type="radio" name="v1"> <code>grid gap-6 md:grid-cols-3</code></label>
+<label><input type="radio" name="v1"> <code>grid grid-cols-3 gap-6</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que o selo leva <code>-translate-x-1/2</code> além do <code>left-1/2</code>?</p>
+<label><input type="radio" name="v2"> para o selo ficar maior que o cartão</label>
+<label><input type="radio" name="v2"> para o selo subir 12 px acima da borda</label>
+<label><input type="radio" name="v2"> porque o <code>left-1/2</code> usa a borda esquerda como referência</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que o <code>mt-auto</code> faz no botão do cartão?</p>
+<label><input type="radio" name="v3"> empurra o botão para o rodapé, alinhando com os cartões vizinhos</label>
+<label><input type="radio" name="v3"> centraliza o botão na horizontal</label>
+<label><input type="radio" name="v3"> aumenta a margem do botão em todos os lados</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o selo do plano</h2>
+<p>Complete o selo para ele ficar pendurado na borda de cima do cartão, centralizado.</p>
+<div class="ex-code">&lt;p class="<input aria-label="resposta 1" data-answer="absolute -top-3 left-1/2 -translate-x-1/2"> rounded-full bg-amber-500 px-3 py-1 text-xs text-white"&gt;Mais escolhido&lt;/p&gt;</div>
+<p class="ex-dica">Dica: são quatro classes. Uma tira do fluxo, uma sobe 12 px, uma encosta no meio e
+uma corrige a metade da largura.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Tabela de preços é uma grade de três colunas iguais — <code>grid gap-6 md:grid-cols-3</code> — com
+cartões de mesma anatomia. Cada cartão leva <code>flex flex-col rounded-2xl border p-6</code>, e o
+botão leva <code>mt-auto</code> para todos ficarem na mesma linha. O preço se destaca por tamanho
+(<code>text-4xl font-semibold</code>) e se mantém estável com <code>tabular-nums</code>.</p>
+
+<p>O plano escolhido recebe <code>border-2 border-amber-500</code> e <code>md:-mt-4</code>, e o selo
+usa <code>absolute -top-3 left-1/2 -translate-x-1/2</code> dentro de um cartão <code>relative</code>.
+Os itens ficam em <code>space-y-2</code>, com marca para o que entra e <code>line-through</code> para
+o que não entra. E o alternador de período usa radios com <code>sr-only</code> e
+<code>peer-checked</code>, sem uma linha de JavaScript.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>grid gap-6 md:grid-cols-3</code> — colunas iguais, comparação lado a lado.</li>
+<li>Não dê mais largura ao destaque: a comparação depende de colunas iguais.</li>
+<li>Cartão: <code>flex flex-col rounded-2xl border p-6</code>.</li>
+<li>Destaque: <code>border-2 border-amber-500</code> e <code>md:-mt-4</code> (margem negativa puxa para cima).</li>
+<li>Selo: <code>absolute -top-3 left-1/2 -translate-x-1/2</code>, com <code>relative</code> no cartão.</li>
+<li><code>left-1/2</code> usa a borda esquerda; o <code>-translate-x-1/2</code> corrige a metade.</li>
+<li>Preço: <code>text-4xl font-semibold tabular-nums</code>; unidade em <code>text-sm text-slate-500</code>.</li>
+<li>Lista: <code>space-y-2</code>; incluído com marca, excluído com <code>line-through text-slate-400</code>.</li>
+<li><code>mt-auto</code> no botão = rodapés alinhados, sem altura fixa.</li>
+<li>Alternador: radios <code>sr-only</code> + <code>peer-checked</code>, acessível e sem JavaScript.</li>
+<li>Teste o maior preço possível: <code>text-3xl sm:text-4xl</code> evita quebra feia na coluna.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

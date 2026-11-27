@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Otimização | Guia Tailwind</title>
+<meta name="description" content="Otimização de CSS no Tailwind v4: por que o arquivo cresce, quanto cada classe custa, como medir o peso, atalhos que substituem quatro classes e o que o build de produção faz.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Otimização</span></h1>
+<p class="intro">O site da Ana está pronto e ela vai mostrar para uma cliente. A cliente abre no
+celular, no 3G do bairro, e espera. Espera. O pão da vitrine aparece depois de uns quatro segundos,
+o texto chega antes da cor, e a página fica dando pulinhos enquanto as fontes carregam. A Ana
+desconfia das fotos — sempre se desconfia das fotos —, mas o culpado é outro: o CSS. Nesta aula ela
+aprende de onde vem o peso desse arquivo, como medir com números em vez de palpite e as quatro
+decisões de escrita que mais engordam uma página. Nada de otimização mágica: conta de bytes e
+escolhas concretas.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que o CSS atrasa o primeiro desenho da página.</li>
+  <li>De onde vem o CSS que o Tailwind gera — e o que <em>não</em> entra nele.</li>
+  <li>Quanto custa cada tipo de classe: valor da escala, valor arbitrário, variante, atalho.</li>
+  <li>Como medir o peso de verdade, no navegador e no terminal, antes de cortar nada.</li>
+  <li>Por que quatro longhands custam mais que <code>p-4</code>.</li>
+  <li>O que a repetição de informação faz com o arquivo.</li>
+  <li>O que o build de produção faz: minificar, comprimir e cachear.</li>
+  <li>O que nunca deve ir para o servidor.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o pão que demora a aparecer</h2>
+
+<p>A página da Ana é simples: um cabeçalho, três cartões de pão e um rodapé. As imagens foram
+reduzidas, as fotos estão em <code>webp</code>, o JavaScript é um arquivo de vinte linhas. Mesmo
+assim, no celular, a tela fica branca por segundos. Ela abre o painel do navegador, vai na aba
+<em>Network</em> e ordena por tamanho. O terceiro maior arquivo é <code>saida.css</code>, com
+setenta e poucos kilobytes.</p>
+
+<p>Setenta kilobytes não é escândalo nenhum, se você compara com uma foto. O problema não é o
+tamanho absoluto, é o momento em que o arquivo é usado. O navegador não desenha a página antes de
+baixar e interpretar o CSS: ele precisa saber as regras para decidir onde cada caixa fica. Se o
+arquivo demora, a tela fica em branco. Isso tem nome — <em>render blocking</em>, bloqueio de
+desenho — e é a razão pela qual CSS grande dói mais do que imagem grande: a imagem atrasa a
+imagem, o CSS atrasa tudo.</p>
+
+<p>O segundo detalhe da cena é mais sutil. A Ana não escreveu setenta kilobytes de regras: ela tem
+três páginas e talvez quarenta classes diferentes. Em algum lugar do projeto entrou coisa que ela
+não usa, ou a mesma informação foi escrita de cinco jeitos. É isso que a aula vai caçar — com
+números.</p>
+
+<h2>2. O que o navegador baixa antes do primeiro pão</h2>
+
+<p>Vale entender a ordem do trabalho do navegador. Ele baixa o HTML, começa a ler, encontra o
+<code>&lt;link rel="stylesheet"&gt;</code> e para de desenhar até o CSS chegar. Depois aplica as
+regras e desenha o que já tem. Só então as fontes e as imagens vão chegando. Ou seja: o CSS é o
+primeiro da fila e o que segura o desenho da página inteira.</p>
+
+<p>Isso muda o que significa “otimizar”. Não é sobre deixar o arquivo bonito, é sobre tirar bytes da
+frente do primeiro desenho. E existem só três maneiras de tirar bytes dali: mandar menos CSS,
+mandar o mesmo CSS menor (minificado e comprimido) ou mandar o mesmo CSS uma vez e reaproveitar
+(cache). As três são assunto desta aula, e a primeira é a que depende de você — é a única que o
+build não conserta.</p>
+
+<p>Uma armadilha comum de quem está começando: publicar a página com o compilador rodando no
+navegador. Existe uma build do Tailwind feita para brincar e para prototipar, a que este guia usa
+nas caixas, e ela compila o CSS <em>no computador do visitante</em>, a cada visita. É ótima para
+aprender e péssima em produção: o visitante baixa o compilador inteiro para gerar o CSS que você
+poderia ter gerado em casa. Em produção, o CSS sai pronto do build e a página só o recebe.</p>
+
+<h2>3. De onde vem o CSS gerado</h2>
+
+<p>Agora a boa notícia, que é a razão pela qual o Tailwind costuma produzir arquivos <em>menores</em>
+que um CSS escrito à mão. O Tailwind não tem um catálogo gigante para o navegador baixar: ele lê os
+seus arquivos, encontra as classes escritas e gera regra só para elas. Uma classe que aparece
+trezentas vezes gera uma regra. Uma classe que aparece uma vez gera uma regra. Uma classe que
+aparece zero vezes gera nada.</p>
+
+<p>O mesmo vale para o tema. A paleta do Tailwind tem dezenas de famílias de cor e centenas de tons,
+mas o arquivo não leva a paleta inteira: leva as variáveis que alguma classe usou. Esta é a
+primeira parte do arquivo gerado por um <code>&lt;div class="bg-amber-100 p-4 rounded-lg"&gt;</code>:</p>
+
+<pre class="term">@layer theme {
+  :root, :host {
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, …;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, …;
+    --color-amber-100: oklch(96.2% 0.059 95.617);
+    --spacing: 0.25rem;
+    --radius-lg: 0.5rem;
+    --default-font-family: var(--font-sans);
+    --default-mono-font-family: var(--font-mono);
+  }
+}</pre>
+
+<p>Repare no que <em>não</em> está ali: nenhuma cor que o elemento não usa. Se você trocar
+<code>bg-amber-100</code> por <code>bg-red-100</code>, o arquivo troca a variável e não cresce. É por
+isso que usar a paleta costuma sair mais barato que inventar hexadecimal: <code>bg-[#fef3c7]</code>
+cria uma regra com um valor solto, enquanto <code>bg-amber-100</code> aproveita uma variável que
+outras classes já usam.</p>
+
+<p>E o que é fixo? O <em>reset</em> — a camada <code>base</code>, aquela que zera margens, ajusta
+títulos e deixa o desenho neutro. Ele vem inteiro, sempre, e custa alguns kilobytes. É o pedágio do
+Tailwind, e ele não muda com o tamanho do site. Depois dele, tudo é proporcional ao que você
+escreve.</p>
+
+<h2>4. O custo fixo e o custo por classe</h2>
+
+<p>Com isso, a conta fica fácil de entender. O arquivo tem uma parte que não depende de você (o
+reset e algumas variáveis de fonte) e uma parte que cresce com a quantidade de classes
+<strong>diferentes</strong> do projeto. Não com a quantidade de elementos: com a quantidade de nomes
+distintos.</p>
+
+<p>Então o que engorda o arquivo? Quatro coisas, e nenhuma delas é “usar Tailwind”:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que você fez</th><th>O que acontece no CSS gerado</th><th>Como sai mais barato</th></tr>
+<tr><td>usou um degrau da escala</td><td>uma regra apontando para uma variável do tema</td><td>já é o barato</td></tr>
+<tr><td>inventou <code>p-[15px]</code></td><td>uma regra nova, com o valor solto dentro</td><td><code>p-4</code> reaproveita o <code>--spacing</code></td></tr>
+<tr><td>escreveu quatro longhands</td><td>quatro regras, uma por lado</td><td><code>p-4</code>, que é uma regra só</td></tr>
+<tr><td>acrescentou <code>md:</code></td><td>a mesma regra, mais uma condição de largura</td><td>não cortar: variante é barata</td></tr>
+<tr><td>repetiu a mesma informação</td><td>uma regra para cada classe repetida, sem ganho visual</td><td>deixar uma classe só</td></tr>
+</table>
+</div>
+
+
+
+<p>Leia a penúltima linha com atenção, porque ela contraria o instinto de quem quer “economizar
+classes”. Uma variante não duplica o valor: ela embrulha a regra numa condição,
+<code>@media (width &gt;= 48rem)</code>. O peso é o de uma regra, quase sempre pequena. Cortar
+variantes para “deixar o CSS leve” é economia falsa: você perde a tela funcionando em troca de
+duzentos bytes.</p>
+
+<p>Já a repetição é economia de verdade. Quando o mesmo elemento carrega <code>p-4 px-4 pt-4</code>,
+o navegador gera três regras e aplica uma; os outros dois nomes só servem para você ter dúvida sobre
+qual está ganhando. É o mesmo raciocínio que a aula <a href="estilos-de-componente.html">Estilos de
+Componente</a> usa para decidir quando dar um nome a uma peça: menos informação repetida, menos
+arquivo e menos dúvida.</p>
+
+<dl class="anatomy">
+<dt>regra</dt>
+<dd>Um seletor e um bloco de declarações: <code>.p-4 { padding: … }</code>. É a unidade de peso do
+arquivo — cada classe diferente acrescenta pelo menos uma.</dd>
+<dt>custo fixo</dt>
+<dd>A parte do arquivo que independe do seu site: o reset da camada <code>base</code> e as variáveis
+de fonte. Vem inteira, sempre.</dd>
+<dt>longhand</dt>
+<dd>Uma propriedade por vez: <code>padding-top</code>, <code>padding-left</code>. A classe
+<code>pt-4</code> é um longhand escrito de forma curta.</dd>
+<dt>atalho</dt>
+<dd>A classe que age no grupo todo: <code>p-4</code> mexe nos quatro lados. O CSS dela é uma
+declaração só.</dd>
+<dt>minificar</dt>
+<dd>Tirar espaços, quebras de linha e comentários do arquivo final, sem mudar o efeito. Feito pelo
+build.</dd>
+<dt>compressão</dt>
+<dd>gzip ou brotli: o servidor envia o arquivo compactado e o navegador descompacta. Feito pelo
+servidor, não pelo Tailwind.</dd>
+</dl>
+
+<h2>5. Missão 1: use a escala em vez de inventar valor</h2>
+
+<p>A primeira decisão é a mais comum de todas. A Ana queria um respiro “um tiquinho menor que 16 px”
+e escreveu <code>p-[15px]</code> nos três cartões da vitrine. Funciona, e cada valor inventado custa
+uma regra própria. A missão é trocar pelo degrau da escala que corresponde a 16 px:</p>
+
+<div class="trytailwind" data-goal="conta:[class*=&quot;p-[&quot;]=0;;css:.cartao|padding=16px">
+  <p class="try-task">Os três cartões usam <code>p-[15px]</code>, um valor inventado. Troque pela
+  classe da escala que dá 16 px nos três, e clique em Rodar. A meta confere que não sobrou nenhum
+  valor arbitrário e que o respiro ficou em 16 px.</p>
+  <pre class="html">&lt;div class="cartao bg-white p-[15px]"&gt;Pão francês&lt;/div&gt;
+&lt;div class="cartao bg-white p-[15px]"&gt;Pão de queijo&lt;/div&gt;
+&lt;div class="cartao bg-white p-[15px]"&gt;Bolo de fubá&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 15px
+background-color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;div class="cartao bg-white p-4"&gt;Pão francês&lt;/div&gt;
+&lt;div class="cartao bg-white p-4"&gt;Pão de queijo&lt;/div&gt;
+&lt;div class="cartao bg-white p-4"&gt;Bolo de fubá&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, olhe o CSS gerado com calma. Antes, havia uma regra com <code>padding: 15px</code>
+escrito à mão. Depois, existe <code>padding: calc(var(--spacing) * 4)</code> — a conta, não o
+resultado. Parece um detalhe de estética de código, e não é: a versão com conta reaproveita a
+variável <code>--spacing</code>, que já estava no arquivo por causa de outras classes. A versão com
+15 px carrega um número que só serve ali.</p>
+
+<p>Há um ganho escondido, e ele vale mais que os bytes: coerência. Quando a Ana decide que o respiro
+dos cartões é 16 px, ela para de decidir isso em cada cartão. Daqui a um mês, o quarto cartão nasce
+com <code>p-4</code> e combina com os outros. O valor arbitrário não é proibido — ele existe para o
+caso que a escala não cobre, como uma largura que veio de um desenho impresso. Só não pode virar o
+jeito normal de trabalhar, porque aí você trocou um sistema de degraus por uma coleção de decisões
+soltas.</p>
+
+<h2>6. Missão 2: o atalho no lugar de quatro longhands</h2>
+
+<p>A segunda decisão é sobre escrever o mesmo valor por quatro portas. O cartão da Ana tem respiro
+igual nos quatro lados, mas ela escreveu lado por lado — <code>pt-4 pr-4 pb-4 pl-4</code>. É o que
+sai de quem veio do CSS antigo, onde se pensava em cada propriedade. Funciona, e custa quatro regras:</p>
+
+<pre class="term">.pt-4 { padding-top: calc(var(--spacing) * 4); }
+.pr-4 { padding-right: calc(var(--spacing) * 4); }
+.pb-4 { padding-bottom: calc(var(--spacing) * 4); }
+.pl-4 { padding-left: calc(var(--spacing) * 4); }
+.p-4  { padding: calc(var(--spacing) * 4); }</pre>
+
+<p>A última linha é o atalho, e ela faz o trabalho das quatro primeiras. No experimento desta aula,
+trocar as quatro longhands por <code>p-4</code> num único elemento encolheu o arquivo gerado em
+cerca de 180 bytes. Parece pouco — e é, num elemento. O problema é que essa repetição aparece em
+todo canto de um site: cada cartão, cada botão, cada campo. Cento e oitenta bytes por
+elemento viram dezenas de kilobytes num site inteiro, sem ninguém perceber.</p>
+
+<div class="trytailwind" data-goal="rule:padding: calc(var(--spacing) * 4);;conta:[class*=&quot;pt-4&quot;]=0">
+  <p class="try-task">O cartão tem respiro igual nos quatro lados, escrito por quatro longhands.
+  troque as quatro por uma classe só, de 16 px. A meta confere a regra <code>padding: …</code> no CSS
+  gerado e que não sobrou nenhum <code>pt-4</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-lg bg-amber-50 pt-4 pr-4 pb-4 pl-4"&gt;Pão quentinho, saído do forno&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 8px
+padding-top: 16px
+padding-right: 16px
+padding-bottom: 16px
+padding-left: 16px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-lg bg-amber-50 p-4"&gt;Pão quentinho, saído do forno&lt;/div&gt;</pre>
+</div>
+
+<p>Vale conhecer os atalhos que existem, porque eles cobrem quase tudo o que a gente escreve:
+<code>p-</code> é o respiro todo, <code>px-</code> só a horizontal, <code>py-</code> só a vertical,
+<code>pt-</code>, <code>pr-</code>, <code>pb-</code> e <code>pl-</code> cada lado. O mesmo esquema
+existe para margem (<code>m-</code>) e para arredondamento (<code>rounded-</code>). E existe o atalho
+de dois valores de uma vez: <code>size-11</code> dá largura e altura iguais, no lugar de
+<code>w-11 h-11</code>.</p>
+
+<p>Só não vale exagerar na direção contrária. Se um cartão precisa de 24 px em cima e 16 px embaixo,
+o certo é <code>pt-6 pb-4</code> — duas regras, cada uma dizendo uma verdade. Usar
+<code>p-4</code> e depois <code>pt-6</code> também funciona, mas aí você tem duas regras para a
+mesma informação vertical, e a de baixo ganha. Menos classes é bom; menos classes <em>dizendo a
+mesma coisa</em> é o objetivo.</p>
+
+<h2>7. Missão 3: não repita informação</h2>
+
+<p>A terceira decisão nasce de um hábito inocente: acrescentar a classe que “resolva” em vez de
+trocar a que já estava. O cartão da Ana tem <code>p-4</code> e, depois, um <code>px-4</code> que ela
+pôs quando tentava acertar o respiro lateral. O resultado visual é idêntico; o arquivo ganha uma
+regra que não muda nada.</p>
+
+<div class="trytailwind" data-goal="conta:[class*=&quot;px-4&quot;]=0;;css:#alvo|padding=16px">
+  <p class="try-task">Além do <code>p-4</code>, o cartão carrega <code>px-4</code> e
+  <code>pt-4</code>, que dizem a mesma coisa que ele. Deixe só a classe que decide o respiro todo e
+  clique em Rodar: o resultado na tela não muda, o CSS gerado diminui.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl bg-white p-4 px-4 pt-4 text-neutral-800"&gt;Pão francês, R$ 9,50&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+color: oklch(0.269 0 none)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-xl bg-white p-4 text-neutral-800"&gt;Pão francês, R$ 9,50&lt;/div&gt;</pre>
+</div>
+
+<p>Compare os dois painéis: o CSS computado é <code>padding: 16px</code> nas duas versões. A
+diferença não aparece na tela; aparece no arquivo e na sua cabeça. Cada classe redundante é uma
+pergunta que alguém vai fazer daqui a seis meses (“por que tem <code>px-4</code> se já tem
+<code>p-4</code>?”), e a resposta é sempre “não sei, foi ficando”. Limpar isso é o tipo de otimização
+que não tem glamour e tem retorno.</p>
+
+<p>Aproveite a mesma varredura para caçar três primos dessa repetição: a classe que ficou de uma
+experiência (<code>hover:shadow-2xl</code> num cartão que nunca tem mouse em cima), a que veio
+copiada de um componente que mudou (<code>text-lg</code> num parágrafo que hoje é
+<code>text-sm</code>) e a que sobrou de um tema escuro que você abandonou
+(<code>dark:bg-neutral-900</code> sem nenhum <code>dark:</code> em volta). Todas geram regra e
+nenhuma muda o desenho.</p>
+
+<h2>8. O arquivo que vai para o servidor</h2>
+
+<p>Escrito o CSS, ele ainda passa por duas máquinas antes de chegar ao celular da cliente: o build,
+que pode <strong>minificar</strong> (tirar espaços, quebras de linha e comentários), e o servidor, que
+pode <strong>comprimir</strong> na hora de enviar (gzip ou brotli) e mandar o navegador
+<strong>guardar</strong> o arquivo em cache. Nenhuma das duas é opcional num site público.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Etapa</th><th>Quanto ajuda</th><th>Quem faz</th></tr>
+<tr><td>gerar só o usado</td><td>é o que decide o tamanho: o resto é percentual</td><td>o Tailwind, lendo seus arquivos</td></tr>
+<tr><td>minificar</td><td>tira espaços e comentários; ganho de alguns por cento a um terço</td><td>o build, com a opção <code>--minify</code></td></tr>
+<tr><td>comprimir (gzip/brotli)</td><td>texto de CSS costuma cair para uma fração do tamanho</td><td>o servidor</td></tr>
+<tr><td>cache</td><td>a segunda visita não baixa nada</td><td>servidor (cabeçalhos) e nome com hash</td></tr>
+</table>
+</div>
+
+<p>Duas armadilhas dessa etapa merecem nome. A primeira é publicar a build
+<code>@tailwindcss/browser</code>: ela compila no navegador do visitante, o que é ótimo para aprender
+e ruim para entregar — o visitante paga o custo do compilador e do CSS juntos. A segunda é montar
+nome de classe por código:</p>
+
+<pre class="file" data-file="painel.js">const cor = "amber";
+elemento.className = "bg-" + cor + "-100";</pre>
+
+<p>Isso não funciona, e não é falha de otimização: é a mesma regra da seção 3 vista do avesso. O
+Tailwind varre o texto dos arquivos; ele vê <code>"bg-"</code>, <code>"amber"</code> e
+<code>"-100"</code>, nunca <code>bg-amber-100</code>. A classe não entra no CSS, o elemento fica sem
+fundo e o arquivo não cresce — o pior dos mundos, porque o defeito aparece só na tela de quem usa.
+A saída é escrever os nomes inteiros, mesmo que seja num mapa:</p>
+
+<pre class="file" data-file="painel.js">const fundo = { ambar: "bg-amber-100", verde: "bg-emerald-100" };
+elemento.className = fundo.ambar;</pre>
+
+<p>Para medir tudo isso sem abrir o navegador, o terminal resolve. Depois do build, um
+<code>ls -l</code> na pasta de saída mostra o tamanho do arquivo; um <code>wc -c</code> mostra em
+bytes. Compare o antes e o depois de cada mudança — e anote os números, porque a memória engana:
+o que parece “muito menor” costuma ser 3%.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o arquivo com 300 KB num site de três páginas</h3>
+<p>Se o CSS é muito maior do que o site justifica, o problema quase nunca é o Tailwind. As causas
+prováveis, em ordem: o compilador do navegador ainda está na página; o CSS antigo continua linkado,
+junto com o novo; existe um arquivo de CSS gerado antigo, commitado por engano; ou o build está
+varrendo uma pasta que não deveria (uma cópia de segurança com o HTML de outro projeto, uma pasta de
+exemplos). O caminho é sempre olhar o arquivo gerado e procurar, no texto, uma classe que você
+reconhece como morta. Se ela está lá, o Tailwind a encontrou em algum lugar — e o trabalho é achar
+esse arquivo.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o painel com uma cor diferente em cada cartão</h3>
+<p>A Ana fez vinte cartões de cor única, cada um com um hexadecimal escolhido no olho:
+<code>bg-[#f6d9a8]</code>, <code>bg-[#f7dca9]</code>, <code>bg-[#f5d8a7]</code>. O site ganhou vinte
+regras quase idênticas e um desenho que parece sujo, porque as cores não combinam de verdade. A
+troca por três ou quatro tons da paleta resolve as duas coisas de uma vez: menos regras, porque os
+cartões passam a compartilhar as mesmas variáveis, e um desenho coerente. Cor inventada é o caso mais
+comum de “o CSS cresceu sem eu mexer em nada”.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: “apaguei metade das páginas e o CSS não encolheu”</h3>
+<p>A varredura do Tailwind é por texto, não por página visitada. Se você apagou a página mas deixou
+uma cópia dela em outra pasta, as classes continuam sendo encontradas e as regras continuam no
+arquivo. O mesmo acontece com classes escritas em comentários de HTML ou em arquivos de teste que
+ficaram no projeto. Para achar o culpado, procure o nome de uma classe que só existia na página
+apagada — se ela ainda está no CSS gerado, existe um arquivo com ela em algum lugar do projeto.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que decide o tamanho do CSS gerado?</p>
+<label><input type="radio" name="q1"> a quantidade de elementos na página</label>
+<label><input type="radio" name="q1"> a quantidade de classes diferentes escritas nos arquivos</label>
+<label><input type="radio" name="q1"> a versão do Tailwind instalada</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que <code>p-4</code> custa menos que
+<code>pt-4 pr-4 pb-4 pl-4</code>?</p>
+<label><input type="radio" name="q2"> porque o navegador ignora as longhands quando o atalho existe</label>
+<label><input type="radio" name="q2"> porque o atalho usa pixels e o longhand usa rem</label>
+<label><input type="radio" name="q2"> porque o atalho gera uma regra e as longhands geram quatro</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Qual dessas mudanças <em>realmente</em> diminui o
+arquivo?</p>
+<label><input type="radio" name="q3"> apagar classes que repetem a mesma informação</label>
+<label><input type="radio" name="q3"> trocar <code>md:p-6</code> por <code>p-6</code></label>
+<label><input type="radio" name="q3"> usar só valores arbitrários, para ter controle</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o cartão da vitrine</h2>
+<p>Este cartão tem respiro igual nos quatro lados, escrito como quatro longhands. Escreva a classe
+única que substitui as quatro e dá 16 px de respiro:</p>
+<div class="ex-code">&lt;div class="rounded-lg bg-white <input aria-label="resposta 1" data-answer="p-4" placeholder="...">"&gt;Pão francês&lt;/div&gt;</div>
+<p class="ex-dica">Dica: o atalho do respiro em todos os lados é a letra <code>p</code> com o degrau
+da escala. 16 px é o quarto degrau, e o CSS que ele gera é
+<code>padding: calc(var(--spacing) * 4)</code>.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O CSS chega antes do primeiro desenho, então cada byte dele é mais caro que um byte de imagem. O
+Tailwind ajuda porque gera só o que você usou: nenhuma classe do catálogo entra sem aparecer nos
+seus arquivos, e nenhuma cor entra na paleta sem ser chamada. O arquivo tem um pedágio fixo (o
+reset) e um custo variável que depende da quantidade de classes <em>diferentes</em> do projeto.</p>
+
+<p>As quatro decisões que mantêm esse custo baixo são de escrita, não de configuração: usar os
+degraus da escala em vez de valores inventados (<code>p-4</code>, não <code>p-[15px]</code>); usar
+atalhos em vez de longhands (<code>p-4</code>, não <code>pt-4 pr-4 pb-4 pl-4</code>); não repetir
+informação (<code>p-4</code>, não <code>p-4 px-4</code>); e escrever nomes de classe inteiros, para
+a varredura encontrá-los. Variantes não são o problema: <code>md:</code> e
+<code>dark:</code> embrulham a regra numa condição, com peso baixo.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>CSS bloqueia o desenho: sem ele, a página fica branca.</li>
+<li>Só entra o CSS das classes escritas nos arquivos — e só as cores usadas.</li>
+<li>O reset é custo fixo; o resto cresce com o número de classes diferentes.</li>
+<li>Valor arbitrário cria regra com valor solto; degrau da escala reaproveita a variável.</li>
+<li><code>p-4</code> é uma regra; <code>pt-4 pr-4 pb-4 pl-4</code> são quatro.</li>
+<li><code>size-11</code> substitui <code>w-11 h-11</code>.</li>
+<li>Classe que repete a mesma informação gera regra sem mudar nada na tela.</li>
+<li>Variante é barata; cortar variante é economia falsa.</li>
+<li>Minificar é do build, comprimir e cachear é do servidor.</li>
+<li>Nunca publique a build que compila no navegador; nunca monte o nome da classe por pedaços.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

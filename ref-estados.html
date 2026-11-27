@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estados e Variantes | Guia Tailwind</title>
+<meta name="description" content="Consulta das variantes de estado do Tailwind v4: hover, focus, active, disabled, first, odd, group-hover, peer, aria e data, com o CSS gerado e as armadilhas.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Estados e <span class="hl">Variantes</span></h1>
+<p class="intro">A Ana já sabe dar respiro, cor e borda ao cartão da padaria. O problema agora é outro: o
+botão de encomendar está bonito, mas parece morto — o mouse passa por cima e nada muda, e quem navega
+com a tecla Tab não enxerga onde está o foco. Ela viu num site que dá para escrever <code>hover</code>
+junto com a classe, separado por dois-pontos, e quando abriu o CSS que o navegador mostrou encontrou um
+nome estranho, com uma barra invertida no meio. Esta página é a consulta dela — e a sua: cada variante
+de estado, o CSS que o Tailwind v4 escreve de verdade, quando usar e o que não funciona.</p>
+
+<h2>1. O que é uma variante</h2>
+
+<p>Uma variante é uma condição colada na frente de uma classe, separada por dois-pontos. A classe
+continua sendo a mesma de sempre; o que muda é <em>quando</em> ela vale. <code>bg-amber-600</code>
+pinta o fundo sempre. <code>hover:bg-amber-600</code> pinta o fundo só enquanto o ponteiro está em
+cima do elemento. O Tailwind lê esse prefixo, monta um seletor com a condição e gera uma regra nova,
+com um nome de classe novo.</p>
+
+<p>O detalhe que assusta no começo é o escape. O nome da classe no HTML tem dois-pontos
+(<code>hover:bg-amber-600</code>), e dois-pontos não pode aparecer cru num seletor CSS, porque ali ele
+significa outra coisa. Então o Tailwind escreve uma barra invertida antes:
+<code>.hover\:bg-amber-600</code>. Essa barra não é erro de digitação nem coisa de programador
+experiente: é só o jeito de dizer ao navegador "esse dois-pontos faz parte do nome". Você nunca
+digita essa barra no HTML — ela nasce no CSS gerado, e é por isso que ela aparece tanto nas saídas
+desta página.</p>
+
+<p>Vale guardar uma consequência prática dessa mecânica: a variante só existe se a classe inteira
+estiver escrita no HTML. O Tailwind não adivinha combinações. Se você escrever
+<code>class="bg-amber-600"</code> e tentar ligar o hover por JavaScript juntando pedaços de texto
+(<code>"hover:" + "bg-amber-600"</code>), a regra pode nunca ser gerada. A variante é resolvida na
+hora de compilar, não na hora do clique. Isso volta na seção 8, porque é a causa de metade dos
+"meu hover não funciona" que aparecem nos fóruns.</p>
+
+<dl class="anatomy">
+<dt>variante</dt>
+<dd>O prefixo com dois-pontos: <code>hover:</code>, <code>md:</code>, <code>dark:</code>,
+<code>group-hover:</code>. Diz em que condição a classe vale.</dd>
+<dt>pseudo-classe</dt>
+<dd>Um estado que o próprio navegador controla, escrito com dois-pontos no CSS:
+<code>:hover</code>, <code>:focus</code>, <code>:checked</code>, <code>:first-child</code>.</dd>
+<dt>prefixo</dt>
+<dd>O que vem antes dos dois-pontos. Pode ser uma condição de tela
+(<code>md:</code>), de tema (<code>dark:</code>) ou de estado (<code>disabled:</code>).</dd>
+<dt>grupo</dt>
+<dd>O pai marcado com <code>group</code>, que serve de gatilho para os filhos usarem
+<code>group-hover:</code> e parentes.</dd>
+<dt>par</dt>
+<dd>O irmão marcado com <code>peer</code>, usado quando quem muda de estado é um campo de formulário
+e quem reage é o texto ao lado.</dd>
+</dl>
+
+<p>Repare que uma variante não é um "modo". Ela não desliga a classe base: as duas convivem, e o
+navegador decide qual aplicar em cada momento. É por isso que
+<code>class="bg-amber-500 hover:bg-amber-600"</code> funciona — o âmbar 500 é o repouso, o 600 é o
+estado. Uma dica de leitura que ajuda muito: leia a classe da direita para a esquerda. Primeiro
+"fundo âmbar 600", depois "quando o mouse estiver em cima".</p>
+
+<h2>2. Ponteiro e teclado</h2>
+
+<p>As variantes de interação são as primeiras que todo mundo usa, e as que mais confundem, porque
+duas delas parecem iguais. <code>focus:</code> pega qualquer foco, inclusive o que nasce de um clique
+do mouse. <code>focus-visible:</code> pega só o foco que o navegador considera "de teclado", ou seja,
+quando a pessoa chegou ali com Tab. Na prática: use <code>focus-visible:</code> para o anel de
+destaque e <code>focus:</code> quando o campo precisa mudar de aparência de qualquer jeito, como um
+input que ganha borda âmbar ao ser clicado. A aula <a href="focus.html">O focus</a> mostra o mesmo
+raciocínio aplicado a um formulário inteiro.</p>
+
+<p>Outra mudança do Tailwind v4 que pega muita gente: <code>hover:</code> não vira mais um
+<code>:hover</code> solto. Ele vem embrulhado numa consulta de mídia, <code>@media (hover: hover)</code>.
+Isso significa que, num celular ou num tablet sem mouse, a regra de hover simplesmente não existe — o
+navegador não tem como "passar o mouse". O efeito é intencional: evita que um toque deixe o botão
+preso no estado escuro até o próximo toque. Se você quer que o toque também dê retorno visual, use
+<code>active:</code>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Variante</th><th>Vira no CSS</th><th>Para que serve</th><th>Cuidado</th></tr>
+<tr><td><code>hover:</code></td><td><code>@media (hover: hover)</code> + <code>:hover</code></td><td>link, botão, cartão que reage ao ponteiro</td><td>não existe no toque; nunca esconda informação só aqui</td></tr>
+<tr><td><code>focus:</code></td><td><code>:focus</code></td><td>campo que muda de cor ao ser clicado ou focado</td><td>dispara também no clique, o que pode parecer "preso"</td></tr>
+<tr><td><code>focus-visible:</code></td><td><code>:focus-visible</code></td><td>anel de foco para quem navega no teclado</td><td>com o mouse pode não aparecer — é o comportamento desejado</td></tr>
+<tr><td><code>focus-within:</code></td><td><code>:focus-within</code></td><td>o cartão inteiro destaca quando um campo dentro tem foco</td><td>vale para qualquer filho, inclusive links internos</td></tr>
+<tr><td><code>active:</code></td><td><code>:active</code></td><td>o "apertar" do botão: afundar, escurecer</td><td>dura só o tempo do clique, às vezes um piscar</td></tr>
+<tr><td><code>visited:</code></td><td><code>:visited</code></td><td>link já visitado</td><td>o navegador limita as propriedades por privacidade</td></tr>
+<tr><td><code>target:</code></td><td><code>:target</code></td><td>a seção que o endereço com <code>#</code> apontou</td><td>só funciona com âncora na URL</td></tr>
+<tr><td><code>group-hover:</code></td><td><code>:is(:where(.group):hover *)</code></td><td>o filho reage ao mouse no pai</td><td>o pai precisa ter a classe <code>group</code></td></tr>
+</table>
+</div>
+
+<p>Quando o Tailwind encontra <code>hover:bg-amber-600</code> e <code>focus-visible:ring-2</code> no
+mesmo botão, ele gera duas regras separadas. Vale ver o texto exato, porque ele explica duas coisas de
+uma vez: o escape do dois-pontos e o fato de o <code>ring</code> ser uma sombra, não uma borda.</p>
+
+<pre class="term">@media (hover: hover) {
+  .hover\:bg-amber-600:hover {
+    background-color: var(--color-amber-600);
+  }
+}
+.focus-visible\:ring-2:focus-visible {
+  --tw-ring-shadow: var(--tw-ring-inset, ) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}</pre>
+
+<p>Duas leituras úteis. Primeiro: a cor vem de uma variável (<code>--color-amber-600</code>), não de um
+hexadecimal, então trocar a paleta depois é trocar a variável. Segundo: o anel é montado com
+<code>box-shadow</code> e variáveis próprias — se você tentar "consertar" o anel com
+<code>border</code>, o layout vai pular 2 px, porque borda ocupa espaço e sombra não. É por isso que o
+guia insiste no <code>ring</code> para foco.</p>
+
+<div class="trytailwind" data-goal="rule:.hover\:bg-amber-600:hover;;rule:.focus-visible\:ring-2:focus-visible;;rule:@media (hover: hover)">
+  <p class="try-task">O botão de encomendar está morto: nada acontece quando o mouse passa e não há
+  sinal de foco. Acrescente o escurecimento no hover (<code>hover:bg-amber-600</code>) e o anel de
+  2 px para quem usa teclado (<code>focus-visible:ring-2</code>).</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-lg bg-amber-500 p-3 text-white"&gt;Encomendar pão&lt;/button&gt;</pre>
+  <pre class="out">
+padding: 12px
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-amber-500 p-3 text-white hover:bg-amber-600 focus-visible:ring-2"&gt;Encomendar pão&lt;/button&gt;</pre>
+</div>
+
+<p>Clique em Rodar e depois em Verificar. O painel vai continuar mostrando o mesmo respiro e a mesma
+cor de repouso, porque o estado não está ligado — nenhum mouse está em cima do botão. O que muda está
+no CSS gerado, e é justamente por isso que a missão confere com <code>rule:</code> e não com
+<code>css:</code>. Para ver o efeito com os olhos, passe o mouse na prévia e aperte Tab até o botão.</p>
+
+<h2>3. Estados de formulário</h2>
+
+<p>Aqui mora a maior economia de JavaScript do Tailwind. O navegador já sabe se um campo está
+preenchido, inválido, desabilitado ou marcado; as variantes só dão nomes a esses fatos. A tabela abaixo
+é a lista completa do que o motor gera hoje, com o seletor real de cada uma.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Variante</th><th>Vira no CSS</th><th>Onde faz sentido</th></tr>
+<tr><td><code>disabled:</code></td><td><code>:disabled</code></td><td>botão cinza e sem sombra enquanto a encomenda não puder ser enviada</td></tr>
+<tr><td><code>enabled:</code></td><td><code>:enabled</code></td><td>o caso oposto, útil para dar cor viva só ao que é clicável</td></tr>
+<tr><td><code>checked:</code></td><td><code>:checked</code></td><td>rádio e caixa de seleção marcados; fundo âmbar na opção escolhida</td></tr>
+<tr><td><code>indeterminate:</code></td><td><code>:indeterminate</code></td><td>caixa "meio marcada", quando só parte dos itens está selecionada</td></tr>
+<tr><td><code>required:</code></td><td><code>:required</code></td><td>marcar o campo obrigatório com borda diferente</td></tr>
+<tr><td><code>optional:</code></td><td><code>:optional</code></td><td>o resto dos campos, para não repetir a classe em cada um</td></tr>
+<tr><td><code>invalid:</code></td><td><code>:invalid</code></td><td>borda vermelha — cuidado: já vale com o campo vazio e obrigatório</td></tr>
+<tr><td><code>valid:</code></td><td><code>:valid</code></td><td>borda verde quando o valor passa na regra do próprio campo</td></tr>
+<tr><td><code>user-invalid:</code></td><td><code>:user-invalid</code></td><td>borda vermelha só depois que a pessoa digitou e saiu do campo</td></tr>
+<tr><td><code>user-valid:</code></td><td><code>:user-valid</code></td><td>a mesma ideia do lado positivo</td></tr>
+<tr><td><code>placeholder-shown:</code></td><td><code>:placeholder-shown</code></td><td>destacar o campo enquanto só aparece o texto de exemplo</td></tr>
+<tr><td><code>read-only:</code></td><td><code>:read-only</code></td><td>campo de consulta, que o leitor vê mas não edita</td></tr>
+<tr><td><code>autofill:</code></td><td><code>:autofill</code></td><td>o amarelo que o navegador pinta ao preencher sozinho</td></tr>
+<tr><td><code>default:</code></td><td><code>:default</code></td><td>a opção que vem marcada de fábrica</td></tr>
+<tr><td><code>in-range:</code></td><td><code>:in-range</code></td><td>número dentro do mínimo e do máximo do campo</td></tr>
+<tr><td><code>out-of-range:</code></td><td><code>:out-of-range</code></td><td>número fora da faixa, como 40 pães num campo que aceita 10</td></tr>
+</table>
+</div>
+
+<p>A diferença entre <code>invalid:</code> e <code>user-invalid:</code> é a que mais estraga formulário
+bonito. <code>:invalid</code> é verdadeiro desde o primeiro desenho da tela: um campo obrigatório
+vazio já é inválido. Se você pintar de vermelho com <code>invalid:</code>, o formulário inteiro nasce
+vermelho e a pessoa se sente culpada antes de digitar. <code>:user-invalid</code> só aparece depois
+que houve interação de verdade — é o que você quer em quase todos os casos. O suporte é bom nos
+navegadores atuais, e quando falta, o pior que acontece é o destaque não aparecer; nada quebra.</p>
+
+<p>Um lembrete que vale para todas as variantes desta seção: elas dependem do estado real do elemento.
+<code>disabled:</code> só pega <code>button</code>, <code>input</code>, <code>select</code>,
+<code>textarea</code>, <code>fieldset</code> e <code>option</code>. Num <code>div</code>, o atributo
+<code>disabled</code> não existe e a regra nunca casa. Para um bloco que "parece desabilitado", use um
+atributo que você mesmo controla — <code>data-bloqueado</code> com <code>data-bloqueado:opacity-50</code>
+— ou o par <code>aria-disabled="true"</code> com <code>aria-disabled:opacity-50</code>. A segunda
+opção é melhor, porque o leitor de tela entende o atributo.</p>
+
+<h2>4. Posição na lista: first, last, odd e even</h2>
+
+<p>Estas variantes não dependem de quem está olhando, e sim do lugar do elemento entre os irmãos. São
+as que mais economizam marcação: em vez de dar uma classe diferente ao primeiro item do cardápio, você
+diz "todo primeiro filho não tem borda em cima". O seletor gerado é literal — dá para ler e conferir.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Variante</th><th>Vira no CSS</th><th>Uso típico</th></tr>
+<tr><td><code>first:</code></td><td><code>:first-child</code></td><td>tirar o respiro do topo do primeiro item</td></tr>
+<tr><td><code>last:</code></td><td><code>:last-child</code></td><td>tirar a borda de baixo do último item da lista</td></tr>
+<tr><td><code>only:</code></td><td><code>:only-child</code></td><td>quando há um item só, ele ganha cantos arredondados</td></tr>
+<tr><td><code>odd:</code></td><td><code>:nth-child(odd)</code></td><td>listra zebrada: linhas 1, 3, 5 com fundo claro</td></tr>
+<tr><td><code>even:</code></td><td><code>:nth-child(even)</code></td><td>a outra metade da listra</td></tr>
+<tr><td><code>first-of-type:</code></td><td><code>:first-of-type</code></td><td>primeiro parágrafo, ignorando títulos acima</td></tr>
+<tr><td><code>last-of-type:</code></td><td><code>:last-of-type</code></td><td>último parágrafo antes do rodapé</td></tr>
+<tr><td><code>only-of-type:</code></td><td><code>:only-of-type</code></td><td>único elemento daquele tipo entre os irmãos</td></tr>
+<tr><td><code>empty:</code></td><td><code>:empty</code></td><td>esconder a caixa de aviso quando não há texto</td></tr>
+<tr><td><code>nth-3:</code></td><td><code>:nth-child(3)</code></td><td>o terceiro item, sem contar os anteriores à mão</td></tr>
+<tr><td><code>nth-[3n+1]:</code></td><td><code>:nth-child(3n+1)</code></td><td>de três em três, começando no primeiro</td></tr>
+<tr><td><code>not-first:</code></td><td><code>:not(:first-child)</code></td><td>borda em cima de todos, menos no primeiro</td></tr>
+</table>
+</div>
+
+<p>O ponto que derruba iniciante é o significado de "filho". <code>first:</code> quer dizer "primeiro
+filho do pai", não "primeiro item da minha lista". Se entre os filhos houver um título
+<code>h3</code> antes do primeiro <code>li</code>, o <code>li</code> deixa de ser o primeiro filho e a
+classe não faz efeito nenhum. É aí que entra <code>first-of-type:</code>: ele conta só os elementos do
+mesmo tipo, então o primeiro <code>li</code> volta a ser o primeiro. Escolher entre um e outro é
+observar o HTML em volta, não a lista em si.</p>
+
+<div class="trytailwind" data-goal="conta:.odd\:bg-amber-50=4;;rule:.odd\:bg-amber-50:nth-child(odd);;rule:.even\:bg-white:nth-child(even)">
+  <p class="try-task">A lista do cardápio está toda branca e os olhos se perdem. Ponha fundo
+  <code>bg-amber-50</code> nos itens ímpares e <code>bg-white</code> nos pares, usando as variantes —
+  sem classe em cada item.</p>
+  <pre class="html">&lt;ul class="space-y-1 rounded-lg border border-stone-200 p-2"&gt;
+  &lt;li id="alvo" class="rounded px-2 py-1"&gt;Pão francês&lt;/li&gt;
+  &lt;li class="rounded px-2 py-1"&gt;Pão de queijo&lt;/li&gt;
+  &lt;li class="rounded px-2 py-1"&gt;Croissant&lt;/li&gt;
+  &lt;li class="rounded px-2 py-1"&gt;Broa de milho&lt;/li&gt;
+&lt;/ul&gt;</pre>
+  <pre class="out">
+border-radius: 4px
+padding-inline: 8px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;ul class="space-y-1 rounded-lg border border-stone-200 p-2"&gt;
+  &lt;li id="alvo" class="odd:bg-amber-50 even:bg-white rounded px-2 py-1"&gt;Pão francês&lt;/li&gt;
+  &lt;li class="odd:bg-amber-50 even:bg-white rounded px-2 py-1"&gt;Pão de queijo&lt;/li&gt;
+  &lt;li class="odd:bg-amber-50 even:bg-white rounded px-2 py-1"&gt;Croissant&lt;/li&gt;
+  &lt;li class="odd:bg-amber-50 even:bg-white rounded px-2 py-1"&gt;Broa de milho&lt;/li&gt;
+&lt;/ul&gt;</pre>
+</div>
+
+<p>O painel desta caixa descreve o primeiro item — ele é ímpar, então ganha o âmbar claro da solução.
+A missão confere duas coisas: que a classe existe uma vez e que o seletor gerado é
+<code>:nth-child(odd)</code>. Note que a classe foi repetida nos quatro itens; parece redundante, mas é
+assim que o Tailwind funciona. O que se ganha é não inventar nome de classe e não manter uma regra em
+outro arquivo.</p>
+
+<h2>5. group: o estado do pai</h2>
+
+<p>O caso clássico: um cartão de produto onde a foto cresce, o título muda de cor e a sombra aumenta
+quando o mouse passa <em>em qualquer lugar do cartão</em>. Sem variante de grupo, você teria de repetir
+<code>hover:</code> em cada filho — e o efeito só aconteceria quando o mouse estivesse exatamente
+sobre aquele pedaço. A solução é marcar o pai com <code>group</code> e escrever
+<code>group-hover:</code> nos filhos.</p>
+
+<pre class="file" data-file="index.html">&lt;a href="#" class="group block rounded-xl bg-white p-4 hover:shadow-lg"&gt;
+  &lt;h3 class="text-amber-700 group-hover:text-amber-900"&gt;Pão do dia&lt;/h3&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h30.&lt;/p&gt;
+&lt;/a&gt;</pre>
+
+<p>A classe <code>group</code> sozinha não gera CSS nenhum: ela é uma etiqueta. O que gera CSS é o
+<code>group-hover:</code> nos filhos, e o seletor que o Tailwind escreve usa <code>:is()</code> e
+<code>:where()</code> em volta do nome. Duas consequências: primeiro, o <code>group</code> precisa ser
+ancestral de verdade — irmão não serve; segundo, a condição vale para qualquer descendente, inclusive
+netos. Se você tem dois grupos aninhados, o <code>group-hover:</code> do neto reage ao hover dos dois,
+o que costuma surpreender.</p>
+
+<p>Por isso o Tailwind v4 permite batizar o grupo: <code>group/cartao</code> no pai e
+<code>group-hover/cartao:text-amber-900</code> no filho. O trecho depois da barra é só um nome, e ele
+existe para desempatar grupos aninhados. É a mesma ideia do <code>peer</code> nomeado, que aparece na
+próxima seção. Fora isso, o comportamento é idêntico e o CSS gerado fica um pouco mais longo, com o
+nome dentro do <code>:where()</code>.</p>
+
+<p>Vale conhecer a família inteira, porque todos seguem a mesma gramática. <code>group-focus:</code>
+quando o pai recebe foco, <code>group-focus-within:</code> quando qualquer coisa dentro do pai foca,
+<code>group-active:</code> durante o clique, <code>group-has-[:checked]:</code> quando o pai tem um
+filho marcado. E há uma armadilha de acessibilidade: um efeito que só aparece no
+<code>group-hover:</code> fica invisível para quem usa teclado. Se a informação for importante, some
+<code>group-focus-within:</code> ao mesmo elemento, com o mesmo efeito.</p>
+
+<h2>6. peer: o estado do vizinho</h2>
+
+<p><code>peer</code> resolve o problema oposto: quem muda de estado é um campo de formulário e quem
+reage é o texto ao lado. O exemplo mais útil é o aviso de erro. O campo recebe <code>peer</code>, o
+aviso recebe <code>peer-invalid:block</code>, e o aviso aparece sozinho quando o valor não passa na
+regra — sem uma linha de JavaScript.</p>
+
+<pre class="file" data-file="index.html">&lt;label class="block"&gt;
+  &lt;span class="text-sm font-medium"&gt;Telefone&lt;/span&gt;
+  &lt;input type="tel" required class="peer mt-1 w-full rounded-md border p-2"&gt;
+  &lt;span class="hidden text-sm text-red-600 peer-invalid:block"&gt;Precisamos de um telefone.&lt;/span&gt;
+&lt;/label&gt;</pre>
+
+<p>A condição do <code>peer</code> é o que mais confunde: ele só enxerga irmãos que vêm
+<strong>antes</strong> dele no HTML. O seletor gerado usa <code>~</code>, o combinador de irmãos
+seguintes, e não existe combinador para trás. Se o aviso estiver acima do campo na marcação, nada
+acontece. A correção é mover o campo para cima do aviso (ou usar flex com <code>order</code>, mas a
+marcação é mais simples).</p>
+
+<pre class="term">:is(:where(.group):hover .group-hover\:text-amber-700) {
+  color: var(--color-amber-700);
+}
+:is(:where(.peer):checked ~ .peer-checked\:text-amber-700) {
+  color: var(--color-amber-700);
+}</pre>
+
+<p>Leia os dois seletores com calma, porque eles explicam por que grupo e par se comportam de jeitos
+diferentes. No primeiro, o estado é do ancestral e o alvo é o descendente: qualquer coisa dentro do
+<code>.group</code> serve. No segundo, o estado é do irmão anterior e o alvo é o que vem depois do
+<code>~</code>. O <code>:where()</code> existe para não somar especificidade — detalhe que importa
+quando você mistura classes do Tailwind com CSS escrito à mão, assunto de <a
+href="ref-vs-css.html">Tailwind x CSS</a>.</p>
+
+<p>O <code>peer</code> aceita os mesmos estados do formulário: <code>peer-checked:</code>,
+<code>peer-focus:</code>, <code>peer-disabled:</code>, <code>peer-placeholder-shown:</code>,
+<code>peer-invalid:</code>. E aceita nomes: <code>peer/email</code> no campo e
+<code>peer-invalid/email:block</code> no aviso, para quando há vários campos no mesmo formulário. Sem
+o nome, todos os <code>peer-*</code> da página reagem a todos os <code>peer</code>, o que quase nunca é
+o que você quer num formulário de contato com cinco campos.</p>
+
+<h2>7. aria-, data-, has- e supports-</h2>
+
+<p>Nem todo estado vem do navegador. Muitos vêm do seu próprio HTML ou do JavaScript que abre um menu.
+Para esses casos o Tailwind tem variantes que leem atributos. A vantagem sobre criar uma classe nova é
+que o estado continua visível no HTML: quem lê a marcação vê <code>data-aberto</code> e entende o que
+está acontecendo — o mesmo não se pode dizer de <code>classe-misteriosa-2</code>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Variante</th><th>Vira no CSS</th><th>Quando usar</th></tr>
+<tr><td><code>aria-expanded:</code></td><td><code>[aria-expanded="true"]</code></td><td>seta do menu que gira quando a lista abre</td></tr>
+<tr><td><code>aria-checked:</code></td><td><code>[aria-checked="true"]</code></td><td>botão de alternância feito com <code>role="switch"</code></td></tr>
+<tr><td><code>aria-disabled:</code></td><td><code>[aria-disabled="true"]</code></td><td>bloco que parece e se anuncia desabilitado</td></tr>
+<tr><td><code>aria-selected:</code></td><td><code>[aria-selected="true"]</code></td><td>aba ativa numa lista de abas</td></tr>
+<tr><td><code>aria-hidden:</code></td><td><code>[aria-hidden="true"]</code></td><td>esconder do leitor de tela e ajustar o visual junto</td></tr>
+<tr><td><code>aria-[sort=ascending]:</code></td><td><code>[aria-sort="ascending"]</code></td><td>coluna de tabela ordenada, com a seta certa</td></tr>
+<tr><td><code>data-aberto:</code></td><td><code>[data-aberto]</code></td><td>presença do atributo já basta: menu aberto</td></tr>
+<tr><td><code>data-[state=aberto]:</code></td><td><code>[data-state="aberto"]</code></td><td>quando o valor do atributo é que importa</td></tr>
+<tr><td><code>has-[:checked]:</code></td><td><code>:has(:is(:checked))</code></td><td>o cartão inteiro reage à caixa marcada dentro dele</td></tr>
+<tr><td><code>has-[&gt;img]:</code></td><td><code>:has( &gt; img)</code></td><td>mudar o respiro só quando há imagem filha direta</td></tr>
+<tr><td><code>group-has-[:checked]:</code></td><td><code>:has(...)</code> no grupo</td><td>a lista toda se destaca quando um item é marcado</td></tr>
+<tr><td><code>supports-[display:grid]:</code></td><td><code>@supports (display:grid)</code></td><td>dar um estilo só a navegador que entende o recurso</td></tr>
+<tr><td><code>motion-safe:</code></td><td><code>@media (prefers-reduced-motion: no-preference)</code></td><td>animação para quem não pediu menos movimento</td></tr>
+<tr><td><code>motion-reduce:</code></td><td><code>@media (prefers-reduced-motion: reduce)</code></td><td>desligar a animação para quem pediu calma</td></tr>
+<tr><td><code>print:</code></td><td><code>@media print</code></td><td>esconder o botão de encomendar na impressão da receita</td></tr>
+</table>
+</div>
+
+<p>Três observações que economizam tentativa e erro. O <code>has-</code> precisa dos colchetes mesmo
+quando o que vai dentro é uma pseudo-classe — <code>has-[:checked]</code>, com dois-pontos dentro. O
+seletor que sai tem um espaço sobrando em <code>:has( &gt; img)</code>, o que é inofensivo mas explica
+por que às vezes a comparação de texto assusta. E <code>supports-</code> aceita a declaração inteira
+com dois-pontos: <code>supports-[display:grid]:</code> vira <code>@supports (display:grid)</code>,
+sem espaço, exatamente como você escreveu.</p>
+
+<p>Sobre <code>aria-</code>: o Tailwind considera que o atributo vale quando é
+<code>"true"</code>. Se o seu componente escreve <code>aria-expanded="false"</code>, a variante não
+pega — que é o desejado. Já as variantes <code>data-</code> com valor precisam da forma
+<code>data-[chave=valor]</code>, e o valor é comparado como texto, com aspas no CSS gerado. Um
+<code>data-state="aberto"</code> no HTML e <code>data-[state=aberto]:</code> na classe combinam; um
+erro de acento ou de maiúscula não.</p>
+
+<h2>8. Combinar variantes e o que não funciona</h2>
+
+<p>Variantes se empilham da esquerda para a direita, e todas precisam ser verdadeiras ao mesmo tempo.
+<code>md:hover:bg-amber-600</code> quer dizer "a partir de 768 px e com o mouse em cima". A ordem em
+que você escreve importa no sentido de aninhamento: o que está mais à esquerda é a condição de fora.
+Trocar a ordem de <code>md:</code> e <code>hover:</code> gera o mesmo efeito na prática, porque as duas
+são independentes; mas empilhar duas condições que dependem uma da outra, como
+<code>dark:group-hover:</code>, produz um seletor que só casa quando o tema e o hover valem juntos.</p>
+
+<p>O CSS gerado para um caso composto mostra o aninhamento. Vale lembrar que o escape vale para cada
+dois-pontos, um por vez: <code>md:hover:bg-amber-600</code> vira
+<code>.md\:hover\:bg-amber-600:hover</code>, dentro de uma consulta de largura. Se você digitar a
+classe com um espaço no lugar do dois-pontos, são duas classes diferentes e nenhuma delas existe.</p>
+
+<p>A lista de conferência rápida, do que vale ao que nunca casa:</p>
+
+<ul>
+<li><code>md:hover:bg-amber-600</code> — largura a partir de 768 px e mouse em cima: vale.</li>
+<li><code>dark:focus:ring-2</code> — tema escuro e foco: vale, e o seletor gerado é
+<code>:where(.dark, .dark *)</code> mais <code>:focus</code>.</li>
+<li><code>hover:focus:underline</code> — hover e foco ao mesmo tempo: vale, mas os dois estados juntos
+são raros, então o efeito quase nunca aparece.</li>
+<li><code>group-hover:peer-checked:block</code> — pai com hover e irmão marcado: vale, e é um dos
+seletores mais difíceis de depurar que existem.</li>
+<li><code>md:md:block</code> — a mesma condição duas vezes: funciona, com regra duplicada no CSS.</li>
+<li><code>hover :bg-amber-600</code> — espaço antes dos dois-pontos: são duas classes que não existem,
+e nada é gerado.</li>
+<li><code>hover:bg-amber600</code> — nome de cor incompleto: nada é gerado, sem aviso nenhum.</li>
+<li><code>disabled:opacity-50</code> num <code>div</code> — <code>:disabled</code> num elemento que
+não aceita o atributo: nunca casa.</li>
+<li><code>peer-checked:block</code> escrito acima do campo, no HTML — o <code>~</code> só olha para
+frente: nunca casa.</li>
+<li><code>group-hover:text-amber-700</code> sem nenhum ancestral com <code>group</code>: nunca
+casa.</li>
+</ul>
+
+<p>Sobre prioridade, o Tailwind não inventa camadas por estado: ele apenas gera regras na ordem em que
+aparecem no CSS compilado. Duas variantes que mexem na mesma propriedade e valem ao mesmo tempo
+— <code>focus:bg-amber-100 hover:bg-amber-200</code> num botão com mouse em cima e foco — resolvem
+pelo que veio depois na folha, e não pelo que veio depois no HTML. A saída é não disputar: use uma
+variante por propriedade, ou aceite que o foco ganhe e escreva o hover pensando nisso.</p>
+
+<p>Três coisas que as variantes não fazem, para você não perder tempo. Primeiro, elas não sobrevivem a
+nomes montados em JavaScript: <code>hover:bg-amber-600</code> precisa estar escrito por inteiro em
+algum arquivo que o compilador leia. Segundo, elas não substituem o <code>!</code> quando você precisa
+vencer uma regra mais forte — em v4 o importante vai no fim, <code>bg-amber-100!</code>, e o
+<code>!</code> na frente é sintaxe antiga e não funciona. Terceiro, elas não atravessam o atributo
+<code>style=""</code>: um <code>style="color: red"</code> vence qualquer
+<code>hover:text-amber-700</code>, porque estilo inline ganha de folha de estilo, sempre.</p>
+
+<h2>9. Resumo</h2>
+
+<p>Variante é condição: o prefixo antes dos dois-pontos diz quando a classe vale, e o Tailwind gera uma
+regra nova com o nome escapado (<code>.hover\:bg-amber-600</code>). No v4, <code>hover:</code> vem
+dentro de <code>@media (hover: hover)</code>, então no toque ele não existe; para retorno no celular,
+use <code>active:</code>. Para foco, prefira <code>focus-visible:</code> no anel e
+<code>focus:</code> quando o campo precisa mudar sempre.</p>
+
+<p>Os estados de formulário vêm prontos do navegador e economizam JavaScript:
+<code>disabled:</code>, <code>checked:</code>, <code>required:</code>, <code>invalid:</code>,
+<code>user-invalid:</code>, <code>placeholder-shown:</code>, <code>read-only:</code>. Use
+<code>user-invalid:</code> no aviso de erro e <code>invalid:</code> só quando quiser o vermelho desde o
+início. Lembre que <code>disabled:</code> depende de um elemento de formulário de verdade.</p>
+
+<ul>
+<li><code>first:</code>, <code>last:</code>, <code>odd:</code>, <code>even:</code> olham a posição
+entre os filhos; <code>first-of-type:</code> ignora os irmãos de outro tipo.</li>
+<li><code>group-*</code> reage ao pai marcado com <code>group</code>; <code>peer-*</code> reage ao
+irmão anterior marcado com <code>peer</code>.</li>
+<li>O seletor do grupo é <code>:is(:where(.group):hover …)</code>; o do par é
+<code>:is(:where(.peer):checked ~ …)</code>. Ler o CSS gerado esclarece quase todo bug.</li>
+<li><code>aria-*</code>, <code>data-*</code>, <code>has-*</code> e <code>supports-*</code> leem o que
+o seu HTML ou o seu JavaScript escreve — e são a melhor alternativa a classes inventadas.</li>
+<li>Variantes se empilham; a classe completa precisa existir no HTML compilado, senão nada é gerado.</li>
+<li><code>ring</code> é sombra, não borda; <code>!</code> vai no fim da classe no v4.</li>
+</ul>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

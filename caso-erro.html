@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Página de Erro | Guia Tailwind</title>
+<meta name="description" content="A página de erro da padaria: centralizar na tela inteira, o número gigante, a mensagem em três linhas, as saídas certas, o fundo desfocado sem imagem e a família de erros 500.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Página de <span class="hl">Erro</span></h1>
+
+<p class="intro">A Ana trocou o cardápio do site e apagou, sem querer, o endereço antigo. Três dias
+depois, uma cliente mandou mensagem dizendo que "o site da padaria estava com vírus". A página que ela
+viu era a do servidor: fundo branco, letras pretas, "404 Not Found" em inglês, sem uma única pista de
+que ali havia uma padaria. A cliente não concluiu que o link estava velho; concluiu que a loja era
+suspeita. Nesta aula a Ana desenha a página de erro como parte do site — a tela inteira, o número
+grande, a mensagem em três linhas, as saídas e o fundo que não pesa no celular.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que uma página de erro precisa fazer em três segundos.</li>
+  <li>Como centralizar uma tela inteira com <code>grid</code> e <code>place-items-center</code>.</li>
+  <li>O número grande: tamanho, peso e por que ele não é vermelho.</li>
+  <li>A mensagem em três linhas: o que houve, o que não foi culpa da pessoa, o que fazer.</li>
+  <li>A hierarquia das saídas: botão principal, link secundário e busca.</li>
+  <li>Um fundo com gradiente e manchas desfocadas, sem baixar imagem.</li>
+  <li>A família de erros: 404, 500, 503 e a página de manutenção.</li>
+  <li>O código HTTP certo, que muita gente esquece de configurar.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o link quebrado do cardápio</h2>
+
+<p>O site da padaria tinha três páginas e um cardápio que a Ana atualizava toda semana. Ao renomear o
+arquivo, o endereço antigo deixou de existir. Quem clicou num link salvo ou num post antigo bateu num
+endereço morto, e o servidor respondeu com a página de erro padrão dele — em inglês, sem marca, sem
+saída, sem nada.</p>
+
+<p>A página de erro é o único lugar do site onde você tem certeza de que a pessoa está perdida. Ela não
+chegou ali de propósito: clicou, digitou errado ou seguiu um link velho. É o momento em que a marca
+mais precisa se apresentar, e é justamente o momento em que quase todo mundo entrega a tela do
+servidor.</p>
+
+<p>Vale dizer o óbvio antes de seguir: uma boa página de erro não conserta o link. O trabalho de evitar
+o erro é feito antes — conferir os links, manter redirecionamentos para os endereços antigos. A página
+é o plano B, e ela importa porque o plano B é o que a pessoa vê quando o plano A falha.</p>
+
+<h2>2. O que uma página de erro precisa fazer</h2>
+
+<p>Três coisas, em ordem de importância. Primeira: dizer que a página não existe, sem rodeio. Segunda:
+tirar a culpa de quem está lendo. Terceira: oferecer uma saída. Tudo o mais — ilustração, número
+gigante, cor — serve a essas três.</p>
+
+<p>O que não fazer é igualmente claro. Não use jargão ("erro de aplicação", "recurso não alocado"). Não
+peça desculpas em excesso nem faça piada com o azar da pessoa. Não esconda o código: ele ajuda quem vai
+reportar o problema. E não ofereça cinco caminhos: uma ação principal, um link e, no máximo, uma
+busca.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que entra</th><th>Por que</th></tr>
+<tr><td>O código (404, 500)</td><td>lugar-comum que orienta a conversa com o suporte</td></tr>
+<tr><td>Um título em português</td><td>"Página não encontrada" resolve em duas palavras</td></tr>
+<tr><td>Uma frase de contexto</td><td>diz que o problema é o link, não o visitante</td></tr>
+<tr><td>Um botão de volta</td><td>a saída que serve para quase todo mundo</td></tr>
+<tr><td>Um contato</td><td>para quem realmente queria comprar e não consegue</td></tr>
+</table>
+</div>
+
+<p>Repare que nenhum item é decorativo. O número gigante que a gente vê por aí é o código, ampliado: ele
+não é obrigatório, mas ajuda a pessoa a nomear o que aconteceu. Se você tirar todos os enfeites e
+deixar só esses cinco itens, a página já funciona.</p>
+
+<dl class="anatomy">
+<dt>código</dt>
+<dd>O número do erro, em letras pequenas e no número grande. Orienta quem vai reportar o problema.</dd>
+<dt>título</dt>
+<dd>Uma frase curta em português que nomeia a situação. É o primeiro texto que a pessoa de fato lê.</dd>
+<dt>explicação</dt>
+<dd>Uma ou duas linhas dizendo o que houve e de quem é a culpa — quase nunca é de quem chegou ali.</dd>
+<dt>ação</dt>
+<dd>O botão que devolve a pessoa ao site. Um só, com uma alternativa discreta ao lado.</dd>
+<dt>fundo</dt>
+<dd>O que dá clima sem roubar atenção. Cor da marca, gradiente ou manchas desfocadas — nunca uma
+imagem pesada.</dd>
+</dl>
+
+<h2>3. A tela inteira: uma coluna no meio</h2>
+
+<p>Página de erro é uma das poucas telas do site que ocupa a janela toda. Não há cabeçalho, não há
+rodapé, não há rolagem: é uma caixa com um recado no meio. Duas decisões resolvem isso — a altura
+mínima da janela e a centralização.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=grid;;css:#alvo|place-items=center">
+  <p class="try-task">A página de erro está encostada no canto superior esquerdo. Faça-a ocupar a
+  altura da janela e centralizar o conteúdo nos dois eixos.</p>
+  <pre class="html">&lt;main id="alvo" class="bg-amber-50 p-6"&gt;
+  &lt;p class="text-sm font-medium text-amber-700"&gt;Erro 404&lt;/p&gt;
+  &lt;p class="text-7xl font-bold tracking-tight"&gt;404&lt;/p&gt;
+  &lt;p&gt;Esta página saiu do forno.&lt;/p&gt;
+&lt;/main&gt;</pre>
+  <pre class="out">
+padding: 24px
+background-color: oklch(0.987 0.022 95.277)
+</pre>
+  <pre class="solucao">&lt;main id="alvo" class="grid min-h-dvh place-items-center bg-amber-50 p-6"&gt;
+  &lt;p class="text-sm font-medium text-amber-700"&gt;Erro 404&lt;/p&gt;
+  &lt;p class="text-7xl font-bold tracking-tight"&gt;404&lt;/p&gt;
+  &lt;p&gt;Esta página saiu do forno.&lt;/p&gt;
+&lt;/main&gt;</pre>
+</div>
+
+<p><code>min-h-dvh</code> é altura mínima igual à altura da janela: <em>dvh</em> quer dizer
+<em>dynamic viewport height</em>, a medida que muda quando a barra do navegador aparece ou some no
+celular. A versão antiga, <code>vh</code>, ignora essa barra e cria uma rolagem de alguns pixels — o
+tipo de defeito que só aparece no telefone. Use <code>min-h-dvh</code> e não <code>h-dvh</code>: com
+altura mínima, um texto maior que a tela continua rolando em vez de ser cortado.</p>
+
+<p>O CSS que centraliza é curto:</p>
+
+<pre class="term">.grid {
+  display: grid;
+}
+.place-items-center {
+  place-items: center;
+}</pre>
+
+<p><code>place-items</code> é o atalho que junta alinhar e justificar de uma vez, aplicado ao grid.
+Numa coluna com um filho só, o resultado é o que você quer: o conteúdo no meio, horizontal e
+verticalmente. A alternativa clássica é <code>flex items-center justify-center</code>, que dá o mesmo
+resultado; o grid tem a vantagem de aceitar mais de um filho sem bagunçar o alinhamento.</p>
+
+<p>O conteúdo interno ganha um teto de largura: <code>w-full max-w-md</code>. Sem ele, num monitor
+grande, a frase se espalha por 1200 px e a leitura fica ruim. Com <code>max-w-md</code>, a coluna para
+em 28 rem — medida confortável para um texto curto.</p>
+
+<h2>4. O número grande</h2>
+
+<p>O "404" é o único elemento puramente gráfico da página, e é onde a marca aparece. Ele precisa ser
+grande o suficiente para ser lido de longe e pequeno o suficiente para não empurrar o resto para fora
+da tela.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|font-size=72px;;css:#alvo|font-weight=700">
+  <p class="try-task">O número está do tamanho do texto comum e some no meio da frase. Deixe-o com
+  72 px e peso 700, mantendo o espaçamento entre letras apertado.</p>
+  <pre class="html">&lt;p id="alvo" class="text-3xl font-bold tracking-tight text-amber-700"&gt;404&lt;/p&gt;</pre>
+  <pre class="out">
+color: oklch(0.555 0.163 48.998)
+font-size: 30px
+font-weight: 700
+line-height: 36px
+letter-spacing: -0.75px
+</pre>
+  <pre class="solucao">&lt;p id="alvo" class="text-7xl font-bold tracking-tight text-amber-700"&gt;404&lt;/p&gt;</pre>
+</div>
+
+<p><code>text-7xl</code> são 72 px. É grande sem ser absurdo: cabe num celular de 375 px com margem
+folgada. <code>tracking-tight</code> aproxima as letras, e é o que impede o número de parecer três
+colunas separadas — em tamanho grande, o espaçamento padrão fica exagerado. <code>font-bold</code>
+completa: peso 700 num número grande dá a firmeza que o desenho pede.</p>
+
+<p>A cor é uma decisão de tom. Vermelho é a cor de erro de formulário, de campo inválido, de algo que a
+pessoa precisa corrigir agora. Um 404 não é isso: é um link velho. Por isso a Ana usou o âmbar da
+marca, que já é a cor da padaria e não grita. Se você usar vermelho, o visitante vai achar que fez
+alguma coisa errada.</p>
+
+<h2>5. A mensagem em três linhas</h2>
+
+<p>A mensagem é o coração da página. Ela tem um rótulo, um número e, depois deles, três linhas de
+texto — e a estrutura funciona em quase todo erro: o que houve, de quem é a culpa, o que fazer.</p>
+
+<pre class="file" data-file="erro.html">&lt;p class="text-sm font-semibold uppercase tracking-wide text-amber-700"&gt;Erro 404&lt;/p&gt;
+&lt;h1 class="mt-2 text-7xl font-bold tracking-tight text-amber-900"&gt;404&lt;/h1&gt;
+&lt;h2 class="mt-4 text-xl font-semibold text-stone-900"&gt;Esta página saiu do forno&lt;/h2&gt;
+&lt;p class="mx-auto mt-2 max-w-xs text-stone-600"&gt;
+  O endereço que você abriu não existe mais. O cardápio de hoje continua aqui do lado.
+&lt;/p&gt;</pre>
+
+<p>O rótulo é a linha pequena em maiúsculas, dizendo "erro 404". Ele prepara o leitor para o número e
+serve para quem vai reportar o problema. O número já foi tratado na seção anterior; agora as três
+linhas. A primeira é o título em linguagem de gente — "Esta página saiu do forno". Uma brincadeira
+curta funciona porque o 404 é banal e não custa dinheiro a ninguém. A segunda é a explicação, e ela faz
+o trabalho pesado: "o endereço que você abriu não existe mais, e o cardápio de hoje continua aqui do
+lado" tira a culpa de quem está lendo e já mostra a saída. A terceira é a frase de apoio, curta, que
+diz o que fazer agora — muitas vezes ela é o próprio botão da seção seguinte.</p>
+
+<p>Uma observação sobre o tom, porque isso erra com frequência: humor cabe no 404, não cabe no 500 nem
+no 503. No 404, o prejuízo é um clique. No 500, alguém pode ter perdido uma encomenda. A mesma
+estrutura de três linhas serve aos dois, com palavras diferentes: no 500, "Não conseguimos carregar
+esta página" e "já estamos verificando" no lugar da piada.</p>
+
+<p>O <code>max-w-xs</code> na explicação não é enfeite: mede a linha em torno de 40 caracteres, o que
+deixa a leitura confortável num bloco curto e centralizado. Parágrafo centralizado com linha longa é
+difícil de seguir, porque o olho não sabe onde a linha começa.</p>
+
+<h2>6. As saídas: o botão e o link</h2>
+
+<p>Quem chega num 404 tem dois desejos: voltar para onde estava ou encontrar o que procurava. A página
+oferece os dois, com pesos diferentes.</p>
+
+<pre class="file" data-file="erro.html">&lt;div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row"&gt;
+  &lt;a href="index.html" class="rounded-lg bg-amber-600 px-5 py-2.5 font-medium text-white hover:bg-amber-700"&gt;
+    Voltar ao início
+  &lt;/a&gt;
+  &lt;a href="index.html#cardapio" class="rounded-lg px-5 py-2.5 font-medium text-stone-600 hover:bg-stone-100"&gt;
+    Ver o cardápio
+  &lt;/a&gt;
+&lt;/div&gt;</pre>
+
+<p>O botão cheio é a saída segura: a página inicial existe e sempre vai existir. O link discreto é para
+quem procurava um produto específico. <code>flex-col sm:flex-row</code> empilha no celular e coloca
+lado a lado no computador; <code>justify-center</code> mantém o par no meio, alinhado com o texto
+centralizado.</p>
+
+<p>Há uma escolha discreta no botão de voltar: apontar para a página inicial ou usar o histórico do
+navegador para voltar de onde a pessoa veio. A página inicial é mais previsível — sempre existe, sempre
+funciona —, e é o que a Ana escolheu. O histórico parece mais gentil, mas falha quando o visitante
+chegou por um link colado no aplicativo de mensagens, sem página anterior: o botão não faz nada e a
+pessoa conclui que a página está quebrada de novo.</p>
+
+<p>Se o site tem busca, ela cabe aqui — mas em versão compacta, abaixo das saídas, com rótulo
+invisível e o mesmo <code>rounded-full</code> da aula de <a href="caso-busca.html">campo de busca</a>.
+A ordem importa: primeiro as saídas que funcionam sempre, depois a que depende de o termo existir.
+Nunca ponha a busca como única saída: ela pode dar em nada, e aí a pessoa fica presa duas vezes.</p>
+
+<p>Uma saída que quase ninguém oferece e faz diferença: o contato. Uma linha discreta no pé, "se você
+chegou aqui por um link nosso, conte pra gente", com um e-mail ou telefone. Custa uma frase e salva a
+venda de quem estava decidido a comprar.</p>
+
+<h2>7. O fundo sem imagem</h2>
+
+<p>Fundo de página de erro costuma virar imagem: um desenho grande, um pão triste, um padrão de bolinhas.
+Imagem de fundo pesa no celular, desalinha em telas estranhas e envelhece rápido. Dá para fazer um fundo
+bonito com duas ou três caixas e um desfoque.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|filter=blur(64px);;css:#alvo|z-index=-10">
+  <p class="try-task">A mancha âmbar atrás do texto está com borda dura e parece um adesivo colado.
+  Desfoca-a com 64 px e empurre-a para trás do conteúdo com <code>z-index</code> negativo.</p>
+  <pre class="html">&lt;div class="relative overflow-hidden p-6"&gt;
+  &lt;div id="alvo" class="absolute h-24 w-24 rounded-full bg-amber-200"&gt;&lt;/div&gt;
+  &lt;p class="relative"&gt;404 — Esta página saiu do forno&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+position: absolute
+width: 96px
+height: 96px
+background-color: oklch(0.924 0.12 95.746)
+border-radius: 3.35544e+07px
+</pre>
+  <pre class="solucao">&lt;div class="relative overflow-hidden p-6"&gt;
+  &lt;div id="alvo" class="absolute -z-10 h-24 w-24 rounded-full bg-amber-200 blur-3xl"&gt;&lt;/div&gt;
+  &lt;p class="relative"&gt;404 — Esta página saiu do forno&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O desfoque é o que transforma um círculo em mancha. O Tailwind implementa isso com variáveis, e vale
+ver a regra inteira uma vez na vida:</p>
+
+<pre class="term">.blur-3xl {
+  --tw-blur: blur(var(--blur-3xl));
+  filter: var(--tw-blur, ) var(--tw-brightness, ) var(--tw-contrast, ) var(--tw-grayscale, ) var(--tw-hue-rotate, ) var(--tw-invert, ) var(--tw-saturate, ) var(--tw-sepia, ) var(--tw-drop-shadow, );
+}</pre>
+
+<p>A classe só preenche a variável do desfoque; a propriedade <code>filter</code> lê as nove de uma vez.
+É o mesmo desenho de <code>tabular-nums</code>: cada utilitário liga a sua peça e a propriedade junta
+tudo. Por isso <code>blur-3xl</code> convive com <code>grayscale</code> e com <code>brightness-110</code>
+sem uma classe brigar com a outra.</p>
+
+<p>O <code>-z-10</code> manda a mancha para trás, e o <code>relative</code> no texto garante que ele
+fique na frente. O <code>overflow-hidden</code> na caixa de fora impede que a mancha crie rolagem
+lateral quando passa da borda — o mesmo cuidado do invólucro da tabela. Dois ou três círculos com
+posições diferentes já dão a sensação de fundo pintado, e o custo é zero de download.</p>
+
+<p>Se ainda assim você quiser gradiente, o Tailwind tem <code>bg-gradient-to-b from-amber-50
+to-white</code>, que dá um degradê vertical discreto. Ele funciona melhor em página inteira do que em
+cartão, e é a escolha mais segura quando a página tem muito texto.</p>
+
+<h2>8. A família de erros</h2>
+
+<p>O 404 é o mais famoso, e não é o único. A página pode ser a mesma, com texto e cor diferentes — uma
+estrutura, várias versões. O que muda é o que a pessoa deve fazer.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Código</th><th>O que significa</th><th>O que a página oferece</th></tr>
+<tr><td>404</td><td>o endereço não existe</td><td>voltar ao início, ver o cardápio, busca</td></tr>
+<tr><td>500</td><td>o servidor falhou ao montar a página</td><td>tentar de novo em instantes, contato</td></tr>
+<tr><td>503</td><td>o site está fora do ar de propósito</td><td>aviso de manutenção e horário de volta</td></tr>
+<tr><td>403</td><td>o acesso é restrito</td><td>pedir acesso a quem administra</td></tr>
+</table>
+</div>
+
+<p>O 500 é o mais delicado porque a causa é sua. A página deve assumir: "não conseguimos carregar",
+e não "algo deu errado" no vazio. Prometer prazo que você não controla é pior que não prometer. E o
+503, quando é manutenção planejada, aceita ser simpático: "voltamos às 7h, o pão vai estar quentinho"
+é uma frase que a Ana usaria.</p>
+
+<p>O detalhe técnico que separa uma página de erro de um enfeite: o servidor precisa responder com o
+código certo. Uma página bonita de 404 servida com status 200 diz ao Google que aquilo é conteúdo
+válido, e o buscador passa a indexar o erro. No servidor, isso é uma linha de configuração; no GitHub
+Pages, que não permite configurar status, a página 404.html é servida com 404 de verdade pelo próprio
+serviço. Vale conferir na aba de rede do navegador: o número aparece na primeira coluna.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a marca que desapareceu junto com a página</h3>
+<p>A primeira versão da página de erro era um retângulo branco com "Página não encontrada" em preto e
+um link azul sublinhado. Funcionava e parecia de outro site. A Ana acrescentou a faixa âmbar, o
+logotipo em texto e o botão na cor da marca. A pessoa continua no mesmo lugar — e é isso que uma
+página de erro bem feita faz: ela confirma que o site é confiável justamente no momento em que algo
+falhou.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o 404 que apareceu no lugar do cardápio</h3>
+<p>O cardápio foi renomeado de <code>cardapio.html</code> para <code>menu.html</code> e todos os links
+antigos passaram a cair no 404. A página de erro não era o problema, e nenhum ajuste nela resolveria:
+a correção foi um redirecionamento no servidor, do endereço antigo para o novo. Página de erro é o
+plano B; o plano A é não precisar dela.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a manutenção que parecia invasão</h3>
+<p>Num domingo, o provedor derrubou o site por duas horas e a página padrão dizia, em inglês, que o
+servidor não estava disponível. Vários clientes acharam que o site tinha sido hackeado. A Ana criou
+uma página de manutenção com a mesma casca do 404, dizendo o horário de volta e o telefone da loja.
+Mudou o texto, não o desenho — e o telefone tocou menos.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual é o trabalho da frase que acompanha o número?</p>
+<label><input type="radio" name="e1"> repetir o código em letras, para reforçar</label>
+<label><input type="radio" name="e1"> explicar o que houve sem culpar quem está lendo e apontar a saída</label>
+<label><input type="radio" name="e1"> pedir desculpas várias vezes pelo transtorno</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">2. Por que <code>min-h-dvh</code> em vez de
+<code>h-dvh</code>?</p>
+<label><input type="radio" name="e2"> porque <code>h-dvh</code> não existe no Tailwind</label>
+<label><input type="radio" name="e2"> porque a altura mínima deixa o conteúdo rolar se for maior que a tela</label>
+<label><input type="radio" name="e2"> porque <code>min-h</code> é mais rápido de renderizar</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que o número da página de erro não é vermelho?</p>
+<label><input type="radio" name="e3"> porque vermelho significa algo que a pessoa precisa corrigir, e um link velho não é isso</label>
+<label><input type="radio" name="e3"> porque vermelho não combina com a paleta âmbar da padaria</label>
+<label><input type="radio" name="e3"> porque o Tailwind não tem vermelho escuro o suficiente</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o meio da tela</h2>
+<p>A página de erro ocupa a altura da janela, mas o conteúdo continua no canto. Complete a classe que
+centraliza o conteúdo nos dois eixos de uma vez.</p>
+<div class="ex-code">&lt;main class="grid min-h-dvh <input aria-label="resposta 1" data-answer="place-items-center" placeholder="..."> bg-amber-50 p-6"&gt;</div>
+<p class="ex-dica">Dica: é a propriedade que junta <code>align-items</code> e <code>justify-items</code>,
+com o valor que significa "no centro". Duas palavras separadas por hífen.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Página de erro é uma tela inteira com um recado no meio. O casco é
+<code>grid min-h-dvh place-items-center</code>, com um filho de <code>w-full max-w-md</code> para o
+texto não se espalhar. Dentro dele, o código em letras pequenas, o número em <code>text-7xl
+tracking-tight</code> na cor da marca, o título em linguagem de gente e uma explicação curta que tira a
+culpa de quem chegou ali.</p>
+
+<p>As saídas são duas: um botão cheio de volta ao início e um link discreto para o cardápio, com a
+busca e o contato como apoio. O fundo pode ser feito com círculos desfocados —
+<code>absolute -z-10 blur-3xl</code> dentro de uma caixa <code>relative overflow-hidden</code> —, sem
+uma imagem sequer. E a mesma casca serve para 404, 500 e 503, mudando o texto e a cor, com o servidor
+respondendo o código certo.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Três trabalhos: dizer o que houve, tirar a culpa, oferecer saída.</li>
+<li>Casco: <code>grid min-h-dvh place-items-center</code> + <code>w-full max-w-md</code>.</li>
+<li><code>min-h-dvh</code> acompanha a barra do navegador no celular; <code>h-</code> corta conteúdo.</li>
+<li>Número: <code>text-7xl font-bold tracking-tight</code>, na cor da marca.</li>
+<li>Explicação com <code>max-w-xs</code> para a linha não ficar longa.</li>
+<li>Uma ação principal, um link secundário; busca e contato como apoio.</li>
+<li>Fundo sem imagem: <code>absolute -z-10 blur-3xl</code> + <code>overflow-hidden</code>.</li>
+<li>404 aceita leveza; 500 e 503 pedem seriedade.</li>
+<li>O servidor precisa responder o código certo, não 200.</li>
+<li>Página de erro é plano B: link quebrado se conserta com redirecionamento.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
