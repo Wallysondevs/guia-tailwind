@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O gap | Guia Tailwind</title>
+<meta name="description" content="O gap do Tailwind explicado do zero: espaço entre os itens sem mexer nas bordas, gap-x e gap-y por eixo, a escala em rem e por que ele é melhor que margem nos filhos.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>O <span class="hl">gap</span></h1>
+<p class="intro">A Ana montou a fileira de cartões da padaria e eles ficaram encostados um no outro,
+formando um bloco só. Ela tentou dar margem em cada cartão e o resultado foi pior: o primeiro cartão
+se afastou da borda e deixou de alinhar com o título da seção. O que ela quer é simples de dizer e
+difícil de fazer com margem — espaço <em>entre</em> as peças, e nada em volta. É exatamente isso que o
+<code>gap</code> faz: ele vive no pai e só aparece nos vãos, nunca nas bordas. Nesta aula a Ana
+aprende o <code>gap</code>, os seus dois eixos e por que ele resolve o que a margem só resolve com
+gambiarra.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é o gap: espaço entre itens, nunca em volta deles.</li>
+  <li><code>gap-4</code> e a escala em múltiplos de 4 px.</li>
+  <li><code>gap-x</code> e <code>gap-y</code> para tratar os eixos separadamente.</li>
+  <li>A diferença entre gap no flex e gap no grid.</li>
+  <li>Por que margem nos filhos desalinha a primeira peça e o gap não.</li>
+  <li>Como substituir um <code>mx-2</code> por gap sem quebrar o layout.</li>
+  <li>Os quatro motivos de "o gap não fez nada".</li>
+</ul>
+</div>
+
+<h2>1. A cena: os cartões encostados</h2>
+
+<p>A vitrine da Ana tem três cartões em fila. Sem espaço entre eles, o olho lê os três como um bloco
+de texto com riscos no meio. Ela precisa de ar. O primeiro instinto — e o de quase todo mundo — é dar
+margem a cada cartão:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="flex"&gt;
+  &lt;div class="mx-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="mx-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="mx-2"&gt;Bolo de fubá&lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<p>Funciona, mais ou menos. O espaço entre o primeiro e o segundo é 16 px (8 de cada um), o mesmo entre
+o segundo e o terceiro. Mas o primeiro cartão ganhou 8 px de margem à esquerda, então ele não começa
+mais na mesma linha que o título acima. E o último ganhou 8 px à direita, então a fileira não termina
+onde o texto termina. A margem é simétrica por natureza: ela não sabe que a borda da caixa é
+diferente do meio dela.</p>
+
+<p>Para consertar, você começa a fazer contas — margem só no segundo, margem negativa no pai, um
+<code>-mx-2</code> no container para compensar. Cada ajuste cria outro problema. É o tipo de código que
+funciona hoje e não funciona quando alguém acrescenta um quarto cartão.</p>
+
+<h2>2. Espaço entre, nunca em volta</h2>
+
+<p>O <code>gap</code> resolve o problema na raiz: ele não é uma propriedade do item, é do
+<strong>pai</strong>. Você diz "o vão entre os meus filhos é 16 px" e o navegador desenha 16 px entre
+um e outro, zero nas bordas. Acrescentou um quarto cartão? O vão novo aparece sozinho. Trocou a ordem?
+Os vãos continuam iguais.</p>
+
+<dl class="anatomy">
+<dt>gap</dt>
+<dd>O vão entre os itens de um container flex, grid ou de colunas. Vive no pai, nunca no filho.</dd>
+<dt>column-gap</dt>
+<dd>O vão na horizontal, entre colunas. No Tailwind, <code>gap-x-*</code>.</dd>
+<dt>row-gap</dt>
+<dd>O vão na vertical, entre linhas. No Tailwind, <code>gap-y-*</code>.</dd>
+<dt>borda do container</dt>
+<dd>O limite externo. O gap não age aqui — se você quer ar nas bordas, é <code>p-*</code> no pai.</dd>
+<dt>escala</dt>
+<dd>Os mesmos degraus do espaçamento: 1 = 4 px, 2 = 8 px, 4 = 16 px, 6 = 24 px, 8 = 32 px.</dd>
+</dl>
+
+<p>Vale dizer o que o gap <em>não</em> é. Ele não é margem: margem empurra o item para fora e pode
+colapsar com a margem do vizinho (o famoso "as margens se somam ou se anulam", que dá nó na cabeça).
+O gap não colapsa com nada — dois vãos de 16 px nunca viram 32. E ele não é padding: o padding é o
+respiro de dentro do item, o gap é o vão de fora, entre os itens.</p>
+
+<p>Uma coisa importante: o gap só existe em containers que organizam filhos — flex, grid e o layout
+de colunas. Num <code>div</code> comum, com filhos empilhados, <code>gap-4</code> não faz nada. É o
+primeiro item da lista de erros mais adiante, e vale memorizar agora.</p>
+
+<p>Outro detalhe que economiza um bom tempo: o gap não é herdado e não atravessa níveis. Se você tem
+uma grade de cartões com <code>gap-4</code>, e dentro de cada cartão um título e um parágrafo, o vão
+de 16 px aparece entre os cartões — e nada entre o título e o parágrafo. Cada container tem o seu
+próprio gap, e é assim que se monta um layout em camadas: 32 px entre as seções, 16 px entre os
+cartões de uma seção, 8 px dentro do cartão. Três gaps, três containers, nenhuma margem.</p>
+
+<h2>3. gap-4: o vão entre os cartões</h2>
+
+<p>A classe é <code>gap-</code> mais um número da escala, igual ao <code>p-</code> e ao
+<code>m-</code>. <code>gap-4</code> quer dizer 16 px. E ela sempre vai no elemento que
+<em>contém</em> os itens, junto do <code>flex</code> ou do <code>grid</code>.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|gap=16px">
+  <p class="try-task">Os três cartões estão quase colados, com 4 px de vão. Dê 16 px de espaço entre
+  eles, sem mexer nas bordas da fileira.</p>
+  <pre class="html">&lt;div id="alvo" class="flex gap-1 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;div class="flex-1 rounded bg-amber-200 p-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="flex-1 rounded bg-amber-200 p-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="flex-1 rounded bg-amber-200 p-2"&gt;Bolo de fubá&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+padding: 8px
+gap: 4px
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex gap-4 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;div class="flex-1 rounded bg-amber-200 p-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="flex-1 rounded bg-amber-200 p-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="flex-1 rounded bg-amber-200 p-2"&gt;Bolo de fubá&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>gap: 16px</code>. E a prévia mostra o que interessa: o vão
+cresceu <em>entre</em> os cartões, e a fileira continua começando e terminando no mesmo lugar. O
+<code>p-2</code> do pai é que dá o ar de dentro da moldura — dois espaçamentos diferentes, cada um
+com a sua função.</p>
+
+<p>O CSS gerado é uma linha, com a conta da escala:</p>
+
+<pre class="term">.gap-4 {
+  gap: calc(var(--spacing) * 4);
+}
+.gap-x-8 {
+  column-gap: calc(var(--spacing) * 8);
+}
+.gap-y-2 {
+  row-gap: calc(var(--spacing) * 2);
+}</pre>
+
+<p><code>--spacing</code> vale 0,25 rem, como em toda a escala do guia: 4 × 0,25 rem = 1 rem = 16 px.
+O <code>gap</code> sozinho é um atalho que define as duas propriedades de uma vez,
+<code>column-gap</code> e <code>row-gap</code>. Quando você usa <code>gap-x</code> ou
+<code>gap-y</code>, mexe em uma só — e é aí que aparecem os layouts com vãos diferentes na horizontal
+e na vertical.</p>
+
+<h2>4. gap-x e gap-y: os dois eixos</h2>
+
+<p>Aqui o nome engana. <code>gap-x</code> é o vão <em>horizontal</em>, entre colunas, e escreve
+<code>column-gap</code>. <code>gap-y</code> é o vão <em>vertical</em>, entre linhas, e escreve
+<code>row-gap</code>. O "x" é o eixo horizontal, como no gráfico; o "y" é o vertical. Se você pensar
+em "gap-x = espaço no eixo x", acerta sempre.</p>
+
+<p>Usar os dois juntos é o que dá o efeito de grade de revista: vãos largos entre as colunas e vãos
+curtos entre as linhas, ou o contrário. Numa lista de itens com título e descrição, por exemplo, um
+<code>gap-y-6</code> respira entre os blocos e um <code>gap-x-2</code> mantém o ícone perto do texto.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|column-gap=32px;;css:#alvo|row-gap=8px">
+  <p class="try-task">A etiqueta está com o mesmo vão nos dois sentidos. Deixe 32 px entre as colunas
+  e 8 px entre as linhas, com as duas classes de eixo.</p>
+  <pre class="html">&lt;div id="alvo" class="flex w-56 flex-wrap gap-2 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;span class="rounded bg-amber-200 px-2 py-1"&gt;Pão&lt;/span&gt;
+  &lt;span class="rounded bg-amber-200 px-2 py-1"&gt;Bolo&lt;/span&gt;
+  &lt;span class="rounded bg-amber-200 px-2 py-1"&gt;Café&lt;/span&gt;
+  &lt;span class="rounded bg-amber-200 px-2 py-1"&gt;Doce&lt;/span&gt;
+  &lt;span class="rounded bg-amber-200 px-2 py-1"&gt;Salgado&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+width: 224px
+padding: 8px
+gap: 8px
+flex-wrap: wrap
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex w-56 flex-wrap gap-x-8 gap-y-2 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;span class="rounded bg-amber-200 px-2 py-1"&gt;Pão&lt;/span&gt;
+  &lt;span class="rounded bg-amber-200 px-2 py-1"&gt;Bolo&lt;/span&gt;
+  &lt;span class="rounded bg-amber-200 px-2 py-1"&gt;Café&lt;/span&gt;
+  &lt;span class="rounded bg-amber-200 px-2 py-1"&gt;Doce&lt;/span&gt;
+  &lt;span class="rounded bg-amber-200 px-2 py-1"&gt;Salgado&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Ao rodar, o painel mostra duas linhas em vez de uma: <code>column-gap: 32px</code> e
+<code>row-gap: 8px</code>. Quando os dois valores são iguais, o navegador resume tudo em
+<code>gap: 8px</code>; quando diferem, ele informa separado. É por isso que a meta desta caixa confere
+as duas propriedades em vez de uma só.</p>
+
+<p>Repare também no <code>flex-wrap</code> do HTML. Sem ele, os cinco itens não quebram linha e o
+<code>gap-y</code> não teria onde agir — não existe linha para separar. O gap vertical em flex só
+aparece quando a fila quebra, o que é fácil de esquecer e difícil de diagnosticar depois.</p>
+
+<h2>5. A escala do gap</h2>
+
+<p>A escala é a mesma do padding e do margin, porque é a mesma variável <code>--spacing</code>. Isso é
+uma vantagem enorme: o vão entre cartões e o respiro dentro do cartão saem do mesmo ritmo, e o layout
+parece coerente sem nenhum esforço.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor</th><th>Onde costuma servir</th></tr>
+<tr><td><code>gap-0</code></td><td>0 px</td><td>voltar ao encostado</td></tr>
+<tr><td><code>gap-px</code></td><td>1 px</td><td>linha divisória fina entre células</td></tr>
+<tr><td><code>gap-1</code></td><td>4 px</td><td>ícone colado no texto</td></tr>
+<tr><td><code>gap-2</code></td><td>8 px</td><td>etiquetas e botões próximos</td></tr>
+<tr><td><code>gap-3</code></td><td>12 px</td><td>itens de menu</td></tr>
+<tr><td><code>gap-4</code></td><td>16 px</td><td>o padrão de cartões e colunas</td></tr>
+<tr><td><code>gap-6</code></td><td>24 px</td><td>grade de seções, galeria</td></tr>
+<tr><td><code>gap-8</code></td><td>32 px</td><td>blocos grandes de página</td></tr>
+<tr><td><code>gap-12</code></td><td>48 px</td><td>espaço entre seções de marketing</td></tr>
+</table>
+</div>
+
+<p>Como toda escala do Tailwind, ela aceita valor livre:
+<code>gap-[10px]</code> ou <code>gap-[2.5rem]</code>. E como todo valor livre, é válvula de escape,
+não caminho. Se você se pega usando 10 px em todo lugar, o problema é a escala, não o número — e o
+lugar de mudar isso é o tema, assunto do nível 3.</p>
+
+<p>Uma curiosidade útil: <code>gap-1</code> é maior que <code>gap-px</code>, mas a diferença visual
+entre eles é pequena no monitor e grande na impressão. Em tabelas, o <code>gap-px</code> com o fundo
+do pai aparecendo no vão é um truque antigo para desenhar linhas de 1 px sem borda. Não é o caminho
+mais direto — a aula de divisores cobre isso — mas explica por que existe um degrau de 1 px numa
+escala que pula de 4 em 4.</p>
+
+<h2>6. No flex e no grid: o mesmo gap, efeitos diferentes</h2>
+
+<p>O <code>gap</code> funciona nos dois, mas o resultado não é idêntico, e vale saber por quê.</p>
+
+<p>Num <strong>grid</strong>, as faixas existem antes dos itens. O gap afasta as faixas, e as células
+de todas as linhas e colunas ficam exatamente alinhadas, mesmo que o conteúdo de cada uma tenha
+tamanhos diferentes. É o vão mais previsível que existe: 16 px em cima, 16 px embaixo, 16 px dos
+lados, sempre.</p>
+
+<p>Num <strong>flex</strong>, os itens é que definem onde o vão cai. Com <code>flex-wrap</code>, cada
+linha pode ter uma quantidade diferente de itens, então o vão horizontal aparece em posições
+diferentes em cada linha. O valor é o mesmo, a sensação é de desalinhamento — e não há como corrigir
+com gap; é a natureza do flex. Se a Ana quer colunas alinhadas, o caminho é grid, não flex com gap.</p>
+
+<p>Há ainda uma diferença de suporte que já foi problema e hoje não é mais: o gap em flex demorou a
+chegar aos navegadores. Durante anos, a recomendação era usar margem negativa no pai para simular.
+Hoje todos os navegadores modernos entendem <code>gap</code> em flex, e você pode usar sem medo. Se
+aparecer um navegador muito antigo no seu público, a margem volta a ser necessária — mas esse é um
+caso raro em 2025.</p>
+
+<p>E existe uma interação com o <code>flex-1</code> que vale entender, porque muda as contas. O gap é
+descontado <em>antes</em> da divisão do espaço livre. Numa fileira de 600 px com três cartões
+<code>flex-1</code> e <code>gap-4</code>, o navegador reserva 32 px para os dois vãos e divide os
+568 px restantes: 189,3 px para cada. Se você calcular "um terço de 600" na cabeça e comparar com a
+tela, vai achar que algo está errado — não está. O gap é um custo fixo que sai do bolo antes de
+qualquer divisão, no flex e no grid.</p>
+
+<h2>7. Margem no filho ou gap no pai</h2>
+
+<p>Vamos voltar ao problema da Ana e resolver direito. A fileira tem três cartões com
+<code>mx-2</code> cada um, e por isso a primeira peça não alinha com o título. A correção tem dois
+passos: tirar a margem dos filhos e pôr o gap no pai.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|column-gap=16px;;css:.cartao|margin-left=0px">
+  <p class="try-task">Os cartões têm <code>mx-2</code> e por isso a fileira começa 8 px à direita do
+  título. Tire a margem dos cartões e ponha 16 px de vão no pai.</p>
+  <pre class="html">&lt;div id="alvo" class="flex rounded-lg bg-amber-50 p-2"&gt;
+  &lt;div class="cartao mx-2 rounded bg-amber-200 p-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="cartao mx-2 rounded bg-amber-200 p-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="cartao mx-2 rounded bg-amber-200 p-2"&gt;Bolo de fubá&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+padding: 8px
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex gap-4 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;div class="cartao rounded bg-amber-200 p-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="cartao rounded bg-amber-200 p-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="cartao rounded bg-amber-200 p-2"&gt;Bolo de fubá&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>column-gap: 16px</code> no pai. A segunda parte da meta
+confere a margem do primeiro cartão, que precisa voltar a zero. Essa é a prova de que você trocou uma coisa pela outra em
+vez de somar as duas — e somar é o erro mais comum, porque a margem continua no HTML depois da troca e
+o resultado fica com 24 px onde você queria 16.</p>
+
+<pre class="term">.mx-2 {
+  margin-inline: calc(var(--spacing) * 2);
+}
+.gap-2 {
+  gap: calc(var(--spacing) * 2);
+}</pre>
+
+<p>As duas regras dão 8 px, mas em lugares diferentes. <code>margin-inline</code> é a margem dos dois
+lados do item; <code>gap</code> é o vão do pai. Note o <code>inline</code>: ele quer dizer "no sentido
+da escrita", ou seja, esquerda e direita em português, e se adapta sozinho em idiomas da direita para
+a esquerda. É um detalhe do CSS moderno que explica por que o Tailwind usa <code>mx</code> e não
+<code>ml</code> mais <code>mr</code> na maioria dos casos.</p>
+
+<p>Existe uma família de classes que aplica margem nos filhos para simular o gap:
+<code>space-x-*</code> e <code>space-y-*</code>. Ela tem a sua própria aula neste guia, e o resumo é
+este: funciona, mas a margem continua sendo do filho, então ela convive mal com outras margens e não
+resolve o alinhamento das pontas. Quando o pai é flex ou grid, <code>gap</code> é a resposta certa e
+mais simples.</p>
+
+<h2>8. Erros comuns</h2>
+
+<p>Quatro motivos explicam quase todo "o gap não fez nada". O primeiro é o mais frequente, e o
+segundo é o mais confuso, porque o CSS está lá e o resultado não é o esperado.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sintoma</th><th>Causa provável</th><th>O que fazer</th></tr>
+<tr><td>O gap não muda nada</td><td>o pai não é <code>flex</code> nem <code>grid</code></td><td>acrescente <code>flex</code> ou <code>grid</code> no pai</td></tr>
+<tr><td>O gap não aparece nas bordas</td><td>é o comportamento dele</td><td>use <code>p-*</code> no pai para o ar de fora</td></tr>
+<tr><td>O gap não separa itens dentro de um cartão</td><td>o gap é do pai, não desce para os netos</td><td>aplique <code>gap</code> também no container interno</td></tr>
+<tr><td>O gap vertical não faz nada</td><td>a fila não quebra, então não há linha</td><td>acrescente <code>flex-wrap</code> no pai</td></tr>
+</table>
+</div>
+
+<p>Há um quinto caso que vale conhecer: gap em elemento que é <code>flex</code> só em tela grande.
+Se o <code>md:flex</code> entra em 768 px, o <code>gap-4</code> só passa a valer a partir dali. No
+celular, o pai é <code>block</code>, os filhos se empilham e o gap não age. O sintoma é "no monitor
+está certo, no celular está tudo grudado" — e a resposta é aplicar o gap junto do breakpoint ou
+aceitar que no celular o espaço virá do padding de cada cartão.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a galeria que respira igual em todas as telas</h3>
+<p>A Ana tem doze fotos e quer uma galeria com vãos iguais. A receita é
+<code>grid grid-cols-2 gap-4 md:grid-cols-3</code>. O gap não muda com o breakpoint, e é isso que dá
+a sensação de grade única: as colunas mudam de quantidade, mas o vão continua 16 px. Se ela quisesse
+vãos maiores no monitor, bastava <code>gap-2 md:gap-6</code> — duas classes, dois tamanhos, um
+resultado coerente. Compare com a versão de margem: cada cartão precisaria de quatro margens e o
+resultado ainda teria espaço dobrado no meio.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a barra de navegação com vão diferente por eixo</h3>
+<p>O cabeçalho da padaria tem a marca, três links e um botão, todos numa linha. O vão horizontal deve
+ser generoso (24 px) para separar os grupos; na vertical, se a barra quebrar no celular, 8 px bastam.
+A classe é <code>gap-x-6 gap-y-2</code>. Note que o <code>gap-y</code> só age quando a barra quebra —
+numa tela larga, ele fica dormindo no CSS. Isso não é desperdício: é preparar o comportamento para o
+momento em que a tela apertar.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o cartão com respiro interno e vão externo</h3>
+<p>Um cartão de produto tem padding de 16 px por dentro e a grade tem gap de 16 px por fora. É fácil
+confundir os dois quando se olha a tela: os dois são "espaço". A diferença aparece quando você muda o
+fundo de um deles. O padding fica dentro da cor de fundo do cartão; o gap fica no fundo do pai, entre
+os cartões. Se a Ana pinta o fundo do cartão de âmbar e o vão entre eles continua âmbar claro, é
+porque o gap pertence ao pai — e é essa separação que permite pintar cada cartão sem borrar a
+moldura.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. Onde o <code>gap</code> é escrito?</p>
+<label><input type="radio" name="q1"> no pai, o elemento com <code>flex</code> ou <code>grid</code></label>
+<label><input type="radio" name="q1"> em cada filho, como se fosse margem</label>
+<label><input type="radio" name="q1"> no neto mais profundo, para separar tudo</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual classe controla só o vão vertical, entre as
+linhas?</p>
+<label><input type="radio" name="q2"> <code>gap-x-2</code></label>
+<label><input type="radio" name="q2"> <code>space-y-2</code></label>
+<label><input type="radio" name="q2"> <code>gap-y-2</code></label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. A Ana quer o vão de 16 px entre os cartões e nada
+nas pontas. Qual classe resolve?</p>
+<label><input type="radio" name="q3"> <code>mx-4</code> em cada cartão</label>
+<label><input type="radio" name="q3"> <code>gap-4</code> no pai</label>
+<label><input type="radio" name="q3"> <code>p-4</code> no pai</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a fileira de cartões</h2>
+<p>Complete o pai da fileira para que os cartões fiquem com 24 px de vão entre si. Depois responda:
+qual é a classe do espaçamento?</p>
+<div class="ex-code">&lt;div class="flex <input aria-label="resposta 1" data-answer="gap-6" placeholder="...">"&gt;</div>
+<p class="ex-dica">Dica: a escala é de 4 em 4. Se você escrever <code>gap-4</code>, o vão fica com
+16 px — funciona, mas não é o pedido.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O <code>gap</code> é o espaço entre os itens, escrito no pai, e nunca nas bordas. Ele não colapsa
+com margem, não soma com o vizinho e não precisa de compensação. A escala é a mesma do espaçamento —
+<code>gap-1</code> são 4 px, <code>gap-4</code> são 16 px — porque vem da mesma variável
+<code>--spacing</code>.</p>
+
+<p><code>gap-x</code> escreve <code>column-gap</code> e cuida do vão horizontal; <code>gap-y</code>
+escreve <code>row-gap</code> e cuida do vertical. No grid os vãos ficam sempre alinhados; no flex, o
+que manda é o conteúdo de cada linha, e por isso o <code>gap-y</code> só age quando a fila quebra com
+<code>flex-wrap</code>. E lembre-se: gap só existe em container flex, grid ou de colunas — num
+<code>div</code> comum, ele não faz nada.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>gap</code> vive no pai e só aparece entre os itens.</li>
+<li><code>gap-4</code> = 16 px; a escala é 1 = 4, 2 = 8, 3 = 12, 4 = 16, 6 = 24, 8 = 32.</li>
+<li><code>gap-x</code> é <code>column-gap</code>; <code>gap-y</code> é <code>row-gap</code>.</li>
+<li>O gap não age nas bordas: para ar em volta, <code>p-*</code> no pai.</li>
+<li>Sem <code>flex</code> ou <code>grid</code> no pai, o gap não funciona.</li>
+<li><code>gap-y</code> em flex só aparece quando a fila quebra.</li>
+<li>Margem no filho desalinha as pontas; gap no pai não.</li>
+<li>Trocar margem por gap exige tirar a margem, não somar as duas.</li>
+<li>No grid o vão é previsível; no flex, depende do conteúdo de cada linha.</li>
+<li><code>gap-[10px]</code> existe, mas é válvula de escape.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

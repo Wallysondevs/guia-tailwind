@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>flex-1 e Crescer | Guia Tailwind</title>
+<meta name="description" content="Como dividir o espaço que sobra numa linha flex: flex-1 para partes iguais, grow para crescer do tamanho natural, basis para proporção e shrink-0 para não encolher.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">flex-1</span> e Crescer</h1>
+<p class="intro">A Ana montou a barra de busca da padaria: o campo de digitar, o botão "Buscar" e nada
+mais. Só que o campo tem 160 px fixos e o resto da barra fica vazio, um buraco à direita que muda de
+tamanho conforme a tela. Ela quer o contrário: o botão do tamanho do texto e o campo ocupando tudo o
+que sobra. Nesta aula ela aprende a dividir o espaço livre de uma linha flex — com
+<code>flex-1</code>, com <code>grow</code>, com <code>basis-</code> quando a proporção precisa ser
+1 para 2, e com <code>shrink-0</code> quando uma peça não pode ser espremida de jeito nenhum.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>De onde vem o "espaço que sobra" numa linha flex.</li>
+  <li>O que <code>flex-1</code> faz e por que ele iguala os itens.</li>
+  <li>A diferença entre <code>flex-1</code>, <code>flex-auto</code>, <code>flex-initial</code> e
+  <code>flex-none</code>.</li>
+  <li>Quando usar <code>grow</code> em vez de <code>flex-1</code>.</li>
+  <li>Como pedir proporção com <code>basis-1/3</code>, <code>basis-2/3</code> e <code>flex-[2]</code>.</li>
+  <li>Como impedir que um botão ou ícone seja esmagado com <code>shrink-0</code>.</li>
+  <li>Por que um texto longo estoura a linha e o que <code>min-w-0</code> tem a ver com isso.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o buraco à direita da busca</h2>
+
+<p>A barra da Ana é simples: um <code>div</code> com <code>flex</code>, um campo de texto e um
+botão. Ela deu <code>w-40</code> ao campo porque "160 px pareciam bons". No monitor grande, a barra
+ocupa 900 px e sobram quase 500 px vazios entre o botão e a borda. No celular, o mesmo campo de
+160 px ocupa quase a tela toda.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="flex gap-2 bg-amber-100 p-2"&gt;
+  &lt;input class="w-40 rounded border border-amber-300 p-2" placeholder="Buscar pão..."&gt;
+  &lt;button class="rounded bg-amber-900 px-4 py-2 text-amber-50"&gt;Buscar&lt;/button&gt;
+&lt;/div&gt;</pre>
+
+<p>Repare no que aconteceu: a Ana escolheu um número em pixels para resolver um problema que não é
+de número, é de divisão. O campo não precisa de 160 px; ele precisa de <em>tudo o que sobrar</em>
+depois que o botão pegar o seu. Essa frase — "tudo o que sobrar" — é a chave de toda esta aula, e o
+flex tem um jeito próprio de calcular isso.</p>
+
+<p>Vale dizer desde já: existem valores em porcentagem (<code>w-1/2</code>, <code>w-2/3</code>) que
+parecem resolver. Eles resolvem quando a conta é simples e nada muda de tamanho. Mas basta o botão
+ficar com o texto "Buscar pães" em vez de "Buscar" para a porcentagem do campo ficar errada e a linha
+transbordar. Porcentagem parte do pai; flex parte do que sobra. É essa diferença que justifica a
+aula.</p>
+
+<h2>2. De onde vem o espaço que sobra</h2>
+
+<p>Quando o navegador monta uma linha flex, ele faz três perguntas para cada filho, e cada pergunta
+tem um número próprio. Esses três números, juntos, são a propriedade <code>flex</code>.</p>
+
+<dl class="anatomy">
+<dt>flex-grow</dt>
+<dd>Quanto do espaço <em>livre</em> o item aceita receber. Zero significa "não cresço"; um significa
+"cresço junto com os outros que também aceitam".</dd>
+<dt>flex-shrink</dt>
+<dd>Quanto o item encolhe quando falta espaço. Zero significa "não me esprema"; um é o padrão e
+permite encolher.</dd>
+<dt>flex-basis</dt>
+<dd>O tamanho de partida do item, antes de qualquer sobra ser dividida. Pode ser
+<code>auto</code> (o tamanho do conteúdo) ou uma medida como <code>0%</code>.</dd>
+<dt>espaço livre</dt>
+<dd>O que resta da largura do pai depois de descontar as bases e os gaps. É esse número que o
+<code>grow</code> divide.</dd>
+</dl>
+
+<p>O padrão do CSS é <code>flex: 0 1 auto</code>: não cresce, pode encolher, parte do tamanho do
+conteúdo. É por isso que a barra da Ana tem um buraco — ninguém pediu para crescer. E é por isso que
+quase todo problema de "não ocupa a largura toda" se resolve pedindo crescimento a alguém.</p>
+
+<p>Faça a conta comigo, porque ela explica tudo o que vem depois. Imagine a barra com 600 px, um
+campo de 160 px e um botão de 100 px, e um gap de 8 px. As bases somam 260 px, o gap come 8 px,
+sobram 332 px livres. Se o campo receber <code>flex-1</code>, ele fica com 160 + 332 = 492 px. Se os
+dois receberem <code>flex-1</code>, a base dos dois vira zero e os 592 px úteis são divididos em
+dois: 296 px para cada, independentemente do conteúdo.</p>
+
+<h2>3. flex-1: a receita da divisão igual</h2>
+
+<p><code>flex-1</code> é a classe mais usada do flex inteiro. Ela escreve <code>flex: 1 1 0%</code>:
+cresce, encolhe e parte do zero. O zero é a parte esperta. Como a base de todos os itens vira zero, o
+navegador não tem como favorecer ninguém, e o espaço é dividido em partes iguais. Dois itens com
+<code>flex-1</code> ficam com metade cada; três ficam com um terço cada.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|flex=1 1 0%">
+  <p class="try-task">Tire a largura fixa do campo e faça ele ocupar todo o espaço que sobra ao lado
+  do botão. O botão deve continuar do tamanho do texto dele.</p>
+  <pre class="html">&lt;div class="flex items-center gap-2 rounded-lg bg-amber-100 p-2"&gt;
+  &lt;input id="alvo" class="w-40 rounded border border-amber-300 p-2" placeholder="Buscar pão..."&gt;
+  &lt;button class="rounded bg-amber-900 px-4 py-2 text-amber-50"&gt;Buscar&lt;/button&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+width: 160px
+padding: 8px
+border-radius: 4px
+border-width: 1px
+border-color: oklch(0.879 0.169 91.605)
+</pre>
+  <pre class="solucao">&lt;div class="flex items-center gap-2 rounded-lg bg-amber-100 p-2"&gt;
+  &lt;input id="alvo" class="flex-1 rounded border border-amber-300 p-2" placeholder="Buscar pão..."&gt;
+  &lt;button class="rounded bg-amber-900 px-4 py-2 text-amber-50"&gt;Buscar&lt;/button&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>flex: 1 1 0%</code> e a prévia mostra o campo indo até o
+botão. O <code>w-40</code> saiu; se ficasse, brigaria com o <code>flex-1</code> pela mesma
+propriedade de largura, e o resultado dependeria da ordem em que o Tailwind gerou o CSS — a pior
+espécie de bug, aquela que some quando você recarrega a página.</p>
+
+<p>Note também que o botão não cresceu. Ele não tem <code>flex-1</code>, então continua com
+<code>flex: 0 1 auto</code>, do tamanho do seu texto mais o padding. Essa é a divisão que a Ana
+queria: um item manda no que sobra, o outro manda no próprio tamanho.</p>
+
+<p>E o que acontece se ela der <code>flex-1</code> aos dois? O botão passa a metade da barra, com o
+texto "Buscar" perdido no meio de um bloco enorme. Não é erro do Tailwind: é o que
+<code>flex-1</code> promete. Sempre que você aplicar, pergunte se aquele item deve mesmo ter o mesmo
+peso dos outros.</p>
+
+<p>Uma última coisa sobre <code>flex-1</code>: ele não é só horizontal. Como o flex cresce no eixo em
+que anda, a mesma classe faz o item esticar para baixo quando o pai tem <code>flex-col</code> e uma
+altura definida. É assim que se monta um painel de duas linhas em que a segunda ocupa todo o resto da
+tela: <code>flex h-screen flex-col</code> no corpo, o cabeçalho sem nada e o miolo com
+<code>flex-1</code>. O miolo come tudo o que o cabeçalho não comeu. Se o pai não tiver altura, não há
+sobra vertical e o <code>flex-1</code> fica sem trabalho — o mesmo raciocínio da aula
+<a href="alinhamento-flex.html">Alinhamento no Flex</a>, só que aplicado ao crescimento.</p>
+
+<h2>4. A família do flex: auto, initial e none</h2>
+
+<p><code>flex-1</code> tem três irmãos, e a diferença entre eles é justamente a base. Todos aceitam
+prefixos e todos convivem com <code>grow</code> e <code>shrink</code> separados. A tabela abaixo é a
+consulta rápida:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Vira no CSS</th><th>Efeito prático</th></tr>
+<tr><td><code>flex-1</code></td><td><code>flex: 1 1 0%</code></td><td>divide o espaço em partes iguais, ignorando o conteúdo</td></tr>
+<tr><td><code>flex-auto</code></td><td><code>flex: 1 1 auto</code></td><td>cresce a partir do conteúdo e reparte a sobra igualmente</td></tr>
+<tr><td><code>flex-initial</code></td><td><code>flex: 0 1 auto</code></td><td>não cresce, mas pode encolher (é o padrão do CSS)</td></tr>
+<tr><td><code>flex-none</code></td><td><code>flex: none</code></td><td>não cresce nem encolhe: fica no tamanho do conteúdo</td></tr>
+<tr><td><code>grow</code></td><td><code>flex-grow: 1</code></td><td>só mexe no crescimento, mantendo a base no conteúdo</td></tr>
+<tr><td><code>grow-0</code></td><td><code>flex-grow: 0</code></td><td>volta a não crescer</td></tr>
+<tr><td><code>shrink-0</code></td><td><code>flex-shrink: 0</code></td><td>impede o encolhimento quando falta espaço</td></tr>
+<tr><td><code>basis-1/3</code></td><td><code>flex-basis: calc(1 / 3 * 100%)</code></td><td>define o tamanho de partida em fração do pai</td></tr>
+</table>
+</div>
+
+<pre class="term">.flex-1 {
+  flex: 1;
+}
+.flex-auto {
+  flex: auto;
+}
+.flex-none {
+  flex: none;
+}
+.flex-initial {
+  flex: 0 1 auto;
+}</pre>
+
+<p>Essas quatro regras são só o atalho do CSS puro. O Tailwind escreve <code>flex: 1</code> e o
+navegador completa o resto — por isso o painel mostra <code>flex: 1 1 0%</code>, com o zero da base
+que você não digitou. Entender que existe um valor implícito ajuda a não se assustar quando o CSS
+gerado parecer diferente do que a classe diz.</p>
+
+<p>A escolha entre <code>flex-1</code> e <code>flex-auto</code> é a mais comum. Com
+<code>flex-1</code>, o conteúdo é ignorado no cálculo: um item com "Pão" e outro com "Bolo de fubá
+com goiabada" ficam exatamente do mesmo tamanho. Com <code>flex-auto</code>, cada um começa do seu
+tamanho natural e a sobra é dividida igualmente: numa linha de 600 px com conteúdos de 100 e 200 px,
+sobram 300 px, 150 para cada, e o resultado é 250 e 350. Os dois crescem, mas a diferença original
+continua visível. Se você quer igualdade, <code>flex-1</code>. Se quer respeito ao conteúdo,
+<code>flex-auto</code>.</p>
+
+<h2>5. grow: crescer sem zerar a base</h2>
+
+<p>Existe um caminho mais cirúrgico. <code>grow</code> mexe em uma coisa só: liga o
+<code>flex-grow</code> em 1 e deixa a base onde estava. É o que você quer quando o item deve ocupar a
+sobra <em>mantendo</em> o seu tamanho de partida — um campo de busca que já tem um mínimo confortável,
+por exemplo.</p>
+
+<pre class="term">.grow {
+  flex-grow: 1;
+}
+.basis-1\/3 {
+  flex-basis: calc(1 / 3 * 100%);
+}
+.shrink-0 {
+  flex-shrink: 0;
+}</pre>
+
+<p>A diferença para <code>flex-1</code> aparece na hora da conta. Com <code>grow</code>, a base
+continua sendo o conteúdo; a sobra é distribuída a partir dali. Com <code>flex-1</code>, a base é
+zero e o conteúdo deixa de importar. Em uma linha com dois itens e muito espaço, os dois terminam
+parecidos; em uma linha apertada, os resultados se separam bastante.</p>
+
+<p>Existe um caso em que <code>grow</code> é obrigatório: quando você quer dois itens crescendo com
+pesos diferentes. <code>flex-1</code> não aceita número. Para proporção você usa a base (próxima
+seção) ou o valor arbitrário <code>flex-[2]</code>, que escreve <code>flex: 2</code> e faz o item
+levar o dobro do espaço livre. É a válvula de escape dos colchetes, com a mesma regra de sempre: use
+quando a escala não resolve.</p>
+
+<p>Outro detalhe que pega as pessoas de surpresa: o crescimento acontece <em>dentro de cada linha</em>
+quando o pai tem <code>flex-wrap</code>. Se a fila quebra em duas linhas, cada linha distribui a sua
+própria sobra separadamente. Com cinco cartões que quebram três e dois, os dois da segunda linha
+esticam até preencher a linha inteira e ficam bem mais largos que os três de cima. Não é bug: é o
+crescimento agindo onde há espaço. Quando a Ana quer cartões de tamanho constante, ela não usa
+<code>flex-1</code> nesse caso — usa grid, que você vê na aula <a href="grid.html">Grid</a>.</p>
+
+<h2>6. Proporção: basis-1/3 e basis-2/3</h2>
+
+<p>Agora a cena clássica: a Ana quer a coluna de categorias com um terço da largura e o conteúdo com
+dois terços. Ela tenta <code>flex-1</code> nos dois e fica meio a meio. É natural: <code>flex-1</code>
+divide igual, não divide na proporção que ela imaginou.</p>
+
+<p>A solução é <code>basis-1/3</code> na coluna e <code>basis-2/3</code> no conteúdo. A base é o
+tamanho de partida; como 1/3 + 2/3 fecham 100%, não sobra nada para distribuir e a proporção se
+mantém. Se você quiser que a proporção se ajuste mesmo com sobra, combine
+<code>basis-1/3 grow</code> — aí o item parte de um terço e ainda participa da divisão do resto.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|flex-basis=33.3333%;;css:.conteudo|flex-basis=66.6667%">
+  <p class="try-task">A vitrine está meio a meio. Deixe o menu de categorias com um terço da linha e
+  o conteúdo com dois terços, usando as classes de base.</p>
+  <pre class="html">&lt;div class="flex gap-2"&gt;
+  &lt;div id="alvo" class="basis-1/2 rounded bg-amber-200 p-2"&gt;Categorias&lt;/div&gt;
+  &lt;div class="conteudo basis-1/2 rounded bg-amber-50 p-2"&gt;Pães e bolos de hoje&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: oklch(0.924 0.12 95.746)
+border-radius: 4px
+flex-basis: 50%
+</pre>
+  <pre class="solucao">&lt;div class="flex gap-2"&gt;
+  &lt;div id="alvo" class="basis-1/3 rounded bg-amber-200 p-2"&gt;Categorias&lt;/div&gt;
+  &lt;div class="conteudo basis-2/3 rounded bg-amber-50 p-2"&gt;Pães e bolos de hoje&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>flex-basis: 33.3333%</code> no elemento com
+<code>id="alvo"</code> — que aqui é a coluna de categorias. O valor é o que o navegador devolve para
+<code>calc(1 / 3 * 100%)</code>: a conta é feita e o resultado aparece com quatro casas. A meta desta
+caixa confere os dois lados, o menu e o conteúdo, porque a proporção só existe na comparação.</p>
+
+<p>Um aviso honesto: <code>basis-1/3</code> mais <code>basis-2/3</code> mais um <code>gap</code>
+somam mais de 100% da linha. O navegador resolve encolhendo um pouco cada lado pelo
+<code>shrink</code>, então a proporção fica levemente menor que exata, mas continua na mesma ordem de
+grandeza. Se você precisa de precisão cirúrgica, ou tira o gap, ou usa
+<code>calc</code> na base com o gap descontado. Para o dia a dia, o resultado visual é o esperado.</p>
+
+<h2>7. shrink-0: o que não pode encolher</h2>
+
+<p>Falta o outro lado da moeda. Quando a linha fica estreita, o navegador encolhe os itens — e ele
+encolhe todos, inclusive o botão que você queria intacto. O resultado é o clássico "Pedir" quebrando
+em duas linhas dentro do botão.</p>
+
+<p>O culpado tem nome: <code>flex-shrink</code>, que vale 1 por padrão. A classe
+<code>shrink-0</code> põe esse número em zero e diz "não me esprema". A partir daí, quem encolhe é o
+resto da linha.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|flex-shrink=0">
+  <p class="try-task">Na cartinha estreita, o botão "Pedir" fica espremido e o rótulo quebra em duas
+  linhas. Impeça que o botão encolha — o texto ao lado é que deve ceder espaço.</p>
+  <pre class="html">&lt;div class="flex w-64 gap-2 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;span&gt;Pão de queijo quentinho saindo do forno agora&lt;/span&gt;
+  &lt;button id="alvo" class="rounded bg-amber-900 px-3 py-2 text-amber-50"&gt;Pedir&lt;/button&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.414 0.112 45.904)
+color: oklch(0.987 0.022 95.277)
+border-radius: 4px
+padding-inline: 12px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;div class="flex w-64 gap-2 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;span&gt;Pão de queijo quentinho saindo do forno agora&lt;/span&gt;
+  &lt;button id="alvo" class="shrink-0 rounded bg-amber-900 px-3 py-2 text-amber-50"&gt;Pedir&lt;/button&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel confirma: <code>flex-shrink: 0</code>. E aí aparece o efeito colateral que você precisa
+conhecer. Todo item flex tem, por padrão, <code>min-width: auto</code> — um mínimo igual ao conteúdo.
+Consequência: um texto longo dentro de um item flex <em>não</em> encolhe abaixo da sua palavra mais
+longa, e a linha estoura. O conserto é <code>min-w-0</code> no item de texto, que libera o mínimo
+para zero e permite que o <code>truncate</code> ou a quebra de linha funcionem. É o par obrigatório de
+<code>shrink-0</code>: um impede que o botão encolha, o outro permite que o texto encolha.</p>
+
+<p>Resumindo a dupla: <code>shrink-0</code> protege a peça que não pode deformar (ícone, botão,
+avatar); <code>min-w-0</code> libera a peça que pode (texto, título, descrição). Sem os dois, o
+layout funciona no seu monitor e quebra no celular da Ana na hora do pedido.</p>
+
+<p>Vale ver o mecanismo por dentro, porque ele reaparece em toda aula de layout. O navegador calcula
+duas larguras para cada item: a <em>preferida</em>, com todo o texto em uma linha, e a
+<em>mínima</em>, com o texto quebrando em cada espaço. O <code>min-width: auto</code> usa a mínima,
+que é a largura da palavra mais longa. Num texto normal, a palavra mais longa é curta e o item
+encolhe sem drama. Num endereço de e-mail, num código de pedido ou numa URL, a "palavra" tem 80
+caracteres e o mínimo vira uma parede. Aí o <code>truncate</code> não corta, o
+<code>overflow-hidden</code> não esconde, e a linha inteira estoura. O <code>min-w-0</code> troca
+esse mínimo automático por zero e devolve o controle ao CSS normal.</p>
+
+<h2>8. Erros comuns</h2>
+
+<p>Quatro tropeços resolvem quase todos os casos de "o flex não dividiu como eu queria". O primeiro
+é de longe o mais comum.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sintoma</th><th>Causa provável</th><th>O que fazer</th></tr>
+<tr><td>Nada cresce e sobra um buraco à direita</td><td>falta <code>flex</code> no pai</td><td>acrescente <code>flex</code> no pai antes de tudo</td></tr>
+<tr><td>Os itens ficaram iguais, mas eu queria proporção</td><td><code>flex-1</code> iguala por definição</td><td>use <code>basis-1/3</code> e <code>basis-2/3</code>, ou <code>flex-[2]</code></td></tr>
+<tr><td>O texto estoura a linha em vez de quebrar</td><td><code>min-width: auto</code> do item flex</td><td><code>min-w-0</code> no item de texto</td></tr>
+<tr><td>O botão ficou espremido e o rótulo quebrou</td><td>o item encolheu junto com o resto</td><td><code>shrink-0</code> no botão</td></tr>
+</table>
+</div>
+
+<p>Há ainda um quinto caso, mais sutil: <code>flex-1</code> aplicado no filho e <code>flex</code>
+esquecido no pai. A classe gera CSS, o painel mostra <code>flex: 1 1 0%</code>, e nada muda, porque
+crescimento só existe em contexto de flex. Antes de investigar a classe do filho, confirme o
+<code>display</code> do pai. Esse hábito economiza horas.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a coluna lateral fixa e o conteúdo elástico</h3>
+<p>É o layout de painel mais comum do mundo: uma coluna de 256 px à esquerda e o conteúdo ocupando o
+resto. A receita tem três classes: <code>w-64 shrink-0</code> na lateral, <code>flex-1</code> no
+conteúdo e <code>min-w-0</code> no conteúdo também. A lateral não encolhe porque o menu quebraria; o
+conteúdo cresce; e o <code>min-w-0</code> garante que uma tabela larga dentro dele role na horizontal
+em vez de empurrar a página. Sem esse último detalhe, a Ana arruma o desktop e descobre que o site
+rola de lado no celular.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: três cartões de preço que precisam ser iguais no desktop</h3>
+<p>Três planos lado a lado, com nomes de tamanhos diferentes. Se ela usar <code>flex-auto</code>, o
+cartão do plano "Completo com encomenda" fica mais largo porque o texto é maior, e a fileira parece
+torta. Com <code>flex-1</code> nos três, cada um fica com um terço exato. No celular, a fileira
+precisa quebrar: <code>flex flex-wrap gap-4</code> no pai e <code>flex-1 basis-full md:basis-0</code>
+nos cartões — cada um ocupa a linha toda no celular e divide a linha no desktop.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o item que não cresce porque o pai não tem largura</h3>
+<p>A Ana colocou <code>flex-1</code> num cartão dentro de um <code>div</code> que só tem
+<code>flex</code>, sem largura definida, e o cartão ficou do tamanho do conteúdo. O motivo: o pai,
+por ser <code>block</code>, ocupa a largura disponível, mas se ele estiver dentro de outro flex sem
+base, a corrente inteira fica do tamanho do conteúdo. Crescer é sempre relativo — antes de culpar a
+classe, olhe a largura do pai e a do avô. Em layout aninhado, o <code>min-w-0</code> costuma aparecer
+em cada nível.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que <code>flex-1</code> escreve no CSS?</p>
+<label><input type="radio" name="q1"> <code>flex: 0 1 auto</code>, o padrão</label>
+<label><input type="radio" name="q1"> <code>flex: 1 1 0%</code>, cresce a partir de zero</label>
+<label><input type="radio" name="q1"> <code>width: 100%</code>, ocupa a linha toda</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. A Ana quer um terço e dois terços. Qual dupla
+resolve?</p>
+<label><input type="radio" name="q2"> <code>flex-1</code> nos dois</label>
+<label><input type="radio" name="q2"> <code>w-1/3</code> e <code>w-2/3</code> com <code>gap-4</code></label>
+<label><input type="radio" name="q2"> <code>basis-1/3</code> e <code>basis-2/3</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O botão fica espremido e o rótulo quebra. Qual
+classe protege o botão?</p>
+<label><input type="radio" name="q3"> <code>shrink-0</code></label>
+<label><input type="radio" name="q3"> <code>flex-1</code></label>
+<label><input type="radio" name="q3"> <code>min-w-0</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a busca da padaria</h2>
+<p>Complete o campo de busca para que ele ocupe todo o espaço que sobra ao lado do botão. Depois
+responda: qual é a classe do crescimento?</p>
+<div class="ex-code">&lt;input class="<input aria-label="resposta 1" data-answer="flex-1" placeholder="..."> rounded border border-amber-300 p-2" placeholder="Buscar pão..."&gt;</div>
+<p class="ex-dica">Dica: a classe que parte de zero e divide o espaço em partes iguais. Se você
+escrever <code>w-full</code>, o campo empurra o botão para fora da linha.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Crescer, no flex, é dividir o espaço livre. O navegador desconta as bases e os gaps da largura do
+pai e reparte o que sobra entre os itens que aceitam crescer. <code>flex-1</code> é o atalho para
+"cresce a partir de zero e divide igual", porque escreve <code>flex: 1 1 0%</code>; por isso ele
+iguala os itens e ignora o conteúdo. <code>flex-auto</code> cresce respeitando o tamanho natural;
+<code>flex-none</code> congela no conteúdo; <code>flex-initial</code> é o padrão do CSS e não cresce.</p>
+
+<p>Para proporção, a ferramenta é a base: <code>basis-1/3</code> e <code>basis-2/3</code> fecham
+100% e mantêm a relação, com ou sem sobra. Para proteger uma peça, <code>shrink-0</code>; para
+liberar o texto, <code>min-w-0</code>. E antes de tudo, confirme que o pai tem <code>flex</code> —
+sem fila, não há divisão.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>flex-1</code> = <code>flex: 1 1 0%</code>: cresce, encolhe, parte do zero.</li>
+<li><code>flex-1</code> iguala os itens; <code>flex-auto</code> respeita o conteúdo.</li>
+<li><code>flex-none</code> = <code>0 0 auto</code>: nem cresce, nem encolhe.</li>
+<li><code>grow</code> só liga o crescimento, mantendo a base.</li>
+<li>Proporção: <code>basis-1/3</code> + <code>basis-2/3</code>, ou <code>flex-[2]</code>.</li>
+<li><code>shrink-0</code> impede o encolhimento de botão, ícone e avatar.</li>
+<li><code>min-w-0</code> libera o texto para encolher e quebrar.</li>
+<li>Espaço livre = largura do pai − bases − gaps.</li>
+<li>Sem <code>flex</code> no pai, nenhuma classe de crescimento faz efeito.</li>
+<li>Largura fixa e <code>flex-1</code> no mesmo elemento brigam: escolha um.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

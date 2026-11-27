@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grid | Guia Tailwind</title>
+<meta name="description" content="O grid do Tailwind para quem nunca programou: grid-cols divide a linha em colunas iguais, grid-rows cuida das linhas, grid-flow da ordem e auto-fit adapta a grade.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Grid</span></h1>
+<p class="intro">A Ana quer mostrar seis pães da padaria numa vitrine de duas fileiras de três. Ela
+tentou com flex, deixou o <code>flex-wrap</code> quebrar a linha e o resultado ficou torto: os três de
+cima com uma largura, os dois de baixo esticados até a borda. O flex decide a largura pelo conteúdo,
+e o conteúdo dela tem tamanhos diferentes. Nesta aula a Ana troca de ferramenta: em vez de deixar o
+conteúdo decidir, ela declara a grade — três colunas iguais — e o navegador encaixa cada pão numa
+célula. É o <strong>grid</strong>, o layout de duas dimensões do Tailwind.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que o grid existe quando o flex já resolve tanta coisa.</li>
+  <li><code>grid</code> e <code>grid-cols-3</code>: as duas classes que montam a grade.</li>
+  <li>A régua de colunas, de <code>grid-cols-1</code> a <code>grid-cols-12</code>.</li>
+  <li><code>grid-rows-*</code> e as linhas que o conteúdo cria sozinho.</li>
+  <li><code>grid-flow-row</code> e <code>grid-flow-col</code>: a ordem em que a grade é preenchida.</li>
+  <li><code>auto-rows-*</code> e <code>auto-cols-*</code> para controlar as faixas automáticas.</li>
+  <li>Como fazer a grade se adaptar sozinha com <code>repeat(auto-fit, minmax(…))</code>.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a vitrine que quebra torta</h2>
+
+<p>O HTML da Ana tem um pai com <code>flex flex-wrap gap-4</code> e seis cartões de pão. No monitor
+largo, cabem três por linha e a primeira fileira fica perfeita. A segunda fileira tem dois cartões e
+eles esticam até preencher a largura, ficando bem mais largos que os de cima. A vitrine parece
+inacabada.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="flex flex-wrap gap-4"&gt;
+  &lt;div class="flex-1"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="flex-1"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="flex-1"&gt;Bolo de fubá&lt;/div&gt;
+  &lt;div class="flex-1"&gt;Croissant&lt;/div&gt;
+  &lt;div class="flex-1"&gt;Rosca doce&lt;/div&gt;
+  &lt;div class="flex-1"&gt;Pão de mel&lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<p>Isso não é um defeito do flex. Ele foi feito para uma dimensão: colocar coisas em fila e dividir o
+espaço que sobra. Quando a fila quebra, cada linha vira uma fila nova e distribui a <em>sua</em> sobra.
+A segunda linha tem dois itens e uma sobra enorme, então os dois crescem. O flex está sendo flex.</p>
+
+<p>A Ana quer outra coisa: uma grade. Ela quer dizer "aqui tem três colunas, todas do mesmo tamanho,
+e o que não couber vai para a próxima fileira". Isso é uma decisão do pai, tomada antes de olhar para
+o conteúdo, e é exatamente o que o grid faz.</p>
+
+<h2>2. Grid não é um flex melhor</h2>
+
+<p>Sempre que alguém descobre o grid, aparece a tentação de usar só ele. Vale entender a diferença
+antes de escolher, porque as duas ferramentas resolvem problemas diferentes.</p>
+
+<p>No flex, o conteúdo manda: cada item entra com o seu tamanho e o espaço livre é dividido depois.
+No grid, o pai manda: ele declara as faixas (as colunas e as linhas) e cada filho é encaixado numa
+célula. Se você declarou três colunas iguais, a terceira coluna existe mesmo que esteja vazia. Essa é
+a diferença de fundo entre uma dimensão e duas.</p>
+
+<dl class="anatomy">
+<dt>grade</dt>
+<dd>O pai que declara as faixas. No Tailwind, é o elemento com <code>grid</code>.</dd>
+<dt>coluna</dt>
+<dd>Uma faixa vertical da grade. Você declara quantas com <code>grid-cols-*</code>.</dd>
+<dt>linha</dt>
+<dd>Uma faixa horizontal. Pode ser declarada com <code>grid-rows-*</code> ou criada pelo conteúdo.</dd>
+<dt>célula</dt>
+<dd>O cruzamento de uma coluna com uma linha. É onde cada filho cai.</dd>
+<dt>faixa implícita</dt>
+<dd>A coluna ou linha que o navegador cria sozinho quando chega mais item do que você previu.</dd>
+</dl>
+
+<p>Na prática, o flex ganha quando o conteúdo é uma fila de coisas de tamanhos diferentes: um menu,
+uma barra de ferramentas, um cartão com ícone e texto. O grid ganha quando a tela é uma tabela
+disfarçada: vitrine de produtos, galeria de fotos, rodapé de quatro blocos, formulário com rótulo e
+campo. E os dois convivem no mesmo projeto, às vezes no mesmo elemento — um grid cujo filho é
+<code>flex</code>.</p>
+
+<h2>3. grid e grid-cols-3: as duas classes</h2>
+
+<p>Montar uma grade no Tailwind é escrever duas classes no pai. A primeira, <code>grid</code>, liga o
+modo grade. A segunda, <code>grid-cols-3</code>, diz que a linha se divide em três colunas de tamanho
+igual. Sem a segunda, o pai tem uma coluna só e os filhos se empilham — o que é o comportamento
+padrão, e o motivo de tanta gente achar que "o grid não funcionou".</p>
+
+<div class="trytailwind" data-goal="rule:grid-template-columns: repeat(3, minmax(0, 1fr))">
+  <p class="try-task">A vitrine está com uma coluna só. Divida a linha em três colunas iguais, para
+  os cartões ficarem lado a lado.</p>
+  <pre class="html">&lt;div id="alvo" class="grid grid-cols-1 gap-2 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Bolo de fubá&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Croissant&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Rosca doce&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Pão de mel&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+padding: 8px
+gap: 8px
+grid-template-columns: 744px
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid grid-cols-3 gap-2 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Bolo de fubá&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Croissant&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Rosca doce&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Pão de mel&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>display: grid</code>, o <code>gap</code> e uma linha de
+<code>grid-template-columns</code> com três medidas em pixels — antes dela, uma coluna só. Não é à toa
+que aparecem pixels: o navegador já resolveu o <code>1fr</code> e informou a largura real de cada
+coluna, dividindo o espaço disponível. Se a prévia mudar de largura, os números mudam — a regra, não.</p>
+
+<p>Repare também que o <code>gap-2</code> continua no HTML. Numa grade, o gap é o que separa as
+células: sem ele, os cartões ficam encostados um no outro e o olho lê o bloco inteiro como uma coisa
+só. O gap não é margem — ele vive no pai, e só aparece <em>entre</em> as faixas, nunca nas bordas da
+grade. É por isso que o primeiro cartão alinha com o título da seção sem precisar de ajuste: a borda
+da grade é exatamente a borda do container. A aula <a href="gap.html">O gap</a> se aprofunda nisso.</p>
+
+<p>Existe uma variante chamada <code>inline-grid</code>, que faz a grade se comportar como uma
+palavra no meio do texto, em vez de ocupar a linha inteira. Você quase nunca vai precisar dela; a
+diferença é a mesma entre <code>block</code> e <code>inline</code>, e o sintoma de usar
+<code>inline-grid</code> sem querer é uma grade encolhida, do tamanho do conteúdo, no canto da linha.
+Se a sua grade não ocupa a largura toda, confira se você escreveu <code>inline-grid</code> — ou se o
+pai dela é flex sem <code>flex-1</code>.</p>
+
+<p>E a regra é curta:</p>
+
+<pre class="term">.grid {
+  display: grid;
+}
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}</pre>
+
+<p>Leia a segunda linha devagar, porque ela explica metade dos comportamentos do grid.
+<code>repeat(3, …)</code> quer dizer "três vezes o que está aqui dentro". E
+<code>minmax(0, 1fr)</code> quer dizer "no mínimo 0, no máximo uma fração igual do espaço". O
+<code>1fr</code> é a fração; o <code>minmax(0, …)</code> é a garantia de que a coluna pode encolher
+até zero em vez de ser empurrada por um conteúdo largo. Sem esse detalhe, uma palavra comprida numa
+célula alargaria a coluna inteira. O Tailwind já resolveu isso por você — e é por isso que o
+<code>grid-cols-3</code> dele costuma se comportar melhor que o CSS feito à mão.</p>
+
+<h2>4. A régua de colunas</h2>
+
+<p>O Tailwind traz a régua pronta de 1 a 12 colunas, que é a mesma quantidade de colunas da grade
+mental que a maioria dos designs usa. Você não precisa de todas; na prática, três ou quatro resolvem
+quase tudo.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Colunas</th><th>Onde costuma servir</th></tr>
+<tr><td><code>grid-cols-1</code></td><td>1</td><td>empilhado no celular</td></tr>
+<tr><td><code>grid-cols-2</code></td><td>2 iguais</td><td>galeria pequena, dois cartões</td></tr>
+<tr><td><code>grid-cols-3</code></td><td>3 iguais</td><td>vitrine de produtos, serviços</td></tr>
+<tr><td><code>grid-cols-4</code></td><td>4 iguais</td><td>rodapé, painel de números</td></tr>
+<tr><td><code>grid-cols-6</code></td><td>6 iguais</td><td>grade fina para combinar com spans</td></tr>
+<tr><td><code>grid-cols-12</code></td><td>12 iguais</td><td>layout de página inteira</td></tr>
+<tr><td><code>grid-cols-none</code></td><td>nenhuma declarada</td><td>voltar ao empilhado</td></tr>
+<tr><td><code>grid-cols-[200px_1fr]</code></td><td>medida livre</td><td>menu de largura fixa e conteúdo elástico</td></tr>
+</table>
+</div>
+
+<p>A última linha merece um comentário. Entre colchetes você escreve o valor do CSS, com
+<strong>underline no lugar dos espaços</strong>: <code>grid-cols-[200px_1fr]</code> vira
+<code>grid-template-columns: 200px 1fr</code>. É a válvula de escape para quando a régua não serve, e
+é o caminho para a grade que se adapta sozinha, mais adiante nesta aula.</p>
+
+<p>Uma pergunta que aparece sempre: por que doze colunas? Porque doze se divide por 1, 2, 3, 4 e 6.
+Com essa régua você monta praticamente qualquer proporção inteira — metade (6), um terço (4), um
+quarto (3), dois terços (8) — sem inventar medida em pixels. É o mesmo motivo pelo qual o relógio tem
+doze horas e a caixa de ovos tem doze lugares: um número que se parte de muitos jeitos. A grade de
+doze aparece na aula <a href="colunas-e-linhas.html">Colunas e Linhas</a>, quando você começa a fazer
+um cartão ocupar mais de uma coluna.</p>
+
+<p>Existe ainda <code>grid-cols-subgrid</code>, que faz um filho herdar as colunas do pai. É poderoso
+e resolve alinhamentos finos, mas exige que o filho também seja <code>grid</code> e que o navegador
+seja recente. Fica para quando você precisar alinhar o conteúdo interno de cartões entre si — não é
+assunto de primeira semana.</p>
+
+<h2>5. grid-rows-* e as linhas que aparecem sozinhas</h2>
+
+<p>As colunas você declara. As linhas, quase sempre, não. Quando os seis cartões da Ana entram numa
+grade de três colunas, o navegador cria duas linhas automaticamente, cada uma com a altura do
+conteúdo daquela fileira. Isso se chama faixa implícita: existe, funciona, e você não escreveu nada.</p>
+
+<p>Quando precisa de controle, você declara as linhas com <code>grid-rows-2</code>,
+<code>grid-rows-3</code> e assim por diante. Com <code>1fr</code> em cada linha, a altura do pai é
+dividida em partes iguais — o que só funciona se o pai tiver altura. E para as linhas que o conteúdo
+criar, existe <code>auto-rows-*</code>: <code>auto-rows-min</code> deixa cada linha do tamanho do
+conteúdo, <code>auto-rows-fr</code> faz todas as linhas implícitas dividirem a altura igualmente e
+<code>auto-rows-[120px]</code> fixa um valor.</p>
+
+<pre class="term">.grid-rows-2 {
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+.grid-flow-col {
+  grid-auto-flow: column;
+}
+.auto-rows-min {
+  grid-auto-rows: min-content;
+}</pre>
+
+<p>Repare que <code>grid-rows-2</code> tem a mesma forma de <code>grid-cols-3</code>, só que na
+vertical. As duas usam <code>repeat</code> e <code>minmax(0, 1fr)</code>, pela mesma razão: impedir
+que o conteúdo force a faixa a crescer além do combinado. E <code>auto-rows-min</code> aponta para
+<code>min-content</code>, que é a altura mínima para caber o conteúdo sem cortar.</p>
+
+<p>Um aviso prático: declarar <code>grid-rows-3</code> num pai sem altura é pedir uma divisão de
+zero. As três linhas vão existir (o navegador reserva as faixas), mas com altura zero se não houver
+conteúdo. Só declare linhas quando o pai tiver <code>h-*</code> ou <code>min-h-*</code>.</p>
+
+<h2>6. grid-flow: a ordem em que a grade enche</h2>
+
+<p>Por padrão, a grade é preenchida <em>em linha</em>: primeiro os itens da primeira fileira, da
+esquerda para a direita, depois a segunda fileira. É o <code>grid-flow-row</code>, que você não
+precisa escrever. Quando o conteúdo é uma lista de links de rodapé, porém, a Ana quer que a leitura
+desça pela coluna — o primeiro item embaixo do título, os seguintes abaixo dele, e só depois a
+segunda coluna.</p>
+
+<p>Para isso basta <code>grid-flow-col</code>: o preenchimento passa a descer a coluna antes de ir
+para a próxima. Combinado com <code>grid-rows-2</code>, você ganha exatamente o efeito de duas linhas
+por coluna, e a grade cria as colunas que faltarem sozinha.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|grid-auto-flow=column;;rule:grid-template-rows: repeat(2, minmax(0, 1fr))">
+  <p class="try-task">O menu de categorias está em três colunas, lido da esquerda para a direita. Faça
+  a grade descer primeiro: duas linhas por coluna, preenchendo de cima para baixo.</p>
+  <pre class="html">&lt;div id="alvo" class="grid grid-cols-3 gap-2 rounded-lg bg-amber-50 p-2 text-amber-900"&gt;
+  &lt;span&gt;Pães&lt;/span&gt;
+  &lt;span&gt;Bolos&lt;/span&gt;
+  &lt;span&gt;Café&lt;/span&gt;
+  &lt;span&gt;Doces&lt;/span&gt;
+  &lt;span&gt;Salgados&lt;/span&gt;
+  &lt;span&gt;Encomendas&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+padding: 8px
+gap: 8px
+grid-template-columns: 242.656px 242.672px 242.672px
+background-color: oklch(0.987 0.022 95.277)
+color: oklch(0.414 0.112 45.904)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid grid-flow-col grid-rows-2 gap-2 rounded-lg bg-amber-50 p-2 text-amber-900"&gt;
+  &lt;span&gt;Pães&lt;/span&gt;
+  &lt;span&gt;Bolos&lt;/span&gt;
+  &lt;span&gt;Café&lt;/span&gt;
+  &lt;span&gt;Doces&lt;/span&gt;
+  &lt;span&gt;Salgados&lt;/span&gt;
+  &lt;span&gt;Encomendas&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Ao rodar, o painel mostra <code>grid-auto-flow: column</code> e
+<code>grid-template-rows</code> com duas alturas. E na prévia a leitura muda: "Pães" em cima,
+"Bolos" embaixo, "Café" no topo da segunda coluna. As três colunas continuam existindo, mas agora
+foram criadas pelo fluxo, não declaradas.</p>
+
+<p>Existe também <code>grid-flow-row-dense</code> e <code>grid-flow-col-dense</code>. A palavra
+<em>dense</em> manda o navegador voltar e preencher buracos deixados por itens que ocupam mais de uma
+célula. Faz diferença quando você usa <code>col-span</code> — o assunto da próxima aula — e um cartão
+grande abre um espaço vazio atrás dele. O custo é que a ordem visual pode não bater com a ordem do
+HTML, o que atrapalha quem navega por teclado. Use com consciência.</p>
+
+<h2>7. A grade que se adapta sozinha</h2>
+
+<p>Falta o truque que resolve a maioria das galerias sem uma linha de breakpoint. Em vez de dizer
+"três colunas", você diz "colunas de no mínimo 200 px, quantas couberem". O navegador mede o espaço,
+encaixa o máximo de colunas possível e divide o resto igualmente. No monitor entram quatro; no
+celular, uma; no tablet, duas. Sem <code>md:</code>, sem <code>lg:</code>.</p>
+
+<div class="trytailwind" data-goal="rule:grid-template-columns: repeat(auto-fit,minmax(200px,1fr))">
+  <p class="try-task">Troque as duas colunas fixas por uma grade que decide sozinha quantas colunas
+  cabem: cada uma com no mínimo 200 px e repartindo o espaço que sobra.</p>
+  <pre class="html">&lt;div id="alvo" class="grid grid-cols-2 gap-2 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Bolo de fubá&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Croissant&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Rosca doce&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+padding: 8px
+gap: 8px
+grid-template-columns: 368px 368px
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Bolo de fubá&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Croissant&lt;/div&gt;
+  &lt;div class="rounded bg-amber-200 p-2"&gt;Rosca doce&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS gerado é uma linha só, sem espaço depois das vírgulas:</p>
+
+<pre class="term">.grid-cols-\[repeat\(auto-fit\2c minmax\(200px\2c 1fr\)\)\] {
+  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+}</pre>
+
+<p>Não se assuste com a sopa de barras invertidas: é o escape que o Tailwind precisa para um seletor
+com parênteses e vírgulas. O que importa é a segunda linha. <code>auto-fit</code> diz "encaixe
+quantas colunas de 200 px couberem"; <code>minmax(200px, 1fr)</code> diz "cada coluna começa em
+200 px e cresce para dividir a sobra". Se você trocar por <code>auto-fill</code>, o navegador mantém
+as colunas vazias no fim da linha; com <code>auto-fit</code>, ele colapsa as vazias e as visíveis
+crescem. Para galeria, <code>auto-fit</code> é quase sempre o que se quer.</p>
+
+<p>Um cuidado: essa técnica esconde a responsividade dentro do CSS, e isso é ótimo até o dia em que
+alguém precisa de uma quebra diferente. Nessa hora, volte para <code>grid-cols-2 md:grid-cols-4</code>
+e assuma o controle. As duas formas são legítimas; a diferença é quem decide — o navegador ou você.</p>
+
+<h2>8. Erros comuns com grid</h2>
+
+<p>Quatro tropeços explicam quase todos os "o grid não fez nada" que aparecem em fórum. O primeiro é
+tão banal que merece ser o primeiro item de qualquer lista.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sintoma</th><th>Causa provável</th><th>O que fazer</th></tr>
+<tr><td>A grade não aparece e os itens continuam empilhados</td><td>falta <code>grid</code> no pai</td><td>escreva <code>grid</code> junto de <code>grid-cols-*</code></td></tr>
+<tr><td>As colunas ficaram de tamanhos diferentes</td><td>uma célula tem conteúdo muito largo</td><td>use <code>grid-cols-N</code> do Tailwind, que já traz <code>minmax(0, 1fr)</code></td></tr>
+<tr><td>O último item ocupa a linha toda</td><td>ele foi colocado sozinho e a célula ficou vazia</td><td>deixe assim ou use <code>col-span</code> na próxima aula</td></tr>
+<tr><td>No celular continua com três colunas apertadas</td><td><code>grid-cols-3</code> fixo, sem breakpoint</td><td><code>grid-cols-1 md:grid-cols-3</code> ou <code>auto-fit</code></td></tr>
+</table>
+</div>
+
+<p>Há um quinto caso que confunde por ser invisível: colocar <code>grid-cols-3</code> num filho em vez
+do pai. A classe gera CSS, o painel mostra a propriedade, e nada muda — porque quem precisa ser grade
+é o elemento que contém as células. Antes de mexer nas classes, pergunte "quem é o pai desta grade?".
+A resposta é o elemento que deve receber <code>grid</code>.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: galeria de fotos com duas colunas no celular e três no monitor</h3>
+<p>A Ana fotografou doze pães e quer uma galeria. A receita mais direta é
+<code>grid grid-cols-2 gap-4 md:grid-cols-3</code>. Duas colunas no celular, três a partir de 768 px.
+Repare que o <code>gap-4</code> não muda com o breakpoint: o espaçamento é o mesmo, só a divisão
+muda. Se as fotos tiverem alturas diferentes, a grade vai criar linhas de alturas diferentes e o
+resultado parece irregular — nesse caso, <code>aspect-square</code> em cada foto iguala as células, ou
+<code>auto-rows-fr</code> no pai. É o tipo de detalhe que separa uma galeria bonita de uma pilha de
+imagens.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o rodapé de quatro blocos que vira um no celular</h3>
+<p>Rodapé com quatro colunas é o exemplo clássico de grade de página inteira. No Tailwind:
+<code>grid grid-cols-1 gap-8 md:grid-cols-4</code>. No celular, os quatro blocos se empilham na ordem
+do HTML; no monitor, ficam lado a lado. O <code>gap-8</code> vale para os dois eixos, então o
+espaçamento entre as colunas no monitor é o mesmo entre os blocos no celular — coerência de graça.
+Se você quisesse espaçamentos diferentes, <code>gap-x-8 gap-y-4</code> resolve.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: formulário com rótulo e campo alinhados</h3>
+<p>O formulário de encomenda tem nove campos, cada um com um rótulo à esquerda e o campo à direita.
+Empilhado, o rótulo fica em cima e nada alinha. Com
+<code>grid grid-cols-[8rem_1fr] items-center gap-2</code>, cada rótulo ganha uma coluna fixa de
+128 px e cada campo ocupa o resto, com as linhas se alinhando sozinhas. Se um rótulo for mais largo
+que 128 px, ele passa para duas linhas em vez de empurrar a coluna — o <code>minmax(0, 1fr)</code> do
+lado do campo protege o resto. É a receita mais sólida para formulário em grade.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Quais duas classes montam uma grade de três colunas
+iguais?</p>
+<label><input type="radio" name="q1"> <code>flex</code> e <code>flex-3</code></label>
+<label><input type="radio" name="q1"> <code>grid</code> e <code>grid-cols-3</code></label>
+<label><input type="radio" name="q1"> <code>grid-cols-3</code> e <code>gap-3</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que <code>grid-cols-3</code> escreve no CSS?</p>
+<label><input type="radio" name="q2"> <code>display: flex</code> com três colunas</label>
+<label><input type="radio" name="q2"> <code>width: 33.333%</code> em cada filho</label>
+<label><input type="radio" name="q2"> <code>grid-template-columns: repeat(3, minmax(0, 1fr))</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. A Ana quer uma galeria que decida sozinha quantas
+colunas cabem, sem breakpoints. Qual caminho?</p>
+<label><input type="radio" name="q3"> <code>grid-cols-[repeat(auto-fit,minmax(200px,1fr))]</code></label>
+<label><input type="radio" name="q3"> <code>grid-cols-12</code> com <code>gap-12</code></label>
+<label><input type="radio" name="q3"> <code>flex-wrap</code> com <code>flex-1</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a vitrine de seis pães</h2>
+<p>Complete a vitrine para que os seis cartões fiquem em três colunas iguais. Depois responda: qual é
+a classe que declara as colunas?</p>
+<div class="ex-code">&lt;div class="grid <input aria-label="resposta 1" data-answer="grid-cols-3" placeholder="..."> gap-4"&gt;</div>
+<p class="ex-dica">Dica: o pai precisa de <code>grid</code> e da régua de colunas. Se você escrever
+<code>cols-3</code>, nada aparece no painel — o prefixo <code>grid-</code> é obrigatório.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O grid é o layout de duas dimensões: o pai declara as faixas e os filhos são encaixados nas
+células. No Tailwind, <code>grid</code> liga o modo e <code>grid-cols-N</code> cria N colunas iguais,
+cada uma com <code>minmax(0, 1fr)</code> — o detalhe que impede o conteúdo de alargar a coluna. As
+linhas, você geralmente não declara: o navegador cria as faixas implícitas conforme o conteúdo chega,
+e <code>auto-rows-*</code> controla a altura delas.</p>
+
+<p>A ordem de preenchimento é em linha por padrão; <code>grid-flow-col</code> faz descer a coluna
+primeiro, e a variante <code>-dense</code> preenche buracos. Para galerias que se adaptam sozinhas,
+<code>grid-cols-[repeat(auto-fit,minmax(200px,1fr))]</code> dispensa breakpoints. E lembre-se do
+primeiro item da tabela de erros: sem <code>grid</code> no pai, nenhuma coluna existe.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>grid</code> = <code>display: grid</code>; <code>grid-cols-3</code> = três colunas iguais.</li>
+<li>A régua vai de 1 a 12; <code>grid-cols-none</code> volta ao empilhado.</li>
+<li><code>minmax(0, 1fr)</code> protege a coluna de conteúdo largo.</li>
+<li>Linhas costumam ser implícitas; <code>auto-rows-*</code> controla a altura delas.</li>
+<li><code>grid-rows-*</code> precisa de altura no pai para dividir.</li>
+<li><code>grid-flow-col</code> desce a coluna antes de ir para a próxima.</li>
+<li><code>grid-flow-row-dense</code> preenche buracos, mas bagunça a ordem de leitura.</li>
+<li><code>grid-cols-[...]</code> aceita CSS cru, com underline no lugar do espaço.</li>
+<li><code>auto-fit</code> colapsa colunas vazias; <code>auto-fill</code> mantém.</li>
+<li>Grid decide o esqueleto; flex decide o conteúdo de cada célula. Os dois convivem.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

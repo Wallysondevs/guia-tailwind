@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alinhamento no Flex | Guia Tailwind</title>
+<meta name="description" content="Como alinhar os itens de um flex no Tailwind: justify-content no eixo principal, align-items no eixo transversal, self para um item só e content nas linhas quebradas.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Alinhamento no <span class="hl">Flex</span></h1>
+<p class="intro">A Ana já conseguiu colocar os três pães da vitrine em uma linha só — isso ficou pronto na
+aula de Flexbox. O problema agora é outro: os três ficam amontoados no canto esquerdo, com alturas
+diferentes, e o preço do bolo aparece longe do nome do bolo. Ela quer decidir onde a linha fica e como
+cada item se acomoda dentro dela. Nesta aula ela conhece as duas famílias de classes que fazem esse
+trabalho: <code>justify-*</code>, que mexe no eixo em que a fila anda, e <code>items-*</code>, que mexe
+no eixo atravessado. E descobre o motivo número um de "não funcionou": o pai sem altura.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que são o eixo principal e o eixo transversal do flex.</li>
+  <li><code>justify-start</code>, <code>justify-center</code>, <code>justify-end</code>,
+  <code>justify-between</code>, <code>justify-around</code> e <code>justify-evenly</code>.</li>
+  <li><code>items-start</code>, <code>items-center</code>, <code>items-end</code>,
+  <code>items-baseline</code> e <code>items-stretch</code>.</li>
+  <li>Como usar <code>self-*</code> quando um item sozinho precisa discordar do grupo.</li>
+  <li>O papel de <code>content-*</code> quando a fila quebra em várias linhas.</li>
+  <li>Por que <code>items-center</code> não faz nada em um pai sem altura.</li>
+  <li>Como ler o painel do CSS computado para descobrir qual família resolve o seu caso.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a vitrine com os preços tortos</h2>
+
+<p>A Ana tem uma página com a vitrine do dia. Ela escreveu uma linha só com os três produtos e
+deixou o navegador arrumar. Ficou assim:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="flex bg-amber-100"&gt;
+  &lt;div class="h-8"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="h-16"&gt;Bolo de fubá&lt;/div&gt;
+  &lt;div class="h-12"&gt;Café&lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<p>O <code>flex</code> fez o combinado: colocou os três lado a lado, em fila, e cada um ficou do
+tamanho do seu texto. Só que o resultado na tela é feio por três motivos diferentes, e é importante
+separá-los, porque cada um tem uma solução própria.</p>
+
+<ul>
+<li><strong>Os três estão encostados na esquerda.</strong> Sobra espaço à direita e ninguém usa.</li>
+<li><strong>Cada um tem uma altura.</strong> O pão de queijo tem 32 px, o bolo tem 64 px, o café tem
+48 px — e todos começam do topo, então as bases ficam desencontradas.</li>
+<li><strong>Os textos parecem soltos.</strong> Sem respiro, o olho não sabe onde um produto termina e
+o outro começa.</li>
+</ul>
+
+<p>O terceiro problema é de espaçamento, e a aula de <a href="p-e-m.html">Padding e Margin</a> já
+resolve. Os dois primeiros são de alinhamento, e é aqui que a Ana trava. Ela tenta
+<code>text-center</code> no pai, imaginando que "centralizar" seja uma coisa só. O texto de dentro
+centraliza, mas os blocos continuam à esquerda — porque <code>text-center</code> mexe nas linhas de
+texto, não nas caixas. É o primeiro desencontro desta aula, e não será o último.</p>
+
+<h2>2. Os dois eixos do flex</h2>
+
+<p>Antes de qualquer classe, é preciso fixar uma ideia que resolve metade das dúvidas. Quando um
+elemento tem <code>flex</code>, o navegador escolhe uma <strong>direção</strong> para enfileirar os
+filhos. Essa direção é uma linha imaginária chamada <em>eixo principal</em>. Tudo que estiver
+<em>nessa</em> direção é controlado por <code>justify-*</code>. O que atravessa essa linha, de
+travessia, é o <em>eixo transversal</em>, controlado por <code>items-*</code>.</p>
+
+<p>Acontece que a direção padrão do flex é a horizontal, e é por isso que quase todo mundo aprende
+"justify é o horizontal, items é o vertical". Isso é meia verdade: é verdade enquanto o pai não
+declarar outra direção. No momento em que a Ana escreve <code>flex-col</code>, a fila passa a andar
+de cima para baixo, e os papéis trocam — <code>justify-between</code> empurra um item para o topo e
+outro para o pé, e <code>items-center</code> centraliza na horizontal. As classes não mudaram de
+significado; o eixo é que girou.</p>
+
+<dl class="anatomy">
+<dt>eixo principal</dt>
+<dd>A direção em que os itens são enfileirados. Na horizontal com <code>flex</code>, na vertical com
+<code>flex-col</code>.</dd>
+<dt>eixo transversal</dt>
+<dd>A travessia do eixo principal. É onde <code>items-*</code> e <code>self-*</code> agem.</dd>
+<dt>justify-content</dt>
+<dd>Distribui os itens ao longo do eixo principal. No Tailwind, o prefixo é <code>justify-</code>.</dd>
+<dt>align-items</dt>
+<dd>Alinha os itens no eixo transversal, todos de uma vez. No Tailwind, <code>items-</code>.</dd>
+<dt>align-self</dt>
+<dd>A mesma coisa, mas para um item só. No Tailwind, <code>self-</code>.</dd>
+<dt>align-content</dt>
+<dd>Distribui as <em>linhas</em> quando a fila quebra. No Tailwind, <code>content-</code>.</dd>
+</dl>
+
+<p>Guarde a imagem: o flex é uma prateleira. <code>justify-*</code> decide onde os potes ficam ao
+longo da prateleira; <code>items-*</code> decide se eles encostam na parede do fundo, no meio ou na
+beirada da frente. Duas perguntas separadas, duas famílias de classes separadas. Quando você não
+souber qual usar, pergunte: "estou movendo ao longo da fila ou atravessando a fila?".</p>
+
+<h2>3. justify-* no eixo principal</h2>
+
+<p>Vamos ao primeiro problema da Ana: os três produtos colados na esquerda, com espaço sobrando. O
+valor padrão do <code>justify-content</code> é <code>flex-start</code> — tudo no começo da fila. Para
+mudar, existe um valor para cada jeito de distribuir a sobra. A tabela da seção 5 resume todos, mas
+vale entender os três que mais aparecem.</p>
+
+<p><code>justify-center</code> junta tudo no meio e deixa metade da sobra de cada lado.
+<code>justify-end</code> empurra tudo para o fim. E <code>justify-between</code> faz uma coisa
+esperta: cola o primeiro item no começo, o último no fim, e divide o resto igualmente entre os
+espaços do meio. Com três itens de 100 px numa linha de 600 px, sobram 300 px: com
+<code>between</code> vira um vão de 150 px entre o primeiro e o segundo e outro de 150 px entre o
+segundo e o terceiro. Nenhuma sobra nas pontas.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|justify-content=space-between">
+  <p class="try-task">A Ana quer o nome do pão na esquerda e o preço na direita, com o vão no meio.
+  Troque <code>justify-center</code> pela classe que cola as pontas e divide o resto.</p>
+  <pre class="html">&lt;div id="alvo" class="flex justify-center bg-amber-100 p-2"&gt;
+  &lt;span&gt;Pão de queijo&lt;/span&gt;
+  &lt;span&gt;R$ 12&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+padding: 8px
+justify-content: center
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex justify-between bg-amber-100 p-2"&gt;
+  &lt;span&gt;Pão de queijo&lt;/span&gt;
+  &lt;span&gt;R$ 12&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Rode as duas versões e compare a linha <code>justify-content</code> no painel. Ela aparece como
+<code>center</code> antes e <code>space-between</code> depois. Esse nome em inglês é o valor do CSS
+puro; a classe do Tailwind é só um apelido mais curto. E é exatamente isso que o Tailwind gera:</p>
+
+<pre class="term">.justify-between {
+  justify-content: space-between;
+}
+.justify-center {
+  justify-content: center;
+}</pre>
+
+<p>Duas regras curtas, cada uma apontando para um valor do CSS. Repare que não há nada de mágico: se
+você já viu <code>justify-content: space-between</code> em algum tutorial de CSS, é a mesma coisa. A
+vantagem da classe é que ela mora no HTML, junto do conteúdo, e aceita prefixos — o
+<code>md:justify-center</code> que muda só em tela grande, por exemplo.</p>
+
+<p>Um detalhe que economiza tempo: se a sobra for zero, todos os valores desenham igual. Isso
+acontece quando os itens somados já ocupam a largura toda. A Ana vai passar por isso na seção 8: ela
+aplica <code>justify-between</code> em uma linha lotada e jura que a classe não funciona. Não é a
+classe, é a falta de espaço para distribuir.</p>
+
+<h2>4. items-* no eixo transversal</h2>
+
+<p>Segundo problema: as alturas desencontradas. Aqui entra o eixo transversal. O valor padrão do
+<code>align-items</code> no flex é <code>stretch</code>, o "esticar": todos os itens crescem até a
+altura do pai. Quando o pai não tem altura definida, ele tem a altura do filho mais alto, e o
+resultado é que todos ficam iguais — por isso a maioria dos layouts parece alinhada por acidente.</p>
+
+<p>Na vitrine da Ana, cada produto tem uma altura própria (<code>h-8</code>, <code>h-16</code>,
+<code>h-12</code>), então o <code>stretch</code> não tem o que esticar e todos sobem para o topo. Para
+escolher o encontro, existem <code>items-start</code> (topo), <code>items-center</code> (meio),
+<code>items-end</code> (base) e <code>items-baseline</code>, que alinha pela linha de base do texto —
+útil quando os tamanhos de fonte são diferentes e você quer que as letras sentem na mesma linha.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|align-items=center">
+  <p class="try-task">O cartão grande tem 96 px de altura e os dois produtos estão grudados no topo.
+  Troque <code>items-start</code> por <code>items-center</code> e veja as caixas se encontrarem no meio.</p>
+  <pre class="html">&lt;div id="alvo" class="flex h-24 items-start gap-2 bg-amber-50 p-2"&gt;
+  &lt;div class="h-8 bg-amber-200 p-2"&gt;Pão&lt;/div&gt;
+  &lt;div class="h-16 bg-amber-300 p-2"&gt;Bolo&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+padding: 8px
+gap: 8px
+align-items: flex-start
+background-color: oklch(0.987 0.022 95.277)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex h-24 items-center gap-2 bg-amber-50 p-2"&gt;
+  &lt;div class="h-8 bg-amber-200 p-2"&gt;Pão&lt;/div&gt;
+  &lt;div class="h-16 bg-amber-300 p-2"&gt;Bolo&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>align-items: center</code> depois de rodar. Antes mostrava
+<code>flex-start</code>, que é o nome do CSS para "encostado no começo". Note que o
+<code>gap-2</code> já está no HTML de partida: espaçamento e alinhamento são coisas diferentes e
+convivem bem. O gap cuida do vão entre as caixas; o <code>items-*</code> cuida de onde elas param na
+vertical.</p>
+
+<p>Agora o detalhe que mais causa confusão no começo: <strong><code>items-center</code> precisa de
+altura para centralizar</strong>. Se o pai tiver exatamente a altura do filho mais alto, o centro do
+pai coincide com o centro do filho e nada parece acontecer. Por isso a caixa desta aula já nasce com
+<code>h-24</code>. Sem uma altura declarada, o flex não tem espaço livre na vertical — e alinhar o
+que não sobra é impossível.</p>
+
+<h2>5. A tabela dos valores</h2>
+
+<p>Esta tabela serve de consulta rápida. A primeira coluna é a classe, a segunda é o que o navegador
+faz, e a terceira é a situação em que ela costuma resolver.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que faz</th><th>Quando usar</th></tr>
+<tr><td><code>justify-start</code></td><td>tudo no começo do eixo principal (padrão)</td><td>menu à esquerda, lista de itens</td></tr>
+<tr><td><code>justify-center</code></td><td>tudo no meio, sobra igual dos dois lados</td><td>botões centralizados, capa</td></tr>
+<tr><td><code>justify-end</code></td><td>tudo no fim do eixo</td><td>preço ou ação alinhados à direita</td></tr>
+<tr><td><code>justify-between</code></td><td>pontas coladas, sobra só no meio</td><td>nome à esquerda, preço à direita</td></tr>
+<tr><td><code>justify-around</code></td><td>cada item ganha metade do vão de cada lado</td><td>fileira de ícones com ar em volta</td></tr>
+<tr><td><code>justify-evenly</code></td><td>todos os vãos iguais, inclusive nas pontas</td><td>abas, atalhos, navegação</td></tr>
+<tr><td><code>items-start</code></td><td>encosta no começo do eixo transversal</td><td>colunas de texto que começam juntas no topo</td></tr>
+<tr><td><code>items-center</code></td><td>centraliza na travessia</td><td>ícone ao lado do texto, botão em barra alta</td></tr>
+<tr><td><code>items-end</code></td><td>encosta no fim do eixo transversal</td><td>preços que devem bater na base</td></tr>
+<tr><td><code>items-baseline</code></td><td>alinha pela base das letras</td><td>títulos de tamanhos diferentes na mesma linha</td></tr>
+<tr><td><code>items-stretch</code></td><td>estica até a altura do pai (padrão)</td><td>colunas de mesma altura num cartão</td></tr>
+</table>
+</div>
+
+<p>Não decore a tabela. Decore a pergunta: <em>ao longo da fila</em> ou <em>atravessando a fila</em>?
+Se você errou a família, o sintoma é claro — a classe existe, o CSS aparece no painel, mas o item se
+move para o lado errado. Trocar de família é mais rápido do que ficar ajustando valor.</p>
+
+<h2>6. self-*: quando um item discorda</h2>
+
+<p>Na padaria da Ana há sempre um item que quer ser diferente. A etiqueta "novo" na fileira de
+produtos, por exemplo: todos os cartões estão centralizados na vertical, mas a etiqueta precisa
+grudar no pé do cartão, para ficar sempre na mesma altura. Se ela usar <code>items-end</code> no pai,
+todos os cartões descem; se não usar nada, a etiqueta sobe junto com o resto.</p>
+
+<p>A solução é <code>self-*</code> no filho. Ele vence o <code>items-*</code> do pai só para aquele
+elemento. Os valores são os mesmos: <code>self-start</code>, <code>self-center</code>,
+<code>self-end</code>, <code>self-stretch</code> e <code>self-baseline</code>.</p>
+
+<pre class="term">.self-end {
+  align-self: flex-end;
+}
+.self-center {
+  align-self: center;
+}</pre>
+
+<p>Repare no nome do CSS: <code>align-self</code>. É o <code>align-items</code> aplicado a si mesmo
+(<em>self</em>, "a si próprio"). O Tailwind encurtou para <code>self-</code> porque o prefixo já
+bastava para distinguir. E vale a mesma regra do eixo: se o pai virar <code>flex-col</code>, o
+<code>self-end</code> passa a empurrar o item para a direita.</p>
+
+<p>Uma armadilha comum: <code>self-*</code> só funciona em filho de flex ou de grid. Se o pai for um
+<code>div</code> comum, sem <code>flex</code> e sem <code>grid</code>, a classe gera CSS e não muda
+nada — o navegador ignora o alinhamento porque não há fila nenhuma. O painel até mostra a
+propriedade, mas o desenho não muda. É a mesma história de sempre: a classe certa no elemento errado
+não faz nada.</p>
+
+<h2>7. content-*: as linhas quebradas</h2>
+
+<p>Falta uma terceira peça, e ela só importa quando a fila quebra. Se o pai tem
+<code>flex-wrap</code> e os itens não cabem em uma linha, o navegador monta várias linhas. Aí você
+passa a ter três níveis: itens, linhas e o espaço entre elas. O <code>items-*</code> alinha os itens
+<em>dentro da linha</em>. O <code>content-*</code> distribui <em>as linhas</em> dentro do pai.</p>
+
+<p>Imagine a Ana com seis etiquetas de sabores numa caixa de 200 px de altura e três linhas de
+etiquetas. Com <code>content-start</code>, as três linhas se empilham no topo e sobra um vão grande
+embaixo. Com <code>content-between</code>, a primeira linha cola no topo, a última no pé, e o vão
+aparece no meio. Os valores são os mesmos do <code>justify-</code>:
+<code>content-start</code>, <code>content-center</code>, <code>content-end</code>,
+<code>content-between</code>, <code>content-around</code>, <code>content-evenly</code> e
+<code>content-stretch</code>.</p>
+
+<p>Na maioria dos layouts do dia a dia você não mexe nisso, e o motivo é simples: se não há sobra
+vertical, <code>content-*</code> não tem o que distribuir. Ele vira assunto no dia em que a Ana
+monta uma parede de produtos com altura fixa e quer o respiro entre as fileiras. Aí a resposta
+costuma ser mais <code>gap-y</code> do que <code>content-*</code> — e essa comparação está na aula
+<a href="gap.html">O gap</a>.</p>
+
+<h2>8. Erros que travam o alinhamento</h2>
+
+<p>Estes são os quatro tropeços que aparecem toda semana no começo. Vale reconhecer o sintoma antes
+de sair trocando classe.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sintoma</th><th>Causa provável</th><th>O que fazer</th></tr>
+<tr><td>"Centralizei e nada mudou"</td><td>o pai não tem altura, então não há sobra vertical</td><td>dê <code>h-*</code> ou <code>min-h-*</code> ao pai</td></tr>
+<tr><td>"A classe aparece no painel e nada se move"</td><td>o pai não é flex</td><td>acrescente <code>flex</code> no pai</td></tr>
+<tr><td>"O texto continua à esquerda"</td><td><code>text-center</code> alinha letras, não caixas</td><td>use <code>justify-center</code> no pai flex</td></tr>
+<tr><td>"Só esse item está torto"</td><td>o grupo está certo e um filho precisa discordar</td><td>use <code>self-*</code> nesse filho</td></tr>
+</table>
+</div>
+
+<p>O caso mais completo é o cabeçalho do site. A Ana quer a marca na esquerda, o menu no meio e o
+botão de pedido na direita, tudo centrado na vertical. São as duas famílias trabalhando juntas — e é
+aí que se vê por que elas têm nomes diferentes:</p>
+
+<div class="trytailwind" data-goal="css:#alvo|align-items=center;;css:#alvo|justify-content=space-between">
+  <p class="try-task">O cabeçalho está com a marca e o botão colados no pé da barra, e o menu
+  amontoado no meio. Deixe os três centralizados na vertical e distribuídos nas pontas.</p>
+  <pre class="html">&lt;div id="alvo" class="flex h-16 items-end justify-center gap-4 bg-amber-100 px-4"&gt;
+  &lt;span class="font-bold"&gt;Padaria da Ana&lt;/span&gt;
+  &lt;span&gt;Pães · Bolos · Café&lt;/span&gt;
+  &lt;span class="rounded bg-amber-900 px-3 py-1 text-amber-50"&gt;Pedir&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+height: 64px
+gap: 16px
+justify-content: center
+align-items: flex-end
+background-color: oklch(0.962 0.059 95.617)
+padding-inline: 16px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex h-16 items-center justify-between gap-4 bg-amber-100 px-4"&gt;
+  &lt;span class="font-bold"&gt;Padaria da Ana&lt;/span&gt;
+  &lt;span&gt;Pães · Bolos · Café&lt;/span&gt;
+  &lt;span class="rounded bg-amber-900 px-3 py-1 text-amber-50"&gt;Pedir&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra as duas linhas: <code>align-items: center</code> e
+<code>justify-content: space-between</code>. São duas decisões independentes no mesmo elemento, cada
+uma com a sua classe. É assim que se lê um layout: uma propriedade por vez, na ordem dos eixos.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o botão de comprar que precisa ficar no pé do cartão</h3>
+<p>A Ana montou um cartão com foto, nome, descrição e o botão de comprar. Como as descrições têm
+tamanhos diferentes, cada botão fica numa altura. Ela quer todos os botões na mesma linha, no rodapé
+do cartão. A saída é mudar de eixo: <code>flex flex-col h-full justify-between</code> no cartão. Em
+coluna, o eixo principal é o vertical, então <code>justify-between</code> passa a empurrar o primeiro
+bloco para o topo e o último para o pé. E <code>h-full</code> é obrigatório, senão o cartão tem a
+altura do conteúdo e não existe sobra para distribuir. É o mesmo raciocínio da seção 4, só que
+girado.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o between que virou buraco no celular</h3>
+<p>No monitor, <code>justify-between</code> ficou elegante entre a marca e o botão. No celular, os
+dois elementos ficaram a 3 px um do outro, praticamente encostados, porque a tela é estreita e não
+sobra espaço. O erro não é do <code>between</code> — ele fez o que prometeu. O que faltou foi o
+prefixo de breakpoint: <code>justify-start md:justify-between</code>. Em tela pequena, tudo à
+esquerda, sem vão artificial; a partir de 768 px, as pontas se separam. Alinhamento é uma decisão por
+tamanho de tela, igual ao espaçamento.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a imagem que esticou e ficou disforme</h3>
+<p>A Ana colocou uma foto pequena ao lado de um texto longo, dentro de um flex. A foto esticou até a
+altura do texto e virou um retângulo borrado. A causa é o <code>stretch</code> padrão do
+<code>align-items</code>, agindo na imagem. Duas correções possíveis: <code>items-center</code> no
+pai, se todas as peças da linha devem se centralizar, ou <code>self-center</code> só na imagem, se o
+resto deve continuar esticando. Um terceiro caminho é <code>items-start</code> com
+<code>object-cover</code> na imagem — mas aí já é assunto de imagem, não de alinhamento.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. Qual família de classes distribui os itens ao longo
+do eixo principal?</p>
+<label><input type="radio" name="q1"> <code>justify-*</code>, como <code>justify-between</code></label>
+<label><input type="radio" name="q1"> <code>items-*</code>, como <code>items-center</code></label>
+<label><input type="radio" name="q1"> <code>self-*</code>, como <code>self-end</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. A Ana aplicou <code>items-center</code> no pai e
+nada mudou. Qual é a explicação mais provável?</p>
+<label><input type="radio" name="q2"> a classe está escrita errado, o correto é <code>align-center</code></label>
+<label><input type="radio" name="q2"> <code>items-center</code> só funciona em grid</label>
+<label><input type="radio" name="q2"> o pai não tem altura, então não há sobra vertical para centralizar</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Você quer o nome do produto na esquerda e o preço
+na direita, sem espaço sobrando nas pontas. Qual valor resolve?</p>
+<label><input type="radio" name="q3"> <code>justify-around</code></label>
+<label><input type="radio" name="q3"> <code>justify-between</code></label>
+<label><input type="radio" name="q3"> <code>justify-evenly</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o cabeçalho da padaria</h2>
+<p>Complete o cabeçalho para que os três itens fiquem centralizados na vertical, dentro da barra de
+64 px. Depois responda: qual é a classe do eixo transversal?</p>
+<div class="ex-code">&lt;div class="flex h-16 <input aria-label="resposta 1" data-answer="items-center" placeholder="..."> justify-between bg-amber-100 px-4"&gt;</div>
+<p class="ex-dica">Dica: é a família que atravessa a fila. O <code>justify-between</code> já está lá e
+cuida do outro eixo — não mexa nele.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Todo flex tem dois eixos. O principal é aquele em que os itens são enfileirados, e quem distribui
+ao longo dele é <code>justify-*</code>: <code>start</code>, <code>center</code>, <code>end</code>,
+<code>between</code>, <code>around</code> e <code>evenly</code>. O transversal é a travessia, e quem
+cuida dele é <code>items-*</code>: <code>start</code>, <code>center</code>, <code>end</code>,
+<code>baseline</code> e <code>stretch</code>. Quando você muda a direção do pai para
+<code>flex-col</code>, os papéis trocam de lugar: as classes continuam as mesmas, o eixo é que girou.</p>
+
+<p>Para um item sozinho discordar do grupo, use <code>self-*</code> nele. Para distribuir as linhas
+quando a fila quebra com <code>flex-wrap</code>, use <code>content-*</code> no pai. E lembre-se do
+motivo mais comum de "não funcionou": sem altura no pai, não existe sobra vertical, e sem sobra não
+há o que centralizar. O painel do CSS computado diz o valor real — se ele mostra
+<code>align-items: center</code> e nada mudou na tela, o problema não está na classe.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>justify-*</code> age no eixo principal; <code>items-*</code> no eixo transversal.</li>
+<li>Com <code>flex-col</code>, os dois eixos trocam de lugar.</li>
+<li><code>between</code> cola as pontas; <code>around</code> dá metade do vão de cada lado;
+<code>evenly</code> iguala todos os vãos.</li>
+<li><code>items-stretch</code> é o padrão — é por isso que muitos layouts parecem alinhados sozinhos.</li>
+<li><code>items-center</code> precisa de altura no pai para ter efeito.</li>
+<li><code>self-*</code> vence o <code>items-*</code> do pai para um único filho.</li>
+<li><code>content-*</code> distribui linhas, não itens; só aparece com <code>flex-wrap</code>.</li>
+<li><code>text-center</code> centraliza letras; <code>justify-center</code> centraliza caixas.</li>
+<li>Sem <code>flex</code> no pai, qualquer classe de alinhamento gera CSS e não muda nada.</li>
+<li>Valores do CSS: <code>flex-start</code>, <code>center</code>, <code>flex-end</code>,
+<code>space-between</code>, <code>space-around</code>, <code>space-evenly</code>, <code>baseline</code>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

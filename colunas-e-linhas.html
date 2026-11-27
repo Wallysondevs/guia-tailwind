@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colunas e Linhas | Guia Tailwind</title>
+<meta name="description" content="Como fazer um item ocupar mais de uma célula no grid do Tailwind: col-span e row-span para atravessar faixas, col-start e col-end para escolher a linha de partida.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Colunas e <span class="hl">Linhas</span></h1>
+<p class="intro">A vitrine da Ana já está em grade: quatro colunas iguais, seis pães encaixados. Mas o
+pão do dia, que é a estrela da padaria, ocupa o mesmo espaço dos outros. Ela quer que ele ocupe duas
+colunas, e que a torta ao lado ocupe duas linhas, formando um bloco de destaque no meio da grade. É
+aqui que o grid mostra o que o flex não faz: um item atravessar várias células. Nesta aula a Ana
+aprende <code>col-span</code> e <code>row-span</code> para atravessar, e <code>col-start</code> e
+<code>col-end</code> para escolher exatamente onde o item começa.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Como a grade conta as faixas e as linhas numeradas.</li>
+  <li><code>col-span-2</code> e <code>row-span-2</code>: atravessar duas células.</li>
+  <li><code>col-start-*</code> e <code>col-end-*</code>: escolher a linha de partida e de chegada.</li>
+  <li><code>row-start-*</code> e <code>row-end-*</code> para a vertical.</li>
+  <li><code>col-span-full</code> e <code>row-span-full</code>: ocupar a grade inteira.</li>
+  <li>Por que a grade deixa buracos quando um item é grande, e o que o <code>dense</code> faz.</li>
+  <li>Como tratar o destaque no celular, onde quatro colunas não cabem.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o pão do dia escondido na grade</h2>
+
+<p>A grade da Ana tem quatro colunas e seis cartões. Funciona, mas é monótona: todos do mesmo tamanho,
+e o pão do dia — o que ela quer vender primeiro — tem o mesmo peso visual dos outros. Ela decide que o
+destaque vai ocupar duas colunas, e que a torta de domingo vai ocupar duas linhas, encaixando embaixo
+dele.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="grid grid-cols-4 gap-2"&gt;
+  &lt;div&gt;Pão do dia&lt;/div&gt;
+  &lt;div&gt;Pão francês&lt;/div&gt;
+  &lt;div&gt;Pão de queijo&lt;/div&gt;
+  &lt;div&gt;Croissant&lt;/div&gt;
+  &lt;div&gt;Torta de domingo&lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<p>O caminho mais óbvio — dar <code>w-2/4</code> ao cartão — não funciona. Numa grade, a largura do
+filho não manda em nada: quem decide o tamanho é a célula. Se você der 50% de largura a um item que
+está numa célula de 25%, ele transborda por cima do vizinho. Para ocupar mais espaço, o item precisa
+pedir mais <em>células</em>, e é isso que as classes desta aula fazem.</p>
+
+<h2>2. Faixas, linhas e células</h2>
+
+<p>Antes das classes, vale firmar o vocabulário, porque os nomes em inglês fazem sentido depois que a
+gente entende o desenho. Uma grade de quatro colunas tem quatro faixas verticais e cinco linhas
+verticais — as linhas são as <em>bordas</em> entre as faixas, e por isso há sempre uma a mais. O item
+que ocupa a coluna 1 começa na linha 1 e termina na linha 2.</p>
+
+<dl class="anatomy">
+<dt>faixa</dt>
+<dd>Uma coluna ou uma linha da grade. É o espaço onde o conteúdo cai.</dd>
+<dt>linha de grade</dt>
+<dd>A borda entre duas faixas. Numa grade de 4 colunas existem 5 linhas verticais, numeradas de 1 a 5.</dd>
+<dt>span</dt>
+<dd>"Atravessar". <code>col-span-2</code> quer dizer atravessar duas colunas a partir de onde o item caiu.</dd>
+<dt>start / end</dt>
+<dd>A linha onde o item começa e a linha onde ele termina. <code>col-start-2</code> começa na linha 2, ou seja, na segunda coluna.</dd>
+<dt>célula</dt>
+<dd>O cruzamento de uma coluna com uma linha. Um item com span ocupa várias células de uma vez.</dd>
+</dl>
+
+<p>Repare que o span não diz <em>onde</em> o item fica — diz só <em>quanto</em> ele ocupa. O lugar
+continua sendo decidido pelo preenchimento automático, que coloca cada item na primeira célula livre.
+Se você precisa de um lugar específico, aí entram as classes de <code>start</code> e
+<code>end</code>, que você vê na seção 5.</p>
+
+<h2>3. col-span-2: atravessar colunas</h2>
+
+<p>A classe se escreve no <strong>filho</strong>, não no pai, e o número é quantas colunas o item
+ocupa. <code>col-span-2</code> ocupa duas, <code>col-span-3</code> ocupa três, e a régua vai até 12,
+acompanhando a régua de colunas. O valor do CSS gerado é curioso: <code>span 2 / span 2</code>,
+repetido. É assim porque a propriedade <code>grid-column</code> aceita início e fim, e o Tailwind
+escreve o span nos dois lados para não depender de onde o item começa.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|grid-column=span 2 / span 2">
+  <p class="try-task">O cartão "Pão do dia" está ocupando uma coluna só, como os outros. Faça ele
+  atravessar duas colunas da grade.</p>
+  <pre class="html">&lt;div class="grid grid-cols-4 gap-2 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;div id="alvo" class="col-span-1 rounded bg-amber-300 p-2"&gt;Pão do dia&lt;/div&gt;
+  &lt;div class="rounded bg-amber-100 p-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="rounded bg-amber-100 p-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="rounded bg-amber-100 p-2"&gt;Croissant&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: oklch(0.879 0.169 91.605)
+border-radius: 4px
+grid-column: span 1 / span 1
+</pre>
+  <pre class="solucao">&lt;div class="grid grid-cols-4 gap-2 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;div id="alvo" class="col-span-2 rounded bg-amber-300 p-2"&gt;Pão do dia&lt;/div&gt;
+  &lt;div class="rounded bg-amber-100 p-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="rounded bg-amber-100 p-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="rounded bg-amber-100 p-2"&gt;Croissant&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>grid-column: span 2 / span 2</code> e a prévia mostra o
+destaque com o dobro da largura, empurrando os vizinhos para a direita. Note que o quarto cartão
+(Croissant) não sobe para a linha do destaque: ele não cabe mais ali, porque o destaque comeu duas
+células. O grid não espreme ninguém — ele reorganiza.</p>
+
+<p>O CSS gerado é:</p>
+
+<pre class="term">.col-span-2 {
+  grid-column: span 2 / span 2;
+}
+.col-span-full {
+  grid-column: 1 / -1;
+}</pre>
+
+<p>A segunda regra é o atalho para "a linha inteira", que a gente vê na seção 7. E repare que não há
+nada de mágica: a propriedade <code>grid-column</code> é uma só, e o valor <code>span 2 / span 2</code>
+significa "comece onde estiver e termine duas faixas depois". Se você abrir o DevTools numa página
+com essa classe, vai ver exatamente essa linha.</p>
+
+<p>O que acontece se o span for maior que a grade? Numa grade de quatro colunas, um
+<code>col-span-6</code> não dá erro nem aviso: o navegador cria duas colunas a mais, com largura zero,
+só para acomodar o item. O efeito visual é o esperado — ele ocupa a largura toda —, mas a grade passa
+a ter seis colunas, e o preenchimento dos itens seguintes muda de um jeito difícil de prever. É um dos
+tropeços mais confusos do grid: nada quebra, nada avisa, e de repente um cartão aparece no lugar
+errado. Quando o item precisa da linha inteira, o caminho seguro é <code>col-span-full</code>, que
+escreve <code>1 / -1</code> e nunca cria coluna nova.</p>
+
+<p>Vale também saber que o span respeita o número de colunas do pai, e não da tela. Se no celular a
+grade virar <code>grid-cols-2</code>, o mesmo <code>col-span-2</code> passa a ocupar a linha inteira.
+É por isso que o span é uma decisão relativa: ele diz "duas células", não "duas células no monitor".
+Você vai ver na seção 9 como escolher spans diferentes por breakpoint.</p>
+
+<h2>4. row-span-2: atravessar linhas</h2>
+
+<p>O mesmo raciocínio vale na vertical. <code>row-span-2</code> faz o item atravessar duas linhas e
+escreve <code>grid-row: span 2 / span 2</code>. A diferença é que a altura das linhas raramente é
+declarada: por padrão, cada linha tem a altura do conteúdo mais alto, e um item com
+<code>row-span-2</code> estica essa altura para caber. O efeito é sutil e às vezes decepcionante — por
+isso, quando o assunto é altura, vale declarar as linhas.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|grid-row=span 2 / span 2">
+  <p class="try-task">A torta está ocupando uma célula só. Faça ela atravessar as duas linhas da
+  grade, criando o bloco alto ao lado dos pães.</p>
+  <pre class="html">&lt;div class="grid h-40 grid-cols-3 grid-rows-2 gap-2 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;div id="alvo" class="row-span-1 rounded bg-amber-300 p-2"&gt;Torta de domingo&lt;/div&gt;
+  &lt;div class="rounded bg-amber-100 p-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="rounded bg-amber-100 p-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="rounded bg-amber-100 p-2"&gt;Croissant&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: oklch(0.879 0.169 91.605)
+border-radius: 4px
+grid-row: span 1 / span 1
+</pre>
+  <pre class="solucao">&lt;div class="grid h-40 grid-cols-3 grid-rows-2 gap-2 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;div id="alvo" class="row-span-2 rounded bg-amber-300 p-2"&gt;Torta de domingo&lt;/div&gt;
+  &lt;div class="rounded bg-amber-100 p-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="rounded bg-amber-100 p-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="rounded bg-amber-100 p-2"&gt;Croissant&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Três detalhes fazem essa caixa funcionar, e sem eles a missão parece impossível. O primeiro é
+<code>grid-rows-2</code>, que declara duas linhas. O segundo é <code>h-40</code>, sem o qual as duas
+linhas teriam a altura do conteúdo e o span não teria o que atravessar. O terceiro é o
+<code>row-span-1</code> no ponto de partida: ele existe só para a missão ter um culpado visível, e
+você pode tirá-lo sem prejuízo.</p>
+
+<p>Na vida real, o mais comum é ver <code>row-span-2</code> junto com <code>auto-rows-*</code>:
+<code>grid auto-rows-[120px] row-span-2</code> cria uma grade de células de altura fixa em que um
+cartão vale duas células. É assim que se monta o painel de notícias com a matéria principal ocupando
+o dobro da altura.</p>
+
+<h2>5. col-start e col-end: escolher a linha</h2>
+
+<p>Span diz quanto. Para dizer <em>onde</em>, existem as quatro classes de linha:
+<code>col-start-N</code>, <code>col-end-N</code>, <code>row-start-N</code> e
+<code>row-end-N</code>. O número é a linha de grade, contando de 1. Numa grade de quatro colunas,
+<code>col-start-2</code> põe o item na segunda coluna, <code>col-start-4</code> na quarta, e
+<code>col-end-5</code> termina na linha 5, que é a borda direita.</p>
+
+<p>Combinar start com span é o jeito mais legível de posicionar. <code>col-start-2 col-span-2</code>
+significa "comece na segunda coluna e ocupe duas". O navegador funde as duas informações numa
+propriedade só, e o painel mostra <code>grid-column: 2 / span 2</code> — o mesmo que dizer "da linha 2
+até a linha 4".</p>
+
+<div class="trytailwind" data-goal="css:#alvo|grid-column=2 / span 2">
+  <p class="try-task">O destaque ocupa duas colunas, mas está preso à esquerda e desceu para a linha
+  de baixo. Faça ele começar na segunda coluna, mantendo as duas colunas de largura.</p>
+  <pre class="html">&lt;div class="grid grid-cols-4 gap-2 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;div class="rounded bg-amber-100 p-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div id="alvo" class="col-start-1 col-span-2 rounded bg-amber-300 p-2"&gt;Pão do dia&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: oklch(0.879 0.169 91.605)
+border-radius: 4px
+grid-column: 1 / span 2
+grid-column-start: 1
+</pre>
+  <pre class="solucao">&lt;div class="grid grid-cols-4 gap-2 rounded-lg bg-amber-50 p-2"&gt;
+  &lt;div class="rounded bg-amber-100 p-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div id="alvo" class="col-start-2 col-span-2 rounded bg-amber-300 p-2"&gt;Pão do dia&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Rode as duas versões com atenção. No início, com <code>col-start-1</code>, o destaque quer a
+coluna 1 — mas ela já está ocupada pelo "Pão francês", e o navegador desce o destaque para a linha de
+baixo. Ao trocar para <code>col-start-2</code>, ele sobe para o lado do primeiro cartão. É a diferença
+entre posicionar por vontade e posicionar por acidente: sem start, quem decide onde o item cai é a
+ordem do HTML e o que já está ocupado.</p>
+
+<pre class="term">.col-start-2 {
+  grid-column-start: 2;
+}
+.row-span-2 {
+  grid-row: span 2 / span 2;
+}
+.col-end-4 {
+  grid-column-end: 4;
+}</pre>
+
+<p>As três regras mostram a anatomia: <code>grid-column-start</code>, <code>grid-row</code> e
+<code>grid-column-end</code>. São propriedades diferentes, e por isso você pode combiná-las sem medo.
+Uma última sutileza: quando <code>col-start</code> e <code>col-end</code> aparecem juntos, o span é
+ignorado — o fim manda. Se você escrever <code>col-start-2 col-end-4</code>, o item vai da linha 2 à 4,
+que é o mesmo que <code>col-start-2 col-span-2</code>. Duas formas de dizer a mesma coisa; escolha a
+que você lê mais fácil.</p>
+
+<h2>6. row-start, row-end e os valores negativos</h2>
+
+<p>Na vertical a lógica é idêntica: <code>row-start-2</code> começa na segunda linha,
+<code>row-end-3</code> termina na terceira. O número é a linha de grade, não a célula — e essa
+confusão de um é a origem de metade dos posicionamentos errados. Se você quer o item na segunda
+linha, use <code>row-start-2</code>; se usar <code>row-start-1</code>, ele fica na primeira.</p>
+
+<p>Existe também o caminho negativo, que conta a partir do fim da grade:
+<code>-col-start-1</code> começa na última linha, e <code>-col-end-1</code> termina nela. É útil
+quando a grade tem um número variável de colunas e você quer grudar algo na direita de qualquer jeito.
+O valor gerado é literalmente <code>grid-column-start: calc(1 * -1)</code>, o que parece estranho e é
+só o Tailwind fazendo a conta do sinal.</p>
+
+<p>Para não precisar de número nenhum, existe <code>col-start-auto</code>, que devolve o item ao
+preenchimento automático. É a classe de quem quer desfazer um posicionamento sem apagar o HTML — em
+tela pequena, por exemplo, onde o item deve voltar a fluir na ordem natural.</p>
+
+<p>Um uso honesto do valor negativo: o botão "voltar ao topo" dentro de uma grade de rodapé que
+termina em número variável de colunas. Com <code>-col-start-1</code> ele cola na última coluna em
+qualquer largura, sem você escrever um breakpoint para cada tamanho de tela. O mesmo raciocínio serve
+para um selo de "novo" que deve ficar sempre no canto direito da linha. São os dois casos em que eu
+recomendo o negativo; fora deles, número positivo é mais fácil de ler e de manter.</p>
+
+<h2>7. col-span-full e a tabela de classes</h2>
+
+<p>Quando o item precisa da linha inteira, você não precisa saber quantas colunas a grade tem:
+<code>col-span-full</code> escreve <code>grid-column: 1 / -1</code>, que quer dizer "da primeira até a
+última linha", sejam quais forem. É a classe do título de seção dentro de uma grade, do aviso que
+ocupa a largura toda, do rodapé de um cardápio em grade.</p>
+
+<p>O par dela na vertical é <code>row-span-full</code>, com <code>grid-row: 1 / -1</code>. Menos usado,
+mas resolve o caso do menu lateral que deve acompanhar a altura inteira de uma grade de conteúdo.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Vira no CSS</th><th>Quando usar</th></tr>
+<tr><td><code>col-span-2</code></td><td><code>grid-column: span 2 / span 2</code></td><td>destaque com o dobro da largura</td></tr>
+<tr><td><code>row-span-2</code></td><td><code>grid-row: span 2 / span 2</code></td><td>cartão alto ao lado de dois baixos</td></tr>
+<tr><td><code>col-span-full</code></td><td><code>grid-column: 1 / -1</code></td><td>título ou aviso na linha inteira</td></tr>
+<tr><td><code>row-span-full</code></td><td><code>grid-row: 1 / -1</code></td><td>coluna que acompanha a altura toda</td></tr>
+<tr><td><code>col-start-2</code></td><td><code>grid-column-start: 2</code></td><td>começar na segunda coluna</td></tr>
+<tr><td><code>col-end-4</code></td><td><code>grid-column-end: 4</code></td><td>terminar na borda da terceira coluna</td></tr>
+<tr><td><code>row-start-2</code></td><td><code>grid-row-start: 2</code></td><td>começar na segunda linha</td></tr>
+<tr><td><code>-col-start-1</code></td><td><code>grid-column-start: calc(1 * -1)</code></td><td>grudar na última coluna</td></tr>
+<tr><td><code>col-start-auto</code></td><td><code>grid-column-start: auto</code></td><td>voltar ao automático</td></tr>
+</table>
+</div>
+
+<p>Não decore a tabela inteira. Guarde as duas ideias: <code>span</code> diz quanto o item ocupa, e
+<code>start</code>/<code>end</code> dizem onde ele começa e termina. Todo o resto é número.</p>
+
+<h2>8. Os buracos que a grade deixa</h2>
+
+<p>Aqui está o efeito colateral que surpreende. Quando um item grande não cabe no fim da linha, o
+navegador não o espreme: ele empurra o item para a linha seguinte e deixa um buraco. Na vitrine da
+Ana, um destaque com <code>col-span-2</code> colocado na terceira coluna de uma grade de quatro não
+cabe — sobram duas células, mas o item precisa de duas a partir da terceira. Resultado: duas células
+vazias e o destaque na linha de baixo.</p>
+
+<p>Para preencher esses buracos, existe <code>grid-flow-dense</code>, que escreve
+<code>grid-auto-flow: dense</code> e manda o navegador voltar para trás e encaixar os itens pequenos
+nos espaços vagos. A grade fica compacta, sem furos. O custo é real e vale dizer em voz alta: a ordem
+visual deixa de acompanhar a ordem do HTML, e quem navega pelo teclado ou por leitor de tela vai
+encontrar os itens numa sequência que não combina com o que os olhos veem. Use <code>dense</code> em
+galeria decorativa, evite em lista com informação importante.</p>
+
+<p>O caminho mais conservador é o oposto: em vez de brigar com os buracos, organize os spans para
+fecharem. Numa grade de quatro colunas, um destaque de <code>col-span-2</code> mais dois itens de
+<code>col-span-1</code> fecham a linha exatamente. Três itens de span 1 e um de span 2 não fecham —
+um deles vai sobrar. Fazer essa continha antes de escrever a classe economiza muito ajuste depois.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sintoma</th><th>Causa provável</th><th>O que fazer</th></tr>
+<tr><td>O item grande não cabe e pula de linha</td><td>o span não caberia nas células restantes</td><td>mude a ordem, reduza o span ou use <code>grid-flow-dense</code></td></tr>
+<tr><td><code>row-span-2</code> não muda nada</td><td>as linhas têm a altura do conteúdo</td><td>declare <code>grid-rows-*</code> e dê altura ao pai</td></tr>
+<tr><td>O item ficou na coluna errada</td><td><code>col-start</code> conta a linha, não a célula</td><td>confira se o número é o da linha de grade (1 a n+1)</td></tr>
+<tr><td>No celular o destaque espreme os outros</td><td><code>col-span-2</code> dentro de duas colunas</td><td><code>col-span-1 md:col-span-2</code></td></tr>
+</table>
+</div>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a galeria com uma foto em destaque</h3>
+<p>A Ana fotografou doze pães e quer a primeira foto grande. A receita:
+<code>grid grid-cols-2 gap-2 md:grid-cols-3</code> no pai, e
+<code>col-span-2 row-span-2</code> na primeira foto. No celular, com duas colunas, o destaque ocupa a
+linha inteira e duas linhas de altura — continua funcionando. No monitor, com três colunas, ele ocupa
+duas de largura e duas de altura, e as outras oito se encaixam em volta. Como a soma nem sempre fecha,
+é uma galeria onde o <code>grid-flow-dense</code> faz sentido: os buracos são decorativos, não
+informação.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: título que atravessa a grade inteira</h3>
+<p>Dentro de uma grade de produtos, a Ana quer um título "Promoções da semana" em cima de tudo.
+Se ela não fizer nada, o título vira uma célula e o primeiro produto sobe para a linha dele.
+<code>col-span-full</code> resolve com uma classe, e a vantagem sobre um <code>div</code> fora da
+grade é que o título continua alinhado com as colunas, com o mesmo gap e a mesma margem. É o que
+mantém a sensação de grade única, mesmo com uma faixa atravessada.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o painel de duas colunas que vira coluna única</h3>
+<p>No painel da padaria, o resumo do dia ocupa duas colunas e o gráfico de vendas ocupa as duas
+restantes, numa grade de quatro. No tablet, isso fica apertado. A saída é declarar spans diferentes
+por breakpoint: <code>col-span-4 md:col-span-2</code> nos dois blocos. No celular, cada um ocupa a
+linha inteira; no tablet, metade. Repare que a classe base é a menor tela: o Tailwind aplica o
+<code>md:</code> só a partir de 768 px, e o resto continua valendo abaixo. É o mesmo raciocínio de
+toda a parte responsiva do guia, agora com spans.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual classe faz um item ocupar duas colunas?</p>
+<label><input type="radio" name="q1"> <code>w-2/4</code></label>
+<label><input type="radio" name="q1"> <code>col-span-2</code></label>
+<label><input type="radio" name="q1"> <code>col-start-2</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Numa grade de quatro colunas, o que
+<code>col-start-2</code> faz?</p>
+<label><input type="radio" name="q2"> ocupa a segunda coluna e a terceira</label>
+<label><input type="radio" name="q2"> repete o item na segunda coluna</label>
+<label><input type="radio" name="q2"> começa na linha 2, que é a borda antes da segunda coluna</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O item precisa da linha inteira, e você não quer
+contar as colunas. Qual classe?</p>
+<label><input type="radio" name="q3"> <code>col-span-full</code></label>
+<label><input type="radio" name="q3"> <code>col-span-12</code>, mesmo com quatro colunas</label>
+<label><input type="radio" name="q3"> <code>w-full</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o destaque da vitrine</h2>
+<p>Complete o cartão do pão do dia para que ele comece na segunda coluna e ocupe duas colunas. Depois
+responda: qual é a classe do começo?</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="col-start-2" placeholder="..."> col-span-2 bg-amber-300"&gt;Pão do dia&lt;/div&gt;</div>
+<p class="ex-dica">Dica: é a classe de linha de partida, com o número da linha de grade. O
+<code>col-span-2</code> já está lá e cuida da largura.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Numa grade, o tamanho do item é medido em células, não em pixels. <code>col-span-N</code> e
+<code>row-span-N</code> dizem quantas faixas o item atravessa; <code>col-start-N</code>,
+<code>col-end-N</code>, <code>row-start-N</code> e <code>row-end-N</code> dizem em que linha da grade
+ele começa e termina. As linhas são as bordas entre as faixas, e por isso são sempre uma a mais que a
+quantidade de colunas.</p>
+
+<p><code>col-span-full</code> ocupa a linha inteira sem você precisar saber o número de colunas, e é a
+classe do título ou do aviso que atravessa a grade. Quando um item grande não cabe no fim da linha,
+o grid deixa um buraco e empurra o item para baixo; <code>grid-flow-dense</code> preenche os buracos
+ao custo de bagunçar a ordem visual. E no celular, com menos colunas, o span base deve ser o menor —
+<code>col-span-1 md:col-span-2</code> é a receita para não espremer ninguém.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>col-span-2</code> = <code>grid-column: span 2 / span 2</code>.</li>
+<li><code>row-span-2</code> = <code>grid-row: span 2 / span 2</code>.</li>
+<li><code>col-span-full</code> = <code>grid-column: 1 / -1</code>: a linha toda.</li>
+<li><code>col-start-2</code> começa na linha de grade 2, ou seja, na segunda coluna.</li>
+<li>Linhas de grade vão de 1 a n+1; a célula fica entre duas linhas.</li>
+<li><code>col-start</code> e <code>col-end</code> juntos vencem o span.</li>
+<li>Valores negativos contam do fim: <code>-col-start-1</code> é a última coluna.</li>
+<li><code>row-span</code> precisa de altura: <code>grid-rows-*</code> e <code>h-*</code> no pai.</li>
+<li><code>grid-flow-dense</code> fecha buracos, mas muda a ordem de leitura.</li>
+<li>No celular, use o span menor como base e cresça com <code>md:</code>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

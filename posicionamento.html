@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Posicionamento | Guia Tailwind</title>
+<meta name="description" content="Posicionamento no Tailwind do zero: static, relative para virar referência, absolute com inset para grudar no canto, fixed na janela e sticky para a barra que acompanha a rolagem.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Posicionamento</span></h1>
+<p class="intro">A Ana quer um selo "novo" no canto do cartão do pão de queijo. Ela colocou o selo
+depois do texto, com <code>absolute</code>, e ele fugiu para o canto de cima da página inteira, longe
+do cartão. Depois, ao rolar a página, o selo ficou parado no ar, como se pairasse. O problema não é o
+selo: é que posicionar um elemento depende de <em>outro</em> elemento — o pai precisa dizer "eu sou a
+referência". Nesta aula a Ana aprende o quarteto <code>relative</code>, <code>absolute</code>,
+<code>fixed</code> e <code>sticky</code>, e as classes <code>inset-*</code> que dizem em qual canto o
+elemento encosta.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é o fluxo normal e por que <code>static</code> é o padrão.</li>
+  <li><code>relative</code>: o elemento fica no lugar e vira referência para os filhos.</li>
+  <li><code>absolute</code>: sai do fluxo e gruda no ancestral posicionado.</li>
+  <li><code>inset-0</code>, <code>top-2</code>, <code>right-2</code> e os valores negativos.</li>
+  <li><code>fixed</code> para o botão preso na tela, e o cuidado com o celular.</li>
+  <li><code>sticky</code> para a barra que acompanha a rolagem — e por que ele às vezes não gruda.</li>
+  <li>Os quatro motivos de "o absolute fugiu para o canto errado".</li>
+</ul>
+</div>
+
+<h2>1. A cena: o selo que fugiu do cartão</h2>
+
+<p>O cartão da Ana tem o nome do pão, o preço e um selo "novo". Ela escreveu o selo por último, com
+<code>absolute top-2 right-2</code>, esperando que ele encostasse no canto do cartão. Na tela, o selo
+apareceu no canto superior direito da <em>página</em>, longe do cartão, e o cartão ficou com um
+buraco no lugar onde o selo deveria estar.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="w-56 rounded-lg bg-amber-100 p-4"&gt;
+  &lt;span class="absolute right-2 top-2"&gt;novo&lt;/span&gt;
+  &lt;p&gt;Pão de queijo&lt;/p&gt;
+  &lt;p&gt;R$ 12 a dúzia&lt;/p&gt;
+&lt;/div&gt;</pre>
+
+<p>Duas coisas aconteceram ao mesmo tempo, e é importante separá-las. A primeira: o selo saiu do
+fluxo, então o espaço que ele ocupava no cartão se fechou — por isso o buraco. A segunda: sem um pai
+posicionado, o <code>absolute</code> procurou a referência mais próxima que existe sempre, que é a
+página. Ele fez exatamente o que foi mandado; a Ana é que não sabia que faltava combinar com o pai.</p>
+
+<h2>2. O fluxo normal e o static</h2>
+
+<p>Todo elemento HTML tem uma posição padrão, calculada pelo navegador a partir da ordem do documento:
+um embaixo do outro, com as margens e os paddings que você deu. Isso se chama <strong>fluxo
+normal</strong>, e é o que faz o site funcionar mesmo quando o CSS não carrega. A propriedade
+<code>position</code> vale <code>static</code> nesse estado — e é por isso que <code>static</code> é o
+padrão e quase nunca aparece escrito.</p>
+
+<p>Quando você troca o <code>position</code> de um elemento, duas coisas mudam de uma vez: <em>onde
+ele se ancora</em> e <em>se ele continua ocupando espaço</em>. As cinco classes do Tailwind cobrem as
+cinco combinações possíveis:</p>
+
+<dl class="anatomy">
+<dt>static</dt>
+<dd>O padrão. Fica no fluxo e ignora <code>top</code>, <code>left</code> e companhia.</dd>
+<dt>relative</dt>
+<dd>Continua no fluxo, mas aceita deslocamento e vira referência para os filhos absolutos.</dd>
+<dt>absolute</dt>
+<dd>Sai do fluxo e se ancora no ancestral posicionado mais próximo.</dd>
+<dt>fixed</dt>
+<dd>Sai do fluxo e se ancora na janela: não anda quando a página rola.</dd>
+<dt>sticky</dt>
+<dd>Fica no fluxo e gruda quando a rolagem chega num limite definido por você.</dd>
+<dt>ancestral posicionado</dt>
+<dd>Qualquer pai, avô ou bisavô com <code>position</code> diferente de <code>static</code>. É a régua do <code>absolute</code>.</dd>
+</dl>
+
+<p>Guarde a frase que resolve a maioria dos casos: <strong><code>absolute</code> só é previsível
+quando algum ancestral tem <code>relative</code></strong>. Sem isso, ele se ancora na página, e o
+resultado muda de lugar conforme a tela. É o erro número um de quem começa.</p>
+
+<h2>3. relative: fica no lugar e vira referência</h2>
+
+<p>O <code>relative</code> faz duas coisas, e a segunda é a que importa 90% das vezes. A primeira é
+óbvia: o elemento aceita ser deslocado por <code>top</code>, <code>left</code> e companhia, e se move
+visualmente sem empurrar os vizinhos — o espaço dele fica reservado no lugar antigo. A segunda é
+invisível: ele passa a ser a régua de qualquer filho com <code>absolute</code>.</p>
+
+<p>Na prática, você quase nunca move um <code>relative</code>. Você o usa como âncora. É o caso do
+cartão da Ana: acrescentar <code>relative</code> no cartão não muda nada na aparência dele, mas
+prende o selo no lugar certo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|position=relative">
+  <p class="try-task">O selo está voando para o canto da página. Faça o cartão virar a referência
+  dele, sem mudar nada no selo.</p>
+  <pre class="html">&lt;div class="p-4"&gt;
+  &lt;div id="alvo" class="w-56 rounded-lg bg-amber-100 p-4"&gt;
+    &lt;span class="absolute right-2 top-2 rounded bg-amber-900 px-2 py-1 text-xs text-amber-50"&gt;novo&lt;/span&gt;
+    &lt;p class="font-bold"&gt;Pão de queijo&lt;/p&gt;
+    &lt;p&gt;R$ 12 a dúzia&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+width: 224px
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div class="p-4"&gt;
+  &lt;div id="alvo" class="relative w-56 rounded-lg bg-amber-100 p-4"&gt;
+    &lt;span class="absolute right-2 top-2 rounded bg-amber-900 px-2 py-1 text-xs text-amber-50"&gt;novo&lt;/span&gt;
+    &lt;p class="font-bold"&gt;Pão de queijo&lt;/p&gt;
+    &lt;p&gt;R$ 12 a dúzia&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Rode as duas versões e observe a prévia com atenção: no início o selo está no canto superior
+direito da área de prévia, colado na borda; depois de acrescentar <code>relative</code>, ele desce
+para o canto do cartão. O painel mostra <code>position: relative</code> — uma linha só, e o layout
+inteiro mudou de sentido.</p>
+
+<p>Note o <code>p-4</code> no <code>div</code> de fora. Ele existe para o cartão não encostar na borda
+da prévia e você conseguir ver a diferença. Em um site de verdade, esse papel cabe ao padding da
+seção ou ao <code>max-w</code> do container.</p>
+
+<h2>4. absolute: sai do fluxo e ancora no pai</h2>
+
+<p>O <code>absolute</code> é o mais poderoso e o mais maltratado da turma. Ele faz três coisas:</p>
+
+<ul>
+<li><strong>Sai do fluxo.</strong> O espaço que ele ocupava é redistribuído entre os irmãos. Para o
+navegador, ele deixa de existir no empilhamento normal.</li>
+<li><strong>Encolhe até o conteúdo.</strong> Deixa de ocupar a linha inteira: fica do tamanho do que
+tem dentro (ou do que o <code>inset</code> mandar).</li>
+<li><strong>Ancora no ancestral posicionado.</strong> O <code>top</code>, <code>right</code>,
+<code>bottom</code> e <code>left</code> são contados a partir da borda interna desse ancestral.</li>
+</ul>
+
+<p>Por sair do fluxo, o <code>absolute</code> é a ferramenta certa para tudo que "flutua" sobre o
+conteúdo: selos, botões de fechar, tarjas de esgotado, setas de carrossel, ícones dentro de campos.
+E é a ferramenta errada para qualquer coisa que deva ocupar espaço na página — se você usar
+<code>absolute</code> num bloco de texto, os vizinhos sobem por cima dele e o layout quebra.</p>
+
+<p>O CSS das cinco classes de posição é o mais curto do guia. Cada uma escreve uma linha, e não há
+valor escondido:</p>
+
+<pre class="term">.relative {
+  position: relative;
+}
+.absolute {
+  position: absolute;
+}
+.fixed {
+  position: fixed;
+}
+.sticky {
+  position: sticky;
+}</pre>
+
+<p>É por isso que dá para decorar em dois minutos o que cada uma faz — o difícil não é a classe, é
+entender a régua. Sempre que um posicionamento der errado, a pergunta certa é "qual é o ancestral
+posicionado mais próximo deste elemento?". Você pode responder isso pelo DevTools, na aba
+<em>Elements</em>: selecione o elemento e olhe os pais até encontrar um com
+<code>position: relative</code> (ou <code>absolute</code>, ou <code>fixed</code>). Esse é o seu
+sistema de coordenadas.</p>
+
+<p>Uma consequência que assusta no começo: como ele não ocupa espaço, o pai não cresce para caber
+nele. Se o filho absoluto for mais alto que o pai, ele vaza — e o <code>overflow</code> de quem estiver
+acima decide se isso aparece ou é cortado. É o assunto da aula de <a href="overflow.html">Overflow</a>,
+mas fica a dica: quando um elemento absoluto é cortado, o culpado costuma ser um
+<code>overflow-hidden</code> num ancestral.</p>
+
+<h2>5. inset: escolher onde encostar</h2>
+
+<p>As classes de encaixe vêm em quatro sabores: <code>top-*</code>, <code>right-*</code>,
+<code>bottom-*</code> e <code>left-*</code>, cada um com a escala de espaço (1 = 4 px, 2 = 8 px,
+4 = 16 px) e com valores negativos para puxar para fora. Existe também o atalho
+<code>inset-*</code>, que aplica os quatro lados de uma vez, e os intermediários
+<code>inset-x-*</code> (esquerda e direita) e <code>inset-y-*</code> (topo e base).</p>
+
+<p><code>inset-0</code> é o mais usado de todos: significa "encoste nos quatro cantos", ou seja, o
+elemento preenche o pai inteiro. É assim que se faz uma tarja que cobre o cartão, uma camada escura
+atrás de um modal ou uma imagem de fundo clicável.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|inset=0px">
+  <p class="try-task">A tarja "esgotado" está 8 px para dentro do cartão, deixando uma moldura
+  aparecendo. Faça ela cobrir o cartão inteiro.</p>
+  <pre class="html">&lt;div class="relative w-56 rounded-lg bg-amber-100 p-4"&gt;
+  &lt;span id="alvo" class="absolute inset-2 flex items-center justify-center rounded bg-amber-900 text-sm text-amber-50"&gt;esgotado&lt;/span&gt;
+  &lt;p class="font-bold"&gt;Bolo de fubá&lt;/p&gt;
+  &lt;p&gt;R$ 18&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+position: absolute
+justify-content: center
+align-items: center
+background-color: oklch(0.414 0.112 45.904)
+color: oklch(0.987 0.022 95.277)
+font-size: 14px
+line-height: 20px
+border-radius: 4px
+inset: 8px
+</pre>
+  <pre class="solucao">&lt;div class="relative w-56 rounded-lg bg-amber-100 p-4"&gt;
+  &lt;span id="alvo" class="absolute inset-0 flex items-center justify-center rounded bg-amber-900 text-sm text-amber-50"&gt;esgotado&lt;/span&gt;
+  &lt;p class="font-bold"&gt;Bolo de fubá&lt;/p&gt;
+  &lt;p&gt;R$ 18&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>inset: 8px</code> antes e <code>inset: 0px</code> depois. Repare que o
+<code>inset</code> sozinho não faz nada: ele precisa do <code>absolute</code> ao lado. Num elemento
+<code>static</code>, <code>inset-0</code> é ignorado pelo navegador — sem erro, sem aviso. É a mesma
+lógica de <code>self-*</code> sem flex: a classe certa no contexto errado não tem efeito.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Vira no CSS</th><th>Quando usar</th></tr>
+<tr><td><code>static</code></td><td><code>position: static</code></td><td>voltar ao fluxo normal</td></tr>
+<tr><td><code>relative</code></td><td><code>position: relative</code></td><td>virar âncora dos filhos absolutos</td></tr>
+<tr><td><code>absolute</code></td><td><code>position: absolute</code></td><td>selo, tarja, ícone sobreposto</td></tr>
+<tr><td><code>fixed</code></td><td><code>position: fixed</code></td><td>botão de ajuda sempre visível</td></tr>
+<tr><td><code>sticky</code></td><td><code>position: sticky</code></td><td>cabeçalho que acompanha a rolagem</td></tr>
+<tr><td><code>inset-0</code></td><td><code>inset: 0px</code></td><td>cobrir o pai inteiro</td></tr>
+<tr><td><code>inset-x-4</code></td><td><code>inset-inline: 16px</code></td><td>afastar dos dois lados</td></tr>
+<tr><td><code>inset-y-4</code></td><td><code>inset-block: 16px</code></td><td>afastar do topo e da base</td></tr>
+<tr><td><code>top-2</code></td><td><code>top: 8px</code></td><td>grudar 8 px abaixo do topo do pai</td></tr>
+<tr><td><code>-top-2</code></td><td><code>top: -8px</code></td><td>puxar para fora do pai</td></tr>
+</table>
+</div>
+
+<p>O CSS gerado é direto, sem surpresas:</p>
+
+<pre class="term">.inset-0 {
+  inset: 0px;
+}
+.inset-x-4 {
+  inset-inline: calc(var(--spacing) * 4);
+}
+.top-4 {
+  top: calc(var(--spacing) * 4);
+}
+.-top-2 {
+  top: calc(var(--spacing) * -2);
+}</pre>
+
+<p>Duas palavras merecem tradução. <code>inset</code> é o atalho dos quatro lados, na ordem topo,
+direita, base, esquerda — e com um valor só, vale para todos. E <code>inset-inline</code> é o nome
+moderno de "esquerda e direita": ele segue o sentido da escrita, então funciona igual em idiomas da
+direita para a esquerda. O Tailwind trocou <code>left</code> e <code>right</code> por
+<code>inline</code> onde dava, e você vê isso no CSS gerado.</p>
+
+<h2>6. fixed: preso na janela</h2>
+
+<p>O <code>fixed</code> é um <code>absolute</code> com uma âncora diferente: em vez do ancestral
+posicionado, ele se ancora na <strong>janela</strong> do navegador. Consequência prática: ele não
+rola com a página. É o botão de WhatsApp no canto, a barra de cookies no rodapé, a faixa de aviso no
+topo.</p>
+
+<p>A receita é sempre parecida: <code>fixed bottom-4 right-4</code> para o botão flutuante,
+<code>fixed inset-x-0 bottom-0</code> para a faixa que ocupa a largura toda. Como ele sai do fluxo,
+não empurra nada — e por isso é comum ele cobrir o rodapé do site sem avisar. A correção é dar
+<code>pb-20</code> no conteúdo, para o texto não passar por baixo do botão.</p>
+
+<p>No celular, o cuidado é maior: a janela do celular inclui as barras do navegador, que aparecem e
+somem ao rolar. Um botão com <code>bottom-4</code> pode ficar atrás da barra de endereço. A solução
+moderna usa <code>env(safe-area-inset-bottom)</code>, um valor que o próprio aparelho informa — mas
+isso já é refino. Para o começo, <code>fixed bottom-4 right-4</code> resolve, e você ajusta quando
+testar no aparelho de verdade.</p>
+
+<p>Há um detalhe do <code>fixed</code> que quase ninguém conta e que já quebrou muito layout: se
+algum ancestral tiver <code>transform</code>, <code>filter</code> ou <code>perspective</code>, ele
+passa a ser a âncora do elemento fixo. Um <code>fixed</code> dentro de um cartão com
+<code>rotate-1</code> deixa de flutuar na janela e passa a flutuar dentro do cartão. Se o seu botão
+"que fica sempre visível" sumir ao rolar, procure um <code>transform</code> em algum pai. É o mesmo
+tipo de armadilha do <code>overflow-hidden</code> no <code>sticky</code>: o efeito existe, mas o
+contexto mudou a régua.</p>
+
+<h2>7. sticky: gruda só quando chega no limite</h2>
+
+<p>O <code>sticky</code> é o meio-termo que mais gente pede sem saber o nome. Ele começa como um
+elemento normal, rola junto com a página, e no momento em que encosta num limite que você definiu, ele
+para e fica preso — até o pai dele sair da tela, quando ele volta a rolar.</p>
+
+<p>Duas condições, e é aqui que quase todo mundo erra. Primeiro: <strong>precisa de um
+<code>inset</code></strong>, quase sempre <code>top-0</code>. Sem isso, o navegador não sabe onde
+grudar e o elemento se comporta como <code>relative</code>. Segundo: <strong>precisa de rolagem no
+pai</strong> — a barra só gruda dentro do container que rola, e se um ancestral tiver
+<code>overflow-hidden</code>, o efeito morre silenciosamente.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|position=sticky;;css:#alvo|top=0px">
+  <p class="try-task">A barra "Cardápio de hoje" rola junto com a lista e some. Faça ela grudar no
+  topo da caixa enquanto o cliente rola o cardápio.</p>
+  <pre class="html">&lt;div class="h-40 overflow-y-auto rounded-lg bg-amber-50"&gt;
+  &lt;div id="alvo" class="relative top-0 bg-amber-900 p-2 font-bold text-amber-50"&gt;Cardápio de hoje&lt;/div&gt;
+  &lt;p class="p-2"&gt;Pão francês — R$ 1,50&lt;/p&gt;
+  &lt;p class="p-2"&gt;Pão de queijo — R$ 4,00&lt;/p&gt;
+  &lt;p class="p-2"&gt;Bolo de fubá — R$ 18,00&lt;/p&gt;
+  &lt;p class="p-2"&gt;Croissant — R$ 7,00&lt;/p&gt;
+  &lt;p class="p-2"&gt;Rosca doce — R$ 9,00&lt;/p&gt;
+  &lt;p class="p-2"&gt;Pão de mel — R$ 6,00&lt;/p&gt;
+  &lt;p class="p-2"&gt;Torta de domingo — R$ 22,00&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+position: relative
+padding: 8px
+background-color: oklch(0.414 0.112 45.904)
+color: oklch(0.987 0.022 95.277)
+font-weight: 700
+top: 0px
+</pre>
+  <pre class="solucao">&lt;div class="h-40 overflow-y-auto rounded-lg bg-amber-50"&gt;
+  &lt;div id="alvo" class="sticky top-0 bg-amber-900 p-2 font-bold text-amber-50"&gt;Cardápio de hoje&lt;/div&gt;
+  &lt;p class="p-2"&gt;Pão francês — R$ 1,50&lt;/p&gt;
+  &lt;p class="p-2"&gt;Pão de queijo — R$ 4,00&lt;/p&gt;
+  &lt;p class="p-2"&gt;Bolo de fubá — R$ 18,00&lt;/p&gt;
+  &lt;p class="p-2"&gt;Croissant — R$ 7,00&lt;/p&gt;
+  &lt;p class="p-2"&gt;Rosca doce — R$ 9,00&lt;/p&gt;
+  &lt;p class="p-2"&gt;Pão de mel — R$ 6,00&lt;/p&gt;
+  &lt;p class="p-2"&gt;Torta de domingo — R$ 22,00&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, role a lista na prévia: a barra escura fica no topo enquanto os preços passam por
+baixo. Antes, ela subia junto e desaparecia. O painel mostra <code>position: sticky</code> e
+<code>top: 0px</code> — as duas coisas são necessárias, e a meta desta caixa confere as duas justamente
+por isso.</p>
+
+<p>Um detalhe que confunde: o <code>sticky</code> gruda dentro do <em>pai</em>, não da página. Quando
+o pai termina, ele vai embora com ele. Numa lista com altura definida, isso é o comportamento que se
+quer. Numa barra de navegação de site, o pai é o <code>body</code> — e aí ela acompanha a página
+inteira, o que é exatamente o que se espera de um cabeçalho fixo.</p>
+
+<h2>8. Erros comuns</h2>
+
+<p>Quatro sintomas e suas causas. O primeiro é o campeão absoluto de audiência em fórum de CSS, e o
+quarto é o mais difícil de acreditar quando acontece.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sintoma</th><th>Causa provável</th><th>O que fazer</th></tr>
+<tr><td>O elemento absoluto fugiu para o canto da página</td><td>nenhum ancestral tem <code>relative</code></td><td>acrescente <code>relative</code> no pai que deve servir de âncora</td></tr>
+<tr><td>O <code>inset-0</code> não fez nada</td><td>falta <code>absolute</code> no mesmo elemento</td><td>use as duas classes juntas</td></tr>
+<tr><td>O que vem depois subiu por cima do elemento</td><td>o absoluto saiu do fluxo e não ocupa espaço</td><td>dê altura ou padding ao pai, ou use fluxo normal</td></tr>
+<tr><td>O <code>sticky</code> não gruda</td><td>falta <code>top-*</code> ou um ancestral corta o <code>overflow</code></td><td>acrescente <code>top-0</code> e remova <code>overflow-hidden</code> dos pais</td></tr>
+</table>
+</div>
+
+<p>Vale um quinto item, que não é erro mas confunde: dois elementos posicionados podem se sobrepor, e
+quem fica na frente é decidido pelo <code>z-index</code> — ou, na falta dele, pela ordem no HTML. O
+selo da Ana deve ficar na frente da foto do pão, e isso é assunto da próxima aula,
+<a href="camadas-z.html">Camadas com z</a>. Por ora, guarde que <code>position</code> e
+<code>z-index</code> são decisões separadas: um manda onde, o outro manda na frente de quem.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o ícone dentro do campo de busca</h3>
+<p>O campo de busca da padaria precisa de uma lupa à esquerda, dentro da moldura. A receita:
+<code>relative</code> no container do campo, o ícone com <code>absolute left-3 top-1/2 -translate-y-1/2</code>
+e o <code>input</code> com <code>pl-10</code> para o texto não passar por baixo da lupa. O
+<code>top-1/2</code> posiciona no meio vertical e o <code>-translate-y-1/2</code> desconta metade da
+altura do ícone. São três classes trabalhando juntas — e a mais fácil de esquecer é o padding no
+campo, que faz o texto digitar por cima do desenho.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a tarja de "esgotado" no cartão</h3>
+<p>O cartão do pão de queijo deve ficar escurecido quando acaba. Em vez de criar um segundo cartão, a
+Ana acrescenta uma camada: <code>absolute inset-0</code> com fundo escuro e opacidade, mais o texto
+centralizado com <code>flex items-center justify-center</code>. O cartão continua o mesmo no HTML; a
+tarja é uma camada por cima. Quando o pão volta, é só apagar a camada. É o padrão que você vai ver em
+todo componente de "indisponível" daqui para a frente.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o botão de encomenda que acompanha a rolagem</h3>
+<p>Na página de encomendas, o botão "Fechar pedido" precisa estar sempre à vista. Duas soluções
+legítimas. <code>fixed bottom-4 right-4</code>: o botão flutua sobre tudo, inclusive sobre o rodapé, e
+exige um padding extra no fim da página para não cobrir conteúdo. Ou <code>sticky bottom-0</code>
+dentro da seção do pedido: ele só aparece enquanto aquela seção está na tela. A primeira é mais
+simples; a segunda é mais educada com o layout. Comece pela primeira e mude quando virar incômodo.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O elemento com <code>absolute</code> fugiu para o
+canto da página. O que faltou?</p>
+<label><input type="radio" name="q1"> <code>fixed</code> no elemento</label>
+<label><input type="radio" name="q1"> <code>relative</code> no ancestral que deve ser a âncora</label>
+<label><input type="radio" name="q1"> <code>inset-0</code> no elemento</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que <code>inset-0</code> faz num elemento com
+<code>absolute</code>?</p>
+<label><input type="radio" name="q2"> deixa 0 px de margem por fora</label>
+<label><input type="radio" name="q2"> zera o padding do elemento</label>
+<label><input type="radio" name="q2"> encosta nos quatro lados do pai, cobrindo-o</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. A barra precisa grudar no topo enquanto a lista
+rola. Qual dupla resolve?</p>
+<label><input type="radio" name="q3"> <code>sticky top-0</code></label>
+<label><input type="radio" name="q3"> <code>absolute top-0</code></label>
+<label><input type="radio" name="q3"> <code>fixed top-0</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o selo do cartão</h2>
+<p>Complete o cartão para que ele vire a âncora do selo "novo". Depois responda: qual é a classe que
+faz esse papel?</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="relative" placeholder="..."> w-56 rounded-lg bg-amber-100 p-4"&gt;</div>
+<p class="ex-dica">Dica: é a classe que mantém o elemento no fluxo e muda a régua dos filhos. Se você
+escrever <code>absolute</code>, o cartão inteiro sai do fluxo e o layout desmonta.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Posicionar é decidir duas coisas: onde o elemento se ancora e se ele continua ocupando espaço. O
+<code>static</code> é o padrão e ignora <code>inset</code>. O <code>relative</code> fica no fluxo e
+vira a régua dos filhos absolutos. O <code>absolute</code> sai do fluxo e se ancora no ancestral
+posicionado mais próximo — ou na página, se não houver nenhum. O <code>fixed</code> se ancora na
+janela e não rola. O <code>sticky</code> fica no fluxo até bater no limite que você definiu com
+<code>top-*</code>.</p>
+
+<p>As classes <code>inset-*</code> dizem em que canto encostar: <code>inset-0</code> cobre o pai
+inteiro, <code>top-2</code> afasta 8 px do topo, <code>-top-2</code> puxa para fora. Elas só têm
+efeito junto de um <code>position</code> diferente de <code>static</code>. E o par que resolve a
+maioria dos casos é sempre o mesmo: <code>relative</code> no pai, <code>absolute inset-0</code> no
+filho.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>absolute</code> precisa de um ancestral com <code>relative</code> para ser previsível.</li>
+<li><code>relative</code> continua no fluxo e não move os vizinhos.</li>
+<li>Elemento absoluto não ocupa espaço: o pai não cresce para caber nele.</li>
+<li><code>inset-0</code> = <code>inset: 0px</code> = os quatro cantos.</li>
+<li><code>inset-x</code> é horizontal; <code>inset-y</code> é vertical.</li>
+<li><code>fixed</code> se ancora na janela e ignora a rolagem.</li>
+<li><code>sticky</code> precisa de <code>top-*</code> e de um container que role.</li>
+<li><code>overflow-hidden</code> num ancestral mata o <code>sticky</code> sem avisar.</li>
+<li><code>inset</code> sem <code>position</code> não faz nada.</li>
+<li>Quem fica na frente é decidido por <code>z-index</code>, na próxima aula.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
