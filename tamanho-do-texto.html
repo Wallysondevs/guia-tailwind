@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tamanho do Texto | Guia Tailwind</title>
+<meta name="description" content="A escala de tamanhos do Tailwind: text-xs a text-9xl, o que é rem, por que o h1 fica do tamanho do texto e como montar hierarquia com três tamanhos só.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Tamanho do <span class="hl">Texto</span></h1>
+<p class="intro">A Ana escreveu a página do pão de fermentação natural e ficou intrigada: o título,
+o preço e a descrição estavam todos do mesmo tamanho. Ela lembrava que, em HTML puro, um
+<code>&lt;h1&gt;</code> sai grande sozinho — mas no Tailwind ele saiu do tamanho de um parágrafo
+qualquer. Nesta aula a Ana descobre que isso não é bug, é uma decisão: o Tailwind apaga o tamanho
+que o navegador dava aos títulos e entrega a escolha para você. Aprender a escala de
+<code>text-</code> é aprender a montar hierarquia — dizer ao leitor, sem palavras, o que é mais
+importante na página.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que o <code>&lt;h1&gt;</code> fica do tamanho do texto no Tailwind.</li>
+  <li>A escala de <code>text-xs</code> a <code>text-9xl</code> e o que é <code>text-base</code>.</li>
+  <li>Por que a escala é em <code>rem</code> e não em pixels.</li>
+  <li>Como a entrelinha vem de carona com o tamanho.</li>
+  <li>Como montar hierarquia com três tamanhos, sem inventar um para cada título.</li>
+  <li>Valores fora da escala, como <code>text-[18px]</code>, e o custo deles.</li>
+  <li>Como o tamanho muda conforme a largura da tela, com <code>md:text-4xl</code>.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o título do tamanho do texto</h2>
+
+<p>A Ana escreveu a página assim, achando que estava tudo certo:</p>
+
+<pre class="file" data-file="pao.html">&lt;h1&gt;Pão de fermentação natural&lt;/h1&gt;
+&lt;p&gt;Feito com farinha orgânica e 24 horas de descanso.&lt;/p&gt;
+&lt;p&gt;R$ 18,00&lt;/p&gt;</pre>
+
+<p>Na tela, as três linhas ficaram com o mesmo tamanho. Nem o título se destacou, nem o preço
+chamou atenção. Ela desconfiou do Tailwind e abriu uma página sem Tailwind para comparar: lá, o
+<code>&lt;h1&gt;</code> saía grande e em negrito, porque todo navegador tem um estilo padrão para
+títulos.</p>
+
+<p>A explicação está no primeiro arquivo que o Tailwind carrega, o <em>preflight</em>, que é uma
+camada de normalização. Ele faz uma limpeza deliberada: tira o tamanho e o peso que os navegadores
+davam aos títulos e deixa tudo herdando do texto normal. A regra é literal como isto:</p>
+
+<pre class="term">h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}</pre>
+
+<p>Por que alguém faria isso? Porque tamanho de título é uma decisão de desenho, não de
+navegador. Em um site bem feito, o título de uma seção pode ser menor que o de outra; um
+<code>&lt;h2&gt;</code> pode aparecer em cartão pequeno e em página inteira. Se o navegador impõe um
+tamanho, você briga com ele em todo lugar. O Tailwind prefere começar do zero e deixar você
+declarar — é o mesmo espírito da aula da primeira classe: nada acontece por acidente.</p>
+
+<h2>2. A escala tem nomes, não números</h2>
+
+<p>Para dar tamanho, você usa <code>text-</code> mais um nome. Os nomes vão de <code>xs</code>
+(extra pequeno) até <code>9xl</code>, e o meio da escada tem um nome especial: <code>text-base</code>
+é o tamanho normal, o ponto de partida. Não existe <code>text-normal</code> nem
+<code>text-medium</code>; existe <code>base</code>, e é ele que você usa quando não quer decidir
+nada.</p>
+
+<p>Como <code>text-</code> também serve para cor, vem a dúvida: <code>text-base</code> é cor ou
+tamanho? É tamanho, porque <code>base</code> não é nome de família de cor. A pista é a mesma da aula
+de cores: cor é sempre <em>família + número</em> (<code>text-amber-900</code>); tamanho é
+<em>nome de tamanho</em> (<code>text-lg</code>, <code>text-base</code>,
+<code>text-2xl</code>).</p>
+
+<p>A escada não foi desenhada no chute. Ela é uma progressão em que cada degrau é de 11% a 33% maior
+que o anterior, com os saltos pequenos perto do corpo do texto e maiores no alto. De
+<code>text-lg</code> para <code>text-xl</code> a diferença é de 11% (18 para 20 px); de
+<code>text-3xl</code> para <code>text-4xl</code> é de 20% (30 para 36 px); de <code>text-4xl</code>
+para <code>text-5xl</code> é de 33% (36 para 48 px). Isso é intencional: no texto corrido, um salto
+grande atrapalha a leitura; nos títulos, um salto pequeno não aparece.</p>
+
+<p>É por isso que trocar <code>text-base</code> por <code>text-lg</code> parece "quase nada" e
+trocar <code>text-base</code> por <code>text-2xl</code> muda tudo. Você não está escolhendo números;
+está escolhendo o quanto quer que o leitor note a diferença. E, se um dia precisar de um tamanho entre
+dois degraus, o colchete existe — mas a pergunta certa, quase sempre, é se o degrau de cima não
+resolveria melhor.</p>
+
+<h2>3. A escada em pixels</h2>
+
+<p>Os degraus são poucos e vale conhecê-los de cor até o <code>3xl</code>. A tabela abaixo é a que
+eu consulto:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Tamanho</th><th>Onde costuma servir</th></tr>
+<tr><td><code>text-xs</code></td><td>12 px</td><td>nota de rodapé, aviso legal, contador</td></tr>
+<tr><td><code>text-sm</code></td><td>14 px</td><td>texto de apoio, rótulo de campo, legenda</td></tr>
+<tr><td><code>text-base</code></td><td>16 px</td><td>o corpo do texto — o padrão</td></tr>
+<tr><td><code>text-lg</code></td><td>18 px</td><td>parágrafo de destaque, preço</td></tr>
+<tr><td><code>text-xl</code></td><td>20 px</td><td>subtítulo, nome de produto</td></tr>
+<tr><td><code>text-2xl</code></td><td>24 px</td><td>título de cartão, preço grande</td></tr>
+<tr><td><code>text-3xl</code></td><td>30 px</td><td>título de seção</td></tr>
+<tr><td><code>text-4xl</code></td><td>36 px</td><td>título de página</td></tr>
+<tr><td><code>text-5xl</code></td><td>48 px</td><td>capa, número de destaque</td></tr>
+<tr><td><code>text-7xl</code></td><td>72 px</td><td>manchete de campanha</td></tr>
+</table>
+</div>
+
+<div class="trytailwind" data-goal="css:#alvo|font-size=24px;;rule:font-size: var(--text-2xl)">
+  <p class="try-task">O preço do pão está do tamanho do texto comum. Ponha <code>text-2xl</code>
+  nele, para o preço saltar sem competir com o título.</p>
+  <pre class="html">&lt;p id="alvo" class="font-semibold text-amber-900"&gt;R$ 18,00&lt;/p&gt;</pre>
+  <pre class="out">
+color: oklch(0.414 0.112 45.904)
+font-weight: 600
+</pre>
+  <pre class="solucao">&lt;p id="alvo" class="text-2xl font-semibold text-amber-900"&gt;R$ 18,00&lt;/p&gt;</pre>
+</div>
+
+<p>O painel mostra duas linhas novas: <code>font-size: 24px</code> e <code>line-height: 32px</code>.
+Essa segunda linha é a primeira pista de que tamanho não vem sozinho — a gente chega lá na seção 5. E
+repare no CSS gerado, que aponta para a variável da escala, como todas as classes de tema do Tailwind
+v4:</p>
+
+<pre class="term">.text-2xl {
+  font-size: var(--text-2xl);
+  line-height: var(--tw-leading, var(--text-2xl--line-height));
+}</pre>
+
+<p>O nome <code>--text-2xl</code> vale <code>1.5rem</code>, que dá 24 px no tamanho padrão. Você não
+precisa decorar a variável; precisa reconhecer que a classe não escreve 24 px na unha — ela aponta
+para a escada. É por isso que a escala é consistente e por isso que ela pode ser trocada de uma vez
+em um projeto.</p>
+
+<h2>4. rem, não pixel</h2>
+
+<p>Todos os degraus são em <code>rem</code>, e isso não é detalhe técnico: é acessibilidade. Um
+<code>rem</code> é o tamanho da fonte raiz do documento, que na maioria dos navegadores vale 16 px.
+Quando você escreve <code>text-base</code>, o navegador aplica <code>1rem</code>. Quando escreve
+<code>text-2xl</code>, aplica <code>1.5rem</code> — 24 px, porque 1,5 × 16 = 24.</p>
+
+<p>A diferença aparece quando o leitor muda o tamanho padrão do navegador, seja nas configurações,
+seja com o zoom. Se a sua página usasse pixels fixos, o texto continuaria com 16 px e ignoraria a
+preferência da pessoa. Com <code>rem</code>, tudo cresce junto: quem precisa de letra maior navega
+confortável, e o desenho não quebra, porque os espaçamentos também são em <code>rem</code>. É a mesma
+lógica da escala de espaçamento da aula da primeira classe.</p>
+
+<p>Isso tem uma consequência prática gostosa: você pode desenhar pensando em proporções e não em
+pixels. <code>text-sm</code> é menor que <code>text-base</code> em qualquer configuração;
+<code>text-4xl</code> é sempre o dobro de <code>text-2xl</code>. A relação entre os tamanhos se
+mantém, mesmo quando o tamanho absoluto muda.</p>
+
+<p>Faça a conta com um leitor que configurou a fonte do navegador em 20 px, o que é comum entre
+pessoas com vista cansada. Nesse navegador, <code>text-base</code> vira 20 px e
+<code>text-2xl</code> vira 30 px; o texto de 13 px do colchete continua 13 px. A página inteira
+cresce em volta dele, e o aviso "miudinho" fica ainda mais difícil de ler, justamente para quem mais
+precisa. É por esse tipo de detalhe que o guia insiste em <code>rem</code>: a escolha parece técnica,
+mas o efeito é gente lendo ou desistindo.</p>
+
+<dl class="anatomy">
+<dt>rem</dt>
+<dd>Unidade relativa ao tamanho da fonte raiz. Por padrão, 1 rem = 16 px. A escala de texto é toda em
+rem.</dd>
+<dt>px</dt>
+<dd>Pixel, unidade absoluta. Não acompanha a preferência de fonte do leitor — use só em casos
+específicos.</dd>
+<dt>escala</dt>
+<dd>Os degraus nomeados de <code>text-xs</code> a <code>text-9xl</code>. Cada degrau traz tamanho e
+entrelinha juntos.</dd>
+<dt>entrelinha</dt>
+<dd>A altura de cada linha de texto (<code>line-height</code>). Vem junto com o tamanho e pode ser
+ajustada depois.</dd>
+<dt>hierarquia</dt>
+<dd>A diferença visível de importância entre título, subtítulo e corpo. Sem ela, o leitor não sabe
+por onde começar.</dd>
+</dl>
+
+<h2>5. A entrelinha vem de carona</h2>
+
+<p>Quem vem de CSS puro estranha: no Tailwind, cada tamanho de texto já traz uma altura de linha
+combinada. <code>text-sm</code> vem com 20 px de entrelinha, <code>text-base</code> com 24 px,
+<code>text-4xl</code> com 40 px. Não é preguiça: é o par que funciona. Texto pequeno com entrelinha
+de texto grande fica esparramado; texto grande com entrelinha pequena sufoca.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Tamanho</th><th>Entrelinha que vem junto</th></tr>
+<tr><td><code>text-xs</code></td><td>12 px</td><td>16 px</td></tr>
+<tr><td><code>text-sm</code></td><td>14 px</td><td>20 px</td></tr>
+<tr><td><code>text-base</code></td><td>16 px</td><td>24 px</td></tr>
+<tr><td><code>text-lg</code></td><td>18 px</td><td>28 px</td></tr>
+<tr><td><code>text-2xl</code></td><td>24 px</td><td>32 px</td></tr>
+<tr><td><code>text-4xl</code></td><td>36 px</td><td>40 px</td></tr>
+</table>
+</div>
+
+<p>Quando quiser mexer só na entrelinha, existe a família <code>leading-</code>, com valores como
+<code>leading-tight</code> e <code>leading-relaxed</code>. Ela substitui a entrelinha que veio com o
+tamanho, sem mexer no tamanho. Isso é assunto de uma aula inteira — <a href="entrelinha.html">
+Entrelinha e Espaçamento</a> —, e a única coisa que você precisa guardar agora é que o número de
+baixo no painel não é erro: é o par do tamanho.</p>
+
+<h2>6. Hierarquia: três tamanhos bastam</h2>
+
+<p>Agora a parte que separa página bonita de página confusa. Hierarquia não é ter muitos tamanhos;
+é ter <em>poucos</em> e repetir. Uma página da padaria fica clara com três: um título grande, um
+corpo médio e um apoio pequeno. Se aparecer um quarto nível, ele costuma ser um erro de conteúdo, não
+uma necessidade de desenho.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Papel</th><th>Classe sugerida</th><th>Quando usar</th></tr>
+<tr><td>título da página</td><td><code>text-3xl</code> ou <code>text-4xl</code></td><td>uma vez por página, no <code>&lt;h1&gt;</code></td></tr>
+<tr><td>título de seção</td><td><code>text-xl</code> ou <code>text-2xl</code></td><td>a cada bloco de conteúdo</td></tr>
+<tr><td>corpo</td><td><code>text-base</code></td><td>parágrafos, descrições, listas</td></tr>
+<tr><td>apoio</td><td><code>text-sm</code></td><td>legenda, data, texto de ajuda</td></tr>
+<tr><td>miúdo</td><td><code>text-xs</code></td><td>aviso legal, contador, etiqueta</td></tr>
+</table>
+</div>
+
+<p>Três decisões, repetidas, fazem o site parecer desenhado. Cinco tamanhos diferentes na mesma
+página fazem parecer que cada bloco foi escrito em um dia. E tem um detalhe de implementação que
+ajuda: como o tamanho não vem mais do navegador, você pode usar <code>&lt;h2&gt;</code> por
+semântica — para leitores de tela e buscadores — e dar a ele o tamanho que o desenho pede, mesmo que
+seja <code>text-lg</code>. A tag diz o que é; a classe diz quanto ocupa.</p>
+
+<p>Essa separação é uma das maiores vantagens do Tailwind. Em HTML puro, escolher a tag já escolhia o
+tamanho, e quem precisava de um <code>&lt;h2&gt;</code> pequeno acabava usando uma
+<code>&lt;div&gt;</code> — o que estraga a leitura por leitor de tela. No Tailwind, tag e tamanho são
+decisões independentes, e você não precisa sacrificar uma pela outra.</p>
+
+<p>Uma última conta que ajuda a escolher o tamanho do corpo: quanto maior a letra, menos caracteres
+cabem na linha, e a linha confortável tem entre 45 e 75 caracteres. Por isso uma página com
+<code>text-lg</code> no corpo pede uma coluna mais estreita que uma com <code>text-base</code>. Se
+você aumentar o tamanho e a linha ficar longa demais, o texto cansa — mas o problema não é o tamanho,
+é a largura. O par natural é <code>text-base</code> com <code>max-w-prose</code>, da aula de
+<a href="min-e-max.html">Mínimos e Máximos</a>, e é surpreendente quantas páginas melhoram só com
+esses dois nomes.</p>
+
+<h2>7. Fora da escala: o colchete</h2>
+
+<p>De vez em quando o desenho pede um tamanho que não está na escada: 13 px para um aviso, 22 px
+para um preço. A solução é o colchete, como em qualquer valor arbitrário:
+<code>text-[13px]</code>, <code>text-[22px]</code>, <code>text-[1.4rem]</code>.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|font-size=13px">
+  <p class="try-task">O aviso legal precisa ficar em 13 px, um tamanho que não está na escala. Use
+  <code>text-[13px]</code>.</p>
+  <pre class="html">&lt;p id="alvo" class="text-xs text-stone-500"&gt;Consumir preferencialmente no dia da compra.&lt;/p&gt;</pre>
+  <pre class="out">
+color: oklch(0.553 0.013 58.071)
+font-size: 12px
+line-height: 16px
+</pre>
+  <pre class="solucao">&lt;p id="alvo" class="text-[13px] text-stone-500"&gt;Consumir preferencialmente no dia da compra.&lt;/p&gt;</pre>
+</div>
+
+<p>Funciona, e o painel mostra <code>font-size: 13px</code>. Mas repare no que você perdeu: a
+entrelinha de 16 px que vinha com o <code>text-xs</code> não veio junto, e um zoom do leitor não vai
+aumentar esse texto, porque 13 px é um valor absoluto. O colchete é uma decisão consciente de sair do
+sistema. Use quando o valor tem motivo — um aviso que precisa caber em uma linha, um número de
+destaque desenhado no Figma — e prefira <code>rem</code> quando quiser manter a acessibilidade:
+<code>text-[0.8rem]</code> dá 12,8 px e acompanha a preferência do leitor.</p>
+
+<p>O que não vale é o hábito. Se você se pegar escrevendo <code>text-[17px]</code>,
+<code>text-[19px]</code> e <code>text-[21px]</code> na mesma página, não está desenhando: está
+fugindo da escala. Os três degraus vizinhos (<code>text-base</code>, <code>text-lg</code>,
+<code>text-xl</code>) existem justamente para você não precisar dessa precisão toda.</p>
+
+<h2>8. Tamanho que muda com a tela</h2>
+
+<p>Um título de 36 px fica elegante no monitor e ocupa metade do celular. Em vez de escolher um meio
+termo que não serve em nenhum dos dois, o Tailwind permite dizer "20 px no celular, 36 px a partir de
+768 px". Isso é feito com um prefixo de breakpoint na classe de tamanho.</p>
+
+<div class="trytailwind" data-largura="768" data-goal="css:#alvo|font-size=36px;;largura:768">
+  <p class="try-task">Esta prévia tem 768 px de largura, o ponto em que o prefixo <code>md:</code>
+  passa a valer. Deixe o título em <code>text-xl</code> no celular e <code>md:text-4xl</code> a partir
+  daí.</p>
+  <pre class="html">&lt;h2 id="alvo" class="text-xl font-semibold"&gt;Pão quentinho a toda hora&lt;/h2&gt;</pre>
+  <pre class="out">
+font-size: 20px
+font-weight: 600
+line-height: 28px
+</pre>
+  <pre class="solucao">&lt;h2 id="alvo" class="text-xl font-semibold md:text-4xl"&gt;Pão quentinho a toda hora&lt;/h2&gt;</pre>
+</div>
+
+<p>Leia a classe da direita para a esquerda: <code>md:text-4xl</code> quer dizer "quando a tela tiver
+pelo menos 768 px, use 36 px". Abaixo disso, vale o <code>text-xl</code> de antes. Essa é a lógica
+<em>mobile first</em> do Tailwind: você descreve o celular primeiro e vai acrescentando o que muda
+nas telas maiores. O prefixo nunca diz "no celular"; ele diz "daqui para cima".</p>
+
+<p>O CSS gerado deixa isso explícito: a classe com prefixo aparece dentro de um bloco de mídia, que
+só vale quando a tela alcança aquele tamanho.</p>
+
+<pre class="term">@media (width >= 48rem) {
+  .md\:text-4xl {
+    font-size: var(--text-4xl);
+    line-height: var(--tw-leading, var(--text-4xl--line-height));
+  }
+}</pre>
+
+<p>Quarenta e oito <code>rem</code> são 768 px no tamanho de fonte padrão — e é por isso que o
+breakpoint é escrito em <code>rem</code> e não em pixel: se o leitor aumentar a fonte do navegador, o
+ponto de corte sobe junto. A aula de <a href="breakpoints.html">Os Breakpoints</a> tem a lista
+completa de pontos de corte; para hoje, basta <code>md:</code> e a ideia de que só o que muda precisa
+de prefixo.</p>
+
+<p>A tentação, quando se descobre o prefixo, é usar quatro breakpoints em todo título. Resista. Cada
+ponto de corte a mais é uma decisão a mais para manter e uma combinação a mais para testar; na
+prática, o título de página costuma precisar de dois tamanhos (celular e mesa) e o corpo de nenhum,
+porque 16 px lê bem em qualquer largura. Se você não sabe por que está mudando o tamanho naquele
+ponto, provavelmente não precisa mudar.</p>
+
+<p>Vale observar também que o prefixo não reescreve a classe: <code>text-xl</code> continua valendo
+abaixo do ponto de corte, e <code>md:text-4xl</code> só entra em cena a partir dele. Por isso a ordem
+no HTML é sempre "o menor primeiro, o maior depois", e é por isso que quem escreve
+<code>text-4xl md:text-xl</code> vê o título pequeno na tela grande e grande na pequena — o prefixo
+não é um "senão", é um "a partir daqui".</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o título enorme no celular</h3>
+<p>A Ana usou <code>text-5xl</code> no título da capa. No monitor, imponente. No celular, a palavra
+"fermentação" não cabia e o navegador quebrou no meio, deixando uma sílaba órfã na linha de baixo.
+A correção não foi diminuir o título para todo mundo, e sim usar <code>text-3xl md:text-5xl</code>:
+48 px onde há espaço, 30 px onde não há. Título grande é decisão de tela grande.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o texto de 12 px que ninguém consegue ler</h3>
+<p>Para "caber mais coisa" na tabela de preços, ela baixou tudo para <code>text-xs</code>. No
+notebook, dava para ler com esforço; no celular, virou letra miúda de bula. A regra prática: 16 px é
+o piso confortável para leitura contínua; 14 px serve para apoio curto; 12 px só para o que não
+precisa ser lido de verdade, como um número de versão. Se a tabela não cabe, o problema é a
+quantidade de colunas, não o tamanho da letra.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: os cinco tamanhos da mesma página</h3>
+<p>Ela foi ajustando cada bloco até gostar: 17 px aqui, 19 px ali, 22 px no preço. Sozinho, cada
+bloco estava bom; a página parecia tremida, sem ritmo. O conserto foi apagar todos os colchetes e
+voltar para a escada: <code>text-base</code> no corpo, <code>text-sm</code> no apoio,
+<code>text-2xl</code> no preço. A página ficou mais simples e mais bonita ao mesmo tempo, que é o
+sinal de que a escala estava certa desde o começo.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Por que o <code>&lt;h1&gt;</code> ficou do tamanho
+do texto no Tailwind?</p>
+<label><input type="radio" name="q1"> porque o Tailwind removeu a tag <code>h1</code> do HTML</label>
+<label><input type="radio" name="q1"> porque o preflight zera o tamanho dos títulos, e você escolhe com <code>text-</code></label>
+<label><input type="radio" name="q1"> porque faltou instalar o arquivo de configuração</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual é o tamanho de <code>text-base</code>?</p>
+<label><input type="radio" name="q2"> 12 px, o menor da escala</label>
+<label><input type="radio" name="q2"> 24 px, o dobro do mínimo</label>
+<label><input type="radio" name="q2"> 16 px, equivalente a 1 rem</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que <code>md:text-4xl</code> faz?</p>
+<label><input type="radio" name="q3"> aplica 36 px a partir de 768 px de largura</label>
+<label><input type="radio" name="q3"> aplica 36 px só no celular</label>
+<label><input type="radio" name="q3"> aumenta o texto em 4 vezes quando o mouse passa</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o preço da vitrine</h2>
+<p>O preço do bolo precisa ficar grande, com 24 px, sem sair da escala. Depois responda: qual é a
+classe do tamanho?</p>
+<div class="ex-code">&lt;p class="<input aria-label="resposta 1" data-answer="text-2xl" placeholder="..."> font-semibold text-amber-900"&gt;R$ 42,00&lt;/p&gt;</div>
+<p class="ex-dica">Dica: 24 px é o degrau que vem depois de <code>text-xl</code> (20 px). Se você
+escrever <code>text-[24px]</code>, funciona na tela, mas perde a entrelinha combinada e o ajuste de
+fonte do leitor.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O Tailwind não deixa o navegador decidir tamanho de título: o preflight zera o
+<code>font-size</code> e o <code>font-weight</code> de <code>h1</code> a <code>h6</code>, e você
+escolhe com <code>text-</code>. A escala vai de <code>text-xs</code> (12 px) a
+<code>text-9xl</code> (128 px), com <code>text-base</code> (16 px) no meio como tamanho normal. Tudo
+é em <code>rem</code>, então acompanha a preferência de leitura de quem visita.</p>
+
+<p>Cada tamanho traz uma entrelinha combinada, que você pode trocar depois com
+<code>leading-</code>. Hierarquia se faz com três ou quatro tamanhos repetidos, e a tag HTML pode ser
+escolhida pela semântica, não pelo tamanho. Para valores fora da escada, existe o colchete — com o
+custo de perder a entrelinha e o ajuste do leitor. E para telas diferentes, o prefixo
+<code>md:</code> muda o tamanho daqui para cima, sem duplicar a página.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>O preflight zera o tamanho dos títulos: <code>h1</code> sem classe tem o tamanho do texto.</li>
+<li>Escala: xs 12, sm 14, base 16, lg 18, xl 20, 2xl 24, 3xl 30, 4xl 36, 5xl 48 px.</li>
+<li><code>text-base</code> = 1 rem = 16 px: o tamanho normal.</li>
+<li>A escala é em <code>rem</code>, então respeita o zoom e a fonte escolhida pelo leitor.</li>
+<li>Cada tamanho traz entrelinha própria; <code>leading-</code> ajusta só ela.</li>
+<li>Cor é <code>text-</code> + família + número; tamanho é <code>text-</code> + nome do degrau.</li>
+<li>Três tamanhos repetidos fazem hierarquia; cinco tamanhos fazem bagunça.</li>
+<li><code>text-[13px]</code> funciona, mas perde a entrelinha e não acompanha o zoom.</li>
+<li><code>md:text-4xl</code> vale de 768 px para cima; abaixo, vale a classe sem prefixo.</li>
+<li>Tag diz o que o elemento é; classe diz o tamanho que ele ocupa.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

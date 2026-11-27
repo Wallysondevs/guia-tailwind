@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peso e Estilo | Guia Tailwind</title>
+<meta name="description" content="Peso e estilo no Tailwind: font-normal a font-black, quando usar 400, 600 e 700, o itálico com font-style e por que negrito demais apaga a hierarquia da página.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Peso e <span class="hl">Estilo</span></h1>
+<p class="intro">A Ana decidiu que o preço do pão precisava "chamar atenção" e colocou negrito em
+tudo: no título, no preço, na descrição e até na linha do horário. O resultado foi o contrário do
+esperado — quando tudo é negrito, nada é. Nesta aula ela aprende que negrito é uma escolha de
+<em>peso</em>, que existe uma escada de nove pesos entre o fininho e o grosso, e que o itálico é
+outra decisão, de <em>estilo</em>. Duas alavancas diferentes, que ela vinha usando como se fossem
+uma só.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é peso de fonte e por que ele vai de 100 a 900.</li>
+  <li>Os nomes das classes, de <code>font-thin</code> a <code>font-black</code>.</li>
+  <li>Por que 400 é normal e 700 é negrito, e onde ficam o 500 e o 600.</li>
+  <li>A diferença entre <code>&lt;strong&gt;</code> no HTML e <code>font-bold</code> na classe.</li>
+  <li>Itálico com <code>italic</code>, e quando ele atrapalha em vez de ajudar.</li>
+  <li>Por que trocar o peso muda a largura do texto e pode empurrar o layout.</li>
+  <li>Quando o peso "não funciona": fontes que só têm dois pesos.</li>
+</ul>
+</div>
+
+<h2>1. A cena: negrito em tudo</h2>
+
+<p>A página do pão de fermentação tinha um título, um preço e uma descrição. O preço era o número
+mais importante da tela — é o que a cliente procura — e estava do mesmo jeito que o resto: texto
+normal, sem graça. A Ana resolveu com negrito. Depois de duas semanas, o negrito estava no título, no
+preço, nos nomes dos produtos, nos avisos e nos links. A página ficou uniformemente cinzenta e
+gritada ao mesmo tempo.</p>
+
+<p>O que ela descobriu, testando, é que negrito não é um botão de "importante": é um degrau numa
+escada. Usar o degrau mais alto em tudo é como um professor que fala gritando — no começo assusta,
+logo vira ruído. O leitor precisa de contraste entre o normal e o importante, e esse contraste só
+existe se a maior parte do texto ficar no normal.</p>
+
+<p>Antes de continuar, vale separar duas coisas que o menu de qualquer editor mistura: <strong>peso</strong>
+é a espessura do traço da letra, e <strong>estilo</strong> é a inclinação. São propriedades
+diferentes, com classes diferentes, e podem ser combinadas. A Ana estava usando só o peso, e nem
+sabia que o estilo existia.</p>
+
+<h2>2. O peso é um número de 100 a 900</h2>
+
+<p>O CSS mede peso em números de 100 a 900, em passos de 100. Quanto maior, mais grosso o traço. O
+valor 400 é o texto normal; 700 é o negrito clássico. O Tailwind dá um nome a cada degrau e uma
+classe para cada nome — e a correspondência é direta:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Número</th><th>Onde costuma servir</th></tr>
+<tr><td><code>font-thin</code></td><td>100</td><td>título gigante de capa, onde o traço fino fica elegante</td></tr>
+<tr><td><code>font-light</code></td><td>300</td><td>texto grande de apoio, citação</td></tr>
+<tr><td><code>font-normal</code></td><td>400</td><td>o corpo do texto — o padrão</td></tr>
+<tr><td><code>font-medium</code></td><td>500</td><td>rótulo de campo, item de menu</td></tr>
+<tr><td><code>font-semibold</code></td><td>600</td><td>subtítulo, nome de produto, botão</td></tr>
+<tr><td><code>font-bold</code></td><td>700</td><td>título de seção, preço, destaque</td></tr>
+<tr><td><code>font-black</code></td><td>900</td><td>número de campanha, manchete</td></tr>
+</table>
+</div>
+
+<p>Faltam dois na tabela para não ficar comprida: <code>font-extralight</code> (200) e
+<code>font-extrabold</code> (800). Eles existem e são usados raramente, porque a diferença para o
+vizinho é pequena e o olho não percebe. Na prática, um site bem resolvido usa três pesos: 400 no
+corpo, 600 nos subtítulos e 700 no título principal. É a mesma lição da escala de tamanho: poucos
+degraus, repetidos, fazem parecer desenhado.</p>
+
+<p>O CSS gerado é curto e usa uma variável de tema para o número:</p>
+
+<pre class="term">.font-semibold {
+  --tw-font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-semibold);
+}
+
+.italic {
+  font-style: italic;
+}</pre>
+
+<p>A variável <code>--font-weight-semibold</code> vale 600, e o Tailwind ainda guarda esse número
+numa variável intermediária (<code>--tw-font-weight</code>) para combinar com outras classes da mesma
+família. Você não precisa dessa mecânica para usar; ela importa quando duas classes de peso caem no
+mesmo elemento e você quer saber quem ganha — a resposta, como sempre, é a última que o Tailwind
+gerou.</p>
+
+<p>Os números da escada também moram no tema, e é por isso que eles são iguais em todo projeto
+Tailwind:</p>
+
+<pre class="term">:root {
+  --font-weight-normal: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}</pre>
+
+<p>Se um dia você criar uma fonte com um peso fora da escada — 450, por exemplo —, o caminho é
+declarar essa variável no <code>@theme</code>, do nível 3. Para o dia a dia, os nove degraus são mais
+do que suficientes, e a limitação real não está no Tailwind: está na fonte que você escolheu.</p>
+
+<h2>3. A escolha prática: 400, 600 e 700</h2>
+
+<p>A pergunta "qual peso usar?" tem uma resposta mais fácil do que parece. Comece tudo em 400. Dê
+600 ao que precisa ser encontrado no meio do texto: nome de produto, rótulo de botão, subtítulo.
+Reserve 700 para o que precisa ser visto antes de ser lido: o título da página, o preço. Se você não
+sabe em qual dos dois cai, use 600 — é mais seguro, porque o 700 em excesso engrossa a página.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|font-weight=700;;rule:font-weight: var(--font-weight-bold)">
+  <p class="try-task">Este é o preço principal da vitrine, e está no peso normal. Ponha
+  <code>font-bold</code> nele.</p>
+  <pre class="html">&lt;p id="alvo" class="text-2xl text-amber-900"&gt;R$ 18,00&lt;/p&gt;</pre>
+  <pre class="out">
+color: oklch(0.414 0.112 45.904)
+font-size: 24px
+line-height: 32px
+</pre>
+  <pre class="solucao">&lt;p id="alvo" class="text-2xl font-bold text-amber-900"&gt;R$ 18,00&lt;/p&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>font-weight: 700</code> ao lado do tamanho de 24 px que já
+estava lá. Compare as duas versões: o número fica mais pesado sem ficar maior. É exatamente essa a
+diferença entre peso e tamanho, e a próxima seção é sobre ela.</p>
+
+<p>O 500 merece uma palavra, porque é o degrau que mais decepciona. Em muitas fontes, a diferença
+entre 400 e 500 é quase invisível na tela, principalmente em corpo pequeno. Ele brilha em rótulos de
+formulário e itens de menu, onde o texto é curto e o olho compara com o que está em volta. Se você
+usar 500 esperando o impacto do negrito, vai achar que a classe não funcionou — e a culpa não é dela,
+é da expectativa. Para impacto, 600 ou 700.</p>
+
+<h2>4. 400 e 700: quem decide o negrito</h2>
+
+<p>Antes de existir CSS, o HTML já tinha uma ideia de ênfase: as tags
+<code>&lt;strong&gt;</code> e <code>&lt;em&gt;</code>. A primeira marca importância; a segunda,
+ênfase na leitura. O navegador desenha <code>&lt;strong&gt;</code> em negrito e
+<code>&lt;em&gt;</code> em itálico, e o Tailwind não tira isso: o preflight deixa a regra
+<code>font-weight: bolder</code> para <code>strong</code> e <code>b</code>.</p>
+
+<p>Isso cria uma dúvida boa: uso <code>&lt;strong&gt;</code> ou <code>font-bold</code>? A resposta é
+"depende do que você quer dizer". <code>&lt;strong&gt;</code> diz ao leitor de tela, ao buscador e
+ao navegador que aquilo é importante — a aparência vem de brinde. <code>font-bold</code> só muda a
+aparência, sem dizer nada a ninguém. Se a palavra é importante de verdade, use a tag; se é só o
+desenho do preço, use a classe.</p>
+
+<pre class="file" data-file="pao.html">&lt;p&gt;&lt;strong&gt;Atenção:&lt;/strong&gt; encomendas para o mesmo dia até as 10h.&lt;/p&gt;
+&lt;p class="font-bold text-2xl"&gt;R$ 18,00&lt;/p&gt;</pre>
+
+<p>Na primeira linha, o negrito é informação. Na segunda, é desenho. As duas coisas convivem, e
+quem escreve HTML há mais tempo costuma usar a tag para o primeiro caso e a classe para o segundo.
+Vale saber também que <code>&lt;b&gt;</code> existe e faz negrito sem importância semântica — mas na
+prática ninguém usa, porque a classe é mais clara e combina com o resto do Tailwind.</p>
+
+<p>O <code>&lt;em&gt;</code> segue a mesma lógica, do lado do estilo. Ele marca ênfase de leitura, e o
+navegador desenha em itálico; um leitor de tela pode anunciar a palavra com outra entonação, o que
+faz diferença em uma frase como "o pão sai <em>às seis</em>". Se a inclinação for só decoração, use
+<code>italic</code>; se for a palavra que muda o sentido da frase, use <code>&lt;em&gt;</code>. É o
+mesmo raciocínio do parágrafo anterior, aplicado à outra alavanca — e o hábito de fazer essa pergunta
+antes de escrever a classe é o que separa HTML decente de HTML bonito por fora e oco por dentro.</p>
+
+<h2>5. Peso não é tamanho</h2>
+
+<p>São duas alavancas independentes, e confundi-las é o erro mais comum de quem está começando. Peso
+muda a espessura; tamanho muda a altura da letra. Um preço pode ser grande e leve, pequeno e pesado,
+grande e pesado. Cada combinação diz uma coisa diferente.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Combinação</th><th>Efeito na leitura</th><th>Onde faz sentido</th></tr>
+<tr><td>grande + 400</td><td>elegante, discreto, deixa o conteúdo falar</td><td>título de página editorial</td></tr>
+<tr><td>grande + 700</td><td>forte, comercial, chama antes de ler</td><td>preço, manchete de promoção</td></tr>
+<tr><td>pequeno + 600</td><td>rótulo firme, fácil de escanear</td><td>botão, etiqueta, menu</td></tr>
+<tr><td>pequeno + 400</td><td>texto de apoio comum</td><td>legenda, descrição, aviso</td></tr>
+</table>
+</div>
+
+<p>Repare que a combinação mais comum em site de padaria é justamente a que a Ana não tinha: preço
+grande e pesado, descrição pequena e normal. Quando ela colocou negrito em tudo, perdeu essa
+diferença — o preço passou a competir com a descrição em vez de mandar na tela. Aumentar o peso de um
+elemento só funciona porque os outros continuam leves.</p>
+
+<p>E tem a combinação que quase ninguém tenta e fica ótima: título grande com peso 300 ou 400. Em
+fonte grande, o traço fino fica legível e elegante; é o que revistas e restaurantes usam para parecer
+sofisticados. Em fonte pequena, o mesmo 300 fica fraco e difícil de ler. Peso e tamanho conversam:
+quanto maior a letra, mais leve ela pode ser.</p>
+
+<h2>6. Itálico: o estilo é outra alavanca</h2>
+
+<p>Peso é espessura; estilo é inclinação. No CSS, quem cuida disso é <code>font-style</code>, e o
+Tailwind tem duas classes: <code>italic</code> e <code>not-italic</code>. A segunda serve para
+desfazer o itálico que veio de outro lugar, como uma citação dentro de um bloco já inclinado.</p>
+
+<p>Itálico é um recurso de leitura, não de decoração. Ele serve para palavras estrangeiras, títulos de
+obras, nomes científicos e ênfase dentro de uma frase. Em blocos longos, porém, cansa: a inclinação
+atrapalha o olho a voltar para o começo da linha seguinte. Por isso o uso clássico é curto — uma
+frase de citação, uma palavra, um trecho de depoimento.</p>
+
+<p>O caso mais comum do <code>not-italic</code> é o oposto: um bloco que já vem inclinado e um filho
+que não deve ser. Um <code>&lt;blockquote&gt;</code> com a classe <code>italic</code> inclina também
+o nome do autor; se você quer o depoimento inclinado e a assinatura reta, aplica
+<code>not-italic</code> só na assinatura. Sem essa classe, o único jeito seria reescrever a estrutura
+— e é justamente para evitar isso que o Tailwind tem o par completo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|font-weight=300;;rule:font-style: italic">
+  <p class="try-task">O depoimento da cliente deve ficar em itálico e com peso leve. Use
+  <code>font-light</code> e <code>italic</code>.</p>
+  <pre class="html">&lt;blockquote id="alvo" class="border-l-4 border-amber-300 pl-4 text-stone-700"&gt;
+  "O pão chega quentinho, do jeito que eu lembro da infância."
+&lt;/blockquote&gt;</pre>
+  <pre class="out">
+color: oklch(0.374 0.01 67.558)
+border-left-width: 4px
+border-color: oklch(0.879 0.169 91.605)
+padding-left: 16px
+</pre>
+  <pre class="solucao">&lt;blockquote id="alvo" class="border-l-4 border-amber-300 pl-4 font-light italic text-stone-700"&gt;
+  "O pão chega quentinho, do jeito que eu lembro da infância."
+&lt;/blockquote&gt;</pre>
+</div>
+
+<p>O painel mostra <code>font-weight: 300</code> e <code>font-style: italic</code> — duas propriedades
+diferentes, duas classes, uma decisão de desenho. Se a fonte que você usa tiver uma versão itálica de
+verdade, o navegador usa o desenho próprio, com letras desenhadas para inclinar; se não tiver, ele
+inclina a fonte normal, o que se chama itálico sintético e fica visivelmente pior. Fontes do sistema
+costumam ter a versão de verdade; fontes baixadas na pressa, não.</p>
+
+<h2>7. O peso muda a largura do texto</h2>
+
+<p>Um detalhe que ninguém conta: letra em negrito é mais larga. O mesmo parágrafo, em 700, ocupa mais
+espaço horizontal que em 400. Isso importa em dois momentos. O primeiro é no layout: um título curto
+que cabe em uma linha em 400 pode quebrar em duas em 700, e a caixa inteira cresce. O segundo é em
+interações: se você troca o peso no <code>hover</code>, o texto muda de largura e os vizinhos pulam —
+um efeito colateral que parece bug.</p>
+
+<p>O jeito de evitar o pulo é não trocar o peso no hover, e sim a cor ou o fundo. Se a troca de peso
+for indispensável, existem truques — reserve a largura do estado mais pesado, ou use uma fonte com
+pesos variáveis —, mas nenhum vale a complexidade para um botão de padaria. Mude a cor: é o que o
+leitor espera e o que não mexe no layout.</p>
+
+<p>Vale lembrar que <code>font-weight</code> também é herdado. Se um cartão inteiro estiver em
+<code>font-semibold</code>, o parágrafo dentro dele vai ficar semibold também, e o título vai precisar
+de <code>font-bold</code> para se diferenciar. Herança é conveniente e traiçoeira na mesma medida:
+quanto mais alta a classe na árvore, mais elementos ela afeta. Na dúvida, aplique o peso no parágrafo,
+não na caixa.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|font-weight=400">
+  <p class="try-task">O cartão inteiro está em negrito e até o horário ficou gritado. Devolva o peso
+  normal a este parágrafo, com <code>font-normal</code>.</p>
+  <pre class="html">&lt;div class="font-bold text-amber-900"&gt;
+  &lt;p&gt;Pão quentinho o dia inteiro&lt;/p&gt;
+  &lt;p id="alvo" class="text-sm"&gt;Aberto das 6h às 18h&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+font-size: 14px
+line-height: 20px
+</pre>
+  <pre class="solucao">&lt;div class="font-bold text-amber-900"&gt;
+  &lt;p&gt;Pão quentinho o dia inteiro&lt;/p&gt;
+  &lt;p id="alvo" class="text-sm font-normal"&gt;Aberto das 6h às 18h&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<dl class="anatomy">
+<dt>peso</dt>
+<dd>A espessura do traço, medida de 100 a 900. No Tailwind, <code>font-thin</code> até
+<code>font-black</code>.</dd>
+<dt>normal</dt>
+<dd>O peso 400, padrão do texto. Não precisa de classe, mas <code>font-normal</code> existe para
+desfazer herança.</dd>
+<dt>negrito</dt>
+<dd>O peso 700, o clássico. Pode vir da tag <code>&lt;strong&gt;</code> ou da classe
+<code>font-bold</code>.</dd>
+<dt>itálico</dt>
+<dd>A inclinação da letra, feita com <code>font-style</code>. No Tailwind, a classe
+<code>italic</code>.</dd>
+<dt>itálico sintético</dt>
+<dd>Quando a fonte não tem versão inclinada e o navegador inclina a normal. Fica menos legível.</dd>
+</dl>
+
+<h2>8. Quando o peso não funciona</h2>
+
+<p>Existe um motivo técnico para o <code>font-semibold</code> parecer igual ao texto normal, e ele
+não é erro de classe. O peso só aparece se a fonte tiver aquele desenho. Muitas fontes populares vêm
+em dois arquivos — normal e negrito —, e aí os pesos 500, 600 e 800 caem no mais próximo, ou são
+desenhados na hora pelo navegador. O resultado é um negrito "de mentira", mais grosso e borrado.</p>
+
+<p>Como saber? Se todos os pesos intermediários parecem iguais, a fonte provavelmente tem só dois. A
+solução é escolher uma família com mais pesos, de preferência uma fonte variável, que traz a escada
+inteira num arquivo só. Isso é assunto da aula de <a href="fontes-proprias.html">Fontes Próprias</a>,
+no nível 3; por hoje, basta saber que o problema pode estar no arquivo da fonte e não na classe.</p>
+
+<p>Há também o caso oposto: peso demais. <code>font-black</code> em texto pequeno fecha os vãos das
+letras e atrapalha a leitura; em texto grande, funciona. E há o peso como única hierarquia: uma página
+que só diferencia seções por negrito, sem tamanho nem espaço, fica confusa mesmo com o peso certo.
+Peso é uma alavanca entre três — as outras duas são tamanho e espaço em branco.</p>
+
+<p>Uma última confusão frequente, agora sobre acessibilidade: <code>font-bold</code> não é lido em
+voz alta por leitor de tela. Ele é só pintura. Quem usa leitor ouve a estrutura do HTML — títulos,
+listas, <code>&lt;strong&gt;</code> —, não a espessura da letra. Por isso um "aviso importante" que
+está apenas em negrito visual pode passar despercebido para parte do público. Se a informação é
+urgente, ela precisa estar em <code>&lt;strong&gt;</code> ou num bloco com papel claro, além de
+aparecer em negrito.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o botão que engorda ao passar o mouse</h3>
+<p>A Ana criou um botão com <code>font-medium</code> e, no hover, <code>font-bold</code>. O texto
+engordou, a largura aumentou e o botão pareceu tremer. A correção foi trocar o peso por cor:
+<code>hover:bg-amber-600</code>. O botão continua respondendo ao mouse, sem alterar o tamanho do texto
+nem empurrar o que está do lado.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o título que quebrou em duas linhas</h3>
+<p>No cartão de promoção, o título "Pão quentinho a toda hora" cabia em uma linha com peso 400. Ela
+achou que ficaria melhor em 800 e o título passou a ocupar duas linhas, aumentando o cartão e
+desalinhando a grade. Não era bug: letra mais grossa é mais larga. A solução foi manter 600 e diminuir
+um degrau no tamanho, o que manteve a força visual sem estourar a linha.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o itálico que ninguém lê</h3>
+<p>Ela inclinou um parágrafo inteiro de descrição para "dar charme". No celular, o bloco ficou difícil
+de acompanhar e duas clientes perguntaram se o texto estava desatualizado — itálico longo, para muita
+gente, parece aviso provisório. Ela voltou ao normal e guardou o itálico para o depoimento de uma
+linha, onde ele funciona como voz de outra pessoa.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que <code>font-semibold</code> faz?</p>
+<label><input type="radio" name="q1"> inclina a letra para a direita</label>
+<label><input type="radio" name="q1"> aplica peso 600, mais grosso que o normal e mais fino que o negrito</label>
+<label><input type="radio" name="q1"> aumenta o tamanho da letra em 6 pontos</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual é a diferença entre <code>&lt;strong&gt;</code>
+e <code>font-bold</code>?</p>
+<label><input type="radio" name="q2"> nenhuma, os dois são a mesma coisa</label>
+<label><input type="radio" name="q2"> <code>&lt;strong&gt;</code> é mais grosso que <code>font-bold</code></label>
+<label><input type="radio" name="q2"> <code>&lt;strong&gt;</code> marca importância também para leitores de tela; a classe só muda a aparência</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que o texto pode pular quando o peso muda no
+hover?</p>
+<label><input type="radio" name="q3"> porque letra mais grossa é mais larga e ocupa mais espaço</label>
+<label><input type="radio" name="q3"> porque o navegador recarrega a fonte a cada hover</label>
+<label><input type="radio" name="q3"> porque o Tailwind não aceita peso dentro de hover</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o nome do pão</h2>
+<p>O nome do pão precisa ficar em semibold, mais firme que o texto da descrição, mas sem chegar ao
+negrito. Depois responda: qual é a classe do peso 600?</p>
+<div class="ex-code">&lt;h3 class="<input aria-label="resposta 1" data-answer="font-semibold" placeholder="..."> text-lg text-amber-900"&gt;Pão de fermentação natural&lt;/h3&gt;</div>
+<p class="ex-dica">Dica: "semibold" é o nome do 600; o 700 se chama <code>font-bold</code>. Se você
+escrever <code>font-extrabold</code>, o nome do pão fica mais pesado que o título da página — e a
+hierarquia se inverte.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Peso é espessura e vai de 100 a 900, com nomes em inglês: <code>font-thin</code> é 100,
+<code>font-normal</code> é 400, <code>font-bold</code> é 700, <code>font-black</code> é 900. Na
+prática, três bastam: 400 no corpo, 600 nos subtítulos e rótulos, 700 no que precisa ser visto
+primeiro. Peso não é tamanho, e as duas alavancas se combinam — letra grande pode ser leve, letra
+pequena pesada pode ficar ilegível.</p>
+
+<p>Estilo é inclinação, feito com <code>italic</code> e <code>not-italic</code>, e é um recurso de
+leitura para trechos curtos: palavra estrangeira, título de obra, depoimento. Negrito e itálico não
+são enfeites para "dar personalidade" — são sinais. E, se o peso parecer não fazer efeito, desconfie
+da fonte: sem o desenho do peso, o navegador simula, e o resultado fica borrado.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Peso vai de 100 a 900; 400 é normal e 700 é negrito.</li>
+<li><code>font-medium</code> 500, <code>font-semibold</code> 600, <code>font-bold</code> 700.</li>
+<li>Três pesos por página bastam: 400, 600 e 700.</li>
+<li>Negrito em tudo apaga o destaque; o contraste é que faz o importante aparecer.</li>
+<li><code>&lt;strong&gt;</code> carrega significado; <code>font-bold</code> só muda a aparência.</li>
+<li>Peso não aumenta a letra: tamanho é <code>text-</code>, peso é <code>font-</code>.</li>
+<li>Itálico: <code>italic</code> para inclinar, <code>not-italic</code> para desfazer.</li>
+<li>Itálico cansa em texto longo; use em trechos curtos.</li>
+<li>Letra mais grossa é mais larga: trocar peso no hover pode empurrar o layout.</li>
+<li>Se os pesos intermediários parecem iguais, a fonte tem poucos pesos — não é a classe.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

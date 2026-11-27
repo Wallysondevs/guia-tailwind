@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alertas | Guia Tailwind</title>
+<meta name="description" content="Alertas no Tailwind: o casco com borda e fundo claro, a linha com ícone e título, as variantes de aviso, sucesso e erro, e o botão de fechar com o mínimo de JavaScript.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Alertas: a mensagem que <span class="hl">avisa</span></h1>
+<p class="intro">A Ana perdeu uma encomenda por causa de uma frase cinza. O formulário do site não
+conseguiu salvar, escreveu “tente novamente” no rodapé, em letra pequena, e a cliente fechou a aba
+achando que tinha dado certo. Alerta é a caixa que avisa — e é diferente de texto porque tem cor,
+borda, ícone e lugar próprio na página. Nesta aula a Ana monta o alerta da padaria do zero, aprende
+as quatro variantes, a faixa lateral que dá ênfase e, no fim, o botão de fechar com o mínimo de
+JavaScript.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O casco do alerta: fundo claro, borda média e texto escuro.</li>
+  <li>Por que as três cores vêm da mesma família.</li>
+  <li>A linha com ícone, título e mensagem, alinhada por cima.</li>
+  <li>As quatro variantes: informação, sucesso, atenção e erro.</li>
+  <li>A faixa lateral de 4 px que puxa o olho.</li>
+  <li>Como fechar o alerta com HTML, CSS e um pouco de JavaScript.</li>
+  <li>O atributo que faz o leitor de tela anunciar a mensagem.</li>
+  <li>Quando um alerta é exagero — e o que usar no lugar.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o “tente novamente” que ninguém leu</h2>
+
+<p>A encomenda da cliente não foi salva. O sistema tentou, falhou, e o site respondeu com uma frase
+em cinza claro, logo abaixo do botão, do mesmo tamanho do texto de apoio. A cliente clicou uma vez,
+viu a página recarregar e foi embora. Duas horas depois, ligou perguntando se o pão estava reservado.
+A frase estava lá — tecnicamente. O problema é que ninguém procura uma mensagem de erro: ela tem de
+aparecer.</p>
+
+<p>Alerta é a solução visual para isso. Ele quebra o ritmo da página: uma caixa colorida, com borda,
+respiro e um ícone, no lugar em que o olho já está. Não é enfeite; é o que separa “o site disse” de
+“o site avisou”. E, como todo componente, tem regras: cor com significado, texto curto, e um lugar
+previsível — normalmente o topo do formulário ou o topo da seção que falhou.</p>
+
+<p>Há também um alerta que não é de erro: o aviso de que o forno desliga às 14h, o sucesso da
+encomenda registrada, a informação de que o frete mudou. Todos usam o mesmo casco e mudam só as
+cores. Aprender um alerta é aprender os quatro.</p>
+
+<h2>2. As peças de um alerta</h2>
+
+<p>Um alerta bom tem cinco peças, e cada uma resolve um problema. O casco separa a mensagem do resto
+da página. A cor diz o tipo antes da leitura. O ícone dá o mesmo recado para quem não distingue as
+cores. O título resume em duas ou três palavras. E a mensagem explica o que fazer. Quando falta o
+título, a pessoa lê uma frase longa sem saber se é erro ou dica; quando falta a cor, a mensagem some
+no meio do texto.</p>
+
+<dl class="anatomy">
+<dt>casco</dt>
+<dd>A caixa do alerta: fundo no tom 50, borda no 300 e raio de 8 px. É o que o destaca do fundo
+branco.</dd>
+<dt>ícone</dt>
+<dd>Um símbolo curto — exclamação, certo, informação — que repete o recado da cor sem depender
+dela.</dd>
+<dt>título</dt>
+<dd>Duas ou três palavras em semibold: “Forno desligado”, “Encomenda salva”.</dd>
+<dt>mensagem</dt>
+<dd>Uma ou duas linhas com o que aconteceu e o que fazer agora. Sem jargão técnico.</dd>
+<dt>ação</dt>
+<dd>Opcional: um botão de fechar, um link “ver horários”, um botão “tentar de novo”.</dd>
+</dl>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>Classes</th><th>Detalhe</th></tr>
+<tr><td>casco</td><td><code>rounded-lg border p-4</code></td><td>borda de 1 px e raio de 8 px</td></tr>
+<tr><td>cor</td><td><code>bg-amber-50 border-amber-300 text-amber-900</code></td><td>três tons da mesma família</td></tr>
+<tr><td>linha</td><td><code>flex items-start gap-3</code></td><td>ícone e texto lado a lado, alinhados por cima</td></tr>
+<tr><td>ícone</td><td><code>shrink-0 text-lg font-bold</code></td><td>não encolhe quando o texto é longo</td></tr>
+<tr><td>título</td><td><code>font-semibold</code></td><td>identifica o tipo da mensagem</td></tr>
+<tr><td>mensagem</td><td><code>text-sm</code></td><td>menor que o corpo, maior que a legenda</td></tr>
+</table>
+</div>
+
+<p>Repare nas três cores do casco: fundo no tom 50, borda no 300 e texto no 900. É a receita de
+contraste do guia para caixas de aviso, e ela vale para todas as famílias. O fundo claro mantém a
+página respirando, a borda média desenha o limite e o texto escuro garante leitura. Se você usar
+fundo no 500, o alerta vira um bloco pesado que briga com o conteúdo; se usar texto no 500, a
+mensagem fica fraca demais justamente quando precisa ser lida.</p>
+
+<h2>3. O casco: quatro classes e a caixa aparece</h2>
+
+<p>Comece pelo fundo, que a Ana já tinha: <code>bg-amber-50</code>. O que falta é o resto do casco —
+<code>rounded-lg</code> para o canto, <code>border border-amber-300</code> para a linha,
+<code>p-4</code> para o respiro e <code>text-sm text-amber-900</code> para a letra. São quatro
+decisões, e nenhuma delas é de cor de texto comum: todas falam a língua do alerta.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=16px;;css:#alvo|border-radius=8px;;rule:border-color: var(--color-amber-300)">
+  <p class="try-task">A caixa de aviso está só com o fundo e parece um parágrafo pintado. Arredonde o
+  canto em 8 px, desenhe a borda âmbar 300, dê 16 px de respiro e deixe o texto em 14 px âmbar
+  900.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-50"&gt;O forno está desligado. As encomendas voltam às 14h.&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.987 0.022 95.277)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"&gt;O forno está desligado. As encomendas voltam às 14h.&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>padding: 16px</code>, <code>border-radius: 8px</code>, a largura da borda e a
+cor dela em <code>oklch(...)</code>. Repare que <code>border</code> e <code>border-amber-300</code>
+aparecem como duas coisas: uma diz a espessura e o estilo, a outra diz a cor. Sem a primeira, a
+segunda não desenha nada — o tropeço que a aula de <a href="bordas.html">bordas</a> repete e que
+volta sempre em alerta e em botão.</p>
+
+<p>Uma decisão de layout que rende: o alerta quase sempre ocupa a largura toda do formulário ou do
+cartão onde está. Como <code>div</code> já é um bloco que ocupa a largura disponível, você não precisa
+de <code>w-full</code>. E se ele estiver dentro de um container com respiro próprio, o
+<code>p-4</code> do alerta é o único respiro — o que dá a sensação de caixa, e não de texto
+deslocado.</p>
+
+<h2>4. A linha com ícone</h2>
+
+<p>Com o casco pronto, entram o ícone e o texto. O alerta vira uma linha flexível com
+<code>flex items-start gap-3</code>: o ícone fica à esquerda, o texto ocupa o resto e o espaço entre
+os dois é de 12 px. O <code>items-start</code> é a escolha certa aqui — se você usar
+<code>items-center</code>, o ícone desce para o meio de um texto de três linhas e a leitura
+desencontra.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=flex;;css:#alvo|gap=12px;;css:#alvo|align-items=flex-start">
+  <p class="try-task">O aviso tem um “!” em cima do título e o texto empurrado para baixo. Coloque os
+  dois na mesma linha, alinhados pelo topo, com 12 px entre eles e o ícone sem encolher.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-lg border border-amber-300 bg-amber-50 p-4"&gt;
+  &lt;span class="text-lg font-bold text-amber-700"&gt;!&lt;/span&gt;
+  &lt;p class="m-0 font-semibold text-amber-900"&gt;Forno desligado&lt;/p&gt;
+  &lt;p class="m-0 text-sm text-amber-800"&gt;As encomendas voltam às 14h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 8px
+border-width: 1px
+border-color: oklch(0.879 0.169 91.605)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4"&gt;
+  &lt;span class="shrink-0 text-lg font-bold text-amber-700"&gt;!&lt;/span&gt;
+  &lt;div&gt;
+    &lt;p class="m-0 font-semibold text-amber-900"&gt;Forno desligado&lt;/p&gt;
+    &lt;p class="m-0 text-sm text-amber-800"&gt;As encomendas voltam às 14h.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Tem duas mudanças de estrutura nessa solução, e as duas importam. O título e a mensagem passaram a
+estar dentro de um <code>div</code>: assim o flex trata os dois como um bloco só, e o ícone fica
+alinhado com o topo do conjunto. Sem esse agrupamento, cada parágrafo vira um item da linha e o
+alerta fica com três colunas. E o <code>shrink-0</code> no ícone impede que ele encolha quando a
+mensagem é longa — num alerta de três linhas, um ícone esmagado é pior do que nenhum.</p>
+
+<p>Sobre o ícone em si: qualquer caractere serve, e a Ana usa os que existem no teclado — <code>!</code>
+para atenção, <code>✓</code> para sucesso, <code>i</code> para informação, <code>×</code> para erro.
+Não é elegante como um ícone desenhado, mas é honesto, leve e funciona sem baixar arquivo nenhum. Se
+o projeto usar uma biblioteca de ícones, o lugar dele é no mesmo <code>span</code>, com as mesmas
+classes.</p>
+
+<p>Um detalhe de cor de texto: o título em <code>text-amber-900</code> e a mensagem em
+<code>text-amber-800</code>. Um degrau de diferença é o suficiente para separar hierarquia sem parecer
+duas cores. É o mesmo princípio do preço e da descrição no cartão.</p>
+
+<h2>5. As quatro variantes</h2>
+
+<p>A cor do alerta é informação, não decoração. Quatro recados cobrem praticamente tudo: informação
+(algo mudou, mas está tudo bem), sucesso (a ação funcionou), atenção (dá para continuar, mas cuidado)
+e erro (não deu, e precisa de ação). Trocar a cor sem trocar o recado é o jeito mais rápido de ensinar
+a cliente a ignorar alertas.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Tipo</th><th>Classes</th><th>Quando a Ana usa</th></tr>
+<tr><td>Informação</td><td><code>border-sky-300 bg-sky-50 text-sky-900</code></td><td>“O frete mudou para R$ 5”</td></tr>
+<tr><td>Sucesso</td><td><code>border-emerald-300 bg-emerald-50 text-emerald-900</code></td><td>“Encomenda salva para amanhã”</td></tr>
+<tr><td>Atenção</td><td><code>border-amber-300 bg-amber-50 text-amber-900</code></td><td>“O forno desliga às 14h”</td></tr>
+<tr><td>Erro</td><td><code>border-rose-300 bg-rose-50 text-rose-900</code></td><td>“Não foi possível salvar”</td></tr>
+</table>
+</div>
+
+<p>O CSS por trás é o mais simples do guia: cada classe aponta para uma variável da paleta. Vale ver
+as três juntas, porque é a única parte do alerta que você vai repetir em toda variante:</p>
+
+<pre class="term" data-title="CSS gerado">.bg-amber-50 {
+  background-color: var(--color-amber-50);
+}
+.border-amber-300 {
+  border-color: var(--color-amber-300);
+}
+.text-amber-900 {
+  color: var(--color-amber-900);
+}</pre>
+
+<p>Para trocar de variante, troque a família nas três classes: <code>amber</code> vira
+<code>rose</code>, e o alerta de atenção vira alerta de erro. O número de cada classe muda um pouco
+porque a receita é fundo 50, borda 300 e texto 900 — os mesmos três degraus em qualquer família. É
+por isso que decorar a receita vale mais do que decorar a lista.</p>
+
+<h2>6. A faixa lateral que puxa o olho</h2>
+
+<p>Quando o alerta precisa de mais peso — o erro que bloqueia a encomenda, por exemplo —, existe uma
+variante de uma borda grossa só de um lado. É a faixa lateral de 4 px, que funciona como um marcador
+de livro: dá ênfase sem encher a caixa de cor. Ela se combina com o fundo claro da mesma família e com
+o canto arredondado apenas do lado direito.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-left-width=4px;;rule:border-left-color: var(--color-rose-500);;css:#alvo|border-top-right-radius=8px">
+  <p class="try-task">O erro está sem destaque, e a cliente passa por ele. Dê a ele uma faixa
+  vermelha de 4 px só à esquerda — âmbar não, rose 500 — e arredonde apenas os cantos da
+  direita.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-rose-50 p-4 text-sm text-rose-900"&gt;Não foi possível salvar a encomenda. Confira o horário e tente de novo.&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.969 0.015 12.422)
+color: oklch(0.41 0.159 10.272)
+font-size: 14px
+line-height: 20px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-r-lg border-l-4 border-l-rose-500 bg-rose-50 p-4 text-sm text-rose-900"&gt;Não foi possível salvar a encomenda. Confira o horário e tente de novo.&lt;/div&gt;</pre>
+</div>
+
+<p>Três classes fazem o serviço: <code>border-l-4</code> diz “4 px de borda à esquerda”,
+<code>border-l-rose-500</code> diz a cor dessa borda e <code>rounded-r-lg</code> arredonda só os
+cantos da direita. O CSS gerado explica por que o arredondamento precisa ser assimétrico:</p>
+
+<pre class="term" data-title="CSS gerado">.rounded-r-lg {
+  border-top-right-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+}
+.border-l-4 {
+  border-left-style: var(--tw-border-style);
+  border-left-width: 4px;
+}
+.border-l-rose-500 {
+  border-left-color: var(--color-rose-500);
+}</pre>
+
+<p>Repare que a faixa usa o tom 500, e não o 300 do casco comum. Uma borda de 4 px no tom claro
+desaparece; no tom cheio, ela marca. É a única parte do alerta em que vale subir a saturação. E repare
+que o canto arredondado foi só para a direita: se a esquerda fosse arredondada também, a faixa sairia
+com as pontas comidas e o desenho perderia a força.</p>
+
+<p>Se o alerta tiver título e ícone, a faixa combina com eles numa boa — o ícone continua à esquerda,
+depois da faixa. O limite é o bom senso: uma faixa em cada alerta da página transforma a ênfase em
+ruído. Use a faixa no erro que bloqueia e na informação que muda o comportamento; deixe os avisos do
+dia a dia com o casco comum.</p>
+
+<h2>7. Fechar o alerta</h2>
+
+<p>Alerta de sucesso costuma ficar; alerta de aviso, às vezes, precisa de um jeito de sair da frente.
+A parte de HTML e CSS é fácil: um botão pequeno, à direita, com <code>ml-auto</code> para empurrar,
+<code>shrink-0</code> e um <code>hover</code> com fundo suave. O que faz o alerta sumir de verdade é
+uma linha de JavaScript — e é aqui que a aula pisa fora do Tailwind por um parágrafo.</p>
+
+<pre class="file" data-file="index.html">&lt;div id="aviso-forno" class="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4"&gt;
+  &lt;span class="shrink-0 text-lg font-bold text-amber-700"&gt;!&lt;/span&gt;
+  &lt;div class="flex-1"&gt;
+    &lt;p class="m-0 font-semibold text-amber-900"&gt;Forno desligado&lt;/p&gt;
+    &lt;p class="m-0 text-sm text-amber-800"&gt;As encomendas voltam às 14h.&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;button type="button" onclick="document.getElementById('aviso-forno').remove()"
+          class="shrink-0 rounded-md px-2 py-1 text-sm font-semibold text-amber-900 hover:bg-amber-100"&gt;
+    Fechar
+  &lt;/button&gt;
+&lt;/div&gt;</pre>
+
+<p>O trecho dentro de <code>onclick</code> é <strong>JavaScript</strong>, não Tailwind: ele procura o
+elemento pelo <code>id</code> e chama <code>remove()</code>, que tira a caixa da página. O resto é
+classes de sempre. Para um projeto de estudo, esse um-linha resolve. Em projeto de verdade, o ideal é
+um arquivo à parte, com um <code>addEventListener</code> — mas a lógica é exatamente a mesma.</p>
+
+<p>Um cuidado antes de dar um botão de fechar a todo alerta: se a mensagem é a única explicação de por
+que a encomenda não foi salva, fechar é apagar a informação. Nesse caso, a ação certa não é “Fechar”,
+é “Tentar de novo” — um botão que reenvia o formulário. E se o alerta é fixo no topo da página, como
+um aviso de feriado, ele deve ser fácil de fechar e não deve voltar a cada rolagem.</p>
+
+<p>Sobre o CSS do botão, dois detalhes de convivência com o flex: o <code>shrink-0</code> impede que
+ele encolha quando a mensagem é longa, e o <code>ml-auto</code> empurra o botão para a direita quando
+o texto não ocupa o espaço todo. Sem o <code>ml-auto</code>, o botão fica grudado na mensagem; com
+ele, fica na ponta, como o olho espera.</p>
+
+<h2>8. Acessibilidade e quando não usar alerta</h2>
+
+<p>Existe um atributo de HTML que faz o leitor de tela anunciar a mensagem no instante em que ela
+aparece: <code>role="alert"</code>. Ele não muda nada no visual e é a diferença entre uma pessoa cega
+saber que o formulário falhou ou continuar clicando num botão que não responde. Use nos alertas que
+aparecem depois de uma ação — erro de envio, sucesso de cadastro — e não nos avisos que já estavam na
+página desde o começo.</p>
+
+<pre class="file" data-file="index.html">&lt;div role="alert" class="rounded-lg border border-rose-300 bg-rose-50 p-4 text-sm text-rose-900"&gt;
+  Não foi possível salvar a encomenda. Confira o horário e tente de novo.
+&lt;/div&gt;</pre>
+
+<p>Três regras de convivência fecham o assunto. A primeira: alerta é para o que a pessoa precisa
+saber <em>agora</em>. Um site com cinco alertas na mesma tela não tem alerta nenhum — tem ruído. A
+segunda: mensagem de campo não é alerta. Quando o problema é um campo só, o aviso fica embaixo dele,
+em letra pequena vermelha, e não numa caixa no topo. A terceira: alerta não substitui texto. Se a
+informação vale para todo mundo e não muda, ela é conteúdo normal, com título e parágrafo.</p>
+
+<p>E há o caso do alerta que não deve aparecer nunca: o de sucesso que fica para sempre na tela, três
+dias depois de a encomenda ter sido salva. Alerta é sobre o agora. Se ele precisa continuar visível,
+provavelmente é um painel de status, e não um alerta — outro componente, com outra cara.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o alerta que empurrou o formulário</h3>
+<p>Quando o erro apareceu no topo do formulário, os campos desceram 60 px e o botão de enviar saiu do
+campo de visão de quem estava no celular. A cliente não viu o botão e achou que o site tinha travado.
+A correção foi deixar um espaço reservado para o alerta — um <code>div</code> vazio com
+<code>min-h-16</code> — e preenchê-lo só quando necessário. Alerta que muda o layout no meio da
+interação assusta mais do que informa.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o alerta de erro que veio em inglês</h3>
+<p>O sistema devolveu “Error 422: unprocessable entity” e a Ana colou no alerta, achando que era
+técnico o suficiente. Ninguém entendeu. A regra é escrever o que a pessoa pode fazer: “Não foi
+possível salvar. Confira o horário de retirada e tente de novo.” O detalhe técnico pode ficar num
+comentário do código; na tela, vai o que resolve.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o alerta de sucesso que parecia erro</h3>
+<p>Ela usou o casco vermelho para tudo, inclusive para “encomenda salva”, porque era a cor da marca.
+As clientes ligavam para confirmar se estava tudo bem. Cor de alerta é convenção, não identidade:
+vermelho é problema, verde é certo, âmbar é cuidado, azul é informação. A marca pode aparecer no
+botão do alerta, na borda ou no ícone — nunca trocando o significado.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual trio de tons forma o casco de um alerta?</p>
+<label><input type="radio" name="a1"> fundo 500, borda 700, texto 100</label>
+<label><input type="radio" name="a1"> fundo 50, borda 300, texto 900</label>
+<label><input type="radio" name="a1"> fundo 900, borda 500, texto 50</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que a linha do alerta usa <code>items-start</code>
+e não <code>items-center</code>?</p>
+<label><input type="radio" name="a2"> porque <code>items-center</code> não existe no Tailwind</label>
+<label><input type="radio" name="a2"> para o ícone ficar maior que o texto</label>
+<label><input type="radio" name="a2"> para o ícone ficar no topo e acompanhar a leitura de um texto
+de várias linhas</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que <code>role="alert"</code> faz?</p>
+<label><input type="radio" name="a3"> faz o leitor de tela anunciar a mensagem quando ela
+aparece</label>
+<label><input type="radio" name="a3"> pinta o alerta de vermelho automaticamente</label>
+<label><input type="radio" name="a3"> fecha o alerta depois de alguns segundos</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a encomenda salva</h2>
+<p>A encomenda foi registrada e o alerta precisa ser verde: fundo no 50, borda no 300 e texto no 900.
+Complete a classe da borda:</p>
+<div class="ex-code">&lt;div class="rounded-lg border <input aria-label="resposta 1" data-answer="border-emerald-300" placeholder="..."> bg-emerald-50 p-4 text-sm text-emerald-900"&gt;Encomenda salva para amanhã.&lt;/div&gt;</div>
+<p class="ex-dica">Dica: a borda vem antes do fundo, e a família é a mesma do sucesso nas etiquetas —
+<code>emerald</code>. O tom é o do meio da receita.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Alerta é uma caixa que avisa: <code>rounded-lg border p-4</code> no casco, fundo no tom 50, borda no
+300 e texto no 900, sempre da mesma família de cor. Dentro dele, uma linha com
+<code>flex items-start gap-3</code>, um ícone com <code>shrink-0</code> e um bloco com título em
+semibold e mensagem em <code>text-sm</code>. Para trocar o tipo, troque a família nas três classes de
+cor — nunca a receita de tons.</p>
+
+<p>Para dar ênfase, a faixa de <code>border-l-4</code> com o tom 500 e o canto arredondado só do lado
+direito. Para fechar, um botão com <code>ml-auto</code> e uma linha de JavaScript que remove o
+elemento. E, para quem não vê a cor, o <code>role="alert"</code> e o texto do título fazem o recado
+chegar. No fim, o critério é sempre o mesmo: alerta é para o que a pessoa precisa saber agora, uma
+vez, com o que fazer em seguida.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Casco: <code>rounded-lg border p-4</code> com fundo 50, borda 300 e texto 900.</li>
+<li><code>border</code> diz a espessura; <code>border-amber-300</code> diz a cor.</li>
+<li>Linha: <code>flex items-start gap-3</code>, ícone com <code>shrink-0</code>.</li>
+<li>Agrupe título e mensagem num <code>div</code> para o flex tratar os dois juntos.</li>
+<li>Variantes: azul informação, verde sucesso, âmbar atenção, vermelho erro.</li>
+<li>Faixa lateral: <code>border-l-4 border-l-rose-500 rounded-r-lg</code>.</li>
+<li>Fechar: botão com <code>ml-auto</code> e <code>remove()</code> — isso é JavaScript.</li>
+<li><code>role="alert"</code> faz o leitor de tela anunciar a mensagem.</li>
+<li>Mensagem de campo é aviso embaixo do campo; alerta é para a página.</li>
+<li>Alerta é sobre o agora: não use cinco na mesma tela.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

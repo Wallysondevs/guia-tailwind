@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cursor e Seleção | Guia Tailwind</title>
+<meta name="description" content="Cursor e seleção no Tailwind: cursor-pointer e not-allowed, cursor-grab para arrastar, select-none sem atrapalhar quem quer copiar e o caret colorido.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Cursor e <span class="hl">Seleção</span></h1>
+<p class="intro">A Ana montou a faixa de pães especiais como um carrossel que se arrasta para o lado. No
+notebook, ao tentar arrastar, o nome do pão ficou azul e selecionado, como texto de dever de casa — e o
+carrossel não saiu do lugar. No botão de encomenda, o ponteiro continuava uma seta, como se aquilo não
+fosse clicável. Nesta aula ela acerta as duas pistas que o mouse dá antes de qualquer clique: a forma do
+cursor e a possibilidade de selecionar o texto.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que a forma do cursor comunica e por que ela é uma promessa.</li>
+  <li>Como usar <code>cursor-pointer</code> em elementos que não são links.</li>
+  <li><code>cursor-not-allowed</code>, <code>cursor-wait</code>, <code>cursor-grab</code> e os outros.</li>
+  <li>Como combinar cursor com as variantes <code>disabled:</code> e <code>active:</code>.</li>
+  <li>O que é a seleção de texto e quando desligá-la com <code>select-none</code>.</li>
+  <li>Quando desligar a seleção é um erro que atrapalha o visitante.</li>
+  <li>Como colorir o cursor de digitação com <code>caret-…</code> e selecionar tudo com <code>select-all</code>.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a seta que não promete nada</h2>
+
+<p>O botão “Encomendar pão” da Ana era um <code>div</code> com fundo âmbar, texto branco e canto
+arredondado. Visualmente, um botão. Ao passar o mouse, porém, o ponteiro continuava uma seta. E a seta,
+nessa posição, quer dizer “aqui não tem nada clicável” — o navegador não tem como saber que aquele
+bloco é uma ação, porque <code>div</code> não é botão.</p>
+
+<p>A pista do cursor é das mais antigas da web e das mais obedecidas pelo cérebro. Mãozinha com o dedo
+estendido quer dizer “clique”; seta quer dizer “texto, nada acontece”; círculo cortado quer dizer
+“desligado”; ampulheta quer dizer “espere”. A pessoa decide se clica antes de clicar, e essa decisão
+passa pelo ponteiro. Um botão que não muda o cursor parece quebrado, mesmo funcionando.</p>
+
+<p>A segunda pista é a seleção. Texto selecionável é texto que o navegador considera conteúdo: você
+arrasta, ele fica azul, dá para copiar. Isso é ótimo para o endereço, o horário e o telefone da padaria
+— e péssimo para o rótulo de um botão, para o número de uma avaliação por estrelas e para uma faixa
+que se arrasta. Quando a Ana tentou arrastar o carrossel, selecionou o nome do pão em vez de mover a
+lista.</p>
+
+<p>As duas pistas são propriedades diferentes, com classes diferentes, e as duas têm o mesmo tipo de
+armadilha: usadas no lugar certo, ajudam; usadas em excesso, mentem. O resto da aula é aprender a
+distinguir os casos.</p>
+
+<h2>2. O cursor: uma pista, não um enfeite</h2>
+
+<p>A propriedade <code>cursor</code> aceita dezenas de valores. O Tailwind expõe os mais úteis em
+classes com o prefixo <code>cursor-</code>. Ela é herdada: se você aplicar no pai, os filhos recebem,
+a não ser que tenham a própria classe. Isso explica por que um cartão inteiro com
+<code>cursor-pointer</code> faz o ponteiro virar mãozinha até sobre o texto de dentro.</p>
+
+<p>Antes de escolher a classe, porém, vale a pergunta mais importante: o elemento é clicável de
+verdade? <code>cursor-pointer</code> não torna nada clicável — ele só muda o desenho do ponteiro. Se
+você aplica num <code>div</code> sem ação, está prometendo um clique que não existe, e a pessoa clica
+duas, três vezes, achando que o site travou. A honestidade aqui é parte do trabalho.</p>
+
+<p>Quando o elemento é um <code>&lt;a&gt;</code> ou um <code>&lt;button&gt;</code>, o navegador já
+mostra a mãozinha sozinho. Nesse caso, a classe não é necessária — e escrevê-la não faz mal, só
+redunda. A classe ganha importância quando você tem um <code>div</code> com
+<code>role="button"</code>, um cartão inteiro clicável, um <i>label</i> que abre um menu, ou qualquer
+coisa que o navegador não reconhece como ação.</p>
+
+<dl class="anatomy">
+<dt>cursor</dt>
+<dd>A propriedade que escolhe a forma do ponteiro. Herdada pelos filhos.</dd>
+<dt>cursor-pointer</dt>
+<dd>A mãozinha com o dedo estendido. A promessa de “aqui dá para clicar”.</dd>
+<dt>user-select</dt>
+<dd>A propriedade que decide se o texto pode ser selecionado com o mouse.</dd>
+<dt>seleção</dt>
+<dd>O realce azul que aparece quando você arrasta sobre o texto. Também permite copiar.</dd>
+<dt>caret</dt>
+<dd>O “pauzinho” que pisca dentro de campos de texto, indicando onde a letra vai entrar.</dd>
+</dl>
+
+<h2>3. A tabela dos cursores que servem</h2>
+
+<p>Não são tantos assim. Estes são os que aparecem em produtos de verdade, com o contexto em que cada
+um faz sentido:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Forma</th><th>Onde faz sentido</th></tr>
+<tr><td><code>cursor-pointer</code></td><td>mãozinha</td><td>cartão clicável, <code>div</code> com <code>role="button"</code>, <i>label</i> de menu</td></tr>
+<tr><td><code>cursor-default</code></td><td>seta</td><td>quando um filho herdou a mãozinha e não devia</td></tr>
+<tr><td><code>cursor-not-allowed</code></td><td>círculo cortado</td><td>botão desligado, opção esgotada</td></tr>
+<tr><td><code>cursor-wait</code></td><td>ampulheta ou relógio</td><td>enquanto a ação está sendo processada</td></tr>
+<tr><td><code>cursor-grab</code></td><td>mão aberta</td><td>faixa ou lista que se arrasta</td></tr>
+<tr><td><code>cursor-grabbing</code></td><td>mão fechada</td><td>a mesma faixa, no instante do arrasto</td></tr>
+<tr><td><code>cursor-text</code></td><td>viga de texto</td><td>área editável que não é um campo de formulário</td></tr>
+<tr><td><code>cursor-help</code></td><td>interrogação</td><td>termo com explicação ao lado (use com moderação)</td></tr>
+</table>
+</div>
+
+<p>Repare que o <code>cursor-default</code> está na tabela por um motivo prático: a herança. Se o pai
+tem <code>cursor-pointer</code>, o texto de dentro também tem, e a pessoa vê mãozinha sobre uma
+descrição que não leva a lugar nenhum. Forçar <code>cursor-default</code> no filho desfaz a herança e
+devolve a seta onde ela é honesta.</p>
+
+<p>Existe ainda o <code>cursor-none</code>, que esconde o ponteiro. Ele é usado em experiências
+imersivas, jogos e telas cheias. Em site de padaria, é uma péssima ideia: sem ponteiro, ninguém sabe
+onde está clicando. Se um dia você precisar, garanta que exista outra pista visual — e lembre que no
+celular não há cursor para esconder.</p>
+
+<h2>4. A primeira missão: a mãozinha no cartão</h2>
+
+<p>Na caixa abaixo há um cartão de pão que é, na prática, um botão: clicar leva para a página do
+produto. Ele é um <code>div</code>, então o navegador não tem como saber. A missão é dar a pista que
+falta.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|cursor=pointer;;rule:cursor: pointer">
+  <p class="try-task">O cartão é clicável, mas o ponteiro continua uma seta. Faça o cursor virar
+  mãozinha ao passar por ele.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-lg bg-amber-600 px-4 py-3 font-semibold text-white"&gt;
+  Encomendar pão
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.666 0.179 58.318)
+color: rgb(255, 255, 255)
+font-weight: 600
+border-radius: 8px
+padding-inline: 16px
+padding-block: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="cursor-pointer rounded-lg bg-amber-600 px-4 py-3 font-semibold text-white"&gt;
+  Encomendar pão
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>cursor: pointer</code> porque a propriedade aparece no CSS computado do
+elemento. Antes da missão, ela vale <code>auto</code> — que, num <code>div</code>, vira a seta. É uma
+das poucas propriedades desta parte do guia que o painel consegue conferir sem depender de estado.</p>
+
+<p>Duas observações que valem para o resto da aula. A primeira: o <code>div</code> continua sem
+funcionar como botão; para quem usa teclado, ele não recebe foco e não responde ao Enter. A solução de
+verdade é usar <code>&lt;button&gt;</code> ou <code>&lt;a&gt;</code> — a classe é o remendo visual, não
+a correção. A segunda: se o cartão tem um botão dentro, o <code>cursor-pointer</code> no pai é
+redundante; o filho já resolve.</p>
+
+<h2>5. Cursor combinado com estado</h2>
+
+<p>O cursor é uma propriedade como qualquer outra, então aceita variantes. As duas combinações mais
+úteis são <code>disabled:cursor-not-allowed</code> e <code>active:cursor-grabbing</code>. A primeira
+diz “desligado”; a segunda diz “estou arrastando agora”.</p>
+
+<p>No caso do botão desligado, a variante certa é a de atributo, não a de estado de mouse. O
+<code>disabled</code> do HTML continua sendo o que bloqueia o clique; o cursor só acompanha. E vale
+lembrar que um botão desligado também precisa parecer desligado — a dupla clássica é
+<code>disabled:opacity-60</code> com <code>disabled:cursor-not-allowed</code>. As aulas de
+<a href="active-e-disabled.html">active e disabled</a> tratam do conjunto; aqui interessa a pista do
+ponteiro.</p>
+
+<div class="trytailwind" data-goal="rule:.disabled\:cursor-not-allowed:disabled;;rule:.disabled\:opacity-60:disabled">
+  <p class="try-task">O pedido está esgotado e o botão está desligado. Faça o cursor virar “proibido” e
+  o botão parecer apagado, usando as variantes <code>disabled:</code>.</p>
+  <pre class="html">&lt;button id="alvo" type="button" disabled class="rounded-lg bg-amber-600 px-4 py-3 font-semibold text-white"&gt;
+  Esgotado
+&lt;/button&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.666 0.179 58.318)
+color: rgb(255, 255, 255)
+font-weight: 600
+border-radius: 8px
+padding-inline: 16px
+padding-block: 12px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" type="button" disabled class="rounded-lg bg-amber-600 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"&gt;
+  Esgotado
+&lt;/button&gt;</pre>
+</div>
+
+<p>O CSS gerado mostra as duas regras com o seletor <code>:disabled</code>. Repare que as classes de
+repouso continuam no HTML: o fundo âmbar e o texto branco estão lá, e as variantes entram na frente
+quando o atributo existe. É o mesmo par que você já viu no <code>hover:</code>, com outra condição.</p>
+
+<p>Um detalhe que confunde: o botão desligado não dispara eventos de mouse, então <em>alguns</em>
+navegadores não atualizam o cursor sobre ele. Na prática, a maioria atualiza, e a pista funciona. Se
+você testar e o cursor não mudar, não é a sua classe: é o navegador. A conferência confiável é o CSS
+computado, que a meta desta caixa usa.</p>
+
+<p>Para o arrasto, a dupla é <code>cursor-grab</code> em repouso e <code>active:cursor-grabbing</code>
+enquanto o botão do mouse está apertado. O CSS gerado é curto:</p>
+
+<pre class="term">.cursor-grab {
+  cursor: grab;
+}
+.active\:cursor-grabbing:active {
+  cursor: grabbing;
+}</pre>
+
+<p>É puro teatro de interface: nada é arrastado de fato. Arrastar de verdade exige JavaScript ou os
+recursos nativos de rolagem. Mas o cursor prepara a expectativa, e a expectativa é metade da sensação
+de qualidade.</p>
+
+<h2>6. A seleção: por que o texto fica azul</h2>
+
+<p>Quando você arrasta o mouse sobre um texto, o navegador seleciona o trecho. Isso é comportamento
+padrão desde os primeiros navegadores, e existe para uma coisa só: copiar. Quem escreve um endereço no
+site da padaria espera poder selecionar e colar no mapa. Quem lê o horário espera poder copiar para
+mandar no grupo da família.</p>
+
+<p>Em alguns lugares, porém, a seleção atrapalha. O rótulo de um botão não é conteúdo: ninguém copia
+“Encomendar”. O número de um seletor de quantidade, o texto de uma faixa que se arrasta, o rótulo de
+uma estrela de avaliação — todos ficam melhores sem seleção. É aí que entra o
+<code>select-none</code>.</p>
+
+<p>A propriedade por trás é <code>user-select</code>. O Tailwind escreve as duas versões, a prefixada
+para navegadores antigos e a padrão:</p>
+
+<pre class="term">.select-none {
+  -webkit-user-select: none;
+  user-select: none;
+}
+.select-text {
+  -webkit-user-select: text;
+  user-select: text;
+}
+.select-all {
+  -webkit-user-select: all;
+  user-select: all;
+}</pre>
+
+<p><code>select-none</code> desliga; <code>select-text</code> liga de volta (útil quando o pai desligou
+e um filho precisa); <code>select-all</code> faz o clique selecionar o conteúdo inteiro de uma vez —
+perfeito para um campo com um código longo, que a pessoa quer copiar por completo.</p>
+
+<p>Há uma pegadinha de HTML nisso: desligar a seleção num container não impede que o texto seja
+selecionado em alguns navegadores se ele estiver dentro de um campo de formulário. Campos de texto
+continuam selecionáveis, o que é bom: ninguém quer um formulário onde não dá para copiar o que
+digitou.</p>
+
+<dl class="anatomy">
+<dt>select-none</dt>
+<dd>Desliga a seleção de texto no elemento e nos filhos. Use em rótulos de ação e superfícies que se
+arrastam.</dd>
+<dt>select-text</dt>
+<dd>Religa a seleção num filho, quando o pai desligou.</dd>
+<dt>select-all</dt>
+<dd>Um clique seleciona tudo. Bom para códigos e chaves que a pessoa vai copiar inteiros.</dd>
+<dt>caret-color</dt>
+<dd>A cor do pauzinho que pisca no campo de texto. É o que o <code>caret-amber-600</code> pinta.</dd>
+<dt>pointer-events</dt>
+<dd>Desliga a interação do mouse com o elemento. Diferente de cursor: aqui o clique passa direto.</dd>
+</dl>
+
+<h2>7. A segunda missão: a faixa que se arrasta</h2>
+
+<p>A faixa da Ana tem cinco pães especiais em sequência. Ela quer que a pessoa possa arrastar para o
+lado, e que o cursor diga “pegue e puxe”. O problema é que arrastar seleciona o nome dos pães no
+caminho. A missão resolve as duas coisas: cursor de mão aberta e seleção desligada.</p>
+
+<div class="trytailwind" data-goal="rule:cursor: grab;;rule:user-select: none">
+  <p class="try-task">A faixa se arrasta, mas arrastar seleciona o texto e o cursor é uma seta.
+  Desligue a seleção e mostre o cursor de “pegar”.</p>
+  <pre class="html">&lt;div id="alvo" class="flex gap-3 overflow-x-auto rounded-lg bg-amber-50 p-4"&gt;
+  &lt;span class="rounded-full bg-white px-3 py-1 text-sm text-amber-900"&gt;Pão de queijo&lt;/span&gt;
+  &lt;span class="rounded-full bg-white px-3 py-1 text-sm text-amber-900"&gt;Broa de milho&lt;/span&gt;
+  &lt;span class="rounded-full bg-white px-3 py-1 text-sm text-amber-900"&gt;Sonho de creme&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+padding: 16px
+gap: 12px
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 8px
+overflow-x: auto
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex cursor-grab select-none gap-3 overflow-x-auto rounded-lg bg-amber-50 p-4"&gt;
+  &lt;span class="rounded-full bg-white px-3 py-1 text-sm text-amber-900"&gt;Pão de queijo&lt;/span&gt;
+  &lt;span class="rounded-full bg-white px-3 py-1 text-sm text-amber-900"&gt;Broa de milho&lt;/span&gt;
+  &lt;span class="rounded-full bg-white px-3 py-1 text-sm text-amber-900"&gt;Sonho de creme&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Experimente as duas coisas na prévia: antes, arrastar seleciona os nomes; depois, arrastar não
+seleciona nada e o ponteiro vira mão aberta. Note que o <code>select-none</code> foi aplicado no pai e
+vale para os filhos por herança — as pílulas de dentro não precisam repetir a classe.</p>
+
+<p>Se você quiser o cursor de mão fechada durante o arrasto, acrescente
+<code>active:cursor-grabbing</code>. A variante <code>active</code> vale enquanto o botão do mouse está
+apertado, e é a única pista de “estou segurando” que o CSS puro consegue dar sem JavaScript.</p>
+
+<p>Uma ressalva importante: numa faixa com <code>overflow-x-auto</code>, o arrasto do mouse já rola
+sozinho em muitos aparelhos com tela sensível ao toque e em alguns navegadores de desktop. O cursor de
+mão aberta sugere um arrasto que, no desktop, pode não acontecer. Se a intenção é só indicar que há
+mais conteúdo, uma seta lateral ou um degradê é mais honesto que a mãozinha.</p>
+
+<h2>8. Onde a seleção desligada atrapalha</h2>
+
+<p>O erro mais comum é aplicar <code>select-none</code> no site inteiro, achando que “seleção é feia”.
+Parece inofensivo e não é: o visitante não consegue copiar o endereço para o mapa, o telefone para o
+aplicativo, o código de rastreio para o site dos Correios. Em um site de padaria, isso é uma barreira
+de verdade — e, em sites de banco e de governo, é motivo de reclamação.</p>
+
+<p>A regra prática: conteúdo que a pessoa pode querer levar embora fica selecionável. Rótulo de ação,
+número em um seletor, estrela de avaliação, superfície de arrasto e elemento puramente decorativo
+podem ficar sem seleção. E há um caso especial: o texto de um botão. Desligar a seleção ali evita o
+azul feio no clique duplo, mas não é obrigatório; o navegador já trata bem.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Elemento</th><th>Seleção?</th><th>Por quê</th></tr>
+<tr><td>endereço, telefone, horário</td><td>ligada</td><td>a pessoa copia para o mapa, o celular, o grupo</td></tr>
+<tr><td>nome do produto e preço</td><td>ligada</td><td>conteúdo que pode ser citado ou comparado</td></tr>
+<tr><td>rótulo de botão</td><td>opcional</td><td>não é conteúdo; desligar evita o azul no clique duplo</td></tr>
+<tr><td>faixa que se arrasta</td><td>desligada</td><td>arrastar selecionaria o texto no caminho</td></tr>
+<tr><td>seletor de quantidade</td><td>desligada</td><td>o número é controle, não texto</td></tr>
+<tr><td>bloco decorativo</td><td>desligada</td><td>não há o que copiar</td></tr>
+</table>
+</div>
+
+<p>E existe a contrapartida de acessibilidade: quem não usa mouse seleciona com o teclado. Se o texto é
+selecionável para o mouse e não é para o teclado, você criou uma diferença silenciosa. O
+<code>select-none</code> desliga os dois, então o cuidado é não abusar dele em conteúdo.</p>
+
+<h2>9. O caret e o resto do conjunto</h2>
+
+<p>Falta uma peça que quase ninguém nomeia: o pauzinho que pisca dentro dos campos de texto. Ele se
+chama <em>caret</em> e a cor é configurável com <code>caret-…</code>, usando a mesma paleta das outras
+cores. Na padaria, o campo de busca ganhou <code>caret-amber-600</code>, para o cursor de digitação
+combinar com a marca.</p>
+
+<pre class="term">.caret-amber-600 {
+  caret-color: var(--color-amber-600);
+}
+.select-all {
+  -webkit-user-select: all;
+  user-select: all;
+}</pre>
+
+<p>O <code>caret-color</code> só aparece em campos editáveis; num parágrafo comum, ele não faz nada. E
+vale testar no navegador: a cor do caret é uma das coisas que o olho percebe sem saber por quê. Um
+campo com caret âmbar parece “da casa”, mesmo que ninguém identifique o detalhe.</p>
+
+<p>Agora a diferença que salva de muita confusão: <code>cursor-not-allowed</code> é uma pista visual;
+<code>pointer-events-none</code> desliga a interação de verdade. Com <code>pointer-events-none</code>,
+o elemento não recebe clique, não recebe hover e o cursor nem muda — o mouse atravessa como se ele não
+existisse. Usar <code>pointer-events-none</code> para “desligar” um botão é um erro clássico: pelo
+teclado, o botão continua focável e continua aceitando Enter. Quem desliga de verdade é o atributo
+<code>disabled</code>.</p>
+
+<p>Outro par que confunde: <code>cursor-pointer</code> num elemento que tem um botão dentro. O cursor
+do pai vale nos espaços vazios, mas sobre o botão o navegador aplica o cursor do botão. Se você quiser
+que a área toda pareça clicável, use um link cobrindo o cartão, com <code>absolute inset-0</code> — a
+técnica das aulas de posicionamento.</p>
+
+<div class="cenario">
+<h3>Cenário 1: a mãozinha que mentia</h3>
+<p>Para “parecer moderno”, a Ana aplicou <code>cursor-pointer</code> em todos os cartões, inclusive nos
+que não levavam a lugar nenhum. O visitante clicava, nada acontecia, e a conclusão era sempre a mesma:
+“esse site está quebrado”. Cursor é promessa; promessa não cumprida é pior que promessa nenhuma. Se o
+cartão não é clicável, deixe a seta.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o endereço que não dava para copiar</h3>
+<p>Depois de gostar do efeito no carrossel, ela aplicou <code>select-none</code> no corpo inteiro do
+site. O endereço da padaria, o telefone e o horário deixaram de ser copiáveis. A cliente reclamou no
+balcão. A cura foi remover a classe do nível global e usá-la só nas superfícies que se arrastam e nos
+rótulos de controle.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o botão “desligado” que ainda funcionava</h3>
+<p>Ela queria bloquear o botão de encomenda fora do horário e aplicou <code>pointer-events-none</code>
+com <code>opacity-50</code>. O clique do mouse parou, mas quem usava teclado ainda conseguia ativar o
+botão com Enter — e o pedido entrava. O conserto é o atributo <code>disabled</code>, que bloqueia os
+dois caminhos. A pista visual vem depois; a regra vem primeiro.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que <code>cursor-pointer</code> faz?</p>
+<label><input type="radio" name="q1"> transforma o elemento em botão clicável</label>
+<label><input type="radio" name="q1"> muda a forma do ponteiro para a mãozinha, sem mexer no clique</label>
+<label><input type="radio" name="q1"> desliga a seleção de texto do elemento</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Quando o <code>select-none</code> é uma boa ideia?</p>
+<label><input type="radio" name="q2"> no corpo da página inteira, para o texto não ficar azul</label>
+<label><input type="radio" name="q2"> no endereço e no telefone, para ninguém copiar</label>
+<label><input type="radio" name="q2"> em rótulos de ação e superfícies que se arrastam</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Qual é a diferença entre <code>cursor-not-allowed</code>
+e <code>pointer-events-none</code>?</p>
+<label><input type="radio" name="q3"> o primeiro é só visual; o segundo desliga a interação do mouse de verdade</label>
+<label><input type="radio" name="q3"> o primeiro bloqueia o clique; o segundo só muda a cor</label>
+<label><input type="radio" name="q3"> os dois fazem a mesma coisa, com nomes diferentes</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a faixa do carrossel</h2>
+<p>A faixa de pães especiais se arrasta e o texto não deve ser selecionado no caminho. Complete a classe
+que desliga a seleção:</p>
+<div class="ex-code">&lt;div class="flex cursor-grab gap-3 overflow-x-auto <input aria-label="resposta 1" data-answer="select-none" placeholder="...">"&gt;…&lt;/div&gt;</div>
+<p class="ex-dica">Dica: <code>select-text</code> faz o contrário; <code>select-all</code> seleciona
+tudo de uma vez. O que você quer é a ausência total de seleção.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Cursor e seleção são pistas que chegam antes do clique. O cursor se escolhe com
+<code>cursor-…</code>: mãozinha para o que é clicável, círculo cortado para o desligado, mão aberta
+para o que se arrasta, seta quando não há ação nenhuma. Ele é herdado, e as variantes
+<code>disabled:</code> e <code>active:</code> ajustam a pista conforme o estado.</p>
+
+<p>A seleção se desliga com <code>select-none</code>, que escreve <code>user-select: none</code> (com
+prefixo para navegadores antigos). É a escolha certa para rótulos de ação, controles e superfícies de
+arrasto; é a escolha errada para endereço, telefone, preço e qualquer conteúdo que a pessoa possa querer
+copiar. E o cursor de digitação, o caret, ganha cor com <code>caret-…</code>.</p>
+
+<p>A honestidade fecha a aula: <code>cursor-pointer</code> não torna nada clicável,
+<code>cursor-not-allowed</code> não bloqueia nada, e <code>pointer-events-none</code> bloqueia o mouse
+mas deixa o teclado passar. Quem desliga de verdade é o atributo <code>disabled</code>. As classes
+contam a história; o HTML faz acontecer.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>cursor-pointer</code> é pista, não ação: só aplique no que é clicável.</li>
+<li>Link e botão já mostram a mãozinha sozinhos.</li>
+<li>O cursor é herdado; <code>cursor-default</code> no filho desfaz a herança.</li>
+<li><code>disabled:cursor-not-allowed</code> acompanha o atributo <code>disabled</code>.</li>
+<li><code>cursor-grab</code> com <code>active:cursor-grabbing</code> sugere arrasto.</li>
+<li><code>select-none</code> desliga a seleção; não use no conteúdo que se copia.</li>
+<li><code>select-text</code> religa num filho; <code>select-all</code> seleciona tudo de uma vez.</li>
+<li><code>caret-…</code> colore o cursor de digitação dos campos.</li>
+<li><code>pointer-events-none</code> desliga o mouse, mas o teclado continua ativo.</li>
+<li>Sem mouse, cursor não existe: a pista precisa de um equivalente para o teclado.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

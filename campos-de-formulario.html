@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campos de Formulário | Guia Tailwind</title>
+<meta name="description" content="Como vestir campos de formulário com Tailwind: borda, canto, respiro, largura, placeholder, tipos de input, textarea, select e campo desativado no site da padaria.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Campos de <span class="hl">Formulário</span></h1>
+
+<p class="intro">A Ana finalmente vai receber encomendas pelo site da padaria. Ela escreveu o
+formulário com quatro campos — tipo de pão, nome, telefone e hora da retirada — abriu no navegador
+e levou um susto: os campos aparecem como risquinhos finos, sem moldura, com o texto encostado na
+borda e uma largura de vinte letras que não combina com nada. Nesta aula ela veste esse formulário
+com poucas classes: borda, canto, respiro, largura e cor. No fim, os campos parecem feitos por
+alguém que sabe o que está fazendo — e ela sabe explicar cada classe que usou.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que o campo nasce sem moldura no Tailwind e o que fazer com isso.</li>
+  <li>A receita de um campo confortável: <code>border</code>, <code>rounded-lg</code>,
+  <code>px-3</code>, <code>py-2</code>.</li>
+  <li>Como acertar a largura com <code>w-full</code> e com larguras fixas.</li>
+  <li>Como pintar o texto do <code>placeholder</code>, que não é texto comum.</li>
+  <li>Os <code>type</code> que mudam o teclado do celular e a validação.</li>
+  <li>O que muda em <code>textarea</code>, <code>select</code> e caixinhas de marcar.</li>
+  <li>Campo desativado e campo só de leitura, sem confundir os dois.</li>
+  <li>Como o foco e o anel de destaque aparecem no campo, na aula de
+  <a href="focus.html">focus</a>.</li>
+  <li>Como conferir tudo isso no painel, sem decorar CSS.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o campo que parece um risco</h2>
+
+<p>O formulário da Ana tem quatro linhas e um botão. No HTML, é o mais simples possível:</p>
+
+<pre class="file" data-file="encomenda.html">&lt;input type="text" placeholder="Qual pão?"&gt;
+&lt;input type="text" placeholder="Seu nome"&gt;</pre>
+
+<p>No navegador, cada um desses campos aparece como um retângulo baixo, com uma borda cinza
+fininha que a gente mal enxerga, e com o texto começando a dois pixels da borda. Parece um
+formulário de 1998. A primeira reação de quem começa é achar que errou alguma coisa. Não errou: é
+assim que o campo nasce.</p>
+
+<p>Só que, no Tailwind, ele nasce ainda mais pelado do que no navegador puro. O Tailwind carrega
+junto um pequeno CSS de base, chamado <em>preflight</em>, que tira as bordas e os espaçamentos
+padrão dos elementos de formulário. A razão é boa: assim o mesmo campo fica igual no Chrome, no
+Safari e no Firefox, e não depende do gosto de cada navegador. A consequência é que a moldura passa
+a ser responsabilidade sua, e é isso que a aula resolve.</p>
+
+<p>Antes de sair colando classe, vale entender o que é esse elemento. Um campo de formulário não é
+uma caixa com texto dentro, como um <code>div</code>. Ele é uma peça interativa: tem um estado, um
+valor que o visitante digita, e esse valor vai junto quando o formulário é enviado. O desenho é
+consequência disso — quando você pinta a borda de um campo, não está decorando; está dizendo
+"aqui se escreve".</p>
+
+<h2>2. input é uma tag vazia</h2>
+
+<p>Repare que no exemplo acima não existe <code>&lt;/input&gt;</code>. O <code>input</code> é uma
+das poucas tags do HTML que não têm fechamento: ela não envolve conteúdo, ela <em>é</em> o
+conteúdo. Tudo o que você precisa dizer sobre ela vai nos atributos. Vale conhecer os cinco que
+aparecem em qualquer formulário:</p>
+
+<dl class="anatomy">
+<dt>input</dt>
+<dd>A tag em si. Não tem tag de fechamento e não envolve texto: o que aparece dentro dela vem dos
+atributos.</dd>
+<dt>type</dt>
+<dd>O tipo do campo: <code>text</code>, <code>email</code>, <code>tel</code>, <code>number</code>,
+<code>date</code>, <code>checkbox</code>. Muda o teclado do celular, a validação e até a aparência
+nativa.</dd>
+<dt>name</dt>
+<dd>O nome do dado quando o formulário é enviado. Sem <code>name</code>, o valor digitado não
+viaja: é o erro número um de quem está começando.</dd>
+<dt>placeholder</dt>
+<dd>A dica cinza que aparece dentro do campo vazio e desaparece quando a pessoa digita. Serve de
+exemplo, não de rótulo.</dd>
+<dt>value</dt>
+<dd>O valor já preenchido. Num campo de edição, é o que chega do banco de dados; num botão, é o
+texto que aparece.</dd>
+<dt>disabled</dt>
+<dd>Atributo sem valor que desliga o campo: ele não recebe clique, não recebe foco e não é enviado.
+Tem um irmão mais gentil, o <code>readonly</code>, que só impede a edição.</dd>
+</dl>
+
+<p>Guarde a diferença entre <code>placeholder</code> e rótulo, porque ela volta na
+<a href="rotulos-e-ajuda.html">aula de rótulos e texto de ajuda</a>: o
+<em>placeholder</em> desaparece assim que a pessoa digita, e quem digitou já não lembra o que o
+campo pedia. Ele é um exemplo, não uma etiqueta. O rótulo de verdade vai numa tag
+<code>label</code>, fora do campo — e é o assunto seguinte.</p>
+
+<h2>3. A moldura: borda, canto e respiro</h2>
+
+<p>Com o campo pelado na frente dela, a Ana faz a primeira tentativa: uma borda. Depois olha e vê
+que o texto continua colado. Então acrescenta o respiro interno. A receita completa tem quatro
+classes, e cada uma cuida de uma coisa:</p>
+
+<pre class="file" data-file="encomenda.html">&lt;input class="w-full rounded-lg border border-stone-300 px-3 py-2" type="text" placeholder="Qual pão?"&gt;</pre>
+
+<p><code>border</code> liga a borda com 1 px na cor padrão do texto. <code>border-stone-300</code>
+troca essa cor por um cinza quente, que combina com o pão. <code>rounded-lg</code> arredonda os
+cantos em 8 px. <code>px-3</code> dá 12 px de respiro à esquerda e à direita, e <code>py-2</code>
+dá 8 px em cima e embaixo. Juntas, as quatro fazem o campo parecer um campo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding-inline=12px;;css:#alvo|padding-block=8px;;rule:padding-inline: calc(var(--spacing) * 3)">
+  <p class="try-task">O campo já tem borda e canto arredondado, mas o texto encosta nas laterais.
+  Dê a ele 12 px de respiro horizontal e 8 px na vertical, com <code>px-3</code> e
+  <code>py-2</code>.</p>
+  <pre class="html">&lt;input id="alvo" class="w-full rounded-lg border border-stone-300" type="text" placeholder="Qual pão?"&gt;</pre>
+  <pre class="out">
+width: 616px
+border-radius: 8px
+border-width: 1px
+border-color: oklch(0.869 0.005 56.366)
+</pre>
+  <pre class="solucao">&lt;input id="alvo" class="w-full rounded-lg border border-stone-300 px-3 py-2" type="text" placeholder="Qual pão?"&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel ganha duas linhas novas: <code>padding-inline: 12px</code> e
+<code>padding-block: 8px</code>, ao lado do que já estava lá. Repare que o Tailwind não usa <code>padding-left</code> e
+<code>padding-right</code>: ele usa as versões modernas, que respeitam o idioma. Num site em árabe,
+o texto começa à direita, e <code>px-3</code> continua certo. É um detalhe que parece firula e que
+salva a vida de quem traduz site.</p>
+
+<p>O CSS gerado é curto e mostra a escala em ação:</p>
+
+<pre class="term">.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+.px-3 {
+  padding-inline: calc(var(--spacing) * 3);
+}
+.py-2 {
+  padding-block: calc(var(--spacing) * 2);
+}</pre>
+
+<p>Dois detalhes que confundem no começo. Primeiro: <code>rounded-lg</code> aponta para
+<code>--radius-lg</code>, uma variável de raio, não para um número solto; trocar o raio do projeto
+inteiro é mexer nessa variável. Segundo: o campo é um elemento <em>inline</em> por natureza, então
+<code>py-2</code> funciona, mas <code>w-full</code> só vai ocupar a linha toda se o elemento se
+comportar como bloco — na prática, o <code>w-full</code> já resolve, porque define a largura como
+100% do espaço disponível.</p>
+
+<h2>4. A largura certa para cada campo</h2>
+
+<p>Largura de campo é comunicação. Um campo de nome ocupa a linha inteira porque o nome é longo;
+um campo de CEP não precisa de 600 px para receber oito dígitos. Um campo largo demais para um dado
+curto faz o visitante achar que precisa escrever mais. Um campo estreito demais para um dado longo
+corta o texto e esconde o fim do que a pessoa digitou.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Efeito</th><th>Onde a Ana usa</th></tr>
+<tr><td><code>w-full</code></td><td>100% da largura disponível</td><td>nome, endereço, observação</td></tr>
+<tr><td><code>w-40</code></td><td>160 px fixos</td><td>CEP e número da casa</td></tr>
+<tr><td><code>w-32</code></td><td>128 px fixos</td><td>quantidade de pães</td></tr>
+<tr><td><code>max-w-md</code></td><td>no máximo 448 px</td><td>o formulário inteiro, num cartão</td></tr>
+<tr><td><code>flex-1</code></td><td>cresce para ocupar a sobra</td><td>campo de busca ao lado de um botão</td></tr>
+</table>
+</div>
+
+<p>O <code>w-full</code> é o padrão para campo de texto em formulário de verdade, porque o campo
+acompanha a coluna em vez de brigar com ela. Numa tela de 375 px, o campo ocupa 343 px; num
+monitor, ocupa os 448 px do cartão. Quem define o teto é o pai: se o formulário está dentro de um
+<code>max-w-md</code>, o campo nunca passa daquilo, mesmo com <code>w-full</code>.</p>
+
+<p>E quando a Ana precisa de dois campos lado a lado — CEP e número, por exemplo? Ela põe os dois
+dentro de um <code>div class="flex gap-3"</code> e deixa o CEP com <code>w-40</code> e o número com
+<code>flex-1</code>. O <code>flex-1</code> diz "cresça e ocupe o que sobrou". É o encaixe mais
+comum de formulário no mundo real, e ele não precisa de nenhuma classe nova além das que você já
+conhece de <code>flex</code> e <code>gap</code>.</p>
+
+<h2>5. O placeholder tem cor própria</h2>
+
+<p>O campo da Ana já está com moldura e respiro. Falta um detalhe que todo mundo tenta resolver do
+jeito errado: o texto de exemplo está escuro demais, quase parecendo valor digitado. Ela tenta
+<code>text-stone-400</code> no campo e o texto do exemplo continua preto. Por quê? Porque o
+placeholder não é texto comum do elemento: é um pedaço interno do navegador, um
+<em>pseudo-elemento</em> chamado <code>::placeholder</code>, e ele tem cor própria.</p>
+
+<p>O Tailwind resolve isso com uma variante que parece um nome composto, e é:
+<code>placeholder:</code> antes da classe de cor. Tudo o que vem depois dos dois-pontos só vale
+para aquele pedacinho interno.</p>
+
+<div class="trytailwind" data-goal="rule:::placeholder;;rule:color: var(--color-stone-400)">
+  <p class="try-task">Deixe o texto de exemplo em cinza claro, para não parecer valor digitado:
+  acrescente <code>placeholder:text-stone-400</code> ao campo e rode para ver o CSS gerado.</p>
+  <pre class="html" data-saida="css">&lt;input id="alvo" class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-stone-900" type="text" placeholder="Ex.: pão de queijo"&gt;</pre>
+  <pre class="out">
+.w-full {
+  width: 100%;
+}
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+.border {
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+}
+.border-stone-300 {
+  border-color: var(--color-stone-300);
+}
+.bg-white {
+  background-color: var(--color-white);
+}
+.px-3 {
+  padding-inline: calc(var(--spacing) * 3);
+}
+.py-2 {
+  padding-block: calc(var(--spacing) * 2);
+}
+.text-stone-900 {
+  color: var(--color-stone-900);
+}
+</pre>
+  <pre class="solucao">&lt;input id="alvo" class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-stone-900 placeholder:text-stone-400" type="text" placeholder="Ex.: pão de queijo"&gt;</pre>
+</div>
+
+<p>Como esta caixa está configurada para mostrar as regras geradas, o painel exibe o seletor
+inteiro, com a barra invertida que o Tailwind usa para escapar os dois-pontos no nome da classe:</p>
+
+<pre class="term">.placeholder\:text-stone-400::placeholder {
+  color: var(--color-stone-400);
+}</pre>
+
+<p>Essa barra invertida é só a forma de escrever, no CSS, um nome que tem dois-pontos. Você não
+digita barra nenhuma no HTML: escreve <code>placeholder:text-stone-400</code> e pronto. O mesmo
+raciocínio vale para todas as variantes — <code>hover:</code>, <code>focus:</code>,
+<code>disabled:</code> — e é a razão de o guia insistir tanto em olhar o CSS gerado: é ali que a
+variante deixa de ser palavra mágica e vira seletor de verdade.</p>
+
+<p>Um aviso de contraste: <code>stone-400</code> é claro o bastante para se distinguir de valor
+digitado, mas ainda legível. Se você usar <code>stone-200</code>, o exemplo desaparece no fundo
+branco e o campo fica mudo. Escolha sempre pensando em quem está no celular, no sol, com a tela
+suja de farinha.</p>
+
+<h2>6. O type muda o campo por dentro</h2>
+
+<p>Até aqui a Ana cuidou do desenho. Mas o atributo <code>type</code> faz coisas que nenhuma classe
+faz: ele muda o teclado que aparece no celular, impede envio de dado inválido e, em alguns casos,
+troca o controle inteiro. Não é enfeite — é acessibilidade e menos erro de digitação.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>type</th><th>O que muda</th><th>Uso na padaria</th></tr>
+<tr><td><code>text</code></td><td>campo comum, sem validação</td><td>nome, observação curta</td></tr>
+<tr><td><code>email</code></td><td>teclado com arroba; cobra formato válido</td><td>e-mail da nota fiscal</td></tr>
+<tr><td><code>tel</code></td><td>teclado numérico no celular, sem validar</td><td>telefone para avisar do pedido</td></tr>
+<tr><td><code>number</code></td><td>aceita número, com setinhas e teclado numérico</td><td>quantidade de pães</td></tr>
+<tr><td><code>date</code></td><td>abre o calendário do sistema</td><td>dia da retirada</td></tr>
+<tr><td><code>checkbox</code></td><td>vira uma caixinha de marcar</td><td>"quero o pão fatiado"</td></tr>
+</table>
+</div>
+
+<p>O <code>type="date"</code> merece uma palavra: o calendário é do navegador, não do Tailwind, e
+por isso ele muda de cara entre Chrome, Safari e Firefox. Você pode pintar a caixa em volta com as
+mesmas classes de sempre, mas não consegue redesenhar o calendário. É uma das poucas situações em
+que a resposta honesta é "aceite o nativo": ele é acessível, traduzido e familiar.</p>
+
+<p>Já o <code>type="number"</code> tem uma armadilha conhecida: as setinhas ocupam espaço e o campo
+aceita colar texto em alguns navegadores. Para quantidade de pães, ele é ótimo. Para CEP e
+telefone, que começam com zero, ele é ruim — <code>type="number"</code> come o zero à esquerda.
+Nesses dois, use <code>text</code> ou <code>tel</code> com <code>inputmode="numeric"</code>, que
+pede o teclado numérico sem estragar o valor.</p>
+
+<h2>7. textarea, select e caixinhas de marcar</h2>
+
+<p>Três primos do <code>input</code> aparecem em todo formulário e cada um tem um ajuste próprio.
+O <code>textarea</code> é a caixa de texto grande, e a primeira coisa que a Ana descobre é que ele
+não aceita <code>rows</code> como classe: a altura vem do atributo <code>rows</code> ou de
+<code>h-24</code>. A segunda é que o canto inferior direito vem com uma alça de redimensionar, e
+ela adora arrastar essa alça até o campo ficar do tamanho de uma parede.</p>
+
+<pre class="file" data-file="encomenda.html">&lt;textarea class="w-full resize-none rounded-lg border border-stone-300 px-3 py-2" rows="3" placeholder="Sem açúcar, por favor"&gt;&lt;/textarea&gt;
+&lt;select class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2"&gt;
+  &lt;option&gt;Pão francês&lt;/option&gt;
+  &lt;option&gt;Pão de queijo&lt;/option&gt;
+&lt;/select&gt;</pre>
+
+<p><code>resize-none</code> remove a alça. Use quando o layout não pode crescer; deixe a alça
+quando a pessoa precisa escrever muito — uma observação de encomenda, por exemplo. E note que
+<code>textarea</code> <em>tem</em> tag de fechamento: o texto inicial fica entre as duas tags, não
+no <code>value</code>. É o erro clássico de quem vem do <code>input</code>.</p>
+
+<p>O <code>select</code> é o menu de opções. Ele nasce com uma setinha desenhada pelo sistema, que
+não combina com nada e muda de tamanho conforme o navegador. Se quiser controle total, use
+<code>appearance-none</code>, que remove a setinha nativa, e depois desenhe a sua — um
+<code>span</code> com uma seta ao lado, dentro de um pai <code>relative</code>. É trabalho de duas
+linhas de HTML e uma classe. Se não quiser esse trabalho, aceite a setinha nativa: ela funciona, é
+acessível e a maioria dos sites grandes usa.</p>
+
+<p>Já as caixinhas de marcar e os botões de rádio têm um detalhe bonito: desde 2022 existe a
+propriedade CSS <code>accent-color</code>, e o Tailwind a expõe como <code>accent-</code>. Uma
+classe pinta o miolo da caixinha com a cor da marca, sem gambiarra:</p>
+
+<pre class="file" data-file="encomenda.html">&lt;label class="flex items-center gap-2"&gt;
+  &lt;input class="size-4 accent-amber-700" type="checkbox"&gt;
+  Quero o pão fatiado
+&lt;/label&gt;</pre>
+
+<p><code>size-4</code> é o atalho de largura e altura iguais, 16 px em cada. <code>gap-2</code>
+afasta a caixinha do texto, e o <code>flex items-center</code> alinha os dois pelo meio. Sem esse
+alinhamento, a caixinha fica boiando acima da linha do texto — detalhe pequeno que denuncia
+formulário feito às pressas.</p>
+
+<h2>8. Campo desativado e campo só de leitura</h2>
+
+<p>Na padaria da Ana existe um caso concreto: o horário de retirada já vem preenchido com o
+horário do dia, e ela quer mostrar, mas não quer que o cliente mexa. A tentação é apagar o campo e
+escrever o horário como texto. Funciona, mas perde a semântica: quem usa leitor de tela precisa
+saber que ali existe um campo, ainda que bloqueado.</p>
+
+<p>O caminho é o atributo <code>disabled</code>, junto com a variante <code>disabled:</code> para
+pintar o estado. Sem pintar, o navegador deixa o campo acinzentado de um jeito que quase sempre
+destoa do resto da página.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-stone-100);;rule:color: var(--color-stone-500);;conta:input:disabled=1">
+  <p class="try-task">O campo do horário está desativado, mas parece um campo normal — ninguém
+  percebe que não dá para editar. Dê a ele fundo <code>stone-100</code> e texto
+  <code>stone-500</code> quando estiver desativado.</p>
+  <pre class="html" data-saida="css">&lt;input id="alvo" class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-stone-900" type="text" value="Segunda-feira, 6h" disabled&gt;</pre>
+  <pre class="out">
+.w-full {
+  width: 100%;
+}
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+.border {
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+}
+.border-stone-300 {
+  border-color: var(--color-stone-300);
+}
+.bg-white {
+  background-color: var(--color-white);
+}
+.px-3 {
+  padding-inline: calc(var(--spacing) * 3);
+}
+.py-2 {
+  padding-block: calc(var(--spacing) * 2);
+}
+.text-stone-900 {
+  color: var(--color-stone-900);
+}
+</pre>
+  <pre class="solucao">&lt;input id="alvo" class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-stone-900 disabled:bg-stone-100 disabled:text-stone-500" type="text" value="Segunda-feira, 6h" disabled&gt;</pre>
+</div>
+
+<p>O painel mostra o seletor com o estado pendurado no fim, e é essa a informação que importa:</p>
+
+<pre class="term">.disabled\:bg-stone-100:disabled {
+  background-color: var(--color-stone-100);
+}</pre>
+
+<p>Leia em voz alta: "quando este elemento estiver desativado, o fundo é o cinza 100". A mesma
+lógica vale para <code>hover:</code>, <code>focus:</code> e <code>dark:</code>. O Tailwind não
+inventa comportamento; ele escreve o seletor que você não quer escrever à mão.</p>
+
+<p>Falta distinguir <code>disabled</code> de <code>readonly</code>, porque os dois parecem iguais na
+tela e são bem diferentes na prática. <code>disabled</code> tira o campo da navegação por teclado,
+impede o clique e faz o valor <strong>não ser enviado</strong>. <code>readonly</code> deixa o campo
+focável, o texto selecionável e o valor enviado — só não deixa editar. Para dado que o cliente
+precisa ver, copiar ou enviar de volta, use <code>readonly</code> com um fundo suave; para campo
+que não faz sentido naquele momento, use <code>disabled</code>.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o campo que sumiu no fundo</h3>
+<p>A Ana montou o formulário num cartão branco e usou <code>bg-white</code> nos campos, com borda
+<code>stone-300</code>. No monitor dela ficou perfeito; no celular do cliente, os campos pareciam
+invisíveis. O motivo era o brilho da tela ao sol: branco sobre branco com uma borda de 1 px clara
+não sobrevive lá fora. A correção foi escurecer a borda para <code>stone-400</code> e dar ao campo
+um fundo <code>stone-50</code>, criando duas diferenças em vez de uma. Regra prática: campo dentro
+de cartão branco pede borda mais escura do que você acha necessário.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o formulário que estoura no celular</h3>
+<p>Um dos campos era um <code>input</code> de e-mail com largura fixa de 420 px, escolhida para
+caber bonito no desktop. Numa tela de 375 px, a página criou barra de rolagem lateral e o botão de
+enviar saiu para fora. A troca foi <code>w-full</code> no campo e <code>max-w-md</code> no
+formulário: no celular ele encolhe, no desktop para de crescer. O hábito que evita isso é nunca
+pensar em pixels fixos para largura de campo de texto; pense em porcentagem com teto.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o campo de telefone que aceitou letras</h3>
+<p>O cliente digitou "amanhã de manhã" no campo de telefone e a encomenda chegou sem número. O
+campo estava com <code>type="text"</code>, que aceita qualquer coisa. A correção não foi JavaScript:
+foi <code>type="tel"</code>, que chama o teclado numérico no celular, mais
+<code>inputmode="numeric"</code> e uma máscara simples no envio. O navegador não valida telefone
+brasileiro, então a validação de verdade fica no servidor — mas o teclado certo já evita a maior
+parte do erro.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Por que o campo do Tailwind aparece sem borda
+antes de você escrever nenhuma classe?</p>
+<label><input type="radio" name="f1"> porque campos sem borda são o padrão de todo navegador</label>
+<label><input type="radio" name="f1"> porque o CSS de base do Tailwind zera as bordas dos elementos</label>
+<label><input type="radio" name="f1"> porque falta instalar o plugin de formulários</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que <code>px-3 py-2</code> faz num
+<code>input</code>?</p>
+<label><input type="radio" name="f2"> aumenta a fonte e engorda a borda</label>
+<label><input type="radio" name="f2"> cria margem por fora, afastando o campo dos vizinhos</label>
+<label><input type="radio" name="f2"> dá 12 px de respiro nas laterais e 8 px em cima e embaixo</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Para pintar o texto de exemplo do campo, qual é
+a classe certa?</p>
+<label><input type="radio" name="f3"> <code>placeholder:text-stone-400</code></label>
+<label><input type="radio" name="f3"> <code>text-stone-400</code> no próprio input</label>
+<label><input type="radio" name="f3"> <code>bg-stone-400</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o campo de observação da encomenda</h2>
+<p>No seu arquivo, deixe o campo de observação com largura total, cantos de 8 px, borda cinza,
+12 px de respiro lateral, 8 px na vertical e texto de exemplo em cinza claro. Depois responda: qual
+classe você usa para pintar só o texto de exemplo?</p>
+<div class="ex-code">&lt;textarea class="<input aria-label="resposta 1" data-answer="placeholder:text-stone-400" placeholder="..."> w-full resize-none rounded-lg border border-stone-300 px-3 py-2" rows="3"&gt;&lt;/textarea&gt;</div>
+<p class="ex-dica">Dica: a variante vem antes, com dois-pontos, e a cor vem depois — a mesma ordem
+de <code>hover:bg-amber-100</code>. Se você escrever só <code>text-stone-400</code>, o texto
+digitado fica cinza e o exemplo continua escuro.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Um campo de formulário é uma tag vazia com atributos: <code>type</code> diz o que ele aceita,
+<code>name</code> diz com que nome o valor viaja, <code>placeholder</code> dá o exemplo e
+<code>value</code> traz o que já está preenchido. O Tailwind zera a borda nativa, então a moldura é
+sua: <code>border border-stone-300 rounded-lg px-3 py-2</code> é a receita que resolve a maioria dos
+casos. A largura vem de <code>w-full</code> com um teto no pai, e não de pixels fixos.</p>
+
+<p>O texto de exemplo é um pseudo-elemento, e por isso pede variante: <code>placeholder:</code>.
+Todo o resto do desenho do campo também aceita variante — <code>disabled:</code>,
+<code>readonly:</code>, <code>focus:</code> —, e é isso que separa um campo estático de um campo que
+responde. <code>textarea</code> tem tag de fechamento e uma alça que se remove com
+<code>resize-none</code>; <code>select</code> traz a setinha do sistema, que se remove com
+<code>appearance-none</code>; caixinha de marcar se pinta com <code>accent-</code>.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Campo confortável: <code>w-full rounded-lg border border-stone-300 px-3 py-2</code>.</li>
+<li>O CSS de base do Tailwind tira a borda nativa: sem <code>border</code>, o campo fica plano.</li>
+<li><code>px</code> é respiro lateral, <code>py</code> é vertical; os dois respeitam o idioma.</li>
+<li><code>w-full</code> acompanha a coluna; <code>max-w-md</code> no pai coloca um teto.</li>
+<li>Placeholder usa <code>placeholder:text-…</code>, nunca <code>text-…</code> sozinho.</li>
+<li><code>type</code> muda teclado e validação: <code>email</code>, <code>tel</code>,
+<code>number</code>, <code>date</code>.</li>
+<li>CEP e telefone começam com zero: prefira <code>text</code> com
+<code>inputmode="numeric"</code>.</li>
+<li><code>textarea</code> fecha com tag e aceita <code>rows</code>; <code>resize-none</code> tira a
+alça.</li>
+<li><code>accent-amber-700</code> pinta caixinha de marcar e botão de rádio.</li>
+<li><code>disabled</code> bloqueia e não envia; <code>readonly</code> só impede a edição.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

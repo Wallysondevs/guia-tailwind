@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tema por Classe | Guia Tailwind</title>
+<meta name="description" content="Quem decide que a página está no escuro: a classe dark no html, o @custom-variant, um botão de trocar tema com JavaScript mínimo e o escopo por seção.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Tema por <span class="hl">Classe</span></h1>
+<p class="intro">A Ana já tinha espalhado <code>dark:</code> pelo site inteiro seguindo a aula
+anterior. O cartão escurecia, o botão mudava de cor, o texto clareava — e nada disso acontecia na
+tela dela, porque faltava combinar uma coisa antes: <strong>quem</strong> avisa o CSS que a página
+está no escuro. Nesta aula ela descobre que esse aviso é uma classe, que mora no elemento mais alto
+da página, e que basta um botão de duas linhas para acender e apagar o tema. De quebra, aprende a
+escurecer só um pedaço do site — o cupom — sem escurecer o resto.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que <code>dark:</code> sozinho não faz nada e o que ele está esperando.</li>
+  <li>O que a linha <code>@custom-variant dark (&amp;:where(.dark, .dark *))</code> quer dizer.</li>
+  <li>Onde colocar a classe <code>dark</code>: no <code>&lt;html&gt;</code>, quase sempre.</li>
+  <li>Um botão de trocar tema com o mínimo de JavaScript, e o que cada pedaço faz.</li>
+  <li>Como lembrar a escolha entre uma visita e outra, sem piscar branco ao carregar.</li>
+  <li>Como escurecer só uma seção, deixando o resto da página no claro.</li>
+  <li>O que quebra quando a classe está no lugar errado.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o escuro que não acende</h2>
+
+<p>Na aula anterior a Ana aprendeu a escrever pares: <code>bg-white dark:bg-stone-900</code>,
+<code>text-stone-900 dark:text-stone-100</code>. Copiou o par para o cartão, para o botão, para o selo,
+para o rodapé. Salvou, recarregou, e a página continuou branca. Aí ela fez o que todo mundo faz: tirou
+e pôs a classe, trocou a ordem, abriu o inspetor. Nada.</p>
+
+<p>O motivo é simples e vale entender antes de decorar: o <code>dark:</code> não escurece nada por
+conta própria. Ele é uma <strong>condição</strong> — "aplique esta regra quando a página estiver no
+tema escuro". A página, por padrão, está no claro. Ninguém tinha dito o contrário, então a condição
+nunca foi verdadeira e as regras com <code>dark:</code> ficaram paradas, esperando.</p>
+
+<p>Quem diz que a página está no escuro? No Tailwind v4, você escolhe — e a escolha mais comum é uma
+classe chamada <code>dark</code> colocada num elemento. Daí o nome desta aula: o tema é decidido por
+classe, não pelo sistema operacional. A vantagem é controle: o visitante aperta um botão, a classe
+entra, o site escurece. A desvantagem é que alguém precisa escrever esse botão.</p>
+
+<h2>2. O que a variante dark espera</h2>
+
+<p>Para o Tailwind tratar <code>dark:</code> como "quando houver uma classe <code>dark</code> acima de
+mim", ele precisa de uma linha no seu arquivo CSS de entrada. Ela se chama <code>@custom-variant</code>
+e é esta aqui:</p>
+
+<pre class="term">@custom-variant dark (&amp;:where(.dark, .dark *));</pre>
+
+<p>Lendo com calma: "crie uma variante chamada <code>dark</code>, cujo seletor é o próprio elemento
+(<code>&amp;</code>) quando ele tiver a classe <code>.dark</code>, ou quando ele for descendente de um
+elemento com a classe <code>.dark</code> (<code>.dark *</code>)". Traduzindo para português: tudo que
+está <em>dentro</em> de um elemento marcado como escuro também é escuro, e o próprio elemento marcado
+conta. É a mesma ideia de herança das variáveis de tema, agora com uma classe como interruptor.</p>
+
+<p>O <code>:where()</code> em volta não é enfeite. Ele serve para que essa condição não aumente a
+"força" da regra no CSS. Sem ele, <code>dark:bg-stone-900</code> ficaria mais forte que qualquer
+classe normal e ganharia brigas que você não queria. Com ele, a classe escura tem o mesmo peso de uma
+classe comum — e o que decide é a ordem em que o Tailwind escreveu as regras no arquivo final.</p>
+
+<p>É fácil ver isso no CSS gerado. A regra da classe escura carrega a condição inteira no seletor:</p>
+
+<pre class="term">.dark\:bg-stone-900:where(.dark, .dark *) {
+  background-color: var(--color-stone-900);
+}</pre>
+
+<p>Aquele <code>:where(.dark, .dark *)</code> no fim é o "e somente se" da regra. Ela existe no
+arquivo desde o começo; o que muda é se o seletor casa com o elemento. Quando o
+<code>&lt;html&gt;</code> ganha a classe, todos os descendentes passam a casar e o fundo escuro entra
+em cena. Quando ela sai, os seletores deixam de casar e vale a regra clara — que está escrita
+antes.</p>
+
+<p>Essa ordem você pode conferir quando quiser: as regras com <code>dark:</code> vêm depois das
+regras normais. Por isso o par funciona sem <code>!important</code> e sem truque nenhum. É um detalhe
+técnico que explica por que você não precisa se preocupar com a ordem em que escreve as classes no
+HTML.</p>
+
+<dl class="anatomy">
+<dt>variante</dt>
+<dd>Um prefixo que muda a condição de uma classe: <code>dark:</code>, <code>hover:</code>,
+<code>md:</code>. Sem a condição satisfeita, a classe não vale.</dd>
+<dt>@custom-variant</dt>
+<dd>A linha do CSS de entrada que ensina ao Tailwind qual é a condição de uma variante — no caso,
+a existência da classe <code>.dark</code>.</dd>
+<dt>:where()</dt>
+<dd>Envelope que zera a especificidade do que está dentro. É o que permite a classe escura ganhar
+pela ordem, sem virar uma regra "mais forte" que as outras.</dd>
+<dt>especificidade</dt>
+<dd>A nota de força de um seletor no CSS. Empate vai para quem vem depois no arquivo; é assim que o
+par claro/escuro se resolve.</dd>
+<dt>classList</dt>
+<dd>O objeto do JavaScript que lista e altera as classes de um elemento: <code>add</code>,
+<code>remove</code>, <code>toggle</code>.</dd>
+<dt>localStorage</dt>
+<dd>Uma gaveta do navegador que guarda textos simples e sobrevive ao recarregar. Boa para lembrar a
+escolha de tema.</dd>
+</dl>
+
+<h2>3. Onde colocar a classe dark</h2>
+
+<p>A escolha mais comum — e a que resolve quase tudo — é o elemento <code>&lt;html&gt;</code>, o
+primeiro de todos. Ele envolve o cabeçalho, o conteúdo, o rodapé, tudo. Se a classe está ali, o site
+inteiro é escuro; se não está, é claro. Você não escreve essa classe à mão: quem coloca é o
+JavaScript do botão, como veremos daqui a pouco.</p>
+
+<pre class="file" data-file="index.html">&lt;html lang="pt-BR" class="dark"&gt;
+  &lt;head&gt;…&lt;/head&gt;
+  &lt;body class="bg-white text-stone-900 dark:bg-stone-900 dark:text-stone-100"&gt;
+    &lt;p&gt;Pão quentinho&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+
+<p>Repare que o <code>dark:</code> aparece no <code>&lt;body&gt;</code>, não no
+<code>&lt;html&gt;</code>. O corpo é quem pinta o fundo da página; o <code>&lt;html&gt;</code> é só o
+aviso. Essa separação é útil: o aviso pode estar ligado enquanto um componente tem a própria
+decoração. E é por isso que, quando o tema "não pega", a primeira coisa a conferir é se a classe
+entrou no elemento certo.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Onde vai a classe</th><th>Alcance</th><th>Quando serve</th></tr>
+<tr><td><code>&lt;html&gt;</code></td><td>a página inteira, inclusive a margem de fora</td><td>o botão de trocar tema do site</td></tr>
+<tr><td><code>&lt;body&gt;</code></td><td>o conteúdo visível</td><td>quando o <code>&lt;html&gt;</code> é de outro sistema e você não pode mexer</td></tr>
+<tr><td>um <code>&lt;div&gt;</code> qualquer</td><td>só os descendentes dele</td><td>um cupom, um bloco de destaque, uma prévia de tema</td></tr>
+<tr><td>o próprio componente</td><td>ele e os filhos</td><td>demonstração; num site real confunde mais do que ajuda</td></tr>
+</table>
+</div>
+
+<p>Também vale saber que você pode marcar um elemento menor. Se a classe <code>dark</code> está num
+<code>&lt;div&gt;</code>, só o que está dentro dele fica escuro — e isso é um recurso, não um
+acidente. É assim que se faz um cupom escuro no meio de uma página clara, ou um bloco de destaque
+com a cara do tema noturno. Guarde o truque; voltamos nele na seção 7.</p>
+
+<div class="trytailwind" data-goal="conta:.dark=1;;rule:background-color: var(--color-stone-800)">
+  <p class="try-task">O cartão já tem os pares <code>dark:</code> escritos, mas a página continua
+  clara porque nenhum ancestral tem a classe <code>dark</code>. Coloque <code>dark</code> na classe da
+  caixa de fora e rode: o cartão escurece na hora.</p>
+  <pre class="html">&lt;div class="p-4 rounded-2xl bg-stone-50"&gt;
+  &lt;div id="alvo" class="p-4 rounded-xl bg-white text-stone-900 dark:bg-stone-800 dark:text-stone-100"&gt;
+    Pão quentinho
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+color: oklch(0.216 0.006 56.043)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div class="dark p-4 rounded-2xl bg-stone-50"&gt;
+  &lt;div id="alvo" class="p-4 rounded-xl bg-white text-stone-900 dark:bg-stone-800 dark:text-stone-100"&gt;
+    Pão quentinho
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Se você rodar a solução e depois apagar a palavra <code>dark</code>, o cartão volta a ser branco na
+mesma hora. O <code>dark:</code> continua escrito no cartão, intacto: o que mudou foi a condição. Essa
+separação entre <em>condição</em> (a classe no alto) e <em>consequência</em> (as regras
+<code>dark:</code> espalhadas) é o coração desta aula. Com ela, o mesmo HTML serve para os dois temas
+e não existe página duplicada.</p>
+
+<h2>4. O botão que acende o escuro</h2>
+
+<p>Agora a parte que não é Tailwind. Um botão que troca de tema precisa mexer no HTML enquanto a pessoa
+usa a página — e HTML sozinho não faz isso. Quem faz é o <strong>JavaScript</strong>, a linguagem que o
+navegador entende além do HTML e do CSS. Daqui para frente, todo trecho com a etiqueta
+<code>&lt;script&gt;</code> é <strong>JavaScript</strong>, e eu vou avisar sempre que isso acontecer.</p>
+
+<pre class="file" data-file="index.html">&lt;button type="button" class="rounded-lg border border-stone-300 px-3 py-1 text-sm" data-trocar-tema&gt;
+  Trocar tema
+&lt;/button&gt;
+
+&lt;script&gt;
+  var botao = document.querySelector("[data-trocar-tema]");
+  botao.addEventListener("click", function () {
+    document.documentElement.classList.toggle("dark");
+  });
+&lt;/script&gt;</pre>
+
+<p>São quatro linhas de JavaScript e vale entender cada uma, porque a lógica se repete em qualquer
+site. <code>document</code> é a página inteira; <code>document.querySelector("[data-trocar-tema]")</code>
+procura o elemento que tem aquele atributo e guarda na variável <code>botao</code>. O
+<code>addEventListener("click", …)</code> significa "quando alguém clicar, execute isto".
+<code>document.documentElement</code> é a tag <code>&lt;html&gt;</code> — exatamente o elemento onde
+combinamos colocar a classe. E <code>classList.toggle("dark")</code> é o interruptor: se a classe não
+está lá, põe; se está, tira.</p>
+
+<p>O atributo <code>data-trocar-tema</code> é só um apelido que você inventa para achar o botão. Não é
+classe do Tailwind, não é atributo do HTML: é um nome livre, e o hábito de usar <code>data-</code>
+para isso evita confusão com as classes de estilo. Podia ser um <code>id</code>, mas o
+<code>id</code> só pode existir uma vez na página, e um botão de tema pode aparecer duas vezes (no
+cabeçalho e no rodapé).</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Pedaço</th><th>O que é</th><th>O que faz ali</th></tr>
+<tr><td><code>document</code></td><td>a página, para o JavaScript</td><td>ponto de partida de qualquer busca</td></tr>
+<tr><td><code>querySelector("[data-trocar-tema]")</code></td><td>uma busca por atributo</td><td>acha o botão e devolve o elemento</td></tr>
+<tr><td><code>addEventListener("click", …)</code></td><td>um "quando acontecer"</td><td>guarda a função para o clique</td></tr>
+<tr><td><code>document.documentElement</code></td><td>a tag <code>&lt;html&gt;</code></td><td>o elemento onde a classe entra</td></tr>
+<tr><td><code>classList.toggle("dark")</code></td><td>o interruptor</td><td>põe ou tira a classe, e devolve o estado</td></tr>
+<tr><td><code>localStorage.setItem / getItem</code></td><td>a gaveta do navegador</td><td>grava e lê a escolha do visitante</td></tr>
+</table>
+</div>
+
+<p>O laço que fecha a ideia: o botão põe uma classe; o Tailwind já escreveu as regras que respondem a
+essa classe; o navegador recalcula a página. Nenhuma linha de Tailwind muda quando você clica. O que
+muda é o estado do HTML — e o CSS reage. É a mesma engrenagem de <code>hover:</code> e
+<code>focus:</code>, que você já viu em <a href="hover.html">hover</a>: um estado, um conjunto de
+regras esperando por ele.</p>
+
+<h2>5. Por que o par é claro e escuro, na mesma classe</h2>
+
+<p>Um detalhe que vale revisitar agora, porque é onde os iniciantes erram: o jeito certo é escrever a
+classe clara e a escura juntas, no mesmo elemento. Não se escreve <code>dark:bg-stone-900</code>
+sozinho, contando com o fundo branco para o tema claro. Se o claro é o padrão, ele precisa estar
+explícito — porque o navegador não tem fundo branco garantido, e porque assim você lê o componente
+inteiro numa linha.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="bg-white text-stone-900 border border-stone-200
+            dark:bg-stone-900 dark:text-stone-100 dark:border-stone-700"&gt;
+  Pão quentinho
+&lt;/div&gt;</pre>
+
+<p>Esse bloco mostra a convenção que o guia usa: cada linha do componente trata de uma coisa, e cada
+coisa tem sua versão escura ao lado. Fundo, tinta, borda. Quando você lê <code>dark:border-stone-700</code>
+sabe exatamente qual borda está sendo trocada, porque a borda clara está na linha de cima. Se o par
+estivesse separado em dois arquivos ou em duas classes diferentes, você teria que caçar.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-stone-900);;rule:color: var(--color-stone-100)" data-tema="escuro">
+  <p class="try-task">Esta prévia está no escuro. Complete o par do cartão: acrescente
+  <code>dark:bg-stone-900</code> e <code>dark:text-stone-100</code> e rode para ver o cartão
+  acompanhar a página.</p>
+  <pre class="html">&lt;div id="alvo" class="p-6 rounded-xl bg-white text-stone-900"&gt;
+  &lt;p class="font-medium"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;saído do forno às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 24px
+background-color: rgb(255, 255, 255)
+color: oklch(0.216 0.006 56.043)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-6 rounded-xl bg-white text-stone-900 dark:bg-stone-900 dark:text-stone-100"&gt;
+  &lt;p class="font-medium"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600 dark:text-stone-400"&gt;saído do forno às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Antes de rodar, repare no que está faltando no HTML inicial: o cartão branco numa página escura fica
+como um holofote. É o sintoma clássico de quem começou o tema escuro pelo componente e esqueceu o
+fundo do cartão. Depois de rodar, repare também na segunda linha do cartão: no escuro, o
+<code>text-stone-600</code> fica apagado demais, e por isso a solução troca por
+<code>dark:text-stone-400</code>. Par de fundo sem par de tinta é meio par.</p>
+
+<h2>6. Lembrar a escolha entre uma visita e outra</h2>
+
+<p>Do jeito que está, o tema vale até a pessoa recarregar a página. Recarregou, voltou ao claro. Se o
+visitante escolheu o escuro porque a luz do balcão é forte, ele vai ter que escolher de novo toda vez —
+e é aí que o <code>localStorage</code> entra. Ele é uma gavetinha do navegador onde você guarda
+textinhos que sobrevivem ao recarregar.</p>
+
+<pre class="file" data-file="index.html">&lt;script&gt;
+  var botao = document.querySelector("[data-trocar-tema]");
+  botao.addEventListener("click", function () {
+    var escuro = document.documentElement.classList.toggle("dark");
+    localStorage.setItem("tema", escuro ? "escuro" : "claro");
+  });
+&lt;/script&gt;</pre>
+
+<p><code>classList.toggle</code> devolve <code>true</code> quando passou a ter a classe e
+<code>false</code> quando tirou. Guardamos isso em <code>escuro</code> e escrevemos na gaveta com
+<code>localStorage.setItem("tema", …)</code>. O <code>?</code> e o <code>:</code> no meio são o
+"se/então" do JavaScript: se for escuro, guarde <code>"escuro"</code>; senão, guarde
+<code>"claro"</code>.</p>
+
+<p>Falta ler a gaveta quando a página abre. E aqui há um detalhe de qualidade: essa leitura tem de
+acontecer no <code>&lt;head&gt;</code>, antes de o corpo ser desenhado. Se você ler depois, o
+navegador já pintou a página de branco e a troca aparece como um piscar — aquele flash branco chato
+que todo site com tema escuro já teve. O script que a página que você está lendo usa é exatamente
+este, e ele é curto:</p>
+
+<pre class="file" data-file="index.html">&lt;head&gt;
+  &lt;script&gt;
+    (function () {
+      try {
+        var t = localStorage.getItem("tema");
+        if (t === "escuro") document.documentElement.classList.add("dark");
+      } catch (e) {}
+    })();
+  &lt;/script&gt;
+&lt;/head&gt;</pre>
+
+<p>Três coisas para observar. O <code>if</code> só age quando a gaveta diz "escuro" — o padrão continua
+claro. O <code>try … catch</code> protege contra navegador que bloqueia armazenamento (acontece em
+abas anônimas e em algumas configurações de privacidade): se der erro, o script segue em silêncio em
+vez de quebrar a página. E o <code>classList.add</code> não é <code>toggle</code>: aqui queremos
+garantir a classe, não alterná-la.</p>
+
+<p>Um aviso honesto: sem JavaScript o botão não funciona e o site fica no claro. Isso é aceitável —
+o conteúdo continua legível —, mas é bom saber. Quem precisa que o escuro funcione sem JavaScript usa
+a preferência do sistema, que é o assunto da próxima aula. As duas técnicas convivem, e muita gente
+usa a preferência do sistema como padrão e a escolha manual por cima.</p>
+
+<h2>7. Escurecer só um pedaço: o cupom</h2>
+
+<p>Agora o truque que a herança da classe permite. A Ana queria um cupom de desconto com cara de
+tema escuro no meio da vitrine clara — um bloco que chamasse atenção. Não precisa de nada novo: basta
+pôr <code>dark</code> na classe do cupom. Ele passa a ser "a página escura" para efeito dos
+<code>dark:</code> que estão dentro dele.</p>
+
+<div class="trytailwind" data-goal="conta:.dark=1;;css:.fora|background-color=rgb(255, 255, 255);;texto:Cupom">
+  <p class="try-task">O cupom já tem os pares <code>dark:</code> escritos, mas está claro como o
+  resto. Ponha <code>dark</code> na classe do cupom — e só nele — para escurecer apenas esse bloco,
+  deixando a linha de baixo no claro.</p>
+  <pre class="html">&lt;div class="p-4 bg-white"&gt;
+  &lt;div id="alvo" class="p-3 rounded-lg bg-white text-stone-900 dark:bg-stone-800 dark:text-stone-100"&gt;
+    Cupom: 10% no café
+  &lt;/div&gt;
+  &lt;p class="fora bg-white text-stone-700"&gt;A padaria abre às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 12px
+background-color: rgb(255, 255, 255)
+color: oklch(0.216 0.006 56.043)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div class="p-4 bg-white"&gt;
+  &lt;div id="alvo" class="dark p-3 rounded-lg bg-white text-stone-900 dark:bg-stone-800 dark:text-stone-100"&gt;
+    Cupom: 10% no café
+  &lt;/div&gt;
+  &lt;p class="fora bg-white text-stone-700"&gt;A padaria abre às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O mesmo vale ao contrário, e é uma das coisas mais úteis de saber: para manter um bloco claro dentro
+de uma página escura, você não precisa de classe nenhuma — precisa de valores fixos no bloco. Se a
+página está escura e o cartão tem <code>bg-white text-stone-900</code> sem par, ele fica claro. O par
+com <code>dark:</code> é só para quem deve acompanhar o tema. Componente que deve ser sempre claro
+(um selo de "novo", uma etiqueta de preço) se protege ficando sem par.</p>
+
+<h2>8. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o site escurece, mas as bordas da página continuam brancas</h3>
+<p>A Ana pôs a classe <code>dark</code> num <code>&lt;div&gt;</code> de conteúdo, dentro do
+<code>&lt;body&gt;</code>. Os textos e cartões escureceram, e a margem de fora continuou branca,
+porque o <code>&lt;body&gt;</code> ficou de fora do bloco escuro. A correção é subir a classe para o
+<code>&lt;html&gt;</code> e deixar o fundo do <code>&lt;body&gt;</code> com o par
+<code>bg-white dark:bg-stone-900</code>. Regra de bolso: o tema começa onde começa a pintura.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o flash branco ao abrir a página</h3>
+<p>Ela guardou a escolha no <code>localStorage</code> e leu a gaveta no fim do
+<code>&lt;body&gt;</code>. Funcionava, mas a cada página nova o site abria branco e escurecia meio
+segundo depois. Movendo a leitura para o <code>&lt;head&gt;</code>, antes de qualquer pintura, o
+problema desapareceu. É a diferença entre arrumar a casa depois da visita entrar e arrumar antes de
+abrir a porta.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: dois botões, uma escolha</h3>
+<p>O site ganhou um botão de tema no cabeçalho e outro no rodapé. Cada um tinha o próprio
+<code>document.querySelector</code>, e os dois mexiam na mesma classe — funcionava, mas o
+<code>localStorage</code> era gravado duas vezes com nomes diferentes em cada script, e a bagunça
+apareceu quando ela quis um terceiro botão. A correção foi uma função só, chamada pelos dois botões, e
+um único nome de chave (<code>"tema"</code>) em todo o site. Um estado, um lugar.</p>
+</div>
+
+<h2>9. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. Por que <code>dark:bg-stone-900</code> não escurece
+nada numa página recém-criada?</p>
+<label><input type="radio" name="q1"> porque a classe está escrita errado</label>
+<label><input type="radio" name="q1"> porque o Tailwind não gera CSS para <code>dark:</code></label>
+<label><input type="radio" name="q1"> porque ninguém colocou a classe <code>dark</code> num ancestral</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. O que <code>classList.toggle("dark")</code> faz?</p>
+<label><input type="radio" name="q2"> põe a classe se ela não estiver e tira se estiver</label>
+<label><input type="radio" name="q2"> sempre põe a classe, mesmo que já exista</label>
+<label><input type="radio" name="q2"> troca a classe por outra de mesmo nome</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Onde faz sentido colocar a classe <code>dark</code>
+no caso mais comum?</p>
+<label><input type="radio" name="q3"> em cada cartão, um por um</label>
+<label><input type="radio" name="q3"> na tag <code>&lt;html&gt;</code>, que envolve a página toda</label>
+<label><input type="radio" name="q3"> no arquivo CSS, dentro do <code>@theme</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o interruptor do tema</h2>
+<p>Complete a linha de JavaScript que liga e desliga a classe <code>dark</code> na tag
+<code>&lt;html&gt;</code>:</p>
+<div class="ex-code">document.documentElement.classList.<input aria-label="resposta 1" data-answer="toggle" placeholder="...">("dark");</div>
+<p class="ex-dica">Dica: é o verbo em inglês para "alternar". O <code>add</code> só põe; este põe e
+tira, que é o que um botão de trocar tema precisa.</p>
+</div>
+
+<h2>10. Fixando com o olho: o que olhar quando não funciona</h2>
+
+<p>Antes do resumo, uma lista de conferência que economiza tempo. Ela é curta porque os erros são
+poucos e sempre os mesmos. Primeiro: a classe <code>dark</code> existe em algum ancestral do elemento?
+Abra o inspetor e olhe a árvore de cima para baixo — a classe pode estar num irmão, que não ajuda.
+Segundo: a linha <code>@custom-variant</code> está no arquivo CSS de entrada? Sem ela, o
+<code>dark:</code> responde à preferência do sistema, não à classe. Terceiro: o CSS foi recompilado
+depois da última alteração? No modo de desenvolvimento com npm, um build parado deixa regras velhas.</p>
+
+<p>Quarto, e o mais sutil: o elemento tem as duas versões? Um componente com
+<code>dark:bg-stone-900</code> mas sem <code>bg-white</code> parece funcionar no escuro e mostra o
+fundo padrão no claro — que pode ser transparente, e aí o cartão fica com a cor do pai. O painel das
+caixas mostra isso na hora: se o <code>background-color</code> não aparece, nenhuma classe de fundo
+está valendo ali. Quinto: o texto tem a cor do par escuro? Fundo escuro com tinta escura é o erro
+seguinte ao primeiro acerto.</p>
+
+<p>E uma conferência que não é de código: o tema escuro não é o tema claro invertido. Sombras fortes
+no claro viram borrões no escuro, branco puro machuca a vista, e a hierarquia de texto precisa de
+outros degraus. A aula de componentes no escuro cuida disso com calma. Aqui, o que importa é que a
+mecânica já está no lugar: uma classe no alto, pares espalhados, um botão de quatro linhas.</p>
+
+<h2>11. Resumo</h2>
+
+<p>O <code>dark:</code> é uma condição, não uma ordem. Quem torna a condição verdadeira é a classe
+<code>dark</code>, colocada num elemento ancestrais — quase sempre o <code>&lt;html&gt;</code> —, e é o
+JavaScript do botão que a coloca e tira. Para o Tailwind obedecer a essa classe em vez da preferência
+do sistema, o seu CSS de entrada precisa da linha
+<code>@custom-variant dark (&amp;:where(.dark, .dark *))</code>. O <code>:where()</code> mantém a
+briga de especificidade justa, e a ordem das regras no arquivo final é o que faz o par funcionar sem
+<code>!important</code>.</p>
+
+<p>O resto é disciplina: escrever sempre o par (claro e escuro no mesmo elemento), guardar a escolha no
+<code>localStorage</code> e ler essa escolha no <code>&lt;head&gt;</code> para não piscar branco, e
+usar a herança a seu favor quando quiser só um bloco escuro. Um estado, um lugar, um botão.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>dark:</code> sozinho não faz nada: falta a classe <code>dark</code> num ancestral.</li>
+<li><code>@custom-variant dark (&amp;:where(.dark, .dark *))</code> liga o <code>dark:</code> à classe.</li>
+<li>A classe vai no <code>&lt;html&gt;</code> no caso comum; num <code>&lt;div&gt;</code> ela vale só
+para dentro dele.</li>
+<li><code>classList.toggle("dark")</code> é o interruptor; <code>add</code> só liga.</li>
+<li><code>document.documentElement</code> é a tag <code>&lt;html&gt;</code> para o JavaScript.</li>
+<li><code>localStorage.setItem("tema", …)</code> guarda; <code>getItem</code> lê.</li>
+<li>Leia a escolha no <code>&lt;head&gt;</code>, antes da pintura, para evitar o flash branco.</li>
+<li>Escreva sempre o par: <code>bg-white dark:bg-stone-900</code>.</li>
+<li>Componente que deve ser sempre claro fica sem par — e é assim que ele se protege.</li>
+<li>Sem JavaScript o botão não troca nada; a preferência do sistema é o plano B da próxima aula.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

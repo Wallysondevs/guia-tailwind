@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variáveis de Tema | Guia Tailwind</title>
+<meta name="description" content="As variáveis de tema do Tailwind na prática: o que é uma variável no CSS, o que o @theme guarda, como --color-* e --spacing viram classes e como usar a sua com bg-(--minha-cor).">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Variáveis de <span class="hl">Tema</span></h1>
+<p class="intro">A Ana decidiu trocar o âmbar do site da padaria por um marrom mais sério, de farinha
+integral. Abriu o arquivo, contou quarenta e dois lugares com <code>amber</code> escrito e desistiu.
+Quarenta e dois lugares é muita coisa para mudar de novo no mês que vem. Nesta aula ela descobre
+que as cores do Tailwind não estão escritas nas classes: elas moram em <strong>variáveis</strong>, e
+uma variável é um valor com nome — um nome que você muda em um lugar só e todos os lugares
+acompanham. É a peça que sustenta o tema claro, o escuro e qualquer cor da marca.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é uma variável no CSS e por que ela começou com dois hífens.</li>
+  <li>Como ler o CSS gerado e ver que <code>bg-amber-100</code> é só um atalho para uma variável.</li>
+  <li>O que o <code>@theme</code> guarda e por que ele fica num arquivo CSS, não no HTML.</li>
+  <li>A convenção <code>--color-*</code>: é ela que transforma um nome em classe.</li>
+  <li>As outras famílias do tema: <code>--spacing</code>, <code>--radius-*</code>, <code>--text-*</code>.</li>
+  <li>Como usar uma variável sua dentro de uma classe: <code>bg-(--minha-cor)</code>.</li>
+  <li>O que acontece quando a variável não existe e para que serve o valor de reserva.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a cor que aparece em quarenta lugares</h2>
+
+<p>A Ana vende pão de queijo, bolo de fubá e café coado. O site tem três páginas: a vitrine, a
+página dos horários e uma de encomendas. Ela escolheu o âmbar do Tailwind porque achou bonito e
+porque combinava com o trigo. Funcionou por seis meses. Agora ela quer um marrom mais escuro, e aí
+vem o problema: cada cartão, cada selo e cada botão está pintado separado, com a classe escrita por
+inteiro.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="bg-amber-100 text-amber-900"&gt;Pão quentinho&lt;/div&gt;
+&lt;span class="bg-amber-200 text-amber-900"&gt;Novo&lt;/span&gt;
+&lt;button class="bg-amber-700 text-white"&gt;Encomendar&lt;/button&gt;</pre>
+
+<p>Três lugares, três tons diferentes da mesma família, e nenhum deles sabe que faz parte de uma
+decisão só. Se a Ana quiser o marrom, ela precisa mexer em quarenta e dois lugares e acertar os tons
+na mão, um por um. É o tipo de tarefa em que a gente erra na linha 38 e só descobre duas semanas
+depois, quando alguém manda mensagem perguntando por que aquele botão está amarelo claro.</p>
+
+<p>A saída não é o Tailwind ter um botão mágico de "trocar tudo". É mais bonito que isso: por baixo
+das classes existe uma camada de valores com nome, e as classes só apontam para ela. Quem mexe nessa
+camada troca a cor do site inteiro de uma vez. Essa camada tem nome — <strong>variáveis de
+tema</strong> — e é o assunto desta aula. Depois dela, a Ana não vai mais copiar uma cor; vai
+apontar para um nome.</p>
+
+<h2>2. O que é uma variável (e por que ela começa com dois hífens)</h2>
+
+<p>Variável é a ideia mais simples do mundo: um nome onde você guarda um valor. No CSS isso existe
+desde 2015 e se chama <em>propriedade personalizada</em>, na documentação oficial. Na prática todo
+mundo chama de variável. O jeito de declarar é este: dois hífens, o nome, dois-pontos e o valor.</p>
+
+<pre class="file" data-file="style.css">:root {
+  --color-trigo: #b45309;
+}</pre>
+
+<p>Aquela primeira linha, <code>:root</code>, quer dizer "a raiz do documento", que na prática é a
+página inteira: tudo que estiver abaixo herda o que foi declarado ali. E depois, quando quiser usar
+o valor, você chama pelo nome dentro de <code>var()</code> — <code>var(--color-trigo)</code>. O
+<code>var()</code> é o carteiro: vai até o nome, pega o conteúdo e entrega no lugar do pedido.</p>
+
+<pre class="file" data-file="style.css">.selo {
+  background-color: var(--color-trigo);
+}</pre>
+
+<p>Por que os dois hífens? Porque o CSS já tinha um monte de propriedades com nome curto
+(<code>color</code>, <code>font</code>, <code>gap</code>) e precisava de um espaço onde ninguém mais
+fosse mexer. Dois hífens no começo é o sinal de "este nome é seu, invente o que quiser". E como o
+nome é livre, o Tailwind pôde batizar as cores dele sem risco de conflito:
+<code>--color-amber-100</code> é a declaração de variável, e uma coisa completamente diferente de
+<code>color</code>.</p>
+
+<dl class="anatomy">
+<dt>variável (propriedade personalizada)</dt>
+<dd>Um valor guardado com um nome, declarado com dois hífens: <code>--color-trigo: #b45309;</code>.
+Ela não pinta nada sozinha; só guarda.</dd>
+<dt>var()</dt>
+<dd>A função que busca o valor de uma variável e o entrega no lugar onde foi chamada:
+<code>background-color: var(--color-trigo)</code>.</dd>
+<dt>@theme</dt>
+<dd>O bloco do arquivo CSS onde o Tailwind lê as variáveis do tema e, de quebra, gera uma classe
+para cada uma delas.</dd>
+<dt>declaração</dt>
+<dd>Uma linha de CSS no formato <code>propriedade: valor;</code>. Declarar a variável é escrever a
+linha; usar a variável é chamar o <code>var()</code>.</dd>
+<dt>escopo</dt>
+<dd>Onde a variável vale. Declarada em <code>:root</code>, vale na página toda; declarada num
+elemento, vale nele e nos filhos dele.</dd>
+<dt>valor de reserva</dt>
+<dd>O segundo pedaço do <code>var()</code>, depois da vírgula: <code>var(--cor-x, #000)</code>.
+É o que o navegador usa se o nome não existir.</dd>
+</dl>
+
+<p>Guarde a distinção que confunde todo mundo no começo: declarar a variável não muda nada na tela.
+Ela é só uma anotação. Enquanto ninguém chamar <code>var(--color-trigo)</code> em alguma
+propriedade, o marrom está guardado e invisível. Se você já viu uma variável "não funcionando",
+provavelmente faltou chamá-la — ou o nome estava escrito diferente no lugar do uso.</p>
+
+<h2>3. O CSS que o Tailwind gera já fala em variáveis</h2>
+
+<p>Agora o pulo do gato. Toda aula deste guia mostrou o CSS gerado com valores em
+<code>var()</code>, e talvez você tenha passado os olhos sem reparar. Repare agora:</p>
+
+<pre class="term">.bg-amber-100 {
+  background-color: var(--color-amber-100);
+}
+.text-amber-900 {
+  color: var(--color-amber-900);
+}</pre>
+
+<p>Não há hexadecimal ali. Não há <code>oklch</code>. O Tailwind não escreveu a cor:
+escreveu <strong>o nome da variável onde a cor mora</strong>. Isso quer dizer que a cor de todos os
+fundos âmbar do seu site é decidida no lugar onde <code>--color-amber-100</code> foi declarada — uma
+linha, num arquivo, longe do HTML. É exatamente o que a Ana queria e não sabia pedir.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-amber-100);;texto:Pão quentinho">
+  <p class="try-task">O cartão já tem texto âmbar escuro e respiro. Falta o fundo: acrescente
+  <code>bg-amber-100</code> e rode. Depois olhe o painel de CSS gerado embaixo e repare no que o
+  Tailwind escreveu no lugar da cor.</p>
+  <pre class="html" data-saida="css">&lt;div id="alvo" class="p-4 text-amber-900"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+.p-4 {
+  padding: calc(var(--spacing) * 4);
+}
+.text-amber-900 {
+  color: var(--color-amber-900);
+}
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4 text-amber-900 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostrou a regra inteira: <code>.bg-amber-100 { background-color: var(--color-amber-100); }</code>.
+Cinco palavras e um nome de variável. Se amanhã a Ana achar esse âmbar claro demais, ela muda o
+valor de <code>--color-amber-100</code> — e esse é o único lugar do projeto em que ele existe. Todos
+os cartões, selos e caixas que pedem <code>bg-amber-100</code> acompanham, porque todos pedem a
+mesma coisa.</p>
+
+<p>Isso também explica um comportamento que parece mágica. Se você declarar a variável dentro de um
+elemento, só o que está abaixo dele muda. A vara de condão funciona por herança: cada pedaço da
+página pergunta "quanto é <code>--color-amber-100</code> aqui?" e obedece ao valor mais próximo
+encontrado. É assim que existem tema claro e tema escuro na mesma folha de estilos, sem duplicar
+nada — mas essa história fica para a aula de tema por classe.</p>
+
+<h2>4. De onde vêm esses nomes: o @theme</h2>
+
+<p>Se as variáveis moram em algum lugar, onde exatamente? No Tailwind v4 elas moram num bloco
+chamado <code>@theme</code>, dentro do seu arquivo CSS de entrada. É um bloco curto e a coisa mais
+parecida com uma "configuração" no v4:</p>
+
+<pre class="term">@import "tailwindcss";
+
+@theme {
+  --color-trigo: #b45309;
+  --radius-caixa: 0.75rem;
+}</pre>
+
+<p>Duas linhas declaradas, duas coisas criadas. A primeira dá ao Tailwind uma cor chamada
+<code>trigo</code>, que passa a existir em classes como <code>bg-trigo</code>,
+<code>text-trigo</code> e <code>border-trigo</code>. A segunda cria um arredondamento chamado
+<code>caixa</code>, que vira <code>rounded-caixa</code>. O <code>@theme</code> é ao mesmo tempo o
+lugar onde você guarda os valores e a lista de nomes que o Tailwind aceita escrever nas classes. Um
+lugar só, duas funções.</p>
+
+<p>Repare também no que <strong>não</strong> mudou: o <code>--color-trigo</code> continua sendo uma
+variável de CSS comum, com dois hífens e tudo. A diferença é que o Tailwind leu o bloco e, para cada
+<code>--color-*</code> que encontrou, montou as classes de cor correspondentes. Você não escreve
+essas classes à mão em lugar nenhum; elas nascem do nome. É por isso que errar o nome no
+<code>@theme</code> e usar outro no HTML é o tropeço mais comum deste assunto: o nome é a única
+ponte entre os dois lados.</p>
+
+<p>E onde fica esse arquivo? No seu projeto, quando você instala o Tailwind com npm, é o arquivo CSS
+que você manda compilar — no nível 3 do guia isso ganha uma aula inteira. Nas caixas desta aula o
+compilador monta esse arquivo para você, e é por isso que as caixas trabalham com as variáveis que
+já existem (a paleta padrão) ou com variáveis declaradas no próprio HTML, no atributo
+<code>style</code>. A mecânica é a mesma; só muda o endereço da declaração.</p>
+
+<h2>5. A convenção --color-* é o que cria as classes</h2>
+
+<p>Aqui está o detalhe mais útil da aula: o Tailwind não adivinha o que a variável significa. Ele lê
+o <em>começo do nome</em>. <code>--color-*</code> gera classes de cor. <code>--radius-*</code> gera
+arredondamentos. <code>--text-*</code> gera tamanhos de texto. O prefixo é a etiqueta da gaveta, e
+cada gaveta produz um tipo de classe.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Variável no @theme</th><th>Classe que nasce</th><th>O que ela pinta</th></tr>
+<tr><td><code>--color-trigo</code></td><td><code>bg-trigo</code>, <code>text-trigo</code>, <code>border-trigo</code></td><td>cor de fundo, de letra e de borda</td></tr>
+<tr><td><code>--radius-caixa</code></td><td><code>rounded-caixa</code></td><td>arredondamento dos cantos</td></tr>
+<tr><td><code>--text-titulo</code></td><td><code>text-titulo</code></td><td>tamanho de fonte</td></tr>
+<tr><td><code>--font-marca</code></td><td><code>font-marca</code></td><td>família de fonte</td></tr>
+<tr><td><code>--spacing</code></td><td><code>p-4</code>, <code>m-2</code>, <code>gap-6</code></td><td>a régua de espaço que todo mundo usa</td></tr>
+</table>
+</div>
+
+<p>As famílias da paleta padrão seguem a mesma convenção, e é por isso que <code>bg-amber-100</code>
+tem exatamente esse nome: existe uma variável <code>--color-amber-100</code> na gaveta. A escala
+inteira está lá, de <code>--color-amber-50</code> a <code>--color-amber-950</code>, com todos os
+números no meio. Você nunca precisa decorar a lista: escreve a classe, roda, e o CSS gerado mostra o
+nome da variável que ele foi buscar.</p>
+
+<p>Cuidado com uma pegadinha: variável declarada em <code>:root</code> não gera classe nenhuma. Ela
+é só um valor guardado, para você usar dentro de um <code>var()</code> no seu próprio CSS. Quem
+fabrica classe é o <code>@theme</code>. A Ana passou uma tarde nessa confusão: declarou
+<code>--color-trigo</code> em <code>:root</code>, escreveu <code>bg-trigo</code> no HTML e nada
+aconteceu. A variável existia, o valor existia, mas a classe não — porque ninguém tinha pedido ao
+Tailwind para olhar aquele nome.</p>
+
+<h2>6. A variável --spacing e as outras escalas do tema</h2>
+
+<p>Cor é só a família mais famosa. A régua de espaço também é uma variável, e é uma das mais
+elegantes: <code>p-4</code> não vale "16 px", vale "quatro vezes a variável
+<code>--spacing</code>". O CSS gerado escreve a conta na sua frente:</p>
+
+<pre class="term">.p-4 {
+  padding: calc(var(--spacing) * 4);
+}
+.max-w-md {
+  max-width: var(--container-md);
+}
+.rounded-xl {
+  border-radius: var(--radius-xl);
+}</pre>
+
+<p>Isso significa que a escala não é uma tabela de números colados: é uma multiplicação por um valor
+que mora no tema. Mude <code>--spacing</code> e todo espaçamento do site cresce ou encolhe na mesma
+proporção — os 4 px do <code>p-1</code>, os 16 px do <code>p-4</code>, os 24 px do <code>p-6</code>.
+É útil para uma marca com respiro mais generoso e é ótimo para entender o desenho do sistema. Só não
+faça isso por esporte: metade do guia supõe a régua padrão, e a sua página vai ficar diferente dos
+exemplos sem que ninguém entenda por quê.</p>
+
+<p>As outras famílias funcionam igual. <code>--radius-xl</code> guarda o arredondamento de
+<code>rounded-xl</code>; <code>--text-lg</code> guarda o tamanho de <code>text-lg</code>, com a
+altura de linha derivada (<code>--text-lg--line-height</code>, outro nome que você pode sobrescrever
+se quiser); <code>--container-md</code> guarda o teto de largura de <code>max-w-md</code>. Sempre o
+mesmo desenho: um nome no tema, uma classe no HTML, um <code>var()</code> no meio.</p>
+
+<div class="trytailwind" data-goal="rule:border-radius: var(--radius-xl);;rule:font-size: var(--text-lg)">
+  <p class="try-task">Dê ao cartão cantos de 12 px e texto maior: acrescente <code>rounded-xl</code>
+  e <code>text-lg</code>. No painel de CSS gerado, veja que nenhuma das duas classes traz o número —
+  as duas chamam variáveis do tema.</p>
+  <pre class="html" data-saida="css">&lt;div id="alvo" class="bg-amber-100 p-4"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+.bg-amber-100 {
+  background-color: var(--color-amber-100);
+}
+.p-4 {
+  padding: calc(var(--spacing) * 4);
+}
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-amber-100 p-4 rounded-xl text-lg"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>Reparou que o <code>text-lg</code> gerou <em>duas</em> linhas, <code>font-size</code> e
+<code>line-height</code>? A altura de linha também sai de uma variável do tema
+(<code>--text-lg--line-height</code>), porque tamanho e entrelinha são uma decisão só. O Tailwind não
+deixa você escolher um tamanho enorme com a entrelinha antiga por acidente — ele já entrega o par
+pronto. E, se quiser mudar, é ali no tema, com o nome certo.</p>
+
+<h2>7. Usar uma variável que ainda não tem classe</h2>
+
+<p>E quando você quer usar uma variável que não tem classe? Acontece quando a cor vem de outro
+lugar: do CSS de um sistema antigo, de uma marca que só existe naquele arquivo, de um valor que
+muda com JavaScript. O Tailwind atende com os parênteses: <code>bg-(--cor-do-dia)</code> quer dizer
+"pinte o fundo com o que estiver em <code>--cor-do-dia</code>". É a forma curta de
+<code>bg-[var(--cor-do-dia)]</code>, que também funciona e faz a mesma coisa.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-trigo)">
+  <p class="try-task">O marrom do trigo está declarado no atributo <code>style</code> do cartão, mas
+  nenhuma classe o usa. Aponte o fundo para essa variável com <code>bg-(--color-trigo)</code>.</p>
+  <pre class="html" data-saida="css">&lt;div id="alvo" class="p-4 text-stone-900" style="--color-trigo: #b45309"&gt;Pão do dia&lt;/div&gt;</pre>
+  <pre class="out">
+.p-4 {
+  padding: calc(var(--spacing) * 4);
+}
+.text-stone-900 {
+  color: var(--color-stone-900);
+}
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4 text-stone-900 bg-(--color-trigo)" style="--color-trigo: #b45309"&gt;Pão do dia&lt;/div&gt;</pre>
+</div>
+
+<p>Duas coisas para levar desse exercício. A primeira: a cor não está no HTML, está na variável, e a
+classe só aponta. Se você trocar o <code>#b45309</code> por outro valor no
+<code>style</code>, o fundo muda na hora, sem tocar em classe nenhuma. A segunda: o mesmo nome que
+você inventa no <code>@theme</code> pode ser usado direto com parênteses. No projeto de verdade,
+<code>bg-(--color-trigo)</code> e <code>bg-trigo</code> chegam no mesmo lugar — a diferença é que a
+segunda forma exige a declaração no <code>@theme</code>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você escreve</th><th>O Tailwind gera</th><th>Quando usar</th></tr>
+<tr><td><code>bg-amber-100</code></td><td><code>background-color: var(--color-amber-100)</code></td><td>cor da paleta, sem pensar</td></tr>
+<tr><td><code>bg-trigo</code></td><td><code>background-color: var(--color-trigo)</code></td><td>cor declarada no <code>@theme</code></td></tr>
+<tr><td><code>bg-(--minha-cor)</code></td><td><code>background-color: var(--minha-cor)</code></td><td>variável que veio de fora do tema</td></tr>
+<tr><td><code>bg-[var(--minha-cor)]</code></td><td>igual ao de cima</td><td>mesma coisa, escrito por extenso</td></tr>
+<tr><td><code>bg-[#b45309]</code></td><td><code>background-color: #b45309</code></td><td>quando o valor é único e acabou ali</td></tr>
+</table>
+</div>
+
+<p>A última linha é a tentação do iniciante e merece uma palavra. O valor entre colchetes funciona e
+é honesto: o Tailwind escreve o hexadecimal na regra, sem variável no meio. O preço é que aquele
+valor não tem nome, então ninguém consegue trocá-lo depois de um lugar só, e ele não acompanha o
+tema escuro sem trabalho extra. Use colchete para o caso avulso, e variável para o que se repete.</p>
+
+<h2>8. Quando a variável não existe</h2>
+
+<p>Existe um jeito de falhar que não dá erro nenhum e por isso assusta: chamar uma variável que não
+existe. O navegador não reclama, o console fica limpo e a propriedade simplesmente não é aplicada —
+como se você não tivesse escrito nada. É o mesmo silêncio das classes digitadas errado, que já
+apareceu na <a href="primeira-classe.html">primeira aula</a>.</p>
+
+<p>A defesa é o valor de reserva, o segundo pedaço do <code>var()</code>:</p>
+
+<pre class="term">.selo {
+  background-color: var(--color-selo, var(--color-amber-100));
+}
+.selo-forte {
+  color: var(--color-tinta, #1c1917);
+}</pre>
+
+<p>Lendo em voz alta: "pinte com <code>--color-selo</code>; se esse nome não estiver declarado em
+lugar nenhum acima, use <code>--color-amber-100</code>". O reserva pode ser outra variável ou um
+valor cru, e pode até ter vírgulas dentro — o navegador usa tudo o que vier depois da primeira
+vírgula. Isso deixa o componente seguro para viver em páginas onde o tema ainda não chegou, e é o
+truque que bibliotecas usam para não depender de uma configuração específica.</p>
+
+<p>Tem um detalhe de escopo que vale conhecer desde já, porque ele explica metade dos mistérios do
+tema escuro. A variável é resolvida <em>no elemento onde a propriedade é aplicada</em>, olhando para
+cima na árvore. Se o seu <code>bg-(--color-fundo)</code> está num cartão, o valor que vale é o que
+estiver declarado no cartão, senão no pai dele, senão na raiz. Então a mesma classe pode pintar
+branco numa seção e preto em outra — sem que a classe mude. Guarde essa ideia: ela é o motor do tema
+claro/escuro das próximas aulas.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a cor da marca muda a cada estação</h3>
+<p>A Ana troca a cor de destaque do site duas vezes por ano — terracota no inverno, verde no verão.
+Com a cor escrita em cada classe, cada troca é uma tarde de trabalho e três erros. Com uma variável
+no <code>@theme</code> (<code>--color-marca</code>) e as classes apontando para ela
+(<code>bg-marca</code>, <code>text-marca</code>, <code>border-marca</code>), a troca é uma linha. O
+ganho não é digitar menos: é não precisar procurar. O nome do papel virou o lugar da decisão, e a
+decisão passou a existir num único endereço.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a variável existe, mas o valor não chega</h3>
+<p>Ela declarou <code>--color-destaque</code> dentro de um <code>&lt;div&gt;</code> e usou a cor num
+botão que estava <em>acima</em> dele, fora da árvore. Não funcionou, e com razão: variável vale para
+o elemento e para os filhos dele, nunca para os tios. A correção é declarar mais alto — na raiz, num
+container que envolva os dois — ou repetir a declaração onde for preciso. Vale a mesma regra do
+tema: quem manda é o ancestral mais próximo que declarou o nome.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: dois nomes para a mesma cor</h3>
+<p>Depois de um tempo o projeto dela tinha <code>--color-trigo</code>, <code>--color-marca</code> e
+<code>--color-destaque</code> com o mesmo hexadecimal, usados em lugares diferentes. Trocar a cor
+virou uma caça ao tesouro: mudar um dos três deixava o site bicolor. A faxina é escolher um nome por
+papel e apagar os outros, ou — melhor ainda — declarar um como apelido do outro:
+<code>--color-destaque: var(--color-trigo)</code>. Uma decisão, um nome de verdade, apelidos
+apontando para ele.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que o <code>@theme</code> faz com uma linha
+como <code>--color-trigo: #b45309;</code>?</p>
+<label><input type="radio" name="q1"> guarda a cor, mas nenhuma classe nova aparece</label>
+<label><input type="radio" name="q1"> guarda a cor e cria classes como <code>bg-trigo</code> e <code>text-trigo</code></label>
+<label><input type="radio" name="q1"> troca a paleta âmbar inteira pela cor nova</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Para que serve o segundo pedaço de
+<code>var(--color-selo, var(--color-amber-100))</code>?</p>
+<label><input type="radio" name="q2"> é o comentário da regra, o navegador ignora</label>
+<label><input type="radio" name="q2"> define a cor do texto quando o fundo é claro</label>
+<label><input type="radio" name="q2"> é o valor usado se <code>--color-selo</code> não existir</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O CSS gerado de <code>p-4</code> é
+<code>padding: calc(var(--spacing) * 4)</code>. O que isso quer dizer?</p>
+<label><input type="radio" name="q3"> o espaçamento é quatro vezes uma variável do tema</label>
+<label><input type="radio" name="q3"> o navegador calcula 4 px, sempre</label>
+<label><input type="radio" name="q3"> a variável <code>--spacing</code> só existe no tema escuro</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o marrom do trigo</h2>
+<p>No seu arquivo, a cor da marca está declarada como <code>--color-trigo</code> e você quer pintar o
+fundo de um selo com ela, sem criar um nome novo no <code>@theme</code>. Complete a classe:</p>
+<div class="ex-code">&lt;span class="<input aria-label="resposta 1" data-answer="bg-(--color-trigo)|bg-[var(--color-trigo)]" placeholder="..."> p-1 text-white"&gt;Novo&lt;/span&gt;</div>
+<p class="ex-dica">Dica: são dois jeitos de escrever a mesma ideia. O curto usa parênteses e o nome
+da variável dentro; o longo usa colchetes e o <code>var()</code> completo. Os dois funcionam.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Uma variável de CSS é um valor com nome, declarado com dois hífens e chamado com
+<code>var()</code>. O Tailwind v4 monta o tema inteiro assim: cada cor da paleta é uma variável, cada
+degrau de espaço é <code>--spacing</code> multiplicado, cada arredondamento é uma variável. As
+classes não carregam valores; elas apontam para nomes. Por isso trocar o valor de uma variável muda
+todos os lugares de uma vez — o que a Ana precisava e não sabia como pedir.</p>
+
+<p>Quem declara é o bloco <code>@theme</code>, no seu arquivo CSS, e é o prefixo do nome que decide a
+classe que nasce: <code>--color-*</code> para cor, <code>--radius-*</code> para canto,
+<code>--text-*</code> para tamanho de letra. Declarar em <code>:root</code> guarda o valor mas não
+gera classe nenhuma. Para usar uma variável de fora do tema, os parênteses resolvem:
+<code>bg-(--minha-cor)</code>. E para dormir tranquila, o valor de reserva do <code>var()</code>
+cobre o nome que não existe, que é o erro que o navegador nunca denuncia.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Variável = valor com nome. Declara com <code>--nome: valor;</code>, usa com <code>var(--nome)</code>.</li>
+<li>O CSS gerado de uma classe de cor é <code>background-color: var(--color-…)</code>: nenhum hexadecimal.</li>
+<li><code>@theme</code> guarda as variáveis do tema <strong>e</strong> cria as classes correspondentes.</li>
+<li>O prefixo manda: <code>--color-*</code> cor, <code>--radius-*</code> canto, <code>--text-*</code> fonte.</li>
+<li><code>--spacing</code> é a régua: <code>p-4</code> é <code>calc(var(--spacing) * 4)</code>.</li>
+<li><code>:root</code> só guarda valor; classe nova exige <code>@theme</code>.</li>
+<li><code>bg-(--minha-cor)</code> é a forma curta de <code>bg-[var(--minha-cor)]</code>.</li>
+<li><code>bg-[#b45309]</code> funciona, mas o valor fica sem nome e ninguém o troca depois.</li>
+<li>Variável vale no elemento e nos filhos; quem manda é o ancestral mais próximo.</li>
+<li><code>var(--x, reserva)</code> evita o silêncio de uma variável que não existe.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

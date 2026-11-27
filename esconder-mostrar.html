@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Esconder e Mostrar | Guia Tailwind</title>
+<meta name="description" content="Esconder e mostrar no Tailwind: hidden, block, md:hidden, sr-only e a diferença entre invisível, transparente e fora do desenho — com o CSS gerado.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Esconder e <span class="hl">Mostrar</span></h1>
+<p class="intro">No celular, o telefone da padaria não cabe ao lado do nome e empurra tudo para fora da
+tela. No monitor, o botão “Ligar agora” não faz sentido nenhum. A Ana já sabe mudar tamanho e cor com o
+breakpoint certo, mas agora precisa de outra coisa: tirar um elemento do desenho numa tela e trazê-lo de
+volta na outra. É a dupla <code>hidden</code> e <code>block</code>, que parece simples e esconde (nunca
+melhor dito) três armadilhas: o elemento que desaparece mas continua no caminho, o que some para quem
+enxerga e continua para quem ouve, e o que você esconde sem deixar alternativa.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que <code>hidden</code> faz de verdade, e por que ele precisa de um par para voltar.</li>
+  <li>Como aparecer só no desktop com <code>hidden md:block</code>.</li>
+  <li>Como desaparecer só no celular com <code>md:hidden</code>.</li>
+  <li>A diferença entre <code>hidden</code>, <code>invisible</code>, <code>opacity-0</code> e
+  <code>sr-only</code>.</li>
+  <li>Por que <code>md:visible</code> não existe para isso e o que usar no lugar.</li>
+  <li>Como esconder sem deixar quem usa leitor de tela (ou teclado) no prejuízo.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o telefone que não cabe e o botão que não serve</h2>
+
+<p>No monitor do balcão, o cabeçalho da padaria tem três coisas numa linha: o nome, o telefone e o
+horário. No celular, as três não cabem. A Ana tentou diminuir a letra, depois tentou quebrar a linha,
+depois pensou em tirar o telefone do site — e aí percebeu que a cliente no celular é justamente quem
+quer ligar. O telefone precisa estar lá, só não precisa estar no cabeçalho apertado.</p>
+
+<p>A decisão ficou assim: no celular, o cabeçalho mostra só o nome e o horário; o telefone aparece no
+rodapé, em forma de botão. No monitor, o telefone volta para o cabeçalho e o botão “Ligar agora”
+desaparece, porque no computador quem liga usa o próprio telefone. Duas informações, dois lugares
+diferentes, e a mesma pergunta para o CSS: como dizer “este elemento existe, mas não aparece aqui”?</p>
+
+<p>A resposta curta é <code>hidden</code>. A resposta completa é <code>hidden</code> combinado com uma
+classe que devolve o elemento ao desenho num breakpoint. E a resposta cuidadosa — a que separa quem sabe
+Tailwind de quem só decorou — é escolher, entre as quatro formas de esconder, a que combina com o motivo
+pelo qual você está escondendo. É o que esta aula faz, uma de cada vez.</p>
+
+<h2>2. hidden: tirar do desenho</h2>
+
+<p>A classe <code>hidden</code> aplica <code>display: none</code>. Não é “fique transparente”, nem
+“fique atrás”: o elemento sai do fluxo do documento, como se não existisse. O espaço que ele ocupava é
+recuperado pelos vizinhos, o navegador não o desenha, ele não recebe clique, não recebe foco pelo
+<kbd>Tab</kbd> e não é anunciado por leitores de tela. É o esconde mais radical que existe, e é o certo
+quando a informação realmente não deve existir naquele contexto.</p>
+
+<p>O nome é uma palavra em inglês que já era usada no HTML: existe um atributo global
+<code>hidden</code> que faz a mesma coisa. No Tailwind, ele virou uma classe, o que permite combiná-lo
+com prefixos — e é aí que está a vantagem. O atributo não sabe de breakpoint; a classe sabe.</p>
+
+<pre class="file" data-file="index.html">&lt;p hidden&gt;Telefone: (11) 4002-8922&lt;/p&gt;
+&lt;p class="hidden"&gt;Telefone: (11) 4002-8922&lt;/p&gt;</pre>
+
+<p>As duas linhas acima escondem o parágrafo, e as duas param de esconder se você apagar o que esconde.
+A diferença aparece na segunda: como é uma classe, ela aceita <code>md:hidden</code>,
+<code>hover:hidden</code>, <code>group-hover:hidden</code>. É o mesmo raciocínio de sempre — a classe é
+uma etiqueta que pode ganhar condição, o atributo não.</p>
+
+<dl class="anatomy">
+<dt>hidden</dt>
+<dd>Classe que aplica <code>display: none</code>: tira o elemento do desenho, do clique e do leitor de
+tela.</dd>
+<dt>display</dt>
+<dd>A propriedade que decide <em>como</em> a caixa se comporta no fluxo: <code>block</code>,
+<code>flex</code>, <code>grid</code>, <code>none</code>.</dd>
+<dt>invisible</dt>
+<dd>Aplica <code>visibility: hidden</code>: ocupa espaço, mas não é desenhado nem clicável.</dd>
+<dt>sr-only</dt>
+<dd>Esconde visualmente, mas mantém o texto disponível para leitores de tela.</dd>
+<dt>árvore de acessibilidade</dt>
+<dd>A versão da página que o leitor de tela “vê”. Esconder no CSS pode remover o elemento dela.</dd>
+</dl>
+
+<p>Um detalhe que confunde: <code>hidden</code> não é “o contrário de mostrar”. O contrário de
+<code>display: none</code> é qualquer outro valor de <code>display</code>, e existem vários. Se o
+elemento escondido era um parágrafo, o valor natural é <code>block</code>; se era um link dentro de um
+texto, <code>inline-block</code>; se era um contêiner flex, <code>flex</code>; se era uma grade,
+<code>grid</code>. É por isso que a volta nunca é “desesconder”: é escolher um display.</p>
+
+<h2>3. Aparecer só no desktop: hidden md:block</h2>
+
+<p>Juntando o que você já sabe de breakpoint com o que acabou de ver: escreva <code>hidden</code> na base
+e devolva o elemento com <code>md:block</code>. A leitura é “escondido em qualquer largura; a partir de
+768 px, bloco”. No celular, nada aparece e o espaço é liberado; no monitor, o parágrafo volta ao lugar
+de sempre.</p>
+
+<p>Na caixa abaixo, o telefone está escondido e a missão é trazê-lo de volta a partir de 768 px. O painel
+observa o parágrafo do telefone e mostra <code>display: none</code> — a prova de que ele saiu do desenho.
+Depois de rodar a solução, o valor depende da janela: <code>block</code> se ela tiver 768 px ou mais, e
+<code>none</code> se estiver abaixo.</p>
+
+<div class="trytailwind" data-goal="rule:.md\:block;;rule:@media (width &gt;= 48rem)">
+  <p class="try-task">O telefone está escondido. Faça ele aparecer a partir de 768 px, mantendo-o
+  escondido no celular: acrescente <code>md:block</code> ao parágrafo do telefone.</p>
+  <pre class="html">&lt;div class="rounded-xl bg-amber-50 p-4"&gt;
+  &lt;p class="font-semibold"&gt;Padaria Pão Quente&lt;/p&gt;
+  &lt;p id="alvo" class="hidden text-sm text-stone-600"&gt;(11) 4002-8922&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Aberto das 6h às 19h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: none
+color: oklch(0.444 0.011 73.639)
+font-size: 14px
+line-height: 20px
+</pre>
+  <pre class="solucao">&lt;div class="rounded-xl bg-amber-50 p-4"&gt;
+  &lt;p class="font-semibold"&gt;Padaria Pão Quente&lt;/p&gt;
+  &lt;p id="alvo" class="hidden text-sm text-stone-600 md:block"&gt;(11) 4002-8922&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Aberto das 6h às 19h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Repare que o <code>md:block</code> não é “o contrário de hidden”: ele é um valor de display, escolhido
+porque o elemento é um parágrafo. Se fosse um link dentro de uma frase, o par seria
+<code>hidden md:inline</code>; se fosse um contêiner de ícones, <code>hidden md:flex</code>. Escolher o
+display errado não esconde nada, mas deixa o layout torto: um <code>md:block</code> num item que devia
+ser <code>flex</code> perde o alinhamento interno, e o sintoma aparece longe do lugar onde você mexeu.</p>
+
+<p>Outra coisa que vale saber: a ordem das classes no HTML não muda o resultado. <code>hidden md:block</code>
+e <code>md:block hidden</code> desenham igual, porque o CSS gerado coloca a base antes e o degrau
+depois. Isso já apareceu nas aulas de breakpoint e de mobile first, e continua valendo aqui — mas, por
+legibilidade, escreva sempre a base primeiro: quem lê o HTML entende “escondido, e depois bloco”.</p>
+
+<h2>4. O CSS que o Tailwind gera</h2>
+
+<p>O par <code>hidden md:block</code> vira duas regras, uma fora e uma dentro da media query:</p>
+
+<pre class="term">.hidden {
+  display: none;
+}
+@media (width &gt;= 48rem) {
+  .md\:block {
+    display: block;
+  }
+}</pre>
+
+<p>Nada de especial acontece aqui: são dois valores da mesma propriedade, e o segundo está dentro de uma
+condição de largura. O que muda o jogo é a cascata — quando a janela passa de 768 px, as duas regras
+casam, e a de baixo vence. É o mesmo mecanismo da escada de respiro da aula de mobile first, aplicado a
+uma propriedade que liga e desliga o elemento inteiro.</p>
+
+<p>Vale notar o que <em>não</em> existe: não há uma regra “desfazendo” o <code>display: none</code>. O
+<code>md:block</code> simplesmente escreve outro valor para a mesma propriedade, e o navegador usa o que
+venceu. Quem pensa em “esconder e depois mostrar” costuma procurar uma classe chamada
+<code>show</code> ou <code>visible</code>. Não existe <code>show</code> no Tailwind, e
+<code>visible</code> existe mas faz outra coisa (volta o <code>visibility</code>, não o
+<code>display</code>) — é a armadilha da próxima seção.</p>
+
+<p>Essa confusão tem nome e sobrenome: <code>md:visible</code> não traz o elemento de volta. Se você
+escrever <code>hidden md:visible</code>, ele continua escondido em todas as larguras, porque
+<code>visible</code> mexe em <code>visibility</code> e quem está mandando no desenho é o
+<code>display: none</code>. O par certo é sempre um valor de display: <code>block</code>,
+<code>inline</code>, <code>inline-block</code>, <code>flex</code>, <code>grid</code>,
+<code>inline-flex</code> ou <code>table</code>.</p>
+
+<h2>5. Desaparecer só no celular: md:hidden</h2>
+
+<p>O contrário também é comum e é mais simples: o elemento aparece normalmente e você o esconde a partir
+de certo ponto. No caso da Ana, o botão “Ligar agora” serve no celular e atrapalha no monitor. A classe é
+<code>md:hidden</code>, sem nenhuma base especial — o estado natural do botão já é visível.</p>
+
+<p>Na caixa abaixo, o botão está visível. A missão é escondê-lo a partir de 768 px. O painel de partida
+mostra o botão em estado normal: fundo âmbar, texto branco, cantos de 6 px, respiro e tamanho de fonte.
+Depois de rodar a solução, o valor de <code>display</code> passa a depender da janela — e no celular o
+botão continua aparecendo.</p>
+
+<div class="trytailwind" data-goal="rule:.md\:hidden;;rule:@media (width &gt;= 48rem)">
+  <p class="try-task">O botão “Ligar agora” só faz sentido no celular. Esconda-o a partir de 768 px:
+  acrescente <code>md:hidden</code> ao botão.</p>
+  <pre class="html">&lt;div class="flex flex-wrap items-center gap-2 rounded-xl bg-amber-50 p-4"&gt;
+  &lt;p class="font-semibold"&gt;Pão de queijo&lt;/p&gt;
+  &lt;button id="alvo" class="rounded-md bg-amber-600 px-3 py-2 text-sm text-white"&gt;Ligar agora&lt;/button&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.666 0.179 58.318)
+color: rgb(255, 255, 255)
+font-size: 14px
+line-height: 20px
+border-radius: 6px
+padding-inline: 12px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;div class="flex flex-wrap items-center gap-2 rounded-xl bg-amber-50 p-4"&gt;
+  &lt;p class="font-semibold"&gt;Pão de queijo&lt;/p&gt;
+  &lt;button id="alvo" class="rounded-md bg-amber-600 px-3 py-2 text-sm text-white md:hidden"&gt;Ligar agora&lt;/button&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A escolha entre <code>hidden md:block</code> e <code>md:hidden</code> não é de gosto, é de leitura do
+código. Se o elemento deve existir na maioria dos casos e sumir em alguns, use <code>md:hidden</code>: a
+base fica limpa e o caso especial aparece explícito. Se ele deve sumir na maioria e aparecer em alguns,
+use <code>hidden md:block</code>. Em ambos, quem olha o HTML entende a intenção sem abrir o CSS — e isso
+é metade do valor do Tailwind.</p>
+
+<p>Há um custo escondido no <code>md:hidden</code>: o elemento continua sendo baixado,
+renderizado e depois escondido. Para um botão, irrelevante. Para uma imagem grande ou um bloco de
+terceiros, é desperdício de dados de quem está no celular — que muitas vezes é justamente quem tem a
+conexão pior. Nesse caso, o caminho é outro: carregar a imagem certa para cada tela, com
+<code>&lt;picture&gt;</code> ou <code>srcset</code>. O CSS não resolve o que nem chegou a ser escolhido.</p>
+
+<h2>6. Quatro jeitos de esconder (e eles não são iguais)</h2>
+
+<p>Aqui está a parte que separa quem sabe de quem acha que sabe. <code>hidden</code>,
+<code>invisible</code>, <code>opacity-0</code> e <code>sr-only</code> parecem a mesma coisa na tela, e
+são mundos diferentes embaixo. Cada um responde de um jeito a quatro perguntas: ocupa espaço? aparece?
+é clicável? o leitor de tela lê?</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que faz</th><th>Ocupa espaço?</th><th>Clique do mouse?</th><th>Leitor de tela</th></tr>
+<tr><td><code>hidden</code></td><td><code>display: none</code></td><td>não</td><td>não</td><td>não lê</td></tr>
+<tr><td><code>invisible</code></td><td><code>visibility: hidden</code></td><td>sim</td><td>não</td><td>não lê</td></tr>
+<tr><td><code>opacity-0</code></td><td>transparente</td><td>sim</td><td>sim</td><td>lê</td></tr>
+<tr><td><code>sr-only</code></td><td>recorte de 1 px</td><td>quase nada</td><td>não</td><td>lê</td></tr>
+</table>
+</div>
+
+<p>Comece pelo <code>hidden</code>, que é o mais usado e o mais honesto: o elemento não existe naquele
+contexto. Depois, o <code>invisible</code>, que é o esconde “segurando o lugar”: o texto fica reservado
+no layout, mas ninguém vê nem clica. Ele serve para truques de alinhamento — trocar um rótulo por outro
+sem que o botão mude de tamanho — e quase nunca para conteúdo.</p>
+
+<p>O <code>opacity-0</code> é o mais perigoso justamente por ser o mais bonito: o elemento fica
+transparente, mas continua ocupando espaço, recebendo cliques e sendo lido em voz alta. Um botão com
+<code>opacity-0</code> é um botão invisível que funciona — o que pode ser ótimo (para animar a entrada
+com <code>transition</code>) ou um desastre (para um botão que devia estar fora do caminho). Na aula de
+<code>group-hover</code>, o botão escondido usava exatamente isso, e a ressalva era a mesma: quem navega
+por teclado encontra o botão antes de vê-lo.</p>
+
+<p>E o <code>sr-only</code> é o esconde do bem: ele reduz o elemento a um quadradinho de 1 px, recortado
+e fora da tela, mas deixa o texto disponível para leitores de tela. É a ferramenta certa para rótulos que
+só fazem sentido fora do visual — o “Buscar” de um campo com ícone de lupa, o “Abrir menu” de um botão
+com três traços. Quem enxerga não precisa ler; quem ouve, precisa.</p>
+
+<h2>7. sr-only: esconder para quem vê, mostrar para quem ouve</h2>
+
+<p>O campo de busca da padaria tem um ícone de lupa e nenhum texto visível — no espaço de um botão não
+cabe “buscar”. Só que um leitor de tela anunciaria apenas “campo de edição”, sem dizer para quê. A
+solução é um <code>&lt;label&gt;</code> de verdade, escondido visualmente com <code>sr-only</code>: ele
+não aparece na tela, mas continua ligado ao campo pelo atributo <code>for</code>.</p>
+
+<p>Na caixa abaixo, o rótulo está visível e empurra o campo para a direita. A missão é aplicar
+<code>sr-only</code> ao <code>&lt;label&gt;</code>. Depois de rodar a solução, o painel mostra o
+resultado em detalhe: posição absoluta, 1 px de largura, 1 px de altura, margem de −1 px, recorte e texto
+sem quebra de linha. É assim que se esconde sem esconder de verdade.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|position=absolute;;css:#alvo|width=1px;;css:#alvo|height=1px">
+  <p class="try-task">Deixe o rótulo “Buscar pão” só para leitores de tela, sem sumir da árvore de
+  acessibilidade: acrescente <code>sr-only</code> ao <code>&lt;label&gt;</code>.</p>
+  <pre class="html">&lt;div class="rounded-xl bg-amber-50 p-4"&gt;
+  &lt;label id="alvo" for="busca" class="text-sm font-medium text-stone-700"&gt;Buscar pão&lt;/label&gt;
+  &lt;input id="busca" type="search" placeholder="Pão francês, broa…" class="mt-1 w-full rounded-md border border-amber-300 bg-white p-2"&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+color: oklch(0.374 0.01 67.558)
+font-size: 14px
+font-weight: 500
+line-height: 20px
+</pre>
+  <pre class="solucao">&lt;div class="rounded-xl bg-amber-50 p-4"&gt;
+  &lt;label id="alvo" for="busca" class="sr-only"&gt;Buscar pão&lt;/label&gt;
+  &lt;input id="busca" type="search" placeholder="Pão francês, broa…" class="mt-1 w-full rounded-md border border-amber-300 bg-white p-2"&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS gerado deixa claro que não há mágica: são nove declarações que, juntas, tiram o elemento da tela
+sem tirá-lo do documento.</p>
+
+<pre class="term">.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
+}</pre>
+
+<p>Repare que a solução <em>removeu</em> as classes de texto do rótulo. Não é obrigatório, mas é
+recomendado: tamanho de fonte e cor não têm efeito visível num elemento recortado, e manter as classes
+dá a impressão de que algo ali ainda é desenhado. O <code>sr-only</code> já cuida de tudo. Se depois você
+precisar trazer o rótulo de volta em telas grandes, existe o par <code>sr-only lg:not-sr-only</code> —
+útil em tabelas e em formulários longos.</p>
+
+<h2>8. Esconder com cuidado</h2>
+
+<p>A primeira regra é simples e cobre metade dos problemas: <strong>o que você esconde no celular
+desaparece para quem está no celular</strong>. O preço, o telefone, o endereço e o botão de comprar não
+podem viver só no desktop. Se a informação é importante, ela muda de lugar, não de existência — como o
+telefone da Ana, que saiu do cabeçalho e apareceu no rodapé em forma de botão.</p>
+
+<p>A segunda regra é sobre o teclado. <code>hidden</code> remove o elemento do foco, o que é correto. Mas
+<code>opacity-0</code> e <code>invisible</code> fora de fluxo deixam armadilhas: o usuário aperta
+<kbd>Tab</kbd>, o foco some da tela, e ele não entende para onde foi. Se você usa esses dois para animar,
+garanta que o elemento também seja escondido do foco quando não deve ser usado — ou aceite que ele seja
+focável e torne-o visível no foco, com <code>focus:opacity-100</code>.</p>
+
+<p>A terceira regra é sobre animação. Por padrão, <code>display</code> não faz transição suave: quando
+o valor muda de <code>none</code> para <code>block</code>, o elemento aparece de uma vez. Se você quer um fade,
+combine <code>opacity-0</code> com <code>invisible</code> e anime a opacidade; se quer só aparecer e
+desaparecer sem frescura, <code>hidden</code> é mais simples e mais leve. Escolher a ferramenta certa
+evita gambiarras de <code>transition</code> com <code>display</code> que nunca funcionam.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sintoma</th><th>Causa provável</th><th>O que fazer</th></tr>
+<tr><td>O elemento some e não volta no desktop</td><td>usou <code>md:visible</code> em vez de um display</td><td>troque por <code>md:block</code>, <code>md:flex</code> ou o display certo</td></tr>
+<tr><td>O elemento some mas o buraco fica</td><td>é <code>invisible</code> ou <code>opacity-0</code></td><td>use <code>hidden</code> se quiser liberar o espaço</td></tr>
+<tr><td>Dá para clicar no que não aparece</td><td><code>opacity-0</code> mantém o clique</td><td>junte <code>pointer-events-none</code> ou use <code>hidden</code></td></tr>
+<tr><td>O leitor de tela não anuncia o campo</td><td>o rótulo foi escondido com <code>hidden</code></td><td>use <code>sr-only</code>, que mantém o texto</td></tr>
+<tr><td>A transição não suaviza</td><td><code>display</code> não anima por padrão</td><td>anime <code>opacity</code> e <code>visibility</code>, não o <code>display</code></td></tr>
+<tr><td>No celular não há como abrir o menu</td><td>escondeu sem alternativa</td><td>deixe um botão na base e mostre os links no degrau</td></tr>
+</table>
+</div>
+
+<p>Uma nota sobre busca: conteúdo com <code>display: none</code> costuma não ser indexado do mesmo jeito
+que o conteúdo visível. Isso não é punição — é a consequência lógica de esconder. Só vira problema
+quando você esconde informação importante para o visitante de celular: além de prejudicar a pessoa, você
+reduz o que o buscador tem para mostrar. De novo: esconda o que não deve existir naquele contexto, não o
+que você não quis organizar.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o menu com dois desenhos</h3>
+<p>O menu da padaria tem seis links no desktop e um botão de três traços no celular. São dois elementos
+no HTML, cada um com a sua condição: os links com <code>hidden md:flex</code> e o botão com
+<code>md:hidden</code>. No celular, os links somem e o botão aparece; no desktop, o contrário. O detalhe
+que ela quase esqueceu: o botão precisa de um <code>aria-label</code> dizendo o que faz, senão o leitor de
+tela anuncia só “botão”. Visibilidade resolvida no CSS, significado resolvido no HTML.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o aviso que só valia no celular</h3>
+<p>Na tabela de preços, ela pôs um aviso “arraste para o lado para ver tudo” acima da tabela. No desktop,
+o aviso era ruído, porque a tabela cabia inteira. A solução foi <code>md:hidden</code> no aviso — e não
+<code>hidden md:block</code> na tabela, que era o conteúdo principal. A lição: esconda o acessório, nunca
+o conteúdo. Se você se pegar escondendo dados no celular, provavelmente o problema é o desenho, não o
+dado.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o formulário que ficou impossível no teclado</h3>
+<p>Num formulário de encomenda, ela animou os campos com <code>opacity-0</code> e
+<code>transition</code> para aparecerem um a um. No teclado, o foco entrava em campos invisíveis e a
+pessoa “sumia” da tela a cada <kbd>Tab</kbd>. A correção foi voltar ao <code>hidden</code> para os campos
+que não deviam existir naquele passo, e reservar a opacidade para o enfeite do botão. Menos bonito na
+animação, muito melhor de usar.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Um elemento com <code>hidden md:block</code> aparece
+quando?</p>
+<label><input type="radio" name="q1"> no celular, e some no desktop</label>
+<label><input type="radio" name="q1"> só a partir de 768 px</label>
+<label><input type="radio" name="q1"> em todas as larguras, com display block</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual é a diferença entre <code>hidden</code> e
+<code>invisible</code>?</p>
+<label><input type="radio" name="q2"> nenhuma: os dois somem com o elemento e liberam o espaço</label>
+<label><input type="radio" name="q2"> <code>invisible</code> some com o elemento e libera o espaço;
+<code>hidden</code> não</label>
+<label><input type="radio" name="q2"> <code>hidden</code> libera o espaço; <code>invisible</code> mantém
+o buraco no layout</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Você quer um rótulo que não aparece na tela, mas que o
+leitor de tela anuncia. Qual classe usa?</p>
+<label><input type="radio" name="q3"> <code>sr-only</code></label>
+<label><input type="radio" name="q3"> <code>hidden</code></label>
+<label><input type="radio" name="q3"> <code>opacity-0</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o horário no cabeçalho</h2>
+<p>O horário de funcionamento deve aparecer só no desktop, a partir de 768 px. O parágrafo já começa
+escondido. Complete com a classe que o traz de volta:</p>
+<div class="ex-code">&lt;p class="hidden <input aria-label="resposta 1" data-answer="md:block" placeholder="..."> text-sm"&gt;Aberto das 6h às 19h&lt;/p&gt;</div>
+<p class="ex-dica">Dica: é o prefixo do ponto de 768 px mais um valor de <code>display</code>. Se você
+escrever <code>md:visible</code>, o parágrafo continua escondido — <code>visible</code> mexe em
+visibilidade, não em display.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p><code>hidden</code> aplica <code>display: none</code>: o elemento sai do desenho, do clique, do foco e
+do leitor de tela, e o espaço é liberado. Para voltar, você não “desesconde”: dá outro valor de display
+num breakpoint — <code>hidden md:block</code> para aparecer no desktop, <code>md:hidden</code> para
+sumir nele. O CSS gerado são duas regras com <code>display</code> diferentes, e a cascata decide qual
+vale em cada largura.</p>
+
+<p>Nem todo esconder é igual: <code>invisible</code> guarda o espaço, <code>opacity-0</code> deixa
+clicável e audível, e <code>sr-only</code> esconde só de quem enxerga. Escolher a ferramenta certa é o
+que separa um layout bonito de uma página que funciona para todas as pessoas — e esconder conteúdo
+essencial no celular nunca é uma boa troca.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>hidden</code> = <code>display: none</code>: some do layout, do clique, do foco e do leitor de
+tela.</li>
+<li>Para voltar, use um valor de display: <code>md:block</code>, <code>md:flex</code>,
+<code>md:inline</code>.</li>
+<li><code>md:visible</code> não traz nada de volta: <code>visible</code> mexe em
+<code>visibility</code>.</li>
+<li><code>hidden md:block</code> = só no desktop; <code>md:hidden</code> = só no celular.</li>
+<li>A ordem das classes no HTML não muda o resultado: a base vem antes no CSS.</li>
+<li><code>invisible</code> ocupa espaço; <code>hidden</code> não.</li>
+<li><code>opacity-0</code> continua clicável, focável e audível.</li>
+<li><code>sr-only</code> esconde visualmente e mantém o texto para leitores de tela.</li>
+<li><code>display</code> não faz transição por padrão: para suavizar, anime <code>opacity</code>.</li>
+<li>Esconda o acessório, não o conteúdo: esconder dado no celular é dívida, não solução.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

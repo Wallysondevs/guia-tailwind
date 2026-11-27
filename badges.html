@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Etiquetas e Badges | Guia Tailwind</title>
+<meta name="description" content="Etiquetas e badges no Tailwind: a pílula com inline-flex, rounded-full, px-2 e text-xs, o ponto colorido, as cores de status e a etiqueta sobre a foto do cartão.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Etiquetas e <span class="hl">Badges</span>: o selo curto</h1>
+<p class="intro">A Ana escreveu “novo” em letra comum, do lado do nome do pão, e ninguém viu. O
+recado era importante — o pão de queijo integral tinha acabado de entrar no cardápio — e desapareceu
+no meio da frase. Etiqueta, ou badge, é o nome que se dá a esse selo curto que cabe em uma ou duas
+palavras e chama o olho sem roubar a cena. Nesta aula a Ana monta a pílula, aprende a colocar o
+ponto colorido dentro, escolhe as cores por significado e prega a etiqueta no canto da foto do
+cartão.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>As sete classes que transformam texto em pílula.</li>
+  <li>Por que <code>inline-flex</code> e não <code>inline-block</code>.</li>
+  <li>O tamanho certo do texto e do respiro de uma etiqueta.</li>
+  <li>O ponto colorido com <code>size-1.5</code> e <code>gap</code>.</li>
+  <li>As cores por significado: novo, promoção, esgotado, último.</li>
+  <li>Como pregar a etiqueta no canto da foto do cartão.</li>
+  <li>O <code>ring</code> branco que separa a etiqueta da imagem.</li>
+  <li>Etiqueta ao lado de um título e contador de itens.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o “novo” que ninguém viu</h2>
+
+<p>O texto era este: “Pão de queijo integral, novo, R$ 9”. A palavra “novo” estava lá, na mesma
+fonte, no mesmo tamanho e na mesma cor do resto. A cliente leu “pão de queijo integral” e parou. O
+recado morreu por falta de contraste, não por falta de importância. A Ana tentou pôr em maiúsculas;
+ficou gritado e ainda sem cara de aviso. Tentou negrito; ficou só um pouco mais escuro.</p>
+
+<p>A etiqueta resolve porque muda três coisas de uma vez: cria um retângulo em volta da palavra, dá a
+ela uma cor de fundo e um respiro próprio, e reduz o tamanho da letra. Parece contraditório diminuir
+a letra para chamar atenção — mas é exatamente isso que funciona. O olho reconhece o objeto novo (a
+pílula colorida) antes de ler, e o texto pequeno dentro dela confirma. É o mesmo princípio do selo na
+embalagem do pão.</p>
+
+<p>O nome em inglês, badge, aparece em toda documentação e em toda conversa de equipe. Etiqueta,
+selo, pílula, chip e tag também são usados. São a mesma peça com nomes diferentes; quando você vir
+“badge” num componente pronto, é este retângulo pequeno com uma ou duas palavras dentro.</p>
+
+<h2>2. O que uma etiqueta é (e o que ela não é)</h2>
+
+<p>Uma etiqueta tem três peças: o texto curtíssimo, a pílula em volta e, opcionalmente, um ponto
+colorido antes do texto. O que ela não tem é comportamento: não é botão, não abre nada, não envia
+nada. Quando a etiqueta tem que reagir ao clique, ela deixa de ser etiqueta e vira botão pequeno —
+com aula própria, ali em <a href="botoes.html">botões</a>.</p>
+
+<dl class="anatomy">
+<dt>badge</dt>
+<dd>O nome em inglês da etiqueta. No código, costuma ser um <code>span</code> com poucas
+palavras.</dd>
+<dt>pílula</dt>
+<dd>A forma com cantos totalmente arredondados, que parece um comprimido. Vem de
+<code>rounded-full</code>.</dd>
+<dt>ponto</dt>
+<dd>O círculo colorido antes do texto. Serve para dar status sem gastar palavras: verde para
+disponível, cinza para esgotado.</dd>
+<dt>contador</dt>
+<dd>Uma etiqueta só com número, como o 3 do carrinho ou o 12 de encomendas do dia.</dd>
+<dt>status</dt>
+<dd>O estado que a etiqueta comunica: novo, promoção, esgotado, última fornada. O texto deve dizer
+isso em uma ou duas palavras.</dd>
+</dl>
+
+<p>Uma regra de ouro antes das classes: se a informação é indispensável, ela não pode viver só na
+etiqueta. Etiqueta é destaque, não é o dado. O preço tem de estar escrito em algum lugar legível; a
+etiqueta diz “promoção”, não substitui o “de R$ 12 por R$ 9”. Pelo mesmo motivo, a cor da etiqueta
+nunca deve ser o único sinal de status — quem não distingue verde de vermelho precisa ler a
+palavra.</p>
+
+<h2>3. A pílula: sete classes para um selo</h2>
+
+<p>Comece pelo texto e pelo fundo, que você já sabe fazer: <code>bg-emerald-100</code> e
+<code>text-emerald-800</code>. A etiqueta usa o tom 100 de fundo e o 800 de texto, o par que garante
+contraste sem ficar pesado. Depois vêm as cinco classes que fazem a forma: <code>inline-flex</code>
+para alinhar o que estiver dentro, <code>items-center</code> para centralizar na vertical,
+<code>rounded-full</code> para o canto virar pílula, <code>px-2 py-0.5</code> para o respiro pequeno
+e <code>text-xs</code> para a letra menor.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=2px 8px;;css:#alvo|font-size=12px;;rule:border-radius: calc(infinity * 1px)">
+  <p class="try-task">O “novo” está com cor de etiqueta, mas ainda é texto solto. Transforme-o em
+  pílula: alinhe como flex, arredonde os cantos por completo, dê 8 px de respiro lateral e 2 px
+  vertical, e baixe a letra para 12 px.</p>
+  <pre class="html">&lt;span id="alvo" class="bg-emerald-100 text-emerald-800"&gt;Novo&lt;/span&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.95 0.052 163.051)
+color: oklch(0.432 0.095 166.913)
+</pre>
+  <pre class="solucao">&lt;span id="alvo" class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"&gt;Novo&lt;/span&gt;</pre>
+</div>
+
+<p>Rode e repare no formato do painel: <code>padding: 2px 8px</code>, <code>font-size: 12px</code> e
+um <code>border-radius</code> enorme. Esse número esquisito não é erro. O <code>rounded-full</code>
+não usa um valor fixo como 9999 px: ele escreve <code>calc(infinity * 1px)</code>, ou seja,
+“infinitamente arredondado”. O navegador transforma isso no maior raio possível, que é metade da
+altura, e é assim que a pílula fica perfeita em qualquer tamanho de etiqueta.</p>
+
+<pre class="term" data-title="CSS gerado">.rounded-full {
+  border-radius: calc(infinity * 1px);
+}
+.px-2 {
+  padding-inline: calc(var(--spacing) * 2);
+}
+.py-0\.5 {
+  padding-block: calc(var(--spacing) * 0.5);
+}
+.text-xs {
+  font-size: var(--text-xs);
+  line-height: var(--tw-leading, var(--text-xs--line-height));
+}</pre>
+
+<p>Esse <code>py-0.5</code> merece um comentário, porque é o único meio degrau da receita. Ele vale
+2 px, e não 4. Numa etiqueta, o respiro vertical é quase simbólico: a pílula já é alta por causa do
+<code>line-height</code> do texto. Se você usar <code>py-1</code>, a etiqueta fica bojuda e começa a
+competir com o título do cartão. Etiqueta boa é achatada.</p>
+
+<p>O <code>text-xs</code> também não é chute: ele vale 12 px de fonte com 16 px de altura de linha, e
+é o menor tamanho que o guia recomenda para texto que alguém precisa ler. Abaixo disso, o número
+existe — <code>text-[10px]</code> com colchete — mas a letra fica fina no celular e o contraste
+despenca. Se a etiqueta não cabe em 12 px, o problema é o texto: corte para uma palavra. “Última
+fornada de hoje” vira “Última fornada”. Etiqueta é resumo, não é frase.</p>
+
+<h2>4. Por que inline-flex e não inline-block</h2>
+
+<p>Aqui está a decisão que separa a etiqueta amadora da profissional. Um <code>span</code> é inline
+por natureza: ele ocupa só o espaço do texto e ignora altura. Para aceitar respiro vertical de
+verdade, precisa virar <code>inline-block</code> ou <code>inline-flex</code>. Os dois funcionam para
+uma etiqueta de texto puro. A diferença aparece quando entra o ponto colorido.</p>
+
+<p>Com <code>inline-flex</code>, o conteúdo de dentro vira uma linha flexível, e é aí que
+<code>items-center</code> e <code>gap-1.5</code> passam a valer. O ponto fica centralizado na altura
+do texto sem nenhum ajuste manual, e o espaço entre o ponto e a palavra é uma classe só. Com
+<code>inline-block</code>, o ponto desce junto com a linha de base do texto e você acaba corrigindo
+com <code>mt-0.5</code> — que funciona até a fonte mudar de tamanho.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que faz</th><th>Valor</th></tr>
+<tr><td><code>inline-flex</code></td><td>vira caixa flexível na mesma linha do texto</td><td><code>display: inline-flex</code></td></tr>
+<tr><td><code>items-center</code></td><td>centraliza ponto e texto na vertical</td><td><code>align-items: center</code></td></tr>
+<tr><td><code>gap-1.5</code></td><td>espaço entre o ponto e a palavra</td><td>6 px</td></tr>
+<tr><td><code>rounded-full</code></td><td>cantos infinitos, a pílula</td><td><code>calc(infinity * 1px)</code></td></tr>
+<tr><td><code>px-2 py-0.5</code></td><td>respiro enxuto, achatado</td><td>8 px e 2 px</td></tr>
+<tr><td><code>text-xs</code></td><td>letra pequena, mas não minúscula</td><td>12 px</td></tr>
+<tr><td><code>font-medium</code></td><td>um pouco mais de peso na letra pequena</td><td>500</td></tr>
+</table>
+</div>
+
+<p>Sobre o <code>font-medium</code>: parece detalhe, mas letra de 12 px sem peso nenhum fica fina
+demais em tela de celular. Subir para 500 dá presença sem engrossar como um título. E sobre o
+<code>items-center</code>: ele é o que faz a etiqueta parecer desenhada em vez de montada. Se você
+esquecer, o texto encosta no topo da pílula e o selo fica torto — o defeito que ninguém identifica,
+mas todo mundo sente.</p>
+
+<h2>5. O ponto colorido</h2>
+
+<p>O ponto resolve a etiqueta sem palavra: um círculo verde antes de “disponível”, um cinza antes de
+“esgotado”. Ele é um <code>span</code> vazio com três classes: <code>size-1.5</code> para 6 px de
+largura e altura, <code>rounded-full</code> para virar círculo e <code>bg-emerald-500</code> para a
+cor. O <code>gap</code> da pílula cuida da distância.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|gap=6px;;conta:.rounded-full=2">
+  <p class="try-task">A etiqueta “Em produção” precisa do ponto verde antes do texto: um
+  <code>span</code> vazio de 6 px, redondo, verde 500. Aproxime os dois com <code>gap-1.5</code>.</p>
+  <pre class="html">&lt;span id="alvo" class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"&gt;Em produção&lt;/span&gt;</pre>
+  <pre class="out">
+display: inline-flex
+align-items: center
+background-color: oklch(0.95 0.052 163.051)
+color: oklch(0.432 0.095 166.913)
+font-size: 12px
+font-weight: 500
+line-height: 16px
+border-radius: 3.35544e+07px
+padding-inline: 8px
+padding-block: 2px
+</pre>
+  <pre class="solucao">&lt;span id="alvo" class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"&gt;
+  &lt;span class="size-1.5 rounded-full bg-emerald-500"&gt;&lt;/span&gt;
+  Em produção
+&lt;/span&gt;</pre>
+</div>
+
+<p>Repare que o ponto não tem texto e não tem tamanho de fonte: ele é uma caixa de 6 px pintada. É o
+mesmo <code>size-1.5</code> que a aula de <a href="w-e-h.html">largura e altura</a> ensina, e é por
+isso que ele não precisa de <code>w-1.5 h-1.5</code> separados. O círculo vem do
+<code>rounded-full</code>, que na altura de 6 px vira um círculo perfeito.</p>
+
+<p>Um truque barato para dar vida ao ponto é o <code>animate-pulse</code>, que faz a opacidade pulsar
+devagar. Ele funciona bem para “ao vivo” e mal para status permanente. E existe o caso oposto: o
+ponto cinza do esgotado, que não deve pulsar nunca. Estado é informação; animação é tempero.</p>
+
+<h2>6. Cores por significado</h2>
+
+<p>A etiqueta da Ana não é decorativa: ela diz uma coisa. E se diz uma coisa, a cor tem que dizer a
+mesma coisa, sempre igual, em todo o site. Verde para o que está novo ou disponível, âmbar para o que
+é promoção, cinza para o que acabou, vermelho para o que é urgente e azul para informação neutra. A
+regra vale mais do que a estética: quando a cliente vê cinza, ela já sabe que acabou antes de ler.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Significado</th><th>Classes</th><th>Texto típico</th></tr>
+<tr><td>Novo</td><td><code>bg-emerald-100 text-emerald-800</code></td><td>Novo</td></tr>
+<tr><td>Promoção</td><td><code>bg-amber-100 text-amber-800</code></td><td>-30%</td></tr>
+<tr><td>Esgotado</td><td><code>bg-stone-200 text-stone-600</code></td><td>Esgotado</td></tr>
+<tr><td>Últimas unidades</td><td><code>bg-rose-100 text-rose-800</code></td><td>Últimas 3</td></tr>
+<tr><td>Encomenda</td><td><code>bg-sky-100 text-sky-800</code></td><td>Sob encomenda</td></tr>
+</table>
+</div>
+
+<p>A receita de cor da etiqueta é sempre a mesma: fundo no tom 100, texto no tom 800, da mesma
+família. Isso dá contraste suficiente para a letra pequena e mantém a etiqueta leve, sem o peso de um
+bloco cheio. Quando a Ana quis uma etiqueta que saltasse mais, ela subiu para o fundo cheio —
+<code>bg-rose-600 text-white</code> — e guardou esse formato só para o desconto, que é o campeão de
+importância no cartão.</p>
+
+<p>Vale um cuidado com a paleta: <code>stone</code> é cinza quente, <code>slate</code> é cinza
+azulado e <code>zinc</code> é cinza neutro. Misturar as três no mesmo site deixa o cinza “sujo” de
+um jeito que ninguém identifica. Escolha uma e use nas etiquetas, nas bordas e nos textos
+secundários. A aula de <a href="cores-da-marca.html">cores da marca</a> mostra como fixar essa
+escolha.</p>
+
+<h2>7. A etiqueta pregada no canto da foto</h2>
+
+<p>Agora o caso mais bonito e mais pedido: o “-30%” no canto superior direito da foto do cartão,
+meio para fora, como um adesivo. Isso é posicionamento absoluto em cima de um pai
+<code>relative</code>: a etiqueta sai do fluxo e é presa com <code>-top-2 -right-2</code>, que são 8
+px para fora em cada direção. O sinal de menos antes do número é o que faz o valor ser negativo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|position=absolute;;css:#alvo|top=-8px;;rule:--tw-ring-color: var(--color-white)">
+  <p class="try-task">A etiqueta de desconto está dentro do cartão, empurrando o texto. Prenda-a no
+  canto superior direito, 8 px para fora, e acrescente um anel branco de 2 px para separá-la da
+  foto.</p>
+  <pre class="html">&lt;div class="relative rounded-xl bg-amber-200 p-6"&gt;
+  &lt;p class="m-0 text-lg font-semibold text-amber-950"&gt;Pão de queijo&lt;/p&gt;
+  &lt;span id="alvo" class="rounded-full bg-rose-600 px-2 py-0.5 text-xs font-semibold text-white"&gt;-30%&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.586 0.253 17.585)
+color: rgb(255, 255, 255)
+font-size: 12px
+font-weight: 600
+line-height: 16px
+border-radius: 3.35544e+07px
+padding-inline: 8px
+padding-block: 2px
+</pre>
+  <pre class="solucao">&lt;div class="relative rounded-xl bg-amber-200 p-6"&gt;
+  &lt;p class="m-0 text-lg font-semibold text-amber-950"&gt;Pão de queijo&lt;/p&gt;
+  &lt;span id="alvo" class="absolute -top-2 -right-2 rounded-full bg-rose-600 px-2 py-0.5 text-xs font-semibold text-white ring-2 ring-white"&gt;-30%&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>position: absolute</code>, <code>top: -8px</code> e
+<code>right: -8px</code>. Com isso a etiqueta deixa de ocupar espaço no fluxo — o texto do cartão
+sobe — e passa a ser posicionada em relação ao pai, que é <code>relative</code>. Se o pai perder o
+<code>relative</code>, a etiqueta foge para o canto da página, porque passa a se referenciar a um
+ancestral mais distante. É o erro número um desse recurso.</p>
+
+<p>O anel branco é o que faz o adesivo parecer adesivo. O <code>ring-2 ring-white</code> desenha um
+contorno de 2 px por fora da pílula, exatamente na cor do fundo do cartão, criando um respiro entre
+o vermelho e a foto. Sem ele, o vermelho encosta na imagem e a etiqueta parece um erro de recorte. O
+anel não ocupa espaço, então não empurra nada; ele é desenhado em cima, como uma sombra.</p>
+
+<p>“Como assim, desenhado em cima?” Vale ver o CSS, porque o anel é uma das coisas mais engenhosas do
+Tailwind e uma das que mais confundem:</p>
+
+<pre class="term" data-title="CSS gerado">.ring-2 {
+  --tw-ring-shadow: var(--tw-ring-inset, ) 0 0 0
+    calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
+    var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+.ring-white {
+  --tw-ring-color: var(--color-white);
+}</pre>
+
+<p>Não existe propriedade <code>ring</code> no CSS: o anel é uma camada de <code>box-shadow</code>
+com desfoque zero e espalhamento de 2 px. A classe <code>ring-2</code> guarda esse desenho numa
+variável, e a <code>box-shadow</code> junta cinco camadas — inclusive a da sombra comum, se houver.
+É por isso que anel e sombra convivem sem um apagar o outro, e é por isso que o anel de foco da aula
+de <a href="anel-e-foco.html">anel de foco</a> usa a mesma máquina.</p>
+
+<p>E o preço do absoluto: a etiqueta não avisa o pai que existe. Se ela crescer — “-30% hoje” — pode
+sair do cartão. Uma proteção simples é deixar o cartão com <code>relative</code> e a etiqueta com
+pouco texto, e evitar colocar a etiqueta em cartão que muda de largura o tempo todo. Para o cartão de
+vitrine, que tem tamanho fixo na grade, funciona perfeitamente.</p>
+
+<h2>8. Etiqueta no meio do texto</h2>
+
+<p>Nem toda etiqueta vive no canto de uma foto. A mais comum fica ao lado de um título ou de um preço,
+dentro da mesma linha. Aí entram duas classes: <code>align-middle</code>, que alinha a pílula pelo
+meio da linha do texto em volta, e uma margem curta para separar. Sem <code>align-middle</code>, a
+etiqueta sobe um ou dois pixels e parece descolada.</p>
+
+<pre class="file" data-file="index.html">&lt;h2 class="text-xl font-semibold text-stone-900"&gt;
+  Pão de queijo integral
+  &lt;span class="ml-2 inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 align-middle text-xs font-medium text-emerald-800"&gt;Novo&lt;/span&gt;
+&lt;/h2&gt;</pre>
+
+<p>O contador é a mesma pílula sem palavra: <code>rounded-full bg-rose-600 px-1.5 py-0.5 text-xs
+font-semibold text-white</code> com um número dentro, ao lado do ícone do carrinho. Nesse caso o
+respiro lateral cai para <code>px-1.5</code> (6 px), porque o número ocupa menos largura do que uma
+palavra. E vale usar <code>min-w-5</code> quando o contador aparece com 1, 2 e 12: sem a largura
+mínima, o círculo muda de tamanho conforme o número e a barra fica tremendo.</p>
+
+<p>Para quem usa leitor de tela, a etiqueta é texto comum e será lida em sequência — o que é bom,
+desde que ela faça sentido ali. “Novo” lido depois do nome do pão funciona. Um “-30%” sozinho, solto
+no meio do cartão, é confuso: o leitor anuncia “menos trinta por cento” sem dizer de quê. Quando a
+etiqueta for só visual, existe o <code>sr-only</code> para dar a versão falada, e a aula de <a
+href="esconder-mostrar.html">esconder e mostrar</a> explica como ele funciona.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a etiqueta que esticou no celular</h3>
+<p>A Ana deu <code>w-full</code> à etiqueta para ela acompanhar o cartão. No celular, a pílula virou
+uma faixa verde de ponta a ponta, e a palavra “Novo” ficou perdida no meio. Etiqueta é objeto
+pequeno: ela não estica. Se a intenção era uma faixa de aviso, o componente é outro — um bloco com
+<code>rounded-lg</code> e respiro maior, como os da aula de <a href="alertas.html">alertas</a>.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: duas etiquetas no mesmo cartão</h3>
+<p>O pão de queijo era novo e estava em promoção. Ela pôs as duas pílulas lado a lado no topo e o
+cartão ficou com quatro cores competindo. A solução foi hierarquizar: a promoção fica no canto da
+foto, em vermelho cheio; o “novo” fica ao lado do título, em verde claro. Duas etiquetas em lugares
+diferentes contam duas histórias; duas no mesmo canto viram bagunça.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o ponto cinza que ninguém entendeu</h3>
+<p>Para marcar o que estava esgotado, ela usou só um ponto cinza antes do nome. Metade das clientes
+não entendeu e a outra metade nem viu. Etiqueta sem palavra é enigma. A correção foi escrever
+“Esgotado” dentro da pílula, manter o ponto cinza como reforço e deixar a foto em
+<code>grayscale</code>, que a aula de <a href="filtros.html">filtros</a> ensina. Três sinais para a
+mesma informação é o certo quando um deles é cor.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Por que a etiqueta usa <code>inline-flex</code> em
+vez de deixar o <code>span</code> como está?</p>
+<label><input type="radio" name="e1"> porque <code>span</code> não aceita cor de fundo</label>
+<label><input type="radio" name="e1"> para aceitar respiro vertical e alinhar o ponto com o texto
+pelo centro</label>
+<label><input type="radio" name="e1"> porque só assim o texto fica em uma linha</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que o <code>rounded-full</code> escreve no CSS
+gerado?</p>
+<label><input type="radio" name="e2"> <code>border-radius: 9999px</code></label>
+<label><input type="radio" name="e2"> <code>border-radius: 50%</code></label>
+<label><input type="radio" name="e2"> <code>border-radius: calc(infinity * 1px)</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. A etiqueta pregada no canto precisa de qual classe
+no cartão que a contém?</p>
+<label><input type="radio" name="e3"> <code>relative</code></label>
+<label><input type="radio" name="e3"> <code>absolute</code></label>
+<label><input type="radio" name="e3"> <code>overflow-hidden</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o selo de esgotado</h2>
+<p>O pão de queijo esgotou e a etiqueta precisa do cinza quente: fundo no tom 200 e texto no 600.
+Complete a classe do texto:</p>
+<div class="ex-code">&lt;span class="inline-flex items-center rounded-full bg-stone-200 px-2 py-0.5 text-xs font-medium <input aria-label="resposta 1" data-answer="text-stone-600" placeholder="...">"&gt;Esgotado&lt;/span&gt;</div>
+<p class="ex-dica">Dica: a família é a mesma do fundo, <code>stone</code>, e o tom é o 600. Não troque
+para <code>text-stone-300</code>: a letra pequena precisa de contraste.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Etiqueta é texto curtíssimo dentro de uma pílula. A receita é
+<code>inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium</code> mais o par de
+cores — fundo no tom 100, texto no 800. O <code>rounded-full</code> escreve
+<code>calc(infinity * 1px)</code>, e é isso que faz a pílula funcionar em qualquer altura. O
+<code>py-0.5</code> mantém a peça achatada, e o <code>inline-flex</code> é o que permite alinhar o
+ponto colorido pelo centro com um <code>gap</code> de 6 px.</p>
+
+<p>As cores são por significado, não por gosto: verde é novo, âmbar é promoção, cinza é esgotado,
+vermelho é urgente. E a etiqueta nunca carrega sozinha a informação que importa — ela destaca, o texto
+explica. Para pregar no canto da foto, o pai ganha <code>relative</code> e a etiqueta ganha
+<code>absolute -top-2 -right-2</code> mais um <code>ring-2 ring-white</code> que separa o adesivo da
+imagem.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Receita: <code>inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium</code>.</li>
+<li><code>rounded-full</code> = <code>calc(infinity * 1px)</code>, o raio infinito.</li>
+<li><code>py-0.5</code> é 2 px: etiqueta boa é achatada.</li>
+<li>Ponto colorido: <code>size-1.5 rounded-full bg-emerald-500</code> e <code>gap-1.5</code>.</li>
+<li>Cores por significado: verde novo, âmbar promoção, cinza esgotado, vermelho urgente.</li>
+<li>Fundo no tom 100 e texto no 800 garantem contraste na letra pequena.</li>
+<li>No canto da foto: pai <code>relative</code>, etiqueta <code>absolute -top-2 -right-2</code>.</li>
+<li><code>ring-2 ring-white</code> separa a etiqueta da imagem.</li>
+<li>Ao lado de um título, <code>align-middle</code> e uma margem curta.</li>
+<li>Cor nunca é o único sinal de status: escreva o estado na pílula.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

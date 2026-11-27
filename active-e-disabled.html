@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>active e disabled | Guia Tailwind</title>
+<meta name="description" content="Os estados active e disabled no Tailwind: o instante do clique, o botão desligado, o CSS gerado com :active e :disabled e a ordem em que os estados vencem.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>active e <span class="hl">disabled</span></h1>
+<p class="intro">A Ana tem dois botões na página de encomenda e os dois mentem. O “Encomendar” não
+afunda quando ela clica — o dedo desce, o pedido é feito, e nada na tela confirma que o clique
+aconteceu. O “Esgotado”, do pão de queijo, é o contrário: parece clicável, tem a mesma cor dos outros,
+e não faz nada quando alguém tenta. São dois estados diferentes, com nomes que o Tailwind conhece:
+<code>active:</code>, o instante do aperto, e <code>disabled:</code>, o botão que está desligado.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é o estado <code>:active</code> e por quanto tempo ele dura.</li>
+  <li>Como usar <code>active:</code> para o botão responder ao clique.</li>
+  <li>O que o atributo <code>disabled</code> faz sozinho — e o que ele não faz.</li>
+  <li>Como usar <code>disabled:</code> e por que o painel <em>mostra</em> esse estado.</li>
+  <li>A ordem em que os estados aparecem no CSS e por que o desligado ganha.</li>
+  <li>O que fazer quando o elemento não é um botão: link e <code>aria-disabled</code>.</li>
+  <li>Os erros clássicos: classe sem atributo, botão que parece ativo e não é.</li>
+</ul>
+</div>
+
+<h2>1. A cena: dois botões que mentem</h2>
+
+<p>A página de encomenda da padaria tem uma lista de pães. Cada linha tem um botão “Encomendar”. No
+sábado, a Ana clicou no primeiro, fez o pedido e ficou com a sensação de que o site tinha “engolido” o
+clique: nada mudou até a tela de confirmação aparecer. Ela clicou de novo, achando que não tinha
+funcionado, e fez dois pedidos. O botão não tinha culpa: ele nunca foi instruído a reagir ao aperto.</p>
+
+<p>Na mesma lista, o pão de queijo estava esgotado. A Ana desligou o botão com o atributo
+<code>disabled</code> e ficou satisfeita: ninguém mais conseguiria pedir. Só que o botão continuava com
+o mesmo âmbar forte dos outros, do mesmo tamanho, com o mesmo cursor de mão. Continuava parecendo
+clicável. Quem tentava, apertava e não acontecia nada — pior do que se o botão não estivesse ali.</p>
+
+<p>Os dois problemas têm a mesma origem: o HTML avisa o navegador sobre o que está acontecendo, mas
+não desenha nada. Quem desenha é o CSS, e o Tailwind entrega esse desenho em forma de prefixo. Um
+prefixo para o instante do clique, outro para o estado desligado. Eles parecem primos, mas têm
+relógios completamente diferentes — e é por aí que a gente começa.</p>
+
+<h2>2. Dois estados, dois relógios</h2>
+
+<p>O <code>:active</code> é o estado do <em>aperto</em>. Ele começa no instante em que o botão do mouse
+desce (ou a tecla <kbd>Enter</kbd> é pressionada) e termina quando o botão sobe. Dura o tempo do
+clique: milésimos de segundo, às vezes menos. É o “afundar” do botão de elevador, o piscar da tecla do
+controle remoto. Serve para confirmar que o site recebeu o seu dedo.</p>
+
+<p>O <code>disabled</code> não é um estado de interação: é um atributo do HTML. Você escreve
+<code>disabled</code> na tag, e o navegador passa a tratar aquele controle como desligado — sem clique,
+sem foco, sem envio de formulário. Ele dura até alguém apagar o atributo do HTML. Não é o visitante que
+liga e desliga: é você, no código. Por isso o Tailwind chama os dois de “estado”, mas o relógio de
+cada um é bem diferente.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Pergunta</th><th><code>active</code></th><th><code>disabled</code></th></tr>
+<tr><td>Quando começa</td><td>no instante do clique ou da tecla</td><td>quando o atributo está no HTML</td></tr>
+<tr><td>Quanto dura</td><td>o tempo do aperto</td><td>até você remover o atributo</td></tr>
+<tr><td>Quem dispara</td><td>o dedo de quem visita</td><td>uma decisão de quem programa</td></tr>
+<tr><td>O painel vê?</td><td>não: ele mede o repouso</td><td>sim: o estado é permanente</td></tr>
+</table>
+</div>
+
+<dl class="anatomy">
+<dt>:active</dt>
+<dd>O instante em que o elemento está sendo apertado. Vale para botões, links e qualquer coisa que
+receba clique.</dd>
+<dt>disabled</dt>
+<dd>Atributo do HTML que desliga o controle: sem clique, sem foco, sem envio de formulário.</dd>
+<dt>aria-disabled</dt>
+<dd>Um aviso para leitores de tela de que o elemento está desligado, sem desligar de fato. Para
+quando o link precisa continuar existindo.</dd>
+<dt>pointer-events</dt>
+<dd>A propriedade que decide se o elemento recebe ponteiro. <code>pointer-events-none</code> deixa o
+clique passar direto, como se o elemento não estivesse ali.</dd>
+</dl>
+
+<p>Se você veio da <a href="focus.html">aula de foco</a>, já reconhece o padrão: são todos
+pseudo-classes, escritas antes dos dois-pontos no nome da classe. O <code>:focus</code> marca quem o
+teclado alcançou; o <code>:active</code> marca o instante do aperto; o <code>:disabled</code> marca o
+que está fora do jogo. Um aviso antes de seguir: os dois estados podem conviver no mesmo elemento, e
+não brigam. Um botão
+desligado também pode ter estilo de hover, de foco e de active escritos — eles simplesmente nunca vão
+acontecer, porque o navegador não entrega eventos a um controle desligado. O CSS fica lá, esperando
+um botão que nunca vai ser apertado.</p>
+
+<h2>3. O active na prática</h2>
+
+<p>O conserto do primeiro botão é pequeno. A Ana escolheu duas mudanças: o fundo escurece um degrau e o
+botão encolhe de leve, como se afundasse. As classes são <code>active:bg-amber-700</code> e
+<code>active:scale-95</code> — a primeira muda a cor, a segunda encolhe o botão para 95% do tamanho.
+Nenhuma das duas ocupa espaço novo, então o texto em volta não se mexe.</p>
+
+<pre class="file" data-file="encomenda.html">&lt;button class="rounded-lg bg-amber-500 p-3 text-white active:bg-amber-700 active:scale-95"&gt;Comprar pão&lt;/button&gt;</pre>
+
+<p>Repare que o <code>scale-95</code> é uma transformação: ela desenha o botão menor por cima do
+espaço reservado, sem alterar o layout. É diferente de <code>active:p-2</code>, que mudaria o tamanho
+de verdade e faria a linha pular a cada clique. A regra é a mesma do hover: mudanças que não mexem no
+espaço são sempre mais seguras.</p>
+
+<div class="trytailwind" data-goal="rule:.active\:bg-amber-700:active;;rule:.active\:scale-95:active">
+  <p class="try-task">O botão não reage ao clique. Quando estiver sendo apertado, ele deve escurecer
+  para o âmbar 700 e encolher para 95%.</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-lg bg-amber-500 p-3 text-white"&gt;Comprar pão&lt;/button&gt;</pre>
+  <pre class="out">
+padding: 12px
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-amber-500 p-3 text-white active:bg-amber-700 active:scale-95"&gt;Comprar pão&lt;/button&gt;</pre>
+</div>
+
+<p>Na prévia, mantenha o botão apertado: ele escurece e encolhe enquanto o dedo está lá, e volta ao
+normal quando você solta. O painel, como sempre, mostra o repouso — e vai continuar mostrando, porque
+o aperto não é um estado em que se possa medir com calma. A prova de que a classe funcionou está no CSS
+gerado.</p>
+
+<p>Um detalhe de vocabulário que ajuda na hora de procurar: o CSS chama esse estado de
+<code>:active</code>, e o Tailwind usa o mesmo nome no prefixo. Não confunda com “botão ativo” no
+sentido de “o botão principal da tela”. Aqui, ativo quer dizer apertado.</p>
+
+<p>E existe uma esquisitice do navegador que assusta na primeira vez: se você aperta o botão, arrasta o
+mouse para fora dele e só então solta, o botão continua com o estilo de <code>:active</code> até você
+soltar. É o comportamento correto segundo a especificação — o aperto começou ali —, mas dá a impressão
+de que o efeito ficou preso. Solte o botão e tudo volta ao normal; não há nada para consertar no
+CSS.</p>
+
+<h2>4. O CSS que o Tailwind gera</h2>
+
+<p>Esta é a saída real para um botão com <code>active:bg-amber-700</code> e
+<code>active:opacity-90</code>:</p>
+
+<pre class="term">.active\:bg-amber-700:active {
+  background-color: var(--color-amber-700);
+}
+.active\:opacity-90:active {
+  opacity: 90%;
+}</pre>
+
+<p>A forma é a mesma do hover e do focus: o nome da classe com os dois-pontos escapados
+(<code>\:</code>) e a condição <code>:active</code> colada no fim. A diferença está na casca: não há
+<code>@media</code>. O <code>@media (hover: hover)</code> existia para proteger o celular do efeito
+preso; o aperto, no celular, existe e é desejável — o dedo encostando é o <code>:active</code>. Por
+isso a regra vale em todo lugar.</p>
+
+<p>Uma consequência prática: no celular, o <code>active:</code> aparece no toque, mas por um instante
+tão curto que às vezes não dá para ver. Ele não substitui o <code>hover:</code> nem o
+<code>focus:</code>; é o terceiro aviso, o do momento exato do clique. Em botões de formulário que
+demoram para responder, é comum um efeito de <code>active:</code> mais forte justamente para dizer
+“recebi, estou trabalhando”.</p>
+
+<h2>5. O disabled: o botão que não pode</h2>
+
+<p>Agora o pão de queijo esgotado. O primeiro passo é o HTML: o botão recebe o atributo
+<code>disabled</code>, sozinho, sem valor. Só com isso o navegador já impede o clique, tira o botão da
+ordem do <kbd>Tab</kbd> e não envia o valor se o formulário for submetido. O que ele <em>não</em> faz é
+mudar a aparência — e é aí que entra o prefixo <code>disabled:</code>.</p>
+
+<pre class="file" data-file="encomenda.html">&lt;button class="rounded-lg bg-stone-300 p-3 text-stone-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled&gt;Esgotado&lt;/button&gt;</pre>
+
+<p>Duas classes, dois avisos: a opacidade cai para 50%, deixando o botão “apagado”, e o cursor vira o
+sinal de proibido quando alguém passa por cima. Note que o atributo fica no HTML, fora do
+<code>class</code>. A classe sozinha não desliga nada — ela só descreve como o desligado deve
+parecer.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|opacity=0.5;;rule:.disabled\:cursor-not-allowed:disabled">
+  <p class="try-task">O botão do pão de queijo já está com o atributo <code>disabled</code>, mas
+  continua com cara de clicável. Deixe-o com 50% de opacidade e com o cursor de proibido.</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-lg bg-stone-300 p-3 text-stone-500" disabled&gt;Esgotado&lt;/button&gt;</pre>
+  <pre class="out">
+padding: 12px
+background-color: oklch(0.869 0.005 56.366)
+color: oklch(0.553 0.013 58.071)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-stone-300 p-3 text-stone-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled&gt;Esgotado&lt;/button&gt;</pre>
+</div>
+
+<p>Aqui acontece uma coisa diferente das aulas anteriores: <strong>o painel muda</strong>. Depois de
+aplicar a solução, ele passa a mostrar <code>opacity: 0.5</code> e <code>cursor: not-allowed</code>.
+Isso não é inconsistência: o botão está desligado o tempo todo, inclusive no repouso. O estado faz
+parte do HTML, não do momento. É por isso que o <code>disabled:</code> é o único destes estados que o
+painel consegue medir — e a razão pela qual a meta desta caixa pode usar <code>css:</code> em vez de
+<code>rule:</code>.</p>
+
+<p>Aproveite para reparar no valor: o CSS gerado diz <code>opacity: 50%</code> e o painel mostra
+<code>0.5</code>. São a mesma coisa escrita de dois jeitos — porcentagem no CSS, número de 0 a 1 no
+valor computado. Não é erro; é o navegador normalizando.</p>
+
+<h2>6. O que o disabled faz sozinho</h2>
+
+<p>Vale a pena separar o que é comportamento do navegador do que é enfeite seu. O atributo
+<code>disabled</code> sozinho já garante três coisas: o botão não recebe clique, não recebe foco pelo
+<kbd>Tab</kbd> e não entra nos dados enviados pelo formulário. Isso é ótimo e você não precisa
+programar nada. O que ele não faz é avisar visualmente — e é aí que o site fica pior do que era.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que o atributo <code>disabled</code> faz</th><th>Faz?</th></tr>
+<tr><td>impede o clique e o toque</td><td>sim</td></tr>
+<tr><td>tira o botão da ordem do <kbd>Tab</kbd></td><td>sim</td></tr>
+<tr><td>deixa de enviar o valor no formulário</td><td>sim</td></tr>
+<tr><td>avisa o leitor de tela de que está indisponível</td><td>sim</td></tr>
+<tr><td>muda a cor, a opacidade ou o cursor</td><td>não: isso é com as suas classes</td></tr>
+</table>
+</div>
+
+<p>Há um uso muito comum desse atributo que vale conhecer: desligar o botão enquanto o pedido está
+sendo enviado. O visitante clica em “Encomendar”, o botão fica cinza e sem resposta por dois segundos,
+o pedido chega — e não há como clicar duas vezes. É a defesa mais simples contra pedido duplicado, e
+ela combina com o <code>active:</code> da seção 3: o primeiro clique avisa, o botão desliga, a
+confirmação aparece.</p>
+
+<p>Há também um efeito colateral que muita gente esquece: como o botão sai da ordem do <kbd>Tab</kbd>,
+quem navega por teclado ou leitor de tela pode nem descobrir que ele existe. Se o “esgotado” for uma
+informação importante — “este pão acabou, volte amanhã” —, talvez valha manter o botão focável e
+avisar de outro jeito. É o caso do <code>aria-disabled</code>, que a seção 8 mostra.</p>
+
+<p>E tem o erro mais comum de todos: escrever a classe e esquecer o atributo. O botão fica com as
+classes de desligado no HTML, parece apagado ou não, e continua clicável. Se você vir um botão
+“esgotado” que ainda faz pedido, comece procurando o atributo <code>disabled</code> na tag — antes de
+suspeitar do CSS.</p>
+
+<h2>7. A ordem dos estados (e por que o desligado ganha)</h2>
+
+<p>Um botão de verdade tem vários estados escritos ao mesmo tempo: a cor de repouso, o hover, o
+active, o disabled. O que acontece quando dois casam no mesmo instante? Por exemplo, um botão
+desligado sob o mouse: o <code>:hover</code> casa e o <code>:disabled</code> também. Quem vence?</p>
+
+<p>Vence a última regra que o Tailwind escreveu, e não a última que você digitou. O Tailwind organiza
+as variantes numa ordem fixa; para os estados desta aula, a ordem é: repouso, depois hover, depois
+active, depois disabled. Ou seja: o desligado sempre tem a palavra final. Veja o CSS real de um botão
+com os três estados:</p>
+
+<pre class="term">.bg-amber-500 {
+  background-color: var(--color-amber-500);
+}
+@media (hover: hover) {
+  .hover\:bg-amber-600:hover {
+    background-color: var(--color-amber-600);
+  }
+}
+.active\:bg-amber-800:active {
+  background-color: var(--color-amber-800);
+}
+.disabled\:bg-stone-300:disabled {
+  background-color: var(--color-stone-300);
+}</pre>
+
+<p>Essa ordem é uma conveniência, não uma regra do CSS: o Tailwind decidiu que estados mais
+“definitivos” vêm depois. Você pode escrever as classes em qualquer ordem no HTML — o resultado será
+sempre esse. E é uma boa notícia: um botão desligado nunca vai parecer apertável por causa de um hover
+esquecido.</p>
+
+<div class="trytailwind" data-goal="rule:.disabled\:bg-stone-300:disabled;;css:#alvo|background-color=oklch(0.769 0.188 70.08)">
+  <p class="try-task">Este botão já escurece no hover e afunda no active. Falta o estado desligado:
+  fundo pedra 300 quando o atributo <code>disabled</code> estiver nele.</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-lg bg-amber-500 p-3 text-white hover:bg-amber-600 active:bg-amber-800"&gt;Encomendar&lt;/button&gt;</pre>
+  <pre class="out">
+padding: 12px
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-amber-500 p-3 text-white hover:bg-amber-600 active:bg-amber-800 disabled:bg-stone-300"&gt;Encomendar&lt;/button&gt;</pre>
+</div>
+
+<p>O painel continua mostrando o âmbar 500, porque o botão desta caixa não está desligado. Se você
+acrescentar o atributo <code>disabled</code> na prévia, o botão fica cinza na hora — e o painel passa a
+mostrar o pedra 300. É um bom experimento: mude o HTML, rode, veja a tabela mudar. Estado que depende
+do HTML é estado que se pode medir.</p>
+
+<h2>8. Quando o elemento não é um botão</h2>
+
+<p>Nem tudo que parece botão é um <code>&lt;button&gt;</code>. Muita gente faz o “Encomendar” com um
+link (<code>&lt;a href="..."&gt;</code>) porque é mais fácil de estilizar. Só que link não tem atributo
+<code>disabled</code>: se você escrever <code>disabled</code> numa tag <code>a</code>, o navegador
+ignora. A classe <code>disabled:opacity-50</code> também não vai valer, porque o seletor
+<code>:disabled</code> nunca casa com um link.</p>
+
+<p>Para esse caso existe o <code>aria-disabled="true"</code>: um atributo que avisa leitores de tela de
+que o elemento está desligado, sem desligar o clique. Ele não muda nada sozinho — o link continua
+clicável —, então você precisa somar duas coisas: o aviso e o bloqueio. O Tailwind tem até uma variante
+para ele, <code>aria-disabled:</code>, que aplica o estilo quando o atributo está em
+<code>true</code>.</p>
+
+<pre class="term">.aria-disabled\:opacity-50[aria-disabled="true"] {
+  opacity: 50%;
+}
+.aria-disabled\:pointer-events-none[aria-disabled="true"] {
+  pointer-events: none;
+}</pre>
+
+<p>O <code>pointer-events-none</code> é o que fecha a porta: ele faz o elemento deixar de receber o
+ponteiro, como se não estivesse ali. Junto com a opacidade, o resultado é um link apagado e
+inclicável, que ainda pode ser lido por quem usa leitor de tela. É mais trabalho do que o
+<code>disabled</code> do botão — e é o preço de usar um link onde devia haver um botão.</p>
+
+<p>A recomendação prática é chata e vale repetir: se a coisa é uma ação, use
+<code>&lt;button&gt;</code>; se é navegação para outra página, use <code>&lt;a&gt;</code>. O botão
+desligado já vem pronto do navegador, com foco, clique e envio resolvidos. O link desligado é sempre
+uma imitação.</p>
+
+<p>Na <a href="primeiro-e-ultimo.html">próxima aula</a>, os estados deixam de depender do visitante:
+<code>first:</code> e <code>last:</code> valem pela posição do elemento entre os irmãos, sem mouse, sem
+teclado e sem atributo.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o pedido feito duas vezes</h3>
+<p>A Ana clicou em “Encomendar”, não viu reação e clicou de novo. O site recebeu dois pedidos e ela
+passou a manhã cancelando um. O botão não tinha <code>active:</code> nem qualquer mudança no clique, e
+a confirmação demorava meio segundo para aparecer. Um <code>active:bg-amber-700</code> teria avisado
+no primeiro clique. Quando o efeito existe, o dedo espera; quando não existe, o dedo insiste.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o “esgotado” que ainda vendia</h3>
+<p>Ela desligou o botão com <code>disabled</code> e esqueceu de mudar a cor. O botão continuou âmbar,
+no meio de outros âmbar, e um cliente pediu o pão de queijo esgotado. O pedido não foi enviado — o
+atributo funcionou —, mas o cliente ficou sem entender por que o site não respondia. A correção foi
+acrescentar <code>disabled:bg-stone-300 disabled:opacity-50 disabled:cursor-not-allowed</code>. Agora
+o botão parece o que é.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o botão que ficou cinza para sempre</h3>
+<p>Depois de um teste, ela deixou o atributo <code>disabled</code> no botão “Encomendar” e não
+entendeu por que o site parou de vender. Como o estado vem do HTML e não do CSS, nenhuma classe
+suspeita aparece: o botão está apenas desligado. A dica é olhar a tag antes de mexer no estilo — e, se
+o botão precisa mudar de estado conforme o estoque, é o JavaScript que acrescenta e remove o atributo,
+não o CSS.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Quando o <code>active:</code> vale?</p>
+<label><input type="radio" name="q1"> enquanto o mouse estiver em cima do elemento</label>
+<label><input type="radio" name="q1"> enquanto o elemento estiver sendo apertado</label>
+<label><input type="radio" name="q1"> para sempre, depois do primeiro clique</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. O que é preciso para o <code>disabled:</code>
+valer?</p>
+<label><input type="radio" name="q2"> que o elemento tenha o atributo <code>disabled</code> no HTML</label>
+<label><input type="radio" name="q2"> que a página tenha um arquivo de configuração</label>
+<label><input type="radio" name="q2"> que o elemento seja um link</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">3. Por que o painel mostra o <code>disabled:</code> e
+não o <code>active:</code>?</p>
+<label><input type="radio" name="q3"> porque o disabled é mais importante</label>
+<label><input type="radio" name="q3"> porque o active não gera CSS</label>
+<label><input type="radio" name="q3"> porque o disabled faz parte do HTML e o active dura só o aperto</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o pão de queijo</h2>
+<p>O botão do pão de queijo está desligado e precisa parecer desligado. Complete a classe que deixa a
+opacidade em 50% quando o atributo estiver presente:</p>
+<div class="ex-code">&lt;button class="rounded-lg bg-stone-300 p-3 <input aria-label="resposta 1" data-answer="disabled:opacity-50" placeholder="...">" disabled&gt;Esgotado&lt;/button&gt;</div>
+<p class="ex-dica">Dica: o prefixo é o nome do atributo. A classe depois dos dois-pontos é a mesma
+opacidade que você usaria em qualquer outro lugar.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p><code>active:</code> é o estado do aperto: começa quando o botão desce e termina quando ele sobe.
+Serve para confirmar o clique com uma mudança de cor ou um encolhimento — de preferência algo que não
+mexa no layout. O CSS gerado termina em <code>:active</code> e não tem <code>@media</code>, porque o
+toque também é um aperto.</p>
+
+<p><code>disabled:</code> é outra história: vem do atributo <code>disabled</code> no HTML, dura até
+alguém apagá-lo e não depende do visitante. O navegador já bloqueia clique, foco e envio; o prefixo
+só cuida da aparência. E, como o estado está sempre lá, o painel consegue medir — é o único destes
+dois que aparece na tabela. Quando os estados brigam pela mesma propriedade, vence o que o Tailwind
+escreveu por último: o desligado.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>active:</code> dura o tempo do clique; <code>disabled:</code> dura o tempo do atributo.</li>
+<li>O CSS do active termina em <code>:active</code>, sem <code>@media</code>.</li>
+<li>Prefira efeitos que não mudam o tamanho: cor, opacidade, <code>scale</code>.</li>
+<li><code>disabled</code> é atributo do HTML, não classe; sem ele, <code>disabled:</code> não faz nada.</li>
+<li>O atributo já bloqueia clique, foco e envio de formulário.</li>
+<li>O painel mede o disabled porque ele está no repouso; o active, não.</li>
+<li>Ordem do CSS: repouso, hover, active, disabled — o desligado ganha.</li>
+<li>A ordem no HTML não muda nada; o Tailwind decide a ordem das regras.</li>
+<li>Link não aceita <code>disabled</code>: use <code>aria-disabled</code> com
+<code>pointer-events-none</code>.</li>
+<li>Ação é <code>&lt;button&gt;</code>; navegação é <code>&lt;a&gt;</code>. Isso resolve metade dos
+problemas.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

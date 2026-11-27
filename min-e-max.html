@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mínimos e Máximos | Guia Tailwind</title>
+<meta name="description" content="Mínimos e máximos no Tailwind: como max-w segura a largura, min-h-screen enche a tela, min-w-0 deixa o flex encolher e quem vence quando as medidas brigam.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Mínimos e <span class="hl">Máximos</span></h1>
+<p class="intro">A Ana comprou um monitor grande para a padaria e o site dela ficou estranho: o cartão de
+encomendas, que era bonito no notebook, agora atravessa a tela inteira e o texto vira uma linha
+comprida, cansativa de ler. Ela tenta resolver com uma largura fixa e aí o cartão passa a vazar no
+celular. O problema não é o número escolhido: é que ela está pedindo uma largura, quando o que ela
+quer é um <em>limite</em>. Nesta aula a Ana aprende a dizer "pode crescer até aqui" e "não encolha
+abaixo disto", que são as duas frases que resolvem quase todo layout torto.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A diferença entre <code>width</code>, <code>max-width</code> e <code>min-width</code> em uma frase.</li>
+  <li>A escala de <code>max-w-</code> e por que 448 px aparece tanto nos exemplos.</li>
+  <li>Por que <code>max-w-prose</code> existe e quando ele vale mais que um número.</li>
+  <li><code>min-h-screen</code>, <code>min-h-dvh</code> e o rodapé que flutua no meio da tela.</li>
+  <li><code>max-h-</code> com rolagem interna para listas longas.</li>
+  <li>Quem vence quando largura, mínimo e máximo discordam.</li>
+  <li>O <code>min-w-0</code> que desamassa texto comprido dentro do <code>flex</code>.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o cartão que estica até a beirada</h2>
+
+<p>A Ana montou o painel de encomendas da padaria no notebook, numa janela de uns 700 px. Ficou
+ótimo. No dia seguinte ela ligou o monitor novo, de 1920 px, e o painel ocupou os 1920 px. O título
+ficou sozinho no canto esquerdo e o parágrafo virou uma linha de 150 letras, daquelas que o olho
+perde no meio. Nada quebrou; só ficou ruim.</p>
+
+<p>O HTML dela era este:</p>
+
+<pre class="file" data-file="encomendas.html">&lt;div class="w-full bg-amber-100 p-6"&gt;
+  &lt;h2&gt;Encomendas de hoje&lt;/h2&gt;
+  &lt;p&gt;Quatro pães de queijo, dois sonhos e um bolo de cenoura para as 16h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+
+<p><code>w-full</code> quer dizer "ocupe 100% da largura disponível". É uma classe honesta: ela faz
+exatamente o que promete. O problema é que 100% de uma tela grande é muita coisa. E se a Ana trocar
+por um número fixo, como <code>w-96</code> (384 px), resolve no monitor e quebra no celular, onde
+nem 384 px cabem direito. Trocar um problema pelo outro não é resolver.</p>
+
+<p>O que ela quer de verdade é uma frase com duas partes: <strong>"pode ocupar a largura toda, mas
+não passe de 448 px"</strong>. O Tailwind tem uma classe para cada parte dessa frase, e é por isso
+que as aulas de tamanho nunca são sobre um número só. São sobre um teto e um piso.</p>
+
+<h2>2. Largura é um pedido; máximo é um limite</h2>
+
+<p>Guarde esta distinção, porque ela vale para largura, para altura e para qualquer outra medida que
+você encontrar pela frente. Uma classe de largura, como <code>w-full</code> ou <code>w-96</code>,
+define o tamanho. Uma classe de máximo, como <code>max-w-md</code>, define até onde o elemento pode
+ir. A diferença aparece quando a tela muda de tamanho: a largura fixa continua teimosa, o máximo se
+ajusta sozinho.</p>
+
+<div class="trytailwind" data-goal="rule:max-width: var(--container-md);;css:#alvo|max-width=448px">
+  <p class="try-task">O painel está com a largura toda do monitor. Ponha um teto de 448 px com
+  <code>max-w-md</code>, mantendo o <code>w-full</code> para ele continuar cabendo no celular.</p>
+  <pre class="html">&lt;div id="alvo" class="w-full rounded-xl bg-amber-100 p-6"&gt;Encomendas de hoje&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 24px
+background-color: oklch(0.962 0.059 95.617)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="w-full max-w-md rounded-xl bg-amber-100 p-6"&gt;Encomendas de hoje&lt;/div&gt;</pre>
+</div>
+
+<p>Rode as duas versões e olhe o painel. Antes, ele mostra o respiro, o fundo e o arredondamento —
+nenhuma linha de <code>max-width</code>, porque o teto não existe. Depois, aparece uma linha nova:
+<code>max-width: 448px</code>. É o navegador confirmando que o limite foi aplicado — e aplicado
+<em>junto</em> com a largura, não no lugar dela. As duas classes convivem.</p>
+
+<p>Repare também no nome: <code>max-w-md</code> é "maximum width" mais o degrau <code>md</code>. O
+Tailwind não usa aqui a mesma escala numérica do espaçamento (<code>p-4</code>, <code>m-2</code>).
+Para larguras máximas ele usa nomes de roupa — <code>xs</code>, <code>sm</code>, <code>md</code>,
+<code>lg</code>, <code>xl</code> — e depois números de 2 a 7. Isso confunde no começo, mas tem uma
+lógica: são tamanhos pensados para <em>caixas de conteúdo</em>, não para respiros.</p>
+
+<dl class="anatomy">
+<dt>largura</dt>
+<dd>O tamanho pedido: <code>w-full</code>, <code>w-96</code>, <code>w-1/2</code>. Sempre que a tela
+mudar, esse pedido continua igual.</dd>
+<dt>máximo</dt>
+<dd>O teto: <code>max-w-md</code>. O elemento pode ser menor, nunca maior. É o que segura o cartão
+no monitor grande.</dd>
+<dt>mínimo</dt>
+<dd>O piso: <code>min-w-0</code>, <code>min-h-screen</code>. O elemento pode ser maior, nunca menor.
+É o que impede que algo suma ou esprema demais.</dd>
+<dt>viewport</dt>
+<dd>A área visível da janela do navegador. As unidades <code>vh</code> e <code>dvh</code> medem
+essa área em porcentagem: <code>100vh</code> é a altura inteira da janela.</dd>
+<dt>overflow</dt>
+<dd>O que acontece com o conteúdo que não cabe na caixa. O padrão é vazar para fora; com
+<code>overflow-y-auto</code> ele ganha rolagem.</dd>
+</dl>
+
+<h2>3. A tabela das larguras máximas</h2>
+
+<p>Os degraus de <code>max-w-</code> são poucos e todos em <code>rem</code>, aquela unidade que vale
+16 px por padrão. A tabela abaixo é a que eu consulto até hoje:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Largura</th><th>Onde costuma servir</th></tr>
+<tr><td><code>max-w-xs</code></td><td>320 px</td><td>etiqueta grande, cartão de visita</td></tr>
+<tr><td><code>max-w-sm</code></td><td>384 px</td><td>formulário estreito, menu lateral</td></tr>
+<tr><td><code>max-w-md</code></td><td>448 px</td><td>cartão, modal pequeno, aviso</td></tr>
+<tr><td><code>max-w-lg</code></td><td>512 px</td><td>formulário de contato, login</td></tr>
+<tr><td><code>max-w-xl</code></td><td>576 px</td><td>texto de post, receita</td></tr>
+<tr><td><code>max-w-2xl</code></td><td>672 px</td><td>artigo, página de produto</td></tr>
+<tr><td><code>max-w-4xl</code></td><td>896 px</td><td>seção de destaque, tabela de preços</td></tr>
+<tr><td><code>max-w-7xl</code></td><td>1280 px</td><td>a página inteira, o "container" do site</td></tr>
+</table>
+</div>
+
+<p>O CSS gerado é curto e aponta para uma variável de tema, como quase tudo no Tailwind v4:</p>
+
+<pre class="term">.max-w-md {
+  max-width: var(--container-md);   /* 28rem = 448px */
+}
+
+.max-w-xl {
+  max-width: var(--container-xl);   /* 36rem = 576px */
+}</pre>
+
+<p>Existe uma pegadinha de nomes aqui, e ela vale uma nota. <code>max-w-lg</code> é 512 px, mas
+<code>max-w-screen-lg</code> também existe e significa outra coisa: o tamanho do breakpoint
+<code>lg</code>, que é 1024 px. As duas classes são válidas, e uma palavra a mais muda a largura pelo
+dobro. A da palavra <code>screen</code> serve para página inteira; a sem
+<code>screen</code>, para cartão e conteúdo. Se um layout seu ficou largo demais sem motivo, confira
+se não escorregou numa dessas.</p>
+
+<p>Existem ainda três valores especiais que não são números. <code>max-w-full</code> significa "não
+passe de 100% do pai" e serve para imagem que insiste em estourar a coluna.
+<code>max-w-fit</code> deixa a caixa do tamanho do conteúdo, sem esticar.
+E <code>max-w-prose</code> aplica <code>65ch</code>: sessenta e cinco caracteres de largura, que é
+mais ou menos o limite em que uma linha continua confortável de ler. Para texto corrido, ele é
+quase sempre melhor que um número em pixels, porque se adapta ao tamanho da fonte.</p>
+
+<h2>4. min-width: o chão que ninguém fura</h2>
+
+<p>Se o máximo é o teto, o mínimo é o piso. <code>min-w-0</code> diz "pode encolher até zero, eu
+autorizo"; <code>min-w-full</code> diz "ocupe pelo menos a largura toda";
+<code>min-w-fit</code> diz "nunca menor que o meu conteúdo". Parece detalhe técnico, mas tem uma
+consequência prática enorme, e ela aparece justamente dentro do <code>flex</code>.</p>
+
+<p>Todo elemento que é filho de um <code>flex</code> nasce com <code>min-width: auto</code>. Isso
+quer dizer: "meu piso é a largura do meu conteúdo". Em outras palavras, o navegador se recusa a
+espremer o texto abaixo do tamanho da maior palavra que ele tem. Quando o conteúdo é uma frase
+normal, ninguém nota. Quando é um e-mail comprido, um link longo ou um número de pedido, o item
+se recusa a encolher, empurra os vizinhos e o layout estoura para fora do cartão. A cura é
+<code>min-w-0</code>, e ela é contraintuitiva: você <em>libera</em> o elemento para ficar pequeno.</p>
+
+<p>Esse é o tipo de bug que a Ana levou uma tarde para achar, e que você vai encontrar na primeira
+semana. O sintoma é sempre o mesmo: um bloco que se recusa a caber e um vizinho que desaparece pela
+direita. A causa também é sempre a mesma: um piso automático que ninguém pediu.</p>
+
+<h2>5. min-h-screen: a página inteira</h2>
+
+<p>Altura tem as mesmas três medidas, com um detalhe a mais: o navegador precisa saber a altura de
+alguém para calcular porcentagem, e nem sempre existe esse alguém. Por isso o Tailwind oferece
+atalhos ligados à janela. <code>min-h-screen</code> quer dizer "pelo menos a altura da tela" e vira
+<code>min-height: 100vh</code>.</p>
+
+<p>A Ana usa isso na página de contato: cabeçalho em cima, formulário no meio, endereço e horário no
+rodapé. Sem <code>min-h-screen</code>, se o formulário é curto, o rodapé sobe e fica boiando no meio
+da tela, com um deserto branco embaixo. Com <code>min-h-screen</code> na caixa que envolve tudo, a
+página ocupa a janela inteira e o rodapé desce para onde deve.</p>
+
+<div class="trytailwind" data-goal="rule:min-height: 100vh;;texto:Aberto até as 18h">
+  <p class="try-task">A caixa da página está com <code>min-h-40</code> e o rodapé sobe no meio da
+  tela. Troque por <code>min-h-screen</code> para a página ocupar a janela inteira.</p>
+  <pre class="html">&lt;div id="alvo" class="flex min-h-40 flex-col justify-between rounded-xl bg-amber-50 p-6"&gt;
+  &lt;p class="font-semibold"&gt;Padaria do Bairro&lt;/p&gt;
+  &lt;p&gt;Aberto até as 18h&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+min-height: 160px
+padding: 24px
+flex-direction: column
+justify-content: space-between
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex min-h-screen flex-col justify-between rounded-xl bg-amber-50 p-6"&gt;
+  &lt;p class="font-semibold"&gt;Padaria do Bairro&lt;/p&gt;
+  &lt;p&gt;Aberto até as 18h&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>flex flex-col justify-between</code> que aparece ali é o que empurra o segundo parágrafo
+para o fim da caixa; sem ele, a altura mínima só aumentaria o espaço vazio embaixo. Você vai ver
+esse par com calma na aula de <a href="flexbox.html">Flexbox</a>. Por ora, fique com a ideia: altura
+mínima e distribuição de espaço trabalham juntas.</p>
+
+<p>Tem uma pegadinha de celular que vale conhecer agora, porque ela aparece em todo projeto. No
+celular, a barra de endereço do navegador some e volta enquanto você rola a página. A unidade
+<code>vh</code> foi definida antes desse comportamento existir: ela mede a janela <em>maior</em>, e
+por isso uma seção de <code>100vh</code> fica alguns pixels mais alta que a tela, obrigando a rolar
+um tico. A correção se chama <code>dvh</code>, "dynamic viewport height", e o Tailwind tem
+<code>min-h-dvh</code>. Em projeto novo, use <code>min-h-dvh</code> na página inteira e guarde
+<code>min-h-screen</code> para quando você quiser exatamente o comportamento antigo.</p>
+
+<h2>6. max-h: o painel que rola por dentro</h2>
+
+<p>Altura máxima resolve um problema que largura máxima não tem: conteúdo que cresce sem parar. A
+Ana tem a lista de encomendas do dia, que pode ter três ou trinta linhas. Ela não quer que essa lista
+empurre o resto da página para baixo, mas também não quer cortar pedido. A resposta é uma caixa com
+teto e rolagem própria.</p>
+
+<pre class="file" data-file="encomendas.html">&lt;div class="max-h-64 overflow-y-auto rounded-xl bg-white p-4"&gt;
+  &lt;p&gt;16h — bolo de cenoura, dona Marli&lt;/p&gt;
+  &lt;p&gt;16h30 — 40 pães de queijo, seu Antônio&lt;/p&gt;
+&lt;/div&gt;</pre>
+
+<p>O CSS gerado mostra as duas peças separadas, o que ajuda a entender que são decisões diferentes:</p>
+
+<pre class="term">.max-h-64 {
+  max-height: calc(var(--spacing) * 64);   /* 16rem = 256px */
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
+}</pre>
+
+<p>Aqui o <code>max-h-64</code> usa a escala de espaçamento, não os nomes de roupa. É a parte que
+confunde: as duas famílias aceitam número — <code>max-w-64</code> também existe, e vale os mesmos
+256 px —, mas só as classes de largura têm a escala de nomes de conteúdo. Não existe
+<code>max-h-md</code>. Para altura, escolha pelo número; para largura de conteúdo, você tem os dois
+caminhos.</p>
+
+<p>Repare que <code>overflow-y-auto</code> só cria a barra <em>se</em> precisar. Com duas linhas, a
+caixa fica curta e ninguém vê barra nenhuma. Com trinta, aparece a rolagem dentro do painel. Essa
+combinação — teto de altura mais rolagem — é o que faz um modal, um menu de busca e um extrato de
+pedidos funcionarem sem arrastar a página toda junto.</p>
+
+<h2>7. Quando as três medidas brigam</h2>
+
+<p>Um elemento pode receber largura, mínimo e máximo ao mesmo tempo, e é aí que aparece a pergunta
+que todo mundo faz: quem ganha? A resposta do CSS é uma ordem fixa, e ela é mais simples do que
+parece.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Se você escrever</th><th>O navegador faz</th><th>Exemplo real</th></tr>
+<tr><td><code>w-24</code> e <code>max-w-32</code></td><td>Fica 96 px; o teto nem é usado</td><td>ícone com tamanho fixo</td></tr>
+<tr><td><code>w-96</code> e <code>max-w-64</code></td><td>Fica 256 px: o teto vence a largura</td><td>cartão que precisa caber no celular</td></tr>
+<tr><td><code>w-10</code> e <code>min-w-32</code></td><td>Fica 128 px: o piso vence a largura</td><td>botão que não pode ficar menor que o rótulo</td></tr>
+<tr><td><code>min-w-32</code> e <code>max-w-24</code></td><td>Fica 128 px: o piso vence o teto</td><td>raro, e sinal de que a decisão está confusa</td></tr>
+</table>
+</div>
+
+<p>A ordem é: o mínimo ganha de tudo, o máximo ganha da largura, e a largura só vale quando ninguém
+a contradiz. O jargão chama isso de "min-width vence max-width", e é bom saber porque explica
+metade dos layouts que "não obedecem". Se você põe <code>max-w-sm</code> numa caixa e ela continua
+larga, quase certamente há um <code>min-w-full</code> ou um <code>min-width: auto</code> de flex
+segurando o piso lá embaixo.</p>
+
+<p>Na prática, o padrão que você vai escrever mil vezes é este:</p>
+
+<pre class="file" data-file="layout.html">&lt;div class="mx-auto w-full max-w-3xl px-4"&gt;
+  …conteúdo da página…
+&lt;/div&gt;</pre>
+
+<p>Leia em voz alta: "ocupe a largura toda, não passe de 768 px, centralize, e deixe 16 px de
+respiro nas laterais para o texto não colar na borda no celular". Três decisões em quatro classes,
+e nenhuma delas briga com as outras. O <code>mx-auto</code> é da aula de
+<a href="m-auto.html">centralização com m-auto</a>; o <code>px-4</code>, da aula dos eixos.</p>
+
+<h2>8. O texto que empurra o preço para fora</h2>
+
+<p>Vamos ao bug que mais aparece em projeto de verdade. A Ana montou a linha de encomenda com três
+peças: o ícone, o e-mail do cliente e o valor. Tudo dentro de um <code>flex</code>. No
+caso de um e-mail curto, perfeito. No caso de um e-mail comprido, o valor some pela direita, como se tivesse sido cortado da foto.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|min-width=0px;;texto:R$ 80,00">
+  <p class="try-task">O e-mail comprido está empurrando o preço para fora do cartão. Dê
+  <code>min-w-0</code> ao parágrafo do e-mail para ele aceitar encolher; o ícone e o preço não podem
+  diminuir.</p>
+  <pre class="html">&lt;div class="flex items-center gap-3 rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-200"&gt;A&lt;/div&gt;
+  &lt;p id="alvo" class="truncate"&gt;ana@padariadabenca.test&lt;/p&gt;
+  &lt;span class="shrink-0 font-semibold"&gt;R$ 80,00&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+overflow: hidden
+text-overflow: ellipsis
+white-space: nowrap
+</pre>
+  <pre class="solucao">&lt;div class="flex items-center gap-3 rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-200"&gt;A&lt;/div&gt;
+  &lt;p id="alvo" class="min-w-0 truncate"&gt;ana@padariadabenca.test&lt;/p&gt;
+  &lt;span class="shrink-0 font-semibold"&gt;R$ 80,00&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>truncate</code> ali é o que transforma o texto que não cabe em reticências; ele é assunto
+da aula de <a href="quebrar-linhas.html">Quebrar e Cortar Texto</a>, e sozinho não resolve — sem
+<code>min-w-0</code>, o parágrafo continua com o piso automático e o <code>truncate</code> fica
+esperando uma permissão que nunca vem. Já o <code>shrink-0</code> no ícone e no preço faz o
+contrário: proíbe esses dois de encolher. Um pede para encolher, os outros pedem para não; o
+navegador obedece aos dois e o layout se resolve.</p>
+
+<p>Vale reparar no painel: antes, ele descreve o parágrafo sem nenhuma linha de
+<code>min-width</code>. Depois de rodar a solução, aparece <code>min-width: 0px</code>. Um valor
+"zero" que muda a tela é o tipo de coisa que assusta quem começou agora, mas é exatamente o que a
+palavra diz: piso nenhum. Você está tirando uma restrição, não pondo.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o modal que não cabe na tela</h3>
+<p>A Ana abriu um modal de "novo pedido" com dez campos. No celular, ele ficou mais alto que a tela
+e o botão de salvar ficou fora do alcance. A correção é o par da seção 6 aplicado ao modal:
+<code>max-h-[85dvh]</code> com <code>overflow-y-auto</code> na área dos campos, e o rodapé com o
+botão fixo embaixo. O colchete permite um valor fora da escala — 85% da altura dinâmica — e é o
+caso legítimo de usar valor arbitrário, porque a altura útil depende do aparelho.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a imagem que estoura a coluna</h3>
+<p>Ela colou a foto do pão com 1200 px de largura e a coluna do cartão tem 320. A foto vazou por cima
+do texto e a página ganhou rolagem lateral, aquele balanço chato no celular. Uma classe resolve:
+<code>max-w-full</code> na imagem, ou <code>w-full</code> se ela deve sempre ocupar a coluna. A
+diferença importa: <code>max-w-full</code> deixa a foto menor que a coluna quando ela é menor, e
+<code>w-full</code> estica até preencher. Para foto de produto, quase sempre é <code>w-full</code>
+com <code>max-w-full</code> de cinto de segurança.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o rodapé que sobe no celular</h3>
+<p>Na página de contato, o rodapé ficava no lugar no monitor e subia para o meio no celular, porque
+o formulário era curto e a página não tinha altura mínima. A Ana pôs <code>min-h-screen</code> na
+caixa que envolve cabeçalho, conteúdo e rodapé, e o rodapé passou a ficar embaixo. No celular, ele
+ainda pulava alguns pixels quando a barra do navegador aparecia; a troca por <code>min-h-dvh</code>
+resolveu. É um detalhe de uma linha que separa "parece pronto" de "está pronto".</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que <code>max-w-md</code> faz em um cartão que já
+tem <code>w-full</code>?</p>
+<label><input type="radio" name="q1"> fixa a largura em 448 px, inclusive no celular</label>
+<label><input type="radio" name="q1"> deixa o cartão ocupar a largura disponível, mas nunca passar de 448 px</label>
+<label><input type="radio" name="q1"> aumenta a largura em 448 px</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Um elemento tem <code>w-96</code> e
+<code>max-w-64</code>. Com quanto ele fica?</p>
+<label><input type="radio" name="q2"> 384 px, porque a largura foi escrita primeiro</label>
+<label><input type="radio" name="q2"> 640 px, porque as duas se somam</label>
+<label><input type="radio" name="q2"> 256 px, porque o máximo vence a largura</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que o texto comprido dentro do
+<code>flex</code> se recusa a encolher?</p>
+<label><input type="radio" name="q3"> porque todo filho de flex nasce com <code>min-width: auto</code>, e o piso é o tamanho do conteúdo</label>
+<label><input type="radio" name="q3"> porque o <code>flex</code> não aceita texto</label>
+<label><input type="radio" name="q3"> porque falta declarar a largura em pixels</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o painel da padaria</h2>
+<p>Monte o painel de encomendas com largura total, teto de 448 px e altura mínima de uma tela cheia.
+Depois responda: qual é a classe do teto de largura?</p>
+<div class="ex-code">&lt;div class="w-full <input aria-label="resposta 1" data-answer="max-w-md" placeholder="..."> min-h-screen rounded-xl bg-amber-100 p-6"&gt;Encomendas&lt;/div></div>
+<p class="ex-dica">Dica: o degrau do meio da escala de roupa, aquele que dá 448 px — o mesmo que
+aparece na tabela da seção 3. Se você escrever <code>max-w-lg</code>, o cartão fica com 512 px:
+funciona, mas não é o pedido.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Largura é um pedido; máximo e mínimo são limites. O máximo segura o elemento quando a tela cresce
+e é o que salva o cartão no monitor grande sem quebrar no celular. O mínimo é o piso que impede o
+elemento de encolher demais — e quando esse piso é automático, como em todo filho de
+<code>flex</code>, ele vira o bug do texto que empurra o preço para fora. <code>min-w-0</code> é a
+permissão que faltava.</p>
+
+<p>A ordem de força é fixa e vale a pena memorizar: o mínimo vence o máximo, o máximo vence a
+largura. De resto, o padrão <code>mx-auto w-full max-w-3xl px-4</code> resolve a maioria das páginas,
+e os pares <code>max-h-64 overflow-y-auto</code> e <code>min-h-dvh</code> resolvem, respectivamente,
+a lista que não pode arrastar a página e o rodapé que não pode flutuar. Na dúvida, meça: o painel
+das caixas mostra o valor que o navegador aplicou, não o que você imaginou.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>w-</code> define o tamanho; <code>max-w-</code> é o teto; <code>min-w-</code> é o piso.</li>
+<li>Escala de largura máxima: xs 320, sm 384, md 448, lg 512, xl 576, 2xl 672, 4xl 896, 7xl 1280 px.</li>
+<li><code>max-w-prose</code> = 65 caracteres: o melhor teto para texto corrido.</li>
+<li><code>max-w-full</code> impede imagem de estourar a coluna.</li>
+<li><code>min-h-screen</code> = <code>100vh</code>; <code>min-h-dvh</code> acompanha a barra do celular.</li>
+<li><code>max-h-</code> usa a escala de espaçamento (0, 4, 8, 64…), não os nomes de roupa.</li>
+<li>Teto de altura só faz sentido com <code>overflow-y-auto</code>.</li>
+<li>Quem vence: mínimo &gt; máximo &gt; largura.</li>
+<li>Filho de <code>flex</code> nasce com <code>min-width: auto</code>; <code>min-w-0</code> libera.</li>
+<li><code>shrink-0</code> no que não pode diminuir, <code>min-w-0</code> no que precisa encolher.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

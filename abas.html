@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abas | Guia Tailwind</title>
+<meta name="description" content="Abas no Tailwind: a faixa com flex, a aba ativa com border-b-2 e -mb-px, os painéis com hidden, o JavaScript mínimo de troca e a acessibilidade com aria.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Abas</span></h1>
+
+<p class="intro">O cardápio da Ana cresceu: pães, doces e salgados, cada grupo com sete itens. Numa
+lista única, o cliente rola meia página para achar o que quer. Ela quer três abas no topo do
+cardápio — "Pães", "Doces", "Salgados" — e só o grupo escolhido visível. Nesta aula ela monta a
+faixa de abas, faz a aba ativa parecer ligada ao painel, esconde os painéis que não estão em uso e
+escreve o pedacinho de JavaScript que troca a aba no clique. O JavaScript é a única parte da aula
+que não é HTML nem Tailwind, e vou avisar sempre que ele aparecer.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que uma aba é: um botão que troca um painel.</li>
+  <li>A faixa das abas com <code>flex</code>, <code>gap-1</code> e a borda embaixo.</li>
+  <li>A aba ativa com <code>border-b-2 border-amber-600 -mb-px</code>.</li>
+  <li>Por que o <code>-mb-px</code> existe e o que ele resolve.</li>
+  <li>Os painéis e a classe <code>hidden</code>.</li>
+  <li>O JavaScript mínimo de troca, e por que ele não pode ficar no CSS.</li>
+  <li>A diferença para a <a href="barra-de-navegacao.html">barra de navegação</a>, que troca de página
+  em vez de painel.</li>
+  <li>Os atributos <code>role</code>, <code>aria-selected</code> e <code>aria-controls</code>.</li>
+  <li>Muitas abas na tela pequena: rolar de lado sem quebrar a página.</li>
+</ul>
+</div>
+
+<h2>1. A cena: vinte e um itens numa lista só</h2>
+
+<p>O cardápio da Ana é uma lista longa: sete tipos de pão, sete doces, sete salgados. O cliente que
+quer um pão de queijo rola por doze itens antes de encontrar. Ela pensou em três páginas separadas, e
+descartou: quem quer um doce com o pão não vai trocar de página no meio. Pensou em esconder atrás de
+um menu suspenso, e descartou também: no cardápio, o cliente quer ver as opções, não procurá-las.</p>
+
+<p>Aba é a resposta certa quando existem três ou quatro grupos e o visitante precisa alternar entre
+eles com frequência. Cada aba mostra um painel, e só um painel aparece por vez. O que faz a aba
+funcionar é uma coisa que nenhum CSS faz sozinho: alguém precisa lembrar qual aba está ativa e qual
+painel está visível. No HTML puro, o elemento que guarda estado é o atributo; a troca vem de um
+pouco de JavaScript.</p>
+
+<p>Calma que é pouco. O CSS faz 90% do trabalho e nós vamos escrevê-lo primeiro. Só no fim entra o
+JavaScript, com a linha marcada.</p>
+
+<h2>2. Uma aba é um botão que troca um painel</h2>
+
+<p>Antes de qualquer classe, vale nomear as peças, porque os nomes se repetem nos atributos de
+acessibilidade e é fácil se perder:</p>
+
+<dl class="anatomy">
+<dt>tablist</dt>
+<dd>A faixa que agrupa os botões das abas. É uma caixa, não um <code>nav</code>: abas trocam conteúdo
+da mesma página, não levam a outra página.</dd>
+<dt>tab</dt>
+<dd>Cada botão de aba. É um <code>button</code>, não um <code>a</code>: ele não navega, ele
+troca.</dd>
+<dt>aba ativa</dt>
+<dd>A aba do grupo selecionado. Ganha cor mais forte, borda embaixo e o atributo
+<code>aria-selected="true"</code>.</dd>
+<dt>tabpanel</dt>
+<dd>O conteúdo de cada aba. Só um fica visível; os outros recebem <code>hidden</code>.</dd>
+<dt>hidden</dt>
+<dd>Classe do Tailwind que aplica <code>display: none</code>. O painel sai da tela e da navegação
+por teclado.</dd>
+</dl>
+
+<p>No HTML, a estrutura fica assim — sem classe ainda, só a marcação:</p>
+
+<pre class="file" data-file="cardapio.html">&lt;div role="tablist"&gt;
+  &lt;button role="tab" aria-selected="true" aria-controls="painel-paes" id="aba-paes"&gt;Pães&lt;/button&gt;
+  &lt;button role="tab" aria-selected="false" aria-controls="painel-doces" id="aba-doces"&gt;Doces&lt;/button&gt;
+  &lt;button role="tab" aria-selected="false" aria-controls="painel-salgados" id="aba-salgados"&gt;Salgados&lt;/button&gt;
+&lt;/div&gt;
+&lt;div role="tabpanel" id="painel-paes" aria-labelledby="aba-paes"&gt;...&lt;/div&gt;
+&lt;div role="tabpanel" id="painel-doces" aria-labelledby="aba-doces" hidden&gt;...&lt;/div&gt;
+&lt;div role="tabpanel" id="painel-salgados" aria-labelledby="aba-salgados" hidden&gt;...&lt;/div&gt;</pre>
+
+<p>Cada <code>aria-controls</code> aponta para o <code>id</code> de um painel, e cada
+<code>aria-labelledby</code> faz o caminho de volta. É o mesmo truque de <code>for</code> e
+<code>id</code> do rótulo de formulário: dois atributos que combinam, letra por letra. E note o
+atributo <code>hidden</code> nos dois únicos painéis que nascem fechados: ele é o estado inicial, e o
+Tailwind já sabe estilizar essa forma — a classe <code>hidden</code> faz a mesma coisa.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>Atributos</th><th>Para que servem</th></tr>
+<tr><td>o grupo</td><td><code>role="tablist"</code></td><td>diz ao leitor de tela que ali começa um conjunto de abas</td></tr>
+<tr><td>cada aba</td><td><code>role="tab"</code>, <code>aria-selected</code>, <code>aria-controls</code></td><td>identifica o botão, informa se está ativa e diz qual painel ela abre</td></tr>
+<tr><td>cada painel</td><td><code>role="tabpanel"</code>, <code>id</code>, <code>aria-labelledby</code></td><td>identifica o conteúdo e o liga de volta ao botão</td></tr>
+<tr><td>o que está fechado</td><td><code>hidden</code> ou a classe <code>hidden</code></td><td>tira o painel da tela e da ordem de tabulação</td></tr>
+</table>
+</div>
+
+<h2>3. A faixa das abas</h2>
+
+<p>Com a marcação pronta, o desenho começa pela faixa. A ideia é uma linha de botões com uma borda
+cinza embaixo, que serve de trilho para a aba ativa se apoiar. O <code>flex</code> põe os botões lado
+a lado, o <code>gap-1</code> deixa 4 px entre eles — abas encostadas parecem um botão só — e a borda
+vem do pai.</p>
+
+<pre class="file" data-file="cardapio.html">&lt;div role="tablist" class="flex gap-1 border-b border-stone-200"&gt;
+  &lt;button role="tab" aria-selected="true"
+    class="px-4 py-2 text-sm font-medium text-amber-800"&gt;Pães&lt;/button&gt;
+  &lt;button role="tab" aria-selected="false"
+    class="px-4 py-2 text-sm font-medium text-stone-500 hover:text-stone-800"&gt;Doces&lt;/button&gt;
+  &lt;button role="tab" aria-selected="false"
+    class="px-4 py-2 text-sm font-medium text-stone-500 hover:text-stone-800"&gt;Salgados&lt;/button&gt;
+&lt;/div&gt;</pre>
+
+<p>Repare que as classes se repetem nos três botões, mudando só a cor: <code>px-4 py-2</code> dá o
+respiro de 16 px por 8 px, <code>text-sm font-medium</code> deixa o texto pequeno e com peso médio.
+A aba inativa é <code>text-stone-500</code> e responde ao mouse com
+<code>hover:text-stone-800</code>; a ativa é <code>text-amber-800</code>, mais forte. Enquanto a
+única diferença é a cor, o visitante pode confundir "aba escolhida" com "aba com o mouse em cima".
+Falta a marcação visual de verdade: a borda embaixo.</p>
+
+<h2>4. A aba ativa: a borda que encosta no trilho</h2>
+
+<p>Aqui está o detalhe que faz uma faixa de abas parecer profissional e é a razão de metade das
+tentativas darem errado. O trilho tem 1 px de borda embaixo. A aba ativa ganha uma borda de 2 px na
+mesma cor de destaque. Se você simplesmente colocar as duas bordas, a da aba fica <em>acima</em> do
+trilho, com um degrau de 1 px — e o efeito de "aba aberta" se perde.</p>
+
+<p>A solução é puxar a aba 1 px para baixo, com margem negativa. Aí a borda dela cobre o trilho e as
+duas linhas viram uma só, contínua.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-bottom-width=2px;;css:#alvo|margin-bottom=-1px;;rule:margin-bottom: -1px">
+  <p class="try-task">A aba "Pães" está só com a cor diferente. Dê a ela a borda de 2 px em âmbar e
+  puxe-a 1 px para baixo, para a borda cobrir o trilho cinza da faixa.</p>
+  <pre class="html">&lt;div class="flex gap-1 border-b border-stone-200"&gt;
+  &lt;button id="alvo" class="px-4 py-2 text-sm font-medium text-amber-800" role="tab" aria-selected="true"&gt;Pães&lt;/button&gt;
+  &lt;button class="px-4 py-2 text-sm font-medium text-stone-500" role="tab" aria-selected="false"&gt;Doces&lt;/button&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+color: oklch(0.473 0.137 46.201)
+font-size: 14px
+font-weight: 500
+line-height: 20px
+padding-inline: 16px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;div class="flex gap-1 border-b border-stone-200"&gt;
+  &lt;button id="alvo" class="-mb-px border-b-2 border-amber-600 px-4 py-2 text-sm font-medium text-amber-800" role="tab" aria-selected="true"&gt;Pães&lt;/button&gt;
+  &lt;button class="px-4 py-2 text-sm font-medium text-stone-500" role="tab" aria-selected="false"&gt;Doces&lt;/button&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>border-bottom-width: 2px</code> e <code>margin-bottom: -1px</code>. O CSS
+gerado explica de onde vem o nome esquisito da classe:</p>
+
+<pre class="term">.-mb-px {
+  margin-bottom: -1px;
+}
+.border-b-2 {
+  border-bottom-style: var(--tw-border-style);
+  border-bottom-width: 2px;
+}
+.border-amber-600 {
+  border-color: var(--color-amber-600);
+}</pre>
+
+<p><code>mb</code> é margin-bottom, <code>px</code> é 1 pixel e o hífen na frente é o sinal negativo.
+É a única sintaxe do Tailwind com hífen no começo, e ela existe em toda a escala: <code>-mt-4</code> é
+16 px para cima, <code>-mx-2</code> encolhe nas laterais. No começo dá um susto; depois vira hábito,
+porque é justamente a margem negativa que faz os encaixes de interface funcionarem.</p>
+
+<p>Duas alternativas que você vai encontrar por aí, e por que evitamos as duas. Dar
+<code>border-b-2</code> em <em>todas</em> as abas e mudar só a cor: todas as bordas ficam com 2 px e a
+faixa cresce 1 px, desalinhando o trilho. Ou usar <code>border-b-2</code> num
+<code>div</code> separado por baixo do texto: funciona, mas cria um elemento a mais em cada aba e
+complica o JavaScript, que passa a precisar mexer em dois elementos por aba.</p>
+
+<h2>5. Os painéis: um visível, dois escondidos</h2>
+
+<p>Do lado do conteúdo, a regra é simples e não tem classe nova: cada painel é uma caixa, e os que
+não estão ativos recebem <code>hidden</code>. O painel ativo ganha respiro, com
+<code>p-4 pt-6</code> — 24 px no topo, porque a faixa de abas já separa o conteúdo e o painel precisa
+respirar longe da borda.</p>
+
+<div class="trytailwind" data-goal="conta:[role=tabpanel]:not(.hidden)=1;;conta:[role=tabpanel].hidden=2;;css:#alvo|display=none">
+  <p class="try-task">Os três painéis estão aparecendo ao mesmo tempo, um embaixo do outro.
+  Esconda "Doces" e "Salgados" com a classe <code>hidden</code>, deixando só "Pães" visível.</p>
+  <pre class="html">&lt;div class="flex gap-1 border-b border-stone-200"&gt;
+  &lt;button class="border-b-2 border-amber-600 px-4 py-2 text-sm text-amber-800" role="tab" aria-selected="true"&gt;Pães&lt;/button&gt;
+  &lt;button class="px-4 py-2 text-sm text-stone-500" role="tab" aria-selected="false"&gt;Doces&lt;/button&gt;
+  &lt;button class="px-4 py-2 text-sm text-stone-500" role="tab" aria-selected="false"&gt;Salgados&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="p-4" role="tabpanel"&gt;Francês, broa, pão de queijo&lt;/div&gt;
+&lt;div id="alvo" class="p-4" role="tabpanel"&gt;Sonho, cueca virada, pão doce&lt;/div&gt;
+&lt;div class="p-4" role="tabpanel"&gt;Coxinha, esfirra, pão de batata&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+</pre>
+  <pre class="solucao">&lt;div class="flex gap-1 border-b border-stone-200"&gt;
+  &lt;button class="border-b-2 border-amber-600 px-4 py-2 text-sm text-amber-800" role="tab" aria-selected="true"&gt;Pães&lt;/button&gt;
+  &lt;button class="px-4 py-2 text-sm text-stone-500" role="tab" aria-selected="false"&gt;Doces&lt;/button&gt;
+  &lt;button class="px-4 py-2 text-sm text-stone-500" role="tab" aria-selected="false"&gt;Salgados&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="p-4" role="tabpanel"&gt;Francês, broa, pão de queijo&lt;/div&gt;
+&lt;div id="alvo" class="hidden p-4" role="tabpanel"&gt;Sonho, cueca virada, pão doce&lt;/div&gt;
+&lt;div class="hidden p-4" role="tabpanel"&gt;Coxinha, esfirra, pão de batata&lt;/div&gt;</pre>
+</div>
+
+<p>A conferência é por contagem: um painel sem <code>hidden</code> e dois com. Se você esconder todos,
+a tela fica vazia; se esconder um só, aparecem dois conteúdos e o visitante não entende por que o
+cardápio tem dois começos. Uma aba ativa, um painel visível — sempre.</p>
+
+<p><code>hidden</code> é <code>display: none</code>, e isso significa três coisas ao mesmo tempo: o
+painel não ocupa espaço, não pode ser clicado e não entra na navegação por teclado. Para aba, é
+exatamente o que queremos. E é por isso que não se usa <code>opacity-0</code> nem
+<code>invisible</code> aqui: os dois escondem visualmente e deixam o conteúdo no caminho do Tab, o
+que faz o foco sumir para dentro de um painel que ninguém está vendo.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que faz de verdade</th><th>Serve para aba?</th></tr>
+<tr><td><code>hidden</code></td><td><code>display: none</code>: some da tela, do clique e do Tab</td><td>sim, é a escolha certa</td></tr>
+<tr><td><code>invisible</code></td><td><code>visibility: hidden</code>: some da tela, mas ocupa espaço</td><td>não: deixa buraco no layout</td></tr>
+<tr><td><code>opacity-0</code></td><td>fica transparente, inteiro na tela</td><td>não: recebe clique e Tab</td></tr>
+<tr><td><code>sr-only</code></td><td>esconde visualmente e mantém no leitor de tela</td><td>não: serve para rótulo e título</td></tr>
+</table>
+</div>
+
+<h2>6. O clique: o pedaço que é JavaScript</h2>
+
+<p>Daqui para baixo, aviso de novo: o próximo bloco é <strong>JavaScript</strong>, não Tailwind. Ele
+existe porque CSS não guarda estado de clique — e é bom saber reconhecer a fronteira. Se você está
+começando, copie, leia os comentários e siga; nada aqui depende de aprender programação de verdade.</p>
+
+<pre class="file" data-file="cardapio.html">&lt;script&gt;
+  // JavaScript: guarda as abas e os painéis em listas
+  const abas = document.querySelectorAll('[role="tab"]');
+  const paineis = document.querySelectorAll('[role="tabpanel"]');
+
+  // JavaScript: para cada aba, escuta o clique
+  abas.forEach(function (aba) {
+    aba.addEventListener('click', function () {
+      // desliga todas
+      abas.forEach(function (outra) {
+        outra.setAttribute('aria-selected', 'false');
+        outra.classList.remove('border-b-2', 'border-amber-600', 'text-amber-800');
+      });
+      paineis.forEach(function (painel) {
+        painel.classList.add('hidden');
+      });
+      // liga só a clicada
+      aba.setAttribute('aria-selected', 'true');
+      aba.classList.add('border-b-2', 'border-amber-600', 'text-amber-800');
+      document.getElementById(aba.getAttribute('aria-controls')).classList.remove('hidden');
+    });
+  });
+&lt;/script&gt;</pre>
+
+<p>Leia em três passos, que é como o código está organizado. Primeiro ele coleta as abas e os
+painéis. Depois, para cada aba, registra um ouvinte de clique. No clique, ele faz duas coisas em
+ordem: desliga tudo (tira a borda de todas as abas, marca todas como não selecionadas e esconde todos
+os painéis) e liga só a clicada (põe a borda, marca como selecionada e mostra o painel que o
+<code>aria-controls</code> aponta).</p>
+
+<p>O detalhe que interessa para quem está aprendendo Tailwind: o JavaScript não escreve CSS. Ele só
+liga e desliga classes, com <code>classList.add</code> e <code>classList.remove</code>. Toda a
+aparência continua vindo do Tailwind, e é por isso que mudar o visual da aba depois é mexer em uma
+classe no HTML, não em vinte linhas de script.</p>
+
+<p>Se as abas forem links para outras páginas de verdade — como na
+<a href="barra-de-navegacao.html">barra de navegação</a> —, e não troca de painel, você não precisa
+de JavaScript nenhum: um <code>a</code> com <code>href</code> para cada página, e o estado ativo
+marcado no HTML. Antes de escrever script, pergunte se o conteúdo poderia ser uma página. Um
+cardápio de três grupos que muda a cada semana cabe numa página com âncoras.</p>
+
+<h2>7. Quem usa teclado e leitor de tela</h2>
+
+<p>A faixa de abas tem um comportamento esperado por quem navega com o teclado: as setas
+esquerda e direita trocam de aba, e o Tab pula direto do grupo para o conteúdo, sem parar em cada
+aba. Implementar isso à mão é trabalho; declarar os papéis certos já resolve metade.</p>
+
+<p>Os atributos <code>role="tab"</code>, <code>aria-selected</code> e <code>aria-controls</code> são o
+que faz o leitor de tela anunciar "Pães, aba selecionada, 1 de 3". Sem eles, o mesmo botão é
+anunciado como "Pães, botão" — e a pessoa não faz ideia de que existe um painel abaixo. Como sempre,
+o atributo repete em palavras o que a cor já diz na tela.</p>
+
+<p>Um detalhe de conteúdo que a Ana aprendeu do jeito difícil: o painel precisa de um título próprio.
+Quando o leitor de tela entra no painel, ele não vê a aba — vê só o conteúdo. Se o painel começa
+direto com "Francês, R$ 0,90", a pessoa não sabe se está vendo pães, doces ou salgados. Uma linha no
+topo do painel, mesmo pequena, com <code>sr-only</code> se você não quiser mostrá-la, resolve:</p>
+
+<pre class="file" data-file="cardapio.html">&lt;div role="tabpanel" id="painel-paes" aria-labelledby="aba-paes" class="p-4"&gt;
+  &lt;h3 class="sr-only"&gt;Pães&lt;/h3&gt;
+  &lt;ul&gt;...&lt;/ul&gt;
+&lt;/div&gt;</pre>
+
+<p>Outra decisão de vida: mantenha os painéis no HTML todos. Esconder com <code>hidden</code> é
+barato, o navegador não desenha o que está escondido, e o buscador lê o conteúdo de todos eles. Se
+você montar os painéis por JavaScript no clique, o conteúdo de "Salgados" não existe na página até
+alguém clicar — e aí ele não é indexado.</p>
+
+<h2>8. Muitas abas na tela pequena</h2>
+
+<p>Três abas cabem em qualquer celular. Quando o cardápio ganhou "Bebidas" e "Encomendas", viraram
+cinco, e a faixa passou a estourar a tela: cada aba tem 16 px de respiro dos dois lados, e cinco abas
+de palavra média somam mais de 400 px. O resultado é aquele clássico — a última aba cortada, e a
+página inteira rolando de lado.</p>
+
+<p>A correção é a mesma da tabela: um invólucro que rola sozinho. Aqui, a própria faixa recebe
+<code>overflow-x-auto</code>, e as abas recebem <code>shrink-0</code> para não encolherem.</p>
+
+<div class="trytailwind" data-largura="360" data-goal="css:#alvo|overflow-x=auto;;rule:overflow-x: auto;;conta:[role=tab]=5;;largura:360">
+  <p class="try-task">Nesta prévia de 360 px, a última aba está cortada. Faça a faixa rolar de lado
+  sozinha, sem arrastar a página, e impeça as abas de encolherem com <code>shrink-0</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="flex gap-1 border-b border-stone-200" role="tablist"&gt;
+  &lt;button class="px-4 py-2 text-sm text-amber-800" role="tab"&gt;Pães&lt;/button&gt;
+  &lt;button class="px-4 py-2 text-sm text-stone-500" role="tab"&gt;Doces&lt;/button&gt;
+  &lt;button class="px-4 py-2 text-sm text-stone-500" role="tab"&gt;Salgados&lt;/button&gt;
+  &lt;button class="px-4 py-2 text-sm text-stone-500" role="tab"&gt;Bebidas&lt;/button&gt;
+  &lt;button class="px-4 py-2 text-sm text-stone-500" role="tab"&gt;Encomendas&lt;/button&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+gap: 4px
+border-bottom-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex gap-1 overflow-x-auto border-b border-stone-200" role="tablist"&gt;
+  &lt;button class="shrink-0 px-4 py-2 text-sm text-amber-800" role="tab"&gt;Pães&lt;/button&gt;
+  &lt;button class="shrink-0 px-4 py-2 text-sm text-stone-500" role="tab"&gt;Doces&lt;/button&gt;
+  &lt;button class="shrink-0 px-4 py-2 text-sm text-stone-500" role="tab"&gt;Salgados&lt;/button&gt;
+  &lt;button class="shrink-0 px-4 py-2 text-sm text-stone-500" role="tab"&gt;Bebidas&lt;/button&gt;
+  &lt;button class="shrink-0 px-4 py-2 text-sm text-stone-500" role="tab"&gt;Encomendas&lt;/button&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>overflow-x: auto</code> na faixa e a contagem de cinco abas. Rode e arraste a
+faixa para o lado: ela anda, e a página fica parada. Sem o <code>shrink-0</code>, o flex encolheria
+os botões até o texto quebrar em duas linhas, cada aba com uma altura diferente — pior que a barra de
+rolagem.</p>
+
+<p>O CSS gerado nessa caixa tem duas regras e uma delas explica o encolhimento das abas:</p>
+
+<pre class="term">.overflow-x-auto {
+  overflow-x: auto;
+}
+.shrink-0 {
+  flex-shrink: 0;
+}</pre>
+
+<p><code>flex-shrink: 0</code> quer dizer "não encolha este item, mesmo que falte espaço". É o
+contrário do padrão do flex, que encolhe tudo para caber. A dupla
+<code>overflow-x-auto</code> mais <code>shrink-0</code> é a receita de toda faixa horizontal com
+muitos itens: as abas mantêm o tamanho, a faixa rola, a página fica parada.</p>
+
+<p>Uma consequência do <code>overflow-x-auto</code> que vale avisar: o estouro no eixo X faz o
+navegador recortar o eixo Y também. Se a sua aba ativa tiver um brilho, um anel de foco mais largo ou
+uma sombra que passa para baixo, ela vai ser cortada. Se isso incomodar, ponha
+<code>pb-1</code> na faixa — 4 px de folga embaixo — e o recorte deixa de pegar o anel.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a aba que não abria nada</h3>
+<p>A Ana montou as abas com <code>a href="#"</code> em vez de <code>button</code> e o clique levava a
+página para o topo. O motivo: <code>href="#"</code> é um link para o topo do documento, e o navegador
+faz o que o link manda antes de qualquer JavaScript. A troca foi simples: <code>button</code> com
+<code>type="button"</code>. Dentro de um formulário, sem o <code>type="button"</code>, o botão vira
+botão de envio e recarrega a página — outra pegadinha da mesma família.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: as abas que mudavam de largura</h3>
+<p>Na primeira versão, a aba ativa ficava em negrito e as outras não. Cada troca de aba mexia na
+largura dos botões, e a faixa inteira tremia como um acordeão. A correção foi separar estado de
+métrica: todas as abas com <code>font-medium</code>, e a diferença ficando só na cor e na borda.
+Regra que vale para botão, aba e link de navegação: peso de fonte constante, estado por cor e
+borda.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o painel que aparecia vazio</h3>
+<p>Depois de uma edição, a aba "Doces" passou a abrir um painel em branco. O JavaScript estava certo;
+o problema era o <code>aria-controls</code> apontando para <code>painel-doces</code> enquanto o
+<code>id</code> do painel era <code>painel-doce</code>, sem o "s". O script procurava um elemento que
+não existia e falhava em silêncio. A lição é a mesma do rótulo de formulário: esses pares de atributo
+são copiados, nunca digitados duas vezes.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Por que a aba ativa leva <code>-mb-px</code>?</p>
+<label><input type="radio" name="a1"> para o texto ficar 1 px mais alto</label>
+<label><input type="radio" name="a1"> para a borda da aba cobrir o trilho cinza da faixa e as duas linhas virarem uma</label>
+<label><input type="radio" name="a1"> para o botão ficar mais largo</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. Qual classe esconde um painel de aba, tirando-o
+também da navegação por teclado?</p>
+<label><input type="radio" name="a2"> <code>hidden</code></label>
+<label><input type="radio" name="a2"> <code>opacity-0</code></label>
+<label><input type="radio" name="a2"> <code>invisible</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">3. O que o JavaScript faz para trocar de aba?</p>
+<label><input type="radio" name="a3"> reescreve o CSS da página</label>
+<label><input type="radio" name="a3"> recarrega a página com outro endereço</label>
+<label><input type="radio" name="a3"> liga e desliga classes e troca o <code>aria-selected</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a aba ativa do cardápio</h2>
+<p>A aba ativa precisa de uma borda de 2 px embaixo, na cor da marca. Qual classe define essa borda
+inferior?</p>
+<div class="ex-code">&lt;button class="<input aria-label="resposta 1" data-answer="border-b-2" placeholder="..."> border-amber-600 -mb-px px-4 py-2 text-sm text-amber-800" role="tab" aria-selected="true"&gt;Pães&lt;/button&gt;</div>
+<p class="ex-dica">Dica: a letra <code>b</code> é de <em>bottom</em>, e o número é a espessura em
+pixels. Só a borda embaixo, porque as outras três lados não devem aparecer.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Aba é um <code>button</code> que troca um painel. A faixa é <code>flex gap-1</code> com
+<code>border-b border-stone-200</code> no pai; cada aba é <code>px-4 py-2 text-sm font-medium</code>,
+inativa em <code>text-stone-500</code> com <code>hover:text-stone-800</code>, ativa em
+<code>text-amber-800</code> mais <code>border-b-2 border-amber-600 -mb-px</code>. O
+<code>-mb-px</code> é margem negativa de 1 px: ele puxa a aba para baixo e faz a borda dela cobrir o
+trilho.</p>
+
+<p>Os painéis são caixas com <code>role="tabpanel"</code>, e só um fica sem <code>hidden</code>.
+<code>hidden</code> é <code>display: none</code>: some da tela, do clique e do Tab — o que
+<code>opacity-0</code> e <code>invisible</code> não fazem. A troca de aba é JavaScript, e ele só
+liga e desliga classes; a aparência continua vindo do Tailwind. E os pares
+<code>aria-controls</code> e <code>id</code> precisam combinar, como <code>for</code> e
+<code>id</code> do rótulo.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Faixa: <code>flex gap-1 border-b border-stone-200</code> com <code>role="tablist"</code>.</li>
+<li>Aba: <code>button</code> com <code>role="tab"</code>, <code>px-4 py-2 text-sm font-medium</code>.</li>
+<li>Aba ativa: <code>border-b-2 border-amber-600 -mb-px text-amber-800</code>.</li>
+<li>Painel: <code>role="tabpanel"</code>, <code>p-4</code> e <code>hidden</code> nos fechados.</li>
+<li>Um painel visível por vez; <code>hidden</code> tira do Tab, <code>opacity-0</code> não.</li>
+<li>Título com <code>sr-only</code> dentro do painel, para o leitor de tela saber onde está.</li>
+<li><code>aria-controls</code> aponta para o <code>id</code> do painel: copie, não digite duas
+vezes.</li>
+<li>Muitas abas: <code>overflow-x-auto</code> na faixa e <code>shrink-0</code> nas abas.</li>
+<li>O clique é JavaScript e só mexe em classes; o CSS continua sendo Tailwind.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

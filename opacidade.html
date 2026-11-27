@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Opacidade | Guia Tailwind</title>
+<meta name="description" content="Opacidade no Tailwind: a escala de 0 a 100, a diferença entre opacity-50 e bg-amber-500/20, e como deixar o fundo transparente sem apagar o texto do filho.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Opacidade: o <span class="hl">transparente</span> do cartão</h1>
+<p class="intro">A Ana colou um selo na vitrine do site da padaria: “última fornada”. O selo ficou tão
+forte que a cliente lê “última fornada” antes de ler o pão, o preço e o horário. Ela quer o selo ali,
+discreto, do jeito que a tinta da etiqueta de papel fica quando o papel é fino. Nesta aula ela
+aprende a controlar transparência no Tailwind: a escala de <code>opacity</code>, o número com barra
+que deixa só uma cor translúcida e a diferença entre os dois — que é a diferença entre apagar a caixa
+inteira e apagar só a tinta.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que a propriedade <code>opacity</code> mede, de 0 a 100.</li>
+  <li>A escala <code>opacity-*</code> do Tailwind e o CSS que ela gera.</li>
+  <li>Por que o painel mostra <code>0,5</code> quando você escreveu 50.</li>
+  <li>O número com barra: <code>bg-amber-500/20</code>, <code>text-stone-700/70</code>.</li>
+  <li>A diferença entre apagar a caixa toda e apagar só a cor de fundo.</li>
+  <li>Como escurecer uma foto sem apagar o texto que está em cima dela.</li>
+  <li>Quando a transparência atrapalha: contraste, botão desligado e hover.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o selo que grita mais alto que o pão</h2>
+
+<p>O site da Ana tem uma área de destaque na página inicial. Dentro dela ficam três coisas: o nome do
+pão do dia, o preço e um selo pequeno escrito “última fornada”. No papel, o selo era discreto. Na
+tela, virou um bloco rosa forte que ganha a atenção de tudo. A Ana tentou resolver trocando a cor,
+depois trocando o texto, depois diminuindo a fonte — e o selo continuava gritando, só que com voz
+mais fina.</p>
+
+<p>O problema não é cor nem tamanho: é peso. Um elemento com a cor cheia, ao lado de um texto
+normal, pesa mais do que tudo. A ferramenta certa aqui é a transparência. Deixar o selo a 60% faz
+ele recuar para trás do conteúdo principal sem sumir, e é exatamente o que a tinta faz no papel
+quando a etiqueta é fina: a cor continua lá, mas o branco do papel entra na mistura.</p>
+
+<p>Antes de escrever a primeira classe, vale entender o que “opacidade” mede, porque a palavra é
+usada em dois sentidos no dia a dia e o Tailwind tem duas ferramentas parecidas. Um deles deixa a
+caixa inteira translúcida, incluindo o que está dentro. O outro deixa só uma cor translúcida, e o
+resto continua firme. Escolher o errado é a fonte da maioria dos textos ilegíveis que a gente vê por
+aí.</p>
+
+<h2>2. O que a opacidade mede (e o que ela apaga junto)</h2>
+
+<p>Todo elemento da página é desenhado numa camada. A opacidade diz quanta tinta dessa camada
+atravessa a tela. Em 100% o desenho é sólido; em 0% ele é invisível; em 50% você vê o que está atrás
+dele misturado com ele. É uma medida da camada inteira, não de uma cor: se a caixa tem fundo, borda,
+texto, ícone e sombra, todos ficam translúcidos na mesma proporção, ao mesmo tempo.</p>
+
+<p>O padrão é 100%, e é por isso que você nunca precisou pensar nisso. O navegador já entrega tudo
+opaco. A aula começa quando você quer um valor diferente — e aí entra a escala do Tailwind.</p>
+
+<dl class="anatomy">
+<dt>opacidade</dt>
+<dd>A proporção de tinta que atravessa uma camada. Vai de 0 (nada) a 1 (tudo), e o CSS moderno
+aceita escrever em porcentagem: 50%.</dd>
+<dt>canal alfa</dt>
+<dd>O quarto número de uma cor: além de vermelho, verde e azul, ela carrega o quanto é opaca. É por
+ele que <code>bg-amber-500/20</code> fica translúcido sem mexer no resto.</dd>
+<dt>camada</dt>
+<dd>Cada retângulo que o navegador desenha, na ordem em que ele empilha. Opacidade menor que 100%
+força o elemento a virar uma camada própria.</dd>
+<dt>valor computado</dt>
+<dd>O que o navegador aplicou de verdade, depois de todas as contas. O painel das caixas mostra esse
+número, e ele vem em decimal: <code>0.5</code>.</dd>
+<dt>mistura</dt>
+<dd>O que acontece quando duas transparências se sobrepõem: elas se multiplicam. 50% sobre 50% dá
+25%, e não 100%.</dd>
+</dl>
+
+<p>Guarde a primeira consequência, que é a que mais confunde: opacidade não é “cor clara”. Se você
+deixa uma caixa branca a 50% sobre um fundo branco, não aparece nada — branco com branco dá branco.
+A transparência só se revela quando existe alguma coisa atrás. É por isso que o selo da Ana, sobre um
+cartão âmbar, fica mais bonito do que o mesmo selo sobre o fundo branco da página.</p>
+
+<h2>3. A escala do opacity</h2>
+
+<p>No Tailwind, a classe é a palavra <code>opacity</code> mais o número da porcentagem que você
+quer: <code>opacity-60</code> é 60%, <code>opacity-90</code> é 90%. A escala vai de 5 em 5, de 0 a
+100, e o número que você escreve é o mesmo que o CSS usa. Sem multiplicador, sem tabela de conversão
+— essa é uma das poucas escalas do Tailwind que se lê em porcentagem direta.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|opacity=0.6;;rule:opacity: 60%">
+  <p class="try-task">O selo está com a cor cheia e ganha a atenção do cartão inteiro. Deixe-o a 60%
+  de opacidade, para ele recuar sem sumir.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-lg bg-rose-100 px-2 py-1 text-sm font-semibold text-rose-800"&gt;Última fornada&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.941 0.03 12.58)
+color: oklch(0.455 0.188 13.697)
+font-size: 14px
+font-weight: 600
+line-height: 20px
+border-radius: 8px
+padding-inline: 8px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-lg bg-rose-100 px-2 py-1 text-sm font-semibold text-rose-800 opacity-60"&gt;Última fornada&lt;/div&gt;</pre>
+</div>
+
+<p>Rode a solução e olhe o painel. Vai aparecer uma linha nova, <code>opacity: 0.6</code>. Repare no
+formato: 0.6, e não 60%. Isso não é o Tailwind sendo esquisito; é o navegador respondendo. O CSS
+antigo só aceitava número de 0 a 1, e o valor computado continua sendo reportado assim. O Tailwind
+escreve <code>60%</code> no CSS gerado porque a versão moderna da linguagem aceita porcentagem, e o
+navegador converte para decimal na hora de medir.</p>
+
+<pre class="term" data-title="CSS gerado">.opacity-60 {
+  opacity: 60%;
+}
+.opacity-0 {
+  opacity: 0%;
+}
+.opacity-100 {
+  opacity: 100%;
+}</pre>
+
+<p>O CSS não tem nenhuma conta: a classe carrega o número que você pediu. Isso significa que
+<code>opacity-60</code> e <code>opacity-[0.6]</code> chegam ao mesmo lugar, e que valores fora da
+escala, como 37%, existem se você realmente precisar: <code>opacity-[37%]</code>. A recomendação é
+a mesma das outras aulas: fique nos degraus de 5 em 5, porque a repetição é o que faz o conjunto
+parecer coerente.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Porcentagem</th><th>Onde costuma servir</th></tr>
+<tr><td><code>opacity-100</code></td><td>100%</td><td>o padrão; usado para voltar ao normal no hover</td></tr>
+<tr><td><code>opacity-90</code></td><td>90%</td><td>quase sólido, só um toque de leveza</td></tr>
+<tr><td><code>opacity-80</code></td><td>80%</td><td>cartão sobre foto, texto ainda legível</td></tr>
+<tr><td><code>opacity-60</code></td><td>60%</td><td>selo que deve recuar para segundo plano</td></tr>
+<tr><td><code>opacity-40</code></td><td>40%</td><td>marca d'água atrás de um bloco</td></tr>
+<tr><td><code>opacity-0</code></td><td>0%</td><td>estado inicial de uma animação de entrada</td></tr>
+</table>
+</div>
+
+<p>Repare que a lista não tem 1, 2 ou 3. Ninguém precisa de 97% de opacidade, e oferecer o número
+fino demais só produz variações que ninguém consegue distinguir na tela. A escala de 5 em 5 é fina o
+bastante para ajustar e grossa o bastante para você reconhecer o degrau de longe. É a mesma lógica da
+escala de espaço: menos opções, decisões mais rápidas.</p>
+
+<h2>4. O que o painel mostra (e o que ele não mostra)</h2>
+
+<p>A caixa desta aula mede o elemento marcado com <code>id="alvo"</code> no estado de repouso: sem
+mouse em cima, sem clique, sem foco. Se a sua classe de opacidade for condicional — daquelas com
+<code>hover:</code> na frente —, o painel não muda quando você passa o mouse, e isso é o esperado.
+Ele mede o normal, não o momento.</p>
+
+<p>Para conferir a opacidade de repouso, o painel é perfeito. Para conferir “o selo fica mais forte
+quando eu passo o mouse?”, você tem dois caminhos. O primeiro é a prévia: é um pedaço de navegador de
+verdade, então passar o mouse funciona. O segundo é o CSS gerado: procurar a regra que começa com
+<code>.hover\:opacity-100:hover</code> responde à pergunta sem depender de o ponteiro passar por
+cima de nada.</p>
+
+<p>Existe um terceiro jeito, que é o que a gente usa quando está com pressa: o DevTools. Selecione o
+elemento na aba <em>Elements</em>, procure o botãozinho <code>:hov</code> na lateral do painel de
+estilos e marque <code>:hover</code>. O estado fica forçado na tela mesmo com o mouse longe, e a aba
+<em>Computed</em> passa a mostrar o número do hover. É a mesma ideia do painel das caixas, só que
+com o controle na sua mão.</p>
+
+<p>E há um detalhe de leitura que economiza tempo: o painel só mostra propriedades que as classes
+<strong>mudaram</strong>. Um elemento sem classe já tem opacidade 100% de fábrica, então
+<code>opacity-100</code> não produz linha nenhuma — ela não mudou nada. Se o painel está vazio
+depois de você escrever <code>opacity-95</code>, desconfie antes do painel: pode ser que o elemento
+observado seja o filho, e não o alvo.</p>
+
+<h2>5. A cor com barra: transparência só na tinta</h2>
+
+<p>Agora a segunda ferramenta, que resolve o caso do selo de outro jeito. Toda classe de cor do
+Tailwind aceita uma barra e um número: <code>bg-amber-500/20</code> quer dizer “o âmbar 500 desta
+paleta, com 20% de tinta”. O valor depois da barra vai de 0 a 100 e é a opacidade daquela cor
+específica, e não da caixa.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: color-mix(in oklab, var(--color-amber-500) 20%, transparent);;rule:color: var(--color-amber-900)">
+  <p class="try-task">O aviso tem fundo âmbar cheio e texto branco, que quase some no claro. Troque o
+  fundo por âmbar 500 a 20% e o texto por âmbar 900, que lê bem em cima do fundo claro.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-lg bg-amber-500 p-4 font-medium text-white"&gt;Encomendas até as 18h&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+font-weight: 500
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-lg bg-amber-500/20 p-4 font-medium text-amber-900"&gt;Encomendas até as 18h&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS gerado para uma cor com barra não é um <code>background-color</code> simples. O Tailwind usa
+a função <code>color-mix</code>, que mistura duas cores: a sua e o transparente. Leia como uma
+receita: “pegue o âmbar 500, use 20% dele e complete com transparência”.</p>
+
+<pre class="term" data-title="CSS gerado">.bg-amber-500\/20 {
+  background-color: color-mix(in srgb, oklch(76.9% 0.188 70.08) 20%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in oklab, var(--color-amber-500) 20%, transparent);
+  }
+}</pre>
+
+<p>Tem duas linhas de <code>background-color</code> porque o Tailwind protege navegadores antigos: a
+primeira é a versão de reserva, com a cor já resolvida em <code>oklch</code>; a segunda, dentro de
+<code>@supports</code>, usa a variável da paleta e o espaço de cor mais moderno. Você não escreve
+nada disso — e não precisa escolher entre as duas. O navegador lê a condição, vê se entende, e usa a
+que der.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que faz</th><th>Onde a Ana usa</th></tr>
+<tr><td><code>bg-amber-500/20</code></td><td>fundo âmbar com 20% de tinta</td><td>caixa de aviso sobre o fundo branco</td></tr>
+<tr><td><code>bg-black/40</code></td><td>preto a 40%, a clássica camada escura</td><td>escurecer o que está atrás de um texto</td></tr>
+<tr><td><code>text-stone-700/70</code></td><td>letra cinza-escura a 70%</td><td>legenda abaixo do preço</td></tr>
+<tr><td><code>border-amber-300/60</code></td><td>fio de borda translúcido</td><td>separar cartões sem linha dura</td></tr>
+<tr><td><code>bg-white/80</code></td><td>branco a 80%</td><td>barra que deixa ver a foto atrás</td></tr>
+<tr><td><code>divide-stone-200/70</code></td><td>divisor entre linhas da lista</td><td>tabela de preços da vitrine</td></tr>
+</table>
+</div>
+
+<p>A barra funciona em qualquer utilidade de cor: fundo, texto, borda, anel, divisor, gradiente. O
+número é o mesmo em todas, e é por isso que decorar a sintaxe vale mais do que decorar a lista. Se a
+classe tem uma cor, ela aceita <code>/20</code> no fim. E se você quiser um valor que não está na
+escala, o colchete também serve: <code>bg-amber-500/[12%]</code>.</p>
+
+<h2>6. Opacidade na caixa ou na cor: a diferença que importa</h2>
+
+<p>As duas ferramentas deixam o visual translúcido, e é por isso que tanta gente troca uma pela
+outra. Mas elas agem em lugares diferentes. <code>opacity-50</code> é uma ordem para a camada
+inteira: “desenhe tudo o que está aqui dentro com metade da tinta”. <code>bg-amber-500/50</code> é
+uma ordem só para o fundo: “pinte este retângulo com metade da tinta e desenhe o resto normalmente”.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="bg-amber-500/20 p-4"&gt;
+  &lt;p class="text-amber-900"&gt;Pão quentinho às 6h&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;div class="bg-amber-500 p-4 opacity-50"&gt;
+  &lt;p class="text-amber-900"&gt;Pão quentinho às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+
+<p>No primeiro bloco, o retângulo de fundo fica clarinho e o texto continua âmbar escuro e nítido. No
+segundo, o fundo fica clarinho <em>e o texto também</em>, porque a opacidade não distingue filho de
+pai: ela aplica a mesma névoa em tudo. Dá para ver a diferença de longe, e ela decide a legibilidade
+do seu site.</p>
+
+<p>Existe um jeito de visualizar isso que ajuda a memorizar: pense em dois copos. <code>opacity</code>
+é pingar água no copo inteiro, com o suco e o gelo dentro. A cor com barra é fazer o suco mais fraco
+e depois colocar o gelo — o gelo continua gelo. Quando você quer que o conteúdo permaneça firme e só
+o cenário recue, a resposta é a barra. Quando você quer o bloco inteiro desaparecendo aos poucos,
+como um aviso que sai da tela, a resposta é <code>opacity</code>.</p>
+
+<p>Tem ainda uma consequência técnica que vale saber: opacidade menor que 100% cria uma camada nova,
+e uma camada nova muda a ordem de empilhamento dos elementos. Se um dia um menu seu começar a
+aparecer atrás de um cartão translúcido sem motivo aparente, o culpado provavelmente é uma opacidade
+no meio do caminho. É o tipo de detalhe que a aula de <a href="camadas-z.html">camadas e z-index</a>
+destrincha; por ora, só saiba que existe.</p>
+
+<h2>7. A camada escura sobre a foto</h2>
+
+<p>O caso mais comum de transparência num site de padaria não é o selo: é a foto. A Ana colocou uma
+foto do balcão no topo da página e escreveu “Pão quentinho às 6h” em branco por cima. O texto sumiu,
+porque a foto tem partes claras. A solução clássica é uma camada escura entre a foto e o texto, com
+opacidade suficiente para o branco aparecer e pouca o bastante para a foto continuar visível. Quarenta
+por cento é um bom começo.</p>
+
+<div class="trytailwind" data-goal="conta:.absolute=1;;rule:background-color: color-mix(in oklab, var(--color-black) 40%, transparent)">
+  <p class="try-task">A faixa âmbar está servindo de foto e o texto branco não se lê. Coloque uma
+  camada preta a 40% cobrindo a faixa inteira, atrás do texto: um <code>div</code> com
+  <code>absolute inset-0</code> e o fundo translúcido.</p>
+  <pre class="html">&lt;div class="relative rounded-xl bg-amber-300 p-6"&gt;
+  &lt;p id="alvo" class="relative m-0 text-lg font-semibold text-white"&gt;Pão quentinho às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+position: relative
+color: rgb(255, 255, 255)
+font-size: 18px
+font-weight: 600
+line-height: 28px
+</pre>
+  <pre class="solucao">&lt;div class="relative rounded-xl bg-amber-300 p-6"&gt;
+  &lt;div class="absolute inset-0 rounded-xl bg-black/40"&gt;&lt;/div&gt;
+  &lt;p id="alvo" class="relative m-0 text-lg font-semibold text-white"&gt;Pão quentinho às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Aqui aparecem três peças que você já viu em outras aulas, agora trabalhando juntas. O
+<code>relative</code> no pai cria a referência de posição; o <code>absolute inset-0</code> estica a
+camada até as quatro bordas do pai; e o <code>bg-black/40</code> dá a tinta. O texto precisa de
+<code>relative</code> também, senão ele fica embaixo da camada escura — e aí você escureceu o próprio
+texto, que é o oposto do que queria.</p>
+
+<p>O painel desta caixa descreve o texto, porque é ele que carrega o <code>id="alvo"</code>: você vai
+ver <code>position: relative</code>, a cor e o tamanho da fonte, e nenhuma linha sobre a camada. Quem
+confere a camada é o botão <em>Verificar</em>, que procura no CSS gerado a regra do preto a 40% e
+conta os elementos posicionados. É um bom lembrete de que o painel é uma lupa apontada para um
+elemento só, e de que o resto da página é conferido de outros jeitos.</p>
+
+<p>Repare que a camada escura usa barra e não <code>opacity</code>. Se fosse
+<code>bg-black opacity-40</code>, funcionaria quase igual, porque o div não tem filho nenhum. Mas no
+dia em que alguém colocar um ícone dentro da camada, ele ficaria translúcido junto e a conta viraria
+uma bagunça. Usar a cor com barra deixa a camada preparada para receber conteúdo depois.</p>
+
+<p>Uma última decisão: 40% é gosto, não lei. Fotos claras pedem mais; fotos escuras, menos. E existe
+um limite: quanto mais escura a camada, mais legível o texto e menos foto. Se a foto for o assunto,
+reduza a camada; se a frase for o assunto, aumente. Só não resolva isso apagando a foto, que é o que
+a Ana fez na primeira tentativa.</p>
+
+<h2>8. Quando a transparência atrapalha</h2>
+
+<p>Transparência é uma ferramenta de hierarquia: o que está translúcido parece secundário. Quando
+tudo está translúcido, nada é secundário e o texto fica difícil de ler. Os tropeços que aparecem
+sempre:</p>
+
+<ul>
+<li><strong>Texto cinza a 60% sobre fundo branco.</strong> O contraste cai e a leitura cansa. Para
+legenda, 70% costuma bastar; abaixo disso, teste no celular e no sol. Contraste é assunto de uma
+aula inteira, e a regra prática é: transparência para o que é decoração, cor sólida para o que é
+informação.</li>
+<li><strong><code>opacity-50</code> no cartão inteiro em vez de na borda.</strong> O fundo, o texto, a
+foto e o botão de comprar ficam todos desbotados. Se a intenção era “cartão apagado porque está
+esgotado”, isso é aceitável; se era “borda mais suave”, use <code>border-stone-200/70</code>.</li>
+<li><strong><code>opacity-0</code> achando que é <code>hidden</code>.</strong> O elemento invisível
+continua ocupando espaço e continua recebendo clique. O buraco na página é a pista de que você usou a
+ferramenta errada. Para desaparecer de verdade, existe a aula de <a
+href="esconder-mostrar.html">esconder e mostrar</a>.</li>
+<li><strong>Duas transparências somadas.</strong> Uma caixa com <code>opacity-50</code> e um texto com
+<code>text-stone-700/70</code> dentro dela terminam em 35% de tinta. A conta é multiplicação, e o
+resultado quase nunca é o que você imaginou.</li>
+<li><strong>Opacidade em vez de hover.</strong> Deixar o botão a 70% e subir para 100% no mouse é um
+efeito simpático, mas no celular não existe mouse. Se o botão depende do hover para ficar legível,
+metade das visitas vê um botão apagado.</li>
+</ul>
+
+<p>O botão desligado é o caso legítimo mais comum de opacidade em componente. O HTML tem um atributo
+chamado <code>disabled</code> que impede o clique; o Tailwind tem a variante <code>disabled:</code>
+que aplica classes só nesse estado. Juntando as duas, o botão de “encomendar” fica cinza e com o
+ponteiro proibido quando a fornada acaba:</p>
+
+<pre class="file" data-file="index.html">&lt;button class="rounded-lg bg-amber-500 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50" disabled&gt;
+  Fornada esgotada
+&lt;/button&gt;</pre>
+
+<p>É a mesma ideia do hover, com um detalhe importante: <code>disabled:</code> não depende de
+ponteiro nenhum. O navegador sabe que o botão está desligado porque o atributo está lá, e aplica a
+regra enquanto ele estiver. Isso funciona no celular, no teclado e no leitor de tela.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o selo “novo” que fica invisível no tema escuro</h3>
+<p>A Ana usou <code>bg-stone-900/10</code> no selo, pensando no fundo branco. De dia, lindo: um cinza
+claríssimo. À noite, com o site no tema escuro, o fundo escuro atravessa a tinta e o selo vira uma
+mancha invisível. A correção é parar de confiar na transparência para o contraste: use uma cor de
+fundo sólida e deixe a transparência só para a borda ou para o fio de separação. Se o selo precisa
+mudar no escuro, o caminho é a variante <code>dark:</code>, que tem aula própria mais adiante.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a foto de fundo que apaga o formulário</h3>
+<p>Ela colocou uma foto do forno atrás do formulário de encomenda e escreveu os rótulos em branco.
+Ficou ilegível, e a tentação foi aumentar a opacidade do cartão até 100%. O resultado foi um cartão
+branco chapado sobre a foto, que resolveu a leitura e matou a foto. O meio-termo é
+<code>bg-white/85</code> no cartão: a foto aparece como textura, o texto lê bem, e o cartão continua
+parecendo um cartão. Transparência em componente quase sempre é um número alto, entre 80 e 95.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a lista de produtos que “pisca” ao trocar de categoria</h3>
+<p>Para suavizar a troca de categoria, a Ana pôs <code>opacity-0</code> na lista enquanto os dados
+carregam e <code>opacity-100</code> quando chegam. No caminho, descobriu que o espaço da lista
+continuava reservado — o que era bom — e que os links invisíveis continuavam clicáveis — o que era
+ruim. A correção foi acompanhar a opacidade de um <code>pointer-events-none</code>, que desliga o
+clique enquanto o elemento está apagado. É o tipo de detalhe que não aparece no visual e aparece no
+teste com o dedo.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que <code>opacity-60</code> faz com um cartão que
+tem texto dentro?</p>
+<label><input type="radio" name="op1"> deixa o fundo a 60% e o texto com a cor cheia</label>
+<label><input type="radio" name="op1"> desenha o cartão inteiro, texto incluído, com 60% de tinta</label>
+<label><input type="radio" name="op1"> esconde o cartão e libera o espaço que ele ocupava</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. A Ana quer o fio da borda suave e o texto bem
+escuro. Qual das duas escreve isso?</p>
+<label><input type="radio" name="op2"> <code>opacity-40</code> no cartão</label>
+<label><input type="radio" name="op2"> <code>opacity-40</code> no texto</label>
+<label><input type="radio" name="op2"> <code>border-amber-300/40</code> no cartão</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. No painel, uma caixa com <code>opacity-50</code>
+mostra qual valor?</p>
+<label><input type="radio" name="op3"> <code>opacity: 0.5</code></label>
+<label><input type="radio" name="op3"> <code>opacity: 50px</code></label>
+<label><input type="radio" name="op3"> nada, porque valores abaixo de 100 não aparecem</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a etiqueta da vitrine</h2>
+<p>A etiqueta de “promoção” precisa de fundo âmbar com 30% de tinta, e o texto dentro dela tem de
+continuar âmbar escuro e nítido. Complete a classe do fundo:</p>
+<div class="ex-code">&lt;span class="rounded-full <input aria-label="resposta 1" data-answer="bg-amber-400/30" placeholder="..."> px-2 py-1 text-amber-900"&gt;Promoção&lt;/span&gt;</div>
+<p class="ex-dica">Dica: a barra vem depois do tom, e o número depois da barra é a porcentagem de
+tinta. Se você escrever <code>opacity-30</code>, o texto também desbota — que é exatamente o que o
+pedido não quer.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Opacidade é uma medida de 0 a 100 da tinta que atravessa uma camada, e no Tailwind ela vem na
+classe <code>opacity-*</code>, com degraus de 5 em 5. O painel mostra o valor computado em decimal —
+<code>0.6</code> para 60% — porque é assim que o navegador reporta. A regra gerada é literal:
+<code>opacity: 60%</code>, sem conta nenhuma no meio.</p>
+
+<p>A segunda ferramenta é o número depois da barra, que muda só a tinta de uma cor:
+<code>bg-amber-500/20</code> deixa o fundo translúcido e mantém o texto e os ícones firmes. É a
+escolha para cartões, avisos, bordas e camadas sobre foto. <code>opacity</code> é a escolha para o
+bloco inteiro: botão desligado, aviso que some, elemento que espera carregar.</p>
+
+<p>E o critério para não errar é sempre a pergunta “o que eu quero apagar?”. Se a resposta for “só
+este fundo”, use a barra. Se for “tudo o que está dentro desta caixa”, use <code>opacity</code>. Se a
+resposta for “nada, eu só quero uma cor mais clara”, troque o tom da paleta — 100 para 200 —, porque
+transparência e cor clara não são a mesma coisa, mesmo quando o olho insiste em dizer que são.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>opacity-*</code> vai de 0 a 100, de 5 em 5; o padrão do navegador é 100.</li>
+<li>O valor computado aparece em decimal no painel: <code>0.5</code>.</li>
+<li><code>opacity</code> apaga a caixa inteira, filhos incluídos.</li>
+<li>A cor com barra (<code>bg-amber-500/20</code>) apaga só aquela cor.</li>
+<li>A barra funciona em fundo, texto, borda, anel, divisor e gradiente.</li>
+<li>Transparências empilhadas se multiplicam: 50% sobre 50% dá 25%.</li>
+<li><code>opacity-0</code> não é <code>hidden</code>: o espaço e o clique continuam lá.</li>
+<li>Camada sobre foto: <code>absolute inset-0</code> e <code>bg-black/40</code>, com o texto em
+<code>relative</code>.</li>
+<li>Botão desligado: <code>disabled:opacity-50</code> e <code>disabled:cursor-not-allowed</code>.</li>
+<li>Opacidade abaixo de 100% cria camada nova e pode mudar a ordem de empilhamento.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

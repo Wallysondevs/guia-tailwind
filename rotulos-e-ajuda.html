@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rótulos e Texto de Ajuda | Guia Tailwind</title>
+<meta name="description" content="Rótulos de formulário no Tailwind: ligar label e campo com for e id, dar respiro, escrever texto de ajuda e de erro, agrupar opções e usar sr-only.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Rótulos e <span class="hl">Texto de Ajuda</span></h1>
+
+<p class="intro">O formulário da Ana já tem <a href="campos-de-formulario.html">campos bonitos</a>, com borda e respiro. O problema agora é
+outro: ninguém sabe o que escrever em cada um. Ela resolveu tudo com <em>placeholder</em>, e o
+resultado é o previsível — o cliente digitou o nome no campo do telefone, deixou o e-mail em branco
+e, quando foi conferir, metade das dicas tinha desaparecido da tela porque o campo já estava
+preenchido. Nesta aula ela aprende a colocar a etiqueta de verdade em cima de cada campo, a escrever
+a frase de ajuda embaixo e a mostrar o erro no lugar certo, sem empurrar o layout.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que o <em>placeholder</em> não substitui o rótulo.</li>
+  <li>Como ligar <code>label</code> e campo com <code>for</code> e <code>id</code>.</li>
+  <li>As classes do rótulo: <code>block</code>, <code>text-sm</code>, <code>font-medium</code>,
+  <code>mb-1</code>.</li>
+  <li>O texto de ajuda embaixo do campo, pequeno e discreto.</li>
+  <li>O texto de erro, que precisa ser lido em voz alta pelo leitor de tela.</li>
+  <li>Como agrupar opções com <code>fieldset</code> e <code>legend</code>.</li>
+  <li>O rótulo invisível com <code>sr-only</code>, para campo de busca.</li>
+  <li>Como evitar que a mensagem de erro dance o layout.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o cliente digitou o nome no telefone</h2>
+
+<p>Na primeira versão do formulário, a Ana economizou palavras: cada campo tinha só um
+<em>placeholder</em> com o nome do dado. Ficou limpo, quase minimalista. Aí a primeira encomenda
+chegou com o nome no campo do telefone, o telefone no campo do e-mail e uma observação que dizia
+"pode ser às 10". Ela olhou aquilo e entendeu o óbvio: quando o campo já está preenchido, a dica
+some, e a pessoa que está preenchendo só lembra o que cada linha pedia se o nome estiver escrito
+fora do campo.</p>
+
+<p>Existe uma segunda razão, que ela não vê mas metade dos clientes dela depende: quem usa leitor de
+tela navega pelos campos e ouve o nome de cada um. Se o nome só existe como <em>placeholder</em>,
+alguns leitores anunciam, outros não; se o campo já tem valor, o anúncio se perde. O rótulo é a
+única coisa que fica no lugar, sempre, para todo mundo.</p>
+
+<p>E tem um terceiro detalhe que parece pequeno e muda a vida de quem usa o site no celular: o
+rótulo é clicável. Tocar nele coloca o cursor dentro do campo. Num celular, isso significa acertar
+um alvo de 40 px de altura em vez de mirar dentro de um retângulo de 2 px de borda. Para quem tem
+mão grande ou problema de visão, não é conveniência: é a diferença entre conseguir e não
+conseguir.</p>
+
+<h2>2. Rótulo não é placeholder</h2>
+
+<p>Vale fixar a diferença antes de escrever qualquer classe, porque ela decide o desenho:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>Onde fica</th><th>Quando aparece</th><th>Para que serve</th></tr>
+<tr><td>rótulo (<code>label</code>)</td><td>fora, acima do campo</td><td>sempre</td><td>dizer o que o campo pede</td></tr>
+<tr><td>texto de ajuda</td><td>fora, abaixo do campo</td><td>sempre</td><td>explicar formato ou condição</td></tr>
+<tr><td>texto de erro</td><td>fora, abaixo do campo</td><td>quando algo está errado</td><td>dizer o que corrigir</td></tr>
+<tr><td>placeholder</td><td>dentro do campo</td><td>só enquanto está vazio</td><td>dar um exemplo curto</td></tr>
+</table>
+</div>
+
+<p>Repare que os três primeiros vivem fora do campo e o <em>placeholder</em> vive dentro. Essa é a
+razão de os três primeiros precisarem de classes de texto e espaçamento, e de o
+<em>placeholder</em> precisar da variante <code>placeholder:</code>. São peças diferentes, com
+regras diferentes.</p>
+
+<h2>3. label, for e id: a ligação que faz o clique funcionar</h2>
+
+<p>Um rótulo não é só um texto em cima do campo: ele é um <code>label</code> ligado a um campo
+específico. A ligação acontece por dois atributos que precisam combinar exatamente:</p>
+
+<pre class="file" data-file="encomenda.html">&lt;label for="nome"&gt;Seu nome&lt;/label&gt;
+&lt;input id="nome" type="text" name="nome"&gt;</pre>
+
+<p>O <code>for</code> do rótulo aponta para o <code>id</code> do campo. Um aponta para o outro, como
+endereço. Se você escrever <code>for="Nome"</code> com maiúscula e <code>id="nome"</code> com
+minúscula, o navegador não liga os dois — o clique no rótulo não faz nada e o leitor de tela não
+anuncia o nome do campo. É o erro mais comum desta aula, e ele é invisível: a página parece
+perfeita.</p>
+
+<p>Existe um segundo jeito, que dispensa o <code>for</code>: colocar o campo <em>dentro</em> do
+<code>label</code>. O navegador entende que o campo é filho do rótulo e faz a ligação sozinho.</p>
+
+<pre class="file" data-file="encomenda.html">&lt;label class="flex items-center gap-2"&gt;
+  &lt;input class="size-4 accent-amber-700" type="checkbox"&gt;
+  Quero o pão fatiado
+&lt;/label&gt;</pre>
+
+<p>Esse segundo jeito é o preferido para caixinha de marcar e botão de rádio, porque o texto fica
+literalmente dentro do alvo do clique. Para campo de texto, o primeiro jeito é melhor: você controla
+onde o rótulo aparece e o campo continua sendo um bloco só, sem herdar o comportamento de linha do
+label.</p>
+
+<dl class="anatomy">
+<dt>label</dt>
+<dd>A tag do rótulo. Serve para nomear um campo; quando ligada a ele, também funciona como alvo de
+clique.</dd>
+<dt>for</dt>
+<dd>Atributo do rótulo que aponta para o <code>id</code> do campo. Precisa ser idêntico, letra por
+letra.</dd>
+<dt>id</dt>
+<dd>O nome único do campo na página. Um <code>id</code> não pode se repetir; é ele que o
+<code>for</code> procura.</dd>
+<dt>aria-describedby</dt>
+<dd>Aponta para o <code>id</code> de um texto de ajuda. O leitor de tela anuncia o rótulo e depois
+esse texto.</dd>
+<dt>sr-only</dt>
+<dd>Classe do Tailwind que esconde visualmente um texto, sem escondê-lo do leitor de tela.</dd>
+</dl>
+
+<h2>4. O rótulo como bloco</h2>
+
+<p>Com o <code>label</code> escrito, a Ana se depara com um comportamento esperado e chato: o rótulo
+aparece <em>na mesma linha</em> do campo, colado à esquerda dele, porque tanto o
+<code>label</code> quanto o <code>input</code> são elementos de linha. A correção é transformar o
+rótulo em bloco, e aí ele ocupa a linha inteira e empurra o campo para baixo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=block;;css:#alvo|font-size=14px;;css:#alvo|margin-bottom=4px">
+  <p class="try-task">O rótulo está na mesma linha do campo e do tamanho do texto comum. Deixe-o em
+  bloco, com 14 px de fonte, peso médio e 4 px de respiro abaixo.</p>
+  <pre class="html">&lt;label id="alvo" class="text-stone-700" for="nome"&gt;Seu nome&lt;/label&gt;
+&lt;input class="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2" id="nome" type="text"&gt;</pre>
+  <pre class="out">
+color: oklch(0.374 0.01 67.558)
+</pre>
+  <pre class="solucao">&lt;label id="alvo" class="block text-sm font-medium text-stone-700 mb-1" for="nome"&gt;Seu nome&lt;/label&gt;
+&lt;input class="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2" id="nome" type="text"&gt;</pre>
+</div>
+
+<p>As quatro classes que a solução acrescenta têm papéis bem distintos, e vale nomear cada uma:
+<code>block</code> muda o comportamento do elemento, <code>text-sm</code> define o tamanho,
+<code>font-medium</code> define o peso e <code>mb-1</code> cria o respiro de 4 px abaixo. A cor
+<code>stone-700</code> já estava lá, e é ela que dá o contraste de rótulo: escuro o bastante para ser
+lido, claro o bastante para não competir com o valor digitado.</p>
+
+<p>Depois de rodar, o painel mostra o resultado completo, e uma das linhas surpreende quem está
+começando: o
+<code>text-sm</code> mexeu em duas propriedades, não em uma. O Tailwind associa tamanho de fonte e
+entrelinha, então o texto de 14 px vem com 20 px de altura de linha. Isso é proposital: texto pequeno
+com entrelinha apertada fica ilegível, e o Tailwind não deixa você esquecer.</p>
+
+<pre class="term">.block {
+  display: block;
+}
+.text-sm {
+  font-size: var(--text-sm);
+  line-height: var(--tw-leading, var(--text-sm--line-height));
+}
+.font-medium {
+  font-weight: var(--font-weight-medium);
+}
+.mb-1 {
+  margin-bottom: calc(var(--spacing) * 1);
+}</pre>
+
+<p>Por que 4 px e não 8? Porque rótulo e campo formam uma unidade visual: precisam estar perto o
+bastante para parecer um bloco só, e longe o bastante para não se tocarem. <code>mb-1</code> cria uma
+costura fina; <code>mb-2</code> já começa a separar demais. Quem separa um campo do outro é o
+espaçamento do grupo, que vem mais adiante.</p>
+
+<h2>5. O texto de ajuda</h2>
+
+<p>Nem todo campo se explica sozinho. "Telefone" é claro; "Telefone para aviso" pede uma frase
+dizendo quando a Ana vai ligar. "Observação" é claro; "Observação" com a informação de que recheio
+tem acréscimo, não. Esse é o texto de ajuda: uma linha pequena, discreta, logo abaixo do campo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|font-size=12px;;css:#alvo|margin-top=4px;;rule:color: var(--color-stone-500)">
+  <p class="try-task">O texto de ajuda está do tamanho do texto comum e escuro demais, competindo
+  com o rótulo. Deixe-o com 12 px, cinza <code>stone-500</code> e 4 px de respiro acima.</p>
+  <pre class="html">&lt;label class="block text-sm font-medium text-stone-700 mb-1" for="tel"&gt;Telefone&lt;/label&gt;
+&lt;input class="w-full rounded-lg border border-stone-300 px-3 py-2" id="tel" type="tel"&gt;
+&lt;p id="alvo" class="text-stone-600"&gt;Só ligamos se o pedido atrasar.&lt;/p&gt;</pre>
+  <pre class="out">
+color: oklch(0.444 0.011 73.639)
+</pre>
+  <pre class="solucao">&lt;label class="block text-sm font-medium text-stone-700 mb-1" for="tel"&gt;Telefone&lt;/label&gt;
+&lt;input class="w-full rounded-lg border border-stone-300 px-3 py-2" id="tel" type="tel"&gt;
+&lt;p id="alvo" class="mt-1 text-xs text-stone-500"&gt;Só ligamos se o pedido atrasar.&lt;/p&gt;</pre>
+</div>
+
+<p>Ao rodar, o painel troca uma linha de cor por três: <code>font-size: 12px</code>,
+<code>margin-top: 4px</code> e a cor nova. Três decisões estão embutidas nessa solução, e todas valem
+para qualquer projeto.
+<code>text-xs</code> é 12 px: menor que o rótulo, deixando claro que é informação secundária.
+<code>text-stone-500</code> é mais claro que o <code>stone-700</code> do rótulo, pela mesma razão.
+<code>mt-1</code> cola o texto no campo, para ele não parecer um parágrafo solto no meio do
+formulário.</p>
+
+<p>O que não se vê no painel é a ligação com o leitor de tela. Texto de ajuda que aparece na tela
+mas não é anunciado é ajuda pela metade. A ligação é feita com <code>aria-describedby</code> no
+campo, apontando para o <code>id</code> do parágrafo:</p>
+
+<pre class="file" data-file="encomenda.html">&lt;input id="tel" type="tel" aria-describedby="ajuda-tel"
+  class="w-full rounded-lg border border-stone-300 px-3 py-2"&gt;
+&lt;p id="ajuda-tel" class="mt-1 text-xs text-stone-500"&gt;Só ligamos se o pedido atrasar.&lt;/p&gt;</pre>
+
+<p>Agora o leitor de tela anuncia "Telefone, campo de texto, só ligamos se o pedido atrasar". Uma
+frase a mais no HTML, e a informação chega a quem não vê a tela. É o tipo de detalhe que separa um
+formulário que funciona de um formulário que só parece bonito.</p>
+
+<h2>6. O texto de erro</h2>
+
+<p>Na primeira vez que o cliente esqueceu o telefone, a Ana fez o que todo mundo faz: pintou a borda
+de vermelho. O cliente olhou, viu uma borda vermelha, e não soube o que fazer — faltava telefone?
+Faltava nome? A cor sozinha não informa; ela só chama atenção. O erro precisa de texto.</p>
+
+<pre class="file" data-file="encomenda.html">&lt;input id="tel" type="tel" aria-describedby="erro-tel" aria-invalid="true"
+  class="w-full rounded-lg border border-red-500 px-3 py-2"&gt;
+&lt;p id="erro-tel" role="alert" class="mt-1 text-sm text-red-600"&gt;
+  Precisamos de um telefone com DDD para avisar sobre a encomenda.
+&lt;/p&gt;</pre>
+
+<p>Quatro coisas acontecem nesse pedaço. A borda do campo fica vermelha com
+<code>border-red-500</code>. O texto usa <code>text-sm text-red-600</code>, um pouco maior que o
+texto de ajuda porque erro precisa ser lido, não decorado. O <code>role="alert"</code> faz o leitor
+de tela anunciar a mensagem assim que ela aparece — sem ele, o cego não fica sabendo que algo deu
+errado. E o <code>aria-invalid="true"</code> marca o campo como inválido, o que muda até o anúncio
+que o leitor faz.</p>
+
+<p>Repare também que o erro é mensagem, não código: "Precisamos de um telefone com DDD" diz o que
+fazer; "Erro 422" diz o que aconteceu com o servidor. O cliente da padaria não é programador.</p>
+
+<p>Um detalhe de layout que dá dor de cabeça: quando a mensagem de erro aparece, ela empurra tudo o
+que está abaixo. Num formulário de cinco campos, o botão de enviar pula para baixo no exato momento
+em que a pessoa vai clicar nele. A solução elegante é reservar o espaço antes de o erro existir —
+um parágrafo que já está lá, com altura fixa, e só troca de conteúdo:</p>
+
+<pre class="file" data-file="encomenda.html">&lt;p id="erro-tel" role="alert" class="mt-1 min-h-5 text-sm text-red-600"&gt;&lt;/p&gt;</pre>
+
+<p><code>min-h-5</code> garante 20 px de altura mesmo vazio, que é a altura de uma linha de
+<code>text-sm</code>. O erro nasce e morre sem mexer em nada em volta. Na sua página, o
+JavaScript preenche o texto; o CSS só reserva o lugar.</p>
+
+<p>Juntando tudo, o formulário tem cinco tipos de texto, cada um com seu tamanho e sua cor. Vale ter
+a tabela na cabeça, porque é ela que faz o conjunto parecer desenhado por uma pessoa só:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>Classes</th><th>Por que assim</th></tr>
+<tr><td>rótulo</td><td><code>text-sm font-medium text-stone-700</code></td><td>14 px, pesado e escuro: é o nome do dado</td></tr>
+<tr><td>valor digitado</td><td><code>text-base text-stone-900</code></td><td>16 px, ainda mais escuro: é o que a pessoa escreveu</td></tr>
+<tr><td>texto de ajuda</td><td><code>text-xs text-stone-500</code></td><td>12 px e claro: informação de apoio</td></tr>
+<tr><td>texto de erro</td><td><code>text-sm text-red-600</code></td><td>14 px e vermelho: precisa ser lido</td></tr>
+<tr><td>placeholder</td><td><code>placeholder:text-stone-400</code></td><td>tom entre a ajuda e o valor, para não mentir</td></tr>
+</table>
+</div>
+
+<p>Se você só puder guardar uma linha dessa tabela, guarde a ordem das alturas: 12 px para o que
+ajuda, 14 px para o que nomeia e para o que corrige, 16 px para o que a pessoa escreveu. Quando um
+formulário parece confuso, quase sempre é porque essas alturas estão trocadas — valor pequeno demais
+e ajuda grande demais.</p>
+
+<h2>7. Opções agrupadas: fieldset e legend</h2>
+
+<p>O formulário da Ana tem um grupo de escolhas que não é um campo: o período de retirada, com
+"manhã" e "tarde". Cada opção tem seu <code>label</code>, mas o grupo também precisa de um nome —
+senão o leitor de tela anuncia "manhã, botão de rádio" e ninguém sabe de quê. Esse nome vem de um
+<code>legend</code> dentro de um <code>fieldset</code>.</p>
+
+<pre class="file" data-file="encomenda.html">&lt;fieldset class="space-y-2"&gt;
+  &lt;legend class="text-sm font-medium text-stone-700"&gt;Retirada&lt;/legend&gt;
+  &lt;label class="flex items-center gap-2 text-sm text-stone-700"&gt;
+    &lt;input class="size-4 accent-amber-700" type="radio" name="periodo" value="manha"&gt;
+    Manhã, das 6h às 11h
+  &lt;/label&gt;
+  &lt;label class="flex items-center gap-2 text-sm text-stone-700"&gt;
+    &lt;input class="size-4 accent-amber-700" type="radio" name="periodo" value="tarde"&gt;
+    Tarde, das 14h às 18h
+  &lt;/label&gt;
+&lt;/fieldset&gt;</pre>
+
+<p>O <code>fieldset</code> desenha uma moldura por padrão em alguns navegadores, e o
+<code>legend</code> corta essa moldura no topo. Se a moldura não é o que você quer, a classe
+<code>border-0</code> no <code>fieldset</code> resolve — não use <code>outline-none</code> nem tente
+esconder o elemento, porque o grupo precisa existir para o leitor de tela. É um caso em que a
+semântica vale mais que dois pixels de moldura.</p>
+
+<p>Para afastar os campos entre si, o segredo é o pai. Em vez de dar <code>mb-4</code> em cada
+rótulo e cada campo, ponha <code>space-y-4</code> no <code>form</code> ou no
+<code>div</code> que envolve tudo. Aí o espaçamento passa a ser uma regra do grupo, e acrescentar um
+campo novo não exige lembrar de margem nenhuma. Você já viu <code>space-y</code> na
+<a href="space-y.html">aula de space-y</a>;
+aqui ele só está sendo aplicado ao formulário inteiro.</p>
+
+<h2>8. O rótulo invisível: sr-only</h2>
+
+<p>Existe um caso em que o rótulo não deve aparecer: o campo de busca do cardápio, que já tem um
+botão com lupa e um <em>placeholder</em> dizendo "Buscar no cardápio". Visualmente, um rótulo em cima
+quebraria o desenho. Semanticamente, o campo continua precisando de nome. A saída é a classe
+<code>sr-only</code>, que esconde o texto da tela mas não do leitor.</p>
+
+<div class="trytailwind" data-goal="conta:label.sr-only=1;;conta:label[for=busca]=1;;css:#alvo|position=absolute">
+  <p class="try-task">O campo de busca não tem rótulo nenhum: o leitor de tela anuncia só "campo de
+  texto". Acrescente um <code>label</code> ligado ao campo e esconda o texto com
+  <code>sr-only</code>.</p>
+  <pre class="html" data-saida="css">&lt;div class="flex gap-2"&gt;
+  &lt;input id="busca" type="search" placeholder="Buscar no cardápio"
+    class="w-full rounded-lg border border-stone-300 px-3 py-2"&gt;
+  &lt;button type="button" class="rounded-lg bg-amber-700 px-4 py-2 text-white"&gt;Buscar&lt;/button&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+.flex {
+  display: flex;
+}
+.w-full {
+  width: 100%;
+}
+.gap-2 {
+  gap: calc(var(--spacing) * 2);
+}
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+.border {
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+}
+.border-stone-300 {
+  border-color: var(--color-stone-300);
+}
+.bg-amber-700 {
+  background-color: var(--color-amber-700);
+}
+.px-3 {
+  padding-inline: calc(var(--spacing) * 3);
+}
+.px-4 {
+  padding-inline: calc(var(--spacing) * 4);
+}
+.py-2 {
+  padding-block: calc(var(--spacing) * 2);
+}
+.text-white {
+  color: var(--color-white);
+}
+</pre>
+  <pre class="solucao">&lt;label id="alvo" class="sr-only" for="busca"&gt;Buscar no cardápio&lt;/label&gt;
+&lt;div class="flex gap-2"&gt;
+  &lt;input id="busca" type="search" placeholder="Buscar no cardápio"
+    class="w-full rounded-lg border border-stone-300 px-3 py-2"&gt;
+  &lt;button type="button" class="rounded-lg bg-amber-700 px-4 py-2 text-white"&gt;Buscar&lt;/button&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Antes de rodar, a caixa não tem nenhum <code>label</code>: a contagem dá zero. Depois, há um
+<code>label</code> com a classe <code>sr-only</code> e com <code>for="busca"</code> apontando para o
+campo. Na tela, nada muda; para quem ouve, muda tudo.</p>
+
+<p>O CSS de <code>sr-only</code> é curioso e vale ler uma vez na vida, porque ele explica por que a
+classe existe em vez de você usar <code>hidden</code>:</p>
+
+<pre class="term">.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
+}</pre>
+
+<p>O elemento continua na página, com 1 px por 1 px, recortado e fora do fluxo. Ele não ocupa espaço,
+não aparece na tela, mas existe para o leitor de tela e para o buscador do navegador. Já
+<code>hidden</code> é <code>display: none</code>: o elemento sai da árvore de acessibilidade e o
+rótulo deixa de existir para quem ouve. São coisas opostas com aparência parecida — e essa é a
+pegadinha da seção.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o rótulo que não acende o campo</h3>
+<p>A Ana escreveu o rótulo bonito, com todas as classes no lugar, e o clique não levava ao campo. O
+<code>for</code> dizia <code>for="Telefone"</code> e o campo tinha <code>id="telefone"</code> — a
+maiúscula no começo bastou para quebrar a ligação. Esses atributos são comparados letra por letra, e
+o navegador não avisa quando não encontram par. O hábito que resolve é copiar e colar o mesmo nome
+nos dois lugares, sempre em minúsculas sem acento.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a mensagem de erro que passou por baixo do dedo</h3>
+<p>No celular, o formulário mostrava o erro logo abaixo do campo — só que o teclado virtual cobria
+justamente aquela linha. A cliente via a borda vermelha, rolava a tela e não achava explicação. A
+correção foi dupla: o erro passou a começar com uma palavra que identifica o campo ("Telefone:
+informe DDD") e o formulário ganhou <code>scroll-mt-24</code> no campo, para o navegador não
+encostar o campo na borda de cima ao trazer o foco. Erro bom diz onde está o problema sem depender
+de a pessoa estar vendo a tela toda.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o texto de ajuda que virou parede de texto</h3>
+<p>Empolgada, ela escreveu três linhas de ajuda em cada campo: formato de telefone, política de
+cancelamento, horário de funcionamento e uma explicação sobre fermentação natural. O formulário
+ficou tão denso que ninguém terminava. A correção foi separar: o texto de ajuda ficou com uma frase
+de até 60 caracteres, o resto virou um link para a página de dúvidas, e o campo de observação
+ganhou <code>rows="2"</code> em vez de três parágrafos fixos. Ajuda é o que a pessoa precisa
+<em>agora</em>, não tudo o que você sabe.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual é a ligação correta entre rótulo e campo?</p>
+<label><input type="radio" name="r1"> <code>label for="nome"</code> com <code>input id="nome"</code></label>
+<label><input type="radio" name="r1"> <code>label id="nome"</code> com <code>input for="nome"</code></label>
+<label><input type="radio" name="r1"> <code>label name="nome"</code> com <code>input class="nome"</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Para que serve o <code>aria-describedby</code> no
+campo?</p>
+<label><input type="radio" name="r2"> para pintar a borda de vermelho quando o campo está inválido</label>
+<label><input type="radio" name="r2"> para transformar o rótulo em negrito</label>
+<label><input type="radio" name="r2"> para o leitor de tela anunciar também o texto de ajuda</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que usar <code>sr-only</code> em vez de
+<code>hidden</code> num rótulo?</p>
+<label><input type="radio" name="r3"> porque <code>sr-only</code> esconde só na tela e o leitor de tela continua anunciando</label>
+<label><input type="radio" name="r3"> porque <code>hidden</code> deixa o texto invisível em uns navegadores e visível em outros</label>
+<label><input type="radio" name="r3"> porque <code>sr-only</code> é mais curto de escrever</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o rótulo do campo de nome</h2>
+<p>Deixe o rótulo do campo de nome numa linha própria, acima do campo. Qual classe faz o
+<code>label</code> ocupar a linha inteira?</p>
+<div class="ex-code">&lt;label class="<input aria-label="resposta 1" data-answer="block" placeholder="..."> text-sm font-medium text-stone-700 mb-1" for="nome"&gt;Seu nome&lt;/label&gt;</div>
+<p class="ex-dica">Dica: sem essa classe, o rótulo fica na mesma linha do campo, porque
+<code>label</code> e <code>input</code> são elementos de linha. A classe que muda isso é uma palavra
+só, que você já viu nas aulas de layout.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Rótulo é texto que fica, e por isso ganha de <em>placeholder</em> em toda comparação: ele não
+desaparece quando a pessoa digita, ele é anunciado pelo leitor de tela e ele é clicável. A ligação
+com o campo é feita por <code>for</code> e <code>id</code>, escritos de forma idêntica; sem isso, o
+rótulo é só um texto solto em cima do formulário.</p>
+
+<p>No desenho, o rótulo é <code>block text-sm font-medium text-stone-700 mb-1</code>. O texto de
+ajuda é menor e mais claro: <code>mt-1 text-xs text-stone-500</code>, com
+<code>aria-describedby</code> ligando os dois. O erro é maior que a ajuda e vermelho:
+<code>mt-1 text-sm text-red-600</code>, com <code>role="alert"</code> para ser anunciado na hora.
+Para não empurrar o layout, reserve a linha com <code>min-h-5</code>.</p>
+
+<p>Grupos de opção pedem <code>fieldset</code> e <code>legend</code>, e o espaçamento entre campos
+mora no pai, com <code>space-y-4</code>. E quando o rótulo não deve aparecer, use
+<code>sr-only</code> — nunca <code>hidden</code>, que apaga o rótulo para o leitor de tela também.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Rótulo fica fora do campo, sempre visível; placeholder é exemplo e desaparece.</li>
+<li><code>for</code> do label aponta para o <code>id</code> do campo, letra por letra.</li>
+<li>Rótulo: <code>block text-sm font-medium text-stone-700 mb-1</code>.</li>
+<li>Ajuda: <code>mt-1 text-xs text-stone-500</code>, ligada com <code>aria-describedby</code>.</li>
+<li>Erro: <code>text-sm text-red-600</code>, com <code>role="alert"</code> e borda vermelha no
+campo.</li>
+<li><code>min-h-5</code> reserva a linha do erro e evita o pulo no layout.</li>
+<li>Opções agrupadas usam <code>fieldset</code> com <code>legend</code>.</li>
+<li><code>sr-only</code> esconde na tela e mantém no leitor de tela; <code>hidden</code> apaga
+dos dois.</li>
+<li>Espaço entre campos fica no pai, com <code>space-y-4</code>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

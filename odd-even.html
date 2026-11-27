@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>odd e even | Guia Tailwind</title>
+<meta name="description" content="odd e even no Tailwind: pintar linhas alternadas com nth-child(odd) e nth-child(even), ler o CSS gerado e entender por que a primeira linha às vezes não pinta.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>odd e <span class="hl">even</span></h1>
+<p class="intro">A Ana escreveu o menu do dia da padaria numa lista de seis linhas: pão francês, pão de
+queijo, croissant, rosquinha, broa e bolo de fubá. No papel ficou ótimo. Na tela, o olho dela escorrega:
+ao ir do nome do pão até o preço, na outra ponta da linha, ela perde a linha de vista e lê o preço
+errado. O que falta ali é o velho truque do papel listrado: uma linha clara, uma linha mais clara ainda,
+uma linha clara de novo. Nesta aula ela aprende que esse zíper tem nome no Tailwind — <code>odd</code>
+e <code>even</code> — e que o navegador já sabia contar linhas muito antes de a Ana nascer.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que as variantes <code>odd:</code> e <code>even:</code> fazem e onde elas entram na classe.</li>
+  <li>Que o navegador conta os filhos com <code>:nth-child()</code> e começa a contagem no 1.</li>
+  <li>Como ler o CSS gerado, inclusive a barra invertida que aparece no nome da classe.</li>
+  <li>Por que a primeira linha às vezes fica com a cor “da segunda”.</li>
+  <li>Em que listas a listra ajuda e em que listas ela só faz barulho.</li>
+  <li>O que acontece quando a listra e o <code>hover</code> querem pintar a mesma linha.</li>
+</ul>
+</div>
+
+<h2>1. A cena: seis pães e nenhuma pista</h2>
+
+<p>A lista da Ana é simples, e é justamente por ser simples que o problema aparece. Cada linha tem um
+nome à esquerda e um preço à direita, e as duas pontas ficam a uns 400 pixels de distância uma da outra.
+Numa lista curta, o olho dá conta. Numa lista de seis linhas, ele já erra: a terceira linha tem “R$ 9” ou
+“R$ 19”? A distância entre o nome e o número é maior do que a distância entre uma linha e a seguinte,
+então o olho não tem para onde se apoiar.</p>
+
+<p>Cartórios, bancos e livros de contabilidade resolveram isso há mais de um século, com papel listrado:
+uma faixa de fundo diferente a cada linha, e a vista segue reta até a coluna do valor. O apelido pegou —
+é a “listra de zebra”, ou só zebra. No navegador, a solução é a mesma: alternar a cor de fundo entre as
+linhas ímpares e as pares. O que muda é que hoje ninguém precisa desenhar duas tabelas nem repetir
+estilos: o CSS sabe contar.</p>
+
+<p>Antes de escrever qualquer classe, vale entender o que o navegador faz. Ele não olha para o conteúdo
+da linha, não sabe o que é “pão” e não sabe o que é “preço”. Ele só sabe uma coisa: qual é a posição de
+cada elemento dentro do seu pai. A primeira linha é a primeira, a segunda é a segunda. Se a gente
+consegue dizer “pinte as de posição ímpar”, a listra aparece sozinha, e continua certa se a Ana
+acrescentar ou tirar um pão amanhã. É esse o ganho: a cor deixa de ser uma decisão por linha e passa a
+ser uma regra.</p>
+
+<p>E tem um segundo ganho, menos óbvio. Quando a cor vem de uma regra, ela não desanda. Se amanhã o
+menu tiver dez pães, ninguém precisa lembrar de pintar a sétima e a nona: as listras se ajeitam. Isso é
+o mesmo raciocínio que você já viu no <code>hover</code>: você não escreve “este botão fica escuro
+quando o mouse passa”, escreve “todo botão desta classe fica escuro quando o mouse passa”. A listra é
+uma regra de posição, e o Tailwind tem uma variante pronta para cada paridade.</p>
+
+<h2>2. O navegador já sabe contar</h2>
+
+<p>A ferramenta que faz a conta é uma função do CSS chamada <code>:nth-child()</code>. O nome é feio, mas
+a tradução é literal: <em>nth</em> quer dizer “enésimo” e <em>child</em> quer dizer “filho”. Juntas, elas
+perguntam “este elemento é o enésimo filho do pai dele?”. Dentro dos parênteses vai a resposta que você
+quer testar: um número (<code>:nth-child(3)</code>), a palavra <code>odd</code> (ímpar) ou a palavra
+<code>even</code> (par).</p>
+
+<p>Duas palavras em inglês que você vai encontrar o tempo todo: <strong>odd</strong> é ímpar e
+<strong>even</strong> é par. Lembre que <em>even</em> vem de <em>equal</em>, “igual”, e que par é o número
+que se divide em partes iguais. Se você trocar as duas, o desenho continua listrado — só que a primeira
+linha fica com a cor da segunda. Ninguém quebra a página com isso, mas o resultado parece
+deslocado, e é a fonte de metade das dúvidas de quem começa.</p>
+
+<p>A contagem começa no 1, não no 0. O primeiro filho é o ímpar número 1; o segundo é o par número 2.
+E a contagem é feita entre <strong>irmãos</strong>: só entram na conta os elementos que estão dentro do
+mesmo pai. Um <code>&lt;li&gt;</code> dentro de uma lista não é contado junto com os parágrafos de fora
+da lista. Isso parece detalhe, mas é o assunto da seção 6 — e é onde quase todo mundo tropeça.</p>
+
+<dl class="anatomy">
+<dt>nth-child</dt>
+<dd>A função do CSS que pergunta a posição de um elemento entre os irmãos:
+<code>:nth-child(2)</code> é o segundo filho do pai.</dd>
+<dt>odd</dt>
+<dd>Ímpar, em inglês: 1º, 3º, 5º… É a linha que abre a lista.</dd>
+<dt>even</dt>
+<dd>Par: 2º, 4º, 6º… É a linha seguinte, e depois de duas em duas.</dd>
+<dt>irmão</dt>
+<dd>Todo elemento que está dentro do mesmo pai, no mesmo nível. A conta é sempre entre irmãos.</dd>
+<dt>variante</dt>
+<dd>O pedaço antes dos dois-pontos na classe (<code>odd:</code>). Ele diz <em>quando</em> a utilidade
+vale; o que vem depois diz <em>o que</em> ela faz.</dd>
+<dt>zebra</dt>
+<dd>O apelido da listra alternada. Vem do papel listrado dos livros de contabilidade.</dd>
+</dl>
+
+<p>Repare que a variante é um prefixo, como o <code>hover:</code> que você já conhece. A regra de
+leitura é sempre a mesma e vale para todas as variantes do Tailwind: <strong>antes dos dois-pontos é o
+quando, depois é o quê</strong>. <code>odd:bg-amber-50</code> diz “quando a linha for ímpar, fundo
+âmbar bem claro”. Se você trocar só a parte de depois, muda o efeito e mantém a condição:
+<code>odd:font-bold</code>, <code>odd:text-amber-900</code>, <code>odd:py-4</code>. A condição é a
+mesma; o que a linha faz, você escolhe.</p>
+
+<h2>3. A primeira variante: odd:</h2>
+
+<p>Vamos pintar as linhas ímpares do menu. O HTML é o de sempre: uma lista com itens, e em cada item o
+nome do pão e o preço. A missão é acrescentar <code>odd:bg-amber-50</code> em cada uma das seis linhas
+e rodar.</p>
+
+<div class="trytailwind" data-goal="conta:.odd\:bg-amber-50=6;;rule:.odd\:bg-amber-50:nth-child(odd)">
+  <p class="try-task">O menu está todo branco. Acrescente <code>odd:bg-amber-50</code> às seis linhas
+  e clique em Rodar.</p>
+  <pre class="html">&lt;ul class="divide-y divide-amber-200 rounded-lg bg-white p-2"&gt;
+  &lt;li id="alvo" class="flex justify-between px-3 py-2"&gt;Pão francês &lt;span class="text-stone-500"&gt;R$ 12/kg&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2"&gt;Pão de queijo &lt;span class="text-stone-500"&gt;R$ 3&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2"&gt;Croissant &lt;span class="text-stone-500"&gt;R$ 11&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2"&gt;Rosquinha &lt;span class="text-stone-500"&gt;R$ 4&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2"&gt;Broa de milho &lt;span class="text-stone-500"&gt;R$ 9&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2"&gt;Bolo de fubá &lt;span class="text-stone-500"&gt;R$ 19&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;</pre>
+  <pre class="out">
+display: flex
+justify-content: space-between
+padding-inline: 12px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;ul class="divide-y divide-amber-200 rounded-lg bg-white p-2"&gt;
+  &lt;li id="alvo" class="flex justify-between px-3 py-2 odd:bg-amber-50"&gt;Pão francês &lt;span class="text-stone-500"&gt;R$ 12/kg&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2 odd:bg-amber-50"&gt;Pão de queijo &lt;span class="text-stone-500"&gt;R$ 3&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2 odd:bg-amber-50"&gt;Croissant &lt;span class="text-stone-500"&gt;R$ 11&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2 odd:bg-amber-50"&gt;Rosquinha &lt;span class="text-stone-500"&gt;R$ 4&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2 odd:bg-amber-50"&gt;Broa de milho &lt;span class="text-stone-500"&gt;R$ 9&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2 odd:bg-amber-50"&gt;Bolo de fubá &lt;span class="text-stone-500"&gt;R$ 19&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;</pre>
+</div>
+
+<p>O painel embaixo da prévia mostra o CSS da primeira linha, a que tem <code>id="alvo"</code>. Antes de
+rodar, ele lista só o que está lá: o <code>display: flex</code> que põe nome e preço na mesma linha, o
+<code>justify-content: space-between</code> que empurra o preço para a direita e os dois paddings — 12 px
+na horizontal, 8 px na vertical. Depois de rodar a solução, aparece mais uma linha:
+<code>background-color: oklch(0.987 0.022 95.277)</code>. Esse número esquisito é o âmbar 50 que você
+pediu, escrito no formato de cor moderno que o Tailwind v4 usa. A prévia mostra o resultado visual: a
+primeira, a terceira e a quinta linha ganham faixa; a segunda, a quarta e a sexta continuam brancas.</p>
+
+<p>Note uma coisa importante na solução: a classe é a mesma nas seis linhas. Quem decide se a linha
+recebe a cor não é a classe, é a posição dela na lista. A linha 2 tem exatamente o mesmo
+<code>odd:bg-amber-50</code> da linha 1 — e continua branca, porque 2 é par. Isso é o contrário do que a
+intuição diz, e é o coração da aula: você escreve a mesma etiqueta em todos os itens e deixa a contagem
+fazer o resto.</p>
+
+<h2>4. O CSS que o Tailwind gera</h2>
+
+<p>Quando você escreve <code>odd:bg-amber-50</code>, o Tailwind não inventa uma classe nova com esse
+nome no CSS. Ele gera a regra com a função de posição colada no fim do seletor:</p>
+
+<pre class="term">.odd\:bg-amber-50:nth-child(odd) {
+  background-color: var(--color-amber-50);
+}</pre>
+
+<p>Leia da esquerda para a direita: “todo elemento que tem a classe <code>odd:bg-amber-50</code>
+<em>e</em> é filho de posição ímpar recebe o fundo âmbar”. O <code>var(--color-amber-50)</code> é a
+variável da paleta, do mesmo jeito que você viu na aula de cores. O que interessa aqui é a barra
+invertida antes dos dois-pontos.</p>
+
+<p>Ela existe porque, no CSS, dois-pontos tem um significado reservado: introduz uma pseudo-classe, como
+<code>:hover</code> ou o próprio <code>:nth-child()</code>. Se o Tailwind escrevesse
+<code>.odd:bg-amber-50</code> sem escapar, o navegador entenderia “elemento com a classe
+<code>odd</code>, no estado <code>bg-amber-50</code>” — que não existe — e a regra morreria ali. A barra
+diz “o que vem depois faz parte do nome, não é estado”. É só isso. Você nunca escreve a barra no HTML;
+o Tailwind coloca quando gera o CSS, e é por isso que a classe no seu código é legível e a regra
+gerada é feia.</p>
+
+<p>Outra coisa que o CSS gerado revela: a ordem importa. As regras de <code>odd:</code> e
+<code>even:</code> vêm antes das regras de <code>hover:</code> no arquivo. Isso quer dizer que, quando
+as duas querem pintar a mesma linha, o <code>hover</code> ganha — não porque você escreveu ele depois no
+atributo <code>class</code>, mas porque o Tailwind o colocou depois no CSS. É uma boa notícia: você pode
+ter zebra e destaque de mouse no mesmo item, e o destaque sempre aparece por cima.</p>
+
+<h2>5. As duas juntas: odd e even na mesma lista</h2>
+
+<p>Na seção 3 a listra apareceu “de graça”, porque o fundo do cartão era branco e só as ímpares foram
+pintadas. Em muitos projetos as duas variantes aparecem juntas, cada uma com a sua cor: as ímpares num
+tom, as pares em outro. A vantagem é que o resultado não depende mais da cor do fundo do cartão — se um
+dia o cartão mudar de cor, a lista continua listrada.</p>
+
+<p>Nesta segunda caixa a missão é outra: as linhas ímpares já estão com o fundo âmbar claro, e você vai
+usar a variante <code>even:</code> para uma propriedade que não é cor. As linhas pares devem ficar em
+negrito, para o preço saltar na leitura. O painel desta vez observa a <strong>segunda</strong> linha
+(ela é a que muda): depois de rodar a solução, aparece ali a linha <code>font-weight: 600</code>, que é
+como o navegador escreve “semibold”.</p>
+
+<div class="trytailwind" data-goal="conta:.even\:font-semibold=6;;rule:.even\:font-semibold:nth-child(even)">
+  <p class="try-task">Acrescente <code>even:font-semibold</code> às seis linhas. O painel observa a
+  segunda linha, que é par: o <code>font-weight</code> tem de virar 600.</p>
+  <pre class="html">&lt;ul class="divide-y divide-amber-200 rounded-lg bg-white p-2"&gt;
+  &lt;li class="flex justify-between px-3 py-2 odd:bg-amber-50"&gt;Pão francês &lt;span class="text-stone-500"&gt;R$ 12/kg&lt;/span&gt;&lt;/li&gt;
+  &lt;li id="alvo" class="flex justify-between px-3 py-2 odd:bg-amber-50"&gt;Pão de queijo &lt;span class="text-stone-500"&gt;R$ 3&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2 odd:bg-amber-50"&gt;Croissant &lt;span class="text-stone-500"&gt;R$ 11&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2 odd:bg-amber-50"&gt;Rosquinha &lt;span class="text-stone-500"&gt;R$ 4&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2 odd:bg-amber-50"&gt;Broa de milho &lt;span class="text-stone-500"&gt;R$ 9&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2 odd:bg-amber-50"&gt;Bolo de fubá &lt;span class="text-stone-500"&gt;R$ 19&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;</pre>
+  <pre class="out">
+display: flex
+justify-content: space-between
+padding-inline: 12px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;ul class="divide-y divide-amber-200 rounded-lg bg-white p-2"&gt;
+  &lt;li class="flex justify-between px-3 py-2 odd:bg-amber-50 even:font-semibold"&gt;Pão francês &lt;span class="text-stone-500"&gt;R$ 12/kg&lt;/span&gt;&lt;/li&gt;
+  &lt;li id="alvo" class="flex justify-between px-3 py-2 odd:bg-amber-50 even:font-semibold"&gt;Pão de queijo &lt;span class="text-stone-500"&gt;R$ 3&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2 odd:bg-amber-50 even:font-semibold"&gt;Croissant &lt;span class="text-stone-500"&gt;R$ 11&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2 odd:bg-amber-50 even:font-semibold"&gt;Rosquinha &lt;span class="text-stone-500"&gt;R$ 4&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2 odd:bg-amber-50 even:font-semibold"&gt;Broa de milho &lt;span class="text-stone-500"&gt;R$ 9&lt;/span&gt;&lt;/li&gt;
+  &lt;li class="flex justify-between px-3 py-2 odd:bg-amber-50 even:font-semibold"&gt;Bolo de fubá &lt;span class="text-stone-500"&gt;R$ 19&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;</pre>
+</div>
+
+<p>Vale reparar no que <strong>não</strong> mudou: nenhuma linha ficou mais alta, o espaçamento é o
+mesmo, a cor de fundo das ímpares está igual. O negrito mexe só no peso da letra. É a mesma lição da
+primeira aula, agora com uma variante no meio: cada classe cuida de uma propriedade só, e a variante não
+muda isso — ela só acrescenta a condição “quando for par”.</p>
+
+<p>Se você quisesse as duas coisas nas linhas pares — fundo e negrito —, escreveria
+<code>even:bg-amber-100 even:font-semibold</code>, duas classes com a mesma variante. Não existe atalho
+para agrupar duas utilidades numa condição só: repetir o prefixo é o jeito normal.</p>
+
+<h2>6. A armadilha: a conta é entre irmãos, não entre linhas</h2>
+
+<p>Agora o erro que a Ana cometeu na primeira tentativa. Ela achou que a lista precisava de um título, e
+escreveu o aviso “Pães de hoje” <em>dentro</em> do bloco que tem as listras. O resultado: a primeira
+linha ficou branca, a segunda ficou âmbar, a terceira branca. A listra inteira andou uma casa para
+baixo — e a Ana passou meia hora olhando o HTML sem entender, porque as classes estavam certíssimas.</p>
+
+<p>O motivo é o que a seção 2 já avisou: <code>:nth-child()</code> conta <em>todos</em> os filhos do pai,
+na ordem em que estão no HTML, sem perguntar o que são. O aviso é o filho número 1, então ele é o
+“ímpar”; o primeiro pão virou o filho número 2, logo é “par”. A sua classe
+<code>odd:bg-amber-50</code> não está errada: ela está obedecendo a uma contagem que você não queria.</p>
+
+<p>Na caixa abaixo, o aviso está no lugar errado de propósito. A missão é tirá-lo de dentro do bloco
+com listras — pode deixá-lo logo antes da <code>&lt;div&gt;</code> que tem o fundo branco. O painel
+observa a primeira linha do pão: antes, ela aparece com o fundo branco
+(<code>rgb(255, 255, 255)</code>); depois da mudança, com o âmbar claro
+(<code>oklch(0.987 0.022 95.277)</code>).</p>
+
+<div class="trytailwind" data-goal="css:#alvo|background-color=oklch(0.987 0.022 95.277);;rule:.even\:bg-white:nth-child(even)">
+  <p class="try-task">O aviso “Pães de hoje” está dentro do bloco e ocupa a primeira posição da
+  contagem. Mova-o para fora do bloco (antes da <code>&lt;div&gt;</code> do fundo branco) e rode: a
+  primeira linha tem de receber o âmbar.</p>
+  <pre class="html">&lt;div class="rounded-lg bg-white p-2"&gt;
+  &lt;p class="px-3 py-2 text-xs uppercase tracking-wide text-stone-500"&gt;Pães de hoje&lt;/p&gt;
+  &lt;div id="alvo" class="odd:bg-amber-50 even:bg-white px-3 py-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="odd:bg-amber-50 even:bg-white px-3 py-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="odd:bg-amber-50 even:bg-white px-3 py-2"&gt;Croissant&lt;/div&gt;
+  &lt;div class="odd:bg-amber-50 even:bg-white px-3 py-2"&gt;Broa de milho&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: rgb(255, 255, 255)
+padding-inline: 12px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;p class="px-3 py-2 text-xs uppercase tracking-wide text-stone-500"&gt;Pães de hoje&lt;/p&gt;
+&lt;div class="rounded-lg bg-white p-2"&gt;
+  &lt;div id="alvo" class="odd:bg-amber-50 even:bg-white px-3 py-2"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="odd:bg-amber-50 even:bg-white px-3 py-2"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="odd:bg-amber-50 even:bg-white px-3 py-2"&gt;Croissant&lt;/div&gt;
+  &lt;div class="odd:bg-amber-50 even:bg-white px-3 py-2"&gt;Broa de milho&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Duas observações que economizam tempo de quem está começando. A primeira: <strong>texto solto não
+conta</strong>. Se entre duas linhas houver só um espaço, uma quebra de linha ou um comentário, a
+contagem não muda, porque <code>:nth-child()</code> conta elementos, não pedaços de texto. A segunda:
+<strong>elementos escondidos contam</strong>. Um <code>&lt;div class="hidden"&gt;</code> no meio da
+lista continua ocupando uma posição — e desloca todas as seguintes, mesmo sem aparecer na tela. Se a
+listra desanda quando você esconde alguma coisa, é isso.</p>
+
+<p>Existe uma saída elegante para o caso do título: mantê-lo fora do pai que recebe as listras. É o que
+a solução faz. Outra saída é contar só os itens de um tipo, com a função <code>:nth-of-type()</code> —
+mas o Tailwind não tem uma variante pronta para ela, e a partir daí você estaria escrevendo CSS à mão.
+Para quem está começando, mexer na estrutura do HTML é mais simples e mais honesto: o problema era a
+estrutura, e a solução também.</p>
+
+<h2>7. Onde a listra ajuda e onde ela atrapalha</h2>
+
+<p>Zebra não é enfeite universal. Ela resolve um problema específico: linhas longas, com conteúdo
+alinhado em colunas, em que o olho precisa voltar para a esquerda. Quando as linhas são curtas ou já estão
+separadas por espaço, a listra vira ruído. A tabela abaixo é o resumo que a Ana colou no caderno.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Onde</th><th>Vale a pena?</th><th>Por quê</th></tr>
+<tr><td>Lista de preços, cardápio</td><td>Sim</td><td>nome e preço ficam longe; a faixa guia o olho</td></tr>
+<tr><td>Tabela de encomendas</td><td>Sim</td><td>muitas colunas, leitura em zigue-zague</td></tr>
+<tr><td>Histórico de pedidos</td><td>Sim, com cor discreta</td><td>linhas de alturas parecidas se confundem</td></tr>
+<tr><td>Três cartões lado a lado</td><td>Não</td><td>pouca linha, e o espaço já separa</td></tr>
+<tr><td>Grade de fotos</td><td>Não</td><td>em três colunas a listra vira xadrez, não faixa</td></tr>
+<tr><td>Formulário de uma coluna</td><td>Raramente</td><td>os campos já têm borda e rótulo</td></tr>
+</table>
+</div>
+
+<p>A linha da grade merece um parágrafo. Numa grade de três colunas, os itens 1, 2 e 3 ficam na mesma
+linha visual — e as posições 1 e 3 são ímpares, a 2 é par. O resultado é um tabuleiro de xadrez, não uma
+faixa. Isso não é bug: <code>:nth-child()</code> conta a ordem no HTML, não a posição na tela. Se a grade
+precisa de ritmo, o caminho é <code>gap</code> e cartões iguais, ou pintar a grade inteira; listra em
+grade é quase sempre uma meia-solução.</p>
+
+<p>Também vale desconfiar de listas com menos de quatro linhas. Com duas ou três, a alternância não
+chega a formar padrão e o olho lê como “um item destacado”, o que muda o significado: parece que a linha
+pintada é importante. Em listas curtas, prefira <code>divide-y</code> — a linha fina entre os itens — que
+separa sem sugerir hierarquia. É o que a lista da Ana já usa, junto com a zebra, e as duas coisas
+convivem bem: a faixa dá o ritmo, o divisor dá a borda.</p>
+
+<h2>8. Zebra com bom gosto</h2>
+
+<p>A escolha da cor importa mais do que parece. O erro clássico é usar branco e cinza-escuro: a listra
+fica tão forte que a lista parece uma tabela de duas seções diferentes. O certo é usar dois tons
+vizinhos da mesma família, com uma diferença que se percebe de relance e some quando você começa a ler.
+No Tailwind, <code>bg-amber-50</code> e <code>bg-amber-100</code> são vizinhos assim; no cinza,
+<code>bg-stone-50</code> e <code>bg-stone-100</code>.</p>
+
+<p>Se você não quer escolher duas cores, deixe a listra implícita: pinte só as ímpares e deixe as pares
+transparentes, como na primeira caixa — desde que o cartão tenha fundo definido, senão a faixa ímpar
+“flutua” no vazio.</p>
+
+<pre class="term">:where(.divide-y &gt; :not(:last-child)) {
+  --tw-divide-y-reverse: 0;
+  border-bottom-style: var(--tw-border-style);
+  border-top-style: var(--tw-border-style);
+  border-top-width: calc(1px * var(--tw-divide-y-reverse));
+  border-bottom-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
+}
+:where(.divide-amber-200 &gt; :not(:last-child)) {
+  border-color: var(--color-amber-200);
+}</pre>
+
+<p>O bloco acima é o que <code>divide-y divide-amber-200</code> gera, e ele ensina uma coisa sobre o
+Tailwind que vale para todo o guia: utilidade que age nos <em>filhos</em> também existe, e ela usa
+seletores de irmandade por baixo — o <code>&gt;</code> e o <code>:not(:last-child)</code> estão ali só
+para escolher quem ganha a borda. O <code>:where()</code> no começo serve para não bagunçar a especificidade das outras regras;
+o <code>:not(:last-child)</code> evita a linha sobrando no último item. Você não precisa escrever isso,
+mas precisa saber que existe — quando uma borda aparece onde não devia, é quase sempre um divisor.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sintoma</th><th>Causa provável</th><th>O que fazer</th></tr>
+<tr><td>A primeira linha não está pintada</td><td>um título ou aviso ocupa a posição 1</td><td>tire o título de dentro do bloco das listras</td></tr>
+<tr><td>As listras andam uma casa quando escondo um item</td><td>o item escondido continua contando</td><td>não esconda com <code>hidden</code>: retire do HTML ou controle por outro caminho</td></tr>
+<tr><td>Nada muda ao rodar</td><td>a classe foi escrita sem o prefixo <code>odd:</code></td><td>confira os dois-pontos: <code>odd:bg-amber-50</code></td></tr>
+<tr><td>A listra some no cartão</td><td>o cartão não tem fundo definido</td><td>dê um <code>bg-white</code> ao cartão, ou pinte as duas paridades</td></tr>
+<tr><td>A listra virou xadrez</td><td>o bloco é uma grade de várias colunas</td><td>troque a zebra por <code>gap</code> e cartões iguais</td></tr>
+</table>
+</div>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a tabela de encomendas e o cabeçalho que não conta</h3>
+<p>A Ana montou a tabela de encomendas com <code>&lt;thead&gt;</code> para os títulos e
+<code>&lt;tbody&gt;</code> para as linhas. Ela ficou preocupada: “o cabeçalho vai deslocar a listra?”.
+Não vai. Cada seção da tabela é um pai diferente, então cada uma conta os seus filhos do zero: as linhas
+do corpo começam na posição 1 dentro do <code>tbody</code>, e a primeira encomenda é ímpar. O navegador
+até cria o <code>tbody</code> sozinho quando você escreve as linhas soltas dentro do
+<code>&lt;table&gt;</code>, o que mantém esse isolamento mesmo nas tabelas mais desleixadas.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a grade de fotos que virou tabuleiro</h3>
+<p>Na galeria de bolos, ela aplicou <code>odd:bg-amber-50</code> nos cartões e o resultado foi um
+xadrez: as posições 1 e 3 da primeira linha ficaram pintadas e a 2 não. A correção foi tirar a zebra da
+grade e usar <code>gap-4</code> com cartões de altura igual. Numa grade, o que cria ritmo é o espaço
+constante, não a alternância de cor — a alternância compete com as fotos e polui. Ficou mais leve e,
+de quebra, mais rápido de ler.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a listra e o hover brigando pela mesma linha</h3>
+<p>Ela quis que a linha ficasse âmbar no mouse. Escreveu <code>odd:bg-amber-50 hover:bg-amber-100</code>
+e ficou na dúvida: qual vence? A resposta está na ordem do CSS gerado: as regras de
+<code>hover:</code> vêm depois das de <code>odd:</code> e <code>even:</code>, então o destaque do mouse
+sempre aparece por cima, nas ímpares e nas pares. Não é preciso inventar nada. Só não vale usar a mesma
+cor para as duas coisas, senão o leitor não percebe que o mouse está ali.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Na lista de seis pães, qual classe deixa a
+<strong>terceira</strong> linha com fundo âmbar claro?</p>
+<label><input type="radio" name="q1"> <code>even:bg-amber-50</code>, porque três é ímpar</label>
+<label><input type="radio" name="q1"> <code>odd:bg-amber-50</code>, porque três é ímpar</label>
+<label><input type="radio" name="q1"> <code>bg-amber-50</code>, porque a terceira linha é sempre a primeira pintada</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. A Ana pôs um aviso dentro da lista e a primeira linha
+ficou branca. O que aconteceu?</p>
+<label><input type="radio" name="q2"> a classe <code>odd:</code> só funciona a partir da segunda linha</label>
+<label><input type="radio" name="q2"> o navegador ignorou a classe porque o aviso não é um <code>&lt;li&gt;</code></label>
+<label><input type="radio" name="q2"> o aviso virou o filho número 1 e a primeira linha passou a ser o filho número 2</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que significa a barra invertida em
+<code>.odd\:bg-amber-50</code> no CSS gerado?</p>
+<label><input type="radio" name="q3"> que o dois-pontos faz parte do nome da classe, e não é uma pseudo-classe</label>
+<label><input type="radio" name="q3"> que a regra só vale em navegadores antigos</label>
+<label><input type="radio" name="q3"> que a classe é obrigatória em todas as linhas</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a tabela de encomendas</h2>
+<p>Na tabela de encomendas da padaria, cada encomenda precisa de fundo âmbar claro nas linhas ímpares e
+branco nas pares. Escreva as duas classes, na ordem em que aparecem no HTML:</p>
+<div class="ex-code">&lt;tr class="<input aria-label="resposta 1" data-answer="odd:bg-amber-50" placeholder="..."> <input aria-label="resposta 2" data-answer="even:bg-white" placeholder="...">"&gt;</div>
+<p class="ex-dica">Dica: o prefixo vem antes dos dois-pontos e a utilidade depois. Se você escrever
+<code>bg-amber-50 odd:</code>, a classe não existe e nada acontece.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p><code>odd:</code> e <code>even:</code> são variantes de posição: valem quando o elemento é,
+respectivamente, o filho ímpar ou o filho par do seu pai. A contagem começa em 1, é feita entre irmãos e
+inclui <em>todos</em> os elementos — inclusive os que você escondeu. Por isso um título dentro da lista
+desloca a listra inteira, e por isso o cabeçalho de uma tabela em <code>&lt;thead&gt;</code> separado não
+desloca nada.</p>
+
+<p>A classe no HTML é sempre a mesma em todos os itens; quem decide é a posição. O Tailwind transforma
+<code>odd:bg-amber-50</code> em <code>.odd\:bg-amber-50:nth-child(odd)</code> — com a barra invertida
+protegendo os dois-pontos — e coloca essa regra antes das de <code>hover:</code>, de modo que o destaque
+do mouse ganha da listra. Use dois tons vizinhos, evite zebra em grades e em listas de duas ou três
+linhas, e prefira <code>divide-y</code> quando o problema é só separar um item do outro.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>odd</code> é ímpar (1º, 3º, 5º); <code>even</code> é par (2º, 4º, 6º).</li>
+<li>A variante vem antes dos dois-pontos: <code>odd:bg-amber-50</code>, <code>even:font-semibold</code>.</li>
+<li>A contagem é entre irmãos, começa no 1 e inclui elementos escondidos.</li>
+<li>Texto solto e comentários não contam posição; elementos contam.</li>
+<li>O CSS gerado usa <code>:nth-child(odd)</code> e escapa o dois-pontos com barra invertida.</li>
+<li>Um título dentro do bloco desloca todas as listras: deixe-o fora.</li>
+<li>Em grade de várias colunas a listra vira xadrez; ali o certo é <code>gap</code>.</li>
+<li><code>hover:</code> vence <code>odd:</code> e <code>even:</code>, porque vem depois no CSS.</li>
+<li>Prefira dois tons vizinhos da mesma cor, com diferença discreta.</li>
+<li>Listas curtas pedem <code>divide-y</code>, não zebra.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keyframes Próprios | Guia Tailwind</title>
+<meta name="description" content="Animações do Tailwind feitas por você: escrever @keyframes, cadastrar --animate- no @theme, ler o CSS gerado e respeitar quem pediu menos movimento.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Keyframes <span class="hl">Próprios</span></h1>
+<p class="intro">A Ana colou uma etiqueta “Assado agora” ao lado do pão do dia e quis dar a ela um
+movimento de respiração: sobe um dedo, desce, sobe de novo, sem parar. Procurou no Tailwind e achou
+quatro animações prontas — girar, pulsar, quicar e espalhar — e nenhuma delas servia. Foi então que
+ela descobriu a parte que quase ninguém conta para quem está começando: dá para escrever o movimento
+você mesma, em CSS, e depois usar uma classe curta como <code>animate-flutuar</code>. É disso que
+esta aula trata: do <code>@keyframes</code>, que desenha o movimento, e do <code>@theme</code>, que
+dá um nome a ele.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é um <code>@keyframes</code> e por que ele se parece com um roteiro de cinema.</li>
+  <li>Como escrever os quadros com porcentagem, <code>transform</code> e <code>opacity</code>.</li>
+  <li>O que é o <code>@theme</code> e para que serve o nome <code>--animate-</code>.</li>
+  <li>Como o Tailwind transforma <code>--animate-flutuar</code> na classe <code>animate-flutuar</code>.</li>
+  <li>O que cada pedaço do atalho <code>animation</code> significa: duração, ritmo, repetição.</li>
+  <li>Como respeitar quem configurou o sistema para reduzir movimento.</li>
+  <li>Os três erros que fazem a animação simplesmente não acontecer — e como descobrir qual é.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o letreiro que queria respirar</h2>
+
+<p>A etiqueta da Ana é simples: um retângulo âmbar claro, texto âmbar escuro, a frase “Assado agora”.
+Ela queria que a etiqueta chamasse o olho sem gritar. A primeira tentativa foi acrescentar
+<code>animate-bounce</code>, aquela animação de quicar que vem no Tailwind. Na prévia, o resultado
+foi constrangedor: a etiqueta parecia uma bola de borracha batendo no chão, duas vezes por segundo,
+e ainda empurrava a linha do preço com o movimento. Uma padaria de bairro não é um cassino.</p>
+
+<p>O segundo caminho foi apelar para o bom senso e desistir da animação. Ficou sem graça, mas
+honesto. Só que a Ana já tinha visto sites em que um selo pequeno parece flutuar de leve, quase
+imperceptível, e quis aquele efeito. O problema é que ele não estava no catálogo do Tailwind: as
+animações prontas são <code>animate-spin</code>, <code>animate-ping</code>,
+<code>animate-pulse</code> e <code>animate-bounce</code>. Quatro. Nenhuma delas é “flutuar de leve
+para cima e para baixo”.</p>
+
+<p>A saída não é instalar um pacote nem pedir ajuda a alguém que programa. O navegador sabe animar
+qualquer propriedade de aparência desde muito antes do Tailwind existir, e a receita para isso tem
+um nome: <em>keyframes</em>. Você descreve alguns momentos da animação — o começo, o meio, o fim — e
+o navegador preenche o resto, quadro a quadro, sozinho. É CSS puro. Não tem JavaScript, não tem
+lógica, não tem laço de repetição: é uma lista de “neste instante, o elemento está assim”.</p>
+
+<p>A parte que o Tailwind soma é o nome curto. Sem ele, você precisaria de um seletor no CSS e de uma
+classe inventada no HTML. Com ele, você cadastra o movimento uma vez e usa
+<code>animate-flutuar</code> em quantos elementos quiser — a etiqueta, o selo de promoção, o ícone do
+carrinho. Duas metades, então: o roteiro e o nome. Esta aula faz as duas, e mostra o CSS que sai
+disso.</p>
+
+<h2>2. O roteiro: o que é um @keyframes</h2>
+
+<p>Comece pela imagem mental. Uma animação de CSS é um filme curto, e o <code>@keyframes</code> é o
+roteiro: cada parágrafo do roteiro diz o que acontece em determinado ponto do tempo. O ponto é escrito
+em porcentagem do total. <code>0%</code> é o instante zero, <code>50%</code> é a metade, <code>100%</code>
+é o fim. O navegador lê esses pontos e calcula todos os instantes intermediários, que ninguém precisou
+escrever.</p>
+
+<p>A palavra <code>@keyframes</code> é uma regra especial do CSS, dessas que começam com arroba, como
+<code>@media</code>. Depois dela vem um nome — o nome do movimento, escolhido por você. Dentro, os
+blocos de porcentagem. Fora, o navegador não liga o movimento a nada: um roteiro guardado na gaveta
+não acontece. Quem manda o filme rodar é a propriedade <code>animation</code>, que você coloca num
+elemento.</p>
+
+<pre class="file" data-file="estilo.css">@keyframes flutuar {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}</pre>
+
+<p>Leia em voz alta: “no começo e no fim, o elemento fica na posição normal; na metade do caminho, ele
+sobe seis pixels”. <code>translateY</code> quer dizer “mover no eixo Y”; valor negativo sobe, positivo
+desce. É a única coisa que esse roteiro faz, e é por isso que ele funciona: movimento pequeno,
+uma propriedade só, nada mais piscando junto.</p>
+
+<p>Repare no <code>0%, 100%</code>: dois pontos do tempo que têm exatamente a mesma aparência podem
+dividir um bloco, separados por vírgula. Você também pode escrever <code>from</code> no lugar de
+<code>0%</code> e <code>to</code> no lugar de <code>100%</code> — é o mesmo, e aparece muito em
+código antigo. Use a porcentagem, que lê melhor quando existem valores no meio.</p>
+
+<p>Uma coisa que surpreende quem nunca programou: a ordem dos quadros não importa, mas a
+<em>presença</em> deles importa. Se você escrever só <code>50%</code>, o navegador entende que o
+começo e o fim são o estado atual do elemento e inventa o resto. Se você escrever
+<code>0%</code> e <code>100%</code> com aparências diferentes, o movimento não volta: ele termina
+longe. Os quadros são âncoras, não uma sequência de passos.</p>
+
+<h2>3. Montando o roteiro: porcentagens, transform e o que não animar</h2>
+
+<p>O <code>transform</code> que aparece no exemplo é o canivete das animações. Ele junta quatro
+movimentos: <code>translate</code> (deslocar), <code>rotate</code> (girar), <code>scale</code>
+(crescer ou encolher) e <code>skew</code> (entortar). Todos aceitam valores pequenos, e todos são
+desenhados pelo navegador sem mexer no lugar que o elemento ocupa na página. Essa última parte é o
+pulo do gato: um elemento que sobe 6 px com <code>transform</code> continua ocupando o mesmo espaço,
+então os vizinhos não se assustam.</p>
+
+<p>Compare com a alternativa ingênua, que é animar <code>margin-top</code> ou <code>height</code>.
+Funciona, mas cada quadro obriga o navegador a recalcular a posição de tudo em volta, e num celular
+barato isso vira engasgo visível. O time do Tailwind levou isso tão a sério que a documentação avisa:
+anime <code>transform</code> e <code>opacity</code>, deixe o resto quieto. Cor de fundo e sombra
+também se comportam bem, mas já pedem um pouco mais do aparelho.</p>
+
+<dl class="anatomy">
+<dt>@keyframes</dt>
+<dd>A regra do CSS que guarda o roteiro do movimento. Tem um nome e uma lista de quadros.</dd>
+<dt>quadro (keyframe)</dt>
+<dd>Cada ponto do roteiro: uma porcentagem e as propriedades que valem naquele instante.</dd>
+<dt>animation</dt>
+<dd>A propriedade que liga o roteiro a um elemento. Sem ela, o <code>@keyframes</code> é só texto
+parado.</dd>
+<dt>--animate-</dt>
+<dd>O prefixo das variáveis de tema que criam as classes <code>animate-…</code>. O que vem depois do
+hífen é o nome da classe.</dd>
+<dt>ease-in-out</dt>
+<dd>O ritmo do movimento: começa devagar, acelera no meio, freia no fim. Sem ele, o movimento é
+mecânico, de esteira.</dd>
+</dl>
+
+<p>Uma sutileza de vocabulário que ajuda a conversar com qualquer tutorial: “keyframe” é o quadro;
+“@keyframes” é a caixa onde os quadros moram; “animation” é o botão de play. Quando alguém diz “minha
+animação não funciona”, a pergunta útil é sempre a mesma: o problema é o roteiro, o play ou o nome?
+Nesta aula você vai separar esses três de propósito.</p>
+
+<h2>4. Cadastrar o movimento no tema: --animate-</h2>
+
+<p>Agora a segunda metade. O Tailwind não adivinha nomes de animação. Ele oferece as classes que
+nascem do <em>tema</em>, e o tema, na versão 4, é um bloco de CSS chamado <code>@theme</code>. Dentro
+dele, cada família de valores tem um prefixo com significado: <code>--color-</code> cria cores,
+<code>--radius-</code> cria arredondamentos, <code>--animate-</code> cria animações. O nome que você
+escreve depois do prefixo vira o sufixo da classe.</p>
+
+<p>Então <code>--animate-flutuar</code> faz nascer <code>animate-flutuar</code>. E o valor da
+variável, na animação, é o atalho inteiro: nome do roteiro, duração, ritmo e quantas vezes repete.
+Escreva com calma, porque é aqui que a maioria dos erros nasce:</p>
+
+<pre class="file" data-file="estilo.css">@theme {
+  --animate-flutuar: flutuar 2s ease-in-out infinite;
+}</pre>
+
+<p>Traduzindo pedaço por pedaço: <code>flutuar</code> é o nome do <code>@keyframes</code> que você
+escreveu (ou vai escrever); <code>2s</code> é quanto tempo um ciclo leva; <code>ease-in-out</code> é o
+ritmo; <code>infinite</code> é “repita para sempre”. A ordem entre a duração, o ritmo e a repetição é
+livre, mas o nome do movimento precisa vir primeiro. Quem define esse formato é o CSS, não o Tailwind:
+é o atalho <code>animation</code> de sempre.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No @theme</th><th>Classe que nasce</th><th>Onde você usa</th></tr>
+<tr><td><code>--color-marca</code></td><td><code>bg-marca</code>, <code>text-marca</code></td><td>a cor da padaria em botões e títulos</td></tr>
+<tr><td><code>--radius-cartao</code></td><td><code>rounded-cartao</code></td><td>o mesmo canto arredondado em todo cartão</td></tr>
+<tr><td><code>--animate-flutuar</code></td><td><code>animate-flutuar</code></td><td>a etiqueta “Assado agora”</td></tr>
+<tr><td><code>--animate-entrada</code></td><td><code>animate-entrada</code></td><td>o painel de encomenda que aparece</td></tr>
+</table>
+</div>
+
+<p>Onde esse bloco mora num projeto de verdade? No arquivo de CSS de entrada, aquele que começa com
+<code>@import "tailwindcss";</code>. O <code>@theme</code> vem logo depois, no mesmo arquivo. Nas
+caixas desta aula, quem faz o papel desse arquivo é uma tag <code>&lt;style
+type="text/tailwindcss"&gt;</code>: é a maneira que o guia encontrou de deixar você escrever CSS de
+verdade dentro da prévia. Quando o assunto for o seu projeto, troque mentalmente uma coisa pela
+outra.</p>
+
+<p>E o <code>@keyframes</code>, onde entra? Há duas respostas. A recomendada é colocá-lo
+<strong>dentro</strong> do <code>@theme</code>, junto da variável: assim o movimento faz parte do
+tema, e o Tailwind cuida de levá-lo para o CSS final. A outra é deixá-lo fora, no mesmo arquivo; o
+seu CSS passa inteiro para a saída, então também funciona — a diferença aparece quando você quer
+que o movimento seja reutilizável e documentado como parte do tema, e não como um bloco solto no fim
+do arquivo. Nos exemplos desta aula, os dois jeitos aparecem de propósito.</p>
+
+<h2>5. A primeira missão: escrever o roteiro</h2>
+
+<p>Hora de sujar as mãos. Na caixa abaixo, o nome já está cadastrado: existe a variável
+<code>--animate-flutuar</code> e o elemento já usa <code>animate-flutuar</code>. Falta o roteiro.
+Sem ele, o navegador recebe a ordem de tocar um filme chamado “flutuar”, procura o filme, não acha e
+não faz nada — em silêncio, sem mensagem de erro. É o comportamento mais comum e mais confuso das
+animações: o CSS está válido, a classe existe, e a tela fica parada.</p>
+
+<div class="trytailwind" data-goal="rule:@keyframes flutuar;;rule:transform: translateY(-6px)">
+  <p class="try-task">Crie o <code>@keyframes flutuar</code> dentro do <code>@theme</code>: o elemento
+  sobe 6 px na metade do caminho e volta ao lugar no fim. Não mexa no resto.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --animate-flutuar: flutuar 2s ease-in-out infinite;
+}
+&lt;/style&gt;
+
+&lt;p id="alvo" class="animate-flutuar bg-amber-100 p-4 text-amber-900"&gt;Pão quentinho&lt;/p&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+color: oklch(0.414 0.112 45.904)
+animation: 2s ease-in-out infinite flutuar
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --animate-flutuar: flutuar 2s ease-in-out infinite;
+
+  @keyframes flutuar {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+}
+&lt;/style&gt;
+
+&lt;p id="alvo" class="animate-flutuar bg-amber-100 p-4 text-amber-900"&gt;Pão quentinho&lt;/p&gt;</pre>
+</div>
+
+<p>Depois de rodar, olhe a prévia com atenção: o movimento é discreto de propósito. Se ele parecer
+que não acontece, aumente a duração para 6 s e observe de novo — a animação existe, só está lenta.
+Esse truque de alongar o tempo é o primeiro que se usa para depurar movimento: com 6 s, você vê cada
+etapa; com 0,2 s, o olho só registra um borrão.</p>
+
+<p>O painel continua mostrando o mesmo <code>animation</code> de antes, porque a classe nunca mudou.
+Quem mudou foi o roteiro que ela chama. Isso é importante: o painel responde “quais propriedades as
+classes mudaram”, não “o que está se mexendo na tela”. Para conferir o movimento, o olho e a
+prévia bastam; para conferir que o roteiro foi gerado, a meta desta caixa olha o texto do CSS, onde
+aparece a linha <code>@keyframes flutuar</code>.</p>
+
+<p>E se você errar o nome? Se escrever <code>@keyframes flutuar2</code> e a variável continuar
+apontando para <code>flutuar</code>, nada acontece. Se escrever <code>@keyframes Flutuar</code> com F
+maiúsculo, também nada: nomes de animação diferenciam maiúsculas de minúsculas. O navegador não avisa
+— ele só não encontra o filme.</p>
+
+<h2>6. O CSS que o Tailwind gera</h2>
+
+<p>Vale ver a saída de verdade, porque ela desfaz o medo de “mexer no tema”. Esta é a parte que o
+compilador escreve para a etiqueta acima:</p>
+
+<pre class="term">@layer utilities {
+  .animate-flutuar {
+    animation: var(--animate-flutuar);
+  }
+}</pre>
+
+<p>Duas linhas. A classe não carrega o nome do movimento nem a duração: ela carrega uma
+<em>referência</em> à variável. Toda a receita mora no <code>@theme</code>, e é por isso que mudar a
+duração de 2 s para 4 s no tema altera todos os elementos que usam a classe, de uma vez. É o mesmo
+raciocínio das cores: <code>bg-amber-100</code> aponta para <code>--color-amber-100</code>, e trocar o
+valor da variável repinta tudo o que aponta para ela.</p>
+
+<p>O <code>@keyframes</code>, por sua vez, não fica dentro de <code>@layer utilities</code> na saída.
+O Tailwind o leva para o nível de cima, fora das camadas, e o escreve uma vez só, mesmo que dez
+elementos usem a mesma animação. Isso não é detalhe de organização: <code>@keyframes</code> não pode
+depender de camada nem de ordem de classe, e o compilador resolve isso por você. Você verá o bloco no
+fim do CSS gerado, com os quadros na ordem em que foram escritos.</p>
+
+<pre class="term">@keyframes flutuar {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}</pre>
+
+<p>Se o seu objetivo é ensinar o CSS para alguém, essa é a melhor hora: o arquivo gerado tem a classe,
+a variável e o roteiro, cada um no seu lugar, e nada de mágica. Você pode abrir o CSS gerado no
+navegador (ou o painel <em>Styles</em>) e procurar pelo nome do movimento quando algo não funciona.
+Se o <code>@keyframes</code> não estiver lá, o problema é de escrita; se estiver, o problema é de
+ligação — nome errado, classe ausente, <code>animation</code> sobrescrita em outro lugar.</p>
+
+<h2>7. A shorthand do animation: duração, ritmo, repetição</h2>
+
+<p>A linha do tema é um atalho, e atalhos escondem peças. Vale conhecer as peças, porque é mexendo
+nelas que o movimento deixa de parecer de brinquedo. São seis, e três aparecem em quase todo
+exemplo:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Pedaço</th><th>Exemplo</th><th>O que decide</th></tr>
+<tr><td>nome</td><td><code>flutuar</code></td><td>qual <code>@keyframes</code> toca; tem de ser idêntico ao nome escrito lá</td></tr>
+<tr><td>duração</td><td><code>2s</code></td><td>quanto tempo um ciclo inteiro leva</td></tr>
+<tr><td>ritmo</td><td><code>ease-in-out</code></td><td>a velocidade ao longo do ciclo: devagar, rápido, devagar</td></tr>
+<tr><td>repetição</td><td><code>infinite</code></td><td>quantas vezes toca; sem isso, uma vez só</td></tr>
+<tr><td>atraso</td><td><code>0.3s</code></td><td>quanto tempo espera antes de começar</td></tr>
+<tr><td>preenchimento</td><td><code>both</code></td><td>segura o primeiro quadro antes e o último depois</td></tr>
+</table>
+</div>
+
+<p>O ritmo é o que separa “animação de tutorial” de “animação de produto”. <code>linear</code> anda
+em velocidade constante e parece uma esteira; <code>ease-out</code> chega freando e transmite
+estabilidade; <code>ease-in-out</code> é o sobe-e-desce suave, perfeito para respiração e flutuação.
+Você também pode escrever uma curva à mão, com <code>cubic-bezier</code>, mas essa é uma sofisticação
+para depois — o Tailwind já traz os nomes prontos em variáveis (<code>--ease-out</code>,
+<code>--ease-in-out</code>, <code>--ease-in</code>, <code>--ease-linear</code>).</p>
+
+<p>A repetição merece um parágrafo próprio. <code>infinite</code> é tentador e cansa. Um selo que se
+mexe sem parar compete com o preço, com o botão e com a leitura; no celular, gasta bateria e faz o
+aparelho esquentar. Na padaria da Ana, a regra ficou: <em>um</em> elemento com movimento contínuo por
+tela, no máximo, e sempre algo secundário. O resto entra uma vez e fica quieto.</p>
+
+<p>Para entradas, o par <code>both</code> mais uma duração curta resolve o clássico “o painel pisca”.
+Sem <code>both</code>, o elemento aparece no estado final antes de a animação começar, porque o
+navegador desenha o elemento antes de aplicar o quadro 0%. Com <code>both</code>, ele segura o quadro
+inicial até o play — e o olho vê uma entrada limpa:</p>
+
+<pre class="file" data-file="estilo.css">@theme {
+  --animate-entrada: entrada 0.4s ease-out both;
+}
+
+@keyframes entrada {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}</pre>
+
+<p>Repare que esse exemplo usa <code>from</code> e <code>to</code>: quando o roteiro tem só dois
+quadros, os nomes em inglês ficam mais legíveis. E repare também no <code>opacity</code>: aparecer
+suavemente é uma animação de opacidade, não de cor de fundo. Duas propriedades no mesmo quadro
+acontecem juntas, como um único gesto.</p>
+
+<h2>8. Registrar é diferente de escrever</h2>
+
+<p>Agora o erro número um, disfarçado de mistério. A Ana escreveu um balanço de dois graus, achou
+bonito, salvou e mandou a etiqueta usar <code>animate-balanco</code>. Nada. O roteiro estava lá, no
+arquivo, perfeito. Faltava a linha do tema que diz ao Tailwind “existe uma animação chamada balanco”.
+Sem essa linha, a classe <code>animate-balanco</code> simplesmente não é gerada — e uma classe que não
+existe é invisível para o navegador.</p>
+
+<div class="trytailwind" data-goal="rule:--animate-balanco: balanco 1.2s ease-in-out infinite;;rule:animation: var(--animate-balanco)">
+  <p class="try-task">O roteiro <code>@keyframes balanco</code> já está escrito e a etiqueta já pede
+  <code>animate-balanco</code>. Cadastre a animação no <code>@theme</code> com 1,2 s, ritmo
+  <code>ease-in-out</code> e repetição infinita.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+}
+
+@keyframes balanco {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+&lt;/style&gt;
+
+&lt;span id="alvo" class="animate-balanco inline-block rounded bg-amber-100 px-3 py-1 text-amber-900"&gt;Assado agora&lt;/span&gt;</pre>
+  <pre class="out">
+display: inline-block
+background-color: oklch(0.962 0.059 95.617)
+color: oklch(0.414 0.112 45.904)
+border-radius: 4px
+padding-inline: 12px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --color-marca: #b4532a;
+  --animate-balanco: balanco 1.2s ease-in-out infinite;
+}
+
+@keyframes balanco {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+&lt;/style&gt;
+
+&lt;span id="alvo" class="animate-balanco inline-block rounded bg-amber-100 px-3 py-1 text-amber-900"&gt;Assado agora&lt;/span&gt;</pre>
+</div>
+
+<p>Aqui o roteiro está fora do <code>@theme</code> de propósito, para você ver que ele é lido mesmo
+assim. Mas note: no HTML inicial, a etiqueta continua parada, mesmo com o <code>@keyframes</code>
+presente e com a classe escrita no <code>class</code>. Nada acontece porque falta o elo do meio. Se
+você rodar esta caixa antes de resolver, o painel vai listar cor, respiro e arredondamento, e nenhuma
+linha de <code>animation</code> — a prova de que a classe não foi gerada.</p>
+
+<p>Há uma segunda versão do mesmo tropeço, mais sutil: cadastrar com um nome e escrever o roteiro com
+outro. <code>--animate-balanco: balanço 1.2s ...</code>, com cedilha, aponta para um movimento que não
+existe. Também pode acontecer o contrário, com o valor apontando para <code>balanco</code> e o
+<code>@keyframes</code> chamado <code>balançar</code>. Nos dois casos, o CSS é válido, a classe aparece,
+e a tela fica imóvel. A conferência é sempre a mesma: compare letra por letra o nome que vem depois de
+<code>@keyframes</code> com o primeiro pedaço do valor da variável.</p>
+
+<h2>9. Respeitar quem pediu menos movimento</h2>
+
+<p>Existe uma configuração no sistema operacional chamada “reduzir movimento”. Quem tem labirintite,
+enxaqueca ou sensibilidade vestibular liga essa opção, e espera que os sites parem de balançar. O
+navegador avisa o seu CSS por meio de uma <em>media query</em>: <code>prefers-reduced-motion</code>.
+O Tailwind embrulha isso em duas variantes curtas, e elas são a diferença entre um site gentil e um
+site que expulsa gente.</p>
+
+<p>A primeira é <code>motion-reduce:</code>, que vale quando a pessoa pediu menos movimento. A
+segunda é <code>motion-safe:</code>, que vale no caso contrário. Existem duas estratégias, e a escolha
+depende de como você pensa: começar animado e desligar para quem pediu menos
+(<code>animate-flutuar motion-reduce:animate-none</code>), ou começar parado e ligar só para quem
+aceita (<code>motion-safe:animate-flutuar</code>). A segunda é mais segura e mais chata de escrever; a
+primeira é mais comum em código que já existe.</p>
+
+<div class="trytailwind" data-goal="rule:@media (prefers-reduced-motion: reduce);;rule:animation: none">
+  <p class="try-task">A etiqueta flutua sem parar. Acrescente a variante que desliga a animação para
+  quem configurou o sistema pedindo menos movimento.</p>
+  <pre class="html">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --animate-flutuar: flutuar 2s ease-in-out infinite;
+  @keyframes flutuar {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+}
+&lt;/style&gt;
+
+&lt;p id="alvo" class="animate-flutuar bg-amber-100 p-4 text-amber-900"&gt;Pão quentinho&lt;/p&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+color: oklch(0.414 0.112 45.904)
+animation: 2s ease-in-out infinite flutuar
+</pre>
+  <pre class="solucao">&lt;style type="text/tailwindcss"&gt;
+@theme {
+  --animate-flutuar: flutuar 2s ease-in-out infinite;
+  @keyframes flutuar {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+}
+&lt;/style&gt;
+
+&lt;p id="alvo" class="animate-flutuar motion-reduce:animate-none bg-amber-100 p-4 text-amber-900"&gt;Pão quentinho&lt;/p&gt;</pre>
+</div>
+
+<p>O CSS gerado mostra a casca que você já viu nas aulas de estado, com outra condição dentro:</p>
+
+<pre class="term">@media (prefers-reduced-motion: reduce) {
+  .motion-reduce\:animate-none {
+    animation: none;
+  }
+}</pre>
+
+<p>É a mesma gramática de <code>hover:</code>: variante, dois-pontos, classe. A diferença é que
+<code>motion-reduce</code> não depende de nada que o visitante faça durante a visita; depende de uma
+escolha feita antes, no sistema. Por isso ela é uma media query, e não uma pseudo-classe.</p>
+
+<p>Vale a franqueza: essa variante custa três palavras e evita um problema de saúde. Não é enfeite de
+acessibilidade de manual. E há um bônus prático — em máquinas configuradas assim, o navegador também
+economiza processamento, e a página fica mais fluida.</p>
+
+<div class="cenario">
+<h3>Cenário 1: a classe existe, mas nada se mexe</h3>
+<p>A etiqueta da Ana tinha <code>animate-flutuar</code> escrito no HTML, e o painel listava
+<code>animation: 2s ease-in-out infinite flutuar</code>. Parecia certo. O problema estava três linhas
+acima: o valor da variável apontava para <code>flutuar</code>, e o roteiro se chamava
+<code>voar</code>. O navegador procurava um filme que não existia. O jeito rápido de achar esse tipo de
+erro é procurar o nome no CSS gerado: se o <code>@keyframes voar</code> está lá e a classe pede
+<code>flutuar</code>, os dois nomes precisam combinar.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o movimento certo no elemento errado</h3>
+<p>Ela aplicou <code>animate-flutuar</code> no <code>span</code> da etiqueta, mas a etiqueta era um
+elemento de texto, que ocupa só a linha da escrita. O movimento acontecia, minúsculo, sem espaço para
+subir. A cura foi <code>inline-block</code>: um elemento de texto em linha não aceita
+<code>transform</code> do jeito que se espera. Vale para etiqueta, para ícone, para qualquer coisa que
+nasce “grudada” no texto. Se a animação parece cortada, o problema pode ser o tipo de caixa, não o
+roteiro.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: tudo se mexendo ao mesmo tempo</h3>
+<p>Empolgada, a Ana pôs flutuação na etiqueta, pulso no preço, giro no ícone do carrinho e balanço no
+botão. O resultado ficou parecido com uma loja de fogos: o olho não sabe onde pousar, e o celular
+esquenta no bolso do visitante. Movimento é como tempero — a ausência deixa sem graça, o excesso
+estraga. A regra prática: um movimento contínuo por tela, e só em elemento secundário. O que é
+informação fica parado e legível.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que o <code>@keyframes</code> faz?</p>
+<label><input type="radio" name="q1"> cria a classe <code>animate-…</code> que você usa no HTML</label>
+<label><input type="radio" name="q1"> descreve os momentos do movimento, mas não liga nada sozinho</label>
+<label><input type="radio" name="q1"> toca o movimento automaticamente em todo elemento da página</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que faz a classe <code>animate-flutuar</code>
+existir?</p>
+<label><input type="radio" name="q2"> o <code>@keyframes flutuar</code> sozinho</label>
+<label><input type="radio" name="q2"> a propriedade <code>transition</code> no elemento</label>
+<label><input type="radio" name="q2"> a variável <code>--animate-flutuar</code> dentro do <code>@theme</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que a duração de 2 s aparece na variável do
+tema, e não na classe?</p>
+<label><input type="radio" name="q3"> porque a classe só aponta para a variável, e o valor mora no tema</label>
+<label><input type="radio" name="q3"> porque o Tailwind não aceita duração escrita no HTML</label>
+<label><input type="radio" name="q3"> porque o navegador ignora a variável quando há classe</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a etiqueta que precisa parar</h2>
+<p>A etiqueta “Assado agora” já usa <code>animate-balanco</code>. Complete o <code>class</code> com a
+variante que desliga o balanço para quem pediu menos movimento no sistema:</p>
+<div class="ex-code">&lt;span class="animate-balanco <input aria-label="resposta 1" data-answer="motion-reduce:animate-none" placeholder="...">"&gt;Assado agora&lt;/span&gt;</div>
+<p class="ex-dica">Dica: é a variante de media query, não a de estado. Ela começa com
+<code>motion-</code> e a classe que ela desliga é <code>animate-none</code>.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Uma animação própria tem duas metades. A primeira é o <code>@keyframes</code>: uma lista de
+porcentagens com a aparência do elemento em cada momento, geralmente usando
+<code>transform</code> e <code>opacity</code>, que o navegador desenha sem refazer o layout. A segunda
+é o cadastro no <code>@theme</code>, com o prefixo <code>--animate-</code>: o nome depois do hífen vira
+a classe <code>animate-…</code>, e o valor é o atalho <code>animation</code> inteiro — nome do
+movimento, duração, ritmo e repetição.</p>
+
+<p>O CSS gerado é curto e honesto: a classe carrega uma linha, <code>animation:
+var(--animate-flutuar)</code>, e o <code>@keyframes</code> é levado para fora das camadas, escrito uma
+vez só. Quando nada se mexe, a ordem de investigação é sempre a mesma: o roteiro existe? os dois nomes
+combinam? a variável está no <code>@theme</code>? E, por fim, o elemento aceita
+<code>transform</code>? Quatro perguntas resolvem praticamente todos os casos.</p>
+
+<p>Para fechar com responsabilidade: toda animação infinita pede a companhia de
+<code>motion-reduce:animate-none</code> (ou nasce com <code>motion-safe:</code>). Custa três palavras
+e evita desconforto real em quem tem sensibilidade a movimento. Movimento bom é o que se nota sem
+querer e nunca atrapalha a leitura.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>@keyframes</code> é o roteiro; <code>animation</code> é o play; a classe é o atalho.</li>
+<li>Quadros em porcentagem: <code>0%</code>, <code>50%</code>, <code>100%</code>; <code>from</code> e <code>to</code> são apelidos.</li>
+<li>Anime <code>transform</code> e <code>opacity</code>; evite altura, margem e largura.</li>
+<li><code>--animate-nome</code> no <code>@theme</code> cria <code>animate-nome</code>; o nome precisa bater com o <code>@keyframes</code>.</li>
+<li>O valor da variável é o atalho: nome, duração, ritmo, repetição.</li>
+<li><code>ease-in-out</code> para respiração; <code>ease-out</code> para entradas; <code>linear</code> para giros.</li>
+<li><code>infinite</code> cansa: um movimento contínuo por tela, no máximo.</li>
+<li><code>both</code> segura o quadro inicial e evita o pisca antes da entrada.</li>
+<li><code>motion-reduce:animate-none</code> desliga para quem pediu menos movimento.</li>
+<li>Elemento de texto em linha precisa de <code>inline-block</code> para aceitar <code>transform</code>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cores Semânticas | Guia Tailwind</title>
+<meta name="description" content="Cores com nome de papel em vez de nome de cor: os papéis que toda página tem, como declará-los no @theme, por que bg-perigo envelhece melhor que bg-vermelho.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Cores <span class="hl">Semânticas</span></h1>
+<p class="intro">O site da Ana tinha um botão de encomenda em âmbar, uma etiqueta de "esgotado" em
+vermelho e um aviso de "pago" em verde. Funcionava até ela decidir que a marca agora é verde: trocou
+o âmbar por verde e passou a ter dois verdes com significados opostos na mesma tela — o de "pague
+aqui" e o de "já está pago". Nesta aula ela aprende a dar nome às cores pelo <strong>papel</strong>
+que elas cumprem, não pela aparência, e descobre que é isso que permite trocar a cara do site sem
+trocar o significado das coisas.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A diferença entre nome de cor (<code>bg-vermelho</code>) e nome de papel (<code>bg-perigo</code>).</li>
+  <li>Os oito papéis que quase toda página precisa e como reconhecê-los.</li>
+  <li>Como declarar os papéis no <code>@theme</code> e que classes cada um cria.</li>
+  <li>Por que um papel precisa de dois tons: o fundo claro e a tinta escura.</li>
+  <li>Como usar a mesma classe em dez lugares sem que o resultado pareça torto.</li>
+  <li>O teste dos três nomes, para saber se um nome vai envelhecer bem.</li>
+  <li>Como os papéis sobrevivem quando o tema escuro chega.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o vermelho que significava duas coisas</h2>
+
+<p>A Ana vende bolo por encomenda, então o site tem três avisos importantes: o pedido foi pago, o
+pedido está atrasado e o pão do dia esgotou. Ela escolheu as cores do jeito que todo mundo começa:
+pelo gosto. Pagou ficou verde, atrasado ficou amarelo, esgotado ficou vermelho. Ficou bonito, e por
+três meses ninguém reclamou.</p>
+
+<p>Depois veio a promoção de aniversário. A Ana pintou o selo da promoção de vermelho, porque
+promoção é vermelha. Agora a mesma página tinha dois vermelhos: um dizendo "aproveite, está barato"
+e outro dizendo "acabou, não tem". O leitor não tinha como saber qual era qual, e a Ana não tinha
+como consertar sem inventar um terceiro vermelho.</p>
+
+<pre class="file" data-file="index.html">&lt;span class="bg-green-100 text-green-800"&gt;Pago&lt;/span&gt;
+&lt;span class="bg-amber-100 text-amber-800"&gt;Atrasado&lt;/span&gt;
+&lt;span class="bg-red-100 text-red-800"&gt;Esgotado&lt;/span&gt;
+&lt;span class="bg-red-600 text-white"&gt;Promoção&lt;/span&gt;</pre>
+
+<p>O problema não é a cor: é o nome. <code>bg-red-600</code> diz a aparência da coisa e nada sobre o
+que ela significa. Quem lê esse HTML daqui a seis meses não sabe se o vermelho é perigo, é festa ou é
+a cor da marca. E quando a marca mudar, esse nome vai brigar com a decisão nova.</p>
+
+<h2>2. Cor não é papel: as duas perguntas</h2>
+
+<p>Toda vez que você pinta alguma coisa, está respondendo a duas perguntas diferentes — e é comum
+responder só a primeira. A primeira pergunta é <strong>que cor é essa</strong>: um verde escuro, um
+cinza claro. A segunda é <strong>para que serve</strong>: é o fundo da página, é a borda de um campo,
+é o botão que resolve o problema do cliente. A cor é a resposta da primeira; o papel é a resposta da
+segunda.</p>
+
+<p><em>Semântica</em> é só o nome bonito de "o significado das coisas". Uma cor semântica é uma cor
+batizada pelo significado: <code>perigo</code>, <code>sucesso</code>, <code>aviso</code>,
+<code>fundo</code>, <code>tinta</code>, <code>borda</code>, <code>primaria</code>. Você usa a mesma
+palavra no CSS, no HTML e na conversa com a sua sócia. "O botão de encomendar é a cor primária" é uma
+frase que não muda quando a cor primária sai do âmbar para o verde.</p>
+
+<p>Há um ganho prático que aparece no primeiro dia: você para de escolher tom por tom. Em vez de
+decidir se o aviso de atrasado é <code>amber-600</code> ou <code>amber-700</code> em cada lugar, você
+decide uma vez "aviso é este par aqui" e usa o par. A página fica coerente de graça, e você economiza
+a energia mental que gastava comparando tons que ninguém ia notar.</p>
+
+<h2>3. Os papéis que toda página tem</h2>
+
+<p>Não é preciso inventar cinquenta papéis. Uma página de padaria — ou de qualquer outra coisa —
+costuma precisar de oito. Vale ler a lista devagar, porque ela é a espinha da aula:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Papel</th><th>Onde aparece</th><th>Escolha comum</th></tr>
+<tr><td>fundo</td><td>a página inteira, atrás de tudo</td><td>um quase-branco, nunca branco puro</td></tr>
+<tr><td>superfície</td><td>cartões, caixas, o que fica "em cima" do fundo</td><td>branco ou o quase-branco de cima</td></tr>
+<tr><td>tinta</td><td>títulos e texto principal</td><td>quase-preto, com um toque de cor</td></tr>
+<tr><td>tinta fraca</td><td>texto de apoio, data, preço pequeno</td><td>cinza médio</td></tr>
+<tr><td>borda</td><td>separar caixas e desenhar campos</td><td>cinza claro — e mais escuro no escuro</td></tr>
+<tr><td>primária</td><td>o botão que resolve: encomendar, pagar</td><td>a cor da marca, em tom médio</td></tr>
+<tr><td>perigo</td><td>erro, esgotado, apagar</td><td>vermelho, em dois tons</td></tr>
+<tr><td>sucesso e aviso</td><td>confirmação e atenção</td><td>verde e âmbar, em dois tons</td></tr>
+</table>
+</div>
+
+<p>Repare que fundo, superfície, tinta e borda não são "cores": são a estrutura invisível da página.
+Elas quase nunca aparecem numa conversa sobre design, e são elas que fazem a página parecer
+organizada. Se o fundo é branco puro e o cartão também, o cartão desaparece; por isso o fundo costuma
+ser um quase-branco (<code>stone-50</code>, <code>amber-50</code>) e a superfície, o branco. É o mesmo
+truque de uma mesa de mármore com uma toalha branca em cima.</p>
+
+<dl class="anatomy">
+<dt>papel</dt>
+<dd>O trabalho que uma cor faz na página: fundo, borda, perigo. É o que dá nome à variável e à
+classe.</dd>
+<dt>superfície</dt>
+<dd>A cor do que está "em cima": cartões, caixas, menus. Precisa se distinguir do fundo, mesmo que
+pouco.</dd>
+<dt>tinta</dt>
+<dd>A cor do texto. <em>Tinta fraca</em> é a versão para texto de apoio, que pode ser mais clara e
+mesmo assim legível.</dd>
+<dt>primária</dt>
+<dd>A cor da ação principal da página. Se tudo é primário, nada é: guarde-a para um botão por
+tela.</dd>
+<dt>par</dt>
+<dd>Fundo claro mais tinta escura da mesma família, como <code>amber-100</code> com
+<code>amber-900</code>. É o jeito de pintar um selo sem perder a leitura.</dd>
+<dt>apelido</dt>
+<dd>Um nome de papel que aponta para outro: <code>--color-tinta: var(--color-stone-900)</code>.
+Muda em um lugar e vale para todos os usos.</dd>
+</dl>
+
+<p>Uma tentação comum é criar um papel para cada coisa: <code>botao-de-encomenda</code>,
+<code>botao-de-cancelar</code>, <code>texto-do-rodape</code>. Não faça. Papéis são poucos e amplos;
+se você precisar de um papel novo a cada semana, é sinal de que está nomeando o conteúdo, não a
+função. A pergunta certa é sempre "isto aqui é fundo, superfície, tinta, borda, primária, perigo,
+sucesso ou aviso?".</p>
+
+<h2>4. Os papéis no @theme</h2>
+
+<p>Declarar os papéis é igual a declarar qualquer variável de tema, com a vantagem de que o nome
+agora é uma frase útil. Num projeto de verdade o bloco fica assim:</p>
+
+<pre class="term">@import "tailwindcss";
+
+@theme {
+  --color-fundo: var(--color-stone-50);
+  --color-superficie: var(--color-white);
+  --color-tinta: var(--color-stone-900);
+  --color-tinta-fraca: var(--color-stone-600);
+  --color-borda: var(--color-stone-200);
+  --color-primaria: var(--color-emerald-700);
+  --color-perigo: var(--color-rose-700);
+}</pre>
+
+<p>Cada linha é uma decisão com nome. O valor aponta para a paleta do Tailwind
+(<code>var(--color-stone-50)</code>), o que é prático: você aproveita os tons já ajustados e continua
+podendo trocar tudo depois, apontando para outra cor. E cada <code>--color-*</code> vira classe:
+<code>bg-fundo</code>, <code>bg-superficie</code>, <code>text-tinta</code>,
+<code>text-tinta-fraca</code>, <code>border-borda</code>, <code>bg-primaria</code>,
+<code>text-perigo</code>.</p>
+
+<p>O CSS gerado não tem surpresa nenhuma — é a mesma mecânica da aula de variáveis, agora com nomes
+que falam português:</p>
+
+<pre class="term">.bg-superficie {
+  background-color: var(--color-superficie);
+}
+.text-tinta-fraca {
+  color: var(--color-tinta-fraca);
+}
+.border-borda {
+  border-color: var(--color-borda);
+}</pre>
+
+<p>Duas observações honestas. A primeira: os nomes podem ser em português, e neste guia eles são,
+porque quem mantém o site é a Ana e ela pensa em português. Se o seu time fala inglês, use
+<code>--color-background</code>, <code>--color-foreground</code>, <code>--color-danger</code> — o
+importante é ser consistente do começo ao fim. A segunda: <code>--color-white</code> e
+<code>--color-stone-50</code> já existem na paleta, então o apelido não cria cor nova nenhuma; ele só
+dá um nome melhor ao que já estava lá.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-white);;rule:color: var(--color-stone-600)">
+  <p class="try-task">Use os papéis: o cartão é a superfície (fundo branco) e a linha de apoio usa a
+  tinta fraca (<code>text-stone-600</code>). Troque <code>bg-stone-100</code> do cartão por
+  <code>bg-white</code> e passe a data para <code>text-stone-600</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="p-6 bg-stone-100"&gt;
+  &lt;p class="text-stone-900"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="text-stone-900"&gt;saído do forno às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 24px
+background-color: oklch(0.97 0.001 106.424)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-6 bg-white"&gt;
+  &lt;p class="text-stone-900"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="text-stone-600"&gt;saído do forno às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Nesse exercício a classe do cartão continua sendo uma cor da paleta, e não
+<code>bg-superficie</code>, porque a caixa compila só o HTML: o <code>@theme</code> do projeto não
+está ali dentro. Na sua página de verdade, com o <code>@theme</code> no arquivo CSS, você escreveria
+<code>bg-superficie</code> e <code>text-tinta-fraca</code> — e o CSS gerado seria o mesmo das duas
+linhas acima. O que se treina aqui é a decisão: este branco é a superfície, este cinza é a tinta
+fraca.</p>
+
+<h2>5. O teste dos três nomes</h2>
+
+<p>Como saber se um nome é bom? Existe um teste rápido, que eu chamo de teste dos três nomes. Pegue o
+nome da classe e imagine-o em três situações: (1) a marca muda de cor; (2) a página ganha tema
+escuro; (3) outra pessoa entra no projeto. Se o nome continua verdadeiro nas três, ele é um papel.
+Se ele fica falso em alguma, é uma cor disfarçada.</p>
+
+<pre class="file" data-file="index.html">&lt;span class="bg-red-600 text-white"&gt;Promoção&lt;/span&gt;
+&lt;span class="bg-perigo text-white"&gt;Esgotado&lt;/span&gt;</pre>
+
+<p>No primeiro caso, <code>bg-red-600</code> passa no teste 3 (todo mundo entende vermelho), falha no
+teste 1 (se a marca virar verde, o vermelho da promoção vira uma decisão solta) e falha no teste 2 (no
+escuro você provavelmente quer um vermelho mais claro, e o nome não tem onde guardar essa
+informação). <code>bg-perigo</code> passa nos três: ele diz o que a coisa é, e o valor por trás pode
+ser trocado quando o mundo mudar.</p>
+
+<p>Existe uma exceção legítima: quando a cor é o conteúdo. Numa aula de contraste, numa paleta de
+demonstração, num seletor de cores, "vermelho" é o assunto e não um papel. O erro é usar nome de cor
+para pintar a interface — para o botão, o selo, o alerta, o fundo. Para esses, papel sempre.</p>
+
+<h2>6. Um papel, um valor, dez lugares</h2>
+
+<p>A parte boa de decidir por papel é que a repetição deixa de ser risco e passa a ser garantia. Se a
+etiqueta de esgotado aparece em quatro telas, ela usa a mesma classe nas quatro, e ninguém precisa
+lembrar qual era o tom. A página fica coerente porque a decisão foi tomada uma vez.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-emerald-700);;rule:color: var(--color-rose-700)">
+  <p class="try-task">A ação principal do cartão é encomendar (cor primária:
+  <code>bg-emerald-700</code>); o aviso de esgotado é perigo, com tinta
+  <code>text-rose-700</code>. Dê ao botão o fundo da ação e ao aviso a tinta de perigo.</p>
+  <pre class="html">&lt;div id="alvo" class="p-4 bg-stone-50"&gt;
+  &lt;button class="p-2 rounded-lg text-white bg-amber-500"&gt;Encomendar&lt;/button&gt;
+  &lt;p class="text-stone-600"&gt;O pão de queijo de hoje esgotou.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.985 0.001 106.423)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4 bg-stone-50"&gt;
+  &lt;button class="p-2 rounded-lg text-white bg-emerald-700"&gt;Encomendar&lt;/button&gt;
+  &lt;p class="text-rose-700"&gt;O pão de queijo de hoje esgotou.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, repare que o aviso deixou de ser "texto de apoio" e passou a ser o que ele é: uma
+informação de perigo. A diferença entre <code>text-stone-600</code> e <code>text-rose-700</code> não é
+decorativa — é de significado. Quem passa os olhos na página entende em meio segundo que aquela linha
+não é um detalhe, é um aviso. Papel escolhido bem faz o trabalho de explicar sem palavra nenhuma.</p>
+
+<p>E tem a conta do contraste, que a aula de contraste vai destrinchar: branco sobre
+<code>emerald-700</code> dá cerca de 5,4 para 1, acima do mínimo de 4,5. Branco sobre
+<code>amber-600</code> dá 3,19 e reprova para texto pequeno. Repare que o par
+<code>text-white</code> mais <code>bg-emerald-700</code> ficou bom por sorte da escolha do tom, não
+porque "branco no escuro sempre funciona". Escolha do papel e escolha do tom são duas decisões; esta
+aula cuida da primeira.</p>
+
+<h2>7. O papel precisa de dois tons: o par</h2>
+
+<p>Um papel sozinho não pinta um selo. Selo é fundo mais tinta, e os dois precisam conversar: fundo
+claro com tinta escura da mesma família, ou fundo escuro com tinta clara. Por isso cada papel de
+estado aparece no tema como um par — e é aí que o nome precisa de um pouco mais de cuidado.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Uso</th><th>Par claro</th><th>Por que funciona</th></tr>
+<tr><td>selo de promoção</td><td><code>bg-amber-100</code> com <code>text-amber-900</code></td><td>8,2 para 1 de contraste, sem gritar</td></tr>
+<tr><td>selo de esgotado</td><td><code>bg-rose-100</code> com <code>text-rose-700</code></td><td>5,0 para 1, legível em texto pequeno</td></tr>
+<tr><td>selo de pago</td><td><code>bg-emerald-50</code> com <code>text-emerald-700</code></td><td>5,1 para 1, com cara de confirmação</td></tr>
+<tr><td>botão de ação</td><td><code>bg-emerald-700</code> com <code>text-white</code></td><td>5,4 para 1, forte o bastante para ser o foco</td></tr>
+<tr><td>erro de formulário</td><td><code>bg-rose-50</code> com <code>text-rose-700</code></td><td>5,5 para 1, e o fundo não agride</td></tr>
+</table>
+</div>
+
+<p>Duas famílias, dois gostos. O selo usa o par claro (fundo <code>100</code> ou <code>50</code>, tinta
+<code>700</code> ou <code>900</code>); o botão usa o par escuro (fundo <code>600</code> ou
+<code>700</code>, texto branco). Misturar os dois no mesmo componente — fundo escuro com tinta escura,
+fundo claro com tinta clara — é o jeito mais rápido de criar um texto ilegível sem perceber.</p>
+
+<p>Se você quiser guardar os pares no tema, dá para criar dois nomes por papel:
+<code>--color-perigo</code> (o forte, para botão) e <code>--color-perigo-suave</code> (o claro, para
+fundo de selo), com <code>--color-perigo-tinta</code> para o texto do selo. Não é obrigatório: muita
+gente usa as classes da paleta direto no selo, porque o par é a única coisa que aquele componente
+precisa. O que não pode acontecer é o mesmo papel aparecer com três vermelhos diferentes na mesma
+tela — isso não é riqueza, é falta de decisão.</p>
+
+<h2>8. O papel sobrevive à troca de tema</h2>
+
+<p>Chegamos ao motivo pelo qual esta aula existe. Quando as cores têm nome de papel, trocar o tema
+deixa de ser um mutirão de classes e passa a ser uma troca de valores. O componente não muda: ele
+continua pedindo <code>bg-superficie</code> e <code>text-tinta</code>. Quem muda é o valor que esses
+nomes têm naquele pedaço da página.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-superficie);;rule:color: var(--color-tinta)">
+  <p class="try-task">A seção já declara <code>--color-superficie</code> escura e
+  <code>--color-tinta</code> clara — é o tema escuro dela. O cartão ainda está com cores fixas.
+  Troque por <code>bg-(--color-superficie)</code> e <code>text-(--color-tinta)</code> e veja o cartão
+  escurecer sem que você escreva um único <code>dark:</code>.</p>
+  <pre class="html">&lt;section style="--color-superficie: #1c1917; --color-tinta: #fafaf9"&gt;
+  &lt;div id="alvo" class="p-6 rounded-xl bg-stone-100 text-stone-900"&gt;Pão quentinho&lt;/div&gt;
+&lt;/section&gt;</pre>
+  <pre class="out">
+padding: 24px
+background-color: oklch(0.97 0.001 106.424)
+color: oklch(0.216 0.006 56.043)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;section style="--color-superficie: #1c1917; --color-tinta: #fafaf9"&gt;
+  &lt;div id="alvo" class="p-6 rounded-xl bg-(--color-superficie) text-(--color-tinta)"&gt;Pão quentinho&lt;/div&gt;
+&lt;/section&gt;</pre>
+</div>
+
+<p>O cartão não sabe que está no escuro. Ele pede o papel; a seção responde com o valor que tem. É
+essa indireção que faz o tema escuro caber num site sem duplicar componente: você troca a resposta,
+não a pergunta. As próximas aulas mostram os dois jeitos de trocar a resposta — pela classe
+<code>dark</code> e automático pelo sistema — mas os dois dependem do que você fez aqui: separar cor
+de papel.</p>
+
+<p>Se você já viu um site com tema escuro em que metade dos cartões fica branca, sabe o que aconteceu:
+aqueles cartões tinham cor fixa no meio do componente. Cada
+<code>bg-white</code> escrito na mão é um lugar que o tema não alcança. Trocar por
+<code>bg-superficie</code> não é preciosismo: é o que evita a caçada.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o cliente quer "aquele verde mais vivo" no botão</h3>
+<p>A Ana acha o botão apagado e pede um verde mais vivo. Com nome de cor, ela teria que caçar todos
+os <code>emerald-700</code> do site e decidir caso a caso. Com papel, a conversa é uma linha no
+<code>@theme</code>: <code>--color-primaria: var(--color-emerald-500)</code>. Trocar o valor muda
+todos os botões de ação de uma vez — e aí aparece a conta do contraste: o verde 500 com texto branco
+dá por volta de 2 para 1 e fica ilegível. Papel não dispensa a conferência; ele só deixa a mudança
+fácil e visível num lugar só.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: dois papéis que parecem um</h3>
+<p>Ela criou <code>perigo</code> e <code>urgente</code>, com o mesmo vermelho, e passou a usar os dois
+sem critério. Uma semana depois ninguém sabia qual era qual, e as telas ficaram com avisos vermelhos
+que ninguém conseguia priorizar. A lição: papel a mais é tão ruim quanto papel de menos. Se dois
+papéis têm o mesmo valor e a mesma função, são um papel; se têm funções diferentes, eles precisam de
+cores diferentes de verdade, senão o leitor não distingue.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a cor do texto de apoio no fundo colorido</h3>
+<p>O texto de apoio (<code>tinta-fraca</code>) funciona no fundo claro. Quando a Ana pintou um bloco
+inteiro de âmbar, aquele cinza médio em cima do âmbar ficou sujo e difícil de ler. A correção não foi
+escurecer o cinza: foi usar o par do papel daquele bloco — <code>text-amber-900</code> sobre
+<code>bg-amber-100</code>. Papel é uma decisão por contexto: sobre uma superfície colorida, a tinta
+fraca muda de valor, mesmo que o nome continue o mesmo.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. Qual destes nomes é uma cor semântica?</p>
+<label><input type="radio" name="q1"> <code>bg-emerald-700</code></label>
+<label><input type="radio" name="q1"> <code>bg-verde</code></label>
+<label><input type="radio" name="q1"> <code>bg-primaria</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. Por que o fundo da página costuma ser um
+quase-branco em vez de branco puro?</p>
+<label><input type="radio" name="q2"> para o cartão branco se destacar do fundo</label>
+<label><input type="radio" name="q2"> porque branco puro não existe no Tailwind</label>
+<label><input type="radio" name="q2"> para economizar tinta na impressão</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. O que acontece com o componente que pede
+<code>bg-superficie</code> quando o tema muda?</p>
+<label><input type="radio" name="q3"> ele precisa de uma classe <code>dark:</code> nova</label>
+<label><input type="radio" name="q3"> nada muda nele: o valor por trás do papel é que muda</label>
+<label><input type="radio" name="q3"> ele fica com a cor antiga até recompilar o HTML</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o selo de esgotado</h2>
+<p>Você decidiu que o selo de esgotado usa o par de perigo, com tinta <code>rose-700</code>. Complete
+a classe que pinta a letra:</p>
+<div class="ex-code">&lt;span class="bg-rose-100 p-1 <input aria-label="resposta 1" data-answer="text-rose-700" placeholder="...">"&gt;Esgotado&lt;/span&gt;</div>
+<p class="ex-dica">Dica: a classe de tinta é <code>text-</code> mais o nome do papel e o tom. O fundo
+já está claro; a letra precisa ser escura o bastante para se ler em cima dele.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Cor semântica é cor com nome de papel: <code>fundo</code>, <code>superficie</code>,
+<code>tinta</code>, <code>tinta-fraca</code>, <code>borda</code>, <code>primaria</code>,
+<code>perigo</code>, <code>sucesso</code>, <code>aviso</code>. Os papéis são poucos de propósito, e
+cada um resolve um tipo de problema que se repete em toda página. Você declara cada um no
+<code>@theme</code> apontando para um tom da paleta, e o Tailwind cria <code>bg-primaria</code>,
+<code>text-tinta</code>, <code>border-borda</code> e assim por diante.</p>
+
+<p>O ganho aparece em três frentes: a página fica coerente porque a decisão é tomada uma vez; a troca
+de cor vira uma linha; e o tema escuro passa a ser possível, porque o componente pede papel e não
+valor. O teste dos três nomes (marca muda, tema escuro chega, outra pessoa lê) separa papel de cor
+disfarçada. E cada papel de estado pede um par — fundo claro com tinta escura, ou fundo escuro com
+tinta branca —, porque selo é sempre dois tons conversando.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Nome de cor diz a aparência; nome de papel diz a função. Prefira o segundo.</li>
+<li>Papéis mínimos: fundo, superfície, tinta, tinta fraca, borda, primária, perigo, sucesso, aviso.</li>
+<li>No <code>@theme</code>, cada papel é um <code>--color-*</code> e vira classe na hora.</li>
+<li>Apelido aponta para a paleta: <code>--color-tinta: var(--color-stone-900)</code>.</li>
+<li>Papel em português ou inglês: escolha um idioma e não misture.</li>
+<li>Teste dos três nomes: marca muda, escuro chega, outra pessoa entra.</li>
+<li>Selo é par: fundo <code>100</code> com tinta <code>700</code> ou <code>900</code>.</li>
+<li>Botão é par escuro: fundo <code>600</code> a <code>700</code> com <code>text-white</code>.</li>
+<li>Papel a mais confunde; se dois nomes têm o mesmo valor e a mesma função, são um só.</li>
+<li>Componente que pede papel sobrevive à troca de tema sem tocar em classe nenhuma.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

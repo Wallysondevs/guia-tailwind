@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O hover | Guia Tailwind</title>
+<meta name="description" content="O prefixo hover: do Tailwind no botão da padaria: o que é um estado, o CSS que ele gera com @media (hover: hover) e por que o painel mostra o repouso.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>O <span class="hl">hover</span></h1>
+<p class="intro">A Ana passou a manhã montando a página da padaria. O pão está bonito, o preço está
+certo, o botão “Encomendar” funciona quando ela clica. Só tem uma coisa errada: nada na tela avisa
+que aquele botão pode ser clicado. O mouse passa por cima e ele não muda de cor, não cresce, não faz
+nada. Nesta aula ela descobre que o navegador já sabe quando o ponteiro está em cima de um elemento —
+e que o Tailwind tem um jeito curto de dizer “mude só enquanto isso acontecer”: o prefixo
+<code>hover:</code>. É uma palavra curta antes dos dois-pontos, e o botão ganha vida.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é um estado e por que ele não é uma classe a mais.</li>
+  <li>Como escrever <code>hover:</code> na frente de uma classe que você já conhece.</li>
+  <li>O CSS que o Tailwind gera, com <code>:hover</code> e com <code>@media (hover: hover)</code>.</li>
+  <li>Por que o painel das caixas continua mostrando o estado de repouso.</li>
+  <li>Como conferir o efeito no navegador, forçando o estado na aba <em>Elements</em>.</li>
+  <li>Como juntar várias classes de hover no mesmo elemento.</li>
+  <li>Quando o hover não chega — celular, teclado — e o que fazer no lugar.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o botão que não responde</h2>
+
+<p>A página da padaria estava pronta havia uma semana. A Ana abriu no notebook, clicou no botão
+“Encomendar pão” e o pedido foi para a tela de confirmação. Funcionava. Mas a filha dela passou na
+frente do monitor, mexeu o mouse por cima do botão e disse a frase que estraga o dia de quem monta
+site: “mãe, esse botão está desligado?”. Não estava. O botão era um botão de verdade, com link de
+verdade, só que <strong>nada nele respondia ao mouse</strong>.</p>
+
+<p>A Ana comparou com o perfil da padaria numa rede social. Ali, cada botão que ela toca faz alguma
+coisa antes de ser clicado: escurece, fica com uma sombra, muda a letra de cor. É um aviso silencioso
+de “sim, eu sou clicável”. Na página dela, todos os botões estavam mudos. Para quem visita, a
+sensação é de site quebrado, mesmo com tudo funcionando.</p>
+
+<p>O diagnóstico é simples e vale para o resto da aula: o site não estava quebrado; ele só nunca
+tinha sido instruído a mudar quando o mouse chegasse. Essa mudança tem nome. Chama-se <em>estado</em>,
+e o navegador já a observa por conta própria desde os anos 1990. O que faltava era dizer o que fazer
+enquanto ela dura.</p>
+
+<h2>2. O que é um estado (e o que o navegador já sabe)</h2>
+
+<p>Sempre que o ponteiro se move, o navegador recalcula qual elemento está embaixo dele. Ele não
+pergunta nada ao seu código: só observa a posição do mouse e marca o elemento com uma condição
+interna chamada <code>:hover</code>. Quando o ponteiro sai, a marca sai junto. É por isso que o efeito
+aparece e desaparece na hora, sem recarregar a página e sem uma linha de JavaScript.</p>
+
+<p>Só que, no CSS puro, usar essa marca exige um arquivo separado, um seletor e um bloco de regras.
+Quem está começando trava aí. O Tailwind resolve com uma ideia bem mais curta: em vez de um arquivo
+para cada estado, você escreve o estado <strong>dentro do nome da classe</strong>. A classe que
+pintava o fundo era <code>bg-amber-500</code>. A que pinta o fundo só no hover é
+<code>hover:bg-amber-600</code>. O que vem antes dos dois-pontos é a condição; o que vem depois é a
+classe de sempre.</p>
+
+<p>Leia em voz alta e a frase aparece: “quando o mouse estiver em cima, fundo âmbar 600”. É
+literalmente isso. Esse pedaço antes dos dois-pontos tem nome no vocabulário do Tailwind: chama-se
+<em>variante</em>. Cada aula desta parte do guia é uma variante diferente, e todas seguem a mesma
+gramática: condição, dois-pontos, classe.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Estado</th><th>Quando acontece</th><th>Prefixo</th></tr>
+<tr><td>repouso</td><td>nada acontecendo — é o que o painel mede</td><td>(nenhum)</td></tr>
+<tr><td>hover</td><td>o ponteiro está em cima do elemento</td><td><code>hover:</code></td></tr>
+<tr><td>focus</td><td>o elemento está selecionado, pelo teclado ou pelo clique</td><td><code>focus:</code></td></tr>
+<tr><td>active</td><td>o instante em que o botão está sendo apertado</td><td><code>active:</code></td></tr>
+<tr><td>disabled</td><td>o botão está desligado, com o atributo <code>disabled</code></td><td><code>disabled:</code></td></tr>
+<tr><td>first e last</td><td>o elemento é o primeiro ou o último filho do pai</td><td><code>first:</code> e <code>last:</code></td></tr>
+</table>
+</div>
+
+<dl class="anatomy">
+<dt>estado</dt>
+<dd>Uma condição que o navegador observa sozinho: o mouse em cima, o foco do teclado, o botão
+apertado, o botão desligado.</dd>
+<dt>repouso</dt>
+<dd>O estado sem nada acontecendo. É o que o painel das caixas mede, e é o que o visitante vê antes
+de mexer no mouse.</dd>
+<dt>variante</dt>
+<dd>O pedaço antes dos dois-pontos: <code>hover</code>, <code>focus</code>, <code>first</code>. Diz
+<em>quando</em> a classe vale.</dd>
+<dt>utilitária</dt>
+<dd>O pedaço depois dos dois-pontos: <code>bg-amber-600</code>, <code>text-amber-900</code>. Diz
+<em>o que</em> muda, e é a mesma classe que você já conhece.</dd>
+<dt>pseudo-classe</dt>
+<dd>O nome técnico de <code>:hover</code> no CSS. Você vai ver essa palavra no DevTools e nas
+mensagens de erro; é só o jeito formal de chamar o estado.</dd>
+</dl>
+
+<p>Um detalhe de vocabulário que evita muita confusão: o estado não é uma classe nova. O navegador
+não acrescenta nada ao atributo <code>class</code> do botão quando o mouse chega. O que muda é só
+qual regra de CSS está valendo naquele instante. O Tailwind escreve as duas regras — a do repouso e a
+do hover — e deixa o navegador escolher.</p>
+
+<h2>3. A primeira variante: hover:bg-amber-600</h2>
+
+<p>Com a ideia na mão, o conserto é curto. O botão da Ana já tinha <code>bg-amber-500</code>, um
+âmbar médio. Para o hover, ela escolheu <code>bg-amber-600</code>, um degrau mais escuro da mesma
+família. Duas classes no mesmo elemento: a primeira pinta o repouso, a segunda pinta o hover.</p>
+
+<pre class="file" data-file="index.html">&lt;button class="rounded-lg bg-amber-500 p-3 text-white hover:bg-amber-600"&gt;Encomendar pão&lt;/button&gt;</pre>
+
+<p>Repare que a classe de repouso não sai. Se você escrever só <code>hover:bg-amber-600</code>, o
+botão fica sem cor até o mouse chegar — e aí ele pisca do nada para o âmbar. As duas classes formam um
+par: uma descreve o normal, a outra descreve a exceção. É assim que se lê
+<code>bg-amber-500 hover:bg-amber-600</code>: “âmbar 500, e âmbar 600 quando o mouse estiver em
+cima”.</p>
+
+<div class="trytailwind" data-goal="rule:.hover\:bg-amber-600:hover;;rule:@media (hover: hover)">
+  <p class="try-task">O botão está com o âmbar 500 e não reage ao mouse. Acrescente a classe que
+  escurece o fundo para o âmbar 600 enquanto o ponteiro estiver em cima.</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-lg bg-amber-500 p-3 text-white"&gt;Encomendar pão&lt;/button&gt;</pre>
+  <pre class="out">
+padding: 12px
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-amber-500 hover:bg-amber-600 p-3 text-white"&gt;Encomendar pão&lt;/button&gt;</pre>
+</div>
+
+<p>Clique em <em>Rodar</em> e passe o mouse sobre o botão na prévia: ele escurece. Agora olhe o painel
+de CSS computado. Ele continua mostrando o âmbar 500, exatamente como antes. Isso não é bug e não é
+o Tailwind falhando: é o assunto da seção 5. Antes dela, vale ver o que o Tailwind escreveu de
+verdade para essa classe.</p>
+
+<h2>4. O CSS que o Tailwind gera</h2>
+
+<p>Esta é a saída real do compilador para um botão com <code>bg-amber-500</code> e
+<code>hover:bg-amber-600</code>:</p>
+
+<pre class="term">.bg-amber-500 {
+  background-color: var(--color-amber-500);
+}
+@media (hover: hover) {
+  .hover\:bg-amber-600:hover {
+    background-color: var(--color-amber-600);
+  }
+}</pre>
+
+<p>Há três coisas para ler nesse bloco. A primeira é o seletor:
+<code>.hover\:bg-amber-600:hover</code>. No HTML a classe se chama <code>hover:bg-amber-600</code>,
+com dois-pontos. No CSS, dois-pontos é o que inicia uma pseudo-classe, então o Tailwind escapa o
+caractere com uma barra invertida: <code>\:</code>. Você nunca digita essa barra — ela aparece no
+DevTools e assusta à toa. É só o mesmo nome, escrito do jeito que o CSS aceita.</p>
+
+<p>A segunda coisa é o <code>:hover</code> colado no fim do seletor. Ali está a condição: esta regra
+só vale enquanto o ponteiro estiver em cima do elemento. E a terceira é a casca em volta:
+<code>@media (hover: hover)</code>. Traduzindo do CSS: “aplique o que está aqui dentro apenas em
+aparelhos que têm um ponteiro capaz de pairar sobre a tela”. Um notebook tem. Um celular não tem — e
+num celular a regra inteira é descartada.</p>
+
+<p>Essa casca é um presente do Tailwind v4. Sem ela, o toque numa tela sensível dispararia o estado
+de hover e ele ficaria <em>preso</em> até o próximo toque em outro lugar. É o clássico “toquei uma vez
+e o botão ficou escuro para sempre”. Com a media query, o problema simplesmente não existe: o celular
+nunca recebe a regra. Você não precisa lembrar de nada; o compilador lembrou por você.</p>
+
+<p>Vale comparar com a versão escrita à mão, que você vai encontrar em qualquer tutorial antigo de
+CSS:</p>
+
+<pre class="term">.botao:hover {
+  background-color: #d97706;
+}</pre>
+
+<p>A ideia é a mesma; o que muda é o resto. O Tailwind guarda a cor numa variável da paleta, então
+trocar o tom é trocar o número da classe, e não caçar um hexadecimal. E ele acrescenta a proteção do
+toque de graça. Duas linhas de CSS viram uma palavra no HTML — e essa palavra carrega as duas
+proteções.</p>
+
+<h2>5. Por que o painel não muda quando o mouse passa</h2>
+
+<p>O painel das caixas não é uma câmera que fotografa a tela. Ele é um instrumento de medida: pega o
+elemento marcado com <code>id="alvo"</code>, pergunta ao navegador qual é o CSS computado dele e
+mostra só as propriedades que as classes mudaram. O detalhe é que a resposta do navegador
+<strong>depende do estado</strong>. Se a medição acontecesse com o mouse em cima, o número mudaria a
+cada movimento do ponteiro e a tabela viraria um pisca-pisca.</p>
+
+<p>Por isso a medida é sempre feita no repouso. O painel responde à pergunta “como este elemento está
+quando ninguém está mexendo nele?”. Para o botão da Ana, a resposta é âmbar 500 hoje e continuará
+sendo âmbar 500 depois do hover — porque a classe de hover não é o estado normal. É exatamente o
+mesmo motivo pelo qual a página não pode ser “fotografada” no meio de um clique.</p>
+
+<p>Então como conferir o efeito? De três jeitos, do mais simples ao mais preciso. O primeiro é o
+óbvio: passar o mouse na prévia, que é um iframe de verdade. O segundo é a aba <em>Elements</em> do
+DevTools: selecione o botão, procure o botãozinho <em>:hov</em> na lateral do painel de estilos e
+marque <code>:hover</code>. O estado fica forçado, mesmo com o mouse longe, e o painel
+<em>Computed</em> passa a mostrar a cor do hover. O terceiro é o próprio <em>Verificar</em> desta
+caixa: ele confere o texto do CSS gerado, onde a regra do hover está escrita — e é por isso que a
+meta desta missão fala em <code>rule:</code> e não em cor computada.</p>
+
+<p>Guarde a consequência prática: se a sua dúvida é “a cor de repouso está certa?”, leia a tabela. Se
+a dúvida é “o hover existe?”, leia o CSS gerado ou force o estado no DevTools. São duas perguntas
+diferentes, e o painel responde bem só a primeira.</p>
+
+<h2>6. Uma variante por propriedade, várias no mesmo elemento</h2>
+
+<p>Cada classe com <code>hover:</code> gera uma regra própria. Se o botão precisa mudar de fundo e de
+cor de letra no hover, são duas classes: <code>hover:bg-amber-700</code> e
+<code>hover:text-amber-50</code>. O Tailwind não junta as duas num bloco só, e isso é bom: você pode
+ligar e desligar cada efeito sem tocar no outro.</p>
+
+<pre class="term">@media (hover: hover) {
+  .hover\:text-amber-900:hover {
+    color: var(--color-amber-900);
+  }
+}
+@media (hover: hover) {
+  .hover\:underline:hover {
+    text-decoration-line: underline;
+  }
+}</pre>
+
+<p>Repare que cada regra ganhou a sua própria casca <code>@media</code>. É redundante do ponto de
+vista do navegador e é ótimo do ponto de vista de quem lê: cada classe vira um bloco independente, com
+o nome da classe no seletor. Quando algo não funciona, você procura o bloco daquela classe e vê na
+hora se ele foi gerado.</p>
+
+<div class="trytailwind" data-goal="rule:.hover\:text-amber-900:hover;;rule:.hover\:no-underline:hover">
+  <p class="try-task">No link da receita, o mouse deve escurecer a letra e tirar o sublinhado. São
+  duas classes de hover, uma para cada propriedade.</p>
+  <pre class="html">&lt;a id="alvo" class="text-amber-700 underline" href="#"&gt;Ver a receita do dia&lt;/a&gt;</pre>
+  <pre class="out">
+color: oklch(0.555 0.163 48.998)
+text-decoration-line: underline
+</pre>
+  <pre class="solucao">&lt;a id="alvo" class="text-amber-700 underline hover:text-amber-900 hover:no-underline" href="#"&gt;Ver a receita do dia&lt;/a&gt;</pre>
+</div>
+
+<p>Aqui o painel também vai continuar mostrando a cor de repouso e o sublinhado. O que mudou está no
+CSS gerado: duas regras novas, cada uma com a condição <code>:hover</code>. No navegador, o link
+escurece e o sublinhado some quando o ponteiro chega. Tire o mouse e tudo volta — não porque alguém
+escreveu “voltar”, mas porque a condição deixou de ser verdadeira e a regra parou de valer.</p>
+
+<p>Essa é a mecânica que sustenta todos os estados: o CSS descreve condições, e o navegador aplica e
+desaplica sozinho. Você nunca escreve o caminho de volta. Se o efeito está preso, o problema é outro
+— quase sempre um estado forçado no DevTools que ficou marcado. E quando o efeito precisa
+acontecer nos filhos de um cartão — o título e o botão reagindo ao mouse que está no cartão, e não
+neles —, a ferramenta é outra: o <code>group-hover</code>, que tem <a href="group-hover.html">aula
+própria</a> mais adiante.</p>
+
+<h2>7. O que costuma ganhar hover</h2>
+
+<p>Com o tempo, alguns efeitos viram padrão de tão repetidos. Estes são os que aparecem em quase todo
+projeto e não assustam ninguém:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que muda</th><th>Onde serve</th></tr>
+<tr><td><code>hover:bg-amber-600</code></td><td>o fundo escurece um degrau</td><td>botão principal, item de menu</td></tr>
+<tr><td><code>hover:text-amber-900</code></td><td>a letra ganha contraste</td><td>link no meio de um parágrafo</td></tr>
+<tr><td><code>hover:border-amber-400</code></td><td>a borda acende</td><td>cartão que abre detalhes</td></tr>
+<tr><td><code>hover:shadow-lg</code></td><td>a sombra cresce, o cartão “levanta”</td><td>cartão de produto, foto</td></tr>
+<tr><td><code>hover:underline</code></td><td>aparece o sublinhado</td><td>título que é link</td></tr>
+<tr><td><code>hover:opacity-90</code></td><td>fica um pouco transparente</td><td>imagem, avatar</td></tr>
+</table>
+</div>
+
+<p>Um cartão de produto é o lugar onde dois desses efeitos aparecem juntos: a sombra que cresce e a
+borda que acende. É o suficiente para o cartão parecer que “levantou” sem sair do lugar.</p>
+
+<div class="trytailwind" data-goal="rule:.hover\:shadow-lg:hover;;rule:.hover\:border-amber-300:hover">
+  <p class="try-task">O cartão do pão do dia deve ganhar sombra forte e borda âmbar enquanto o mouse
+  estiver em cima dele. Duas classes, no próprio cartão.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl border border-stone-200 bg-white p-4"&gt;
+  &lt;h3 class="text-lg font-semibold"&gt;Pão do dia&lt;/h3&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h30.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+border-radius: 12px
+border-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-xl border border-stone-200 bg-white p-4 hover:border-amber-300 hover:shadow-lg"&gt;
+  &lt;h3 class="text-lg font-semibold"&gt;Pão do dia&lt;/h3&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Sai do forno às 6h30.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Na prévia, o painel continua descrevendo o cartão parado: 16 px de respiro, fundo branco, borda de
+1 px. Passe o mouse e a borda muda de cor e a sombra aparece — dois efeitos, duas regras, nenhuma
+mudança de tamanho. É o tipo de hover que não atrapalha ninguém: quem vê, entende; quem não vê, não
+perde informação.</p>
+
+<p>A regra de bom gosto é curta: <strong>o hover confirma, não surpreende</strong>. Ele existe para
+dizer “eu ouvi você”. Uma mudança de cor, de sombra ou de sublinhado basta. O que costuma dar errado
+é mexer no tamanho. <code>hover:p-6</code> num botão que tinha <code>p-4</code> faz o botão crescer,
+empurra o texto de baixo, o mouse sai do lugar, o botão encolhe, o mouse volta a ficar em cima — e o
+resultado é um tremor. Se você quer “levantar” o cartão, use sombra ou
+<code>hover:-translate-y-0.5</code>: eles mudam o desenho sem mudar o espaço que o elemento ocupa.</p>
+
+<p>Também vale desconfiar de efeitos que escondem coisa importante. <code>hover:hidden</code> num
+elemento que tem informação, <code>hover:text-xs</code> numa letra que precisa ser lida,
+<code>hover:opacity-0</code> em qualquer coisa que o visitante precise clicar. O hover é um enfeite
+com função de aviso; quando ele começa a carregar conteúdo, o site fica pior para quem não tem
+mouse.</p>
+
+<h2>8. Hover sem mouse: toque, teclado e o que não pode depender dele</h2>
+
+<p>Nem todo mundo navega com um ponteiro. No celular, o dedo não paira: ele toca. No teclado, a tecla
+<kbd>Tab</kbd> pula de elemento em elemento e nunca passa “por cima” de nada. E há quem use leitor de
+tela, que nem vê cor. Se a única pista de que algo é clicável for o hover, essas pessoas ficam sem
+pista nenhuma.</p>
+
+<p>A primeira proteção já está no CSS que você viu: <code>@media (hover: hover)</code> apaga a regra
+onde não existe ponteiro. Isso evita o estado preso, mas não resolve a falta de aviso. A segunda
+proteção é de conteúdo: o link continua com cor diferente do texto e, de preferência, com sublinhado
+no repouso. O hover entra como bônus, não como a única diferença entre “link” e “texto”.</p>
+
+<p>A terceira proteção é o foco, e ele merece aula própria: quando você aperta <kbd>Tab</kbd>, o
+navegador marca o elemento com <code>:focus</code>, um estado irmão do <code>:hover</code> com o mesmo
+prefixo no Tailwind. A <a href="focus.html">próxima aula</a> é exatamente sobre ele. Por enquanto, guarde a regra de ouro:
+<strong>todo efeito de hover deveria ter um equivalente de foco</strong>. Se o botão escurece no mouse,
+ele também deveria mudar quando o teclado chega nele.</p>
+
+<p>Um último detalhe que confunde: hover não muda o cursor. Num <code>&lt;button&gt;</code>, o
+navegador mostra a seta; se você quer a mãozinha, precisa da classe <code>cursor-pointer</code>, que
+age no repouso e não é uma variante. É comum ver os dois juntos,
+<code>cursor-pointer hover:bg-amber-600</code>, porque um cuida da mão e o outro cuida da cor.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o botão que pula quando o mouse chega</h3>
+<p>A Ana quis um botão mais “gordinho” no hover e escreveu <code>hover:p-6</code> num botão que já
+tinha <code>p-4</code>. O botão cresceu, o texto de baixo desceu, o ponteiro ficou fora do novo
+tamanho por um instante, o botão encolheu — e a tela começou a tremer. Espaço não é enfeite de hover:
+mexer em <code>p</code>, <code>m</code>, <code>w</code> ou <code>h</code> muda o layout e afeta os
+vizinhos. Para dar a sensação de movimento sem empurrar nada, use sombra
+(<code>hover:shadow-lg</code>) ou transformação (<code>hover:-translate-y-0.5</code>), que desenham
+por cima do espaço reservado.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: “no celular o efeito não funciona”</h3>
+<p>Ela testou no celular e o botão não escureceu. Não é defeito: o celular não tem ponteiro que
+pairar, então a regra dentro de <code>@media (hover: hover)</code> nem chega a ser aplicada. O que
+resolve o susto é entender que o hover é um bônus do notebook. Se alguma informação só aparece no
+hover — o preço, o “esgotado”, o horário —, ela precisa de outro lugar para aparecer, porque no
+celular esse lugar não existe.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o hover que fica preso</h3>
+<p>Depois de forçar <code>:hover</code> no DevTools para inspecionar uma cor, a Ana esqueceu a marca
+ligada e passou meia hora achando que o botão tinha um problema. Quando o estado é forçado, ele não
+sai quando o mouse se afasta. A cura é desmarcar o <code>:hover</code> no painel
+<em>Elements</em> ou fechar o DevTools. O mesmo acontece no celular com efeitos escritos à mão sem a
+media query: o toque deixa a marca ligada até o próximo toque. O Tailwind já protege desse caso; o
+DevTools, não.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que o prefixo <code>hover:</code> faz numa
+classe?</p>
+<label><input type="radio" name="q1"> esconde o elemento até o primeiro clique</label>
+<label><input type="radio" name="q1"> aplica a classe só enquanto o ponteiro está sobre o elemento</label>
+<label><input type="radio" name="q1"> faz a classe valer mais que as outras no CSS</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que o painel da caixa não mostra a cor do
+hover?</p>
+<label><input type="radio" name="q2"> porque o Tailwind não gerou o CSS daquela classe</label>
+<label><input type="radio" name="q2"> porque o navegador bloqueia cores de hover</label>
+<label><input type="radio" name="q2"> porque o painel mede o elemento no estado de repouso</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Para que serve o
+<code>@media (hover: hover)</code> que aparece na regra?</p>
+<label><input type="radio" name="q3"> para a regra não valer em aparelhos sem ponteiro, como o celular</label>
+<label><input type="radio" name="q3"> para o efeito ficar mais rápido</label>
+<label><input type="radio" name="q3"> para exigir que o mouse fique parado por um segundo</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o link do rodapé</h2>
+<p>No rodapé da padaria, o link “Horários” precisa ficar âmbar escuro enquanto o mouse estiver em
+cima. Complete a classe que falta, lembrando que a cor de repouso continua sendo a âmbar 700:</p>
+<div class="ex-code">&lt;a href="#" class="text-amber-700 underline <input aria-label="resposta 1" data-answer="hover:text-amber-900" placeholder="...">"&gt;Horários&lt;/a&gt;</div>
+<p class="ex-dica">Dica: o prefixo vem antes dos dois-pontos, colado na classe. E o tom 900 é o mais
+escuro da família âmbar; o 700 é o que já está no link.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Um estado é uma condição que o navegador observa sozinho — o mouse em cima, o foco do teclado, o
+botão apertado. O Tailwind escreve essa condição dentro do nome da classe, antes dos dois-pontos:
+<code>hover:bg-amber-600</code> quer dizer “fundo âmbar 600 quando o ponteiro estiver em cima”. A
+classe de repouso continua no elemento, porque uma descreve o normal e a outra descreve a
+exceção.</p>
+
+<p>O CSS gerado tem duas marcas que valem reconhecer: o seletor com a barra invertida
+(<code>.hover\:bg-amber-600:hover</code>), que é só o nome da classe escapado, e a casca
+<code>@media (hover: hover)</code>, que apaga a regra em aparelhos sem ponteiro. E o painel das
+caixas continua mostrando o repouso de propósito: ele mede o estado normal, e o hover se confere na
+prévia, no CSS gerado ou forçando <code>:hover</code> no DevTools.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Estado não é classe: é uma condição que o navegador liga e desliga sozinho.</li>
+<li>A gramática é sempre <em>variante</em> + dois-pontos + classe: <code>hover:bg-amber-600</code>.</li>
+<li>Mantenha a classe de repouso; sem ela o elemento nasce sem estilo.</li>
+<li>O CSS gerado termina em <code>:hover</code> e o nome da classe leva uma barra antes dos dois-pontos.</li>
+<li><code>@media (hover: hover)</code> protege o celular do efeito preso.</li>
+<li>O painel mede o repouso: a cor mostrada é a de antes do mouse chegar.</li>
+<li>Para ver o hover no DevTools, force <code>:hover</code> na aba <em>Elements</em>.</li>
+<li>Cada propriedade pede a sua própria classe de hover.</li>
+<li>Hover confirma, não surpreende: cor, sombra e sublinhado funcionam; tamanho, não.</li>
+<li>Quem usa teclado não tem hover — o par dele é o <code>focus:</code>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

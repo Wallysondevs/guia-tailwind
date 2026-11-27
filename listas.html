@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Listas de Itens | Guia Tailwind</title>
+<meta name="description" content="Listas de itens no Tailwind: ul e li, espaço entre itens com flex e gap, cada item como linha com nome e preço, avatar, separadores e o truncate com min-w-0.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Listas de <span class="hl">Itens</span></h1>
+
+<p class="intro">A Ana agora tem uma tela de bastidor: as encomendas do dia, uma embaixo da outra,
+com nome do cliente, o pão pedido e o horário de retirada. Ela escreveu tudo numa <code>ul</code> e o
+resultado foi um paredão de texto — cinco linhas grudadas, sem espaço, sem hierarquia, e o horário
+misturado com o nome. Nesta aula ela transforma essa lista numa peça de interface: cada
+<code>li</code> vira uma linha organizada, com o nome à esquerda, o horário à direita, um respiro
+entre os itens e um corte elegante quando o nome do pão é comprido demais.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Quando usar <code>ul</code>, <code>ol</code> e <code>li</code>, e por que não <code>div</code>.</li>
+  <li>Por que a lista nasce sem marcador no Tailwind.</li>
+  <li>O espaço entre os itens com <code>flex flex-col gap-3</code>.</li>
+  <li>O item como linha: <code>flex items-center justify-between</code>.</li>
+  <li>Nome, descrição e preço, cada um com seu tamanho e sua cor.</li>
+  <li>O quadradinho do ícone, que não pode amassar.</li>
+  <li>Separar itens com <code>divide-y</code> e dar resposta ao mouse.</li>
+  <li>Nome comprido: <code>truncate</code> e o <code>min-w-0</code> que faz ele funcionar.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o paredão de encomendas</h2>
+
+<p>O HTML que a Ana escreveu era este, repetido cinco vezes:</p>
+
+<pre class="file" data-file="encomendas.html">&lt;ul&gt;
+  &lt;li&gt;Marina · pão de queijo · 7h&lt;/li&gt;
+  &lt;li&gt;João · francês · 8h&lt;/li&gt;
+&lt;/ul&gt;</pre>
+
+<p>Funciona, no sentido de que a informação está lá. Mas o olho não encontra nada: os itens se
+encostam, todos os dados têm o mesmo peso, e o horário — que é a informação mais urgente de todas,
+porque define a ordem de produção — fica escondido no meio da frase. A Ana tentou separar com
+vírgulas, depois com traços, depois com maiúsculas. Nenhuma dessas soluções resolve, porque o
+problema não é de pontuação: é de estrutura.</p>
+
+<p>A lista precisa de três decisões visuais que a Ana ainda não tomou. A primeira é o espaço entre um
+item e outro. A segunda é o que fica à esquerda e o que fica à direita em cada item. A terceira é o
+que acontece quando um texto é maior que o espaço — e ele vai ser, porque sempre existe um pão com
+nome comprido.</p>
+
+<h2>2. ul, ol e li: a lista que o navegador entende</h2>
+
+<p>Antes das classes, vale escolher a tag certa. Existem três listas no HTML e cada uma diz uma coisa
+diferente para o navegador e para o leitor de tela:</p>
+
+<dl class="anatomy">
+<dt>ul</dt>
+<dd>Lista sem ordem. A sequência não significa nada: o cardápio de hoje, os ingredientes, as
+encomendas. Os leitores de tela anunciam quantos itens existem.</dd>
+<dt>ol</dt>
+<dd>Lista ordenada. A sequência importa: passos de uma receita, ordem de produção. Por padrão vem
+numerada.</dd>
+<dt>li</dt>
+<dd>Um item da lista. Só existe dentro de <code>ul</code> ou <code>ol</code>, e é o elemento que você
+vai estilizar como linha.</dd>
+<dt>dl</dt>
+<dd>Lista de pares nome e valor, feita de <code>dt</code> e <code>dd</code>. Serve para ficha
+técnica: "Peso: 60 g", "Validade: 2 dias".</dd>
+<dt>marcador</dt>
+<dd>A bolinha ou o número que o navegador desenha ao lado do item. O Tailwind tira esse marcador por
+padrão, e existe uma aula só para devolvê-lo quando faz sentido.</dd>
+</dl>
+
+<p>Se você fizer a lista com <code>div</code>, o desenho fica igual e a informação se perde: o leitor
+de tela não anuncia "lista com 5 itens", o navegador não oferece atalho de navegação entre itens, e o
+buscador não entende que aquilo é uma lista de produtos. Use <code>div</code> para layout; use
+<code>li</code> para item. É uma escolha de uma palavra no HTML que muda o significado inteiro.</p>
+
+<p>Uma surpresa para quem vem do HTML puro: no Tailwind, a lista nasce <em>sem</em> marcador. O CSS
+de base do Tailwind aplica <code>list-style: none</code> em <code>ul</code> e <code>ol</code>, porque
+na maioria dos sites a lista é usada como componente — menu, cardápio, passos — e a bolinha
+atrapalha. Para uma lista de ingredientes com bolinha, você devolve o marcador com
+<code>list-disc</code>; esse é o assunto de outra aula, e por aqui seguimos sem marcador mesmo.</p>
+
+<h2>3. O espaço entre os itens</h2>
+
+<p>Sem espaço, cinco itens parecem um parágrafo de cinco linhas. O primeiro ajuste é afastar um item
+do outro, e existem duas formas de fazer isso: margin em cada item ou espaço no pai. A segunda é
+melhor, porque a regra fica num lugar só — e há duas classes de pai que resolvem: <code>space-y-3</code>,
+que você já viu, e <code>flex flex-col gap-3</code>, que é a que vamos usar aqui.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=flex;;css:#alvo|flex-direction=column;;css:#alvo|gap=12px">
+  <p class="try-task">A lista está com <code>p-2</code>, que só afasta os itens da borda e não cria
+  espaço entre eles. Transforme-a numa coluna com 12 px de espaço entre os itens:
+  <code>flex flex-col gap-3</code> no <code>ul</code>.</p>
+  <pre class="html">&lt;ul id="alvo" class="p-2"&gt;
+  &lt;li&gt;Marina · pão de queijo · 7h&lt;/li&gt;
+  &lt;li&gt;João · francês · 8h&lt;/li&gt;
+  &lt;li&gt;Rita · broa · 9h&lt;/li&gt;
+&lt;/ul&gt;</pre>
+  <pre class="out">
+padding: 8px
+</pre>
+  <pre class="solucao">&lt;ul id="alvo" class="flex flex-col gap-3"&gt;
+  &lt;li&gt;Marina · pão de queijo · 7h&lt;/li&gt;
+  &lt;li&gt;João · francês · 8h&lt;/li&gt;
+  &lt;li&gt;Rita · broa · 9h&lt;/li&gt;
+&lt;/ul&gt;</pre>
+</div>
+
+<p>Antes de rodar, o painel mostra uma linha só: <code>padding: 8px</code>. Esse é o resultado da
+primeira tentativa da Ana — ela deu respiro à lista inteira, e os itens continuaram colados uns nos
+outros. Depois da solução, o painel mostra três linhas: <code>display: flex</code>,
+<code>gap: 12px</code> e
+<code>flex-direction: column</code>. Leia na ordem inversa para entender: a lista virou uma coluna
+porque a direção do flex é <code>column</code>; os filhos ficam um embaixo do outro; e o
+<code>gap</code> coloca 12 px entre eles, sem margem em ninguém.</p>
+
+<pre class="term">.flex {
+  display: flex;
+}
+.flex-col {
+  flex-direction: column;
+}
+.gap-3 {
+  gap: calc(var(--spacing) * 3);
+}</pre>
+
+<p>Por que <code>gap</code> e não margem? Porque margem não sabe onde o vizinho está: você põe
+<code>mb-3</code> em todos e o último item ganha uma margem que sobra embaixo, empurrando o que vem
+depois. O <code>gap</code> só existe <em>entre</em> os itens, nunca antes do primeiro nem depois do
+último. É a diferença entre "espaço entre" e "espaço embaixo".</p>
+
+<p>Com <code>flex-col</code>, a lista deixa de ser uma lista para o motor de layout e passa a ser uma
+coluna — mas continua sendo uma <code>ul</code> para o leitor de tela. Isso é uma das coisas boas do
+Tailwind: as classes mudam o desenho, não a semântica.</p>
+
+<h2>4. O item como linha</h2>
+
+<p>Agora cada item precisa de organização interna. Na cabeça da Ana, cada linha tem três informações:
+o nome do cliente, o que ele pediu e o horário. O horário é a informação que ela olha primeiro, então
+precisa estar alinhado à direita, sempre no mesmo lugar, para o olho descer a coluna sem esforço.</p>
+
+<p>O jeito de conseguir isso é o <code>flex</code> no próprio <code>li</code>, com
+<code>justify-between</code> empurrando o primeiro bloco para a esquerda e o último para a direita.
+<code>items-center</code> alinha os dois pelo meio vertical, o que importa quando um bloco tem duas
+linhas de texto e o outro só uma.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=flex;;css:#alvo|justify-content=space-between;;css:#alvo|align-items=center">
+  <p class="try-task">Dentro de cada item, o nome e o horário estão em linhas separadas. Deixe os
+  dois na mesma linha, com o nome à esquerda e o horário à direita, alinhados pelo meio.</p>
+  <pre class="html">&lt;ul class="flex flex-col gap-3"&gt;
+  &lt;li id="alvo" class="rounded-lg border border-stone-200 p-3"&gt;
+    &lt;div&gt;
+      &lt;p class="font-medium text-stone-900"&gt;Marina&lt;/p&gt;
+      &lt;p class="text-xs text-stone-500"&gt;12 pães de queijo&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;span class="text-sm text-amber-800"&gt;7h&lt;/span&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;</pre>
+  <pre class="out">
+padding: 12px
+border-radius: 8px
+border-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+</pre>
+  <pre class="solucao">&lt;ul class="flex flex-col gap-3"&gt;
+  &lt;li id="alvo" class="flex items-center justify-between gap-3 rounded-lg border border-stone-200 p-3"&gt;
+    &lt;div&gt;
+      &lt;p class="font-medium text-stone-900"&gt;Marina&lt;/p&gt;
+      &lt;p class="text-xs text-stone-500"&gt;12 pães de queijo&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;span class="text-sm text-amber-800"&gt;7h&lt;/span&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;</pre>
+</div>
+
+<p>Repare no <code>div</code> que envolve as duas linhas de texto: sem ele, os três pedaços — nome,
+quantidade e horário — seriam três filhos do flex e ficariam lado a lado, cada um do tamanho do seu
+texto. Com o <code>div</code>, o flex tem dois filhos: o bloco de texto e o horário. O
+<code>justify-between</code> então empurra um para cada ponta.</p>
+
+<p>Essa ideia de agrupar antes de distribuir é o coração do flex, e vale para qualquer componente:
+antes de escolher classes, decida em quantos blocos o conteúdo se divide. Um erro comum de quem está
+começando é tentar alinhar seis elementos soltos com <code>justify-between</code> e terminar com
+espaços tortos.</p>
+
+<h2>5. Nome, descrição e preço no lugar certo</h2>
+
+<p>Dentro do bloco de texto, a hierarquia se faz com tamanho e cor, e o Tailwind oferece exatamente
+três degraus que resolvem quase tudo:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Papel</th><th>Classes</th><th>Efeito</th></tr>
+<tr><td>título do item</td><td><code>font-medium text-stone-900</code></td><td>peso médio e o tom mais escuro: é o nome</td></tr>
+<tr><td>detalhe</td><td><code>text-xs text-stone-500</code></td><td>12 px e claro: quantidade, tipo de pão</td></tr>
+<tr><td>valor</td><td><code>text-sm font-medium text-amber-800 tabular-nums</code></td><td>preço ou horário, alinhado e com cor de destaque</td></tr>
+<tr><td>linha inteira</td><td><code>flex items-center justify-between gap-3 p-3</code></td><td>organiza e dá respiro interno</td></tr>
+<tr><td>lista</td><td><code>flex flex-col gap-3</code></td><td>coluna com espaço entre itens</td></tr>
+</table>
+</div>
+
+<p>Note que o item aqui usa <code>rounded-lg border p-3</code> e não linhas separando. As duas opções
+são válidas, e a diferença é de intenção: <strong>cartão por item</strong> diz "cada um é um objeto
+independente"; <strong>lista com separadores</strong> diz "todos fazem parte do mesmo bloco". Para
+encomendas que a Ana vai riscar uma a uma, o cartão ajuda; para o cardápio, a lista com separadores
+é mais leve.</p>
+
+<p>E quando o item é clicável — a lista de produtos que leva para a página de cada pão —, ele não
+pode ser um <code>li</code> com eventos de clique: precisa ser um <code>a</code> de verdade dentro
+do <code>li</code>, ocupando a linha toda. Acessibilidade e Google agradecem, e o foco por teclado
+funciona de graça.</p>
+
+<h2>6. O quadradinho do ícone</h2>
+
+<p>Numa lista de produtos, o ícone ou a foto pequena à esquerda ajuda muito: o olho reconhece antes de
+ler. O padrão é um quadrado de 40 px com fundo suave e uma letra ou um símbolo dentro:</p>
+
+<pre class="file" data-file="cardapio.html">&lt;li class="flex items-center gap-3 rounded-lg border border-stone-200 p-3"&gt;
+  &lt;span class="grid size-10 shrink-0 place-items-center rounded-full bg-amber-100 text-sm font-medium text-amber-800"&gt;F&lt;/span&gt;
+  &lt;div class="min-w-0"&gt;
+    &lt;p class="font-medium text-stone-900"&gt;Francês&lt;/p&gt;
+    &lt;p class="text-xs text-stone-500"&gt;60 g · assado às 5h&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;span class="ml-auto text-sm font-medium text-amber-800 tabular-nums"&gt;R$ 0,90&lt;/span&gt;
+&lt;/li&gt;</pre>
+
+<p>Quatro classes merecem explicação. <code>size-10</code> define largura e altura iguais, 40 px.
+<code>grid place-items-center</code> centraliza o conteúdo nos dois eixos — é o jeito mais curto de
+centralizar uma letra numa caixa. <code>rounded-full</code> deixa o quadrado redondo.
+<code>shrink-0</code> é o seguro contra o flex: sem ele, quando o texto ao lado é longo, o flex
+encolhe o ícone até virar uma bolinha oval. Com ele, o ícone mantém 40 px e o texto é que se
+ajusta.</p>
+
+<p>O <code>ml-auto</code> no preço é um atalho elegante: dentro de um flex, margem automática à
+esquerda empurra o elemento para a ponta direita, sem precisar de <code>justify-between</code> no
+pai. Funciona bem quando você tem três filhos e quer só o último na ponta. Quando você quer dois
+blocos distintos, <code>justify-between</code> continua sendo mais claro.</p>
+
+<h2>7. Separar sem moldura e responder ao mouse</h2>
+
+<p>Lista de cardápio costuma ficar melhor sem moldura em cada item: um fio fino entre eles, e nada em
+volta. A classe é <code>divide-y</code> no pai, e ela desenha a linha <em>entre</em> os filhos, nunca
+antes do primeiro nem depois do último. Você já viu <code>divide-y</code> na
+<a href="divisores.html">aula de divisores</a>; aqui
+basta lembrar que a cor vem junto, <code>divide-stone-200</code>.</p>
+
+<pre class="file" data-file="cardapio.html">&lt;ul class="divide-y divide-stone-200"&gt;
+  &lt;li class="flex items-center justify-between gap-3 py-3"&gt;
+    &lt;span class="font-medium text-stone-900"&gt;Francês&lt;/span&gt;
+    &lt;span class="text-sm tabular-nums text-stone-600"&gt;R$ 0,90&lt;/span&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;</pre>
+
+<p>Se os itens forem clicáveis, o <code>py-3</code> precisa virar <code>px-3 py-3</code> e o item
+ganha <code>rounded-lg hover:bg-stone-50</code>. O padding horizontal existe para o fundo do
+<code>hover</code> ter o que pintar: sem ele, o cinza fica grudado no texto e parece um erro de
+renderização. E o <code>rounded-lg</code> no item evita o canto quadrado no meio de uma interface
+arredondada.</p>
+
+<p>Juntando as opções, cada jeito de agrupar os itens comunica uma coisa diferente. Vale escolher com
+intenção, porque a lista é a peça que o cliente vê primeiro numa tela de bastidor:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Jeito</th><th>Onde vão as classes</th><th>Quando usar</th></tr>
+<tr><td>coluna com respiro</td><td><code>flex flex-col gap-3</code> no <code>ul</code></td><td>itens soltos, sem moldura; ocupa menos</td></tr>
+<tr><td>cartão por item</td><td><code>rounded-lg border p-3</code> em cada <code>li</code></td><td>itens independentes, que a pessoa risca um a um</td></tr>
+<tr><td>linhas separadas</td><td><code>divide-y divide-stone-200</code> no <code>ul</code></td><td>bloco único, como cardápio e lista de preços</td></tr>
+<tr><td>linha que responde</td><td><code>border-b</code> mais <code>hover:bg-stone-50</code> no <code>li</code></td><td>itens clicáveis dentro de um mesmo bloco</td></tr>
+</table>
+</div>
+
+<p>Um cuidado com <code>divide-y</code> e <code>hover</code> juntos: a linha do divisor não muda de
+cor no hover, e o item parece "flutuar" sobre uma linha fixa. É aceitável e é o que a maioria dos
+sites faz. Só não tente pintar o divisor no hover com uma classe no <code>li</code> — o divisor
+pertence ao pai, não ao filho, e a classe não pega. Se isso incomodar, troque o divisor por
+<code>border-b border-stone-200</code> em cada <code>li</code>, que aí sim responde ao hover.</p>
+
+<h2>8. Nome comprido: truncate e min-w-0</h2>
+
+<p>Chegamos ao problema que mais aparece no mundo real. O pão se chama "Pão de queijo com queijo
+minas, orégano e uma pimenta que a Rita trouxe". Num item com horário à direita, esse nome empurra o
+horário para fora da tela ou quebra em cinco linhas. A solução é cortar com reticências, e a classe
+para isso é <code>truncate</code>.</p>
+
+<p>Só que <code>truncate</code> sozinho não funciona dentro de um flex — e essa é a pegadinha da
+aula. O motivo é que um filho de flex tem largura mínima automática, e essa largura mínima é o
+tamanho do conteúdo. O navegador se recusa a encolher o texto abaixo do nome inteiro, então não
+sobra nada para cortar. A solução é dizer explicitamente "você pode encolher até zero" com
+<code>min-w-0</code>.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|text-overflow=ellipsis;;css:#alvo|overflow=hidden;;css:#alvo|min-width=0px">
+  <p class="try-task">O nome comprido está empurrando o preço para fora do cartão. Corte o nome com
+  reticências, lembrando que, dentro do flex, o <code>truncate</code> só funciona junto com
+  <code>min-w-0</code>.</p>
+  <pre class="html">&lt;div class="flex max-w-sm items-center justify-between gap-3 rounded-lg border border-stone-200 p-3"&gt;
+  &lt;p id="alvo" class="font-medium text-stone-900"&gt;Pão de queijo com queijo minas, orégano e pimenta&lt;/p&gt;
+  &lt;span class="shrink-0 text-sm font-medium text-amber-800 tabular-nums"&gt;R$ 12,00&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+color: oklch(0.216 0.006 56.043)
+font-weight: 500
+</pre>
+  <pre class="solucao">&lt;div class="flex max-w-sm items-center justify-between gap-3 rounded-lg border border-stone-200 p-3"&gt;
+  &lt;p id="alvo" class="min-w-0 truncate font-medium text-stone-900"&gt;Pão de queijo com queijo minas, orégano e pimenta&lt;/p&gt;
+  &lt;span class="shrink-0 text-sm font-medium text-amber-800 tabular-nums"&gt;R$ 12,00&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra as três propriedades que o <code>truncate</code> liga de uma vez, mais o
+<code>min-width: 0px</code> do <code>min-w-0</code>:</p>
+
+<pre class="term">.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.min-w-0 {
+  min-width: 0px;
+}</pre>
+
+<p>Cada linha tem seu papel. <code>white-space: nowrap</code> proíbe a quebra em várias linhas.
+<code>overflow: hidden</code> esconde o que passa da caixa. <code>text-overflow: ellipsis</code>
+desenha as reticências no ponto do corte — mas só funciona se as duas primeiras estiverem lá. Por
+isso <code>truncate</code> é uma classe só para três propriedades que sempre andam juntas.</p>
+
+<p>Se em vez de cortar você preferir mostrar o texto em duas linhas e depois cortar, existe
+<code>line-clamp-2</code>, que faz isso com reticências no fim da segunda linha. É ótimo para
+descrição de produto e péssimo para nome, porque nome cortado em duas linhas deixa a lista com
+alturas diferentes. Nome sempre numa linha; descrição pode ter duas.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a lista que virou tabela sem querer</h3>
+<p>A Ana queria nome, quantidade e horário na mesma linha e começou a dar larguras fixas em cada
+pedaço, tipo <code>w-40</code>, <code>w-16</code>, <code>w-12</code>. Funcionou no monitor dela e
+quebrou no celular, porque a soma passava da tela. A correção foi trocar as larguras fixas por
+<code>flex flex-col gap-3</code> no item, na tela pequena, e <code>sm:flex-row sm:items-center
+sm:justify-between</code> a partir de 640 px. O mesmo HTML, duas disposições: em pé no celular, em
+linha no desktop.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o horário que desapareceu do lado direito</h3>
+<p>Num dos itens, o horário simplesmente não aparecia. Não era CSS: o nome do pão era tão comprido
+que o bloco de texto ocupava tudo e o horário era espremido até a largura zero — porque o bloco de
+texto não tinha <code>min-w-0</code> e o horário não tinha <code>shrink-0</code>. Com as duas
+classes no lugar, o texto encolhe e corta, e o horário mantém o tamanho. A dupla
+<code>min-w-0</code> no texto e <code>shrink-0</code> no valor é a receita de toda lista com valor à
+direita.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: vinte itens, nenhum marcador de posição</h3>
+<p>Quando a lista passou de vinte encomendas, a Ana percebeu que não sabia onde estava ao rolar. Ela
+resolveu com duas coisas simples: <code>divide-y</code> no pai para cada item ter começo e fim
+visíveis, e um cabeçalho fixo com a data acima da lista. Zíper não é enfeite: numa lista longa, ele
+é o que permite ao olho voltar para o lugar certo depois de olhar para o lado.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual é o jeito recomendado de separar os itens de
+uma lista?</p>
+<label><input type="radio" name="l1"> <code>mb-3</code> em cada <code>li</code></label>
+<label><input type="radio" name="l1"> <code>flex flex-col gap-3</code> no <code>ul</code></label>
+<label><input type="radio" name="l1"> <code>p-3</code> em cada <code>li</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que <code>justify-between</code> faz num item de
+lista?</p>
+<label><input type="radio" name="l2"> centraliza o texto na vertical</label>
+<label><input type="radio" name="l2"> coloca os filhos em coluna</label>
+<label><input type="radio" name="l2"> empurra o primeiro filho para a esquerda e o último para a direita</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que <code>truncate</code> não funciona sozinho
+dentro de um flex?</p>
+<label><input type="radio" name="l3"> porque o filho do flex tem largura mínima do tamanho do conteúdo; é preciso <code>min-w-0</code></label>
+<label><input type="radio" name="l3"> porque <code>truncate</code> só funciona em <code>td</code></label>
+<label><input type="radio" name="l3"> porque o flex apaga as reticências</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o nome comprido do cardápio</h2>
+<p>O nome do pão é maior que o espaço e está empurrando o preço. Qual classe corta o texto com
+reticências em vez de deixar quebrar?</p>
+<div class="ex-code">&lt;p class="min-w-0 <input aria-label="resposta 1" data-answer="truncate" placeholder="..."> font-medium text-stone-900"&gt;Pão de queijo com queijo minas&lt;/p&gt;</div>
+<p class="ex-dica">Dica: é uma classe de uma palavra só, que liga três propriedades: esconder o
+excesso, não quebrar linha e desenhar reticências. O <code>min-w-0</code> ao lado é o que permite a
+ela funcionar dentro do flex.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Lista de itens começa com a tag certa: <code>ul</code> para ordem livre, <code>ol</code> para
+sequência, <code>dl</code> para pares de nome e valor. No Tailwind, a lista nasce sem marcador, e
+isso é intencional: a maioria das listas na tela é componente, não texto corrido. O espaço entre
+itens fica no pai, com <code>flex flex-col gap-3</code>, e cada item vira uma linha com
+<code>flex items-center justify-between gap-3</code>.</p>
+
+<p>A hierarquia dentro do item se faz com três degraus de texto: nome em
+<code>font-medium text-stone-900</code>, detalhe em <code>text-xs text-stone-500</code> e valor em
+<code>text-sm tabular-nums</code>. O ícone é <code>size-10 shrink-0 rounded-full</code> com
+<code>grid place-items-center</code> por dentro. Para separar itens, <code>divide-y</code> no pai ou
+<code>border-b</code> em cada um, dependendo de você querer que a linha responda ao hover.</p>
+
+<p>E o par que salva qualquer lista real: <code>min-w-0 truncate</code> no texto que pode encolher,
+<code>shrink-0</code> no valor que não pode. Sem esse par, o nome comprido espreme o preço até
+desaparecer — e você passa uma tarde achando que o problema é o preço.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>ul</code> é para ordem livre, <code>ol</code> para ordem que importa, <code>dl</code> para
+fichas.</li>
+<li>O Tailwind tira o marcador por padrão; <code>list-disc</code> devolve quando fizer sentido, como
+mostra a aula de <a href="listas-e-marcadores.html">listas e marcadores</a>.</li>
+<li>Espaço entre itens: <code>flex flex-col gap-3</code> no <code>ul</code>.</li>
+<li>Item em linha: <code>flex items-center justify-between gap-3</code>.</li>
+<li>Nome escuro e médio; detalhe pequeno e claro; valor com <code>tabular-nums</code>.</li>
+<li>Ícone: <code>size-10 shrink-0 rounded-full grid place-items-center</code>.</li>
+<li><code>divide-y divide-stone-200</code> separa sem moldura e ignora o primeiro e o último.</li>
+<li><code>hover:bg-stone-50</code> só faz sentido com <code>px-3</code> e <code>rounded-lg</code>.</li>
+<li><code>truncate</code> exige <code>min-w-0</code> dentro do flex; o valor ao lado pede
+<code>shrink-0</code>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

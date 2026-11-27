@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cards | Guia Tailwind</title>
+<meta name="description" content="Cards no Tailwind: as partes do cartão, a grade de cartões com grid e gap, o rodapé separado com divide-y, a elevação no hover e o cartão deitado da lista.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Cards: o cartão que se <span class="hl">repete</span></h1>
+<p class="intro">A Ana já sabe montar um cartão de pão: fundo branco, canto arredondado, respiro e um
+preço em destaque. O problema apareceu quando ela colou o segundo e o terceiro na vitrine: cada um
+num tamanho, um mais alto que o outro, um descendo quando o texto era maior. Cartão não é uma peça
+solitária — é uma peça que se repete dentro de uma grade. Nesta aula a Ana aprende a montar o cartão
+com partes (cabeçalho, corpo e rodapé), a alinhar vários deles, a fazê-lo inteiro clicável com
+elevação no mouse e a virá-lo de lado quando a lista é de encomendas.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>As partes de um cartão e o que vai em cada uma.</li>
+  <li>A grade com <code>grid</code>, <code>gap</code> e <code>sm:grid-cols-2</code>.</li>
+  <li>Por que os cartões desalinham e como o grid resolve.</li>
+  <li>O rodapé separado por <code>divide-y</code> e por <code>border-t</code>.</li>
+  <li>O cartão inteiro clicável, com elevação no hover.</li>
+  <li>A imagem no topo sem estourar o canto arredondado.</li>
+  <li>O cartão deitado, para listas de encomendas.</li>
+  <li>Borda, sombra ou anel: três jeitos de separar o cartão do fundo.</li>
+</ul>
+</div>
+
+<h2>1. A cena: três cartões que não combinam</h2>
+
+<p>A Ana montou o primeiro cartão com carinho: <code>rounded-xl</code>, <code>border</code> âmbar
+claro, <code>p-5</code> e um preço grande. Ficou bonito. Aí duplicou o HTML para os outros dois
+produtos. O segundo tinha um nome mais comprido e ficou mais alto. O terceiro tinha uma descrição de
+duas linhas e ficou mais alto ainda. Os três, empilhados, pareciam três blocos de tamanhos
+diferentes, e a vitrine parecia inacabada.</p>
+
+<p>O defeito não está em nenhum dos cartões: está na relação entre eles. Um cartão solto pode ter a
+altura que o conteúdo pedir. Vários cartões lado a lado precisam de duas coisas que o CSS só dá se
+você pedir: uma grade que defina a largura de cada coluna e uma altura que se iguale entre vizinhos
+da mesma linha. A grade é o assunto desta aula, e ela resolve os dois de uma vez.</p>
+
+<p>Antes das classes, vale separar o que é conteúdo do que é moldura. O conteúdo é o nome do pão, o
+preço, a foto e o botão. A moldura é o fundo, a borda, o canto, a sombra e o respiro. Quando os dois
+se misturam no CSS, o cartão fica impossível de reaproveitar: cada produto novo exige uma classe
+nova. A receita que a Ana vai montar mantém a moldura igual em todos e deixa só o conteúdo variar.</p>
+
+<h2>2. As partes de um cartão</h2>
+
+<p>Um cartão de vitrine tem até quatro partes, e cada uma tem um papel. Nem todo cartão precisa das
+quatro; o que não pode é misturá-las sem critério. A vantagem de pensar em partes é que o cartão
+grande e o pequeno compartilham a mesma estrutura — só as partes opcionais saem.</p>
+
+<dl class="anatomy">
+<dt>mídia</dt>
+<dd>A foto ou a ilustração do topo. Fica colada nas bordas e precisa de recorte para não estourar o
+canto.</dd>
+<dt>cabeçalho</dt>
+<dd>A primeira linha de texto, com o nome do produto e, às vezes, uma etiqueta ao lado.</dd>
+<dt>corpo</dt>
+<dd>A explicação curta: quantidade, ingredientes, horário. É o que dá contexto ao preço.</dd>
+<dt>rodapé</dt>
+<dd>A linha de baixo, com o preço e a ação. Costuma ser separado do corpo por um fio.</dd>
+<dt>grade</dt>
+<dd>O pai que organiza vários cartões em colunas iguais, com um espaço fixo entre eles.</dd>
+</dl>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Parte</th><th>Classes típicas</th><th>Cuidado</th></tr>
+<tr><td>casca</td><td><code>rounded-xl border border-amber-200 bg-white</code></td><td>o respiro vai nas partes, não na casca</td></tr>
+<tr><td>mídia</td><td><code>aspect-video w-full object-cover</code></td><td>a casca precisa de <code>overflow-hidden</code></td></tr>
+<tr><td>cabeçalho</td><td><code>p-5 pb-2 text-lg font-semibold</code></td><td>menos respiro embaixo, para colar no corpo</td></tr>
+<tr><td>corpo</td><td><code>px-5 pb-4 text-sm text-stone-500</code></td><td>duas linhas no máximo</td></tr>
+<tr><td>rodapé</td><td><code>flex items-center justify-between border-t border-amber-100 p-4</code></td><td>preço à esquerda, ação à direita</td></tr>
+</table>
+</div>
+
+<p>Repare na coluna de cuidado do rodapé: <code>justify-between</code> empurra o preço para um lado e
+o botão para o outro, ocupando a linha toda. É a solução para o clássico “o preço e o botão ficam
+grudados no canto esquerdo”. E repare que o respiro da casca some quando o cartão tem mídia: se o pai
+tiver <code>p-5</code>, a foto não encosta na borda e o cartão perde o ar de cartão. O respiro passa
+a ser responsabilidade de cada parte.</p>
+
+<h2>3. A grade: o cartão vira vitrine</h2>
+
+<p>Para alinhar cartões, o pai vira uma grade: <code>grid</code> para ligar o modo, <code>gap-6</code>
+para o espaço entre eles e <code>sm:grid-cols-2</code> para dizer que, a partir de 640 px, são duas
+colunas iguais. No celular, sem coluna declarada, a grade tem uma coluna só e os cartões se empilham
+— que é exatamente o que se quer numa tela estreita.</p>
+
+<div class="trytailwind" data-goal="largura:900;;rule:grid-template-columns: repeat(2, minmax(0, 1fr));;conta:#alvo &gt; div=3" data-largura="900">
+  <p class="try-task">A prévia está com 900 px e os três cartões estão empilhados. Transforme o pai
+  numa grade de duas colunas a partir de 640 px, com 24 px de espaço entre os cartões.</p>
+  <pre class="html">&lt;div id="alvo" class="grid gap-6"&gt;
+  &lt;div class="rounded-xl border border-amber-200 bg-white p-4"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="rounded-xl border border-amber-200 bg-white p-4"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="rounded-xl border border-amber-200 bg-white p-4"&gt;Bolo de cenoura&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: grid
+gap: 24px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="grid gap-6 sm:grid-cols-2"&gt;
+  &lt;div class="rounded-xl border border-amber-200 bg-white p-4"&gt;Pão francês&lt;/div&gt;
+  &lt;div class="rounded-xl border border-amber-200 bg-white p-4"&gt;Pão de queijo&lt;/div&gt;
+  &lt;div class="rounded-xl border border-amber-200 bg-white p-4"&gt;Bolo de cenoura&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>grid-template-columns: 426px 426px</code> — duas colunas de tamanhos iguais,
+calculadas a partir da largura disponível. O CSS gerado escreve a intenção, e é ele que vale decorar:
+<code>repeat(2, minmax(0, 1fr))</code>. Traduzindo: repita duas colunas, cada uma com no mínimo zero e
+no máximo uma fração igual do espaço livre. O <code>minmax(0, 1fr)</code> é o detalhe que impede a
+coluna de estourar quando um conteúdo é mais largo do que ela — sem ele, uma palavra comprida pode
+empurrar a grade para fora da tela.</p>
+
+<p>Com a grade no lugar, os cartões passam a ter a mesma largura e ficam alinhados pela linha. A
+altura de cada um continua sendo a do conteúdo, mas o vizinho da mesma linha estica junto: o
+<code>align-items</code> padrão do grid é <code>stretch</code>, e é isso que faz dois cartões de
+textos diferentes terminarem no mesmo nível. Se você quiser alturas independentes, o caminho é
+<code>items-start</code>; na vitrine, você não quer.</p>
+
+<h2>4. Cabeçalho, corpo e rodapé</h2>
+
+<p>O cartão completo tem uma casca e, dentro dela, três blocos. A casca cuida do fundo, da borda e do
+canto; os blocos cuidam do respiro. Esse arranjo tem uma vantagem prática: o fio que separa o rodapé
+precisa ir de ponta a ponta, e ele só vai se o rodapé não tiver respiro lateral próprio na casca. Com
+o respiro na casca, o fio fica flutuando no meio, com margem dos dois lados.</p>
+
+<pre class="file" data-file="index.html">&lt;article class="overflow-hidden rounded-xl border border-amber-200 bg-white"&gt;
+  &lt;div class="aspect-video bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div class="p-5"&gt;
+    &lt;h3 class="text-lg font-semibold text-stone-900"&gt;Pão de queijo&lt;/h3&gt;
+    &lt;p class="mt-1 text-sm text-stone-500"&gt;12 unidades, direto do forno.&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="flex items-center justify-between border-t border-amber-100 p-4"&gt;
+    &lt;span class="text-lg font-semibold text-amber-900"&gt;R$ 18&lt;/span&gt;
+    &lt;button type="button" class="rounded-lg bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white"&gt;Encomendar&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/article&gt;</pre>
+
+<p>O <code>overflow-hidden</code> na casca é o que impede a foto de estourar o canto arredondado — o
+detalhe que a aula de <a href="arredondamento.html">arredondamento</a> mostra em close. E o
+<code>aspect-video</code> dá à mídia a proporção de 16 por 9 sem precisar de altura fixa, assunto da
+aula de <a href="aspect-ratio.html">proporção</a>. Com os dois, a foto ocupa a largura toda e tem
+altura previsível, qualquer que seja a imagem.</p>
+
+<p>Repare no rodapé: <code>border-t border-amber-100 p-4</code>. O fio vem de uma borda no topo do
+próprio rodapé, e ele só atravessa o cartão de ponta a ponta porque o respiro está no rodapé, não na
+casca. É a diferença entre um fio que separa e um fio flutuando no meio, com margem dos dois lados.</p>
+
+<p>Quando o cartão tem uma lista de linhas — os horários de retirada, por exemplo —, o jeito mais
+limpo de separar as linhas é o <code>divide-y</code>: uma classe no pai, e o fio aparece entre os
+filhos, sem ninguém no último. A aula de <a href="divisores.html">divisores</a> destrincha o seletor
+que faz isso; aqui basta saber que ele não briga com a borda do rodapé, porque age nos filhos.</p>
+
+<p>Falta resolver o problema da altura: os três cartões da vitrine têm textos de tamanhos diferentes,
+e o preço precisa ficar na mesma linha horizontal em todos. A receita é transformar a casca numa
+coluna flexível e mandar o rodapé para o fim com <code>mt-auto</code>:</p>
+
+<pre class="term" data-title="CSS gerado">.flex {
+  display: flex;
+}
+.flex-col {
+  flex-direction: column;
+}
+.mt-auto {
+  margin-top: auto;
+}</pre>
+
+<p>Em uma coluna flex, <code>margin-top: auto</code> não significa “zero de margem”: significa “empurre
+para o máximo”. Como o cartão da grade já foi esticado pelo pai, sobra espaço em branco embaixo do
+corpo — e é esse espaço que o <code>mt-auto</code> come, colando o rodapé na base. O resultado é uma
+linha de botões perfeitamente alinhada, mesmo quando um título tem uma linha e o outro tem três.</p>
+
+<h2>5. O cartão inteiro clicável</h2>
+
+<p>Na vitrine, o cartão todo deve ser clicável, não só o botão de encomendar. A pessoa clica na foto,
+no nome, no preço — tudo leva ao mesmo lugar. O jeito mais simples e mais correto é transformar a
+casca num link: um <code>&lt;a&gt;</code> com <code>block</code>, que se comporta como caixa e aceita
+as mesmas classes de antes. Nada de JavaScript para isso.</p>
+
+<div class="trytailwind" data-goal="rule:.hover\:shadow-lg:hover;;rule:--tw-shadow: 0 10px 15px -3px">
+  <p class="try-task">O cartão é um link e não avisa que é clicável. Dê a ele uma elevação no hover —
+  a sombra grande — e a transição para a mudança não ser um pulo.</p>
+  <pre class="html">&lt;a id="alvo" href="#cardapio" class="block rounded-xl border border-stone-200 bg-white p-5 shadow-sm"&gt;
+  &lt;p class="m-0 text-lg font-semibold text-stone-900"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="m-0 mt-1 text-sm text-stone-500"&gt;12 unidades — R$ 18&lt;/p&gt;
+&lt;/a&gt;</pre>
+  <pre class="out">
+display: block
+padding: 20px
+background-color: rgb(255, 255, 255)
+border-radius: 12px
+box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px
+border-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+</pre>
+  <pre class="solucao">&lt;a id="alvo" href="#cardapio" class="block rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:shadow-lg"&gt;
+  &lt;p class="m-0 text-lg font-semibold text-stone-900"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="m-0 mt-1 text-sm text-stone-500"&gt;12 unidades — R$ 18&lt;/p&gt;
+&lt;/a&gt;</pre>
+</div>
+
+<p>O painel continua mostrando a sombra pequena, porque mede o repouso. Quem confere a elevação é o
+CSS gerado, e o <em>Verificar</em> desta caixa faz exatamente isso: procura a regra do
+<code>hover:shadow-lg</code>. O CSS é o mesmo desenho de sempre, com o <code>:hover</code> colado no
+seletor e a casca de <code>@media (hover: hover)</code> que protege o celular:</p>
+
+<pre class="term" data-title="CSS gerado">@media (hover: hover) {
+  .hover\:shadow-lg:hover {
+    --tw-shadow: 0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.1)),
+      0 4px 6px -4px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
+      var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+}</pre>
+
+<p>Duas decisões acompanham esse efeito. A primeira é o <code>transition</code>, sem o qual a sombra
+aparece de um salto — e sombra que pula parece bug. A segunda é a escolha da elevação: um degrau
+(<code>hover:shadow-md</code>) é discreto, dois degraus (<code>hover:shadow-lg</code>) é convite. Em
+cartão com borda, uma elevação pequena já resolve; em cartão sem borda, a sombra é a única pista de
+profundidade e vale subir mais.</p>
+
+<p>Um aviso que evita um problema de HTML: não coloque um link dentro do link. Um
+<code>&lt;a&gt;</code> dentro de outro <code>&lt;a&gt;</code> é inválido, e o navegador desmancha o
+primeiro. Se o cartão precisa ter dois destinos — “ver o produto” e “adicionar ao carrinho” —, o
+cartão deixa de ser link: vira uma caixa com dois botões dentro, e o visual de clique fica só no
+título, com <code>hover:underline</code>.</p>
+
+<h2>6. A imagem no topo</h2>
+
+<p>A mídia é a parte que mais muda o cartão, e a que mais dá errado. Três classes resolvem 90% dos
+casos: <code>w-full</code> na imagem para ela ocupar a largura, <code>aspect-video</code> (ou
+<code>aspect-square</code>) para a altura ser proporcional e <code>object-cover</code> para a foto
+preencher o espaço sem distorcer, cortando o excesso nas laterais.</p>
+
+<p>Sem <code>object-cover</code>, a foto estica: o pão fica achatado ou comprido, e o erro é sutil o
+bastante para ninguém saber explicar por que o cartão parece amador. Sem <code>aspect-*</code>, cada
+foto de tamanho diferente produz um cartão de altura diferente, e a grade começa a parecer uma escada.
+Com as três, todos os cartões da vitrine têm a mesma silhueta, mesmo que as fotos sejam de celulares
+diferentes — e é isso que faz a vitrine parecer uma vitrine.</p>
+
+<p>Se você não tem foto e quer um lugar reservado, um <code>div</code> com a mesma proporção e um
+fundo âmbar claro funciona como espaço reservado e mantém o desenho do cartão. É o que as caixas desta
+aula fazem. Quando a foto chegar, ela entra no lugar do fundo com as mesmas classes de proporção.</p>
+
+<h2>7. O cartão deitado: a lista de encomendas</h2>
+
+<p>Nem toda lista é vitrine. A tela de encomendas do dia é uma lista de linhas, e cada linha é um
+cartão deitado: miniatura à esquerda, texto no meio, estado à direita. A casca é a mesma; o que muda é
+que ela vira <code>flex</code> em vez de <code>block</code>, e a miniatura ganha <code>shrink-0</code>
+para não ser esmagada pelo texto comprido.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=flex;;css:#alvo|gap=16px;;rule:flex-shrink: 0">
+  <p class="try-task">A encomenda está com a miniatura em cima do texto. Deite o cartão: flex, com os
+  itens centralizados, 16 px de espaço e a miniatura impedida de encolher.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl border border-stone-200 bg-white p-3"&gt;
+  &lt;div class="size-16 rounded-lg bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div&gt;
+    &lt;p class="m-0 font-semibold text-stone-900"&gt;Encomenda da Marta&lt;/p&gt;
+    &lt;p class="m-0 text-sm text-stone-500"&gt;12 pães — retirar às 7h&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 12px
+background-color: rgb(255, 255, 255)
+border-radius: 12px
+border-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex items-center gap-4 rounded-xl border border-stone-200 bg-white p-3"&gt;
+  &lt;div class="size-16 shrink-0 rounded-lg bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div&gt;
+    &lt;p class="m-0 font-semibold text-stone-900"&gt;Encomenda da Marta&lt;/p&gt;
+    &lt;p class="m-0 text-sm text-stone-500"&gt;12 pães — retirar às 7h&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O <code>items-center</code> centraliza a miniatura e o texto na vertical; sem ele, os dois começam
+no topo e o cartão parece desalinhado quando o texto tem uma linha só. O <code>gap-4</code> é o
+espaço entre a miniatura e o texto, e substitui a margem que você escreveria no filho. E o
+<code>shrink-0</code> é a peça que quase ninguém lembra: por padrão, itens de um flex encolhem para
+caber, e a miniatura de 64 px vira 40 px quando o nome da cliente é comprido.</p>
+
+<p>Para o lado direito, o padrão é <code>justify-between</code> com um bloco de estado e um botão. E
+se o texto for muito longo, <code>truncate</code> no nome corta com reticências e mantém a linha
+única. Numa lista de encomendas, linha única é regra: altura variável transforma a lista num
+zigue-zague.</p>
+
+<h2>8. Borda, sombra ou anel?</h2>
+
+<p>Existem três jeitos de separar o cartão do fundo, e os três aparecem na natureza. A borda é uma
+linha de 1 px, discreta e previsível. A sombra dá profundidade e não ocupa espaço. O anel é uma borda
+que não muda o tamanho da caixa, desenhada por fora. Escolher um e manter é o que dá unidade ao
+site.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Jeito</th><th>Classes</th><th>Quando</th></tr>
+<tr><td>Borda</td><td><code>border border-stone-200</code></td><td>fundo claro e visual plano, tipo planilha</td></tr>
+<tr><td>Sombra</td><td><code>shadow-sm</code> ou <code>shadow-md</code></td><td>cartão flutuando sobre foto ou cor</td></tr>
+<tr><td>Anel</td><td><code>ring-1 ring-stone-200</code></td><td>borda que não altera a largura, em grade apertada</td></tr>
+</table>
+</div>
+
+<p>A diferença prática entre borda e anel é onde a linha mora. O Tailwind liga
+<code>box-sizing: border-box</code> em tudo, então a borda de 1 px não aumenta a caixa: ela come 1 px
+do conteúdo de cada lado. O anel não come nada — ele é desenhado por fora, em cima do que estiver em
+volta, sem mexer no layout e sem empurrar o vizinho. Em grade com <code>gap</code> folgado, os dois
+dão o mesmo resultado visual. Em cartão sobreposto ou em componente dentro de outro, o anel é o que
+evita a linha dupla no encontro. A aula de <a href="bordas.html">bordas</a> e a de <a
+href="sombras.html">sombras</a> têm as escalas completas; a de <a href="badges.html">etiquetas</a>
+mostra o anel em ação.</p>
+
+<p>E o que não fazer: borda <em>e</em> sombra forte no mesmo cartão. A borda já diz “aqui termina”; a
+sombra diz “isto está flutuando”. Juntas, elas dizem as duas coisas e o cartão fica pesado. Se o
+fundo for branco sobre branco, use a borda e uma sombra mínima; se o fundo for colorido, use só a
+sombra.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o cartão que ficou gigante na grade</h3>
+<p>A Ana pôs três cartões numa grade de três colunas, com <code>gap-6</code>, dentro de um container
+de 1200 px. Cada coluna ficou com 384 px, e o cartão com foto de 16 por 9 ficou enorme na vertical. A
+correção foi trocar <code>aspect-video</code> por <code>aspect-square</code> na mídia e aumentar a
+grade para quatro colunas em telas grandes com <code>xl:grid-cols-4</code>. A regra é: quanto mais
+colunas, mais quadrada deve ser a foto.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: os cartões que desalinhavam por causa do título</h3>
+<p>Um produto tinha nome de uma linha e outro de três, e os botões de encomendar ficavam em alturas
+diferentes. O grid iguala a altura do cartão, mas não empurra o rodapé para baixo sozinho. A solução
+foi <code>flex flex-col</code> na casca e <code>mt-auto</code> no rodapé: o rodapé passa a ser
+empurrado para o fim do cartão, e todos os botões ficam na mesma linha horizontal.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o cartão clicável que o teclado não alcançava</h3>
+<p>Ela fez o cartão com <code>div</code> e um <code>onclick</code>. No celular funcionou; no teclado,
+ninguém conseguia chegar ao cartão. Trocando a casca por <code>&lt;a href&gt;</code>, o Tab passou a
+alcançar todos os cartões e o Enter passou a abrir. De brinde, veio o foco visível: vale acrescentar
+<code>focus-visible:outline-2</code> para o contorno aparecer como nos botões.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que <code>sm:grid-cols-2</code> faz no pai dos
+cartões?</p>
+<label><input type="radio" name="c1"> deixa dois cartões visíveis e esconde os outros</label>
+<label><input type="radio" name="c1"> cria duas colunas iguais a partir de 640 px</label>
+<label><input type="radio" name="c1"> aumenta o espaço entre os cartões para 2 rem</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O <code>divide-y</code> desenha o fio onde?</p>
+<label><input type="radio" name="c2"> em volta do elemento que tem a classe</label>
+<label><input type="radio" name="c2"> só no primeiro filho</label>
+<label><input type="radio" name="c2"> entre os filhos, em todos menos no último</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que a miniatura do cartão deitado leva
+<code>shrink-0</code>?</p>
+<label><input type="radio" name="c3"> para ela não encolher quando o texto ao lado é comprido</label>
+<label><input type="radio" name="c3"> para ela ficar redonda</label>
+<label><input type="radio" name="c3"> para ela ficar por cima do texto</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o rodapé do cartão</h2>
+<p>O rodapé do cartão precisa do preço à esquerda e do botão à direita, na mesma linha. Complete a
+classe que distribui os dois nas pontas:</p>
+<div class="ex-code">&lt;div class="flex items-center <input aria-label="resposta 1" data-answer="justify-between" placeholder="..."> border-t border-amber-100 p-4"&gt;</div>
+<p class="ex-dica">Dica: é a mesma classe que separa a marca do menu na barra de navegação. Sem ela,
+o preço e o botão ficam grudados à esquerda.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Cartão é uma casca com partes: mídia, cabeçalho, corpo e rodapé. A casca cuida de fundo, borda e
+canto; as partes cuidam do respiro, e é isso que permite o fio do rodapé ir de ponta a ponta com
+<code>border-t</code> ou com <code>divide-y</code>. A mídia precisa de <code>aspect-video</code>,
+<code>object-cover</code> e <code>overflow-hidden</code> na casca para não estourar o canto.</p>
+
+<p>Vários cartões vivem dentro de uma grade: <code>grid gap-6 sm:grid-cols-2</code>, com
+<code>repeat(2, minmax(0, 1fr))</code> no CSS. A grade iguala as colunas; o <code>flex flex-col</code>
+na casca com <code>mt-auto</code> no rodapé iguala os botões. Para o cartão inteiro clicável, a casca
+vira <code>a block</code> e ganha <code>transition hover:shadow-lg</code> — reforço visual de que ali
+se clica. E quando a lista é de linhas, o mesmo casco vira <code>flex items-center gap-4</code> com a
+miniatura em <code>shrink-0</code>.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Partes: mídia, cabeçalho, corpo e rodapé; a casca não leva o respiro quando há mídia.</li>
+<li>Grade: <code>grid gap-6 sm:grid-cols-2</code> no pai dos cartões.</li>
+<li><code>minmax(0, 1fr)</code> impede a coluna de estourar com conteúdo largo.</li>
+<li>O grid estica os vizinhos da linha, e isso alinha as alturas.</li>
+<li><code>divide-y</code> põe o fio nos filhos, todos menos o último.</li>
+<li><code>border-t</code> é o jeito mais simples de separar o rodapé.</li>
+<li>Cartão clicável: casca <code>a block</code> e <code>transition hover:shadow-lg</code>.</li>
+<li>Mídia: <code>aspect-video</code>, <code>object-cover</code> e <code>overflow-hidden</code>.</li>
+<li>Rodapé no fim do cartão: <code>flex flex-col</code> na casca e <code>mt-auto</code> no rodapé.</li>
+<li>Cartão deitado: <code>flex items-center gap-4</code> e <code>shrink-0</code> na miniatura.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

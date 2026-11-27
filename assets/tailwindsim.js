@@ -79,7 +79,10 @@
       if (velho) velho.remove();
       var iframe = document.createElement("iframe");
       iframe.setAttribute("title", "Prévia do HTML com Tailwind");
-      iframe.style.width = "100%";
+      /* a largura do iframe é o viewport da prévia: é ela que decide qual breakpoint vale */
+      iframe.style.width = lerLargura(largura) + "px";
+      iframe.style.maxWidth = "100%";
+      iframe.style.margin = "0 auto";
       iframe.style.border = "0";
       iframe.style.display = "block";
       iframe.style.background = escuro ? "#0b0b0c" : "#fff";
@@ -124,13 +127,29 @@
     return regras;
   }
 
+  /* ".dark\:invert:where(.dark, .dark *)" tem vírgula DENTRO de :where(): separa só no nível de fora */
+  function partirSeletores(sel) {
+    var out = [];
+    var nivel = 0;
+    var atual = "";
+    for (var i = 0; i < sel.length; i++) {
+      var c = sel.charAt(i);
+      if (c === "(" || c === "[") nivel++;
+      else if (c === ")" || c === "]") nivel = Math.max(0, nivel - 1);
+      if (c === "," && nivel === 0) { if (atual.trim()) out.push(atual.trim()); atual = ""; continue; }
+      atual += c;
+    }
+    if (atual.trim()) out.push(atual.trim());
+    return out;
+  }
+
   /* as propriedades que as classes DO ELEMENTO mandam o Tailwind gerar */
   function propriedadesDasClasses(doc, el) {
     var props = [];
     var regras = regrasDoTexto(doc);
     regras.forEach(function (r) {
-      var casa = r.seletor.split(",").some(function (sel) {
-        try { return el.matches(sel.trim()); } catch (e) { return false; }
+      var casa = partirSeletores(r.seletor).some(function (sel) {
+        try { return el.matches(sel); } catch (e) { return false; }
       });
       if (!casa) return;
       r.corpo.forEach(function (l) {
@@ -249,8 +268,7 @@
       var sel = linha.match(/^\s*(\.[^{]+?)\s*\{\s*$/);
       if (!bloco && sel) {
         var seletor = sel[1].trim();
-        var casa = seletor.split(",").some(function (x) {
-          x = x.trim();
+        var casa = partirSeletores(seletor).some(function (x) {
           return procurados.some(function (p) { return x.indexOf(p) === 0; });
         });
         var wrapper = null;
@@ -335,6 +353,7 @@
 
     var inicial = fonte.textContent.replace(/^\n+|\s+$/g, "");
     var meta = caixa.getAttribute("data-goal") || "";
+    var querCss = fonte.getAttribute("data-saida") === "css";
     var largura = lerLargura(caixa.getAttribute("data-largura"));
     var escuro = caixa.getAttribute("data-tema") === "escuro";
 
@@ -352,6 +371,7 @@
       '<button type="button" class="try-solucao secondary">Ver solução</button>' +
       '<button type="button" class="try-restaurar secondary">Restaurar</button>' +
       '<span class="try-largura" aria-label="Largura da prévia">' + largura + " px</span>";
+    var etiquetaLargura = barra.querySelector(".try-largura");
 
     var palco = document.createElement("div");
     palco.className = "try-vivo";
@@ -370,14 +390,22 @@
     caixa.appendChild(status);
 
     function mostrarTabela(doc) {
-      var t = tabela(doc);
-      saida.textContent = t || "(nenhuma propriedade mudou)";
+      var t = querCss ? regrasUsadas(doc) : tabela(doc);
+      saida.textContent = t || (querCss ? "(nenhuma regra gerada para essas classes)" : "(nenhuma propriedade mudou)");
       saida.hidden = !t;
+    }
+
+    /* o rótulo diz a largura de verdade do viewport da prévia (no celular ela é limitada) */
+    function medirLargura(r) {
+      if (!etiquetaLargura || !r || !r.doc) return;
+      var v = r.doc.defaultView ? r.doc.defaultView.innerWidth : 0;
+      if (v) etiquetaLargura.textContent = v + " px";
     }
 
     function rodar() {
       status.textContent = "";
       return compilar(palco, fonte.textContent, largura, escuro).then(function (r) {
+        medirLargura(r);
         mostrarTabela(r.doc);
         return r;
       }).catch(function (e) {
@@ -389,6 +417,7 @@
 
     function verificar() {
       return compilar(palco, fonte.textContent, largura, escuro).then(function (r) {
+        medirLargura(r);
         mostrarTabela(r.doc);
         var falha = conferir(r.doc, r.css, meta);
         if (falha) {
@@ -436,9 +465,16 @@
   }
 
   /* API usada pelo testador (tools/avaliar.html) */
-  window.__tailwindRegras = function (html, largura, escuro) {
+  function palcoDe(largura) {
     var palco = document.createElement("div");
+    palco.style.width = lerLargura(largura) + "px";
+    palco.style.maxWidth = "none";
     document.body.appendChild(palco);
+    return palco;
+  }
+
+  window.__tailwindRegras = function (html, largura, escuro) {
+    var palco = palcoDe(largura);
     return compilar(palco, html, lerLargura(largura), !!escuro).then(function (r) {
       var texto = regrasUsadas(r.doc);
       if (r.iframe) r.iframe.remove();
@@ -451,8 +487,7 @@
   };
 
   window.__tailwindAvaliar = function (html, meta, largura, escuro) {
-    var palco = document.createElement("div");
-    document.body.appendChild(palco);
+    var palco = palcoDe(largura);
     return compilar(palco, html, lerLargura(largura), !!escuro).then(function (r) {
       var falha = conferir(r.doc, r.css, meta);
       var tabelaTexto = tabela(r.doc);

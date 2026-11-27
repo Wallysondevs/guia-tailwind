@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filtros | Guia Tailwind</title>
+<meta name="description" content="Filtros no Tailwind v4: grayscale, blur, brightness, sepia e drop-shadow, o CSS com variáveis que se somam e o backdrop-blur que desfoca o fundo.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Filtros: o <span class="hl">tratamento</span> da imagem</h1>
+<p class="intro">A Ana tirou a foto do balcão com o celular e a foto saiu amarelada. Na mesma tela,
+o pão de queijo está esgotado e continua com a cor viva de sempre, como se estivesse à venda. E o
+título do topo precisa de uma mancha desfocada atrás para o texto branco aparecer. Três problemas
+diferentes, uma família de classes só: os filtros do Tailwind. Nesta aula ela aprende a deixar uma
+foto cinza, a desfocar uma mancha, a ajustar brilho e a desfocar o que está atrás de uma barra
+translúcida.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é um filtro e por que ele é diferente de cor e de opacidade.</li>
+  <li><code>grayscale</code> e <code>grayscale-0</code>: o item que saiu de estoque.</li>
+  <li>A escala de <code>blur</code>, de 4 px a 64 px.</li>
+  <li>Brilho, contraste, saturação, sépia, rotação de matiz e inversão.</li>
+  <li>Como vários filtros se somam sem um apagar o outro.</li>
+  <li><code>backdrop-blur</code>: o filtro que age no que está atrás.</li>
+  <li><code>drop-shadow</code> e a diferença para <code>shadow</code>.</li>
+  <li>O que fazer quando o filtro deixa o texto ilegível.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a foto amarelada e o pão que acabou</h2>
+
+<p>A câmera do celular da Ana não mente, mas exagera. A luz da padaria é amarela, e a foto do balcão
+saiu com aquele tom de fim de tarde dentro de casa. No editor de imagem ela corrigiria em dois
+segundos; no site, sem editor, ela quer uma correção leve: tirar um pouco da saturação, dar uma
+clareada, pronto. E, ao lado dessa foto, há o pão de queijo que esgotou às dez da manhã. Ele não pode
+continuar colorido como os outros, senão a cliente tenta comprar o que não existe.</p>
+
+<p>São dois problemas de imagem, e nenhum dos dois se resolve trocando a cor do fundo. O filtro não
+pinta: ele processa o desenho que já está lá. É a diferença entre passar uma camada de tinta por cima
+de uma foto e mexer no arquivo da foto. No CSS, essa operação tem nome — <code>filter</code> — e o
+Tailwind entrega um catálogo de filtros prontos, cada um com a sua escala.</p>
+
+<p>Vale dizer desde já para que serve cada família, porque são muitas palavras novas de uma vez:
+cinza é <code>grayscale</code>, desfoque é <code>blur</code>, claro e escuro é
+<code>brightness</code>, contraste é <code>contrast</code>, cor viva é <code>saturate</code>, tom
+de foto antiga é <code>sepia</code>, giro de cor é <code>hue-rotate</code> e negativo é
+<code>invert</code>. Tem também o <code>drop-shadow</code>, que é sombra feita com filtro, e a
+família <code>backdrop-</code>, que aplica tudo isso no que está atrás do elemento. São poucas ideias,
+muitos nomes.</p>
+
+<h2>2. O que um filtro faz (e o que ele não faz)</h2>
+
+<p>Um filtro é uma etapa a mais no desenho. O navegador pinta o elemento, pinta os filhos, junta
+tudo numa imagem só e passa essa imagem por um processamento antes de mostrar. Por isso o filtro age
+no conjunto: se você põe <code>grayscale</code> num cartão, o fundo, o texto, a foto e o ícone ficam
+cinzas juntos. Não existe “cinza só no fundo” — para isso você usaria uma cor cinza no fundo mesmo.</p>
+
+<dl class="anatomy">
+<dt>filtro</dt>
+<dd>Um processamento aplicado ao desenho pronto do elemento e dos filhos. Não muda o tamanho nem a
+posição: muda só a aparência.</dd>
+<dt><code>filter</code></dt>
+<dd>A propriedade do CSS que recebe a lista de filtros, na ordem em que eles são aplicados.</dd>
+<dt><code>backdrop-filter</code></dt>
+<dd>A mesma ideia, mas aplicada ao que está atrás do elemento, e não a ele. É o que desfoca o fundo
+de uma barra translúcida.</dd>
+<dt>valor neutro</dt>
+<dd>O valor que não muda nada: <code>grayscale(0%)</code>, <code>blur(0)</code>,
+<code>brightness(100%)</code>. No Tailwind, quase sempre é o sufixo <code>-0</code>.</dd>
+<dt>variável acumulada</dt>
+<dd>O jeito do Tailwind somar filtros: cada classe guarda o seu pedaço numa variável
+<code>--tw-*</code> e a propriedade <code>filter</code> junta todas.</dd>
+</dl>
+
+<p>Duas consequências práticas saem daí. A primeira: filtro é caro. Desfocar uma área grande obriga o
+navegador a recalcular muita coisa, e animar um <code>blur</code> é uma das formas mais rápidas de
+deixar um celular antigo lento. Use com parcimônia, e prefira filtros estáticos. A segunda: qualquer
+coisa diferente de <code>none</code> em <code>filter</code> cria uma camada própria de empilhamento,
+igual à opacidade menor que 100% que você viu na <a href="opacidade.html">aula de opacidade</a>. Se
+um elemento seu começar a se comportar como se tivesse <code>z-index</code> próprio, procure um
+filtro no caminho.</p>
+
+<h2>3. O primeiro filtro: grayscale</h2>
+
+<p><code>grayscale</code> sem número é o cinza total: 100%. É a classe do produto esgotado, do
+patrocinador que não deve competir com o conteúdo e do retrato antigo da parede. O sufixo
+<code>-0</code> devolve a cor e serve para o hover, como você vai ver na seção 8.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|filter=grayscale(1);;rule:--tw-grayscale: grayscale(100%)">
+  <p class="try-task">O pão de queijo esgotou e continua colorido como se estivesse à venda. Deixe o
+  bloco inteiro em preto e branco com uma classe só.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl bg-amber-400 p-6 text-center text-lg font-bold text-amber-950"&gt;Pão de queijo — esgotado&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 24px
+background-color: oklch(0.828 0.189 84.429)
+color: oklch(0.279 0.077 45.635)
+font-size: 18px
+font-weight: 700
+line-height: 28px
+text-align: center
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-xl bg-amber-400 p-6 text-center text-lg font-bold text-amber-950 grayscale"&gt;Pão de queijo — esgotado&lt;/div&gt;</pre>
+</div>
+
+<p>O painel responde <code>filter: grayscale(1)</code>. Repare que o valor computado é 1, e não
+100%: é o mesmo número escrito de dois jeitos, como aconteceu com a opacidade. O CSS gerado guarda o
+valor em porcentagem dentro de uma variável e deixa a propriedade <code>filter</code> apontando para
+ela. Essa separação parece complicação, mas é o que permite somar filtros — e é o assunto da seção
+6.</p>
+
+<p>Um aviso que economiza meia hora de procura: <code>grayscale</code> num elemento de fundo branco
+não faz nada visível. Cinza de branco é branco. O filtro precisa de cor para ter o que tirar, então
+teste sempre com um fundo colorido — como o âmbar da caixa acima.</p>
+
+<h2>4. As famílias de filtro</h2>
+
+<p>Todos seguem o mesmo formato: a palavra, um hífen e um número da escala. O que muda é o que o
+número significa. Em <code>blur</code>, é tamanho em pixels; em <code>brightness</code>, é
+porcentagem; em <code>hue-rotate</code>, é ângulo. A tabela abaixo é a que a Ana colou no caderno,
+porque cobre 90% do que aparece num site de verdade.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que faz</th><th>Uso típico na padaria</th></tr>
+<tr><td><code>grayscale</code></td><td>tira toda a cor</td><td>produto esgotado, patrocinador discreto</td></tr>
+<tr><td><code>sepia</code></td><td>tom de foto antiga, amarronzado</td><td>seção “desde 1987”</td></tr>
+<tr><td><code>blur-sm</code></td><td>desfoque leve</td><td>mancha atrás de um título</td></tr>
+<tr><td><code>brightness-75</code></td><td>escurece para 75%</td><td>foto com luz estourada</td></tr>
+<tr><td><code>contrast-125</code></td><td>aumenta o contraste</td><td>textura de pão na foto</td></tr>
+<tr><td><code>saturate-150</code></td><td>deixa a cor mais viva</td><td>foto sem graça do bolo</td></tr>
+<tr><td><code>hue-rotate-30</code></td><td>gira o matiz em 30 graus</td><td>efeito decorativo, quase nunca</td></tr>
+<tr><td><code>invert</code></td><td>negativo da imagem</td><td>ícone branco a partir de um preto</td></tr>
+<tr><td><code>drop-shadow-md</code></td><td>sombra que segue o contorno</td><td>adesivo e ícone recortado</td></tr>
+</table>
+</div>
+
+<p>As escalas não são iguais entre as famílias, e isso confunde no começo. <code>brightness</code>
+vai de 0 a 200, de 5 em 5 perto de 100; <code>contrast</code> vai de 0 a 200 em degraus maiores;
+<code>saturate</code> tem 0, 50, 100, 150 e 200; <code>hue-rotate</code> trabalha com ângulos de 15,
+30, 60, 90 e 180. Não decore as listas: escreva a classe, rode a caixa e leia o valor computado. A
+escala existe para você não inventar número solto, e o painel existe para você não precisar
+adivinhar.</p>
+
+<p>Um detalhe de leitura do painel: <code>sepia</code> sozinho mostra
+<code>filter: sepia(1)</code>, e <code>brightness-75</code> mostra
+<code>filter: brightness(0.75)</code>. O navegador converte porcentagem em decimal e ângulo em
+graus. Nada disso muda o que você escreveu; é só o mesmo valor em outra roupa.</p>
+
+<h2>5. Desfoque: a escala do blur</h2>
+
+<p><code>blur</code> é o filtro mais visível e o mais mal usado. O número depois do hífen não é uma
+porcentagem: é o raio do desfoque, em pixels, já traduzido pela escala do Tailwind. Quanto maior,
+mais a imagem se espalha. A escala vai de 4 px a 64 px.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Raio</th><th>Para que serve</th></tr>
+<tr><td><code>blur-xs</code></td><td>4 px</td><td>tirar a nitidez de um detalhe de fundo</td></tr>
+<tr><td><code>blur-sm</code></td><td>8 px</td><td>foto de trás levemente desfocada</td></tr>
+<tr><td><code>blur-md</code></td><td>12 px</td><td>fundo de barra translúcida</td></tr>
+<tr><td><code>blur-lg</code></td><td>16 px</td><td>mancha decorativa média</td></tr>
+<tr><td><code>blur-xl</code></td><td>24 px</td><td>bolha de cor atrás de um selo</td></tr>
+<tr><td><code>blur-2xl</code></td><td>40 px</td><td>fundo de capa</td></tr>
+<tr><td><code>blur-3xl</code></td><td>64 px</td><td>mancha grande, quase abstrata</td></tr>
+</table>
+</div>
+
+<div class="trytailwind" data-goal="css:#alvo|filter=blur(24px);;rule:--tw-blur: blur(var(--blur-xl))">
+  <p class="try-task">A bolha de cor atrás do selo está com a borda dura, parece um adesivo colado. Dê
+  a ela 24 px de desfoque, o degrau <code>xl</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="size-24 rounded-full bg-rose-400"&gt;&lt;/div&gt;</pre>
+  <pre class="out">
+width: 96px
+height: 96px
+background-color: oklch(0.712 0.194 13.428)
+border-radius: 3.35544e+07px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="size-24 rounded-full bg-rose-400 blur-xl"&gt;&lt;/div&gt;</pre>
+</div>
+
+<p>Duas coisas importantes sobre desfoque. A primeira: ele vaza. O navegador espalha a tinta para
+fora dos limites da caixa, então uma bolha desfocada parece maior do que era antes do filtro. Se o
+vazamento incomodar, o pai precisa de <code>overflow-hidden</code> para cortar. A segunda: desfoque
+não esconde conteúdo de verdade. Um texto desfocado continua no HTML, continua selecionável e
+continua no leitor de tela. Para esconder, o caminho é outro — a aula de <a
+href="esconder-mostrar.html">esconder e mostrar</a>.</p>
+
+<h2>6. O CSS gerado: as variáveis que se somam</h2>
+
+<p>Se você escrever dois filtros no mesmo elemento, os dois valem. É o que faz o Tailwind guardar
+cada pedaço numa variável em vez de escrever a propriedade inteira em cada classe. A regra do
+<code>grayscale</code> é assim:</p>
+
+<pre class="term" data-title="CSS gerado">.grayscale {
+  --tw-grayscale: grayscale(100%);
+  filter: var(--tw-blur, ) var(--tw-brightness, ) var(--tw-contrast, )
+    var(--tw-grayscale, ) var(--tw-hue-rotate, ) var(--tw-invert, )
+    var(--tw-saturate, ) var(--tw-sepia, ) var(--tw-drop-shadow, );
+}</pre>
+
+<p>Leia com calma, porque esse bloco explica o comportamento de todos os filtros. A classe guarda
+<code>--tw-grayscale</code> com o valor e, logo abaixo, escreve a propriedade <code>filter</code> com
+a lista completa de variáveis. Quando uma variável não foi definida no elemento, o segundo argumento
+do <code>var()</code> assume — e o segundo argumento é vazio. Por isso a lista inteira está lá com
+espaços entre os parênteses: cada filtro ausente contribui com nada.</p>
+
+<p>Juntar <code>blur-sm grayscale brightness-75</code> produz uma única propriedade
+<code>filter</code> com três pedaços, e a ordem não é a que você escreveu no HTML: é a ordem da lista
+— desfoque, depois brilho, depois cinza. Essa ordem importa, porque filtros não são independentes.
+Tirar a cor de uma imagem escurecida não dá o mesmo resultado de escurecer uma imagem sem cor. Quando
+o resultado visual surpreender, é aí que está a explicação.</p>
+
+<p>Para apagar todos os filtros de uma vez existe <code>filter-none</code>, que escreve
+<code>filter: none</code> e é útil quando um componente herdou classes de outro lugar. E existe um
+detalhe de compatibilidade que você não precisa gerenciar: o Tailwind já escreve a versão com prefixo
+<code>-webkit-</code> quando o navegador exige. Você não digita prefixo nenhum.</p>
+
+<h2>7. Filtrar o que está atrás: o backdrop</h2>
+
+<p>A barra de avisos da Ana fica sobre a foto do balcão, translúcida, e o texto de trás aparece
+nítido através dela. Fica sujo. A solução que todo mundo conhece é a mesma dos sistemas operacionais
+modernos: desfocar só o que está atrás da barra. É o <code>backdrop-filter</code>, que no Tailwind
+tem a mesma família de filtros com o prefixo <code>backdrop-</code>.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|backdrop-filter=blur(12px);;rule:--tw-backdrop-blur: blur(var(--blur-md))">
+  <p class="try-task">A barra branca passou por cima do título e o que está atrás dela aparece
+  nítido, atrapalhando a leitura. Desfoque o fundo com <code>backdrop-blur-md</code>.</p>
+  <pre class="html">&lt;div class="relative rounded-xl bg-amber-300 p-6"&gt;
+  &lt;p class="m-0 pr-40 text-2xl font-bold text-amber-950"&gt;Forno a lenha, pão quentinho&lt;/p&gt;
+  &lt;div id="alvo" class="absolute inset-x-3 bottom-3 rounded-lg bg-white/40 p-3 text-sm font-medium text-stone-900"&gt;Encomendas até as 18h&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+position: absolute
+padding: 12px
+background-color: oklab(0.999994 0.0000455678 0.0000200868 / 0.4)
+color: oklch(0.216 0.006 56.043)
+font-size: 14px
+font-weight: 500
+line-height: 20px
+border-radius: 8px
+bottom: 12px
+inset-inline: 12px
+</pre>
+  <pre class="solucao">&lt;div class="relative rounded-xl bg-amber-300 p-6"&gt;
+  &lt;p class="m-0 pr-40 text-2xl font-bold text-amber-950"&gt;Forno a lenha, pão quentinho&lt;/p&gt;
+  &lt;div id="alvo" class="absolute inset-x-3 bottom-3 rounded-lg bg-white/40 p-3 text-sm font-medium text-stone-900 backdrop-blur-md"&gt;Encomendas até as 18h&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>backdrop-filter: blur(12px)</code>. Repare que é outra propriedade:
+<code>filter</code> age no elemento; <code>backdrop-filter</code>, no que está atrás dele. Se você
+trocar um pelo outro, o resultado é bem diferente — e é o erro mais comum de quem copia um trecho
+pronto. Na dúvida, olhe se a classe começa com <code>backdrop-</code>.</p>
+
+<p>Para o efeito aparecer, o elemento precisa ser pelo menos um pouco translúcido. Uma barra com
+<code>bg-white</code> cheio esconde o fundo e o desfoque não tem o que mostrar; é justamente por isso
+que <code>bg-white/40</code> e <code>backdrop-blur-md</code> andam juntos, como na caixa. O número
+depois da barra e o número do desfoque trabalham em time: mais transparência deixa mais fundo
+aparecer, e aí o desfoque precisa ser maior para o texto continuar legível.</p>
+
+<h2>8. Filtro com estado: o hover que o painel não vê</h2>
+
+<p>O gesto clássico é a foto cinza que ganha cor quando o mouse passa. No Tailwind são três classes:
+<code>grayscale</code> no repouso, <code>hover:grayscale-0</code> para o mouse e
+<code>transition</code> para a troca não ser um susto. O painel continua mostrando
+<code>grayscale(1)</code>, porque ele mede o repouso — e não há nada de errado nisso. A conferência
+confiável, aqui, é o CSS gerado:</p>
+
+<pre class="term" data-title="CSS gerado">.grayscale {
+  --tw-grayscale: grayscale(100%);
+  filter: var(--tw-blur, ) var(--tw-brightness, ) var(--tw-contrast, )
+    var(--tw-grayscale, ) var(--tw-hue-rotate, ) var(--tw-invert, )
+    var(--tw-saturate, ) var(--tw-sepia, ) var(--tw-drop-shadow, );
+}
+@media (hover: hover) {
+  .hover\:grayscale-0:hover {
+    --tw-grayscale: grayscale(0%);
+    filter: var(--tw-blur, ) var(--tw-brightness, ) var(--tw-contrast, )
+      var(--tw-grayscale, ) var(--tw-hue-rotate, ) var(--tw-invert, )
+      var(--tw-saturate, ) var(--tw-sepia, ) var(--tw-drop-shadow, );
+  }
+}</pre>
+
+<p>Duas leituras. A primeira: a classe de hover reescreve a variável com o valor neutro em vez de
+apagar a propriedade, então o resto dos filtros continua inteiro. A segunda: a casca
+<code>@media (hover: hover)</code> protege o celular, exatamente como na <a href="hover.html">aula
+de hover</a>. O toque não deixa a foto presa em cinza.</p>
+
+<p>No mesmo assunto entra o <code>drop-shadow</code>, que é sombra feita com filtro. Ele aparece na
+lista de variáveis em vez de usar <code>box-shadow</code>, e a diferença é visível: a
+<code>shadow</code> desenha um retângulo atrás da caixa, enquanto a <code>drop-shadow</code> segue o
+contorno do que está pintado. Num cartão retangular, as duas parecem iguais; num ícone recortado ou
+num adesivo com fundo transparente, a <code>drop-shadow</code> acompanha o desenho e a
+<code>shadow</code> aparece como uma caixa fantasma. Se você só quer a sombra do cartão, a aula de <a
+href="sombras.html">sombras</a> tem a escala certa; se quer a sombra do desenho, use
+<code>drop-shadow</code>.</p>
+
+<p>E o preço: sombra em filtro é mais caro que sombra em caixa. Um <code>drop-shadow</code> obriga o
+navegador a calcular o contorno de cada pixel. Num ícone, é barato. Numa lista de cinquenta cartões,
+não é. Na dúvida, prefira <code>shadow</code>; guarde <code>drop-shadow</code> para o recorte.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o cinza que deixou a etiqueta ilegível</h3>
+<p>A Ana aplicou <code>grayscale</code> no cartão inteiro do produto esgotado — fundo, texto e o selo
+“esgotado” vermelho. O vermelho virou um cinza médio e o texto do selo perdeu o contraste, justamente
+na informação mais importante. A correção foi mover o filtro para a imagem: <code>grayscale</code> só
+na foto, e o selo com a cor cheia por cima. Filtro em componente é uma decisão sobre o que deve
+parecer apagado, e a resposta quase nunca é “tudo”.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a mancha desfocada que escorreu para fora do cartão</h3>
+<p>Ela pintou a bolha atrás do selo com <code>blur-2xl</code> e o resultado vazou para fora do cartão,
+manchando o fundo branco da página. O desfoque não respeita a borda do elemento; ele espalha tinta
+para todos os lados. A solução foi <code>overflow-hidden</code> no cartão, que corta o que passa.
+Outra saída, mais elegante, é desfocar um elemento que já esteja dentro dos limites, com margem
+suficiente para o borrão caber.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a barra translúcida que ficou ilegível no celular</h3>
+<p>No notebook, a barra com <code>bg-white/40</code> e <code>backdrop-blur-md</code> ficou
+sofisticada. No celular, o texto de trás passou a competir com o da frente, porque a tela é pequena e
+a foto ocupa a largura toda. A Ana subiu a opacidade do fundo para <code>bg-white/80</code> e manteve
+o desfoque: o efeito continua bonito e a leitura melhora. Efeito de vidro é enfeite; texto legível é
+requisito.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. Qual classe deixa um cartão inteiro em preto e
+branco, incluindo o texto e a foto?</p>
+<label><input type="radio" name="f1"> <code>bg-stone-400</code></label>
+<label><input type="radio" name="f1"> <code>opacity-50</code></label>
+<label><input type="radio" name="f1"> <code>grayscale</code></label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">2. A Ana quer desfocar só o que está atrás da barra
+translúcida. Qual família usa?</p>
+<label><input type="radio" name="f2"> <code>blur-md</code></label>
+<label><input type="radio" name="f2"> <code>backdrop-blur-md</code></label>
+<label><input type="radio" name="f2"> <code>shadow-md</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que dois filtros no mesmo elemento não se
+anulam?</p>
+<label><input type="radio" name="f3"> cada classe guarda o seu pedaço numa variável e a propriedade
+<code>filter</code> junta todas</label>
+<label><input type="radio" name="f3"> o navegador escolhe o último filtro da linha</label>
+<label><input type="radio" name="f3"> porque o Tailwind gera uma folha de estilo para cada
+classe</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a foto da vitrine</h2>
+<p>A foto do balcão saiu amarelada. A Ana quer tirar boa parte da cor, sem deixar em preto e branco:
+saturação em 50%. Complete a classe:</p>
+<div class="ex-code">&lt;img class="rounded-xl <input aria-label="resposta 1" data-answer="saturate-50" placeholder="...">" src="balcao.jpg" alt="Balcão da padaria"&gt;</div>
+<p class="ex-dica">Dica: a família da saturação é <code>saturate</code>, e o valor neutro é 100. Para
+menos cor, você desce o número; para mais, sobe. Se escrever <code>grayscale</code>, a foto fica sem
+cor nenhuma — funciona, mas não é o pedido.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Filtro é processamento de imagem, não pintura: o elemento e os filhos são desenhados e depois
+passam por um tratamento. No Tailwind, cada família tem a sua palavra e a sua escala —
+<code>grayscale</code>, <code>blur-*</code>, <code>brightness-*</code>, <code>contrast-*</code>,
+<code>saturate-*</code>, <code>sepia</code>, <code>hue-rotate-*</code>, <code>invert</code> e
+<code>drop-shadow-*</code> — e todas se somam, porque cada uma guarda o seu valor numa variável
+<code>--tw-*</code> que a propriedade <code>filter</code> junta.</p>
+
+<p>O <code>backdrop-blur-*</code> é o irmão que age no que está atrás, e é ele que faz o efeito de
+vidro fosco; sem transparência no fundo, ele não tem o que desfocar. E o <code>drop-shadow</code> faz
+a sombra seguir o contorno do desenho, enquanto <code>shadow</code> desenha um retângulo atrás da
+caixa — a escolha depende de o elemento ter recorte ou não.</p>
+
+<p>O hábito que resolve os casos difíceis é sempre o mesmo: desconfie do resultado visual e leia o
+valor computado. Se o filtro não aparece, provavelmente o elemento não tem cor para perder, ou você
+usou <code>backdrop-</code> onde queria <code>filter</code>. E cuidado com o custo: filtro em área
+grande e animada é o tipo de enfeite que transforma um site bonito num site lento.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Filtro age no elemento e nos filhos, juntos; não muda tamanho nem posição.</li>
+<li><code>grayscale</code> é 100%; <code>grayscale-0</code> devolve a cor.</li>
+<li><code>blur-*</code> vai de 4 px (<code>xs</code>) a 64 px (<code>3xl</code>).</li>
+<li>O desfoque vaza para fora da caixa: <code>overflow-hidden</code> no pai corta.</li>
+<li>Filtros se somam em variáveis <code>--tw-*</code>, na ordem da lista do CSS.</li>
+<li><code>filter-none</code> apaga todos os filtros do elemento.</li>
+<li><code>backdrop-blur-*</code> age no que está atrás e pede fundo translúcido.</li>
+<li><code>drop-shadow</code> segue o contorno; <code>shadow</code> é retângulo.</li>
+<li>Estado de hover: o painel mede o repouso, então confira pelo CSS gerado.</li>
+<li>Filtro cria camada de empilhamento e custa caro em áreas grandes.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

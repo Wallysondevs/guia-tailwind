@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>first e last | Guia Tailwind</title>
+<meta name="description" content="As variantes first e last do Tailwind: o primeiro e o último filho da lista, o CSS gerado com :first-child e :last-child e as armadilhas da posição no HTML.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>first e <span class="hl">last</span></h1>
+<p class="intro">A Ana está com a lista de preços da padaria quase pronta. O cartão tem respiro, as
+linhas têm divisórias, o preço está alinhado. Só ficaram duas sobras chatas nas pontas: o primeiro pão tem
+espaço demais em cima, porque o respiro do cartão se soma ao respiro da linha, e o último pão tem uma
+linha sobrando embaixo, que encontra a borda do cartão e desenha um risco duplo. Consertar isso à mão
+seria criar uma classe para cada item. O Tailwind resolve com dois prefixos que não dependem de mouse
+nem de teclado: <code>first:</code> e <code>last:</code>, o primeiro e o último filho da lista.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é um estado de posição e por que ele não depende do visitante.</li>
+  <li>Como usar <code>first:</code> e <code>last:</code> em listas e cartões.</li>
+  <li>O CSS que o Tailwind gera, com <code>:first-child</code> e <code>:last-child</code>.</li>
+  <li>Quem conta como “primeiro filho” — e por que um elemento em volta estraga tudo.</li>
+  <li>Por que o painel mostra o <code>first:</code> e não o <code>last:</code>.</li>
+  <li>O caso do item único, com <code>only:</code>.</li>
+  <li>Quando a posição visual não é a posição do HTML.</li>
+</ul>
+</div>
+
+<h2>1. A cena: as sobras nas pontas da lista</h2>
+
+<p>A lista de preços é um cartão branco com três linhas: pão francês, bolo de fubá e pão de queijo.
+Cada linha tem 12 px de respiro em todos os lados, e o cartão tem 8 px. No papel, a conta parece certa.
+Na tela, o topo do cartão ficou com 20 px de espaço e o rodapé com 20 px também — e as linhas do meio,
+com 12. O olho percebe na hora: a lista parece apertada no meio e frouxa nas pontas.</p>
+
+<p>O outro problema é a divisória. A Ana desenhou uma linha fina embaixo de cada item para separar os
+pães. Funciona nos dois primeiros. No último, a linha aparece bem em cima da borda do cartão e o
+resultado é um risco grosso, como se alguém tivesse passado o lápis duas vezes. São dois sintomas do
+mesmo problema: o primeiro e o último item precisam de um tratamento diferente dos outros.</p>
+
+<p>O jeito antigo seria criar uma classe só para o primeiro (<code>primeiro</code>) e outra só para o
+último (<code>ultimo</code>), e lembrar de trocá-las sempre que a lista mudasse de ordem. O jeito do
+Tailwind não precisa de nome nenhum: ele pergunta ao navegador quem é o primeiro e quem é o último. É o
+que a próxima seção explica.</p>
+
+<h2>2. Posição, não interação</h2>
+
+<p>Até aqui, os estados dependiam de algo que o visitante faz: passar o mouse, clicar, apertar
+<kbd>Tab</kbd>. Estes dois são diferentes. <code>:first-child</code> e <code>:last-child</code> são
+pseudo-classes de <em>posição</em>: elas casam com um elemento porque ele é o primeiro ou o último
+filho do seu pai. Nada de mouse, nada de teclado, nada de atributo. O HTML já contém a informação, e
+ela não muda enquanto a página está aberta.</p>
+
+<p>Por isso a notação é a mesma das outras variantes: o prefixo antes dos dois-pontos, a classe de
+sempre depois. <code>first:pt-0</code> quer dizer “sem respiro em cima, quando este elemento for o
+primeiro filho do pai”. <code>last:border-b-0</code> quer dizer “sem linha embaixo, quando for o
+último”. Simples assim — e o CSS que sai disso é igualmente curto.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Variante</th><th>Vira no CSS</th><th>Vale quando</th></tr>
+<tr><td><code>first:</code></td><td><code>:first-child</code></td><td>o elemento é o primeiro filho do pai</td></tr>
+<tr><td><code>last:</code></td><td><code>:last-child</code></td><td>o elemento é o último filho do pai</td></tr>
+<tr><td><code>only:</code></td><td><code>:only-child</code></td><td>o elemento é filho único</td></tr>
+<tr><td><code>odd:</code> e <code>even:</code></td><td><code>:nth-child(...)</code></td><td>alterna entre ímpares e pares — assunto da próxima aula</td></tr>
+</table>
+</div>
+
+<dl class="anatomy">
+<dt>pai</dt>
+<dd>O elemento que contém outros. Na lista, o pai dos itens é o <code>&lt;ul&gt;</code>.</dd>
+<dt>filho</dt>
+<dd>Um elemento dentro do pai. Todos os itens de uma lista são filhos do mesmo <code>&lt;ul&gt;</code>.</dd>
+<dt>irmão</dt>
+<dd>Um filho em relação aos outros filhos do mesmo pai. O primeiro e o último são irmãos entre si.</dd>
+<dt>:first-child</dt>
+<dd>A condição “sou o primeiro filho”. Não olha a tag nem a classe: olha a posição entre os irmãos.</dd>
+<dt>:only-child</dt>
+<dd>A condição “sou o único filho”. Um item só é, ao mesmo tempo, o primeiro e o último.</dd>
+</dl>
+
+<p>Uma consequência que vale guardar desde já: o <code>first:</code> não quer dizer “o primeiro item da
+lista que eu tenho na cabeça”. Quer dizer “o primeiro filho do meu pai”. Se o item estiver dentro de
+uma caixa intermediária, o pai dele passa a ser essa caixa, e ele pode ser o primeiro filho dela mesmo
+sendo o terceiro item da lista. Essa é a armadilha mais comum, e a seção 5 mostra como reconhecê-la.</p>
+
+<h2>3. O first na prática</h2>
+
+<p>Vamos ao respiro. A ideia é tirar o espaço de cima do primeiro item, porque o cartão já dá o
+respiro dele. A classe é <code>first:pt-0</code>: <code>pt</code> é o respiro do topo,
+<code>0</code> é nenhum, e o prefixo diz quando. Ela vai em todos os itens — a condição é que decide
+qual deles vai receber o efeito.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding-top=0px;;rule:.first\:pt-0:first-child">
+  <p class="try-task">O primeiro item da lista tem 12 px de respiro em cima, que se somam aos 8 px do
+  cartão. Zere só o respiro de cima do primeiro item.</p>
+  <pre class="html">&lt;ul class="rounded-xl bg-white p-2"&gt;
+  &lt;li id="alvo" class="p-3"&gt;Pão francês — R$ 8,00&lt;/li&gt;
+  &lt;li class="p-3"&gt;Bolo de fubá — R$ 12,00&lt;/li&gt;
+  &lt;li class="p-3"&gt;Pão de queijo — R$ 6,00&lt;/li&gt;
+&lt;/ul&gt;</pre>
+  <pre class="out">
+padding: 12px
+</pre>
+  <pre class="solucao">&lt;ul class="rounded-xl bg-white p-2"&gt;
+  &lt;li id="alvo" class="p-3 first:pt-0"&gt;Pão francês — R$ 8,00&lt;/li&gt;
+  &lt;li class="p-3"&gt;Bolo de fubá — R$ 12,00&lt;/li&gt;
+  &lt;li class="p-3"&gt;Pão de queijo — R$ 6,00&lt;/li&gt;
+&lt;/ul&gt;</pre>
+</div>
+
+<p>O painel desta vez ajuda de verdade. Antes, ele mostra <code>padding: 12px</code> — o respiro igual
+nos quatro lados. Depois de aplicar a solução, ele passa a mostrar
+<code>padding: 0px 12px 12px</code>: zero em cima, 12 px nos lados, 12 px embaixo. A ordem do atalho é
+sempre essa — topo, direita, baixo, esquerda —, então a leitura é direta: a única coisa que mudou foi
+o topo.</p>
+
+<p>Por que o painel vê essa e não vai ver o <code>last:</code> da seção 6? Porque o alvo continua sendo
+o primeiro filho durante a medição. O medidor põe uma cópia do elemento logo depois dele para comparar
+os valores; no caso do primeiro, a cópia vira o segundo filho e o alvo segue sendo o primeiro. No caso
+do último, a cópia empurra o alvo para o meio, e ele deixa de ser o último. Guarde essa diferença: ela
+explica o comportamento das próximas caixas.</p>
+
+<h2>4. O CSS que o Tailwind gera</h2>
+
+<p>Esta é a saída real para um item com <code>first:pt-0</code> e outro com
+<code>last:border-b-0</code>:</p>
+
+<pre class="term">.first\:pt-0:first-child {
+  padding-top: 0px;
+}
+.last\:border-b-0:last-child {
+  border-bottom-style: var(--tw-border-style);
+  border-bottom-width: 0px;
+}</pre>
+
+<p>A forma já é conhecida: nome da classe com os dois-pontos escapados, mais a condição no fim. O que
+muda é o nome da pseudo-classe. Em vez de <code>:hover</code> ou <code>:active</code>, aparece
+<code>:first-child</code> ou <code>:last-child</code>. E, como no foco, não há <code>@media</code> em
+volta: a posição existe em todo aparelho, em toda largura de tela, em todo tema.</p>
+
+<p>Repare que o <code>last:border-b-0</code> não gera uma linha “invisível”: ele zera a largura da
+borda. É por isso que ele é melhor do que pintar a borda da cor do fundo. Uma borda transparente
+continua ocupando 1 px de espaço; uma borda com largura zero não ocupa nada. Em uma lista com muitas
+linhas, a diferença aparece na altura total.</p>
+
+<p>O seletor também revela uma coisa importante: a regra não fala em <code>li</code>,
+<code>ul</code> nem em nenhuma tag. Ela casa com qualquer elemento que seja o primeiro filho do pai e
+tenha a classe. Um <code>first:pt-0</code> num <code>div</code> funciona igual; num
+<code>&lt;td&gt;</code> também. A tag não importa — a posição, sim.</p>
+
+<h2>5. Quem é o primeiro filho?</h2>
+
+<p>Aqui mora o erro que faz o <code>first:</code> “não funcionar”. O navegador conta apenas
+<em>elementos</em>. Espaços, quebras de linha e texto solto não contam. Se o seu HTML tem o
+<code>&lt;li&gt;</code> como primeiro elemento dentro do <code>&lt;ul&gt;</code>, ele é o primeiro
+filho, mesmo que haja duas linhas em branco antes dele no arquivo. Isso é tranquilo.</p>
+
+<p>O problema aparece quando alguém coloca uma caixa em volta de cada item — para dar um link, um
+efeito, uma animação. Aí o pai do item deixa de ser o <code>&lt;ul&gt;</code> e passa a ser a caixa. E
+cada item é o primeiro filho da sua própria caixa. Resultado: o estilo de “primeiro” aparece em todos
+os itens, e a lista inteira fica com o respiro de cima zerado.</p>
+
+<pre class="file" data-file="precos.html">&lt;!-- errado: cada item tem a sua caixa --&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;div class="first:pt-0 p-3"&gt;Pão francês&lt;/div&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;div class="first:pt-0 p-3"&gt;Bolo de fubá&lt;/div&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!-- certo: a classe fica no filho do ul --&gt;
+&lt;ul&gt;
+  &lt;li class="first:pt-0 p-3"&gt;Pão francês&lt;/li&gt;
+  &lt;li class="first:pt-0 p-3"&gt;Bolo de fubá&lt;/li&gt;
+&lt;/ul&gt;</pre>
+
+<p>Há uma segunda variação do mesmo problema: um elemento que não é item no meio da lista. Se o
+<code>&lt;ul&gt;</code> tem um título antes dos itens, o título é o primeiro filho — e nenhum
+<code>&lt;li&gt;</code> vai casar com <code>:first-child</code>. A lista parece quebrada, mas o CSS
+está obedecendo à risca. A cura é sempre a mesma: olhe a árvore do HTML no DevTools e pergunte “quem
+são os irmãos deste elemento?”.</p>
+
+<p>Vale conhecer também o <code>only:</code>, que é a condição de filho único. Uma lista com um item
+só é, ao mesmo tempo, primeira e última. Se você escreveu <code>first:rounded-t-xl</code> e
+<code>last:rounded-b-xl</code>, esse item recebe as duas metades do arredondamento. Com
+<code>only:rounded-xl</code>, você cobre o caso com uma classe só e um arredondamento inteiro. É o tipo
+de detalhe que ninguém nota quando está certo e todo mundo nota quando falta.</p>
+
+<h2>6. O last e a linha que sobra</h2>
+
+<p>Voltando à divisória. Cada item tem <code>border-b</code>, uma linha embaixo. Funciona como
+separador entre um pão e o seguinte — mas o último não tem seguinte, e a linha dele encosta na borda do
+cartão. A solução é <code>last:border-b-0</code> em todos os itens: só o último casa com a condição e
+perde a linha.</p>
+
+<div class="trytailwind" data-goal="rule:.last\:border-b-0:last-child;;css:#alvo li:last-child|border-bottom-width=0px">
+  <p class="try-task">A linha de baixo do último item está dobrando a borda do cartão. Acrescente a
+  classe que zera a borda inferior do último item da lista.</p>
+  <pre class="html">&lt;ul id="alvo" class="rounded-xl bg-white p-2"&gt;
+  &lt;li class="border-b border-amber-100 py-2"&gt;Pão francês — R$ 8,00&lt;/li&gt;
+  &lt;li class="border-b border-amber-100 py-2"&gt;Bolo de fubá — R$ 12,00&lt;/li&gt;
+  &lt;li class="border-b border-amber-100 py-2"&gt;Pão de queijo — R$ 6,00&lt;/li&gt;
+&lt;/ul&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: rgb(255, 255, 255)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;ul id="alvo" class="rounded-xl bg-white p-2"&gt;
+  &lt;li class="border-b border-amber-100 py-2"&gt;Pão francês — R$ 8,00&lt;/li&gt;
+  &lt;li class="border-b border-amber-100 py-2"&gt;Bolo de fubá — R$ 12,00&lt;/li&gt;
+  &lt;li class="border-b border-amber-100 py-2 last:border-b-0"&gt;Pão de queijo — R$ 6,00&lt;/li&gt;
+&lt;/ul&gt;</pre>
+</div>
+
+<p>Aqui o alvo do painel é o <code>&lt;ul&gt;</code>, então a tabela descreve o cartão: 8 px de
+respiro, fundo branco, cantos de 12 px. O que muda está nos filhos, e a tabela de CSS computado não
+desce para os filhos. É por isso que a meta desta caixa confere duas coisas: a regra gerada
+(<code>rule:</code>) e a borda do último item (<code>css:#alvo li:last-child|…</code>), que é medida no
+elemento certo.</p>
+
+<p>E se você puser <code>id="alvo"</code> no último item para tentar ver a borda sumindo na tabela?
+Não vai ver, e o motivo é a cópia que o medidor insere logo depois do alvo: com a cópia ali, o alvo
+deixa de ser o último filho, e a regra <code>:last-child</code> para de casar justo no instante da
+medição. A lista na prévia mostra a verdade; a tabela, nesse caso, mente. É a única situação do guia
+em que o painel não serve de prova — e agora você sabe por quê.</p>
+
+<h2>7. first e last juntos: os cantos do grupo</h2>
+
+<p>Um uso em que os dois aparecem na mesma linha de classes é o grupo de itens que precisa parecer um
+bloco só: o primeiro com os cantos de cima arredondados, o último com os de baixo, os do meio
+retos. É o desenho de um menu vertical ou de uma lista de endereços. As classes são
+<code>first:rounded-t-xl</code> e <code>last:rounded-b-xl</code> — <code>rounded-t</code> é o canto de
+cima, <code>rounded-b</code> o de baixo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-top-left-radius=12px;;css:#lista li:last-child|border-bottom-right-radius=12px;;rule:.first\:rounded-t-xl:first-child">
+  <p class="try-task">Os itens do cardápio devem formar um bloco único: cantos de cima arredondados no
+  primeiro item e cantos de baixo no último. Use <code>first:</code> e <code>last:</code>.</p>
+  <pre class="html">&lt;ul id="lista" class="bg-white p-2"&gt;
+  &lt;li id="alvo" class="bg-amber-100 p-3"&gt;Pão francês — R$ 8,00&lt;/li&gt;
+  &lt;li class="bg-amber-100 p-3"&gt;Bolo de fubá — R$ 12,00&lt;/li&gt;
+  &lt;li class="bg-amber-100 p-3"&gt;Pão de queijo — R$ 6,00&lt;/li&gt;
+&lt;/ul&gt;</pre>
+  <pre class="out">
+padding: 12px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;ul id="lista" class="bg-white p-2"&gt;
+  &lt;li id="alvo" class="bg-amber-100 p-3 first:rounded-t-xl last:rounded-b-xl"&gt;Pão francês — R$ 8,00&lt;/li&gt;
+  &lt;li class="bg-amber-100 p-3 first:rounded-t-xl last:rounded-b-xl"&gt;Bolo de fubá — R$ 12,00&lt;/li&gt;
+  &lt;li class="bg-amber-100 p-3 first:rounded-t-xl last:rounded-b-xl"&gt;Pão de queijo — R$ 6,00&lt;/li&gt;
+&lt;/ul&gt;</pre>
+</div>
+
+<p>Depois da solução, o painel mostra os mesmos 12 px de respiro e o mesmo âmbar 100, mais duas linhas
+novas: <code>border-top-left-radius: 12px</code> e <code>border-top-right-radius: 12px</code>. Os
+cantos de baixo não aparecem porque o alvo é o primeiro item, e ele não é o último. Se você quisesse
+ver os quatro, teria de medir o item único de uma lista de um item só — e aí entraria o
+<code>only:</code>.</p>
+
+<pre class="term">.first\:rounded-t-xl:first-child {
+  border-top-left-radius: var(--radius-xl);
+  border-top-right-radius: var(--radius-xl);
+}
+.last\:rounded-b-xl:last-child {
+  border-bottom-right-radius: var(--radius-xl);
+  border-bottom-left-radius: var(--radius-xl);
+}
+.only\:rounded-xl:only-child {
+  border-radius: var(--radius-xl);
+}</pre>
+
+<p>Repare que cada classe mexe em dois cantos, não em um. <code>rounded-t</code> é um atalho para “os
+dois cantos de cima”; no CSS ele vira duas propriedades. E todas apontam para
+<code>var(--radius-xl)</code>, a mesma variável da classe <code>rounded-xl</code> — o valor fica num
+lugar só, e mudar o tema muda os três de uma vez.</p>
+
+<h2>8. Quando não é lista</h2>
+
+<p>Nada disso é exclusivo de <code>&lt;ul&gt;</code>. Qualquer pai com filhos serve: uma grade de
+cartões, um menu horizontal, uma linha de botões, uma tabela. Em todos, <code>first:</code> e
+<code>last:</code> olham a posição entre irmãos, e a leitura é sempre a mesma.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Situação</th><th>As classes</th><th>Por quê</th></tr>
+<tr><td>lista dentro de um cartão</td><td><code>first:pt-0 last:pb-0</code></td><td>o cartão já dá o respiro das pontas</td></tr>
+<tr><td>lista com linha entre os itens</td><td><code>last:border-b-0</code></td><td>a última linha não separa nada</td></tr>
+<tr><td>menu que é um bloco só</td><td><code>first:rounded-t-xl last:rounded-b-xl</code></td><td>os cantos de fora ficam redondos, os de dentro não</td></tr>
+<tr><td>lista que ficou com um item</td><td><code>only:rounded-xl</code></td><td>o item único precisa dos quatro cantos</td></tr>
+</table>
+</div>
+
+<p>Se você chegou aqui depois de <a href="active-e-disabled.html">active e disabled</a>, a diferença
+principal é que estes dois não têm relógio: eles não começam nem terminam, apenas são. O estado está no
+HTML e pronto. Um caso em que a posição engana: o <code>order</code>. Em flexbox e grid, você pode mudar a ordem
+visual dos filhos com <code>order-1</code>, <code>order-2</code> e assim por diante. O
+<code>:first-child</code> não liga para isso: ele continua sendo o primeiro do HTML. Se você reordenar
+os cartões e o estilo de “primeiro” aparecer no cartão errado, a causa é essa. Posição visual e posição
+de código são coisas diferentes — e o CSS de posição fala a língua do código.</p>
+
+<p>Na <a href="odd-even.html">aula seguinte</a>, a posição continua mandando, mas a conta fica mais
+esperta: <code>odd:</code> e <code>even:</code> alternam entre ímpares e pares. Antes disso, outro
+caso de posição que engana: a tabela. O <code>first:</code> num <code>&lt;tr&gt;</code> olha os irmãos dentro do
+mesmo <code>&lt;tbody&gt;</code>; o <code>&lt;thead&gt;</code> é outro pai. Então “a primeira linha da
+tabela” pode ser a primeira do corpo, e não a do cabeçalho. Quando a dúvida bater, abra o DevTools,
+selecione o elemento e leia a árvore: quem está dentro de quem resolve mais rápido do que qualquer
+tentativa.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o first que pegou em todos</h3>
+<p>A Ana quis que cada linha da lista fosse um link e envolveu cada item numa <code>div</code> com a
+classe do respiro. O <code>first:pt-0</code> foi junto. Resultado: todas as linhas ficaram sem respiro
+em cima, porque cada uma era a primeira filha da sua própria caixa. O conserto foi mover a classe para
+o <code>&lt;li&gt;</code>, que é filho do <code>&lt;ul&gt;</code>, e deixar a <code>div</code> só com o
+link. A lição: a variante de posição mora no elemento cujo pai é a lista.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a linha sobrando embaixo</h3>
+<p>Com <code>border-b</code> em todos os itens, a última linha se somou à borda do cartão e virou um
+risco grosso. A primeira tentativa dela foi pintar a borda de branco no último item. Funcionou até o
+dia em que o cartão ficou cinza-claro: a linha branca apareceu. O certo é <code>last:border-b-0</code>,
+que zera a largura — a linha deixa de existir, em qualquer cor de fundo.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o primeiro cartão que mudou de lugar</h3>
+<p>Na grade de produtos, ela usou <code>first:mt-0</code> para o primeiro cartão não ter margem em
+cima. Depois reordenou os destaques com <code>order-first</code> e o espaço estranho apareceu no cartão
+do meio. O motivo: o <code>:first-child</code> continuava sendo o primeiro do HTML, mesmo desenhado por
+último. Se a ordem visual precisa mandar, a solução é mudar a ordem no HTML — e não brigar com a
+pseudo-classe.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Quando o <code>first:pt-0</code> vale?</p>
+<label><input type="radio" name="q1"> sempre que o elemento estiver visível na tela</label>
+<label><input type="radio" name="q1"> quando o elemento é o primeiro filho do pai</label>
+<label><input type="radio" name="q1"> quando o mouse passa por cima do primeiro item</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que o painel mostra o <code>first:</code> e não
+o <code>last:</code>?</p>
+<label><input type="radio" name="q2"> porque o last não gera CSS</label>
+<label><input type="radio" name="q2"> porque o last só vale em listas</label>
+<label><input type="radio" name="q2"> porque a cópia que o medidor insere depois do alvo faz ele deixar de ser o último</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O <code>first:pt-0</code> não pegou em nenhum item.
+Qual é a causa mais provável?</p>
+<label><input type="radio" name="q3"> cada item está dentro de uma caixa, e o pai virou a caixa</label>
+<label><input type="radio" name="q3"> a classe precisa de um arquivo de configuração</label>
+<label><input type="radio" name="q3"> o Tailwind não tem a variante first</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o último pedido da lista</h2>
+<p>A lista de encomendas do dia tem uma linha embaixo de cada item. O último não deve ter. Complete a
+classe que zera a borda de baixo do último item:</p>
+<div class="ex-code">&lt;li class="border-b border-amber-100 py-2 <input aria-label="resposta 1" data-answer="last:border-b-0" placeholder="...">"&gt;Pão de queijo&lt;/li&gt;</div>
+<p class="ex-dica">Dica: o prefixo é o nome do estado de posição; a classe depois dos dois-pontos é a
+mesma que você usaria para zerar uma borda em qualquer lugar.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p><code>first:</code> e <code>last:</code> são variantes de posição: valem para o primeiro e para o
+último filho de um pai, sem depender de mouse, teclado ou atributo. O CSS gerado termina em
+<code>:first-child</code> e <code>:last-child</code>, sem <code>@media</code>, porque a posição existe
+em qualquer aparelho. A classe vai em todos os itens; a condição escolhe qual deles recebe o efeito.</p>
+
+<p>O cuidado principal é com a árvore do HTML: o navegador conta elementos irmãos, não a sua intenção.
+Uma caixa em volta de cada item, um título antes da lista ou uma reordenação com <code>order</code>
+mudam quem é o primeiro. E há a particularidade do painel: ele mostra o <code>first:</code> no alvo,
+mas não o <code>last:</code> — a cópia que ele insere depois do alvo tira do alvo a condição de
+último. Para o <code>last:</code>, a prova é o CSS gerado e a prévia.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>first:</code> vale para o primeiro filho; <code>last:</code>, para o último.</li>
+<li>O CSS gerado usa <code>:first-child</code> e <code>:last-child</code>, sem <code>@media</code>.</li>
+<li>A condição olha a posição entre irmãos, não a tag nem a classe.</li>
+<li>Texto e espaços em branco não contam como filhos.</li>
+<li>Uma caixa em volta de cada item faz todos parecerem primeiros.</li>
+<li>Um título antes dos itens tira o <code>:first-child</code> de todos eles.</li>
+<li><code>last:border-b-0</code> zera a borda; pintar de branco não resolve em todo fundo.</li>
+<li>O painel vê o <code>first:</code>, mas não o <code>last:</code> — a cópia muda quem é o último.</li>
+<li><code>only:</code> cobre o item único, que é ao mesmo tempo primeiro e último.</li>
+<li><code>order</code> muda a posição visual, não a posição do HTML.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

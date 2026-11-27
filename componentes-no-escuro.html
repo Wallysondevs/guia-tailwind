@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Componentes no Escuro | Guia Tailwind</title>
+<meta name="description" content="Um componente inteiro no tema escuro, peça por peça: superfície, borda, sombra, tinta e botão. A receita dos pares e os erros que deixam o cartão cinza sujo.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Componentes no <span class="hl">Escuro</span></h1>
+<p class="intro">A Ana já sabia acender o tema escuro: a classe entra no <code>&lt;html&gt;</code>, o
+site escurece. O problema era o cartão do pão. No escuro ele ficou com cara de cinza sujo — o fundo
+escuro tinha entrado, o texto tinha clareado, mas a sombra, a borda, o ícone e o botão continuavam os
+do tema claro. Nesta aula ela desmonta um componente em peças e aprende a receita que cada uma segue
+quando a página escurece. É menos sobre cor e mais sobre papel: no claro quem separa é a sombra; no
+escuro, quem separa é a borda.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>As sete peças de um componente e o par de cada uma.</li>
+  <li>Por que a superfície do escuro precisa ser mais clara que o fundo — e por que isso quase não
+  aparece.</li>
+  <li>Por que a sombra perde o sentido no escuro e a borda assume o trabalho.</li>
+  <li>Os três degraus de tinta e quando usar cada um.</li>
+  <li>Como inverter botão e selo sem perder contraste.</li>
+  <li>O campo de formulário no escuro: fundo, borda, letra e texto de exemplo.</li>
+  <li>O que nunca se inverte com filtro, e o que fazer com ícones.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o cartão com cara de cinza sujo</h2>
+
+<p>O cartão da vitrine tinha tudo o que um cartão deve ter: fundo branco, canto arredondado, uma sombra
+leve embaixo, uma borda cinza-clarinha, o nome do pão em quase-preto, a linha de apoio em cinza médio,
+um selo de "novo" e um botão de encomendar. No claro, era um cartão bonito. A Ana copiou o par de
+fundo e de tinta, colocou <code>dark:bg-stone-800 dark:text-stone-100</code>, e o resultado pareceu
+errado sem que ela soubesse dizer por quê.</p>
+
+<p>Não era o fundo nem a letra. Era o resto: a sombra preta embaixo do cartão, que no escuro virou uma
+mancha suja; a borda <code>stone-200</code>, que sumiu; a linha de apoio em <code>stone-600</code>, que
+ficou apagada demais; o selo âmbar claro com texto branco, que passou a incomodar; o botão verde
+escuro, que perdeu o destaque. Cada peça estava no tema errado.</p>
+
+<p>O erro de raciocínio é tratar "cartão" como uma coisa só. Um componente é feito de camadas, e cada
+camada tem a sua função — e a sua versão escura. Quem troca só o fundo está entregando metade do
+trabalho, e a metade que falta é justamente a que dá forma.</p>
+
+<h2>2. As sete peças de um componente</h2>
+
+<p>Vale abrir o cartão em partes e dar nome a cada uma. São poucas, e o mesmo esquema serve para
+cartão, modal, barra de navegação, lista de itens, o que aparecer pela frente.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>No claro</th><th>No escuro</th><th>Por quê</th></tr>
+<tr><td>fundo da página</td><td><code>bg-stone-50</code></td><td><code>dark:bg-stone-950</code></td><td>o quase-preto dá profundidade, e não cansa como o preto puro</td></tr>
+<tr><td>superfície do cartão</td><td><code>bg-white</code></td><td><code>dark:bg-stone-800</code></td><td>um degrau acima do fundo, para o cartão "levantar"</td></tr>
+<tr><td>borda</td><td><code>border-stone-200</code></td><td><code>dark:border-stone-700</code></td><td>no escuro ela é o contorno que a sombra fazia</td></tr>
+<tr><td>sombra</td><td><code>shadow-md</code></td><td><code>dark:shadow-none</code></td><td>sombra preta em fundo preto é sujeira, não profundidade</td></tr>
+<tr><td>tinta do título</td><td><code>text-stone-900</code></td><td><code>dark:text-stone-100</code></td><td>o extremo claro, para o que precisa ser lido primeiro</td></tr>
+<tr><td>tinta de apoio</td><td><code>text-stone-600</code></td><td><code>dark:text-stone-400</code></td><td>mais discreta, mas ainda muito legível</td></tr>
+<tr><td>ação (botão)</td><td><code>bg-emerald-700 text-white</code></td><td><code>dark:bg-emerald-400 dark:text-stone-950</code></td><td>no escuro, a cor forte chama mais se for clara</td></tr>
+</table>
+</div>
+
+<p>Repare no padrão: o claro usa <em>superfícies claras com tinta escura</em>; o escuro usa
+<em>superfícies escuras com tinta clara</em>. Parece óbvio escrito assim, e é onde 90% dos erros
+acontecem — porque as pessoas trocam o fundo e esquecem que a borda, a sombra e o botão também são
+"tinta" com o papel invertido.</p>
+
+<dl class="anatomy">
+<dt>camada</dt>
+<dd>Cada parte visual de um componente: fundo, superfície, borda, sombra, tinta, ação. Cada uma tem
+o próprio par.</dd>
+<dt>degrau</dt>
+<dd>Um passo na escala de tom do Tailwind. No escuro, a superfície fica um ou dois degraus acima do
+fundo.</dd>
+<dt>separador</dt>
+<dd>O que marca a fronteira entre o cartão e a página. No claro é a sombra; no escuro, a borda.</dd>
+<dt>estado</dt>
+<dd>Hover, foco, ativo, desabilitado. Cada estado também precisa de versão escura, senão o mouse
+"acende" o que já estava claro.</dd>
+<dt>receita</dt>
+<dd>A lista de pares que define o componente, escrita uma vez e repetida. É o que evita cartões
+diferentes na mesma tela.</dd>
+<dt>ruído</dt>
+<dd>O que não carrega informação e só suja: sombra preta no preto, branco puro em texto longo, borda
+que brilha.</dd>
+</dl>
+
+<h2>3. A regra do degrau: a superfície sobe</h2>
+
+<p>No tema claro, o fundo da página é um quase-branco e o cartão é branco. A diferença entre os dois é
+quase nada — e funciona, porque a sombra faz o trabalho de separar. No tema escuro a lógica continua a
+mesma, na direção oposta: o fundo é um quase-preto e o cartão é um degrau mais claro.</p>
+
+<p>Aqui está a conta que surpreende. A superfície <code>stone-800</code> sobre o fundo
+<code>stone-950</code> tem uma razão de contraste de apenas 1,30 para 1. É pouco: o olho vê a diferença,
+mas não é ela que desenha o cartão. <code>stone-900</code> sobre <code>stone-950</code> fica em 1,13 —
+praticamente invisível. Quem tentar fazer o cartão aparecer só pela diferença de fundo vai terminar com
+um retângulo que a pessoa adivinha.</p>
+
+<p>É por isso que a borda é obrigatória no escuro, e é por isso que a sombra deixa de servir. Uma
+sombra funciona porque escurece o que está em volta; num fundo já quase preto, escurecer não produz
+nada — só uma mancha. O par <code>shadow-md dark:shadow-none</code> com
+<code>border border-stone-200 dark:border-stone-700</code> é a troca de turno mais comum do tema
+escuro: a sombra sai, a borda entra.</p>
+
+<h2>4. A sombra sai, a borda entra</h2>
+
+<p>Vamos ver o CSS dessa troca. As duas classes existem no arquivo o tempo todo; a condição decide qual
+delas vale:</p>
+
+<pre class="term">.dark\:border-stone-700:where(.dark, .dark *) {
+  border-color: var(--color-stone-700);
+}
+.dark\:shadow-none:where(.dark, .dark *) {
+  --tw-shadow: 0 0 #0000;
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}</pre>
+
+<p><code>--tw-shadow: 0 0 #0000</code> é a forma que o Tailwind usa para dizer "sombra nenhuma": zero
+deslocamento, zero desfoque, cor transparente. A segunda linha reaplica a pilha de sombras com esse
+valor vazio, e o resultado é o cartão liso. Não há nada de mágico: é a variável de sombra sendo
+zerada.</p>
+
+<p>Se você quiser manter alguma profundidade no escuro, o caminho é a sombra <em>mais escura e mais
+difusa</em>, não a padrão: <code>dark:shadow-lg dark:shadow-black/40</code> cria um halo que separa o
+cartão sem parecer um borrão cinza. Mas seja honesta: na maioria dos casos a borda resolve melhor e
+custa menos. Um cartão escuro com borda de 1 px é mais nítido que um cartão escuro com sombra
+esfumaçada.</p>
+
+<div class="trytailwind" data-goal="rule:border-color: var(--color-stone-700);;rule:background-color: var(--color-stone-800)" data-tema="escuro">
+  <p class="try-task">Esta prévia está no escuro. O cartão está branco no meio de uma página escura.
+  Complete as duas peças que faltam: <code>dark:bg-stone-800</code> e
+  <code>dark:border-stone-700</code> (a borda já está declarada com <code>border</code>, falta a cor
+  dela).</p>
+  <pre class="html">&lt;div id="alvo" class="p-6 rounded-xl border border-stone-200 bg-white text-stone-900"&gt;
+  &lt;p class="font-medium"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;R$ 6 · saído do forno às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 24px
+background-color: rgb(255, 255, 255)
+color: oklch(0.216 0.006 56.043)
+border-radius: 12px
+border-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-6 rounded-xl border border-stone-200 bg-white text-stone-900 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"&gt;
+  &lt;p class="font-medium"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600 dark:text-stone-400"&gt;R$ 6 · saído do forno às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, olhe o cartão na prévia escura e compare com o que estava antes. A diferença não
+está no fundo: está no contorno. Sem a borda, o <code>stone-800</code> sobre <code>stone-950</code> dá
+1,30 de contraste e o cartão parece um retângulo adivinhado. Com <code>stone-700</code> na borda
+(1,48 sobre a superfície do cartão, e bem mais sobre o fundo escuro), o olho encontra a forma.</p>
+
+<h2>5. Os três degraus de tinta</h2>
+
+<p>No claro, a hierarquia do texto costuma usar <code>stone-900</code>, <code>stone-700</code> e
+<code>stone-500</code>. No escuro a escada é outra, e tem três degraus que funcionam bem:</p>
+
+<p>O primeiro é <code>stone-100</code>, com 13,93:1 sobre o cartão <code>stone-800</code>: é o título e
+o que precisa ser lido primeiro. O segundo é <code>stone-300</code>, em 10,21:1 — texto normal, com
+folga de sobra. O terceiro é <code>stone-400</code>, em 7,63:1 sobre o fundo escuro e 5,87:1 sobre o
+cartão: é a linha de apoio, a data, o horário, o "R$ 6". Cada degrau perde um pouco de força e
+continua legível, que é exatamente o que se quer.</p>
+
+<p>Duas armadilhas. A primeira é usar branco puro (<code>text-white</code>) no texto longo: sobre o
+escuro, a letra branca cria um halo que cansa a vista em parágrafos grandes. Guarde o branco para o
+título curto e para o texto dentro do botão colorido. A segunda é copiar o <code>stone-600</code> do
+tema claro: no escuro ele fica com 3,64:1 sobre <code>stone-900</code> e a linha de apoio desaparece
+— é o mesmo problema da aula de contraste, agora dentro de um componente.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-emerald-400);;rule:color: var(--color-stone-950)" data-tema="escuro">
+  <p class="try-task">O botão de encomendar está com o par do tema claro
+  (<code>bg-emerald-700 text-white</code>) e fica apagado no meio do cartão escuro. Inverta: fundo
+  <code>dark:bg-emerald-400</code> e tinta <code>dark:text-stone-950</code>, que dá 10,22:1.</p>
+  <pre class="html">&lt;div class="p-6 rounded-xl bg-stone-800"&gt;
+  &lt;button id="alvo" class="p-2 rounded-lg bg-emerald-700 text-white"&gt;Encomendar&lt;/button&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: oklch(0.508 0.118 165.612)
+color: rgb(255, 255, 255)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div class="p-6 rounded-xl bg-stone-800"&gt;
+  &lt;button id="alvo" class="p-2 rounded-lg bg-emerald-700 text-white dark:bg-emerald-400 dark:text-stone-950"&gt;Encomendar&lt;/button&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A inversão do botão é a parte mais contraintuitiva do tema escuro. No claro, "forte" quer dizer
+escuro: verde 700 com letra branca. No escuro, "forte" quer dizer claro: verde 400 com letra quase
+preta. A cor não ficou mais fraca — ela mudou de lado na escala. Se você mantiver o verde 700, ele vai
+disputar com o fundo do cartão e o botão vira um retângulo sujo.</p>
+
+<h2>6. Botão e selo: dois pares que se invertem</h2>
+
+<p>O botão precisa de dois pares, um para cada tema. O par claro é fundo escuro com texto branco; o
+par escuro é fundo claro com texto quase preto. Repare no CSS gerado das duas classes que fazem a
+inversão:</p>
+
+<pre class="term">.dark\:bg-emerald-400:where(.dark, .dark *) {
+  background-color: var(--color-emerald-400);
+}
+.dark\:text-stone-950:where(.dark, .dark *) {
+  color: var(--color-stone-950);
+}</pre>
+
+<p>O selo segue a mesma lógica, com uma diferença: ele não precisa ser o mais forte da tela. No claro é
+fundo claro (<code>amber-100</code>) com tinta escura (<code>amber-900</code>); no escuro, o fundo do
+selo precisa ser escuro o bastante para não virar um holofote, e a tinta clara o bastante para se ler.
+Um par que funciona: <code>bg-amber-100 text-amber-900</code> no claro e
+<code>dark:bg-stone-700 dark:text-amber-300</code> no escuro — o âmbar aparece na letra, o fundo fica
+neutro, e a leitura chega a 10,51:1.</p>
+
+<p>Tem uma alternativa mais elegante para selos: em vez de trocar o par inteiro, mantenha a família e
+suba a tinta. <code>dark:bg-amber-950 dark:text-amber-300</code> dá ao selo uma cara de âmbar no escuro
+sem o brilho do âmbar 100. Escolha um caminho e use o mesmo em todos os selos; o que não pode é o selo
+de promoção ser um tipo de âmbar e o de esgotado outro, porque aí o leitor perde a pista de que ambos
+são etiquetas.</p>
+
+<p>Do mesmo jeito, os estados precisam de par. Um botão com
+<code>hover:bg-emerald-800 dark:hover:bg-emerald-300</code> responde nos dois temas; sem a versão
+escura, o mouse escurece o botão no escuro — o contrário do que se espera. O mesmo vale para
+<code>focus</code> e para o anel de foco, que no escuro precisa de uma cor que apareça sobre o fundo
+escuro. Se você já viu um botão que "apaga" ao passar o mouse no tema escuro, era isso.</p>
+
+<h2>7. O campo de formulário</h2>
+
+<p>Campo de formulário é o componente que mais sofre no escuro, porque tem quatro peças empilhadas:
+fundo, borda, letra e o texto de exemplo (aquele cinza dentro do campo vazio). Quem troca só o fundo
+fica com um campo quase invisível, e quem esquece o texto de exemplo entrega um campo com letra
+ilegível justo no momento em que a pessoa precisa dele.</p>
+
+<div class="trytailwind" data-goal="rule:border-color: var(--color-stone-600);;rule:background-color: var(--color-stone-800)" data-tema="escuro">
+  <p class="try-task">O campo de nome está com o par do claro dentro de um painel escuro: fundo branco
+  e borda clara. Acrescente <code>dark:bg-stone-800</code>, <code>dark:border-stone-600</code> e
+  <code>dark:text-stone-100</code>.</p>
+  <pre class="html">&lt;div class="p-4 rounded-xl bg-white dark:bg-stone-900"&gt;
+  &lt;input id="alvo" class="p-2 rounded-lg border border-stone-300 bg-white text-stone-900" placeholder="Seu nome"&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: rgb(255, 255, 255)
+color: oklch(0.216 0.006 56.043)
+border-radius: 8px
+border-width: 1px
+border-color: oklch(0.869 0.005 56.366)
+</pre>
+  <pre class="solucao">&lt;div class="p-4 rounded-xl bg-white dark:bg-stone-900"&gt;
+  &lt;input id="alvo" class="p-2 rounded-lg border border-stone-300 bg-white text-stone-900 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-100" placeholder="Seu nome"&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A escolha do <code>stone-600</code> para a borda não é enfeite: é o mínimo para o campo ter contorno
+visível no escuro (1,99:1 sobre a superfície, e mais sobre o painel). Bordas mais escuras que isso
+somem, e o campo passa a existir só pelo fundo — o que é frágil quando o fundo do painel e o do campo
+são parecidos. E o texto de exemplo merece uma linha própria:
+<code>placeholder:text-stone-500</code> no claro e <code>dark:placeholder:text-stone-400</code> no
+escuro, para o nome do campo não desaparecer antes de a pessoa escrever.</p>
+
+<p>Tem um detalhe de HTML que confunde: o texto de exemplo é o atributo
+<code>placeholder="Seu nome"</code> e não um valor digitado. Ele tem cor própria no CSS, e é por isso
+que às vezes o campo está com a letra clara e o exemplo continua cinza escuro. A variante
+<code>placeholder:</code> existe justamente para você acertar essa cor sem tocar em JavaScript.</p>
+
+<h2>8. O que não se inverte</h2>
+
+<p>Nem tudo tem par. Fotos, ilustrações e a logo da padaria não ganham uma versão escura por
+<code>dark:</code> — e a tentação de resolver com <code>filter</code> costuma sair caro. Um
+<code>dark:invert</code> no container inteiro do cartão inverte o fundo, a letra, a foto e o botão de
+uma vez: o pão da foto fica azul e o verde do botão fica magenta. É o tipo de erro que parece
+elegante no CSS e é evidente na tela.</p>
+
+<p>A regra aqui é de escopo: filtro, se for usado, vai na imagem isolada — e mesmo nela, só quando fizer
+sentido. Foto de comida quase nunca deve ser invertida; logo de traço escuro quase sempre precisa de
+algum ajuste. A próxima aula é exatamente sobre isso, com os casos da padaria: a logo, a foto do balcão
+e a ilustração do bolo.</p>
+
+<p>Ícones de traço (<code>svg</code>) são mais fáceis: como são desenhados com <code>currentColor</code>
+na maioria dos conjuntos, eles herdam a cor da tinta. Se o texto do cartão clareia, o ícone clareia
+junto, sem classe extra. Quando o ícone tem cor fixa, aí entra o par
+<code>text-stone-500 dark:text-stone-400</code> no próprio elemento — e o selo de "novo" volta a ser
+legível.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sintoma no escuro</th><th>Causa</th><th>Conserto</th></tr>
+<tr><td>o cartão parece uma mancha</td><td>superfície igual ao fundo e sombra preta</td><td><code>dark:bg-stone-800</code> + <code>dark:shadow-none</code></td></tr>
+<tr><td>não dá para achar a borda do cartão</td><td>borda do tema claro (<code>stone-200</code>)</td><td><code>dark:border-stone-700</code></td></tr>
+<tr><td>texto de apoio ilegível</td><td>tinta <code>stone-500</code>/<code>600</code> copiada do claro</td><td><code>dark:text-stone-400</code></td></tr>
+<tr><td>texto longo cansa a vista</td><td>branco puro em parágrafo</td><td><code>dark:text-stone-200</code> ou <code>300</code></td></tr>
+<tr><td>o botão some no cartão</td><td>verde 700 do tema claro</td><td><code>dark:bg-emerald-400 dark:text-stone-950</code></td></tr>
+<tr><td>o campo de formulário desaparece</td><td>fundo branco e borda clara</td><td><code>dark:bg-stone-800 dark:border-stone-600</code></td></tr>
+<tr><td>o mouse "apaga" o botão</td><td><code>hover:</code> sem versão escura</td><td><code>dark:hover:bg-emerald-300</code></td></tr>
+<tr><td>a foto ficou azul</td><td><code>dark:invert</code> no container</td><td>tirar o filtro do container (próxima aula)</td></tr>
+</table>
+</div>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o cartão que some</h3>
+<p>A Ana usou <code>bg-stone-900</code> no cartão e <code>bg-stone-950</code> na página, sem borda. No
+monitor dela, dava para ver. No celular, com brilho baixo, o cartão virou uma sombra dentro da sombra
+— 1,13:1 não é contraste, é esperança. A correção foi barata: subir a superfície para
+<code>stone-800</code> e acrescentar <code>dark:border-stone-700</code>. Se você tiver que escolher
+entre subir o fundo ou pôr a borda, ponha a borda: ela funciona com qualquer fundo.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a sombra que virou mancha</h3>
+<p>Ela manteve <code>shadow-lg</code> no cartão escuro porque "dá profundidade". O efeito foi uma
+borda esfumaçada cinzenta em volta de um cartão que já era quase da cor do fundo — parece sujeira, não
+profundidade. A solução foi <code>dark:shadow-none</code> mais a borda. Quando quis mesmo profundidade,
+usou <code>dark:shadow-lg dark:shadow-black/40</code> com a sombra praticamente opaca: aí a diferença
+aparece, porque o preto puro sobre o quase-preto ainda é mais escuro.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o mesmo componente em duas telas</h3>
+<p>O cartão da vitrine e o da lista de encomendas nasceram iguais e terminaram diferentes: um com
+<code>dark:bg-stone-800</code>, outro com <code>dark:bg-stone-900</code>; um com borda
+<code>stone-700</code>, outro sem borda. Não foi decisão, foi esquecimento. A receita resolve: uma
+lista de pares escrita num lugar só (no comentário do componente, no seu caderno, ou num componente
+reutilizável) e copiada idêntica para os dois. Componente que aparece duas vezes na tela tem que
+parecer o mesmo componente.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Por que a sombra costuma sair no tema escuro?</p>
+<label><input type="radio" name="q1"> porque sombra gasta desempenho no navegador</label>
+<label><input type="radio" name="q1"> porque escurecer um fundo já escuro só produz mancha</label>
+<label><input type="radio" name="q1"> porque o Tailwind desliga sombras no tema escuro</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual borda dá contorno visível a um campo escuro
+sobre superfície <code>stone-800</code>?</p>
+<label><input type="radio" name="q2"> <code>border-stone-200</code>, que é o par do claro</label>
+<label><input type="radio" name="q2"> nenhuma: o fundo do campo já resolve</label>
+<label><input type="radio" name="q2"> <code>border-stone-600</code>, em torno de 2:1 sobre a superfície</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Como um botão verde forte se comporta no tema
+escuro?</p>
+<label><input type="radio" name="q3"> fica mais claro (verde 400) com letra quase preta</label>
+<label><input type="radio" name="q3"> continua verde 700 com letra branca</label>
+<label><input type="radio" name="q3"> fica transparente com borda verde</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o cartão da vitrine</h2>
+<p>Você está escrevendo o par da superfície do cartão. No claro ele é branco; no escuro, um degrau
+acima do fundo <code>stone-950</code>. Complete a classe:</p>
+<div class="ex-code">&lt;div class="bg-white <input aria-label="resposta 1" data-answer="dark:bg-stone-800" placeholder="..."> p-6 rounded-xl"&gt;Pão&lt;/div&gt;</div>
+<p class="ex-dica">Dica: a variante é <code>dark:</code>, a classe de fundo é <code>bg-</code>, e o
+degrau é o 800 — não o 950 do fundo da página, senão o cartão desaparece.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Componente no escuro não é "trocar a cor do fundo": é percorrer as camadas e dar um par a cada uma.
+Superfície fica um degrau acima do fundo da página (e essa diferença é pequena, 1,30:1, então não
+conte com ela sozinha); a sombra sai e a borda entra; a tinta sobe de 900 para 100 no título, de 700
+para 300 no corpo e de 500/600 para 400 no apoio; botão e selo invertem o par, com fundo claro e letra
+escura.</p>
+
+<p>Os estados também precisam de par — hover, foco, texto de exemplo —, e nada disso se resolve com um
+<code>invert</code> no container: foto e logo têm tratamento próprio, que é a próxima aula. Com a
+receita escrita, o mesmo cartão aparece igual em todas as telas do site, e o tema escuro deixa de ser
+um susto para virar rotina.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Um componente tem camadas: fundo, superfície, borda, sombra, tinta, ação, estado.</li>
+<li>No escuro a superfície sobe um degrau: <code>bg-white</code> vira <code>dark:bg-stone-800</code>.</li>
+<li><code>stone-800</code> sobre <code>stone-950</code> dá 1,30:1: separa pouco, e é de propósito.</li>
+<li>Quem desenha o cartão no escuro é a borda; <code>dark:shadow-none</code> tira a sombra inútil.</li>
+<li>Tinta em três degraus: <code>stone-100</code> título, <code>stone-300</code> corpo,
+<code>stone-400</code> apoio.</li>
+<li>Botão inverte: <code>bg-emerald-400</code> com <code>text-stone-950</code>, 10,22:1.</li>
+<li>Selo escuro: fundo neutro com tinta da família, como <code>bg-stone-700 text-amber-300</code>.</li>
+<li>Campo de formulário pede quatro pares: fundo, borda, letra e <code>placeholder:</code>.</li>
+<li>Hover e foco também invertem; sem par, o mouse apaga o botão no escuro.</li>
+<li>Nunca <code>dark:invert</code> no container inteiro: estraga foto, logo e cor de ação.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

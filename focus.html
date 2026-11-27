@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O focus | Guia Tailwind</title>
+<meta name="description" content="O prefixo focus: do Tailwind: como marcar o campo e o botão que o teclado alcança, o CSS gerado com :focus e :focus-visible e por que o painel mede o repouso.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>O <span class="hl">focus</span></h1>
+<p class="intro">A Ana vende pão pelo site e acabou de descobrir uma coisa incômoda: a vizinha fez a
+encomenda dela sem tocar no mouse. Só com o teclado — <kbd>Tab</kbd> para andar, <kbd>Enter</kbd> para
+confirmar. A Ana tentou repetir a proeza no próprio site e se perdeu no segundo toque: nada na tela
+dizia onde ela estava. O culpado não é o teclado; é a falta de estilo para o estado que o teclado
+produz. Ele se chama <em>foco</em>, e o Tailwind tem um prefixo para ele: <code>focus:</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é o foco, quem pode recebê-lo e por que ele é diferente do hover.</li>
+  <li>Como usar <code>focus:</code> em campos, botões e links.</li>
+  <li>O CSS que o Tailwind gera — e por que ele não vem dentro de um <code>@media</code>.</li>
+  <li>Por que o painel mede o repouso e como forçar <code>:focus</code> no DevTools.</li>
+  <li>Por que apagar o contorno do navegador sem colocar outro é um problema.</li>
+  <li>A diferença entre <code>focus:</code> e <code>focus-visible:</code>.</li>
+  <li>Onde o foco importa de verdade: formulário, menu e o primeiro <kbd>Tab</kbd> da página.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a encomenda feita só com o teclado</h2>
+
+<p>A vizinha da Ana tem o mouse quebrado há duas semanas e não reclama: ela navega com o teclado
+desde os tempos do computador antigo. Sentou na frente do notebook, apertou <kbd>Tab</kbd> uma vez e
+o primeiro link da página ganhou um retângulo fino em volta. Apertou de novo e o retângulo pulou para
+o próximo. Quando chegou no botão “Encomendar”, apertou <kbd>Enter</kbd> e o pedido foi feito em
+dez segundos.</p>
+
+<p>A Ana ficou impressionada e foi tentar. No segundo <kbd>Tab</kbd>, o retângulo sumiu. No terceiro,
+ela não sabia mais onde estava — o site tinha botões que não mostravam nada quando o teclado chegava
+neles. A vizinha fez na frente dela, com paciência: “aqui ó, este está selecionado, mas não dá para
+ver”. Era exatamente isso. O site funcionava pelo teclado, só não <em>avisava</em> que estava
+funcionando.</p>
+
+<p>O que faltava era a mesma coisa da aula de <a href="hover.html">hover</a>, com outro gatilho. Lá, o
+gatilho era o mouse em cima. Aqui, é o elemento estar selecionado para receber o que o teclado digitar.
+O navegador já sabe quem está selecionado; o site é que não estava dizendo o que fazer com isso.</p>
+
+<h2>2. O que é o foco (e por que não é o hover)</h2>
+
+<p>O foco é o “dedo” do teclado. Só um elemento da página tem foco por vez, e é nele que as teclas vão
+agir: o texto que você digita entra no campo em foco, o <kbd>Enter</kbd> aciona o botão em foco, as
+setas rolam a lista em foco. Quem aperta <kbd>Tab</kbd> anda para a frente na ordem em que os
+elementos aparecem no HTML; <kbd>Shift</kbd> + <kbd>Tab</kbd> anda para trás.</p>
+
+<p>Nem tudo pode receber foco. Podem: links, botões, campos de texto, caixas de seleção, áreas de
+texto — e qualquer elemento que tenha <code>tabindex="0"</code>. Não podem: um <code>div</code>, um
+parágrafo, uma imagem, a não ser que você force. Isso é uma proteção: se tudo recebesse foco, o
+<kbd>Tab</kbd> viraria uma caminhada sem fim por enfeites.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Elemento</th><th>Recebe foco?</th><th>Observação</th></tr>
+<tr><td><code>&lt;a href="..."&gt;</code></td><td>sim</td><td>entra na ordem do <kbd>Tab</kbd> como qualquer link</td></tr>
+<tr><td><code>&lt;button&gt;</code></td><td>sim</td><td>menos quando está com o atributo <code>disabled</code></td></tr>
+<tr><td><code>&lt;input&gt;</code>, <code>&lt;select&gt;</code></td><td>sim</td><td>é onde a letra digitada vai aparecer</td></tr>
+<tr><td><code>&lt;div&gt;</code>, <code>&lt;span&gt;</code></td><td>não</td><td>só com <code>tabindex="0"</code>, e mesmo assim pense duas vezes</td></tr>
+<tr><td><code>tabindex="-1"</code></td><td>fora do <kbd>Tab</kbd></td><td>focável por código; útil para levar o foco a um aviso</td></tr>
+</table>
+</div>
+
+<dl class="anatomy">
+<dt>foco</dt>
+<dd>O elemento que vai receber o que o teclado digitar. Existe um só por vez na página.</dd>
+<dt>ordem de tabulação</dt>
+<dd>A sequência em que o <kbd>Tab</kbd> visita os elementos. É a ordem em que eles aparecem no HTML,
+salvo se algum <code>tabindex</code> positivo embaralhar tudo.</dd>
+<dt>contorno</dt>
+<dd>O <em>outline</em>: a linha que o navegador desenha por fora do elemento em foco. Não ocupa espaço
+no layout, por isso não empurra nada.</dd>
+<dt>tabindex</dt>
+<dd>O atributo que decide se um elemento entra na ordem do <kbd>Tab</kbd>. <code>0</code> entra,
+<code>-1</code> fica de fora.</dd>
+</dl>
+
+<p>Há duas diferenças grandes em relação ao hover. A primeira: o foco não precisa de mouse, então
+funciona no celular, no tablet e no leitor de tela. A segunda: o foco <em>fica</em>. O hover dura
+enquanto o ponteiro está em cima; o foco dura até outro elemento tomar o lugar, ou até você apertar
+<kbd>Esc</kbd> em alguns casos. É por isso que o sinal de foco precisa ser estável e visível, e não um
+pisca-pisca.</p>
+
+<p>O navegador já desenha esse sinal sozinho: é o contorno (o <em>outline</em>) que aparece em volta do
+elemento. Você viu isso no primeiro <kbd>Tab</kbd> da vizinha. O problema é que esse contorno padrão é
+discreto, às vezes se confunde com a borda do próprio botão, e — pior — é comum ele ter sido apagado
+por algum trecho de CSS copiado da internet. A Ana tinha esse trecho no site dela. É o que a seção 6
+vai resolver.</p>
+
+<h2>3. A primeira variante: focus:bg-amber-50</h2>
+
+<p>Vamos ao campo mais importante da padaria: o de nome, no formulário de encomenda. Ele já tem borda,
+fundo branco e respiro. Falta avisar quando é a vez dele. A ideia é a mesma do hover: escrever a
+condição antes dos dois-pontos e a classe de sempre depois.</p>
+
+<pre class="file" data-file="encomenda.html">&lt;input class="rounded-lg border border-stone-300 bg-white p-2 focus:border-amber-500 focus:bg-amber-50" placeholder="Seu nome"&gt;</pre>
+
+<p>Duas classes de foco, uma para cada propriedade: a borda fica âmbar 500 e o fundo fica âmbar 50, um
+quase branco amarelado. Quando a pessoa clica no campo ou chega nele pelo <kbd>Tab</kbd>, as duas
+regras entram em ação ao mesmo tempo. Quando ela sai, voltam ao normal. Nada de JavaScript, nada de
+“limpar” o efeito: o navegador desliga a condição.</p>
+
+<div class="trytailwind" data-goal="rule:.focus\:border-amber-500:focus;;rule:.focus\:bg-amber-50:focus">
+  <p class="try-task">O campo de nome não avisa quando está selecionado. Deixe a borda âmbar 500 e o
+  fundo âmbar 50 enquanto ele estiver em foco.</p>
+  <pre class="html">&lt;input id="alvo" class="rounded-lg border border-stone-300 bg-white p-2" placeholder="Seu nome"&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: rgb(255, 255, 255)
+border-radius: 8px
+border-width: 1px
+border-color: oklch(0.869 0.005 56.366)
+</pre>
+  <pre class="solucao">&lt;input id="alvo" class="rounded-lg border border-stone-300 bg-white p-2 focus:border-amber-500 focus:bg-amber-50" placeholder="Seu nome"&gt;</pre>
+</div>
+
+<p>Rode e clique dentro do campo na prévia: a borda muda de cor e o fundo amarela. Agora olhe o painel:
+ele continua mostrando a borda cinza e o fundo branco. É o mesmo comportamento da aula passada, e tem
+a mesma explicação — o painel mede o repouso, e o foco só existe quando o campo está selecionado. A
+diferença é que, aqui, você consegue ligar o estado sozinho: basta clicar no campo.</p>
+
+<p>Um detalhe que costuma passar batido: <code>focus:border-amber-500</code> muda a <em>cor</em> da
+borda, não a espessura. A borda continua com 1 px, porque quem definiu isso foi
+<code>border</code>, no repouso. Se você quisesse uma borda mais grossa no foco, precisaria de outra
+classe (<code>focus:border-2</code>) — e aí o campo mudaria de tamanho, o que costuma deslocar o que
+está em volta.
+Quase sempre a cor resolve e o tamanho atrapalha.</p>
+
+<h2>4. O CSS que o Tailwind gera</h2>
+
+<p>Esta é a saída real para o campo acima:</p>
+
+<pre class="term">.focus\:border-amber-500:focus {
+  border-color: var(--color-amber-500);
+}
+.focus\:bg-amber-50:focus {
+  background-color: var(--color-amber-50);
+}</pre>
+
+<p>Compare com o CSS do hover e a diferença salta: <strong>não há <code>@media</code></strong>. O
+hover precisava da casca <code>@media (hover: hover)</code> porque nem todo aparelho tem ponteiro. O
+foco existe em todos: no celular, o toque no campo também o coloca em foco; no notebook, o clique e o
+<kbd>Tab</kbd> fazem o mesmo; no leitor de tela, o foco é a própria forma de navegar. Por isso a regra
+vale sempre.</p>
+
+<p>O seletor, de novo, tem a barra invertida antes dos dois-pontos:
+<code>.focus\:bg-amber-50:focus</code>. É o nome da classe escapado, mais o <code>:focus</code> no fim
+— a condição. Se você ler em voz alta, fica: “a classe <code>focus:bg-amber-50</code>, quando o
+elemento estiver em foco”.</p>
+
+<p>E repare no que <em>não</em> aparece: não há regra para “desfocar”. O CSS não precisa de volta. No
+instante em que o campo perde o foco, o seletor deixa de casar e o navegador volta a aplicar só a
+regra de repouso. Essa é a beleza das pseudo-classes: você descreve condições, não coreografias.</p>
+
+<h2>5. Por que o painel mostra o repouso (e como forçar o foco)</h2>
+
+<p>O painel das caixas mede o elemento no estado de repouso, sempre. Não é teimosia: se ele medisse o
+estado “atual”, o resultado dependeria de onde o seu mouse está e de qual campo está selecionado
+naquele segundo, e dois leitores veriam tabelas diferentes para o mesmo HTML. Medir o repouso é o que
+torna a tabela previsível.</p>
+
+<p>Para ver o foco, então, você tem três caminhos. O primeiro é o mais direto: clique no campo da
+prévia. O segundo é o teclado: clique na prévia e aperte <kbd>Tab</kbd> até chegar no campo. O
+terceiro é o DevTools, que serve quando o elemento é difícil de alcançar: selecione o elemento na aba
+<em>Elements</em>, clique no botãozinho <em>:hov</em> ao lado do painel de estilos e marque
+<code>:focus</code>. O estado fica forçado — e o painel <em>Computed</em> passa a mostrar a cor da
+borda em foco.</p>
+
+<p>O <em>Verificar</em> das caixas desta aula confere o texto do CSS gerado, e não a cor da borda. É a
+mesma escolha do hover, pelo mesmo motivo: a cor computada no repouso é igual antes e depois da
+missão; o que muda é a existência da regra. Quando a dúvida é “a regra foi gerada?”, o texto do CSS é
+a prova mais honesta.</p>
+
+<h2>6. Não apague o contorno sem colocar outro no lugar</h2>
+
+<p>Agora a parte que estraga sites de verdade. Em algum tutorial, a Ana leu que o contorno do
+navegador “é feio” e colou a classe <code>outline-none</code> no botão. O contorno sumiu. O botão
+ficou bonito. E o site ficou inavegável para quem usa teclado: sem contorno e sem outro sinal, não há
+como saber onde o foco está.</p>
+
+<p>A regra é simples de enunciar e fácil de esquecer: <strong>se você tira o contorno, coloque algo no
+lugar</strong>. Esse algo pode ser uma borda colorida, um fundo diferente, uma sombra — qualquer
+mudança visível que apareça no foco e suma ao sair. O que não pode é o silêncio.</p>
+
+<div class="trytailwind" data-goal="rule:.focus\:outline-2:focus;;rule:.focus\:outline-amber-700:focus">
+  <p class="try-task">Dê ao botão um contorno de 2 px, afastado 2 px da borda e na cor âmbar 700
+  quando ele estiver em foco. Três classes, todas com <code>focus:</code>.</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-lg bg-amber-500 p-3 text-white"&gt;Encomendar pão&lt;/button&gt;</pre>
+  <pre class="out">
+padding: 12px
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-amber-500 p-3 text-white focus:outline-2 focus:outline-offset-2 focus:outline-amber-700"&gt;Encomendar pão&lt;/button&gt;</pre>
+</div>
+
+<p>O contorno é diferente da borda em um ponto que importa: ele é desenhado <em>por fora</em> e não
+ocupa espaço no layout. Um botão com contorno de 2 px afastado 2 px não empurra nada em volta — por
+isso ele é o jeito mais seguro de sinalizar foco sem mexer no desenho. Na prévia, chegue no botão com
+<kbd>Tab</kbd> depois de clicar na área da prévia; o contorno aparece e o painel continua mostrando o
+repouso.</p>
+
+<p>Quem decide o contraste é a cor do fundo. Âmbar 700 sobre o branco da página funciona; âmbar 200
+sobre branco desaparece. Uma dica prática: escolha uma cor de contorno com pelo menos três degraus de
+diferença em relação ao fundo, e prefira 2 px a 1 px — contornos finos somem em tela de celular e para
+quem tem baixa visão.</p>
+
+<h2>7. focus ou focus-visible? O botão que fica aceso</h2>
+
+<p>Existe uma pegadinha. O <code>:focus</code> não é exclusivo do teclado: em muitos navegadores,
+clicar num botão também o deixa em foco. Resultado: o visitante clica no “Encomendar”, o contorno
+aparece, ele tira o mouse e o contorno continua ali, como se o botão estivesse selecionado. Algumas
+pessoas acham feio; outras, útil. Mas há uma solução melhor do que escolher entre feio e útil: o
+navegador também sabe <code>:focus-visible</code>, um foco que ele só considera “visível” quando vale
+a pena mostrar — tipicamente quando a pessoa chegou ali pelo teclado.</p>
+
+<pre class="term">.focus\:outline-2:focus {
+  outline-style: var(--tw-outline-style);
+  outline-width: 2px;
+}
+.focus-visible\:outline-2:focus-visible {
+  outline-style: var(--tw-outline-style);
+  outline-width: 2px;
+}</pre>
+
+<p>As duas regras são idênticas, menos pelo seletor. A primeira vale em qualquer foco; a segunda, só no
+foco que o navegador julga visível. No Tailwind, você escolhe trocando o prefixo:
+<code>focus:</code> vira <code>focus-visible:</code>. É a mesma classe depois dos dois-pontos.</p>
+
+<div class="trytailwind" data-goal="rule:.focus-visible\:outline-2:focus-visible;;rule:.focus-visible\:outline-amber-700:focus-visible">
+  <p class="try-task">No link do rodapé, o contorno deve aparecer só para quem chega pelo teclado.
+  Troque as duas classes de <code>focus:</code> por <code>focus-visible:</code>, sem mudar o resto.</p>
+  <pre class="html">&lt;a id="alvo" class="text-amber-700 underline focus:outline-2 focus:outline-amber-700" href="#"&gt;Horários da padaria&lt;/a&gt;</pre>
+  <pre class="out">
+color: oklch(0.555 0.163 48.998)
+text-decoration-line: underline
+</pre>
+  <pre class="solucao">&lt;a id="alvo" class="text-amber-700 underline focus-visible:outline-2 focus-visible:outline-amber-700" href="#"&gt;Horários da padaria&lt;/a&gt;</pre>
+</div>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Situação</th><th>Prefira</th><th>Por quê</th></tr>
+<tr><td>campo de texto</td><td><code>focus:</code></td><td>o clique já seleciona o campo; a borda mudando é esperada</td></tr>
+<tr><td>botão de ação</td><td><code>focus-visible:</code></td><td>evita o contorno aceso depois de um clique de mouse</td></tr>
+<tr><td>link no meio do texto</td><td><code>focus-visible:</code></td><td>quem usa mouse já tem o cursor como pista</td></tr>
+<tr><td>navegador antigo</td><td><code>focus:</code></td><td><code>:focus-visible</code> pode não existir; o <code>:focus</code> sempre existe</td></tr>
+</table>
+</div>
+
+<p>Qual usar? Para campos de texto, <code>focus:</code> quase sempre, porque o campo já muda de borda
+ao ser clicado e ninguém estranha. Para botões e links, <code>focus-visible:</code> costuma ser o
+melhor dos dois mundos: quem usa mouse não vê contorno depois do clique, quem usa teclado vê. O que
+não vale é usar <code>focus-visible:</code> para esconder o foco de quem precisa dele — em navegador
+antigo, a pseudo-classe pode não existir, e aí o contorno padrão é que salva o dia.</p>
+
+<h2>8. Onde o foco importa de verdade</h2>
+
+<p>O primeiro lugar é o formulário. Um campo sem sinal de foco faz a pessoa digitar no lugar errado:
+ela clica, acha que está no campo de nome, e o texto vai para o de telefone. O foco visível responde
+“é aqui que a letra vai aparecer”. Para campos, o par <code>focus:border-*</code> com
+<code>focus:bg-*</code> já resolve; quem quiser mais pode acrescentar um anel, assunto de outra
+aula.</p>
+
+<p>O segundo lugar são os botões e links de ação. Quem navega por teclado chega no “Encomendar” e
+precisa saber que o <kbd>Enter</kbd> vai apertar <em>aquele</em> botão, e não o “Cancelar” ao lado. Um
+contorno de 2 px resolve. Em menus, o contorno também mostra em que item o <kbd>Enter</kbd> vai agir —
+e, em páginas com muitos links, é o único mapa que a pessoa tem.</p>
+
+<p>O terceiro lugar é o começo da página. O primeiro <kbd>Tab</kbd> cai no primeiro elemento focável do
+HTML, que costuma ser o link da marca. Sites bem cuidados colocam ali um “pular para o conteúdo”,
+visível só no foco. Você não precisa montar isso agora; só precisa saber que a ordem do HTML é a ordem
+do <kbd>Tab</kbd> — e que <code>tabindex</code> com número positivo embaralha tudo, então evite.</p>
+
+<p>Existe ainda um parente do <code>focus:</code> que vale conhecer de nome: o
+<code>focus-within:</code>. Ele marca o <em>pai</em> quando um filho recebe foco. É o que permite
+acender a borda do cartão inteiro quando o campo de dentro está selecionado. Guarde o nome; a ideia é
+a mesma, só muda quem recebe o estilo.</p>
+
+<p>E existe o irmão do outro lado do clique: o instante em que o botão está sendo apertado, com o
+prefixo <code>active:</code>. Ele é o assunto da <a href="active-e-disabled.html">próxima aula</a>,
+junto com o <code>disabled:</code> — o estado do botão que não pode ser usado.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a cliente digitou o nome no campo de telefone</h3>
+<p>A Ana recebeu uma encomenda com “Maria” no lugar do telefone. A cliente contou o que aconteceu:
+clicou no primeiro campo, digitou, e o texto foi para o segundo. O formulário não mostrava qual campo
+estava em foco — na verdade, os dois eram brancos com borda cinza, idênticos. A correção foi de duas
+linhas: <code>focus:border-amber-500</code> e <code>focus:bg-amber-50</code> em todos os campos. Quem
+clica agora vê para onde a letra vai.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o contorno apagado pelo tutorial</h3>
+<p>Ao reformar o botão, ela colou <code>outline-none</code> para “tirar aquele contorno feio do
+Chrome”. O botão ficou limpo e o site ficou sem sinal de foco. A cliente que usa teclado voltou a se
+perder. O conserto não é recolocar o contorno padrão: é escolher um contorno próprio, na cor da marca,
+com 2 px e um afastamento. O resultado é mais bonito que o original e continua visível.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o botão que fica aceso depois do clique</h3>
+<p>Com <code>focus:</code>, o botão “Encomendar” ganha contorno quando alguém clica nele, e o contorno
+fica até o clique seguinte em outro lugar. A Ana achou que era defeito. Não é: é o foco sobrevivendo
+ao clique. A troca para <code>focus-visible:</code> resolve o incômodo sem tirar o contorno de quem
+chega pelo teclado — e é o tipo de ajuste que se faz no fim, olhando a página funcionando, não no
+começo.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. O que o <code>focus:</code> faz numa classe?</p>
+<label><input type="radio" name="q1"> deixa o elemento em foco para sempre</label>
+<label><input type="radio" name="q1"> faz o navegador rolar até o elemento</label>
+<label><input type="radio" name="q1"> aplica a classe enquanto o elemento está selecionado para o teclado</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. Por que a regra de <code>focus:</code> não vem dentro
+de <code>@media (hover: hover)</code>?</p>
+<label><input type="radio" name="q2"> porque o foco existe em todos os aparelhos, inclusive no celular</label>
+<label><input type="radio" name="q2"> porque o Tailwind esqueceu de colocar</label>
+<label><input type="radio" name="q2"> porque media queries só valem para cores</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Você tirou o contorno com <code>outline-none</code>.
+O que fazer?</p>
+<label><input type="radio" name="q3"> nada: o contorno padrão é sempre feio</label>
+<label><input type="radio" name="q3"> colocar outro sinal visível no lugar, como um contorno próprio ou uma borda</label>
+<label><input type="radio" name="q3"> desligar o teclado da página</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o campo de telefone</h2>
+<p>O campo de telefone do formulário precisa ficar com o fundo âmbar 50 quando estiver em foco.
+Complete a classe que falta:</p>
+<div class="ex-code">&lt;input type="tel" class="rounded-lg border border-stone-300 bg-white p-2 <input aria-label="resposta 1" data-answer="focus:bg-amber-50" placeholder="...">" placeholder="(11) 90000-0000"&gt;</div>
+<p class="ex-dica">Dica: o prefixo é o mesmo da seção 3 — condição, dois-pontos, classe. O tom 50 é o
+mais claro da família âmbar, quase branco.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O foco é o dedo do teclado: um elemento por vez, alcançado por <kbd>Tab</kbd>, que recebe o que for
+digitado e o <kbd>Enter</kbd>. Ele não precisa de mouse e não desaparece sozinho, então o sinal
+precisa ser estável e visível. O Tailwind escreve esse estado com o prefixo <code>focus:</code> antes
+da classe de sempre, e o CSS gerado termina em <code>:focus</code> — sem <code>@media</code>, porque
+o foco existe em todo aparelho.</p>
+
+<p>O painel das caixas mede o repouso, como sempre; para ver o foco, clique no campo da prévia ou
+force <code>:focus</code> no DevTools. E a regra que vale para qualquer projeto: se você apagar o
+contorno do navegador, coloque outro sinal no lugar. Sem isso, quem usa teclado fica sem mapa. Para
+botões e links, <code>focus-visible:</code> faz o contorno aparecer só quando ele é necessário.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Foco é o elemento selecionado para receber o teclado; só um por vez.</li>
+<li>Chegam ao foco: links, botões, campos, selects, textareas e o que tiver <code>tabindex="0"</code>.</li>
+<li>A gramática é <code>focus:</code> + a classe: <code>focus:bg-amber-50</code>.</li>
+<li>O CSS gerado termina em <code>:focus</code> e não tem <code>@media</code>.</li>
+<li>Clique e <kbd>Tab</kbd> podem colocar o mesmo elemento em foco.</li>
+<li>O painel mostra o repouso; o foco se vê na prévia ou forçando <code>:focus</code> no DevTools.</li>
+<li><code>outline-none</code> sem substituto deixa o site inavegável pelo teclado.</li>
+<li>Contorno não ocupa espaço: é o sinal de foco mais seguro para o layout.</li>
+<li><code>focus-visible:</code> mostra o contorno só para quem chega pelo teclado.</li>
+<li><code>focus-within:</code> marca o pai quando um filho recebe foco.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

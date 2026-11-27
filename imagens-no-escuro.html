@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Imagens no Escuro | Guia Tailwind</title>
+<meta name="description" content="Logo, foto e ilustração no tema escuro: dark:invert, hue-rotate, brightness, plaquinha atrás da logo, duas versões da imagem e moldura para a foto não flutuar.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Imagens no <span class="hl">Escuro</span></h1>
+<p class="intro">O rodapé do site da Ana ficou pronto e o tema escuro estava impecável — menos na logo.
+O desenho da padaria, um traço preto sobre fundo transparente, simplesmente desapareceu no fundo
+escuro. A foto do balcão teve o problema oposto: clareou tanto que virou um clarão no meio da página.
+Nesta aula ela aprende que imagem não obedece a variável de tema: cada tipo de imagem precisa de um
+tratamento próprio, e as ferramentas do Tailwind para isso se chamam filtro, visibilidade e
+moldura.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que imagem não tem "par" de tema como as cores.</li>
+  <li>Como inverter a logo de traço com <code>dark:invert</code> — e o que isso faz com as cores.</li>
+  <li>O truque do <code>hue-rotate</code> para logo colorida.</li>
+  <li>Como baixar o brilho de uma foto com <code>dark:brightness-90</code>.</li>
+  <li>A plaquinha clara atrás de uma logo transparente.</li>
+  <li>Duas versões da mesma imagem, uma para cada tema.</li>
+  <li>Moldura, anel e o motivo de a foto "flutuar" no escuro.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a logo que sumiu e a foto que brilhou</h2>
+
+<p>A logo da padaria é um desenho simples: o contorno de um pão com um telhadinho em cima. Foi feita
+num programa de desenho, salva em PNG com fundo transparente, e o traço é preto. No site claro,
+funciona: o preto aparece sobre o branco. No site escuro, o mesmo preto aparece sobre um
+<code>stone-950</code> e vira nada.</p>
+
+<p>A foto do balcão é o contrário. Uma foto naturalmente clara — luz da manhã entrando, parede branca,
+pão dourado — num fundo escuro parece um letreiro aceso. O olho vai direto para ela e não encontra
+descanso. E a ilustração do bolo, que é colorida, ficou com as cores gritando: o rosa ficou mais
+saturado, o amarelo virou neon.</p>
+
+<pre class="file" data-file="index.html">&lt;header class="bg-white dark:bg-stone-950"&gt;
+  &lt;img src="logo-padaria.png" alt="Padaria da Ana" class="h-10"&gt;
+  &lt;img src="foto-balcao.jpg" alt="O balcão pela manhã" class="rounded-lg"&gt;
+&lt;/header&gt;</pre>
+
+<p>Três imagens, três problemas, e nenhuma delas se resolve com <code>dark:bg-…</code>. Imagem não é
+cor de tema: é um arquivo com cores próprias dentro. Enquanto a cor da página é uma variável que você
+troca, a imagem é um conteúdo que você recebeu pronto — e é isso que faz o tema escuro tropeçar
+justamente na última etapa.</p>
+
+<h2>2. Por que imagem não tem par de tema</h2>
+
+<p>Nas aulas anteriores, tudo tinha par: <code>bg-white dark:bg-stone-800</code>,
+<code>text-stone-900 dark:text-stone-100</code>. A imagem não tem, porque o arquivo é o mesmo nos dois
+temas. E o mesmo arquivo não pode servir para tudo: um traço preto não aparece em fundo preto, e um
+traço branco não aparece em fundo branco.</p>
+
+<p>Existem quatro jeitos de lidar com isso, e a escolha depende do tipo de imagem. O primeiro é
+<strong>filtrar</strong>: aplicar um efeito de CSS que muda a imagem sem trocar o arquivo — inverter as
+cores, baixar o brilho. O segundo é <strong>dar um fundo</strong> para a imagem (a plaquinha), que
+resolve logos transparentes de um jeito simples e honesto. O terceiro é ter <strong>duas versões
+prontas</strong> do arquivo e mostrar uma ou outra. O quarto é não fazer nada: algumas imagens não
+precisam de ajuste nenhum, e forçar um filtro só piora.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Tipo de imagem</th><th>Problema no escuro</th><th>Tratamento</th></tr>
+<tr><td>logo de traço preto</td><td>desaparece no fundo</td><td><code>dark:invert</code> ou plaquinha clara</td></tr>
+<tr><td>logo colorida</td><td>as cores ficam estranhas</td><td><code>dark:invert dark:hue-rotate-180</code> ou duas versões</td></tr>
+<tr><td>foto clara</td><td>brilha demais</td><td><code>dark:brightness-90 dark:contrast-125</code></td></tr>
+<tr><td>foto escura</td><td>some no fundo escuro</td><td>moldura clara ou <code>dark:brightness-110</code></td></tr>
+<tr><td>ilustração decorativa</td><td>disputa atenção</td><td><code>dark:opacity-80</code> ou <code>dark:grayscale</code></td></tr>
+<tr><td>imagem com fundo branco (JPEG)</td><td>o branco vira um retângulo aceso</td><td>versão com fundo transparente, ou plaquinha assumida</td></tr>
+</table>
+</div>
+
+<p>A primeira linha da tabela é a que resolve a logo da Ana. Antes de chegar nela, vale entender o que
+é um filtro: um efeito que o navegador aplica na hora de desenhar a imagem, como uma lente na frente
+dela. O arquivo não muda — o que muda é o que aparece na tela. É a diferença entre trocar a foto na
+parede e pôr um vidro colorido em cima dela.</p>
+
+<dl class="anatomy">
+<dt>filtro</dt>
+<dd>Efeito de CSS aplicado ao desenho do elemento: inverter, clarear, escurecer, tirar cor. O arquivo
+fica intacto.</dd>
+<dt>invert</dt>
+<dd>Inverte as cores: preto vira branco, branco vira preto, e cada matiz vai para o lado oposto do
+círculo de cores.</dd>
+<dt>brightness</dt>
+<dd>Ajusta a claridade. Abaixo de 100% escurece; acima, clareia.</dd>
+<dt>hue-rotate</dt>
+<dd>Gira o matiz das cores. Usado junto com <code>invert</code> para devolver, mais ou menos, as cores
+originais.</dd>
+<dt>plaquinha</dt>
+<dd>Um fundo sólido atrás da imagem, com respiro, para o desenho ter contra o que aparecer.</dd>
+<dt>duas versões</dt>
+<dd>Dois arquivos com o mesmo desenho, um para cada tema, e uma classe que esconde um ou outro.</dd>
+</dl>
+
+<h2>3. A logo de traço: dark:invert</h2>
+
+<p>A classe é <code>invert</code>, e ela inverte as cores do elemento. Com
+<code>dark:invert</code>, o traço preto vira branco quando a página está no escuro. Simples assim —
+e é a solução certa para desenhos de uma cor só, feitos com traço escuro sobre fundo
+transparente.</p>
+
+<div class="trytailwind" data-goal="rule:--tw-invert: invert(100%)" data-tema="escuro">
+  <p class="try-task">Esta prévia está no escuro e a logo (o desenho de traço abaixo) está preta,
+  quase invisível. Acrescente <code>dark:invert</code> na classe do desenho. A caixa não tem acesso à
+  internet, então o lugar do PNG é ocupado por um desenho feito na própria página.</p>
+  <pre class="html" data-saida="css">&lt;div class="p-4 rounded-xl bg-stone-950"&gt;
+  &lt;svg id="alvo" class="h-10 w-10 text-stone-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+    &lt;path d="M4 20h16M6 20V10l6-6 6 6v10"/&gt;
+  &lt;/svg&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+.h-10 {
+  height: calc(var(--spacing) * 10);
+}
+.w-10 {
+  width: calc(var(--spacing) * 10);
+}
+.rounded-xl {
+  border-radius: var(--radius-xl);
+}
+.bg-stone-950 {
+  background-color: var(--color-stone-950);
+}
+.p-4 {
+  padding: calc(var(--spacing) * 4);
+}
+.text-stone-900 {
+  color: var(--color-stone-900);
+}
+</pre>
+  <pre class="solucao">&lt;div class="p-4 rounded-xl bg-stone-950"&gt;
+  &lt;svg id="alvo" class="h-10 w-10 text-stone-900 dark:invert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+    &lt;path d="M4 20h16M6 20V10l6-6 6 6v10"/&gt;
+  &lt;/svg&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>No painel de CSS gerado você vê a regra da variante: <code>--tw-invert: invert(100%)</code> mais a
+linha do <code>filter</code> que junta todos os efeitos. Essa linha comprida, cheia de
+<code>var(--tw-…, )</code>, é o jeito do Tailwind permitir que você combine filtros: cada classe mexe
+na sua variável, e a propriedade <code>filter</code> existe uma vez só, com todos os espaços
+opcionais. Se você escrever <code>dark:invert</code> e <code>dark:brightness-90</code> no mesmo
+elemento, os dois convivem.</p>
+
+<p>O detalhe importante: <code>invert</code> vai no elemento da imagem, nunca no container. Se você
+puser <code>dark:invert</code> numa <code>&lt;section&gt;</code>, tudo que está dentro dela é invertido:
+a logo, a foto, o texto, o botão verde e a tarja âmbar. É o erro que estraga o tema escuro inteiro de
+uma vez.</p>
+
+<h2>4. Logo colorida: invert com hue-rotate</h2>
+
+<p>Se a logo tem cor — o pão dourado, o telhado vermelho —, inverter tudo devolve um pão azul e um
+telhado verde-água. Tecnicamente legível, visualmente errado. Existe um truque conhecido para isso:
+inverter e girar o matiz em 180 graus.</p>
+
+<pre class="term">.dark\:invert:where(.dark, .dark *) {
+  --tw-invert: invert(100%);
+  filter: var(--tw-blur, ) var(--tw-brightness, ) var(--tw-contrast, ) var(--tw-grayscale, ) var(--tw-hue-rotate, ) var(--tw-invert, ) var(--tw-saturate, ) var(--tw-sepia, ) var(--tw-drop-shadow, );
+}
+.dark\:hue-rotate-180:where(.dark, .dark *) {
+  --tw-hue-rotate: hue-rotate(180deg);
+  filter: var(--tw-blur, ) var(--tw-brightness, ) var(--tw-contrast, ) var(--tw-grayscale, ) var(--tw-hue-rotate, ) var(--tw-invert, ) var(--tw-saturate, ) var(--tw-sepia, ) var(--tw-drop-shadow, );
+}</pre>
+
+<p>Por que funciona? Inverter leva cada cor para o lado oposto do círculo de cores; girar o matiz em
+180 graus traz o matiz de volta para perto do original. A claridade continua invertida — o que era
+claro fica escuro —, e é exatamente isso que você quer numa logo colorida que precisa aparecer em
+fundo escuro. O resultado não é idêntico ao desenho original: é uma aproximação, e serve bem para
+logos simples com poucas cores.</p>
+
+<p>Use com moderação e sempre no elemento isolado. Em foto de comida, <code>invert</code> é proibido por
+bom senso: pão azul não vende pão. E em logo com foto dentro (muita marca tem), o truque também não
+presta — a foto fica negativa. Nesses casos, a solução é a seção 6: duas versões do arquivo.</p>
+
+<h2>5. A foto: brilho e contraste</h2>
+
+<p>Foto não se inverte. Foto se ajusta. O problema da foto clara no fundo escuro é que ela emite luz
+demais em relação ao resto da página: o olho se adapta ao escuro e leva um jato de claridade. Baixar o
+brilho no escuro resolve, e a classe é <code>brightness</code>.</p>
+
+<div class="trytailwind" data-goal="rule:--tw-brightness: brightness(90%)" data-tema="escuro">
+  <p class="try-task">A "foto" (aqui, um retângulo com degradê no lugar da foto, porque a caixa não
+  acessa a internet) está clara demais na prévia escura. Baixe o brilho com
+  <code>dark:brightness-90</code> e rode.</p>
+  <pre class="html" data-saida="css">&lt;div class="p-4 rounded-xl bg-stone-950"&gt;
+  &lt;div id="alvo" class="h-16 w-24 rounded-lg bg-gradient-to-br from-amber-200 to-amber-600"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+.h-16 {
+  height: calc(var(--spacing) * 16);
+}
+.w-24 {
+  width: calc(var(--spacing) * 24);
+}
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+.rounded-xl {
+  border-radius: var(--radius-xl);
+}
+.bg-stone-950 {
+  background-color: var(--color-stone-950);
+}
+.bg-gradient-to-br {
+  --tw-gradient-position: to bottom right in oklab;
+  background-image: linear-gradient(var(--tw-gradient-stops));
+}
+.from-amber-200 {
+  --tw-gradient-from: var(--color-amber-200);
+  --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+}
+.to-amber-600 {
+  --tw-gradient-to: var(--color-amber-600);
+  --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+}
+.p-4 {
+  padding: calc(var(--spacing) * 4);
+}
+</pre>
+  <pre class="solucao">&lt;div class="p-4 rounded-xl bg-stone-950"&gt;
+  &lt;div id="alvo" class="h-16 w-24 rounded-lg bg-gradient-to-br from-amber-200 to-amber-600 dark:brightness-90"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Quanto baixar? Depende da foto, e é uma decisão de olho, não de conta. <code>dark:brightness-90</code>
+é um ajuste discreto, bom para fotos que já são equilibradas; <code>dark:brightness-75</code> é para
+fotos muito claras, de estúdio ou de dia ensolarado. Junto com o brilho, um toque de contraste ajuda a
+imagem a não ficar "lavada": <code>dark:contrast-125</code>. A combinação
+<code>dark:brightness-90 dark:contrast-125</code> é uma receita segura para quase toda foto.</p>
+
+<p>Vale saber o que o filtro <em>não</em> faz: ele não conserta uma foto mal exposta, nem devolve detalhe
+que o arquivo não tem. Uma foto estourada (aquela em que o céu vira branco chapado) continua estourada
+depois do <code>brightness</code>. O filtro ajusta a relação entre a imagem e o fundo escuro; a
+qualidade da imagem é outro assunto, resolvido na hora de fotografar ou de pedir o arquivo certo.</p>
+
+<p>O contrário também acontece: foto escura (jantar à luz de vela, fachada à noite) desaparece no fundo
+escuro. Aí o caminho é <code>dark:brightness-110</code>, ou — melhor — uma moldura clara em volta, que
+trata o problema pela borda em vez de mexer na imagem. Moldura é assunto da seção 7.</p>
+
+<h2>6. Duas versões da mesma imagem</h2>
+
+<p>Quando o filtro não dá conta — logo com foto dentro, ilustração com muitas cores, marca que não pode
+mudar de tom de jeito nenhum —, o caminho profissional é ter os dois arquivos e mostrar um de cada vez.
+O Tailwind faz isso com duas classes que você já conhece: <code>hidden</code> e <code>block</code>,
+cada uma com a sua variante.</p>
+
+<div class="trytailwind" data-goal="css:.logo-escuro|display=none;;css:.logo-claro|display=block;;texto:PADARIA" data-tema="escuro">
+  <p class="try-task">Há duas versões da logo na página: a escura e a clara. No escuro, só a clara deve
+  aparecer. Esconda a escura com <code>dark:hidden</code> e mostre a clara com <code>hidden</code> mais
+  <code>dark:block</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="p-4 rounded-xl bg-stone-950"&gt;
+  &lt;span class="logo-escuro text-stone-900"&gt;PADARIA&lt;/span&gt;
+  &lt;span class="logo-claro text-stone-100"&gt;PADARIA&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.147 0.004 49.25)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4 rounded-xl bg-stone-950"&gt;
+  &lt;span class="logo-escuro text-stone-900 dark:hidden"&gt;PADARIA&lt;/span&gt;
+  &lt;span class="logo-claro hidden text-stone-100 dark:block"&gt;PADARIA&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A lógica é a mesma dos pares de cor, aplicada à visibilidade: no tema claro, a versão escura
+aparece e a clara está escondida; no escuro, invertem-se. Aqui usei <code>&lt;span&gt;</code> com
+texto no lugar dos arquivos, mas com <code>&lt;img&gt;</code> é idêntico:
+<code>&lt;img src="logo-escura.png" class="dark:hidden"&gt;</code> e
+<code>&lt;img src="logo-clara.png" class="hidden dark:block"&gt;</code>.</p>
+
+<p>O <code>hidden</code> põe <code>display: none</code>, e <code>block</code> põe
+<code>display: block</code>. As duas regras existem no arquivo final, uma ao lado da outra:</p>
+
+<pre class="term">.dark\:hidden:where(.dark, .dark *) {
+  display: none;
+}
+.dark\:block:where(.dark, .dark *) {
+  display: block;
+}</pre>
+
+<p>Isso explica um detalhe que confunde: <code>hidden</code> numa imagem é
+seguro, porque imagem já é bloco; numa <code>&lt;span&gt;</code>, o <code>dark:block</code> muda o
+comportamento dela (de linha para bloco) e pode quebrar o alinhamento do rodapé. Se o elemento era
+inline, use <code>dark:inline-block</code> para não mudar o desenho.</p>
+
+<p>Existe um caminho que dispensa classe: o elemento <code>&lt;picture&gt;</code> com
+<code>prefers-color-scheme</code>. Ele escolhe o arquivo antes de a página pintar, e por isso é o
+preferido de quem se importa com o primeiro segundo:</p>
+
+<pre class="file" data-file="index.html">&lt;picture&gt;
+  &lt;source srcset="logo-clara.svg" media="(prefers-color-scheme: dark)"&gt;
+  &lt;img src="logo-escura.svg" alt="Padaria da Ana" class="h-10"&gt;
+&lt;/picture&gt;</pre>
+
+<p>Esse caminho tem uma vantagem técnica que as duas <code>&lt;img&gt;</code> não têm: o navegador baixa
+só o arquivo que vai usar. Com duas imagens e <code>hidden</code>, as duas são baixadas — o
+<code>display: none</code> esconde da tela, não da rede. Em logo de 5 kB isso não pesa; em foto de
+galeria, pesa. Se a página é leve e o botão de tema é por classe, fique com as duas
+<code>&lt;img&gt;</code> e não complique.</p>
+
+<p>Só tem um porém, e é grande: <code>prefers-color-scheme</code> responde à configuração do
+<em>sistema operacional</em>, não à classe <code>dark</code> que o seu botão liga. Se o tema do site é
+por classe — como na aula de tema por classe —, o <code>&lt;picture&gt;</code> não acompanha o botão. Ele
+combina com o tema automático, que é o assunto da próxima aula. Escolha a técnica que combina com o
+seu interruptor, não a que parece mais moderna.</p>
+
+<h2>7. A plaquinha e a moldura</h2>
+
+<p>Existe uma terceira saída para a logo, mais antiga e muitas vezes mais bonita: dar um fundo claro
+para ela. Em vez de inverter o traço preto, você mantém o preto e põe um retângulo claro atrás — a
+plaquinha. É o que uma padaria faria na vida real: a placa de metal escuro ganha um fundo de madeira
+clara.</p>
+
+<pre class="file" data-file="index.html">&lt;a href="index.html" class="inline-flex items-center gap-2 rounded-xl bg-white p-3 dark:bg-stone-100"&gt;
+  &lt;img src="logo-padaria.png" alt="Padaria da Ana" class="h-8"&gt;
+&lt;/a&gt;</pre>
+
+<p>Repare no <code>dark:bg-stone-100</code>: a plaquinha continua clara no escuro, só que um degrau
+abaixo do branco puro para não ofuscar. Você não está "enganando" o tema — está declarando que aquela
+logo é feita para fundo claro, e dando um fundo claro para ela. É honesto e não depende de filtro
+nenhum.</p>
+
+<p>O mesmo raciocínio serve para a foto, com outra palavra: moldura. Uma foto clara sobre fundo escuro
+parece flutuar, porque não tem onde encostar. Uma borda ou um anel em volta dá a ela um limite.
+<code>ring-1 ring-stone-200 dark:ring-stone-700</code> é discreto; <code>border-4 border-white dark:border-stone-700</code>
+é uma escolha de estilo, boa para galeria de vitrine. O anel é o mesmo recurso da aula de
+<a href="anel-e-foco.html">anel e foco</a>, aplicado à imagem.</p>
+
+<p>Escolha uma das três técnicas por imagem e mantenha: filtro, plaquinha ou duas versões. Misturar as
+três na mesma página produz um rodapé com logo invertida, logo com plaquinha e logo trocada — e aí a
+marca parece três marcas diferentes. Consistência vale mais que a técnica mais esperta.</p>
+
+<h2>8. O que não fazer</h2>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Vontade</th><th>O que acontece</th><th>Faça em vez disso</th></tr>
+<tr><td><code>dark:invert</code> na <code>&lt;section&gt;</code></td><td>tudo inverte: foto, cor do botão, tarja</td><td>o filtro vai na imagem, sozinha</td></tr>
+<tr><td><code>dark:invert</code> em foto de comida</td><td>o pão fica azul, o dourado fica roxo</td><td><code>dark:brightness-90</code></td></tr>
+<tr><td><code>dark:grayscale</code> na logo</td><td>a marca perde a cor que a identifica</td><td>duas versões do arquivo</td></tr>
+<tr><td><code>dark:opacity-50</code> na foto</td><td>a foto fica translúcida e mostra o fundo</td><td>baixar o brilho, ou moldura</td></tr>
+<tr><td>logo branca sobre fundo branco</td><td>desaparece igual à preta no escuro</td><td>o par completo: clara no escuro, escura no claro</td></tr>
+<tr><td><code>&lt;picture&gt;</code> com tema por classe</td><td>a imagem não acompanha o botão</td><td>duas <code>&lt;img&gt;</code> com <code>hidden</code> e <code>dark:block</code></td></tr>
+</table>
+</div>
+
+<p>A última linha é a que mais engana, porque o código parece certo e funciona no computador de quem
+escreveu — que costuma estar com o sistema no escuro. Ao abrir no celular com o sistema no claro, a
+logo some. Antes de publicar, teste as duas combinações: tema do site e tema do sistema, cada um no
+seu estado.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o rodapé com a logo invisível</h3>
+<p>A Ana tinha um rodapé <code>bg-white dark:bg-stone-950</code> e a logo em PNG de traço preto. No
+escuro, a logo desapareceu por completo — não estava "apagada", estava ausente. Ela tentou
+<code>dark:invert</code> e resolveu em um minuto, mas o traço branco puro ficou forte demais no rodapé
+preto. O ajuste final foi <code>dark:invert dark:opacity-90</code>: a logo aparece, e sem o brilho de
+letreiro. Filtro combina com opacidade sem briga.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a foto que virou um clarão</h3>
+<p>A foto do balcão ocupava meia tela. No claro era aconchegante; no escuro, um holofote. Baixar o
+brilho resolveu a maior parte, e a moldura
+(<code>ring-1 ring-stone-200 dark:ring-stone-700</code>) deu o limite que faltava. Uma alternativa que
+ela considerou: trocar a foto por uma do balcão à noite. É a solução mais bonita quando você tem o
+arquivo — mas dá trabalho, e o filtro resolve hoje.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a ilustração colorida do bolo</h3>
+<p>A ilustração tinha seis cores, incluindo um chantili branco. Inverter deixou o chantili preto e o
+bolo azul; o <code>hue-rotate</code> melhorou o matiz, mas o chantili continuou errado. A solução
+honesta foi pedir ao designer a versão escura do desenho — e, até ela chegar, usar
+<code>dark:brightness-90 dark:contrast-125</code> com uma moldura clara, deixando a ilustração no seu
+jeito original. Filtro é remédio; arquivo certo é cura.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Onde vai o <code>dark:invert</code>?</p>
+<label><input type="radio" name="q1"> no container que envolve a página</label>
+<label><input type="radio" name="q1"> no próprio elemento da imagem</label>
+<label><input type="radio" name="q1"> no arquivo CSS, dentro do <code>@theme</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual ajuste combina com foto clara no tema escuro?</p>
+<label><input type="radio" name="q2"> <code>dark:invert</code>, para escurecer</label>
+<label><input type="radio" name="q2"> <code>dark:grayscale</code>, para tirar a cor</label>
+<label><input type="radio" name="q2"> <code>dark:brightness-90</code> com <code>dark:contrast-125</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que <code>&lt;picture&gt;</code> com
+<code>prefers-color-scheme</code> pode não funcionar no seu site?</p>
+<label><input type="radio" name="q3"> porque ele segue o tema do sistema, não a classe <code>dark</code></label>
+<label><input type="radio" name="q3"> porque o Tailwind não gera CSS para <code>&lt;picture&gt;</code></label>
+<label><input type="radio" name="q3"> porque <code>&lt;picture&gt;</code> só aceita SVG</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a segunda logo</h2>
+<p>Você pôs duas versões da logo no rodapé. A clara começa escondida e só deve aparecer no tema escuro.
+Complete a classe que a mostra no escuro:</p>
+<div class="ex-code">&lt;img src="logo-clara.png" alt="Padaria" class="hidden <input aria-label="resposta 1" data-answer="dark:block" placeholder="...">"&gt;</div>
+<p class="ex-dica">Dica: a variante é <code>dark:</code> e a classe de exibição é <code>block</code> —
+a mesma que desfaz o <code>hidden</code>. Se o elemento fosse inline, seria <code>dark:inline-block</code>.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Imagem não tem par de tema: o arquivo é o mesmo nos dois. Por isso cada tipo pede um tratamento.
+Logo de traço escuro resolve com <code>dark:invert</code>, sempre no elemento da imagem e nunca no
+container. Logo colorida pede <code>dark:invert dark:hue-rotate-180</code>, que devolve o matiz e
+mantém a claridade invertida. Foto pede <code>dark:brightness-90</code> com
+<code>dark:contrast-125</code> — inverter foto é pecado. Quando nada disso serve, use duas versões com
+<code>dark:hidden</code> e <code>hidden dark:block</code>, ou a plaquinha clara atrás da logo.</p>
+
+<p>E não esqueça a moldura: <code>ring-1 ring-stone-200 dark:ring-stone-700</code> dá limite à foto que
+flutua no escuro. O teste final é sempre o mesmo: abra a página nos dois temas, com o sistema nos dois
+temas também, e veja se alguma imagem desapareceu, ofuscou ou mudou de cor sem você mandar.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Imagem é arquivo: não obedece a variável de tema, precisa de classe própria.</li>
+<li><code>dark:invert</code> no elemento da imagem, nunca no container.</li>
+<li>Logo colorida: <code>dark:invert dark:hue-rotate-180</code>, com resultado aproximado.</li>
+<li>Foto: <code>dark:brightness-90 dark:contrast-125</code>; <code>brightness-75</code> para fotos muito claras.</li>
+<li><code>invert</code> e <code>brightness</code> convivem: cada um mexe na sua variável de filtro.</li>
+<li>Plaquinha: <code>bg-white dark:bg-stone-100</code> atrás da logo transparente.</li>
+<li>Duas versões: <code>dark:hidden</code> numa, <code>hidden dark:block</code> na outra.</li>
+<li>Elemento inline interrompido por <code>block</code>? Use <code>dark:inline-block</code>.</li>
+<li><code>&lt;picture&gt;</code> com <code>prefers-color-scheme</code> só acompanha o tema do sistema.</li>
+<li>Moldura no anel: <code>ring-1 ring-stone-200 dark:ring-stone-700</code>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

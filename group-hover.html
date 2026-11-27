@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>group-hover | Guia Tailwind</title>
+<meta name="description" content="group-hover no Tailwind: como a classe group no pai faz o cartão inteiro reagir ao mouse, o CSS que o Tailwind gera e por que o efeito some no celular.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>O <span class="hl">group-hover</span></h1>
+<p class="intro">A Ana montou o cartão do pão de queijo com nome, descrição e preço, e quis dar um
+toque de vida: quando o mouse passasse por cima, o cartão deveria reagir. Ela pôs
+<code>hover:</code> no botão e passou o mouse no cartão. Nada. Passou no botão e só o botão mudou. O
+problema é que o <code>hover:</code> sozinho pergunta “o mouse está neste elemento?”, e o mouse está no
+cartão, não no preço que fica dentro dele. Nesta aula ela conhece a classe que resolve isso — uma
+etiqueta no pai que diz “quando o mouse estiver em mim, avise os meus filhos”. É o
+<code>group-hover</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que o <code>hover:</code> sozinho não alcança os filhos do elemento.</li>
+  <li>O que a classe <code>group</code> faz — e por que ela não pinta nada sozinha.</li>
+  <li>Como escrever <code>group-hover:</code> e ler o CSS que o Tailwind gera.</li>
+  <li>Como animar vários filhos do mesmo grupo ao mesmo tempo.</li>
+  <li>Grupos aninhados, grupos com nome e qual deles manda.</li>
+  <li>Por que o efeito não funciona no celular e o que fazer quando o dado é importante.</li>
+  <li>Os erros que fazem o efeito “não pegar” e como diagnosticar cada um.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o mouse no cartão, o botão parado</h2>
+
+<p>O cartão que a Ana tem na tela é pequeno: uma caixa âmbar clara, o nome do pão em negrito, uma linha
+de descrição e um botão “Encomendar”. O que ela quer é o clássico: passar o mouse em qualquer pedaço do
+cartão e ver o botão ficar mais forte, como se o cartão inteiro despertasse. É o gesto que quase todo
+site tem, e que ninguém percebe quando está bem feito.</p>
+
+<p>A primeira tentativa foi a mais óbvia: colocar <code>hover:bg-amber-300</code> no botão. O resultado
+decepciona — e não é culpa do navegador. O seletor que o Tailwind gera é
+<code>.hover\:bg-amber-300:hover</code>, e o que ele pede é literal: o elemento <em>com essa classe</em>
+precisa estar sob o mouse. O preço, o título e a descrição não têm essa classe, então nada acontece
+quando o mouse passa por eles. Cada elemento responde por si, e o mouse só está em um lugar de cada vez.</p>
+
+<p>Existe a saída de repetir <code>hover:</code> em cada filho — e ela funciona, tecnicamente. Mas você
+teria de repetir a condição em cinco elementos e, pior, o efeito passaria a disparar quando o mouse
+estivesse em cima de cada filho, com uma diferença de milímetros entre um e outro: no instante em que o
+mouse cai no vão de 4 px entre dois elementos, o efeito pisca. Quem já viu um menu piscando ao passar o
+mouse sabe do que estou falando.</p>
+
+<p>O que a Ana precisa é de <strong>uma condição só, decidida no pai</strong>, e filhos que a escutem.
+É exatamente o que o Tailwind chama de grupo. O pai recebe uma etiqueta — <code>group</code> — e cada
+filho que quiser reagir recebe uma variante especial: <code>group-hover:</code>. O efeito é o mesmo do
+<code>hover:</code>, mas a pergunta muda: “o mouse está no <em>grupo</em>?”, e não “o mouse está em
+mim?”.</p>
+
+<h2>2. O limite do hover sozinho</h2>
+
+<p>Vale entender o mecanismo antes de decorar a classe, porque ele reaparece em outras variantes. O
+<code>hover</code> do CSS é um estado do próprio elemento: o navegador sabe quando o ponteiro está
+sobre a caixa daquele elemento e liga o estado. Não existe herança de <code>:hover</code> — o filho não
+fica em <em>hover</em> porque o pai está. Cada caixa tem o seu estado, e o filho, na maioria dos casos,
+está dentro da caixa do pai, então o mouse “passa” pelos dois na mesma hora. Mas o navegador só marca o
+elemento que está na frente do ponteiro: o texto, o botão, a borda. O pai fica marcado também, porque a
+área dele inclui a dos filhos; o contrário não vale.</p>
+
+<p>É por isso que o CSS resolveu isso com um seletor de descendência: “quando o pai estiver em hover,
+mude o filho”. A ideia é velha e o Tailwind só deu um nome curto para ela. Se você abrir o CSS gerado
+por <code>group-hover:underline</code>, vai ver um seletor com dois pedaços: o primeiro procura o
+elemento com a classe <code>group</code> que está sob o mouse; o segundo procura, <em>dentro dele</em>,
+o elemento com a classe que você escreveu. É a mesma relação de pai e filho que você já usa no HTML.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="rounded-xl bg-amber-50 p-4"&gt;
+  &lt;p class="font-semibold"&gt;Pão de queijo&lt;/p&gt;
+  &lt;button class="hover:bg-amber-300"&gt;Encomendar&lt;/button&gt;
+&lt;/div&gt;</pre>
+
+<p>No exemplo acima, passar o mouse no parágrafo não faz nada; passar no botão muda o fundo dele. Repare
+que o <code>hover:</code> não está errado: ele está no elemento errado para o que a Ana quer. A partir
+de agora, a pergunta que você faz antes de escrever é: <em>quem decide o estado?</em> Se é o próprio
+elemento, <code>hover:</code>. Se é o conjunto, o pai vira <code>group</code> e os filhos usam
+<code>group-hover:</code>.</p>
+
+<h2>3. A marca do grupo: a classe group</h2>
+
+<p>A classe <code>group</code> é diferente de todas as que você viu até aqui: ela não pinta, não espaça
+e não muda o tamanho de nada. Se você olhar o CSS gerado de uma página que só tem
+<code>class="group"</code>, não vai achar nenhuma regra para ela. Isso assusta no começo — parece que a
+classe “não funciona”. Na verdade ela funciona como um marco: existe para que outros seletores possam
+dizer “dentro deste elemento”. É a primeira classe do guia que não desenha nada sozinha.</p>
+
+<p>Na caixa abaixo, o cartão já tem fundo, respiro e cantos arredondados, mas não tem a marca. O preço
+tem a classe de destaque e nada mais. A missão tem duas partes, e as duas são obrigatórias: a
+<code>&lt;div&gt;</code> do cartão recebe <code>group</code>, e o <code>&lt;span&gt;</code> do preço
+recebe <code>group-hover:underline</code>. Só com as duas o sublinhado aparece quando o mouse entra no
+cartão.</p>
+
+<div class="trytailwind" data-goal="conta:.group=1;;rule::where(.group):hover .group-hover\:underline">
+  <p class="try-task">Faça o preço ganhar sublinhado quando o mouse estiver em qualquer lugar do
+  cartão: acrescente <code>group</code> à <code>&lt;div&gt;</code> e
+  <code>group-hover:underline</code> ao <code>&lt;span&gt;</code> do preço.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl bg-amber-50 p-4"&gt;
+  &lt;p class="text-lg font-semibold"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Assado às 6h, sai quentinho&lt;/p&gt;
+  &lt;span class="font-bold text-amber-900"&gt;R$ 3&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="group rounded-xl bg-amber-50 p-4"&gt;
+  &lt;p class="text-lg font-semibold"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Assado às 6h, sai quentinho&lt;/p&gt;
+  &lt;span class="font-bold text-amber-900 group-hover:underline"&gt;R$ 3&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Rode a solução e passe o mouse na prévia: o sublinhado aparece quando o ponteiro entra em qualquer
+ponto do cartão — no título, na descrição, no vão vazio. O painel, porém, vai continuar mostrando as
+mesmas linhas de antes: o <code>background-color</code> do cartão, o <code>padding</code>, o
+<code>border-radius</code>. Isso não é defeito do painel. Ele descreve o estado <em>de repouso</em>, sem
+mouse em lugar nenhum, e no repouso o <code>group-hover:</code> não muda nada. A prova do efeito é a
+prévia, com o seu mouse de verdade.</p>
+
+<dl class="anatomy">
+<dt>group</dt>
+<dd>A marca no pai. Não pinta nada: só avisa aos filhos que existe um grupo ali.</dd>
+<dt>group-hover</dt>
+<dd>A variante do filho: vale quando o mouse está em qualquer ponto do grupo.</dd>
+<dt>descendente</dt>
+<dd>Elemento dentro de outro, em qualquer profundidade: filho, neto, bisneto.</dd>
+<dt>estado</dt>
+<dd>Uma condição do elemento (mouse em cima, foco, marcado). O navegador liga e desliga sozinho.</dd>
+<dt>especificidade</dt>
+<dd>O peso de uma regra quando duas discordam. O <code>:where()</code> do Tailwind deixa as variantes
+com peso baixo de propósito.</dd>
+</dl>
+
+<p>Esse detalhe vale para toda variante de estado. Hover, focus, checked: o CSS computado que você lê
+sem interagir é sempre o estado inicial. Quem confere comportamento no dia a dia é o olho e o mouse, não
+a tabela de propriedades. Quando você quiser investigar por que um efeito não aparece, aí sim a tabela
+ajuda — mas ela nunca mostra o “depois” sozinha.</p>
+
+<h2>4. O CSS que o Tailwind gera</h2>
+
+<p>Vale abrir a caixa-preta, porque o seletor gerado explica todos os comportamentos estranhos de uma
+vez. Para <code>group-hover:underline</code> dentro de um <code>group</code>, o Tailwind escreve isto:</p>
+
+<pre class="term">@media (hover: hover) {
+  :is(:where(.group):hover .group-hover\:underline) {
+    text-decoration-line: underline;
+  }
+}</pre>
+
+<p>Leia de dentro para fora. <code>:where(.group):hover</code> é “o elemento que tem a classe
+<code>group</code> e está sob o mouse”. O espaço depois dele quer dizer “um descendente”: o
+<code>.group-hover\:underline</code> precisa estar dentro do grupo, em qualquer profundidade — filho,
+neto, bisneto. O <code>:is()</code> e o <code>:where()</code> são envelopes que o Tailwind usa para
+controlar uma coisa chamada especificidade, que é o peso da regra na hora de decidir quem ganha quando
+duas regras discordam. Você não precisa calcular nada disso; só saiba que o efeito do grupo é
+<em>fraco</em> de propósito, e por isso uma classe comum no mesmo elemento ainda consegue vencê-lo.</p>
+
+<p>O envelope de fora, <code>@media (hover: hover)</code>, é o mais importante dos três e o menos
+comentado. Ele manda: “aplique esta regra só em aparelhos que têm um ponteiro capaz de pairar”, ou seja,
+mouse ou trackpad. Num celular de toque, o bloco inteiro é ignorado. Não é castigo: é o navegador
+evitando o estado “preso”, aquele em que você toca num cartão, a cor muda e nunca mais volta porque não
+existe “tirar o mouse”.</p>
+
+<p>A consequência prática é dura e vale repetir: <strong>nada que só aparece no hover pode ser a única
+forma de acessar uma informação</strong>. Preço, telefone, endereço e botão de comprar não podem viver
+atrás de um <code>group-hover</code>. Use o efeito para reforçar o que já está visível, ou para animar
+um detalhe — nunca como único caminho. No celular, metade do seu público veria um cartão morto.</p>
+
+<h2>5. Vários filhos reagindo ao mesmo tempo</h2>
+
+<p>Agora que a marca está no pai, cada filho escolhe o que fazer. Não existe uma lista de propriedades
+“do grupo”: cada elemento recebe a sua própria variante, com a utilidade que você quiser. Um cartão
+pode, no mesmo hover, escurecer o título, engrossar o botão, girar a setinha e levantar a sombra — são
+quatro classes, em quatro elementos, todas disparando juntas.</p>
+
+<p>Na caixa seguinte, o cartão já está marcado com <code>group</code> e a missão é mudar dois filhos: o
+título fica âmbar escuro e o botão fica com o fundo mais forte. Repare que o botão tem
+<code>hover:</code>? Não tem — e isso é bom. Se você misturar <code>hover:</code> no filho com
+<code>group-hover:</code> no mesmo elemento, o efeito passa a exigir o mouse <em>no filho</em> e o do
+grupo passa a ser ignorado naquele pedaço.</p>
+
+<div class="trytailwind" data-goal="rule:.group-hover\:text-amber-900);;rule:.group-hover\:bg-amber-300)">
+  <p class="try-task">Com o mouse em qualquer ponto do cartão, o título deve ficar âmbar escuro e o
+  botão deve ganhar fundo âmbar mais forte: use <code>group-hover:text-amber-900</code> no
+  <code>&lt;h3&gt;</code> e <code>group-hover:bg-amber-300</code> no <code>&lt;button&gt;</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="group rounded-xl bg-amber-50 p-4"&gt;
+  &lt;h3 class="text-lg font-semibold"&gt;Pão francês&lt;/h3&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Casquinha fina, feito na hora.&lt;/p&gt;
+  &lt;button class="mt-3 rounded-md bg-amber-100 px-3 py-2 text-sm font-medium text-amber-900"&gt;Encomendar&lt;/button&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="group rounded-xl bg-amber-50 p-4"&gt;
+  &lt;h3 class="text-lg font-semibold group-hover:text-amber-900"&gt;Pão francês&lt;/h3&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Casquinha fina, feito na hora.&lt;/p&gt;
+  &lt;button class="mt-3 rounded-md bg-amber-100 px-3 py-2 text-sm font-medium text-amber-900 group-hover:bg-amber-300"&gt;Encomendar&lt;/button&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Uma coisa que confunde: o título e o botão já têm cor no estado de repouso, e a variante só entra em
+cena quando o mouse chega. Não existe “voltar ao normal” escrito em lugar nenhum — o navegador desfaz o
+estado sozinho quando o ponteiro sai do grupo, porque o seletor deixa de casar. É por isso que você
+nunca precisa escrever um <code>group-not-hover</code>: o CSS já é feito de condições que ligam e
+desligam.</p>
+
+<p>Outro detalhe de quem está começando: o filho pode estar em qualquer profundidade. Se o cartão tem
+uma <code>&lt;div&gt;</code> no meio, o <code>group-hover:</code> no neto funciona igual, porque o
+seletor procura a marca em qualquer nível acima. O que não funciona é o contrário — pôr
+<code>group-hover:</code> num elemento que está <em>fora</em> do grupo. Se o cartão é o grupo, ninguém
+acima dele escuta nada.</p>
+
+<h2>6. Um caso especial: o que aparece no hover</h2>
+
+<p>Há um padrão que a Ana viu num site de restaurante e quis copiar: o botão “Encomendar” escondido, que
+surge quando o mouse passeia sobre o prato. Dá para fazer com <code>group-hover:</code> e uma utilidade
+de opacidade. O botão nasce com <code>opacity-0</code> — invisível, mas ocupando espaço — e ganha
+<code>group-hover:opacity-100</code> do pai. Quando o mouse entra no cartão, a opacidade sobe e o botão
+aparece.</p>
+
+<p>É um efeito bonito e traiçoeiro. O botão invisível continua no meio do caminho: ele recebe clique,
+recebe foco pelo teclado e aparece para quem usa leitor de tela. Quem navega com <kbd>Tab</kbd> chega
+num botão que não vê. Se você usar esse padrão, acrescente também um estado de foco no mesmo elemento —
+<code>focus:opacity-100</code> —, para o teclado ter o mesmo privilégio do mouse. E lembre do que já
+sabemos: no celular, o <code>group-hover</code> não dispara.</p>
+
+<div class="trytailwind" data-goal="conta:.group=1;;rule:.group-hover\:opacity-100)">
+  <p class="try-task">O botão está invisível (<code>opacity-0</code>) e o cartão ainda não é um grupo.
+  Faça o botão aparecer quando o mouse estiver no cartão: acrescente <code>group</code> à
+  <code>&lt;div&gt;</code> e <code>group-hover:opacity-100</code> ao botão.</p>
+  <pre class="html">&lt;div class="rounded-xl bg-amber-50 p-4"&gt;
+  &lt;p class="font-semibold"&gt;Bolo de fubá&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Fatia generosa, R$ 8&lt;/p&gt;
+  &lt;button id="alvo" class="mt-3 rounded-md bg-amber-600 px-3 py-2 text-sm font-medium text-white opacity-0"&gt;Encomendar&lt;/button&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.666 0.179 58.318)
+color: rgb(255, 255, 255)
+font-size: 14px
+font-weight: 500
+line-height: 20px
+border-radius: 6px
+opacity: 0
+margin-top: 12px
+padding-inline: 12px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;div class="group rounded-xl bg-amber-50 p-4"&gt;
+  &lt;p class="font-semibold"&gt;Bolo de fubá&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Fatia generosa, R$ 8&lt;/p&gt;
+  &lt;button id="alvo" class="mt-3 rounded-md bg-amber-600 px-3 py-2 text-sm font-medium text-white opacity-0 group-hover:opacity-100"&gt;Encomendar&lt;/button&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel desta caixa observa o próprio botão, e a última linha dele é
+<code>opacity: 0</code> — a prova de que o botão está invisível no repouso. Depois de rodar a solução e
+passar o mouse no cartão, o botão aparece na prévia, mas o painel continua dizendo zero, pelo mesmo
+motivo da caixa anterior: ele descreve o repouso. Para ver o número mudar, só com o mouse em cima e o
+painel recalculando — o que a caixa não faz.</p>
+
+<p>Se o cartão tiver mais de um filho que reage, o padrão continua igual: cada um com a sua variante.
+Não há limite de quantos filhos escutam o mesmo grupo. O que existe é um limite de bom senso: quando
+todo mundo se mexe ao mesmo tempo, o olho não sabe para onde ir. Um título que muda de cor e um botão
+que cresce já é bastante para um cartão de padaria.</p>
+
+<h2>7. Grupos com nome e grupos aninhados</h2>
+
+<p>Num cartão sozinho, um <code>group</code> basta. Mas imagine a vitrine inteira com seis cartões, cada
+um com o seu botão: se o <code>group</code> estiver na vitrine, o mouse em qualquer cartão acende os
+seis botões. A solução é o <code>group</code> ficar em cada cartão. Até aí, nada novo.</p>
+
+<p>O problema aparece quando um cartão está dentro de outro grupo que também precisa reagir — por
+exemplo, uma seção que clareia o fundo inteiro e, dentro dela, cartões que reagem por conta própria.
+Nesse caso, o Tailwind permite dar um <strong>nome</strong> ao grupo, e o filho escolhe qual grupo
+escuta:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="group/vitrine"&gt;
+  &lt;div class="group/cartao rounded-xl bg-white p-4"&gt;
+    &lt;h3 class="group-hover/vitrine:underline group-hover/cartao:text-amber-900"&gt;Pão francês&lt;/h3&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<p>A barra depois de <code>group</code> é o nome que você inventou. O CSS gerado carrega o nome no
+seletor, com as barras escapadas, e o mecanismo é idêntico: pai marcado, filho escutando.</p>
+
+<pre class="term">:is(:where(.group\/cartao):hover .group-hover\/cartao\:underline) {
+  text-decoration-line: underline;
+}</pre>
+
+<p>Leia com calma: as três barras invertidas são só escapamento de caractere, como na aula de
+<code>odd</code> e <code>even</code>. O que importa é que o nome <code>cartao</code> aparece nas duas
+pontas — no pai e no filho — e é isso que amarra um ao outro. Um filho marcado com
+<code>group-hover/vitrine:</code> não reage ao grupo do cartão, mesmo estando dentro dele: nomes
+diferentes, grupos diferentes.</p>
+
+<p>O nome não é decoração — é o que permite dois grupos convivendo no mesmo pedaço de tela. Se
+você só precisa de um nível, ignore esta parte e continue com <code>group</code> puro; nomes só entram
+quando o aninhamento é inevitável.</p>
+
+<p>Agora o susto que a Ana levou: ela pôs <code>group</code> na vitrine <em>e</em> em cada cartão, e
+esperou que o cartão “protegesse” o que está dentro dele. Não protege. Como o mouse sobre o cartão está
+também sobre a vitrine, os dois grupos ficam em hover ao mesmo tempo, e tudo que tem
+<code>group-hover:</code> naquele galho reage junto. Grupo sem nome não tem hierarquia: quem está em
+hover é <em>todo</em> ancestral marcado. Para separar os dois comportamentos, é preciso dar nome a cada
+um — e é exatamente para isso que o recurso existe.</p>
+
+<h2>8. O cartão da padaria de ponta a ponta</h2>
+
+<p>Juntando o que já sabemos, o cartão da Ana ficou com quatro coisas acontecendo no hover: o título
+escurece, o botão fica mais forte, a sombra sobe e a seta anda 4 px para a direita. Cada uma é uma
+variante em um filho diferente, e todas dependem da mesma etiqueta no pai. A tabela abaixo é o mapa que
+ela colou ao lado do computador.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que muda</th><th>Classe no filho</th><th>Efeito para o leitor</th></tr>
+<tr><td>Título</td><td><code>group-hover:text-amber-900</code></td><td>o nome do pão ganha peso visual</td></tr>
+<tr><td>Botão</td><td><code>group-hover:bg-amber-300</code></td><td>o convite fica mais evidente</td></tr>
+<tr><td>Sombra do cartão</td><td><code>group-hover:shadow-lg</code></td><td>o cartão “levanta” da página</td></tr>
+<tr><td>Seta ao lado do botão</td><td><code>group-hover:translate-x-1</code></td><td>sugere o movimento do clique</td></tr>
+<tr><td>Imagem do pão</td><td><code>group-hover:scale-105</code></td><td>a foto cresce de leve, sem sair do lugar</td></tr>
+<tr><td>Botão escondido</td><td><code>group-hover:opacity-100</code></td><td>aparece só com o mouse: use com cuidado</td></tr>
+</table>
+</div>
+
+<p>Metade desses efeitos só fica boa com transição — o <code>transition</code>, que muda o valor aos
+poucos em vez de num piscar. Sem ele, a sombra “salta” e o olho percebe o corte. O Tailwind tem uma
+utilidade <code>transition</code> que liga as transições mais comuns; ela é assunto de outra aula, mas o
+convite fica: quando o efeito parecer brusco, é quase sempre falta de transição, não excesso de classe.</p>
+
+<p>E há o outro lado: efeito demais. Um cartão em que tudo se mexe ao mesmo tempo em que o mouse passa
+vira um brinquedo, e o leitor que só queria ver o preço se distrai. A regra da Ana, que ela chama de
+“regra do pão quente”, é simples: o hover deve reforçar a ação principal do cartão — encomendar — e nada
+mais. Um alvo, talvez dois. O resto fica parado.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sintoma</th><th>Causa provável</th><th>O que fazer</th></tr>
+<tr><td>Nada acontece ao passar o mouse</td><td>falta <code>group</code> no pai, ou falta o <code>group-hover:</code> no filho</td><td>confira as duas pontas: marca no pai, variante no filho</td></tr>
+<tr><td>Funciona no computador e não no celular</td><td>a regra vive dentro de <code>@media (hover: hover)</code></td><td>não deixe informação essencial só no hover</td></tr>
+<tr><td>Só um pedaço do cartão dispara</td><td>a marca <code>group</code> ficou num filho, não no cartão</td><td>mova a classe para o elemento que envolve tudo</td></tr>
+<tr><td>Vários cartões acendem juntos</td><td>o <code>group</code> está na vitrine, e não em cada cartão</td><td>uma marca por cartão</td></tr>
+<tr><td>O efeito pisca no vão entre elementos</td><td>o <code>hover:</code> foi repetido em cada filho</td><td>troque por <code>group</code> no pai + <code>group-hover:</code> nos filhos</td></tr>
+<tr><td>O filho certo não reage, o errado sim</td><td>há dois grupos aninhados e o de fora também entra em hover</td><td>dê nome aos grupos com <code>group/nome</code> e escute com <code>group-hover/nome:</code></td></tr>
+</table>
+</div>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a vitrine com seis cartões</h3>
+<p>A Ana montou a vitrine numa grade de três colunas e pôs <code>group</code> na
+<code>&lt;div&gt;</code> que envolve a grade inteira. Resultado: o mouse em qualquer cartão acendia os
+seis botões. O conserto foi descer a marca um nível, para o cartão de cada pão. Ela aprendeu a regra
+nesse dia: <strong>o grupo é do tamanho do efeito que você quer</strong>. Quer que o cartão inteiro
+reaja? Marque o cartão. Quer que a vitrine reaja? Marque a vitrine, e aceite que todos os filhos reajam
+juntos.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a lista de encomendas que já tinha zebra</h3>
+<p>Na lista de encomendas, cada linha já tinha <code>odd:bg-amber-50</code>. Ela quis que a linha
+inteira ficasse mais escura no mouse e escreveu <code>group</code> em cada <code>&lt;li&gt;</code> com
+<code>group-hover:bg-amber-100</code> no mesmo <code>&lt;li&gt;</code>. Não funcionou como esperado: o
+elemento que tem <code>group-hover:</code> precisa estar <em>dentro</em> do grupo, e ele estava no
+próprio. O certo, ali, era o bom e velho <code>hover:bg-amber-100</code> — quando o elemento reage a si
+mesmo, o grupo é desnecessário.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o botão que ninguém conseguia clicar no celular</h3>
+<p>O botão “Encomendar” aparecia só no hover, e no celular da cliente ele simplesmente não existia. A
+Ana não tinha testado no telefone. A correção foi deixar o botão sempre visível e usar o
+<code>group-hover</code> só para o brilho do fundo — um enfeite que pode faltar sem prejuízo. Ficou menos
+“esperto” e muito mais vendável: no celular, o botão está lá desde o primeiro toque.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Onde vai a classe <code>group</code>?</p>
+<label><input type="radio" name="q1"> no elemento que deve mudar de aparência</label>
+<label><input type="radio" name="q1"> no elemento que envolve os filhos que vão reagir</label>
+<label><input type="radio" name="q1"> em todos os elementos do cartão, para garantir</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que <code>group-hover:</code> não funciona no
+celular?</p>
+<label><input type="radio" name="q2"> porque o Tailwind desliga variantes em telas pequenas</label>
+<label><input type="radio" name="q2"> porque o celular não carrega a classe <code>group</code></label>
+<label><input type="radio" name="q2"> porque a regra fica dentro de <code>@media (hover: hover)</code>, e o toque não tem ponteiro que paira</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Dois cartões, cada um com o seu botão, e você quer
+que só o botão do cartão sob o mouse reaja. Onde fica o <code>group</code>?</p>
+<label><input type="radio" name="q3"> em cada cartão, um por um</label>
+<label><input type="radio" name="q3"> na grade que envolve os dois cartões</label>
+<label><input type="radio" name="q3"> no botão de cada cartão</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o cartão do croissant</h2>
+<p>Complete a classe do preço para que ele ganhe sublinhado quando o mouse estiver em qualquer ponto do
+cartão. O cartão já tem a marca do grupo:</p>
+<div class="ex-code">&lt;div class="group rounded-xl bg-amber-50 p-4"&gt;
+  &lt;span class="<input aria-label="resposta 1" data-answer="group-hover:underline" placeholder="...">"&gt;R$ 11&lt;/span&gt;
+&lt;/div&gt;</div>
+<p class="ex-dica">Dica: a variante do grupo tem hífen e dois-pontos, nessa ordem. Se você escrever
+<code>hover:underline</code>, o efeito só aparece com o mouse em cima do próprio preço — e o cartão
+inteiro fica sem reação.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O <code>hover:</code> pergunta pelo próprio elemento; o <code>group-hover:</code> pergunta pelo pai
+marcado com <code>group</code>. A marca não tem estilo nenhum — ela existe para os filhos poderem
+escutar. Cada filho que reage leva a sua própria variante, e todos disparam no mesmo instante, porque a
+condição é uma só: o mouse dentro do grupo.</p>
+
+<p>O CSS gerado mostra o mecanismo e a limitação: <code>:is(:where(.group):hover .group-hover\:…)</code>
+dentro de <code>@media (hover: hover)</code>. Grupos aninhados sem nome entram em hover juntos — o de
+fora também conta —, e os grupos com nome existem para separar esse caso; e nenhum deles deve esconder
+informação essencial, porque no celular o efeito não existe. De resto, é a mesma disciplina de sempre: uma condição por grupo, poucos alvos por
+cartão e o efeito sempre a serviço da ação principal.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>group</code> vai no pai; <code>group-hover:</code> vai no filho que reage.</li>
+<li>A classe <code>group</code> não gera CSS sozinha: é só uma marca.</li>
+<li>Vários filhos podem reagir juntos, cada um com a sua variante.</li>
+<li>O seletor gerado é <code>:is(:where(.group):hover …)</code>: pai em hover, filho mudando.</li>
+<li>Tudo isso vive dentro de <code>@media (hover: hover)</code>: no toque, não acontece.</li>
+<li>Grupos aninhados sem nome entram em hover juntos: o de fora também conta.</li>
+<li><code>group/nome</code> + <code>group-hover/nome:</code> separa dois grupos no mesmo lugar.</li>
+<li>Elemento que reage a si mesmo usa <code>hover:</code>, não grupo.</li>
+<li>Botão escondido no hover também precisa de <code>focus:opacity-100</code>.</li>
+<li>O painel das caixas mostra o repouso: a prova do hover é a prévia.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proporção com aspect | Guia Tailwind</title>
+<meta name="description" content="A classe aspect do Tailwind: moldura quadrada, vídeo 16:9 e foto 4:3 sem distorcer. Entenda proporção, object-cover e por que a página deixa de pular.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Proporção com <span class="hl">aspect</span></h1>
+<p class="intro">A Ana publicou a galeria de pães da padaria e ficou decepcionada: cada foto tem uma
+altura diferente, os cartões parecem degraus e, pior, a página inteira "pula" enquanto as imagens
+carregam. Ela já sabe dar largura e altura, mas percebeu que o problema não é nenhuma das duas — é a
+relação entre elas. Nesta aula a Ana aprende a reservar uma <em>forma</em> antes de a foto chegar,
+com as classes <code>aspect-</code>, e a encaixar a imagem dentro dessa forma sem esticar o pão nem
+achatar o bolo.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é uma proporção e como ler <code>16 / 9</code> em voz alta.</li>
+  <li>As três classes prontas: <code>aspect-square</code>, <code>aspect-video</code> e <code>aspect-auto</code>.</li>
+  <li>Como o navegador calcula a altura quando só a largura é conhecida.</li>
+  <li>Proporções fora do padrão, como <code>aspect-4/3</code>, e o colchete para valores que não são fração.</li>
+  <li><code>object-cover</code>, <code>object-contain</code> e o recorte que não distorce.</li>
+  <li>Por que reservar a proporção evita o pulo do layout ao carregar a foto.</li>
+  <li>Quando a proporção perde a disputa para uma altura definida ou para um mínimo.</li>
+</ul>
+</div>
+
+<h2>1. A cena: seis fotos, seis alturas</h2>
+
+<p>A galeria da Ana tinha seis fotos de pão, todas com a mesma largura de cartão. O problema é que
+cada arquivo tinha uma altura diferente: a foto do pão francês era alta, a da broa era baixa, a do
+croissant era quase quadrada. Alinhadas em três colunas, as fileiras ficavam tortas, com um degrau a
+cada duas fotos. Ela tentou resolver com altura fixa em todas:</p>
+
+<pre class="file" data-file="galeria.html">&lt;img src="pao-frances.jpg" class="h-48 w-full" alt="Pão francês"&gt;
+&lt;img src="broa.jpg" class="h-48 w-full" alt="Broa de milho"&gt;</pre>
+
+<p>Funcionou pela metade. As molduras ficaram iguais, mas os pães ficaram esquisitos: o francês
+esticou para cima, a broa achou por bem ficar mais baixa. É que altura e largura fixas ao mesmo
+tempo mandam a imagem ocupar aquele retângulo exato, e a imagem obedece do jeito que dá — esticando.
+O que a Ana queria não era uma altura: era uma <strong>forma</strong>. E forma, em CSS, se chama
+proporção.</p>
+
+<h2>2. O que é uma proporção, sem mistério</h2>
+
+<p>Proporção é só uma divisão: a largura dividida pela altura. Quando dizemos "16 por 9",
+estamos dizendo que, para cada 16 unidades de largura, a caixa tem 9 de altura. Não importa se a
+unidade é pixel, centímetro ou palmo: a forma é a mesma. Um vídeo de 640 px de largura, em 16:9,
+tem 360 px de altura, porque 640 ÷ 16 × 9 = 360. Se a tela dobra para 1280, a altura dobra para
+720, e o vídeo continua com o mesmo jeito.</p>
+
+<p>Essa é a diferença conceitual que resolve o problema da Ana: uma altura fixa é um número; uma
+proporção é uma regra. Com a regra, você diz "seja quadrado" e o navegador calcula a altura a partir
+da largura que ele tiver na hora. No celular, o quadrado fica pequeno; no monitor, grande. Sempre
+quadrado.</p>
+
+<p>Você já viu proporção hoje, mesmo sem saber o nome. A foto tirada com o celular em pé é 9:16; o
+vídeo do YouTube é 16:9; a foto antiga de álbum é 3:2; a capa de disco é 1:1. Cada formato existe
+porque a indústria decidiu que aquela forma é a certa para aquele conteúdo. No site, a mesma lógica
+se aplica: o cartão do produto pede uma forma, o banner do topo pede outra.</p>
+
+<p>Para não errar a conta de cabeça, use a regra de três do jeito mais simples: divida a largura
+pelo primeiro número e multiplique pelo segundo. Uma caixa de 480 px em 3:2 tem 480 ÷ 3 × 2 = 320 px
+de altura. Uma de 480 px em 4:3 tem 480 ÷ 4 × 3 = 360 px. Repare que, com a mesma largura, a 3:2 é
+mais baixa que a 4:3 — o segundo número é maior em relação ao primeiro. Esse tipo de comparação
+ajuda a escolher a moldura antes de escrever a classe, e evita a tentativa e erro de ficar mudando o
+número até "parecer bom".</p>
+
+<p>Tem um detalhe que vale guardar desde já: a proporção não depende do tamanho da tela. O que muda
+com a tela é a largura, e a altura vem junto, na mesma conta. É por isso que uma galeria feita com
+proporções fica alinhada no celular e no monitor sem nenhuma linha de código a mais.</p>
+
+<h2>3. As proporções que já vêm prontas</h2>
+
+<p>O Tailwind traz três proporções com nome — e, além delas, aceita a proporção escrita direto na
+classe. Comece pelas três, que resolvem a maioria das telas:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Proporção</th><th>Onde costuma servir</th></tr>
+<tr><td><code>aspect-square</code></td><td>1 / 1</td><td>foto de perfil, ícone de produto, miniatura de galeria</td></tr>
+<tr><td><code>aspect-video</code></td><td>16 / 9</td><td>vídeo, capa de post, banner do topo</td></tr>
+<tr><td><code>aspect-auto</code></td><td>automática</td><td>quando a imagem deve voltar a ter a altura natural dela</td></tr>
+</table>
+</div>
+
+<p>Além dessas, a versão 4 aceita a razão escrita direto no nome da classe: <code>aspect-4/3</code>,
+<code>aspect-3/2</code>, <code>aspect-9/16</code>, <code>aspect-21/9</code>. Sem colchetes, com a
+barra no meio. É o caminho normal para foto fora do padrão, e a seção 5 mostra como escolher.</p>
+
+<p><code>aspect-auto</code> parece inútil e não é: ele serve para <em>desligar</em> a proporção em
+um caso específico, como no celular, onde a foto deve manter a forma original. Você vai usar isso
+junto com os prefixos de breakpoint, mais adiante.</p>
+
+<p>O CSS gerado é de uma simplicidade que tranquiliza:</p>
+
+<pre class="term">.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+.aspect-video {
+  aspect-ratio: var(--aspect-video);   /* 16 / 9 */
+}</pre>
+
+<p>É literalmente a propriedade <code>aspect-ratio</code> do CSS, que existe desde 2021 e hoje
+funciona em todos os navegadores relevantes. O Tailwind só deu nomes curtos para os valores mais
+comuns e guardou o 16:9 numa variável de tema, para você poder trocar depois se quiser. Se você ler
+"<code>var(--aspect-video)</code>" e sentir um frio na barriga, respire: é o mesmo 16/9 escrito com
+outro nome.</p>
+
+<h2>4. Como o navegador descobre a altura</h2>
+
+<p>Aqui está o pulo do gato, e ele explica por que <code>aspect-square</code> sozinho não faz nada em
+uma caixa vazia. A proporção só consegue calcular uma dimensão se a outra já for conhecida. Em uma
+<code>div</code> comum, a largura é conhecida (ela ocupa a largura do pai) e a altura é automática —
+então a proporção funciona e calcula a altura. Em um elemento sem largura definida, como um
+<code>&lt;span&gt;</code> ou uma caixa com <code>w-fit</code>, não há o que multiplicar.</p>
+
+<div class="trytailwind" data-goal="rule:aspect-ratio: 1 / 1;;texto:Foto do dia">
+  <p class="try-task">O espaço reservado para a foto do dia está com 96 px de altura fixa. Troque a
+  altura por <code>aspect-square</code> e veja a altura passar a acompanhar a largura.</p>
+  <pre class="html">&lt;div id="alvo" class="flex h-24 w-full items-center justify-center rounded-xl bg-stone-100 text-stone-400"&gt;Foto do dia&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+height: 96px
+justify-content: center
+align-items: center
+background-color: oklch(0.97 0.001 106.424)
+color: oklch(0.709 0.01 56.259)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex aspect-square w-full items-center justify-center rounded-xl bg-stone-100 text-stone-400"&gt;Foto do dia&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>aspect-ratio: 1 / 1</code> e mais nada de altura — porque
+a altura deixou de ser um valor e virou uma conta. O quadrado vai ficar enorme na prévia, do tamanho
+da largura disponível. É o comportamento correto, e é a razão pela qual, na vida real, você quase
+sempre combina a proporção com um teto de largura, como <code>max-w-xs</code>, da aula de
+<a href="min-e-max.html">Mínimos e Máximos</a>.</p>
+
+<dl class="anatomy">
+<dt>proporção</dt>
+<dd>A relação entre largura e altura, escrita <code>16 / 9</code>. Não tem unidade: é uma divisão.</dd>
+<dt>largura definida</dt>
+<dd>A dimensão que precisa existir para a proporção calcular a outra. Em bloco normal, é a largura
+do pai.</dd>
+<dt>altura automática</dt>
+<dd>Altura que o navegador calcula. É o estado natural de uma caixa e o que deixa a proporção agir.</dd>
+<dt>recorte</dt>
+<dd>O que a imagem perde quando preenche uma moldura de proporção diferente. Quem decide onde
+cortar é o <code>object-position</code>.</dd>
+<dt>layout shift</dt>
+<dd>O "pulo" da página quando algo carrega e muda de tamanho. Reservar a proporção evita o pulo.</dd>
+</dl>
+
+<h2>5. Quando a proporção não é 1:1 nem 16:9</h2>
+
+<p>A vida real tem 4:3, 3:2, 9:16, 21:9. Para todas elas, escreva a razão direto na classe, com a
+barra no lugar dos dois-pontos: <code>aspect-4/3</code>. Não precisa de colchete, não precisa de
+cálculo, não precisa inventar nome. A barra faz parte do nome da classe, como o hífen de
+<code>max-w-md</code>.</p>
+
+<div class="trytailwind" data-goal="rule:aspect-ratio: 4/3;;texto:Vídeo do forno">
+  <p class="try-task">A padaria gravou o vídeo do forno na horizontal antiga, em 4:3. A moldura está
+  em 16:9. Troque <code>aspect-video</code> por <code>aspect-4/3</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="flex aspect-video w-full max-w-sm items-center justify-center rounded-xl bg-stone-800 text-white"&gt;Vídeo do forno&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+width: 384px
+max-width: 384px
+justify-content: center
+align-items: center
+background-color: oklch(0.268 0.007 34.298)
+color: rgb(255, 255, 255)
+border-radius: 12px
+aspect-ratio: 16 / 9
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex aspect-4/3 w-full max-w-sm items-center justify-center rounded-xl bg-stone-800 text-white"&gt;Vídeo do forno&lt;/div&gt;</pre>
+</div>
+
+<p>Repare que o <code>max-w-sm</code> continua ali: sem ele, a moldura ocuparia a largura toda e
+ficaria alta demais para caber na tela. Proporção e teto de largura são amigos, não concorrentes.
+E repare também no valor que o painel mostra: <code>4 / 3</code>, com espaços que o navegador põe
+sozinho. Você escreveu <code>4/3</code>; ele normalizou. Isso não é erro.</p>
+
+<p>Uma ressalva que economiza meia hora de dúvida: a barra não é um operador matemático, é o
+separador da proporção. <code>aspect-3/2</code> é "três por dois", não "três dividido por dois, que dá
+1,5" — embora o resultado seja o mesmo, o CSS precisa da forma escrita assim. E o Tailwind gera a
+classe com o nome escapado, porque barra não pode aparecer crua em seletor:
+<code>.aspect-4\/3</code>. Você nunca escreve isso à mão; só não se assuste se encontrar no CSS
+gerado.</p>
+
+<p>E quando a proporção não é uma fração de números inteiros? Aí, sim, o colchete:
+<code>aspect-[1.618]</code> para a razão áurea, <code>aspect-[2.4]</code> para um banner esquisito que
+o designer desenhou. Dentro dos colchetes vai o valor cru do CSS, e o Tailwind gera uma classe só
+para ele. A ordem de preferência é simples: use o nome pronto quando existir
+(<code>aspect-square</code>, <code>aspect-video</code>), a razão escrita quando for uma fração
+(<code>aspect-4/3</code>), e o colchete só quando o valor não couber nas duas formas.</p>
+
+<h2>6. A foto dentro da moldura</h2>
+
+<p>Reservar a forma é metade do trabalho. A outra metade é o que acontece com a imagem lá dentro,
+porque uma foto 3:2 colocada numa moldura quadrada não cabe sem uma decisão. O CSS chama essa
+decisão de <code>object-fit</code>, e o Tailwind tem uma classe para cada escolha:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que faz com a foto</th><th>Resultado visual</th></tr>
+<tr><td><code>object-cover</code></td><td>preenche a moldura e corta o que sobra</td><td>sem distorção, mas perde pedaços da borda</td></tr>
+<tr><td><code>object-contain</code></td><td>cabe inteira dentro da moldura</td><td>sem distorção, mas sobram faixas vazias</td></tr>
+<tr><td><code>object-fill</code></td><td>estica até preencher</td><td>o pão fica achatado ou comprido</td></tr>
+</table>
+</div>
+
+<p>Para foto de produto, <code>object-cover</code> é quase sempre a resposta: o cartão fica com as
+formas alinhadas e ninguém percebe o recorte. Para foto de documento, planta ou obra de arte,
+<code>object-contain</code> ganha, porque cortar seria perder informação. E <code>object-fill</code>
+é o padrão do navegador — é justamente o que a Ana tinha sem saber, quando a foto esticou.</p>
+
+<p>O CSS gerado mostra que são só três valores da mesma propriedade, sem nenhum mistério:</p>
+
+<pre class="term">.object-cover {
+  object-fit: cover;
+}
+
+.object-contain {
+  object-fit: contain;
+}
+
+.object-fill {
+  object-fit: fill;
+}</pre>
+
+<p>Todos eles só têm efeito quando as duas dimensões da imagem são conhecidas. Numa
+<code>&lt;img&gt;</code> com largura 100% e altura automática, a imagem mantém a proporção do próprio
+arquivo e nenhuma dessas classes muda nada. É a moldura — a proporção, a altura fixa ou a dupla
+largura e altura — que cria a situação em que o encaixe precisa ser decidido.</p>
+
+<div class="trytailwind" data-goal="rule:aspect-ratio: 1 / 1;;rule:object-fit: cover">
+  <p class="try-task">A foto do pão está achatada numa moldura de 96 px de altura. Dê a ela uma
+  moldura quadrada e mande a imagem preencher o quadro sem distorcer: <code>aspect-square</code> e
+  <code>object-cover</code>. O código esquisito no <code>src</code> é uma imagem desenhada na hora,
+  para a prévia não depender da internet.</p>
+  <pre class="html">&lt;img id="alvo" class="h-24 w-full rounded-xl" alt="Pão de fermentação natural"
+  src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Crect width='3' height='2' fill='%23b45309'/%3E%3C/svg%3E"&gt;</pre>
+  <pre class="out">
+width: 616px
+height: 96px
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;img id="alvo" class="aspect-square w-full rounded-xl object-cover" alt="Pão de fermentação natural"
+  src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Crect width='3' height='2' fill='%23b45309'/%3E%3C/svg%3E"&gt;</pre>
+</div>
+
+<p>O painel da solução mostra a largura, o arredondamento, a proporção e o
+<code>object-fit: cover</code>. Sem a última, o quadrado existiria e a imagem continuaria esticada
+dentro dele — um problema resolvido pela metade, que é o tipo mais comum. Forma e encaixe são duas
+decisões; as duas moram no mesmo elemento, mas em classes diferentes.</p>
+
+<h2>7. O pulo que a proporção resolve</h2>
+
+<p>Volte à galeria da Ana. Antes de qualquer classe, o navegador lê o HTML, encontra um
+<code>&lt;img&gt;</code> sem largura e sem altura e reserva <em>zero</em> de espaço. Quando a foto
+chega pela rede, ele descobre o tamanho e empurra tudo para baixo. Se o leitor já estava lendo o
+horário de funcionamento, o texto foge debaixo do dedo. Esse tranco tem nome — <em>layout shift</em>
+— e é uma das coisas que mais incomodam em site feito às pressas.</p>
+
+<p>A solução tem duas camadas, e a proporção é a segunda. A primeira é dizer ao navegador o tamanho
+da imagem antes de carregá-la, com os atributos <code>width</code> e <code>height</code> no próprio
+HTML. O navegador usa essa dupla como proporção provisória e reserva o espaço certo, mesmo antes de
+baixar o arquivo. A segunda é a classe: com <code>aspect-square</code> ou <code>aspect-video</code>,
+o espaço está reservado mesmo se o arquivo demorar, falhar ou for trocado por outro de proporção
+diferente.</p>
+
+<pre class="file" data-file="galeria.html">&lt;div class="grid grid-cols-2 gap-4"&gt;
+  &lt;div class="aspect-square overflow-hidden rounded-xl bg-stone-100"&gt;
+    &lt;img src="pao-frances.jpg" alt="Pão francês" class="h-full w-full object-cover"&gt;
+  &lt;/div&gt;
+  &lt;div class="aspect-square overflow-hidden rounded-xl bg-stone-100"&gt;
+    &lt;img src="broa.jpg" alt="Broa de milho" class="h-full w-full object-cover"&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<p>Esse é o padrão que eu uso em toda galeria: a moldura é uma <code>div</code> com a proporção e um
+fundo neutro; a imagem ocupa 100% da moldura nos dois eixos e é recortada com
+<code>object-cover</code>. Se a foto não carregar, o quadrado cinza fica no lugar e o layout não
+dança. Se carregar, o recorte é previsível. A moldura manda, a foto obedece.</p>
+
+<h2>8. Quando a proporção perde a disputa</h2>
+
+<p>A proporção é uma sugestão forte, não uma lei. Três coisas passam por cima dela, e vale conhecer
+as três para não perder tempo procurando erro onde não há.</p>
+
+<ul>
+<li><strong>Altura definida.</strong> Se o elemento tem <code>h-48</code> e <code>aspect-square</code>,
+a altura vence: com as duas dimensões conhecidas, a proporção não tem o que calcular. Ou você usa
+altura, ou usa proporção.</li>
+<li><strong>Altura mínima.</strong> Um <code>min-h-64</code> maior que a altura calculada faz a caixa
+crescer, e a forma deixa de ser quadrada. Isso é intencional: o conteúdo precisa caber. Se a caixa
+tem texto dentro, a proporção vira o mínimo e o texto manda no resto.</li>
+<li><strong>Conteúdo maior que a moldura.</strong> Uma <code>div</code> com <code>aspect-square</code>
+e um parágrafo comprido vai transbordar para fora, porque a proporção define a caixa, não o
+conteúdo. Quem resolve isso é <code>overflow-hidden</code> — ou, melhor, não usar proporção em caixa
+de texto.</li>
+</ul>
+
+<p>Tem ainda um caso que confunde muito: <code>aspect-square</code> em elemento
+<code>inline</code>, como um <code>&lt;span&gt;</code>. Elemento inline não aceita largura nem
+altura; a proporção não tem por onde começar. A cura é <code>inline-block</code> ou
+<code>block</code>, que você encontra na aula de <a href="posicionamento.html">Posicionamento</a>.</p>
+
+<p>E existe a armadilha do <code>grid</code>, que pega até quem já escreveu muita tela. Por padrão,
+os itens de uma linha de grid esticam para ficarem com a mesma altura do vizinho mais alto. Se a
+célula vizinha tem três parágrafos e a sua tem uma foto quadrada, o navegador estica a foto para
+acompanhar — e a proporção, que já tinha calculado a altura, é ignorada. O sintoma é uma moldura
+deixando de ser quadrada só quando o vizinho cresce. A solução é uma classe de alinhamento,
+<code>self-start</code>, que diz "não me estique, fique do meu tamanho". Guarde o nome: a relação
+entre proporção e alinhamento no grid é o assunto da aula de <a href="grid.html">Grid</a>.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a miniatura que cortou a cabeça do padeiro</h3>
+<p>A Ana montou os cartões da equipe com <code>aspect-square</code> e <code>object-cover</code>. Na
+foto do seu Antônio, o recorte pegou o queixo e deixou o teto da padaria. O <code>object-cover</code>
+centraliza por padrão; para foto de gente, <code>object-top</code> costuma resolver, porque mantém o
+rosto na parte de cima do quadro. É uma classe de posição, irmã do <code>object-cover</code>, e ela
+só faz sentido junto com ele.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o vídeo que virou uma faixa preta</h3>
+<p>Ela embutiu o vídeo do forno com <code>aspect-video</code> e, mesmo assim, apareceram duas faixas
+pretas em cima e embaixo. O motivo não era o Tailwind: o arquivo tinha sido exportado em 4:3 e o
+player respeitava a proporção do próprio vídeo. Nesse caso, a moldura certa é
+<code>aspect-[4/3]</code>; a moldura 16:9 estava correta para o padrão do YouTube, mas errada para
+aquele arquivo. Antes de escolher a classe, vale abrir o vídeo e ver a forma real dele.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a foto que esticou no cartão de oferta</h3>
+<p>No banner de promoção, a foto do bolo ocupava <code>w-full h-64</code> — largura e altura
+definidas, imagem esticada. A correção foi trocar a altura fixa por <code>aspect-[3/2]</code> e
+acrescentar <code>object-cover</code>. No monitor ficou uma faixa larga e baixa; no celular, uma
+faixa menor, com a mesma forma. O bolo parou de parecer chato e a promoção continuou legível, porque
+o texto do banner ficou fora da moldura da foto, e não por cima dela.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que <code>aspect-video</code> faz?</p>
+<label><input type="radio" name="q1"> deixa o elemento com 16 px de altura e 9 px de largura</label>
+<label><input type="radio" name="q1"> mantém a proporção 16:9, calculando a altura a partir da largura</label>
+<label><input type="radio" name="q1"> transforma o elemento em um player de vídeo</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual destas classes deixa a caixa em 4:3?</p>
+<label><input type="radio" name="q2"> <code>aspect-4-3</code></label>
+<label><input type="radio" name="q2"> <code>ratio-4x3</code></label>
+<label><input type="radio" name="q2"> <code>aspect-4/3</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que a foto ficou achatada dentro da moldura
+quadrada?</p>
+<label><input type="radio" name="q3"> porque faltou <code>object-cover</code>; o padrão é esticar</label>
+<label><input type="radio" name="q3"> porque <code>aspect-square</code> sempre distorce a imagem</label>
+<label><input type="radio" name="q3"> porque a imagem precisa ter exatamente 1:1 no arquivo</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a foto do pão na vitrine</h2>
+<p>Deixe a foto da vitrine numa moldura quadrada, preenchendo o quadro sem distorcer. Depois
+responda: qual é a classe que recorta a imagem para preencher a moldura?</p>
+<div class="ex-code">&lt;img class="w-full aspect-square <input aria-label="resposta 1" data-answer="object-cover" placeholder="...">" src="vitrine.jpg" alt="Vitrine da padaria"&gt;</div>
+<p class="ex-dica">Dica: é a classe que faz a imagem "cobrir" a moldura, cortando o excesso.
+<code>object-contain</code> caberia inteira, mas deixaria faixas vazias nas laterais.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Proporção é uma divisão entre largura e altura, e a classe <code>aspect-</code> transforma essa
+divisão em regra: a altura deixa de ser um número escolhido no escuro e passa a ser calculada a
+partir da largura. <code>aspect-square</code> é 1:1, <code>aspect-video</code> é 16:9, e qualquer
+outra razão vai direto no nome — <code>aspect-4/3</code>, <code>aspect-3/2</code>,
+<code>aspect-9/16</code>. O colchete fica para valores que não são fração, como
+<code>aspect-[1.618]</code>. Para a proporção funcionar, uma das dimensões precisa ser conhecida; em
+caixa de bloco, a largura já é.</p>
+
+<p>Reservar a forma resolve dois problemas de uma vez: alinha os cartões da galeria e evita o pulo
+do layout enquanto as fotos carregam. A moldura manda, a foto obedece — e quem faz a foto caber sem
+distorcer é <code>object-cover</code>, com <code>object-position</code> escolhendo o pedaço que fica.
+Por fim, lembre-se das três coisas que vencem a proporção: altura definida, altura mínima maior que a
+conta e conteúdo que transborda. Se a moldura não obedece, procure uma dessas três antes de
+desconfiar da classe.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>aspect-square</code> = 1 / 1; <code>aspect-video</code> = 16 / 9; <code>aspect-auto</code> desliga.</li>
+<li>Outra razão vai na classe: <code>aspect-4/3</code>, <code>aspect-3/2</code>, <code>aspect-9/16</code>.</li>
+<li>Colchete só para valor não fracionário: <code>aspect-[1.618]</code>.</li>
+<li>A proporção calcula a altura a partir da largura — precisa de uma dimensão conhecida.</li>
+<li>Altura definida anula a proporção; altura mínima pode esticar a caixa.</li>
+<li><code>object-cover</code> recorta, <code>object-contain</code> cabe inteira, <code>object-fill</code> estica.</li>
+<li><code>object-cover</code> centraliza o recorte; <code>object-top</code> muda o foco para o alto.</li>
+<li>Galeria alinhada: moldura com <code>aspect-square</code> + <code>overflow-hidden</code>, imagem <code>h-full w-full object-cover</code>.</li>
+<li>Reservar a proporção evita o pulo da página ao carregar as imagens.</li>
+<li>Proporção em caixa de texto transborda: use <code>overflow-hidden</code> ou não use.</li>
+<li>Elemento inline não aceita proporção; precisa ser <code>block</code> ou <code>inline-block</code>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

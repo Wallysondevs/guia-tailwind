@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estado de Carregando | Guia Tailwind</title>
+<meta name="description" content="O estado de carregando no Tailwind: girador de borda com animate-spin, esqueleto com animate-pulse, botão desligado e o aviso que o leitor de tela ouve.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Estado de <span class="hl">Carregando</span></h1>
+<p class="intro">A Ana clicou em “Encomendar pão” no site da padaria e ficou dois segundos olhando para
+uma tela que não mudava. Clicou de novo, por via das dúvidas. Quando a confirmação chegou, havia dois
+pedidos iguais na cozinha — e o cliente só queria um. O problema não era lentidão: era falta de
+resposta. Nesta aula ela aprende a avisar o visitante de que algo está acontecendo, com as três peças
+do estado de carregando: o girador, o esqueleto que ocupa o lugar do conteúdo e o botão que se desliga
+enquanto trabalha.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que “carregando” é um estado, e não uma tela separada.</li>
+  <li>Como montar um girador com borda, canto redondo e <code>animate-spin</code>.</li>
+  <li>Como usar <code>animate-pulse</code> para desenhar o esqueleto do conteúdo.</li>
+  <li>Por que o esqueleto precisa ter o mesmo tamanho do conteúdo real.</li>
+  <li>Como desligar o botão e mudar a aparência dele com as variantes <code>disabled:</code>.</li>
+  <li>Como avisar quem usa leitor de tela com <code>role="status"</code> e <code>sr-only</code>.</li>
+  <li>Quanto tempo de carregamento é demais e o que fazer quando a resposta é instantânea.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o clique que não responde</h2>
+
+<p>A encomenda da Ana demorava porque o servidor tinha de gravar o pedido, calcular a taxa de entrega e
+mandar um e-mail para a cozinha. Do lado de lá, meio segundo. Do lado de cá, o navegador fica parado
+esperando a resposta — e o visitante também. Sem nenhum sinal na tela, o cérebro dele faz o que faz
+qualquer pessoa apressada: clica outra vez. Aí nascem os pedidos duplicados.</p>
+
+<p>O conserto tem duas partes. A primeira é visual: mostrar que algo está em andamento. A segunda é
+funcional: impedir que o clique se repita enquanto o pedido está no ar. As duas andam juntas, e é por
+isso que esta aula não é só de enfeite — um girador bonito num botão que aceita dez cliques continua
+produzindo dez pedidos.</p>
+
+<p>O nome técnico do que falta é <em>estado</em>. A página tem pelo menos três: repouso (nada
+acontecendo), carregando (o pedido foi enviado, a resposta não chegou) e concluído ou com erro (a
+resposta chegou). Cada um precisa de uma cara. O Tailwind não cuida da troca de estado — quem faz isso
+é o JavaScript ou o próprio servidor —, mas oferece todas as classes de aparência para cada um deles.</p>
+
+<p>Nesta aula, as caixas mostram o estado de carregando congelado, como se a resposta nunca chegasse.
+É de propósito: assim você desenha com calma. Num site de verdade, um pedacinho de JavaScript troca o
+texto e liga o atributo que desliga o botão. A aula diz quando esse pedaço entra, para você não achar
+que o Tailwind faz mágica que ele não faz.</p>
+
+<h2>2. As três peças do carregando</h2>
+
+<p>Nem todo carregamento pede as três. A escolha depende de quanto tempo a espera dura e do que está
+faltando na tela. Mas as três são fáceis de reconhecer e cada uma resolve um caso diferente.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Estado</th><th>O que o visitante vê</th><th>Como se faz</th></tr>
+<tr><td>repouso</td><td>o botão normal, o conteúdo normal</td><td>as classes de sempre, sem variante</td></tr>
+<tr><td>ação em andamento</td><td>botão apagado, com girador e texto “Assando…”</td><td><code>disabled</code> + <code>disabled:</code> + <code>animate-spin</code></td></tr>
+<tr><td>conteúdo em andamento</td><td>barras cinzentas no lugar dos textos</td><td><code>animate-pulse</code> e blocos com a altura do conteúdo</td></tr>
+<tr><td>concluído</td><td>o conteúdo real aparece</td><td>o JavaScript troca o HTML</td></tr>
+<tr><td>erro</td><td>uma mensagem clara e um caminho de volta</td><td>texto e cor de alerta, sem girador</td></tr>
+</table>
+</div>
+
+<p>Repare na terceira coluna: em quase toda linha, o CSS é a parte fácil. O que dá trabalho é decidir
+qual estado está valendo. Um site que mostra o esqueleto para sempre é pior do que um site que não
+mostra nada, porque promete uma chegada que nunca acontece. Por isso, cada peça abaixo vem com a
+pergunta “quando isso sai da tela?”.</p>
+
+<dl class="anatomy">
+<dt>estado de carregando</dt>
+<dd>O intervalo entre pedir e receber. Tem aparência própria e, de preferência, um fim anunciado.</dd>
+<dt>girador (spinner)</dt>
+<dd>Um anel que gira. Serve para ações curtas: enviar, salvar, entrar.</dd>
+<dt>esqueleto (skeleton)</dt>
+<dd>Blocos cinzentos com a forma do conteúdo que vai chegar. Serve para páginas e listas.</dd>
+<dt>aria-busy</dt>
+<dd>Atributo que diz ao leitor de tela que a região está atualizando. Não muda nada visualmente.</dd>
+<dt>sr-only</dt>
+<dd>Classe que esconde o texto dos olhos, mas deixa o leitor de tela ler. Texto para quem não vê.</dd>
+</dl>
+
+<h2>3. O girador sai de uma borda</h2>
+
+<p>O girador mais comum não é uma imagem: é um círculo com borda grossa, em que um dos lados tem cor
+diferente. A borda clara desenha o anel inteiro; o lado escuro marca o pedaço que “anda”. Quando o
+elemento gira, a impressão é de movimento contínuo. São quatro classes: <code>size-8</code> para o
+tamanho, <code>rounded-full</code> para virar círculo, <code>border-4</code> para a espessura e duas
+cores de borda.</p>
+
+<p>A parte esperta é a cor do topo. <code>border-amber-200</code> pinta os quatro lados de âmbar
+claro; <code>border-t-amber-700</code> repinta só o lado de cima com o âmbar escuro. Esse único lado
+diferente é o que o olho acompanha. Sem ele, o anel é um círculo de cor única girando — e círculo de
+cor única girando parece um círculo parado.</p>
+
+<div class="trytailwind" data-goal="rule:animation: var(--animate-spin);;rule:border-top-color: var(--color-amber-700)">
+  <p class="try-task">Transforme o anel em girador: faça-o girar para sempre e pinte apenas o lado de
+  cima com o âmbar escuro (<code>amber-700</code>).</p>
+  <pre class="html">&lt;div class="flex items-center gap-3 rounded-lg bg-amber-50 p-4"&gt;
+  &lt;div id="alvo" class="size-8 rounded-full border-4 border-amber-200"&gt;&lt;/div&gt;
+  &lt;p class="text-sm text-amber-900"&gt;Assando o pão…&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+width: 32px
+height: 32px
+border-radius: 3.35544e+07px
+border-width: 4px
+border-color: oklch(0.924 0.12 95.746)
+</pre>
+  <pre class="solucao">&lt;div class="flex items-center gap-3 rounded-lg bg-amber-50 p-4"&gt;
+  &lt;div id="alvo" class="size-8 animate-spin rounded-full border-4 border-amber-200 border-t-amber-700"&gt;&lt;/div&gt;
+  &lt;p class="text-sm text-amber-900"&gt;Assando o pão…&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Rode a caixa e olhe a prévia: o anel gira sem parar, em um segundo por volta. O painel do CSS
+computado mostra o tamanho, a borda e o raio, mas não mostra o giro — ele mede o repouso, como sempre.
+Quem confere a animação é o olho, ou a meta desta caixa, que olha o CSS gerado: a linha
+<code>animation: var(--animate-spin)</code> e a cor do topo.</p>
+
+<p>A escolha das cores também tem regra. As duas precisam de contraste suficiente para o anel ser
+visível, mas não tanto a ponto de parecer um gráfico. Na padaria, o par foi <code>amber-200</code> e
+<code>amber-700</code>: mesma família, quatro degraus de diferença. Um par comum em sites claros é
+cinza claro com cinza escuro; em fundo escuro, o contrário. O que não funciona é
+<code>border-white</code> com <code>border-t-white</code>, que é o mesmo que não ter feito nada.</p>
+
+<h2>4. O CSS do giro</h2>
+
+<p>Vale ver a regra por trás do <code>animate-spin</code>, porque ela responde a uma dúvida frequente:
+“de onde vem essa animação?”. Vem do tema, como qualquer outra: existe a variável
+<code>--animate-spin</code>, com o valor <code>spin 1s linear infinite</code>, e existe o
+<code>@keyframes spin</code> correspondente. A classe só aponta para a variável.</p>
+
+<pre class="term">.animate-spin {
+  animation: var(--animate-spin);
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}</pre>
+
+<p>O roteiro é o mais curto possível: no fim do ciclo, o elemento está girado 360 graus. O navegador
+deduz que, no meio, está girado 180. E <code>linear</code> é o ritmo certo aqui — um giro que acelera
+e freia parece um pião tonto; velocidade constante passa a ideia de trabalho contínuo.</p>
+
+<p>Como é uma animação do tema, ela também é sua se você quiser. Se o anel tivesse de girar em 2 s, ou
+ao contrário, bastaria cadastrar outra variável no <code>@theme</code> e usar
+<code>animate-girar-devagar</code> — assunto da aula de
+<a href="keyframes-proprios.html">keyframes próprios</a>. E como toda animação infinita, ela merece a
+companhia de <code>motion-reduce:animate-none</code>, para quem pediu menos movimento no sistema.</p>
+
+<p>Um detalhe de desempenho que agrada em celular: girar é uma transformação, e transformações são
+desenhadas sem refazer o layout. Um girador de borda custa quase nada, mesmo em aparelho simples. Já
+uma imagem de GIF animado custa mais — e não acompanha a cor do seu tema.</p>
+
+<h2>5. O esqueleto: ocupar o lugar do conteúdo</h2>
+
+<p>O girador resolve a espera curta. Quando a espera é de conteúdo — a lista de pães do dia, os
+pedidos do cliente —, o melhor é o esqueleto: blocos com a forma e o tamanho aproximados do que vai
+chegar, pulsando de leve. A pessoa vê a página se montando, em vez de um espaço vazio.</p>
+
+<p>A classe do pulso é <code>animate-pulse</code>. Ela não muda a cor: muda a opacidade do elemento,
+de 1 para 0,5 no meio do ciclo e de volta, em dois segundos. Por isso o esqueleto precisa de um fundo
+próprio, geralmente um tom de cinza ou o âmbar claro da marca. O resultado é uma respiração suave, bem
+menos nervosa que um pisca.</p>
+
+<pre class="term">.animate-pulse {
+  animation: var(--animate-pulse);
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}</pre>
+
+<p>A regra de ouro do esqueleto é a mais fácil de esquecer: <strong>ele precisa ter o tamanho do
+conteúdo real</strong>. Se as barras ocupam 3 linhas e o texto verdadeiro ocupa 5, a página pula
+quando o conteúdo chega. Esse salto tem nome — deslocamento de layout — e é o motivo de tanta gente
+odiar sites que “pulam”. Reserve a altura certa, com <code>h-…</code> ou <code>min-h-…</code>, e o
+conteúdo real entra sem empurrar nada.</p>
+
+<div class="trytailwind" data-goal="rule:animation: var(--animate-pulse);;rule:@keyframes pulse">
+  <p class="try-task">Os três blocos abaixo são o esqueleto do cartão de encomenda. Faça todos
+  pulsarem juntos, acrescentando a classe no elemento de fora.</p>
+  <pre class="html">&lt;div id="alvo" class="space-y-2 rounded-xl border border-amber-100 bg-white p-4"&gt;
+  &lt;div class="h-3 w-24 rounded bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div class="h-3 w-40 rounded bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div class="h-3 w-32 rounded bg-amber-200"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+border-radius: 12px
+border-width: 1px
+border-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="animate-pulse space-y-2 rounded-xl border border-amber-100 bg-white p-4"&gt;
+  &lt;div class="h-3 w-24 rounded bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div class="h-3 w-40 rounded bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div class="h-3 w-32 rounded bg-amber-200"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A solução põe a classe no elemento de fora, e isso é uma escolha, não a única possibilidade. Se
+você colocar <code>animate-pulse</code> em cada barra, cada uma pulsa no seu próprio tempo e o
+conjunto fica desencontrado. No pai, a opacidade muda no container inteiro e as três barras respiram
+juntas — que é o que o olho espera de um conteúdo que vai chegar de uma vez.</p>
+
+<p>Note também que as barras usam <code>h-3</code> (12 px) e larguras diferentes. Larguras diferentes
+imitam linhas de texto de verdade: título curto, descrição longa, rodapé médio. Três blocos do mesmo
+tamanho parecem um erro de carregamento; três blocos variados parecem a página se montando.</p>
+
+<h2>6. O botão que avisa que está trabalhando</h2>
+
+<p>Agora o caso da Ana, o que gerou os dois pedidos. O botão precisa fazer três coisas ao entrar em
+carregando: desligar, mudar de cara e dizer o que está acontecendo. Desligar é um atributo HTML,
+<code>disabled</code>, e ele bloqueia cliques e também tira o botão da ordem de tabulação. Mudar de
+cara é o que as variantes <code>disabled:</code> fazem: elas valem só quando o atributo está presente.</p>
+
+<p>A lista é curta e suficiente: <code>disabled:bg-amber-300</code> apaga o fundo,
+<code>disabled:text-amber-900</code> mantém o texto legível,
+<code>disabled:cursor-wait</code> troca a mãozinha pelo cursor de espera. E o texto do botão muda para
+“Assando…” — isso não é CSS, é conteúdo. No exemplo abaixo, o texto já está trocado e o atributo já
+está presente: o estado está congelado para você desenhar o visual dele.</p>
+
+<div class="trytailwind" data-goal="rule:.disabled\:bg-amber-300:disabled;;rule:.disabled\:cursor-wait:disabled">
+  <p class="try-task">Enquanto o pedido está no ar, o botão deve parecer desligado: fundo âmbar 300,
+  texto âmbar 900 e cursor de espera. Use as variantes <code>disabled:</code>.</p>
+  <pre class="html">&lt;button id="alvo" type="button" disabled class="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 font-semibold text-white"&gt;
+  &lt;span class="size-4 animate-spin rounded-full border-2 border-amber-100 border-t-amber-700"&gt;&lt;/span&gt;
+  Assando…
+&lt;/button&gt;</pre>
+  <pre class="out">
+display: inline-flex
+gap: 8px
+align-items: center
+background-color: oklch(0.666 0.179 58.318)
+color: rgb(255, 255, 255)
+font-weight: 600
+border-radius: 8px
+padding-inline: 16px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" type="button" disabled class="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 font-semibold text-white disabled:cursor-wait disabled:bg-amber-300 disabled:text-amber-900"&gt;
+  &lt;span class="size-4 animate-spin rounded-full border-2 border-amber-100 border-t-amber-700"&gt;&lt;/span&gt;
+  Assando…
+&lt;/button&gt;</pre>
+</div>
+
+<p>Repare que as classes de repouso continuam no HTML: <code>bg-amber-600</code> e
+<code>text-white</code>. As variantes não substituem as classes normais — elas entram na frente
+quando o atributo existe. É a mesma lógica do <code>hover:</code>: um par, o normal e a exceção.</p>
+
+<p>O <code>inline-flex</code> com <code>gap-2</code> é o que mantém o girador e o texto alinhados no
+meio da linha. Sem ele, o quadradinho girando sobe para a linha de base do texto e fica torto. E o
+<code>size-4</code> deixa o girador do tamanho de uma letra maiúscula, que é o ponto doce dentro de um
+botão: menor passa despercebido, maior empurra o botão a crescer.</p>
+
+<p>Uma armadilha de HTML que vale conhecer: <code>aria-disabled="true"</code> parece com
+<code>disabled</code>, mas só avisa o leitor de tela. O botão continua clicável. Se a intenção é
+impedir o segundo pedido, o atributo tem de ser <code>disabled</code>, sem o prefixo <code>aria</code>.
+A dupla ideal é usar os dois: o atributo que bloqueia e o aviso de acessibilidade que explica.</p>
+
+<h2>7. O aviso que o olho não vê</h2>
+
+<p>Quem usa leitor de tela não vê o girador nem o esqueleto. Para essa pessoa, o site simplesmente
+não faz nada — e a espera fica ainda mais angustiante. A solução é um texto escondido, dentro de uma
+região que o leitor de tela anuncia quando muda. Três peças de HTML fazem isso, e nenhuma é classe:</p>
+
+<p><code>role="status"</code> marca a região como “aviso educado”; <code>aria-live="polite"</code> diz
+que a mudança deve ser lida quando o leitor terminar a frase atual; e o texto dentro dela deve ser
+curto e informativo: “Assando o pão…”, “Carregando encomendas”. A classe entra só para esconder o
+texto dos olhos: <code>sr-only</code>, de <em>screen reader only</em>.</p>
+
+<pre class="term">.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
+}</pre>
+
+<p>É um bloco feio, e por um bom motivo. Não basta <code>hidden</code> nem <code>opacity-0</code>:
+os dois escondem também do leitor de tela. O <code>sr-only</code> encolhe o elemento para 1 px, tira
+do fluxo com <code>position: absolute</code> e recorta o que sobrar. O texto continua no documento,
+continua sendo lido, e ninguém o vê na tela.</p>
+
+<p>No botão, o par é <code>aria-busy="true"</code> enquanto o pedido está no ar, e
+<code>aria-busy="false"</code> quando a resposta chega. O leitor de tela usa isso para não anunciar
+mudanças no meio de uma atualização. O visual não muda em nada — e é justamente por isso que esse
+trabalho some do radar de quem só olha a tela.</p>
+
+<p>Se você quiser ver o texto escondido funcionando, abra a prévia de uma das caixas com o leitor de
+tela ligado, ou inspecione o elemento no DevTools: o texto está lá, com 1 px por 1 px. É a parte do
+estado de carregando que ninguém elogia e que muda a vida de quem depende dela.</p>
+
+<h2>8. Quanto tempo é demais</h2>
+
+<p>Carregamento bom é carregamento curto. Passando de três segundos, o visitante começa a desconfiar;
+passando de dez, ele fecha a aba. O CSS não resolve a lentidão, mas resolve a <em>percepção</em>: um
+esqueleto com a forma certa faz a espera parecer menor do que é, porque o olho já tem o que ler. É o
+mesmo motivo pelo qual elevador com espelho parece mais rápido.</p>
+
+<p>Existe também o problema oposto: o carregamento que pisca. Se a resposta chega em 120 ms, o
+girador aparece e some antes de o olho registrar, e o resultado é um tremelique. A prática comum é
+segurar o estado de carregando por pelo menos uns 300 ms, ou só mostrá-lo se a espera passar de uns
+200 ms. Isso é decisão de JavaScript, não de classe — mas saber que o problema existe evita que você
+tente consertar com CSS o que é tempo de resposta.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>Use quando</th><th>Evite quando</th></tr>
+<tr><td>girador</td><td>ação curta: enviar, salvar, entrar</td><td>a tela inteira vai montar</td></tr>
+<tr><td>esqueleto</td><td>conteúdo com forma previsível: listas, cartões, tabelas</td><td>o texto tem tamanho imprevisível</td></tr>
+<tr><td>texto “carregando”</td><td>espera longa, com etapas</td><td>a espera é de menos de meio segundo</td></tr>
+<tr><td>barra de progresso</td><td>dá para medir o quanto falta</td><td>você não sabe o total: vira mentira</td></tr>
+</table>
+</div>
+
+<p>E vale uma advertência sobre a barra de progresso falsa, aquela que enche sozinha em cinco segundos
+independentemente do servidor. Ela parece simpática e destrói a confiança quando chega a 100% e a
+página continua carregando. Se você não sabe o total, use um girador ou um esqueleto: os dois prometem
+“estou trabalhando”, não “falta pouco”.</p>
+
+<div class="cenario">
+<h3>Cenário 1: o pedido duplicado</h3>
+<p>Este é o da Ana. O botão tinha um girador bonito, mas continuava clicável. Dois cliques, dois
+pedidos, duas cobranças. A cura foi o atributo <code>disabled</code>, aplicado pelo JavaScript no
+instante do clique e retirado quando a resposta chega. O visual acompanhou com
+<code>disabled:bg-amber-300</code>. Sem o atributo, nenhuma classe de aparência impede o segundo
+envio: CSS não bloqueia clique.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o esqueleto do tamanho errado</h3>
+<p>O esqueleto da lista de pães tinha três barras de 12 px de altura. O conteúdo real tinha título de
+24 px, duas linhas de descrição e um botão — quase o dobro da altura. Quando os dados chegaram, tudo
+abaixo desceu 90 px de uma vez e a Ana levou um susto com o próprio site. A cura foi medir o cartão
+real e desenhar o esqueleto com a mesma altura, usando <code>h-6</code> para o título e reservando o
+espaço do botão com <code>min-h-9</code>.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o carregando eterno</h3>
+<p>Um erro de rede deixou o pedido sem resposta, e a tela ficou no girador para sempre. O visitante
+não sabia se esperava ou recomeçava. Estado de carregando precisa de prazo: passados alguns segundos,
+vira mensagem de erro com um botão “Tentar de novo”. No CSS, isso significa desenhar também o estado
+de erro — texto, cor e um caminho de volta. Carregar não é um estado final.</p>
+</div>
+
+<h2>9. Onde fica o JavaScript (e o que ele faz)</h2>
+
+<p>Esta é a hora de ser direto: trocar de estado é trabalho de JavaScript. O CSS não sabe quando a
+resposta chegou. Nas caixas desta aula, o estado está congelado pelo atributo <code>disabled</code> e
+pelo texto já trocado, o que é ótimo para desenhar com calma. Num site de verdade, um pedaço de código
+faz três coisas: desliga o botão, troca o texto e liga o girador; quando a resposta chega, desfaz tudo
+e mostra o conteúdo.</p>
+
+<p>Você não precisa aprender JavaScript hoje. Precisa saber que existe essa fronteira, para não
+procurar no Tailwind uma classe que espera resposta de servidor. O que o Tailwind entrega é a
+aparência de cada estado, pronta e consistente. O que ele não entrega é o relógio.</p>
+
+<p>Para quem quiser ver o mínimo, isto é JavaScript — de verdade, e só isto —, o suficiente para
+entender o vaivém:</p>
+
+<pre class="file" data-file="script.js">botao.disabled = true;
+botao.textContent = "Assando…";</pre>
+
+<p>Duas linhas, dois estados. O resto é a mesma ideia repetida: quando a resposta chega,
+<code>botao.disabled = false</code> e o texto volta. As classes que você aprendeu aqui continuam
+valendo, porque <code>disabled:</code> reage ao atributo, não ao texto. É por isso que vale investir
+na variante em vez de criar uma classe “botao-carregando” na mão.</p>
+
+<p>E o mesmo vale para o esqueleto: o JavaScript troca o bloco que pulsa pelo conteúdo real. O CSS
+garante que os dois ocupem o mesmo espaço; o código garante que a troca aconteça. Um sem o outro
+produz ou um salto feio, ou uma tela vazia.</p>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que faz um girador de borda parecer que está
+girando?</p>
+<label><input type="radio" name="q1"> uma imagem de GIF no lugar do anel</label>
+<label><input type="radio" name="q1"> um dos lados da borda com cor diferente, mais o <code>animate-spin</code></label>
+<label><input type="radio" name="q1"> quatro lados com a mesma cor e uma sombra forte</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Para que serve o atributo <code>disabled</code> no
+botão de carregando?</p>
+<label><input type="radio" name="q2"> para escurecer o botão automaticamente</label>
+<label><input type="radio" name="q2"> para o leitor de tela ler o texto em voz alta</label>
+<label><input type="radio" name="q2"> para impedir cliques repetidos enquanto a resposta não chega</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que o esqueleto precisa ter o tamanho do
+conteúdo real?</p>
+<label><input type="radio" name="q3"> para a página não pular quando o conteúdo chega</label>
+<label><input type="radio" name="q3"> porque o Tailwind exige a mesma altura</label>
+<label><input type="radio" name="q3"> para o pulso ficar mais rápido</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o aviso escondido</h2>
+<p>A região abaixo anuncia o carregamento para quem usa leitor de tela, mas não deve aparecer na tela.
+Complete a classe que esconde o texto dos olhos sem escondê-lo do leitor:</p>
+<div class="ex-code">&lt;p role="status" aria-live="polite" class="<input aria-label="resposta 1" data-answer="sr-only" placeholder="...">"&gt;Assando o pão…&lt;/p&gt;</div>
+<p class="ex-dica">Dica: são duas letras e um hífen, e o nome vem do inglês <em>screen reader only</em>.
+<code>hidden</code> e <code>opacity-0</code> não servem: os dois escondem também do leitor.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Carregando é um estado, com cara própria e prazo para terminar. As três peças se dividem assim: o
+girador de borda para ações curtas (<code>size-8 rounded-full border-4</code>, duas cores, uma delas
+só no topo, mais <code>animate-spin</code>); o esqueleto para conteúdo previsível
+(<code>animate-pulse</code> no container, blocos com a altura do conteúdo real); e o botão desligado
+para impedir repetição (<code>disabled</code> mais as variantes <code>disabled:bg-…</code>,
+<code>disabled:text-…</code>, <code>disabled:cursor-wait</code>).</p>
+
+<p>O CSS gerado é curto e vem todo do tema: <code>animate-spin</code> aponta para uma variável que
+gira 360 graus em um segundo, <code>animate-pulse</code> aponta para outra que baixa a opacidade pela
+metade. A parte invisível é a que mais importa para quem não vê a tela: <code>role="status"</code>,
+<code>aria-live="polite"</code>, <code>aria-busy</code> e o texto em <code>sr-only</code>.</p>
+
+<p>E a fronteira, para não se perder: o Tailwind desenha os estados; o JavaScript decide quando cada
+um vale. Carregamento sem fim não é estado, é defeito — todo girador precisa de um caminho para o
+conteúdo ou para o erro.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Carregando é estado, não tela: tem começo, aparência e fim.</li>
+<li>Girador = círculo + borda grossa + um lado com cor diferente + <code>animate-spin</code>.</li>
+<li>Sem o lado diferente, o anel gira e parece parado.</li>
+<li><code>animate-pulse</code> muda a opacidade, não a cor: o esqueleto precisa de fundo próprio.</li>
+<li>Esqueleto com a altura do conteúdo real evita o salto da página.</li>
+<li>Pulse no pai faz as barras respirarem juntas; pulse em cada uma fica desencontrado.</li>
+<li><code>disabled</code> bloqueia o clique; <code>aria-disabled</code> só avisa.</li>
+<li><code>disabled:</code> vale enquanto o atributo existir — o par do estado normal continua no HTML.</li>
+<li><code>role="status"</code> + <code>aria-live="polite"</code> + <code>sr-only</code> avisam quem não vê.</li>
+<li>Espera longa precisa de saída: conteúdo, erro e um “tentar de novo”.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

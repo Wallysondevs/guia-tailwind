@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mobile First | Guia Tailwind</title>
+<meta name="description" content="Mobile first no Tailwind: escrever do menor para o maior, a classe base sem prefixo, a escada de breakpoints na ordem certa e quando não usar breakpoint nenhum.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Mobile</span> First</h1>
+<p class="intro">A Ana desenhou o cartão do pão olhando para o monitor do balcão: duas colunas, respiro
+grande, texto de 18 px. Depois “adaptou” para o celular, cortando o que não cabia. O resultado ficou
+ruim nas duas pontas — apertado no telefone, esparramado no monitor. Nesta aula ela vira o processo de
+cabeça para baixo e aprende o jeito que o Tailwind foi pensado para ser usado: começar pelo desenho
+menor, o do celular, e crescer a partir dele. O nome disso é <strong>mobile first</strong>, e não tem
+nada de moda passageira: é uma ordem de decisão que deixa o CSS menor e mais fácil de consertar.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que “mobile first” quer dizer de verdade (e o que não quer).</li>
+  <li>Por que a classe sem prefixo é a mais importante de todas.</li>
+  <li>Como montar uma escada de respiro e de colunas do menor para o maior.</li>
+  <li>Por que a ordem das classes no HTML não muda nada, e o que muda de fato.</li>
+  <li>Como reconhecer uma escada invertida e consertá-la.</li>
+  <li>O caminho prático para refazer um cartão começando por 375 px.</li>
+  <li>Quando o melhor breakpoint é nenhum: layouts que se adaptam sozinhos.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o cartão que ficou ruim nas duas pontas</h2>
+
+<p>O cartão da Ana tinha, no monitor, duas colunas: a foto do pão de um lado, o texto do outro, com 32 px
+de respiro em volta e o título em 24 px. Bonito. No celular, o mesmo cartão herdava respiro de 32 px,
+título de 24 px e duas colunas de 160 px cada — o texto cabia em três palavras por linha e o preço saía
+pela borda. A “adaptação” dela foi apagar coisas no celular, o que quase sempre termina num desenho
+pobre para quem está no telefone.</p>
+
+<p>O erro não foi de classe, foi de ordem. Ela desenhou o caso mais espaçoso primeiro e tratou o celular
+como exceção — um lugar onde se corta. O Tailwind, e boa parte do mundo do CSS moderno, faz o contrário:
+o caso pequeno é a regra, e o caso grande é que recebe acréscimos. A razão é prática. Numa tela estreita
+não sobra espaço para nada: o que não é essencial simplesmente não cabe. Se você começa por ela, cada
+elemento que sobrevive já passou pelo teste mais duro. Depois é só dar mais ar e mais colunas conforme
+o espaço aparece.</p>
+
+<p>Há também uma razão de manutenção. Quando a base é o celular, um componente novo no projeto já nasce
+funcionando em qualquer tela: ele não tem nada de especial para telas grandes, então aparece igual em
+todas. Você só acrescenta um degrau quando o conteúdo pede. Na ordem contrária, todo componente novo
+nasce “de desktop” e precisa de uma correção para o celular — e é sempre a correção que alguém esquece
+de fazer.</p>
+
+<p>Uma última vantagem, que parece técnica mas aparece no dia a dia: se o CSS falhar em carregar pela
+metade, ou se o navegador for antigo e ignorar uma media query, o que sobra é o desenho base — uma
+coluna, texto legível, tudo empilhado. Um site mobile-first degrada bem. Um site desktop-first degrada
+em duas colunas espremidas numa tela de 400 px.</p>
+
+<h2>2. O que “mobile first” quer dizer</h2>
+
+<p>O nome engana. “Mobile first” não quer dizer “faça um site para celular” nem “esconda coisas no
+celular”. Quer dizer que a <strong>primeira decisão</strong> de cada componente é tomada pensando no
+menor espaço, e as seguintes são acréscimos para espaços maiores. A tradução mais honesta seria “do
+menor para o maior”.</p>
+
+<p>No Tailwind, isso aparece na própria sintaxe: a classe sem prefixo vale em <em>todas</em> as larguras,
+e o prefixo só acrescenta uma condição “a partir daqui”. Não existe, na escala padrão, um prefixo que
+diga “só no celular” — e isso é de propósito. Se a base vale em todo lugar, você é obrigado a pensar no
+pequeno primeiro; o grande é sempre um ajuste.</p>
+
+<dl class="anatomy">
+<dt>base</dt>
+<dd>A classe sem prefixo (<code>p-3</code>, <code>grid-cols-1</code>). Vale em qualquer largura e é o
+desenho do celular.</dd>
+<dt>degrau</dt>
+<dd>Cada ponto em que você acrescenta uma mudança: <code>sm:</code>, <code>md:</code>,
+<code>lg:</code>.</dd>
+<dt>escada</dt>
+<dd>O conjunto dos degraus de um componente, sempre do menor para o maior.</dd>
+<dt>acréscimo</dt>
+<dd>O jeito certo de usar um degrau: só dizer o que muda, sem repetir o que já vale abaixo.</dd>
+<dt>intrínseco</dt>
+<dd>Layout que se adapta sozinho ao espaço, sem breakpoint: <code>flex-wrap</code>,
+<code>auto-fit</code>, largura em porcentagem.</dd>
+</dl>
+
+<p>Há um detalhe do mundo real que vale trazer para cá: o celular mais estreito ainda em uso tem cerca
+de 320 px, e os mais comuns ficam entre 360 e 430. Se o seu desenho base funciona em 375, provavelmente
+funciona em 320 com um ou outro ajuste. Comece a testar por 375, que é o número que os inspetores usam
+como padrão, e depois desça até 320 para ver se nada estoura.</p>
+
+<h2>3. A base vale em todo lugar</h2>
+
+<p>Antes de qualquer breakpoint, o componente precisa ficar decente sem nenhum prefixo. Isso quer dizer
+três coisas: uma coluna, respiro modesto e texto em tamanho de leitura normal. No cartão da padaria, a
+base ficou <code>flex flex-col gap-3 p-3</code> — empilhado, com 12 px de respiro. É feio no monitor?
+Um pouco. Mas é <em>correto</em> em qualquer lugar, e é a partir dele que os degraus vão trabalhar.</p>
+
+<p>A base é também o que salva o componente quando alguém usa o site num aparelho esquisito: uma TV, um
+leitor de ebook, uma janela estreita no meio de dois monitores. Nenhum desses casos tem breakpoint
+próprio, e todos caem na base. Por isso ela não é “a versão do celular”: é a versão de todo mundo, com
+os degraus servindo de exceção para quem tem mais espaço.</p>
+
+<p>Na prática, você escreve a base uma vez e nunca mais mexe nela. Cada degrau só acrescenta o que
+muda. Se o respiro é 12 px no celular e 24 no tablet, você não escreve <code>p-6</code> na base e
+<code>md:p-3</code> — escreve <code>p-3</code> e <code>md:p-6</code>. A diferença parece cosmética e não
+é: na primeira versão, o celular herda 24 px e você precisa de outro degrau para corrigir; na segunda, o
+valor cresce quando há espaço, e não há nada para corrigir.</p>
+
+<p>Uma confusão comum é achar que a base “é aplicada primeiro e depois substituída”. Não é bem isso.
+Todas as regras que casam valem ao mesmo tempo; o que decide quem pinta por último é a ordem no CSS
+gerado, e o Tailwind põe a base antes e os degraus depois, em ordem crescente. Você pode pensar como
+substituição — é uma boa simplificação — mas o mecanismo é ordem.</p>
+
+<h2>4. A escada do cartão: p-3, sm:p-6, md:p-8</h2>
+
+<p>Com a base pronta, cada degrau responde a uma pergunta: “o que passa a caber aqui?”. A partir de
+640 px, o cartão ganha respiro médio. A partir de 768, mais respiro e talvez o texto maior. A partir de
+1024, o cartão pode virar duas colunas. Nada disso é obrigatório: você acrescenta degraus só onde o
+conteúdo pede.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Degrau</th><th>Largura</th><th>O que costuma mudar no cartão</th></tr>
+<tr><td>base</td><td>de 0 px</td><td>uma coluna, respiro de 12 px, tudo empilhado</td></tr>
+<tr><td><code>sm:</code></td><td>640 px</td><td>respiro de 24 px; o texto ganha um degrau</td></tr>
+<tr><td><code>md:</code></td><td>768 px</td><td>foto e texto lado a lado; respiro de 32 px</td></tr>
+<tr><td><code>lg:</code></td><td>1024 px</td><td>o cartão entra numa grade de três; respiro de 48 px</td></tr>
+</table>
+</div>
+
+<p>Na caixa abaixo, o cartão está com o respiro de celular e nada mais. A missão é subir a escada em três
+degraus. Repare que não há nada para apagar: o <code>p-3</code> continua valendo em todas as larguras, e
+cada novo degrau assume a partir do seu ponto. É a escada no sentido literal — cada passo em cima do
+anterior.</p>
+
+<div class="trytailwind" data-goal="conta:.sm\:p-6=1;;rule:.md\:p-8;;rule:.lg\:p-12">
+  <p class="try-task">Suba o respiro conforme a tela cresce: mantenha <code>p-3</code>, acrescente
+  <code>sm:p-6</code>, <code>md:p-8</code> e <code>lg:p-12</code> ao cartão.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl bg-amber-50 p-3"&gt;
+  &lt;p class="text-base font-semibold"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Assado às 6h, sai quentinho.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 12px
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-xl bg-amber-50 p-3 sm:p-6 md:p-8 lg:p-12"&gt;
+  &lt;p class="text-base font-semibold"&gt;Pão de queijo&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Assado às 6h, sai quentinho.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Com a solução rodada, o painel mostra o respiro da largura em que você está agora: 12 px abaixo de
+640, 24 px entre 640 e 768, 32 px entre 768 e 1024, e 48 px acima disso. Se você arrastar a janela
+devagar, vai ver os saltos. O valor de partida que está impresso no painel é o do HTML inicial — 12 px,
+que é o único valor que não depende de janela nenhuma.</p>
+
+<p>Antes de seguir, um teste de sanidade: a escada tem quatro degraus e três prefixos. Se você contar
+seis classes de respiro num elemento, provavelmente está repetindo valores ou usando dois prefixos para
+a mesma coisa. Uma propriedade, uma escada. Escadas paralelas — uma para respiro, uma para tamanho de
+texto — são normais e esperadas; duas escadas para a mesma propriedade, não.</p>
+
+<h2>5. O CSS gerado e a ordem que resolve tudo</h2>
+
+<p>Aqui está o motivo de a escada funcionar. Quando você escreve <code>p-3 sm:p-6 md:p-8</code>, o
+Tailwind gera as regras nesta ordem, com a base primeiro e os degraus em ordem crescente:</p>
+
+<pre class="term">.p-3 {
+  padding: calc(var(--spacing) * 3);
+}
+@media (width &gt;= 40rem) {
+  .sm\:p-6 {
+    padding: calc(var(--spacing) * 6);
+  }
+}
+@media (width >= 48rem) {
+  .md\:p-8 {
+    padding: calc(var(--spacing) * 8);
+  }
+}</pre>
+
+<p>Numa tela de 800 px, as três regras casam ao mesmo tempo: a janela é maior que 0, maior que 640 e
+maior que 768. Quem decide o valor final é a última que aparece no arquivo — a do <code>md</code>, que
+está embaixo. É a cascata do CSS fazendo o trabalho, e é por isso que a ordem em que você escreve as
+classes no atributo não importa: <code>p-3 sm:p-6 md:p-8</code> e <code>md:p-8 sm:p-6 p-3</code> geram o
+mesmo CSS, na mesma ordem.</p>
+
+<p>Isso tem uma consequência que muita gente custa a aceitar: não existe “forçar” um valor colocando a
+classe por último. Se você quer que o celular tenha 24 px e o desktop 12 px, escrever
+<code>md:p-3 p-6</code> não resolve — no desktop, o <code>md:p-3</code> vai vencer de qualquer jeito,
+porque ele está mais abaixo no CSS. A única forma de ter um valor menor no desktop é usar um prefixo
+<code>max-</code>, ou repensar o desenho.</p>
+
+<p>E é justamente aí que nasce a escada invertida, o erro da próxima seção. Quem vem do desktop pensa
+“no computador é grande, no celular é pequeno” e traduz isso como <code>p-8 md:p-2</code>. O CSS é
+gerado na ordem certa, mas o desenho fica ao contrário do que se quer: 32 px no celular e 8 px no
+desktop.</p>
+
+<h2>6. A escada invertida e como consertar</h2>
+
+<p>O sintoma é fácil de reconhecer: o componente fica apertado na tela grande e folgado na pequena. No
+cartão da Ana, isso apareceu quando ela copiou um bloco de um modelo pronto e colou no projeto:
+<code>class="rounded-xl bg-amber-50 p-8 md:p-2"</code>. No monitor, 8 px de respiro — o texto quase
+encostava na borda. No celular, 32 px — metade da tela comido pelo respiro.</p>
+
+<p>Na caixa seguinte, o cartão está assim de propósito. A missão é inverter: 8 px no celular, 24 px a
+partir de 640 e 32 px a partir de 768. Isso quer dizer trocar a base e montar a escada para cima. A
+classe <code>p-8</code> tem de sair; se ela ficar, volta a valer em todas as larguras e a escada perde o
+sentido.</p>
+
+<div class="trytailwind" data-goal="conta:.p-8=0;;conta:.p-2=1;;rule:.sm\:p-6;;rule:.md\:p-8">
+  <p class="try-task">Conserte a escada invertida: o cartão está com <code>p-8 md:p-2</code>. Deixe
+  <code>p-2</code> na base, <code>sm:p-6</code> a partir de 640 e <code>md:p-8</code> a partir de
+  768.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl bg-amber-50 p-8 md:p-2"&gt;
+  &lt;p class="text-base font-semibold"&gt;Broa de milho&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Feita com milho da roça.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 32px
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-xl bg-amber-50 p-2 sm:p-6 md:p-8"&gt;
+  &lt;p class="text-base font-semibold"&gt;Broa de milho&lt;/p&gt;
+  &lt;p class="text-sm text-stone-600"&gt;Feita com milho da roça.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel de partida também depende da janela, e isso aqui ajuda a entender o problema: numa janela
+larga ele mostra 8 px, porque o <code>md:p-2</code> já venceu a base — o cartão abre com o respiro de
+celular num monitor. Estreite a janela para menos de 768 e o valor salta para 32 px, o respiro de
+monitor num telefone. Depois da correção, a leitura fica intuitiva: 8 px abaixo de 640, 24 px entre 640
+e 768, 32 px acima disso. O número final no monitor pode ser o mesmo de antes; o que muda é o caminho
+até ele.</p>
+
+<p>O que o <code>md:p-2</code> fazia, para quem quiser ver no CSS: ele gera uma regra dentro do
+<code>@media (width &gt;= 48rem)</code>, que aparece <em>depois</em> da base. O arquivo sai assim:</p>
+
+<pre class="term">.p-8 {
+  padding: calc(var(--spacing) * 8);
+}
+@media (width &gt;= 48rem) {
+  .md\:p-2 {
+    padding: calc(var(--spacing) * 2);
+  }
+}</pre>
+
+<p>No desktop, a regra de baixo vence a de cima e o cartão fica com 8 px. No celular, a media query não
+vale e sobra o <code>p-8</code>, com 32 px. Ou seja: o CSS está correto, obedecendo a ordem; o desenho é que está ao contrário.
+Quem escreve <code>max-md:</code> no lugar de <code>md:</code> também consegue o efeito — mas paga o
+preço de manter uma lógica invertida em todos os componentes.</p>
+
+<h2>7. Refazendo o cartão, do celular para fora</h2>
+
+<p>O roteiro que a Ana passou a seguir tem quatro passos. Primeiro, abra a página numa largura de 375 px
+e escreva só a base, sem nenhum prefixo: uma coluna, texto legível, respiro pequeno. Segundo, aumente
+para 640 e pergunte o que passa a caber — normalmente respiro e um tamanho de texto. Terceiro, vá para
+768 e veja se duas colunas fazem sentido. Quarto, vá para 1024 e decida se o cartão entra numa grade.</p>
+
+<p>A regra de ouro é nunca “desfazer” no degrau maior. Se você se pegar escrevendo um valor menor num
+prefixo, é sinal de que a base está errada: conserte a base, não o degrau. Isso vale para respiro,
+tamanho de texto, largura e visibilidade. Um componente mobile-first tem uma base simples e degraus que
+só acrescentam.</p>
+
+<p>Na caixa abaixo, o cartão da padaria está empilhado — foto em cima, texto embaixo, botão no fim. A
+partir de 640 px, o conteúdo deve ficar em linha e alinhado ao centro, que é como o cartão fica bonito
+quando há largura sobrando. São dois acréscimos, e o <code>flex-col</code> da base continua lá.</p>
+
+<div class="trytailwind" data-goal="rule:.sm\:flex-row;;rule:flex-direction: row;;rule:.sm\:items-center">
+  <p class="try-task">No celular o cartão fica empilhado (já está). A partir de 640 px, ponha foto,
+  texto e botão em linha, alinhados ao centro: acrescente <code>sm:flex-row</code> e
+  <code>sm:items-center</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="flex flex-col gap-3 rounded-xl bg-amber-50 p-3"&gt;
+  &lt;div class="h-16 w-16 rounded-full bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div&gt;
+    &lt;p class="text-base font-semibold"&gt;Pão francês&lt;/p&gt;
+    &lt;p class="text-sm text-stone-600"&gt;Casquinha fina, feito na hora.&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;button class="rounded-md bg-amber-600 px-3 py-2 text-sm text-white"&gt;Encomendar&lt;/button&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+padding: 12px
+gap: 12px
+flex-direction: column
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex flex-col gap-3 rounded-xl bg-amber-50 p-3 sm:flex-row sm:items-center"&gt;
+  &lt;div class="h-16 w-16 rounded-full bg-amber-200"&gt;&lt;/div&gt;
+  &lt;div&gt;
+    &lt;p class="text-base font-semibold"&gt;Pão francês&lt;/p&gt;
+    &lt;p class="text-sm text-stone-600"&gt;Casquinha fina, feito na hora.&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;button class="rounded-md bg-amber-600 px-3 py-2 text-sm text-white"&gt;Encomendar&lt;/button&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Duas coisas para observar na prévia depois de rodar. A primeira: no celular, o botão fica embaixo do
+texto e ocupa só o necessário — se você quisesse o botão de largura cheia ali, usaria
+<code>w-full sm:w-auto</code>, outro par clássico de escada. A segunda: o <code>gap-3</code> não mudou.
+Espaço entre elementos é uma decisão que costuma valer em todas as larguras; mudar o respiro de dentro
+do cartão já é suficiente para dar a sensação de folga.</p>
+
+<p>Esse é o padrão que você vai repetir em tudo: empilhar no celular, alinhar em linha quando houver
+espaço. Cabeçalho, cartão de produto, rodapé, formulário de duas colunas — quase todos começam com
+<code>flex-col</code> e ganham <code>sm:flex-row</code> ou <code>md:flex-row</code> no degrau em que a
+linha deixa de espremer o texto.</p>
+
+<h2>8. Quando não existe breakpoint no código</h2>
+
+<p>Nem todo layout precisa de escada. Alguns se adaptam sozinhos, e são a melhor invenção do CSS para
+quem não quer manter vinte breakpoints. O <code>flex-wrap</code> é o exemplo mais simples: os itens vão
+para a linha de baixo quando não cabem, em qualquer largura, sem uma media query sequer. O
+<code>grid</code> com <code>auto-fit</code> faz o mesmo com colunas, criando e removendo colunas conforme
+o espaço. Larguras em porcentagem e <code>max-w-*</code> também dispensam breakpoint.</p>
+
+<p>A regra prática: se o layout pode se resolver com fluxo (quebra de linha, colunas automáticas,
+limite de largura), prefira isso. Breakpoint é para quando a <em>decisão</em> muda de natureza — duas
+colunas viram três, o menu some, o texto cresce um degrau. Se o que muda é só “cabe ou não cabe”, o
+navegador sabe resolver melhor do que você.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Necessidade</th><th>Mobile first (escada)</th><th>Sem breakpoint</th></tr>
+<tr><td>Cartões lado a lado quando há espaço</td><td><code>md:grid-cols-2</code></td><td><code>grid-cols-[repeat(auto-fit,minmax(220px,1fr))]</code></td></tr>
+<tr><td>Botões que não cabem na linha</td><td><code>sm:flex-nowrap</code></td><td><code>flex-wrap</code></td></tr>
+<tr><td>Texto que não pode ficar largo demais</td><td><code>2xl:max-w-3xl</code></td><td><code>max-w-prose</code></td></tr>
+<tr><td>Imagem que estoura a coluna</td><td><code>md:w-1/2</code></td><td><code>w-full max-w-full</code></td></tr>
+<tr><td>Respiro que acompanha a tela</td><td><code>p-3 sm:p-6 md:p-8</code></td><td><code>p-[3vw]</code> com moderação</td></tr>
+</table>
+</div>
+
+<p>A última linha merece um aviso: valor em <code>vw</code> (porcentagem da largura da janela) é tentador
+e vira armadilha. Em telas muito estreitas, o texto pode ficar ilegível; em telas muito largas, o
+respiro fica absurdo. Use quando quiser mesmo que o valor acompanhe a tela de forma contínua, e teste
+nas duas pontas. Para quase todo o resto, a escada de três ou quatro degraus é mais previsível.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o menu que ela esqueceu de olhar</h3>
+<p>O site estava todo mobile-first, menos o menu, que ela fez antes de aprender. Resultado: no celular,
+seis links espremidos numa linha, dois deles cortados. A correção foi refazer o menu como escada: base
+com o botão de abrir e os links escondidos; a partir de 768, os links aparecem em linha e o botão some.
+Note que a base é o estado mais simples — o menu fechado — e o degrau acrescenta o que só cabe em tela
+grande. Fazer o contrário, com o menu aberto por padrão, obrigaria a esconder coisas no celular.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o formulário de duas colunas que virava uma bagunça</h3>
+<p>O formulário de encomenda tinha nome e telefone lado a lado, com 50% cada. No celular, cada campo
+ficou com 160 px e o número do telefone era cortado no meio. A correção foi a escada clássica:
+<code>grid-cols-1 sm:grid-cols-2 gap-3</code>. Duas colunas só quando houver espaço para dois campos
+inteiros. Detalhe: ela manteve a ordem dos campos igual à ordem de leitura, para quem navega por teclado
+não pular de um lado para o outro da tela.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a tabela de preços e o “não dá para empilhar”</h3>
+<p>Nem todo conteúdo pode virar coluna. A tabela de preços com quatro colunas não faz sentido empilhada,
+porque o visitante precisa comparar linha com linha. A solução foi manter a tabela como está e dar a ela
+rolagem horizontal própria, com um aviso discreto. Mobile-first não é uma regra que obriga a empilhar
+tudo: é uma ordem de decisão que, neste caso, decidiu que a tabela continua tabela — só que rolando
+dentro do seu espaço.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. O que “mobile first” quer dizer na prática?</p>
+<label><input type="radio" name="q1"> fazer um site que só funciona bem no celular</label>
+<label><input type="radio" name="q1"> esconder conteúdo no celular para caber</label>
+<label><input type="radio" name="q1"> decidir o desenho pequeno primeiro e crescer com degraus</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. Um cartão tem só <code>sm:p-6</code>, sem nenhuma
+outra classe de respiro. O que acontece numa tela de 500 px?</p>
+<label><input type="radio" name="q2"> não há respiro nenhum: o degrau só vale a partir de 640 px</label>
+<label><input type="radio" name="q2"> o respiro é de 24 px, porque o valor desce para a base</label>
+<label><input type="radio" name="q2"> o navegador usa 24 px em metade da tela</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Qual escada está na ordem do mobile first?</p>
+<label><input type="radio" name="q3"> <code>p-8 md:p-2</code></label>
+<label><input type="radio" name="q3"> <code>p-2 sm:p-6 md:p-8</code></label>
+<label><input type="radio" name="q3"> <code>md:p-8 p-6 sm:p-2</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a grade da vitrine</h2>
+<p>A vitrine já tem <code>grid grid-cols-1 gap-3</code> na base — uma coluna no celular. Complete com a
+classe que faz duas colunas a partir de 768 px:</p>
+<div class="ex-code">&lt;div class="grid grid-cols-1 gap-3 <input aria-label="resposta 1" data-answer="md:grid-cols-2" placeholder="...">"&gt;</div>
+<p class="ex-dica">Dica: o prefixo é o do ponto de 768 px, e a utilidade continua sendo
+<code>grid-cols-2</code>. Se você escrever <code>grid-cols-2</code> sozinho, a vitrine fica com duas
+colunas até no celular.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Mobile first é uma ordem de decisão, não um tipo de site: a classe sem prefixo desenha o caso menor e
+vale em todo lugar; os degraus <code>sm:</code>, <code>md:</code>, <code>lg:</code> só acrescentam o que
+passa a caber quando há espaço. O Tailwind gera o CSS nessa ordem — base primeiro, degraus crescentes —
+e é por isso que a última regra vence numa tela larga e a ordem do atributo <code>class</code> não muda
+nada.</p>
+
+<p>A escada invertida (<code>p-8 md:p-2</code>) é o erro clássico de quem desenha no monitor e adapta
+depois; o remédio é inverter a base e montar os degraus para cima. E nem tudo precisa de breakpoint:
+<code>flex-wrap</code>, <code>auto-fit</code> e <code>max-w-*</code> resolvem sozinhos o que é só
+questão de “cabe ou não cabe”.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Base sem prefixo = o desenho do celular, e vale em todas as larguras.</li>
+<li>Cada degrau só acrescenta o que muda; nunca repita o que já vale abaixo.</li>
+<li>A ordem das classes no HTML não importa: o CSS gerado é que manda.</li>
+<li>Se você escreve um valor <em>menor</em> num prefixo, a base está errada.</li>
+<li>Teste em 375 px primeiro; depois 640, 768 e 1024.</li>
+<li>Empilhar no celular e virar linha com <code>sm:flex-row</code> é o padrão mais comum.</li>
+<li><code>flex-wrap</code>, <code>auto-fit</code> e <code>max-w-prose</code> dispensam breakpoint.</li>
+<li><code>vw</code> para respiro é tentador e traiçoeiro: teste nas duas pontas.</li>
+<li>Nem todo conteúdo pode ser empilhado; tabela pode rolar dentro do próprio espaço.</li>
+<li>Mobile first degrada bem: se o CSS falhar, sobra uma coluna legível.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

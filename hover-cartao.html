@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Efeito no Cartão | Guia Tailwind</title>
+<meta name="description" content="O cartão da padaria que levanta no hover: sombra, translate e borda com transição, o CSS gerado e por que o efeito precisa de um cartão clicável de verdade.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Efeito no <span class="hl">Cartão</span></h1>
+<p class="intro">A Ana montou os cartões dos pães da padaria e ficou satisfeita: fundo branco, borda
+fina, canto arredondado, preço no lugar. Só que, ao lado dos sites grandes, os dela pareciam adesivos
+colados numa folha. Nos outros, o cartão parece <em>levantar</em> quando o mouse passa — e a pessoa
+entende, sem ler nada, que aquilo é uma peça que dá para pegar. Nesta aula ela monta esse efeito com
+três classes de sombra, deslocamento e borda, aprende por que ele precisa de uma transição para
+parecer natural e descobre a pergunta que quase ninguém faz: esse cartão é clicável de verdade?</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Os três sinais que, juntos, fazem um cartão parecer que levanta.</li>
+  <li>Como usar <code>hover:shadow-lg</code> sem exagerar no degrau da sombra.</li>
+  <li>Como subir 4 px com <code>hover:-translate-y-1</code> sem empurrar os vizinhos.</li>
+  <li>Por que o mesmo efeito, sem transição, parece um pulo.</li>
+  <li>Como escolher a duração e o ritmo com <code>duration-…</code> e <code>ease-…</code>.</li>
+  <li>O que fazer quando a sombra fica escondida atrás do cartão vizinho.</li>
+  <li>Quando o efeito mente para o visitante — e como evitar isso.</li>
+</ul>
+</div>
+
+<h2>1. A cena: os cartões parecem adesivos numa folha</h2>
+
+<p>O catálogo da Ana tem quatro cartões: pão de queijo, pão integral, broa de milho e café coado. Cada
+um é uma caixa branca com uma borda âmbar bem clara, um título, duas linhas de descrição e o preço em
+negrito. Layout impecável. Mas ela abriu o site de uma livraria que admira e sentiu a diferença na
+hora: lá, quando o mouse encosta num livro, o cartão inteiro sobe um tico, a sombra cresce e a borda
+ganha um tom mais quente. Não é enfeite: é a página dizendo “isto é clicável” antes de você clicar.</p>
+
+<p>A primeira tentativa foi mudar só o fundo: <code>hover:bg-amber-50</code>. O cartão ficou um
+pouco mais amarelo e a sensação foi de “selecionado”, não de “levantado”. A segunda foi aumentar o
+respiro: <code>hover:p-8</code>, no lugar de <code>p-6</code>. Deu errado de um jeito constrangedor —
+o cartão cresceu, o texto de dentro se mexeu, a grade reorganizou as colunas e o ponteiro ficou fora
+da área por um instante. A tela tremeu. Espaço não é enfeite de hover: mexer em <code>p</code>,
+<code>m</code>, <code>w</code> ou <code>h</code> muda o layout e assusta tudo em volta.</p>
+
+<p>O que funcionou veio de outra lógica. Levantar um objeto de verdade não o deforma: ele sai do
+lugar, a sombra que ele projeta muda e a luz bate diferente na borda. No CSS, isso corresponde a
+três propriedades que o navegador desenha sem refazer o layout: <code>box-shadow</code>,
+<code>translate</code> e <code>border-color</code>. Nenhuma delas ocupa mais espaço na tela; todas
+são pintadas por cima do espaço reservado.</p>
+
+<p>E há a quarta peça, invisível mas decisiva: o tempo. Um objeto não teleporta. Se a sombra aparece
+de um quadro para o outro, o cérebro lê “piscou”, não “levantou”. O <code>transition</code> distribui
+a mudança ao longo de alguns milissegundos, e é ele que transforma três classes em um gesto.</p>
+
+<h2>2. O que faz um cartão parecer que levanta</h2>
+
+<p>Vale separar os sinais, porque cada um conta uma parte da história. A sombra diz “há espaço entre
+o cartão e a página”. O deslocamento diz “ele se afastou do fundo”. A borda mais quente diz “ele está
+ativo agora”. Usados juntos e com moderação, os três produzem a sensação de levantar. Usados com
+exagero, produzem um cartão-brinquedo que pisca e distrai.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sinal</th><th>Classe no hover</th><th>O que o navegador pinta</th><th>Custo</th></tr>
+<tr><td>sombra cresce</td><td><code>hover:shadow-lg</code></td><td><code>box-shadow</code></td><td>baixo</td></tr>
+<tr><td>cartão sobe</td><td><code>hover:-translate-y-1</code></td><td><code>translate</code></td><td>baixo</td></tr>
+<tr><td>borda acende</td><td><code>hover:border-amber-300</code></td><td><code>border-color</code></td><td>baixíssimo</td></tr>
+<tr><td>fundo clareia</td><td><code>hover:bg-amber-50</code></td><td><code>background-color</code></td><td>baixíssimo</td></tr>
+<tr><td>respiro maior</td><td><code>hover:p-8</code></td><td><code>padding</code></td><td>altera o layout</td></tr>
+</table>
+</div>
+
+<p>A última linha está na tabela de propósito. <code>padding</code> e <code>margin</code> são
+propriedades de espaço, e espaço é o que decide onde as coisas ficam. Mudar espaço no hover obriga o
+navegador a recalcular a posição dos vizinhos, e você vê o tremor. Já a sombra, o <code>translate</code>
+e a cor são <em>pintura</em>: o lugar reservado continua igual, só o desenho em cima dele muda.</p>
+
+<p>Um detalhe de vocabulário que evita confusão ao ler tutoriais: o Tailwind v4 não usa mais a
+propriedade <code>transform</code> para deslocar. Ele escreve <code>translate</code>, uma propriedade
+mais nova que faz o mesmo papel com menos conflito. Você verá <code>transform</code> em código antigo
+e nas aulas de transformações; o efeito visual é o mesmo. O que importa agora é a ideia: mover sem
+mexer no espaço reservado.</p>
+
+<dl class="anatomy">
+<dt>elevação</dt>
+<dd>A ilusão de que o cartão saiu do fundo da página. Feita com sombra maior e deslocamento para
+cima.</dd>
+<dt>box-shadow</dt>
+<dd>A sombra desenhada em volta da caixa. Não ocupa espaço: pode invadir o vizinho sem empurrar
+nada.</dd>
+<dt>translate</dt>
+<dd>O deslocamento do elemento no eixo X (horizontal) ou Y (vertical). Valor negativo em Y sobe.</dd>
+<dt>transition</dt>
+<dd>A ponte entre o valor antigo e o novo. Sem ela, a mudança acontece num único quadro.</dd>
+<dt>duração</dt>
+<dd>Quanto tempo a transição leva, em milissegundos. <code>duration-200</code> são 200 ms.</dd>
+</dl>
+
+<p>Uma palavra sobre gosto, que é sempre discutível: em cartões, menos é mais. Uma sombra que dobra de
+tamanho, um deslocamento de 8 px e uma borda que vira laranja ao mesmo tempo ficam barulhentos. A
+receita que a Ana adotou depois de testar foi esta: sombra de <code>sm</code> para <code>lg</code>,
+deslocamento de 4 px, borda um degrau acima, 200 ms. Discreto, e o olho entende na primeira vez.</p>
+
+<h2>3. A sombra: o sinal mais barato</h2>
+
+<p>O cartão em repouso já tem uma sombra pequena, <code>shadow-sm</code>. Ela é quase imperceptível e
+serve para o cartão não parecer recortado com tesoura. No hover, a sombra cresce:
+<code>hover:shadow-lg</code>. O CSS gerado mostra que a sombra de verdade é uma lista de duas sombras
+sobrepostas — uma larga e difusa, outra curta e próxima —, e é essa combinação que imita a luz de um
+ambiente:</p>
+
+<pre class="term">.shadow-sm {
+  --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}</pre>
+
+<p>Não é preciso decorar os números. Vale entender a estrutura: quatro valores separados por espaço
+são deslocamento horizontal, deslocamento vertical, desfoque e espalhamento; depois vem a cor. A
+sombra do <code>lg</code> desce 10 px e espalha 15 px de desfoque, então parece que o cartão está mais
+alto. Quanto maior o número da classe, mais longe a luz “vê” o objeto.</p>
+
+<p>Um cuidado de bom gosto: suba no máximo dois degraus. De <code>sm</code> para <code>lg</code> o
+olho percebe a mudança. De <code>sm</code> para <code>2xl</code> o cartão parece decolar. E existe um
+jeito de deixar a sombra mais quente, combinando com a padaria: <code>hover:shadow-amber-900/20</code>
+pinta a sombra com o âmbar escuro em 20% de opacidade, o que combina com fundo creme e foge do cinza
+padrão. É um detalhe pequeno que muda a sensação de “site pronto” para “site cuidado”.</p>
+
+<p>Se você quiser revisar os degraus de sombra com calma, o guia tem uma aula inteira sobre
+<a href="sombras.html">sombras</a>. Aqui interessa o par: uma sombra de repouso, uma de hover, e a
+diferença entre elas perceptível sem susto.</p>
+
+<h2>4. Subir sem empurrar: o hover:-translate-y-1</h2>
+
+<p>Agora o deslocamento. A classe que move para cima é <code>-translate-y-1</code>: o sinal de menos
+antes do nome indica direção negativa, e no eixo Y o negativo é para cima — porque a origem do plano
+do navegador fica no canto superior esquerdo, e Y cresce para baixo. O número é a escala de sempre:
+<code>1</code> vale 0,25 rem, ou 4 px.</p>
+
+<p>No hover, ela vira <code>hover:-translate-y-1</code>. O CSS gerado tem duas linhas, e a primeira
+pode assustar:</p>
+
+<pre class="term">@media (hover: hover) {
+  .hover\:-translate-y-1:hover {
+    --tw-translate-y: calc(var(--spacing) * -1);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
+}</pre>
+
+<p>A primeira linha guarda o valor numa variável — é o mesmo truque das cores e das sombras, e serve
+para o Tailwind combinar vários deslocamentos sem brigar. A segunda aplica o deslocamento. A casca
+<code>@media (hover: hover)</code> você já conhece da aula de <a href="hover.html">hover</a>: ela
+apaga a regra em aparelhos sem ponteiro, como o celular. Ou seja, no telefone o cartão não levanta —
+e isso é uma proteção, não um defeito.</p>
+
+<p>Escolha o degrau pensando no tamanho do cartão. Em cartões pequenos, <code>-translate-y-0.5</code>
+(2 px) já se nota. Em cartões grandes, <code>-translate-y-1</code> (4 px) é o ponto doce.
+<code>-translate-y-2</code> (8 px) começa a parecer propaganda. E se o cartão estiver dentro de uma
+grade apertada, subir demais faz a sombra encostar no cartão de cima.</p>
+
+<h2>5. A primeira missão: levantar e crescer a sombra</h2>
+
+<p>Na caixa abaixo está o cartão do pão de queijo, com a sombra de repouso e a borda clara. Falta o
+efeito: subir 4 px e crescer a sombra quando o mouse chega. Escreva as duas classes na ordem que
+preferir — a ordem no HTML não altera o resultado.</p>
+
+<div class="trytailwind" data-goal="rule:.hover\:-translate-y-1:hover;;rule:.hover\:shadow-lg:hover">
+  <p class="try-task">Dê ao cartão o efeito de levantar: no hover, ele sobe 4 px e a sombra passa de
+  <code>shadow-sm</code> para <code>shadow-lg</code>.</p>
+  <pre class="html">&lt;a id="alvo" href="#" class="block rounded-xl border border-amber-200 bg-white p-6 shadow-sm"&gt;
+  &lt;h3 class="text-lg font-bold text-amber-900"&gt;Pão de queijo&lt;/h3&gt;
+  &lt;p class="text-sm text-amber-800"&gt;Assado às 6h, porção com 6 unidades.&lt;/p&gt;
+  &lt;p class="mt-2 font-bold text-amber-900"&gt;R$ 18,00&lt;/p&gt;
+&lt;/a&gt;</pre>
+  <pre class="out">
+display: block
+padding: 24px
+background-color: rgb(255, 255, 255)
+border-radius: 12px
+box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px
+border-width: 1px
+border-color: oklch(0.924 0.12 95.746)
+</pre>
+  <pre class="solucao">&lt;a id="alvo" href="#" class="block rounded-xl border border-amber-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"&gt;
+  &lt;h3 class="text-lg font-bold text-amber-900"&gt;Pão de queijo&lt;/h3&gt;
+  &lt;p class="text-sm text-amber-800"&gt;Assado às 6h, porção com 6 unidades.&lt;/p&gt;
+  &lt;p class="mt-2 font-bold text-amber-900"&gt;R$ 18,00&lt;/p&gt;
+&lt;/a&gt;</pre>
+</div>
+
+<p>Atenção a um detalhe da solução: ela já inclui <code>transition</code>. Você pode resolver a missão
+sem ele — a meta confere só o deslocamento e a sombra —, mas o resultado vai pular, e o assunto da
+próxima seção é exatamente esse. Rodar a caixa com e sem <code>transition</code>, alternando, é o
+melhor jeito de sentir a diferença com os próprios olhos.</p>
+
+<p>Outro detalhe: o cartão precisa ser <code>block</code>. Um link é, por natureza, um elemento de
+linha, e o <code>translate</code> funciona melhor quando ele ocupa a caixa inteira. O
+<code>block</code> também é o que faz a área clicável cobrir o cartão todo, e não só o texto do
+título. Repare que as classes internas não mudaram: título, descrição e preço continuam iguais.</p>
+
+<p>E por que o efeito aparece no cartão, e não nos filhos? Porque o <code>hover:</code> pergunta
+“o mouse está neste elemento?” e o cartão é o elemento que ocupa a área. Se você quisesse que o
+título mudasse de cor junto, a ferramenta seria o <code>group-hover</code>, que tem
+<a href="group-hover.html">aula própria</a>. Aqui o alvo é o cartão inteiro, então as classes ficam
+nele.</p>
+
+<h2>6. O que separa um pulo de um deslize: a transição</h2>
+
+<p>Sem transição, o navegador aplica o valor novo no quadro seguinte. A 60 quadros por segundo, isso é
+uma mudança de 16 milissegundos: o olho vê um salto. Com transição, o navegador interpola o valor
+entre o antigo e o novo durante o tempo que você mandar, e o cérebro lê como movimento.</p>
+
+<p>A classe <code>transition</code> não escolhe um tempo; ela escolhe <em>o que</em> pode animar. O CSS
+gerado lista as propriedades comuns — cor, fundo, borda, opacidade, sombra, transformação,
+deslocamento — e liga a duração e o ritmo padrão do tema. É por isso que ela basta na maioria dos
+casos: <code>box-shadow</code> e <code>translate</code> estão na lista.</p>
+
+<p>As outras duas peças vêm em classes separadas. <code>duration-200</code> diz que a transição leva
+200 milissegundos; <code>ease-out</code> diz que ela começa rápida e freia no fim, o que dá a sensação
+de peso. Veja as duas regras como saem de verdade:</p>
+
+<pre class="term">.duration-200 {
+  --tw-duration: 200ms;
+  transition-duration: 200ms;
+}
+.ease-out {
+  --tw-ease: var(--ease-out);
+  transition-timing-function: var(--ease-out);
+}</pre>
+
+<p>Repare que cada classe escreve a variável e a propriedade. A variável existe para o Tailwind
+resolver conflitos e combinações; a propriedade é o que o navegador lê. A transição padrão, sem
+classes, é de 150 ms com uma curva suave — decente, mas um pouco apressada para um cartão grande.
+200 ms é o degrau que a maioria dos produtos usa.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Parte do cartão</th><th>Classe no hover</th><th>O que a pessoa lê</th></tr>
+<tr><td>sombra</td><td><code>hover:shadow-lg</code></td><td>“ele se afastou do fundo”</td></tr>
+<tr><td>posição</td><td><code>hover:-translate-y-1</code></td><td>“ele subiu para mim”</td></tr>
+<tr><td>borda</td><td><code>hover:border-amber-300</code></td><td>“ele está ativo agora”</td></tr>
+<tr><td>fundo</td><td><code>hover:bg-amber-50</code></td><td>“deu sinal de vida” — opcional</td></tr>
+<tr><td>texto de dentro</td><td><code>hover:text-amber-950</code></td><td>quase ninguém nota; só gera ruído</td></tr>
+</table>
+</div>
+
+<p>O ritmo tem a mesma lógica das outras aulas de movimento: <code>ease-out</code> freia no fim e dá
+sensação de chegada — é a escolha quase automática para hover de cartão. <code>ease-in</code> acelera
+no fim e serve para sair de cena; <code>ease-linear</code> parece mecânico. A escala completa de
+duração, espera e curva está nas aulas de <a href="transicoes.html">transições</a> e de
+<a href="duracao-e-espera.html">duração e espera</a>; aqui basta o degrau que o cartão usa.</p>
+
+<p>Uma armadilha comum: usar <code>transition-all</code>. Parece prático — anima tudo —, mas também
+anima propriedades de layout que aparecem no meio do caminho, e qualquer mudança de conteúdo passa a
+arrastar. Além disso, <code>transition-all</code> liga transição em propriedades que você nunca quis
+animar, e o resultado é aquele cartão “mole”, em que até a cor do texto demora a acompanhar. Use
+<code>transition</code>, que já cobre o que interessa, ou <code>transition-shadow</code> e
+<code>transition-transform</code> quando quiser ser específica.</p>
+
+<h2>7. A segunda missão: dar tempo ao movimento</h2>
+
+<p>O cartão abaixo já levanta e já cresce a sombra, mas tudo acontece de uma vez, num piscar. A missão
+é dar tempo: 200 ms, com o ritmo que freia no fim. São três classes, e a ordem entre elas não importa.</p>
+
+<div class="trytailwind" data-goal="rule:transition-duration: 200ms;;rule:transition-timing-function: var(--ease-out)">
+  <p class="try-task">Suavize o efeito: acrescente as classes de transição, com duração de 200 ms e
+  ritmo <code>ease-out</code>.</p>
+  <pre class="html">&lt;a id="alvo" href="#" class="block rounded-xl border border-amber-200 bg-white p-6 shadow-sm hover:-translate-y-1 hover:shadow-lg"&gt;
+  &lt;h3 class="text-lg font-bold text-amber-900"&gt;Broa de milho&lt;/h3&gt;
+  &lt;p class="text-sm text-amber-800"&gt;Receita da vó, com erva-doce.&lt;/p&gt;
+  &lt;p class="mt-2 font-bold text-amber-900"&gt;R$ 12,00&lt;/p&gt;
+&lt;/a&gt;</pre>
+  <pre class="out">
+display: block
+padding: 24px
+background-color: rgb(255, 255, 255)
+border-radius: 12px
+box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px
+border-width: 1px
+border-color: oklch(0.924 0.12 95.746)
+</pre>
+  <pre class="solucao">&lt;a id="alvo" href="#" class="block rounded-xl border border-amber-200 bg-white p-6 shadow-sm transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"&gt;
+  &lt;h3 class="text-lg font-bold text-amber-900"&gt;Broa de milho&lt;/h3&gt;
+  &lt;p class="text-sm text-amber-800"&gt;Receita da vó, com erva-doce.&lt;/p&gt;
+  &lt;p class="mt-2 font-bold text-amber-900"&gt;R$ 12,00&lt;/p&gt;
+&lt;/a&gt;</pre>
+</div>
+
+<p>Enquanto você mexe, aproveite para olhar o painel antes e depois. No repouso, ele continua
+mostrando a sombra pequena e nada de deslocamento. É a mesma limitação de sempre: o painel mede o
+estado parado. O que a meta confere está no CSS gerado, onde as regras de
+<code>transition-duration</code> e <code>transition-timing-function</code> aparecem com os valores
+que você pediu. A conferência visual é na prévia: passe o mouse e veja o cartão subir devagar.</p>
+
+<p>Se você exagerar na duração, sente na hora: 500 ms transforma o gesto em lentidão. Se exagerar no
+contrário, 75 ms devolve o pulo. E vale testar uma coisa curiosa: com 200 ms e <code>ease-out</code>,
+o cartão parece mais leve do que com 200 ms e <code>ease-in</code>, mesmo com a mesma duração. O
+ritmo muda a percepção de peso mais do que o tempo.</p>
+
+<h2>8. Os detalhes que fazem o cartão parecer caro</h2>
+
+<p>Com sombra, deslocamento e transição no lugar, sobra o acabamento. O primeiro é a borda:
+<code>border-amber-200</code> em repouso e <code>hover:border-amber-300</code> no hover. Um degrau só,
+sem trocar de família. O segundo é o fundo: um <code>hover:bg-amber-50</code> suave conversa com a
+borda e com a sombra, desde que os três sejam da mesma família de cor. Misturar borda laranja, fundo
+azulado e sombra preta faz o cartão parecer montado com peças de kits diferentes.</p>
+
+<p>O terceiro detalhe é o empilhamento. Sombra é pintada por cima do próprio cartão, mas embaixo do
+vizinho que vem depois no HTML. Numa grade de quatro cartões, o de cima, ao levantar, pode ter a sombra
+cortada pelo cartão de baixo. A cura é <code>hover:z-10</code>, junto com <code>relative</code> no
+cartão: no hover, ele passa a ser desenhado depois dos outros, e a sombra aparece inteira.</p>
+
+<p>O quarto detalhe é o mais importante, e não é de CSS: <strong>o cartão precisa ser clicável</strong>.
+Se o efeito de levantar aparece num <code>div</code> que não leva a lugar nenhum, o visitante clica,
+não acontece nada e a página ganha a fama de quebrada. Aqui o cartão é um <code>&lt;a&gt;</code> de
+verdade, com <code>href</code>. Quando o cartão tem um botão dentro, a solução é o link por cima do
+cartão inteiro, com <code>absolute inset-0</code>, e o conteúdo por baixo — padrão comum, que aparece
+nas aulas de posicionamento.</p>
+
+<p>E o quinto detalhe: quem navega por teclado não tem hover. Se o efeito é a única pista de que o
+cartão é clicável, ele não existe para essa pessoa. A pista equivalente é o
+<a href="focus.html">foco</a> — <code>focus-visible:</code> aceita as mesmas classes de sombra e
+deslocamento, e o cartão responde ao teclado do mesmo jeito que responde ao mouse.</p>
+
+<div class="cenario">
+<h3>Cenário 1: o cartão que levanta e deixa um vazio</h3>
+<p>A Ana não conhecia o <code>translate</code> e escreveu <code>hover:mt-2</code> para subir o cartão.
+O cartão subiu, mas levou a grade junto: os vizinhos desceram para abrir espaço, o texto de baixo
+pulou e a página inteira tremeu a cada passada de mouse. <code>margin</code> ocupa espaço;
+<code>translate</code> não. A diferença entre os dois é a diferença entre um efeito e um defeito — e,
+num grid ou flex, a regra vale dobrado.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a sombra que some atrás do vizinho</h3>
+<p>Com quatro cartões na grade, o de cima levantava e a sombra era cortada em linha reta pelo cartão de
+baixo. Parecia erro de recorte. O motivo: o vizinho seguinte é pintado depois e cobre a sombra. A cura
+foi <code>relative hover:z-10</code>. O <code>z-index</code> só funciona em elemento posicionado, e é
+por isso que o <code>relative</code> anda junto — sem ele, a classe de z não faz nada e você jura que
+o Tailwind está quebrado.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o cartão mole</h3>
+<p>Empolgada com a transição, ela trocou <code>transition</code> por <code>transition-all</code> e
+<code>duration-700</code>. O cartão passou a levantar em quase um segundo, e a cor do preço, que mudava
+no hover, demorou junto. A sensação foi de site pesado. Transição de hover é resposta, não espetáculo:
+200 ms, no máximo 300, e só nas propriedades que devem mudar. Se algo precisa de 700 ms, provavelmente
+não é hover — é uma animação de entrada.</p>
+</div>
+
+<h2>9. Quem pediu menos movimento</h2>
+
+<p>O sistema operacional tem uma opção de reduzir movimento, e o navegador a entrega ao CSS pela media
+query <code>prefers-reduced-motion</code>. Para quem ligou essa opção, uma sombra que cresce em 200 ms
+não é problema; um cartão que desliza 4 px também não. Mas o hábito é bom, custa duas palavras e
+protege os casos em que o efeito é maior — e um dia ele será, porque você vai querer experimentar.</p>
+
+<p>A variante <code>motion-reduce:</code> vale quando a pessoa pediu menos movimento. Ela aceita
+qualquer classe, e a que faz sentido aqui é <code>transition-none</code>: o cartão continua levantando
+e ganhando sombra, mas na hora, sem deslize. Quem não quer movimento não vê deslize nenhum; quem não
+se importa vê o efeito completo.</p>
+
+<div class="trytailwind" data-goal="rule:@media (prefers-reduced-motion: reduce);;rule:transition-property: none">
+  <p class="try-task">Para quem configurou o sistema pedindo menos movimento, o cartão não deve
+  deslizar. Acrescente a variante que desliga a transição nesse caso, mantendo o efeito no hover.</p>
+  <pre class="html">&lt;a id="alvo" href="#" class="block rounded-xl border border-amber-200 bg-white p-6 shadow-sm transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"&gt;
+  &lt;h3 class="text-lg font-bold text-amber-900"&gt;Café coado&lt;/h3&gt;
+  &lt;p class="text-sm text-amber-800"&gt;Grãos da serra, torra média, 500 ml.&lt;/p&gt;
+  &lt;p class="mt-2 font-bold text-amber-900"&gt;R$ 9,00&lt;/p&gt;
+&lt;/a&gt;</pre>
+  <pre class="out">
+display: block
+padding: 24px
+background-color: rgb(255, 255, 255)
+border-radius: 12px
+box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px
+border-width: 1px
+border-color: oklch(0.924 0.12 95.746)
+transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events
+transition-timing-function: cubic-bezier(0, 0, 0.2, 1)
+transition-duration: 0.2s
+</pre>
+  <pre class="solucao">&lt;a id="alvo" href="#" class="block rounded-xl border border-amber-200 bg-white p-6 shadow-sm transition duration-200 ease-out motion-reduce:transition-none hover:-translate-y-1 hover:shadow-lg"&gt;
+  &lt;h3 class="text-lg font-bold text-amber-900"&gt;Café coado&lt;/h3&gt;
+  &lt;p class="text-sm text-amber-800"&gt;Grãos da serra, torra média, 500 ml.&lt;/p&gt;
+  &lt;p class="mt-2 font-bold text-amber-900"&gt;R$ 9,00&lt;/p&gt;
+&lt;/a&gt;</pre>
+</div>
+
+<p>Repare que a solução não envolve o <code>hover:</code> em nada. A variante
+<code>motion-reduce</code> é independente do estado; ela só decide se a transição existe para aquela
+pessoa. É por isso que ela entra na lista de classes junto com <code>transition</code>, e não dentro de
+um <code>hover:</code>.</p>
+
+<p>O CSS gerado é o de sempre, com a casca da media query e a propriedade que zera a lista:
+<code>transition-property: none</code>. Nada de animação, nada de deslize. O efeito de sombra e
+deslocamento continua, aplicado instantaneamente, o que é aceitável: quem pediu menos movimento
+costuma se incomodar com o deslocamento no tempo, não com a mudança de estado.</p>
+
+<p>Se você quiser ser mais radical, existe a estratégia oposta: deixar o cartão parado e ligar o
+efeito apenas para quem aceita movimento, com <code>motion-safe:</code> antes de cada classe de hover.
+Dá mais trabalho e resulta num site mais quieto. Para a padaria da Ana, a escolha foi a primeira:
+efeito para todos, sem deslize para quem pediu.</p>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. Por que <code>hover:p-8</code> é uma má ideia no
+cartão?</p>
+<label><input type="radio" name="q1"> porque o Tailwind não aceita <code>p</code> com <code>hover:</code></label>
+<label><input type="radio" name="q1"> porque a cor do texto fica ilegível</label>
+<label><input type="radio" name="q1"> porque espaço muda o layout e faz a tela tremer</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">2. O que <code>transition</code> faz?</p>
+<label><input type="radio" name="q2"> aumenta a sombra do cartão em dois degraus</label>
+<label><input type="radio" name="q2"> distribui a mudança ao longo de um tempo, em vez de num quadro</label>
+<label><input type="radio" name="q2"> impede que o efeito apareça no celular</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O cartão tem <code>shadow-lg</code> e
+<code>hover:z-10</code>, mas o z não funciona. O que falta?</p>
+<label><input type="radio" name="q3"> uma posição, como <code>relative</code></label>
+<label><input type="radio" name="q3"> uma duração maior</label>
+<label><input type="radio" name="q3"> um segundo cartão na mesma linha</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o cartão da broa</h2>
+<p>O cartão da broa precisa subir 4 px quando o mouse passa. Complete a classe que faz o deslocamento
+para cima:</p>
+<div class="ex-code">&lt;a href="#" class="block rounded-xl bg-white p-6 shadow-sm transition duration-200 <input aria-label="resposta 1" data-answer="hover:-translate-y-1" placeholder="...">"&gt;Broa de milho&lt;/a&gt;</div>
+<p class="ex-dica">Dica: são três pedaços — a variante, o sinal de menos e o eixo com o degrau. O
+degrau 1 vale 4 px; se você escrever <code>hover:translate-y-1</code>, o cartão desce.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O efeito de levantar é a soma de três pinturas: sombra maior, deslocamento para cima e borda mais
+quente. Nenhuma delas mexe no espaço reservado, então os vizinhos ficam parados. A quarta peça é o
+tempo: <code>transition</code> liga a interpolação nas propriedades comuns, <code>duration-200</code>
+escolhe quanto dura e <code>ease-out</code> escolhe como chega. Sem essa camada, o efeito é um pulo;
+com ela, é um gesto.</p>
+
+<p>O CSS gerado confirma o que está acontecendo: o deslocamento vira <code>--tw-translate-y</code> mais
+<code>translate</code>, a sombra vira variável mais <code>box-shadow</code>, e a transição vira
+<code>transition-duration</code> e <code>transition-timing-function</code>. Tudo dentro de
+<code>@media (hover: hover)</code> quando depende do mouse — o celular não recebe. E, se a sombra for
+cortada pelo vizinho, <code>relative hover:z-10</code> resolve.</p>
+
+<p>O conselho que vale levar: efeito de cartão confirma uma promessa. Se o cartão é um link, ele
+levanta; se não é, ele fica quieto e o cursor não mente. E <code>motion-reduce:transition-none</code>
+é o par gentil de qualquer transição.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Três sinais juntos: sombra, deslocamento e borda; fundo é opcional.</li>
+<li><code>shadow-sm</code> em repouso e <code>hover:shadow-lg</code> no hover: dois degraus bastam.</li>
+<li><code>hover:-translate-y-1</code> sobe 4 px; <code>translate</code> não muda o layout.</li>
+<li>Animar <code>padding</code>, <code>margin</code> ou tamanho faz a página tremer.</li>
+<li><code>transition</code> + <code>duration-200</code> + <code>ease-out</code> é a receita do cartão.</li>
+<li><code>transition-all</code> anima demais e deixa o cartão mole.</li>
+<li>O efeito pertence ao elemento clicável: link de verdade, <code>block</code>, cobrindo o cartão.</li>
+<li><code>relative hover:z-10</code> evita a sombra cortada pelo vizinho.</li>
+<li>Quem usa teclado precisa do par <code>focus-visible:</code> com as mesmas classes.</li>
+<li><code>motion-reduce:transition-none</code> desliga o deslize sem desligar o efeito.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

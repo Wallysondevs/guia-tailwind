@@ -59,11 +59,12 @@ O que cada peça faz:
 - `pre.out` — **opcional**: o painel com o CSS computado, para o leitor ver o resultado sem clicar.
   Só vale o que o motor devolve: rode `node tools/verificar-saidas.js --fix pagina.html` e ele
   grava a saída certa.
-- `data-largura="768"` — largura da prévia (240 a 1280; o padrão é 640). Use quando a aula for de
-  breakpoint.
+- `data-largura="768"` — **o viewport da prévia**, em pixels (240 a 1280; o padrão é 640). É ele que
+  decide qual breakpoint vale: com 640 px o `md:` (768 px) ainda não pega, com 768 pega. Use sempre
+  que a aula depender de breakpoint.
 - `data-tema="escuro"` — prévia no tema escuro.
-- `data-saida="css"` no `pre.html` — em vez do CSS computado, o `pre.out` mostra as **regras
-  geradas** para as classes usadas (bom para ensinar `@media`, `hover:` e afins).
+- `data-saida="css"` no `pre.html` — em vez do CSS computado, o painel mostra as **regras geradas**
+  para as classes usadas (bom para ensinar `@media`, `hover:` e afins).
 
 O painel mostra, para o elemento com `id="alvo"` (ou o primeiro filho da prévia), só as
 propriedades que as classes dele **mudaram** — `padding: 16px`, `background-color: oklch(...)`.

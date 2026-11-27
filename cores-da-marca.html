@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cores da Sua Marca | Guia Tailwind</title>
+<meta name="description" content="A cor da sua marca não está na paleta do Tailwind? Veja valor entre colchetes, variável CSS, tons derivados e @theme para usar o terracota da padaria em todo o site.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Cores da Sua <span class="hl">Marca</span></h1>
+<p class="intro">A Ana mandou imprimir o cartão de visita da padaria e escolheu um terracota bonito,
+da cor da crosta do pão. Quando abriu o site, o botão era laranja do Tailwind e a faixa de promoção
+era âmbar: nada combinava com o cartão que ela tinha na mão. A pergunta desta aula é a que todo
+projeto enfrenta cedo ou tarde — o que fazer quando a cor da marca não está na paleta? A Ana vai
+descobrir que existem três respostas, da mais rápida à mais definitiva, e que a diferença entre elas
+é quantas vezes você vai precisar repetir um número esquisito.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Como usar um valor exato com colchetes: <code>bg-[#b4532a]</code>.</li>
+  <li>Quando vale a pena usar o parente mais próximo da paleta em vez do valor exato.</li>
+  <li>Como guardar a cor numa variável CSS e usá-la na classe.</li>
+  <li>O que o <code>@theme</code> faz e por que ele é o caminho definitivo.</li>
+  <li>Como derivar tons claros e escuros a partir de uma cor só.</li>
+  <li>Por que a cor da marca como fundo muda a cor do texto que fica em cima.</li>
+  <li>Como manter a marca consistente sem repetir hexadecimal em quinze lugares.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o cartão terracota e o site laranja</h2>
+
+<p>O terracota do cartão da Ana tem um código: <code>#b4532a</code>. Ela encontrou esse número no
+arquivo que o designer mandou, junto com o logotipo. No site, o botão principal estava com
+<code>bg-orange-700</code>, que é o laranja mais próximo da paleta. Lado a lado, os dois parecem
+quase iguais. No mesmo cartão de visita, um ao lado do outro, a diferença salta: o laranja do
+Tailwind é mais vivo e puxa para o vermelho; o terracota é mais terroso e mais escuro.</p>
+
+<p>O problema não é estético, é de confiança. A cliente da padaria vê o cartão, entra no site e
+sente que é outra empresa. Marca é repetição: a mesma cor no cartão, na fachada, no site, no
+comprovante. Se cada peça usa um laranja diferente, o conjunto parece descuidado mesmo quando cada
+peça isolada está bonita.</p>
+
+<p>Há ainda uma questão prática. Se o terracota aparecer em quinze lugares do HTML como
+<code>#b4532a</code>, mudar de ideia depois é uma caçada. E sempre se muda de ideia: o tom impresso
+não fica igual na tela, o cliente acha que ficou escuro, a nova embalagem vem com outra cor. A aula
+inteira gira em torno de uma pergunta simples: <strong>quantas vezes você quer escrever esse
+número?</strong></p>
+
+<h2>2. A cor não está na paleta. E agora?</h2>
+
+<p>Existem três caminhos, e eles não são excludentes: você começa pelo mais rápido e migra para o
+mais definitivo quando o projeto cresce.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Caminho</th><th>Como se escreve</th><th>Quando vale a pena</th></tr>
+<tr><td>valor entre colchetes</td><td><code>bg-[#b4532a]</code></td><td>uma ou duas vezes, teste rápido, cor de um selo específico</td></tr>
+<tr><td>parente na paleta</td><td><code>bg-orange-700</code></td><td>quando a diferença é imperceptível e você quer tons prontos</td></tr>
+<tr><td>tema da marca</td><td><code>bg-marca-500</code> com <code>@theme</code></td><td>projeto de verdade, com a cor repetida em muitos lugares</td></tr>
+</table>
+</div>
+
+<p>O erro comum é começar pelo terceiro. Quem está aprendendo vê um tutorial de <code>@theme</code>
+e passa a configurar tema antes de saber pintar um botão. A ordem natural é a inversa: use o colchete
+para ver a cor na tela, compare com o parente da paleta para decidir se vale a pena sair dela, e só
+então dê um nome à cor. Cada passo resolve o problema do passo anterior — e o primeiro resolve
+agora.</p>
+
+<p>Uma ressalva sobre de onde vem o hexadecimal. Se você pegar a cor de uma captura de tela, de uma
+foto do cartão ou de um story do Instagram, o número estará errado: a imagem foi comprimida, o
+celular aplicou ajuste automático e o fundo contaminou as bordas. O valor confiável vem do arquivo
+original do designer — SVG, PDF, AI — ou de uma amostra oficial da marca. Pegar cor de captura de
+tela é a origem mais comum de "o site ficou com um tom sujo", e não tem nada a ver com Tailwind.</p>
+
+<h2>3. O valor cru entre colchetes</h2>
+
+<p>Quando o valor não está na escala do Tailwind, você o coloca entre colchetes e ele passa direto
+para o CSS. Essa é a válvula de escape do Tailwind, e ela funciona em qualquer prefixo: fundo, texto,
+borda, largura, altura, o que você precisar. No caso da cor:</p>
+
+<div class="trytailwind" data-goal="rule:background-color: #b4532a;;texto:Encomendar">
+  <p class="try-task">O botão está com o laranja mais próximo da paleta. Troque por
+  <code>bg-[#b4532a]</code>, o terracota exato do cartão da padaria.</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-lg bg-orange-700 px-4 py-2 text-white"&gt;Encomendar&lt;/button&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.553 0.195 38.402)
+color: rgb(255, 255, 255)
+border-radius: 8px
+padding-inline: 16px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-[#b4532a] px-4 py-2 text-white"&gt;Encomendar&lt;/button&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>background-color: rgb(180, 83, 42)</code> — que é o mesmo
+<code>#b4532a</code> escrito em outro formato, porque o navegador converte o hexadecimal em números
+de 0 a 255. Se você comparar com o valor de antes, vai ver que o laranja da paleta era mais
+vermelho. A diferença de três ou quatro pontos em cada número é o que separa "quase" de "é a
+nossa cor".</p>
+
+<p>Duas observações sobre os colchetes. A primeira é que eles não criam um degrau novo na escala:
+<code>bg-[#b4532a]</code> é uma classe isolada, sem 50, 100, 900. A segunda é que o Tailwind gera um
+nome escapado para ela no CSS, cheio de barras invertidas — você nunca escreve esse nome, só não se
+assuste ao encontrá-lo no arquivo gerado:</p>
+
+<pre class="term">.bg-\[\#b4532a\] {
+  background-color: #b4532a;
+}</pre>
+
+<p>Esse é o custo escondido do colchete: cada valor é uma classe própria, e o Tailwind precisa gerar
+uma regra para cada uma. Com três ou quatro valores no projeto inteiro, não há problema nenhum. Com
+trinta variações de terracota espalhadas pelo HTML, você tem um CSS maior, um HTML ilegível e
+nenhuma garantia de que são o mesmo tom. É aí que os outros dois caminhos entram.</p>
+
+<h2>4. O parente mais próximo da paleta</h2>
+
+<p>Antes de criar um tom próprio, vale a pergunta honesta: a diferença aparece? A família
+<code>orange</code> tem onze tons, e o <code>orange-700</code> é o mais parecido com o terracota da
+Ana. Ele não é igual — tem mais saturação e um matiz levemente mais vermelho — mas em um selo
+pequeno, ninguém distingue. A vantagem é enorme: você ganha a escada inteira pronta, com tons para
+fundo, texto, borda, botão no mouse e tema escuro.</p>
+
+<p>Vale fazer o teste com sinceridade: coloque os dois lado a lado na tela e afaste-se um metro. Se
+ainda incomoda, é porque a marca importa. Se não, use o parente e economize decisões. Muitas empresas
+pequenas vivem felizes com um tom da paleta — e o site fica coerente, que é o que o leitor percebe.</p>
+
+<p>Quando a diferença importa, existe um meio-termo que quase ninguém usa e funciona muito bem:
+manter a estrutura da paleta e acertar só o tom principal. A página continua com
+<code>stone</code> no fundo e no texto, e a marca aparece em um ponto — o botão. Um terracota num mar
+de pedra chama mais atenção do que cinco tons de laranja brigando.</p>
+
+<h2>5. Um nome para cada papel</h2>
+
+<p>Agora o passo que separa site amador de site organizado: dar nomes. Em vez de repetir
+<code>#b4532a</code>, você declara uma variável CSS com um nome que diz para que ela serve, e usa
+esse nome na classe. A variável pode ficar num <code>style</code> do elemento, para testes, ou num
+arquivo CSS, que é o normal:</p>
+
+<pre class="file" data-file="estilo.css">:root {
+  --marca: #b4532a;          /* a cor principal */
+  --marca-forte: #8f3f1f;    /* botão no mouse */
+  --marca-clara: #f6e7e0;    /* fundo de selo */
+}</pre>
+
+<p>Antes de escrever código, vale listar os papéis que a marca vai ocupar na página. Quatro ou cinco
+bastam, e cada um ganha um nome — porque é o nome que você vai repetir no HTML, não o número:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Papel na página</th><th>Nome da variável</th><th>Valor de exemplo</th></tr>
+<tr><td>fundo geral</td><td><code>--fundo</code></td><td><code>#fdfaf8</code></td></tr>
+<tr><td>cartão e selo claro</td><td><code>--marca-clara</code></td><td><code>#f6e7e0</code></td></tr>
+<tr><td>botão principal</td><td><code>--marca</code></td><td><code>#b4532a</code></td></tr>
+<tr><td>botão no mouse</td><td><code>--marca-forte</code></td><td><code>#8f3f1f</code></td></tr>
+<tr><td>texto principal</td><td><code>--texto</code></td><td><code>#3f2a22</code></td></tr>
+</table>
+</div>
+
+<p>Com os nomes combinados, a variável entra na classe entre colchetes, como qualquer valor cru:</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--marca);;texto:Comprar pão">
+  <p class="try-task">O botão está branco, mas a cor da marca já está guardada na variável
+  <code>--marca</code>. Pinte o botão com <code>bg-[var(--marca)]</code>.</p>
+  <pre class="html">&lt;div style="--marca: #b4532a"&gt;
+  &lt;button id="alvo" class="rounded-lg bg-white px-4 py-2"&gt;Comprar pão&lt;/button&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: rgb(255, 255, 255)
+border-radius: 8px
+padding-inline: 16px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;div style="--marca: #b4532a"&gt;
+  &lt;button id="alvo" class="rounded-lg bg-[var(--marca)] px-4 py-2 text-white"&gt;Comprar pão&lt;/button&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Repare no que mudou na prática: o valor <code>#b4532a</code> agora existe em um lugar só. Se o
+designer mandar um terracota novo amanhã, você troca a variável e todos os botões, selos e bordas
+que usam <code>var(--marca)</code> mudam juntos. O HTML continua dizendo "isto é a cor da marca" em
+vez de "isto é o número 180, 83, 42" — e essa diferença é o começo do pensamento de sistema.</p>
+
+<p>Só tome cuidado com o nome. <code>--marca</code> é melhor que <code>--laranja</code>, porque a
+marca pode mudar de cor sem que o nome fique mentiroso, e é melhor que <code>--cor1</code>, porque
+daqui a três meses ninguém lembra o que era a cor 1. Nomeie pelo papel: <code>--marca</code>,
+<code>--marca-forte</code>, <code>--marca-clara</code>, <code>--texto-suave</code>.</p>
+
+<dl class="anatomy">
+<dt>valor arbitrário</dt>
+<dd>O que vai entre colchetes: <code>bg-[#b4532a]</code>. Passa direto para o CSS, sem escala e sem
+tons vizinhos.</dd>
+<dt>variável CSS</dt>
+<dd>Um nome que guarda um valor, declarado com dois hífens: <code>--marca: #b4532a</code>. Muda em um
+lugar e vale em todos.</dd>
+<dt>token</dt>
+<dd>Um nome curto que representa uma decisão de design, como <code>--marca-forte</code>. É o que
+permite trocar a cor sem caçar hexadecimal.</dd>
+<dt>@theme</dt>
+<dd>O bloco do CSS do Tailwind v4 onde você declara cores próprias para que virem classes
+(<code>bg-marca-500</code>).</dd>
+<dt>mistura</dt>
+<dd>Combinar uma cor com transparência pela barra (<code>/10</code>), gerando um tom claro sem
+inventar outro hexadecimal.</dd>
+</dl>
+
+<h2>6. O jeito definitivo: @theme</h2>
+
+<p>Variável CSS resolve o "um lugar só", mas o HTML continua com colchetes. O Tailwind v4 tem um
+lugar próprio para declarar cores de projeto: o bloco <code>@theme</code>, que fica no arquivo CSS de
+entrada — aquele que você configurou na instalação. Lá dentro, cada cor vira um token com nome, e o
+Tailwind passa a gerar as classes correspondentes:</p>
+
+<pre class="file" data-file="app.css">@import "tailwindcss";
+
+@theme {
+  --color-marca-500: #b4532a;
+  --color-marca-600: #8f3f1f;
+  --color-marca-100: #f6e7e0;
+}</pre>
+
+<p>Com esse bloco no lugar, <code>bg-marca-500</code>, <code>hover:bg-marca-600</code> e
+<code>text-marca-100</code> passam a existir como qualquer outra classe do Tailwind, com variantes e
+tudo. O CSS gerado é idêntico em espírito ao das cores da paleta:</p>
+
+<pre class="term">.bg-marca-500 {
+  background-color: var(--color-marca-500);
+}
+
+.hover\:bg-marca-600:hover {
+  background-color: var(--color-marca-600);
+}</pre>
+
+<p>Duas coisas importantes. Primeiro: o <code>@theme</code> não inventa os tons por você. Se você
+declara só o <code>500</code>, os outros degraus não existem — <code>bg-marca-300</code> não gera
+nada. Ou você declara cada tom que pretende usar, ou usa a barra de opacidade para derivar tons
+claros de um tom só (o assunto da próxima seção). Segundo: isso é configuração de projeto, feita uma
+vez no arquivo CSS, e mora no nível 3 do guia. Se você está começando, guarde o nome
+<code>@theme</code> e siga com colchetes e variáveis até precisar. As aulas
+<a href="arroba-theme.html">O @theme</a> e <a href="cores-proprias.html">Cores Próprias</a> mostram
+o passo a passo.</p>
+
+<h2>7. Tons a partir de um valor só</h2>
+
+<p>Marca boa precisa de mais de uma cor: um tom para o fundo do selo, um para o texto em cima, um
+para o botão no mouse. Você pode declarar três hexadecimais, ou pode derivar dois deles do principal
+com a barra de opacidade. <code>bg-[#b4532a]/10</code> é o terracota com 10% de força sobre o fundo
+branco — o suficiente para um selo clarinho, com a garantia de ser a mesma cor.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: color-mix(in oklab, #b4532a 10%, transparent);;rule:color: #7a3418">
+  <p class="try-task">O selo "Feito hoje" está cinza. Pinte o fundo com a marca a 10% —
+  <code>bg-[#b4532a]/10</code> — e a letra com o terracota escuro <code>text-[#7a3418]</code>.</p>
+  <pre class="html">&lt;span id="alvo" class="rounded-full bg-stone-100 px-3 py-1 text-stone-700"&gt;Feito hoje&lt;/span&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.97 0.001 106.424)
+color: oklch(0.374 0.01 67.558)
+border-radius: 3.35544e+07px
+padding-inline: 12px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;span id="alvo" class="rounded-full bg-[#b4532a]/10 px-3 py-1 text-[#7a3418]"&gt;Feito hoje&lt;/span&gt;</pre>
+</div>
+
+<p>O CSS gerado mostra a mistura em vez de um hexadecimal novo: <code>color-mix(in oklab, #b4532a
+10%, transparent)</code>. Isso é ótimo para consistência, porque o tom claro é sempre derivado do
+principal — se a marca mudar, o selo acompanha. E é ótimo também para o tema escuro, que você vai ver
+adiante: 10% de terracota sobre fundo escuro dá um tom escuro avermelhado, e não aquele bege claro
+que brigaria com a página.</p>
+
+<p>A mesma barra aceita valores intermediários, como <code>/15</code> ou <code>/20</code>, e aceita
+também <code>/5</code> para um véu quase invisível. O que não dá para fazer é derivar um tom
+<em>mais escuro</em> com barra: transparência clareia sobre fundo branco. Para o botão no mouse, você
+precisa de um valor próprio, mais escuro, como <code>hover:bg-[#8f3f1f]</code>.</p>
+
+<h2>8. Contraste: a marca como fundo</h2>
+
+<p>Cor de marca é escolhida em um cartão impresso, onde o texto tem outros tamanhos e a luz é outra.
+Na tela, ela vira fundo de botão, e aí a pergunta é sempre a mesma: o texto em cima dela é legível?
+O terracota da Ana é escuro o suficiente para o branco — passa no mínimo de 4,5 para 1, com pouca
+folga. Texto preto em cima dele, curiosamente, ficaria pior: preto sobre terracota tem menos
+contraste que branco sobre terracota, porque o tom está no meio da escada.</p>
+
+<p>Duas receitas que evitam dor de cabeça. Se a marca é escura, use <code>text-white</code> no botão
+e reserve a marca clara (a 10% ou 15%) para fundos grandes. Se a marca é clara — um amarelo, um
+verde-limão —, o botão precisa de texto escuro e o selo precisa de uma borda ou de um tom mais forte
+para não desaparecer no branco. A regra é a mesma da aula de cores: fundo claro pede texto escuro,
+fundo escuro pede texto claro; a diferença é que agora você tem um tom só e precisa decidir de que
+lado ele está.</p>
+
+<p>E vale resistir à tentação de usar a marca em tudo. Marca repetida em cada título, cada borda e
+cada ícone deixa de ser marca e vira papel de parede. Um terracota no botão principal, um toque no
+logotipo e o resto em neutro é mais parecido com as marcas que a Ana admira do que um site inteiro
+pintado.</p>
+
+<p>Faça a conferência no lugar mais hostil, não no seu monitor de mesa: abra a página no celular, com
+o brilho pela metade, na luz do dia. É ali que o botão terracota com texto branco se revela ou
+fracassa, e é ali que a maioria dos clientes da padaria vai ver o site. Se estiver legível nesse
+cenário, está legível em todos — e você resolveu a parte da cor que não depende de gosto.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: três terracotas diferentes na mesma página</h3>
+<p>Ela começou com <code>bg-[#b4532a]</code> no botão, depois colou um componente de outro projeto com
+<code>bg-[#a94f28]</code> e, mais tarde, arredondou um terceiro para <code>bg-[#b05029]</code>. Cada
+um foi digitado "de cabeça" em um dia diferente. O resultado é uma página com três cores que ninguém
+distingue individualmente e que, juntas, parecem sujeira. A cura é a variável: um valor, um nome, e
+ninguém digita hexadecimal no HTML.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a cor mudou depois do lançamento</h3>
+<p>O cliente voltou com uma nova identidade: o terracota virou um vinho profundo. Com a marca presa
+em quinze <code>bg-[#b4532a]</code> espalhados pelo HTML, a troca é uma busca e substituição que
+sempre deixa um esquecido para trás. Com <code>@theme</code> e <code>bg-marca-500</code>, é uma linha
+no CSS. Esse é o tipo de mudança que decide se um projeto envelhece bem ou vira arqueologia.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a cor da tela não é a cor do papel</h3>
+<p>A Ana comparou o site com o cartão impresso e achou o site mais claro. Não era erro de código: a
+impressão usa outro modelo de cor e o papel absorve tinta, então o mesmo número parece diferente nas
+duas mídias. A decisão prática é aprovar a cor na tela, com o designer, e usar esse valor no site —
+o cartão é que deve se aproximar, não o contrário. Se o marketing exigir igualdade absoluta, é
+conversa de perfil de cor, não de classe do Tailwind.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Como se escreve o terracota <code>#b4532a</code>
+como fundo, sem criar tema?</p>
+<label><input type="radio" name="q1"> <code>bg-(#b4532a)</code></label>
+<label><input type="radio" name="q1"> <code>bg-[#b4532a]</code></label>
+<label><input type="radio" name="q1"> <code>bg-#b4532a</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que o <code>@theme</code> faz com
+<code>--color-marca-500</code>?</p>
+<label><input type="radio" name="q2"> cria automaticamente os onze tons da família</label>
+<label><input type="radio" name="q2"> substitui a paleta inteira do Tailwind</label>
+<label><input type="radio" name="q2"> gera a classe <code>bg-marca-500</code>, e só os tons que você declarar</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que guardar a cor numa variável
+<code>--marca</code>?</p>
+<label><input type="radio" name="q3"> para trocar a cor em um lugar só e não repetir hexadecimal no HTML</label>
+<label><input type="radio" name="q3"> porque o Tailwind não aceita hexadecimal direto</label>
+<label><input type="radio" name="q3"> porque variável deixa o site mais rápido no celular</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o botão da padaria</h2>
+<p>Pinte o botão com o terracota exato da marca, <code>#b4532a</code>, mantendo o texto branco.
+Depois responda: qual é a classe do fundo?</p>
+<div class="ex-code">&lt;button class="rounded-lg px-4 py-2 text-white <input aria-label="resposta 1" data-answer="bg-[#b4532a]" placeholder="...">"&gt;Encomendar&lt;/button&gt;</div>
+<p class="ex-dica">Dica: o valor vai entre colchetes, com o <code>#</code> junto. Se você escrever
+<code>bg-orange-700</code>, o botão fica laranja vivo — funciona na tela, mas não é a cor do cartão
+impresso.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Quando a cor da marca não está na paleta, o caminho mais curto é o colchete:
+<code>bg-[#b4532a]</code>. Ele passa o valor direto para o CSS, não cria tons vizinhos e serve para
+testar e para casos isolados. O segundo caminho é aceitar o parente mais próximo da paleta —
+<code>orange-700</code> no caso do terracota — e ganhar a escada inteira de graça. O terceiro é dar
+nome à cor: variável CSS para o projeto pequeno, <code>@theme</code> para o projeto que vai crescer.</p>
+
+<p>O que importa não é a técnica, é a consistência. Um valor, um nome, um lugar para mudar. A cor de
+marca aparece no botão principal, num detalhe do logotipo e talvez num selo; o resto do site continua
+neutro, e é esse contraste que faz a marca parecer escolhida em vez de espalhada. E, sempre que a
+marca virar fundo, confira o texto que fica em cima: contraste é a única parte da cor que o leitor
+não pode ignorar.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Valor fora da paleta vai entre colchetes: <code>bg-[#b4532a]</code>, <code>text-[#7a3418]</code>.</li>
+<li>Colchete não cria tons: cada valor é uma classe isolada.</li>
+<li>Antes de sair da paleta, compare com o parente mais próximo (<code>orange-700</code>).</li>
+<li>Variável CSS: <code>--marca: #b4532a</code>; na classe, <code>bg-[var(--marca)]</code>.</li>
+<li>Nomeie pelo papel, não pela cor: <code>--marca</code>, <code>--marca-forte</code>.</li>
+<li><code>@theme</code> no CSS de entrada transforma <code>--color-marca-500</code> em
+<code>bg-marca-500</code>.</li>
+<li>O <code>@theme</code> só gera os tons declarados; <code>bg-marca-300</code> não existe por
+mágica.</li>
+<li><code>bg-[#b4532a]/10</code> deriva um tom claro da própria marca.</li>
+<li>Transparência clareia; para escurecer, é preciso outro valor.</li>
+<li>Marca escura pede texto branco; marca clara pede texto escuro — confira o contraste.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

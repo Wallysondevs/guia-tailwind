@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Botões | Guia Tailwind</title>
+<meta name="description" content="Botões no Tailwind: o casco com px, py, rounded e cor, os estados de hover e foco, as variantes primário e secundário, os tamanhos e a largura no celular.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Botões: a peça que <span class="hl">pede</span> o clique</h1>
+<p class="intro">A Ana escreveu “Encomendar” no site com a cor da marca e achou que estava pronto.
+No teste com a vizinha, ninguém clicou: o texto colorido parecia um título. O botão é a peça que
+convida ao clique, e ela precisa de quatro decisões — tamanho, forma, cor e o que acontece quando o
+dedo chega — mais uma quinta, que é não parecer clicável quando o produto acabou. Nesta aula a Ana
+monta o botão da padaria do zero, com as classes do Tailwind, e aprende a fazer as variantes que
+todo site precisa.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>As cinco classes que transformam texto em botão.</li>
+  <li>Por que <code>px</code> e <code>py</code> aparecem separados, e não um <code>p-</code>.</li>
+  <li>Os estados de um botão: hover, active, foco e desligado.</li>
+  <li>As quatro variantes: primário, secundário, fantasma e perigo.</li>
+  <li>Os três tamanhos e a área mínima de toque no celular.</li>
+  <li>Botão largo no celular e do tamanho do texto no computador.</li>
+  <li>Quando usar <code>button</code> e quando usar <code>a</code>.</li>
+  <li>Ícone ao lado do rótulo sem desalinhar o texto.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o texto que ninguém clicou</h2>
+
+<p>O botão da Ana era um <code>div</code> com fundo âmbar e a palavra “Encomendar” dentro. No
+computador dela, funcionava: ela sabia onde clicar, porque tinha escrito aquilo. A vizinha, que abriu
+o site pela primeira vez, leu “Encomendar” como parte do texto, passou o olho e foi embora. O
+problema não era a cor: era a falta de tudo o mais que faz uma peça parecer um botão.</p>
+
+<p>Botão é uma convenção visual. A pessoa reconhece pelo conjunto: um retângulo de cantos
+arredondados, com respiro em volta do texto, uma cor que se destaca do fundo, texto curto no meio e
+uma reação quando o dedo ou o mouse chega. Tire uma dessas peças e o reconhecimento cai. Tire duas e
+some. É por isso que “só um pouco de cor” não resolve — e é por isso que a aula tem essa ordem:
+primeiro o casco, depois o comportamento, depois as variações.</p>
+
+<p>Tem também a parte que não se vê: o elemento certo no HTML. Um botão feito com
+<code>&lt;div&gt;</code> não recebe foco pelo teclado, não é anunciado como botão pelo leitor de tela
+e não responde à tecla Enter. A tag <code>&lt;button&gt;</code> faz tudo isso de graça. Antes de
+qualquer classe, portanto, a decisão é de HTML; as classes vêm depois, para dar forma.</p>
+
+<h2>2. As quatro decisões de um botão</h2>
+
+<p>Quando você olha um botão bem-feito, vê um retângulo. O que está por trás são quatro perguntas,
+sempre as mesmas: quanto de respiro em volta do texto, qual o raio do canto, qual a cor de fundo e do
+texto, e qual o peso da fonte. Cada uma tem um punhado de classes do Tailwind que você já conhece de
+outras aulas; o trabalho desta é juntá-las numa receita.</p>
+
+<dl class="anatomy">
+<dt>casco</dt>
+<dd>O retângulo visível: fundo, canto, respiro e cor da letra. É o que faz a peça parecer um
+botão.</dd>
+<dt>rótulo</dt>
+<dd>O texto de dentro. Verbo curto, primeira pessoa do ponto de vista de quem lê: “Encomendar”,
+“Ver a vitrine”.</dd>
+<dt>alvo de toque</dt>
+<dd>A área que o dedo precisa acertar. Abaixo de 40 px de altura, o botão começa a errar no
+celular.</dd>
+<dt>estado</dt>
+<dd>A mesma peça em outra situação: com o mouse em cima, apertada, com foco do teclado ou desligada.
+Cada estado é uma classe com prefixo.</dd>
+<dt>variante</dt>
+<dd>Uma versão do botão com papel diferente: a ação principal, a secundária, a discreta e a
+destrutiva.</dd>
+</dl>
+
+<p>Repare que “tamanho” e “variante” não são classes do Tailwind: são combinações que você repete. O
+Tailwind não tem um componente chamado “botão primário” — tem as peças com que você monta um. Isso
+assusta no começo e liberta depois: no dia em que a marca mudar de âmbar para terracota, você troca
+duas classes e todos os botões acompanham.</p>
+
+<h2>3. O casco: cinco classes e a peça nasce</h2>
+
+<p>Comece pelo respiro. Um botão precisa de mais espaço na horizontal do que na vertical, porque o
+texto é mais largo do que alto e porque o dedo precisa de largura para acertar. É por isso que a
+receita usa <code>px-4</code> e <code>py-2</code> em vez de um <code>p-4</code> único: 16 px nas
+laterais e 8 px em cima e embaixo. O canto arredondado de 8 px (<code>rounded-lg</code>) é o padrão
+que combina com cartões, e o texto branco sobre âmbar com <code>font-semibold</code> dá o peso que
+falta à fonte.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=8px 16px;;css:#alvo|border-radius=8px;;css:#alvo|font-weight=600">
+  <p class="try-task">O botão está com fundo e texto, mas continua parecendo um selo colado. Dê a ele
+  16 px de respiro nas laterais, 8 px em cima e embaixo, cantos de 8 px e texto semibold.</p>
+  <pre class="html">&lt;button id="alvo" class="bg-amber-500 text-white"&gt;Encomendar&lt;/button&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="bg-amber-500 px-4 py-2 rounded-lg font-semibold text-white"&gt;Encomendar&lt;/button&gt;</pre>
+</div>
+
+<p>Rode a solução e compare com o estado de partida: o texto passa a ter ar em volta, os cantos
+amolecem e a fonte engrossa. São quatro classes, e nenhuma delas é exclusiva de botão — é o mesmo
+<code>px-4</code> da aula de <a href="px-py.html">espaçamento</a> e o mesmo <code>rounded-lg</code> da
+aula de <a href="arredondamento.html">arredondamento</a>. O que muda é o conjunto.</p>
+
+<pre class="term" data-title="CSS gerado">.px-4 {
+  padding-inline: calc(var(--spacing) * 4);
+}
+.py-2 {
+  padding-block: calc(var(--spacing) * 2);
+}
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+.font-semibold {
+  --tw-font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-semibold);
+}</pre>
+
+<p>Vale ler esse CSS com atenção a duas palavras: <code>padding-inline</code> e
+<code>padding-block</code>. Elas são a versão moderna de “esquerda e direita” e “cima e baixo”, e
+existem porque existem idiomas que escrevem da direita para a esquerda. Quando alguém traduzir o site
+da Ana para o árabe, o botão continua certo sem você mexer em nada. No painel, essas duas
+propriedades aparecem separadas em vez de um <code>padding</code> único; é a mesma coisa dita em
+duas linhas.</p>
+
+<h2>4. Os estados: o botão responde</h2>
+
+<p>Um botão parado é uma promessa; o estado é a resposta. São quatro, e cada um tem uma aula própria
+neste guia, então aqui vai só o que interessa para montar a peça. O <code>hover</code> muda algo
+quando o ponteiro está em cima — na prática, um degrau mais escuro da mesma cor. O
+<code>focus-visible</code> aparece quando o botão recebe foco pelo teclado, e é o que salva quem
+navega com Tab. O <code>active</code> vale no instante do clique. E <code>disabled</code> é o botão
+que existe, mas não pode.</p>
+
+<div class="trytailwind" data-goal="rule:.hover\:bg-amber-600:hover;;rule:outline-offset: 2px;;rule:outline-color: var(--color-amber-600)">
+  <p class="try-task">O botão está pronto e não reage a nada. Acrescente o âmbar 600 no hover, a
+  transição suave e um contorno de foco visível de 2 px com 2 px de afastamento. Esta caixa mostra o
+  CSS gerado em vez do valor computado: clique em <em>Ver solução</em> e as regras do
+  <code>:hover</code> e do <code>:focus-visible</code> aparecem no painel.</p>
+  <pre class="html" data-saida="css">&lt;button id="alvo" class="rounded-lg bg-amber-500 px-4 py-2 font-semibold text-white"&gt;Encomendar&lt;/button&gt;</pre>
+  <pre class="out">
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+.bg-amber-500 {
+  background-color: var(--color-amber-500);
+}
+.px-4 {
+  padding-inline: calc(var(--spacing) * 4);
+}
+.py-2 {
+  padding-block: calc(var(--spacing) * 2);
+}
+.font-semibold {
+  --tw-font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-semibold);
+}
+.text-white {
+  color: var(--color-white);
+}
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-amber-500 px-4 py-2 font-semibold text-white transition hover:bg-amber-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"&gt;Encomendar&lt;/button&gt;</pre>
+</div>
+
+<p>Clique em <em>Rodar</em> e passe o mouse: o fundo escurece devagar, por causa do
+<code>transition</code>. Depois aperte Tab na prévia: aparece o contorno âmbar afastado 2 px do
+botão. São dois estados diferentes e nenhum dos dois aparece no painel, que fotografa o repouso. É a
+mesma lição da aula de <a href="hover.html">hover</a>: para estado, confira o CSS gerado.</p>
+
+<pre class="term" data-title="CSS gerado">@media (hover: hover) {
+  .hover\:bg-amber-600:hover {
+    background-color: var(--color-amber-600);
+  }
+}
+.focus-visible\:outline-2:focus-visible {
+  outline-style: var(--tw-outline-style);
+  outline-width: 2px;
+}
+.focus-visible\:outline-amber-600:focus-visible {
+  outline-color: var(--color-amber-600);
+}</pre>
+
+<p>Duas notas sobre esse CSS. O <code>hover</code> vem dentro de <code>@media (hover: hover)</code>,
+o que impede o celular de ficar com o botão escuro preso depois do toque. E o foco usa
+<code>outline</code>, que é desenhado fora da caixa e não empurra nada — diferente de uma borda, que
+ocupa espaço. Se você preferir o anel, a aula de <a href="anel-e-foco.html">anel de foco</a> mostra o
+equivalente com <code>ring</code>; os dois funcionam, e o importante é que exista algum.</p>
+
+<p>O estado <code>active</code> é opcional e barato: <code>active:scale-95</code> dá a sensação de
+afundar no clique. Use com moderação em botões grandes; em botão pequeno o encolhimento de 5% some.
+E existe uma regra de convivência entre estados que a aula de <a href="active-e-disabled.html">active
+e disabled</a> explica em detalhe: quando dois estados valem ao mesmo tempo, vence a regra que o
+Tailwind escreveu por último no CSS. Não é a ordem em que você escreveu no HTML.</p>
+
+<h2>5. As quatro variantes</h2>
+
+<p>Uma vitrine precisa de hierarquia. Se todos os botões forem âmbar cheio, a cliente não sabe o que
+é principal e o que é acessório. A convenção é simples: uma ação principal por tela, uma secundária
+para o caminho alternativo, uma fantasma para o que é quase um link e uma de perigo para o que apaga
+ou cancela.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Variante</th><th>Classes</th><th>Quando a Ana usa</th></tr>
+<tr><td>Primária</td><td><code>bg-amber-500 text-white hover:bg-amber-600</code></td><td>“Encomendar” no cartão do pão</td></tr>
+<tr><td>Secundária</td><td><code>border border-amber-300 bg-white text-amber-900 hover:bg-amber-50</code></td><td>“Ver a vitrine” ao lado da primária</td></tr>
+<tr><td>Fantasma</td><td><code>text-amber-800 hover:bg-amber-100</code></td><td>“Voltar” no topo de uma página</td></tr>
+<tr><td>Perigo</td><td><code>bg-rose-600 text-white hover:bg-rose-700</code></td><td>“Cancelar encomenda”</td></tr>
+</table>
+</div>
+
+<p>Repare que todas compartilham o mesmo esqueleto: <code>rounded-lg px-4 py-2 font-semibold
+transition</code>. Só o miolo de cor e de borda muda. Essa é a vantagem de montar com classes em vez
+de usar um componente pronto: a parte comum é visível e igual em todas, e a diferença fica explícita
+em duas ou três classes.</p>
+
+<p>A variante secundária tem um detalhe que vale destacar: ela precisa de
+<code>border border-amber-300</code> e não só de <code>border-amber-300</code>. A classe de cor não
+desenha linha nenhuma sozinha; sem <code>border</code>, que diz “1 px de borda sólida”, não aparece
+nada. É o tropeço clássico da aula de <a href="bordas.html">bordas</a>, e ele volta a assombrar
+justamente nos botões. Se a linha não aparece, procure o <code>border</code> solto.</p>
+
+<p>Sobre a fantasma, um aviso de acessibilidade: um botão sem fundo e sem borda é indistinguível de
+um link de texto. Se ele é a única saída de uma tela, prefira a secundária. A fantasma funciona bem
+quando existe outra ação visível por perto — aí ela é claramente a opção discreta, e não a única.</p>
+
+<h2>6. Tamanhos e a área de toque</h2>
+
+<p>Três tamanhos cobrem quase tudo: pequeno para dentro de tabela e de barra, médio para o corpo do
+site, grande para a ação principal de uma página de venda. O que muda entre eles é o respiro e o
+tamanho da fonte — o raio e as cores ficam iguais.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Tamanho</th><th>Classes</th><th>Altura final</th></tr>
+<tr><td>Pequeno</td><td><code>px-2.5 py-1.5 text-sm</code></td><td>32 px</td></tr>
+<tr><td>Médio</td><td><code>px-4 py-2 text-sm</code></td><td>36 px</td></tr>
+<tr><td>Grande</td><td><code>px-6 py-3 text-base</code></td><td>48 px</td></tr>
+</table>
+</div>
+
+<p>A coluna da altura não é enfeite: é a conta que decide se o dedo acerta. A recomendação de
+acessibilidade é que o alvo de toque tenha pelo menos 44 px por 44 px. O botão grande chega lá
+sozinho; o médio fica perto e passa se você acrescentar <code>min-h-11</code>, que garante 44 px sem
+mexer no respiro. O pequeno é para mouse, não para dedo — e é por isso que ele aparece em tabelas
+administrativas, não na vitrine.</p>
+
+<p>Uma segunda conta: o texto do botão deve caber em uma linha. “Encomendar pão para amanhã às 7h” é
+uma frase, não um rótulo. Se o texto quebrar em duas linhas, o botão vira um retângulo alto e
+estranho. Encurte o rótulo e deixe o detalhe para o texto ao lado. Em último caso,
+<code>whitespace-nowrap</code> impede a quebra, mas ele também estoura o layout em tela pequena:
+prefira encurtar.</p>
+
+<h2>7. Largo no celular, do tamanho do texto no computador</h2>
+
+<p>No celular, o botão principal deve ocupar a largura disponível: é mais fácil de acertar e não
+deixa dúvida de que é ali que se clica. No computador, um botão da largura da tela fica grotesco. A
+solução é a combinação de <code>w-full</code> com <code>sm:w-auto</code>: largo por padrão, do
+tamanho do texto a partir de 640 px.</p>
+
+<div class="trytailwind" data-goal="largura:375;;rule:width: 100%;;rule:.sm\:w-auto" data-largura="375">
+  <p class="try-task">Esta prévia está com 375 px, a largura de um celular. Faça o botão ocupar a
+  largura toda aqui e voltar ao tamanho do texto em telas maiores: <code>w-full</code> mais
+  <code>sm:w-auto</code>.</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-lg bg-amber-500 px-4 py-2 font-semibold text-white"&gt;Encomendar&lt;/button&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+font-weight: 600
+border-radius: 8px
+padding-inline: 16px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="w-full rounded-lg bg-amber-500 px-4 py-2 font-semibold text-white sm:w-auto"&gt;Encomendar&lt;/button&gt;</pre>
+</div>
+
+<p>Essa é a lógica mobile-first em uma linha: a classe sem prefixo vale sempre, e a classe com
+<code>sm:</code> vale de 640 px para cima, sobrescrevendo a primeira. Você já viu isso na aula de <a
+href="mobile-first.html">mobile first</a>; aqui é a aplicação que mais aparece no dia a dia, porque
+todo formulário de encomenda tem um botão assim.</p>
+
+<p>Se o botão não estiver sozinho — se houver um “Cancelar” ao lado —, a largura toda não cabe. Nesse
+caso o par vira dois botões dividindo o espaço: <code>flex gap-2</code> no pai e
+<code>flex-1</code> em cada um. No celular, os dois ocupam metade cada; no computador, você pode
+manter. É a aula de <a href="flex-grow.html">flex-grow</a> fazendo o trabalho, e a diferença entre um
+formulário que parece acabado e um que parece remendo.</p>
+
+<h2>8. Botão ou link?</h2>
+
+<p>Essa é a decisão que mais gente erra, e ela não é de CSS: é de HTML. Um <code>&lt;button&gt;</code>
+faz alguma coisa — envia a encomenda, abre o modal, limpa o campo. Um <code>&lt;a&gt;</code> leva a
+algum lugar — abre outra página, baixa o cardápio, pula para uma seção. Aparência igual, papéis
+diferentes, e o navegador trata cada um de um jeito.</p>
+
+<pre class="file" data-file="index.html">&lt;!-- faz alguma coisa: botão --&gt;
+&lt;button type="button" class="rounded-lg bg-amber-500 px-4 py-2 font-semibold text-white"&gt;
+  Encomendar
+&lt;/button&gt;
+
+&lt;!-- leva a algum lugar: link com cara de botão --&gt;
+&lt;a href="#cardapio" class="inline-block rounded-lg bg-amber-500 px-4 py-2 font-semibold text-white"&gt;
+  Ver o cardápio
+&lt;/a&gt;</pre>
+
+<p>Três detalhes nesse trecho. O primeiro é o <code>type="button"</code>: dentro de um formulário, um
+botão sem tipo é tratado como “enviar”, e um botão de “limpar” acaba enviando a encomenda sem querer.
+O segundo é o <code>inline-block</code> no link: elemento de link é inline por padrão e ignora parte
+do respiro vertical, então sem essa classe o link-com-cara-de-botão fica com altura esquisita. O
+terceiro é que um link não responde a <code>disabled</code>; se ele não deve funcionar, o caminho é
+remover o <code>href</code> — ou, melhor, trocar por um <code>button</code> desligado.</p>
+
+<p>E o caso que mais aparece no começo: um <code>&lt;div&gt;</code> com <code>cursor-pointer</code>
+não é botão. Ele não recebe Tab, não aceita Enter, não é anunciado. Se você quer um botão, use o
+elemento botão e dê a ele as classes. É mais curto do que parece e evita um problema que só aparece
+quando alguém tenta usar o site sem mouse.</p>
+
+<p>Para o ícone ao lado do rótulo, o casco ganha duas classes: <code>inline-flex items-center
+gap-2</code>. O <code>inline-flex</code> alinha ícone e texto numa linha, <code>items-center</code>
+centraliza os dois na vertical e <code>gap-2</code> abre 8 px entre eles. Sem o flex, o ícone desce
+ou sobe alguns pixels e o botão fica torto — o tipo de detalhe que ninguém identifica, mas todo mundo
+sente.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: dois botões primários lado a lado</h3>
+<p>A Ana pôs “Encomendar” e “Ver o cardápio” com o mesmo âmbar cheio. A cliente ficou em dúvida e
+clicou no segundo. A correção foi rebaixar o segundo para a variante secundária: fundo branco, borda
+âmbar, texto âmbar escuro. A regra que ela adotou é fácil de lembrar: em cada tela, um botão cheio.
+Se dois parecem igualmente importantes, nenhum dos dois é.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o botão que ficou torto por causa da borda</h3>
+<p>Ela montou a variante secundária com borda de 1 px e manteve o mesmo <code>py-2</code> da primária.
+Os dois botões, lado a lado, ficaram com 2 px de diferença de altura — o suficiente para o olho notar
+e não saber por quê. A saída é padronizar: ou toda variante tem borda (a primária pode ter borda da
+mesma cor do fundo), ou toda variante usa o mesmo <code>border</code> com cor transparente. Alinhar
+por baixo, com <code>items-center</code> no pai, também resolve.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o botão que só funciona com mouse</h3>
+<p>Ela testou o site no celular e o botão de encomendar não abria nada. O botão era um
+<code>div</code> com <code>onclick</code>, e no toque o evento não chegou como ela esperava. Depois
+de trocar por <code>&lt;button type="button"&gt;</code>, o clique funcionou no celular, no teclado e no
+leitor de tela sem uma linha a mais. Quando o assunto é interação, o HTML certo economiza JavaScript
+e uma tarde de depuração.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Por que a receita do botão usa <code>px-4</code> e
+<code>py-2</code> em vez de <code>p-4</code>?</p>
+<label><input type="radio" name="b1"> porque <code>p-4</code> não existe no Tailwind</label>
+<label><input type="radio" name="b1"> porque o botão precisa de mais respiro na horizontal do que na
+vertical</label>
+<label><input type="radio" name="b1"> porque só as classes com <code>x</code> e <code>y</code> aceitam
+valores em pixel</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. A Ana escreveu <code>border-amber-300</code> no
+botão secundário e nenhuma linha apareceu. O que falta?</p>
+<label><input type="radio" name="b2"> trocar a cor para <code>border-amber-500</code></label>
+<label><input type="radio" name="b2"> acrescentar <code>shadow-sm</code></label>
+<label><input type="radio" name="b2"> acrescentar <code>border</code>, que diz a espessura e o
+estilo</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Qual é a diferença entre <code>w-full</code> e
+<code>sm:w-auto</code> no mesmo botão?</p>
+<label><input type="radio" name="b3"> <code>w-full</code> vale sempre e <code>sm:w-auto</code>
+sobrescreve a partir de 640 px</label>
+<label><input type="radio" name="b3"> <code>sm:w-auto</code> vale sempre e <code>w-full</code>
+sobrescreve no celular</label>
+<label><input type="radio" name="b3"> as duas valem ao mesmo tempo e o navegador escolhe a
+menor</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o botão do cardápio</h2>
+<p>O botão “Ver o cardápio” precisa da variante fantasma: texto âmbar escuro, sem fundo, que ganha um
+fundo âmbar bem claro no hover. Complete a classe do fundo do hover:</p>
+<div class="ex-code">&lt;button class="rounded-lg px-4 py-2 font-semibold text-amber-800 <input aria-label="resposta 1" data-answer="hover:bg-amber-100" placeholder="...">"&gt;Ver o cardápio&lt;/button&gt;</div>
+<p class="ex-dica">Dica: o prefixo do estado vem antes do nome da propriedade, e o tom é o mais claro
+da família âmbar — o mesmo 100 que você viu nos cartões.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Botão no Tailwind é uma receita, não uma classe: <code>px-4 py-2 rounded-lg bg-amber-500
+font-semibold text-white</code> resolve o casco, e a partir dele você monta as variantes mudando só o
+miolo de cor. O respiro horizontal maior que o vertical é o que dá cara de botão; o
+<code>transition</code> mais o <code>hover:</code> dão a resposta ao mouse; o
+<code>focus-visible:</code> com <code>outline</code> ou <code>ring</code> garante o teclado; e o
+<code>disabled:</code> cuida do botão que não pode.</p>
+
+<p>O tamanho é uma decisão por tela e por aparelho: médio no corpo do site, grande na ação principal,
+pequeno só onde o mouse é garantido. No celular, <code>w-full</code>; no computador,
+<code>sm:w-auto</code>. E a escolha entre <code>button</code> e <code>a</code> é de papel, não de
+aparência: um faz, o outro leva. O resto é disciplina — um botão cheio por tela, rótulo curto em uma
+linha e o mesmo raio em todo lugar.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Casco do botão: <code>px-4 py-2 rounded-lg font-semibold</code> mais as cores.</li>
+<li><code>px</code> é lateral e <code>py</code> é vertical: botão pede horizontal maior.</li>
+<li>Estados: <code>hover:</code>, <code>active:</code>, <code>focus-visible:</code>,
+<code>disabled:</code>.</li>
+<li><code>focus-visible:outline-2</code> com <code>outline-offset-2</code> salva o teclado.</li>
+<li>Variantes mudam só o miolo: primária, secundária, fantasma e perigo.</li>
+<li>Cor de borda sem <code>border</code> não desenha linha.</li>
+<li>Alvo de toque confortável começa em 44 px: use <code>min-h-11</code> quando precisar.</li>
+<li><code>w-full sm:w-auto</code> deixa o botão largo no celular.</li>
+<li><code>button</code> faz, <code>a</code> leva; dentro de formulário, use
+<code>type="button"</code>.</li>
+<li><code>inline-flex items-center gap-2</code> alinha ícone e rótulo.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tabelas | Guia Tailwind</title>
+<meta name="description" content="Tabelas no Tailwind: estrutura com thead, tbody, th e td, respiro nas células, alinhamento de preços, cabeçalho, linhas e o invólucro que rola no celular.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Tabelas</span></h1>
+
+<p class="intro">A Ana decidiu publicar os preços da padaria numa tabela de verdade: pão, peso,
+preço por quilo. Montou, abriu no celular e a tabela explodiu — as colunas se espremeram, o preço
+quebrou em três linhas e o nome "Pão de queijo" virou "Pão de / quei / jo". No desktop estava
+aceitável, mas apertado, com tudo encostado na borda. Nesta aula ela arruma a tabela por dentro e
+por fora: respiro nas células, números alinhados à direita, cabeçalho que se distingue e um
+invólucro que deixa a tabela rolar de lado quando a tela é pequena.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>As seis tags de uma tabela e por que elas existem.</li>
+  <li>Por que a tabela é a escolha certa aqui, e não uma pilha de <code>div</code>.</li>
+  <li>O respiro das células com <code>px-4 py-3</code>, e por que ele vai em cada célula.</li>
+  <li>Como alinhar preços à direita e usar números de largura fixa.</li>
+  <li>Cabeçalho, linhas e a borda que fica só entre elas.</li>
+  <li>O invólucro <code>overflow-x-auto</code> que salva a tabela no celular.</li>
+  <li>Largura de coluna, texto comprido e o que fazer com ele.</li>
+  <li>O <code>caption</code>, a legenda que o leitor de tela também lê.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a tabela que estourou no celular</h2>
+
+<p>A primeira tabela da Ana era simples: três colunas e cinco linhas. No monitor, ficou até
+bonitinha. No celular, virou um borrão — porque uma tabela tem uma regra dura: ela nunca fica menor
+que o conteúdo das células. Se a soma mínima das colunas passa da largura da tela, ou o texto quebra
+em pedaços ou a página cria barra de rolagem lateral. Nenhum dos dois é aceitável.</p>
+
+<p>Na segunda versão, ela tentou resolver com <code>text-xs</code> em tudo. Ficou pequeno, ilegível
+e ainda apertado. Aí entendeu o problema real: faltava respiro dentro das células e faltava um jeito
+de a tabela rolar sozinha, sem arrastar a página junto. As duas coisas se resolvem com classes, e é
+o que a aula faz.</p>
+
+<p>Antes, um aviso que economiza meses de dor: tabela serve para dado tabular — linhas e colunas
+que se cruzam, como preço por produto, horário por dia da semana, encomenda por cliente. Se o seu
+conteúdo é uma lista de cartões, use <code>flex</code> ou <code>grid</code>, como a aula de
+<a href="listas.html">listas de itens</a> mostra. Uma tabela de uma coluna
+só é uma lista disfarçada, e ela se comporta mal no celular sem motivo.</p>
+
+<h2>2. Tabela é uma grade com significado</h2>
+
+<p>Dá para desenhar uma tabela com <code>div</code> e <code>grid</code>, e o resultado visual fica
+idêntico. O que se perde é o significado: o leitor de tela não anuncia "coluna Preço, linha Pão de
+queijo"; ele lê tudo como uma sopa de textos. O navegador também deixa de oferecer atalhos de
+navegação entre células. E o buscador do Google, quando encontra uma tabela de preços de verdade,
+consegue entendê-la.</p>
+
+<p>Por isso, para dado tabular, use as tags certas. Elas são antigas, funcionam desde sempre e o
+Tailwind não muda nada nelas: só veste. A estrutura tem seis peças, e nenhuma é decorativa.</p>
+
+<dl class="anatomy">
+<dt>table</dt>
+<dd>O elemento que envolve tudo. Só ele pode conter as linhas; texto solto aqui dentro vira uma
+caixa estranha acima da grade.</dd>
+<dt>thead</dt>
+<dd>O grupo do cabeçalho. Separa as linhas de título das linhas de dado, e o navegador repete esse
+grupo quando a tabela é impressa em várias páginas.</dd>
+<dt>tbody</dt>
+<dd>O grupo do corpo, com os dados. Uma tabela pode ter mais de um <code>tbody</code>, o que é útil
+quando você agrupa por seção.</dd>
+<dt>tr</dt>
+<dd>Uma linha. Dentro dela ficam as células, na ordem das colunas.</dd>
+<dt>th</dt>
+<dd>Uma célula de cabeçalho. Vem em negrito e centralizada por padrão, e aceita o atributo
+<code>scope</code> para dizer se encabeça uma coluna ou uma linha.</dd>
+<dt>td</dt>
+<dd>Uma célula de dado. É onde mora o conteúdo comum e onde o respiro faz mais diferença.</dd>
+</dl>
+
+<p>Com isso, a tabela de preços da Ana fica assim:</p>
+
+<pre class="file" data-file="cardapio.html">&lt;table&gt;
+  &lt;caption&gt;Preços de hoje, atualizados às 7h&lt;/caption&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th scope="col"&gt;Pão&lt;/th&gt;
+      &lt;th scope="col"&gt;Peso&lt;/th&gt;
+      &lt;th scope="col"&gt;Preço&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Francês&lt;/td&gt;
+      &lt;td&gt;60 g&lt;/td&gt;
+      &lt;td&gt;R$ 0,90&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</pre>
+
+<p>O <code>scope="col"</code> é uma palavra de acessibilidade que quase ninguém escreve e que muda o
+anúncio do leitor de tela: ele passa a dizer "coluna Preço" ao entrar na célula. Custa sete letras.
+Use sempre que a célula de cabeçalho encabeçar uma coluna; se ela encabeçar uma linha (o nome do pão
+na primeira coluna, por exemplo), use <code>scope="row"</code>.</p>
+
+<h2>3. O respiro das células</h2>
+
+<p>Tabela apertada é tabela ilegível. O navegador dá um respiro mínimo de 1 px nas células, o que
+serve para dado de planilha e não para cardápio. O respiro de verdade se dá com as mesmas classes de
+sempre — <code>px-4</code> e <code>py-3</code> —, mas há um detalhe importante: elas vão em
+<strong>cada célula</strong>, não na tabela.</p>
+
+<p>Por que? Porque padding é uma propriedade de caixa, e a caixa é a célula. Se você puser
+<code>p-4</code> no <code>table</code>, o espaço aparece em volta da grade inteira, não entre as
+células. E se puser na linha (<code>tr</code>), o navegador ignora.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding-inline=16px;;css:#alvo|padding-block=12px;;conta:td.px-4=2">
+  <p class="try-task">As células estão apertadas, com 8 px na horizontal e 4 px na vertical. Dê a
+  todas elas 16 px na horizontal e 12 px na vertical, com <code>px-4</code> e <code>py-3</code>.</p>
+  <pre class="html">&lt;table class="w-full text-sm"&gt;
+  &lt;tr class="bg-stone-100 text-left"&gt;
+    &lt;th class="px-2 py-1" scope="col"&gt;Pão&lt;/th&gt;
+    &lt;th class="px-2 py-1" scope="col"&gt;Preço&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td id="alvo" class="px-2 py-1"&gt;Francês&lt;/td&gt;
+    &lt;td class="px-2 py-1"&gt;R$ 0,90&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</pre>
+  <pre class="out">
+padding-inline: 8px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;table class="w-full text-sm"&gt;
+  &lt;tr class="bg-stone-100 text-left"&gt;
+    &lt;th class="px-4 py-3" scope="col"&gt;Pão&lt;/th&gt;
+    &lt;th class="px-4 py-3" scope="col"&gt;Preço&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td id="alvo" class="px-4 py-3"&gt;Francês&lt;/td&gt;
+    &lt;td class="px-4 py-3"&gt;R$ 0,90&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</pre>
+</div>
+
+<p>O painel descreve a célula de "Francês" e mostra <code>padding-inline: 16px</code> e
+<code>padding-block: 12px</code>. O CSS gerado é o mesmo de qualquer caixa com <code>px-4</code>:</p>
+
+<pre class="term">.px-4 {
+  padding-inline: calc(var(--spacing) * 4);
+}
+.py-3 {
+  padding-block: calc(var(--spacing) * 3);
+}</pre>
+
+<p>Repare que a classe é a mesma que você usa num cartão ou num botão. Tabela não tem classe
+especial: ela é feita de caixas, e as caixas obedecem às mesmas regras. É por isso que aprender
+Tailwind é aprender um vocabulário pequeno que serve em todo lugar.</p>
+
+<p>Existe uma alternativa mais curta, que projetos grandes usam: aplicar o respiro de uma vez com um
+seletor de filho, escrito como variante arbitrária. Em vez de repetir <code>px-4 py-3</code> em cada
+célula, você escreve <code>[&amp;gt;td]:px-4</code> no <code>table</code>. Funciona e economiza
+digitação, mas o HTML fica menos óbvio para quem está começando, e é fácil errar o seletor. Nesta
+fase, prefira escrever a classe em cada célula: é mais chato e é mais claro.</p>
+
+<h2>4. Alinhamento: preço à direita</h2>
+
+<p>Preço é número, e número se lê pela direita — é ali que está a parte que muda. Quando todos os
+preços de uma coluna ficam à esquerda, o olho precisa caçar o começo do número linha por linha. À
+direita, as casas decimais se alinham e a comparação fica instantânea.</p>
+
+<p>Só isso não basta: a fonte que a página usa pode desenhar cada dígito com larguras diferentes, e
+aí o alinhamento escorrega. A solução é <code>tabular-nums</code>, que pede à fonte a versão de
+números de largura fixa — a mesma usada em planilhas.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|text-align=right;;rule:--tw-numeric-spacing: tabular-nums">
+  <p class="try-task">Na coluna de preço, alinhe os números à direita e ponha a fonte em modo de
+  números tabulares, para as casas decimais ficarem umas sobre as outras.</p>
+  <pre class="html">&lt;table class="w-full text-sm"&gt;
+  &lt;tr class="bg-stone-100 text-left"&gt;
+    &lt;th class="px-4 py-3" scope="col"&gt;Pão&lt;/th&gt;
+    &lt;th class="px-4 py-3" scope="col"&gt;Preço&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="px-4 py-3"&gt;Francês&lt;/td&gt;
+    &lt;td id="alvo" class="px-4 py-3"&gt;R$ 0,90&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="px-4 py-3"&gt;Pão de queijo&lt;/td&gt;
+    &lt;td class="px-4 py-3"&gt;R$ 12,00&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</pre>
+  <pre class="out">
+padding-inline: 16px
+padding-block: 12px
+</pre>
+  <pre class="solucao">&lt;table class="w-full text-sm"&gt;
+  &lt;tr class="bg-stone-100 text-left"&gt;
+    &lt;th class="px-4 py-3" scope="col"&gt;Pão&lt;/th&gt;
+    &lt;th class="px-4 py-3" scope="col"&gt;Preço&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="px-4 py-3"&gt;Francês&lt;/td&gt;
+    &lt;td id="alvo" class="px-4 py-3 text-right tabular-nums"&gt;R$ 0,90&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="px-4 py-3"&gt;Pão de queijo&lt;/td&gt;
+    &lt;td class="px-4 py-3"&gt;R$ 12,00&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</pre>
+</div>
+
+<p>Uma decisão de projeto escondida nessa missão: a classe vai em cada célula ou na coluna inteira?
+No HTML puro não existe coluna, então a resposta prática é repetir <code>text-right tabular-nums</code>
+em cada <code>td</code> da coluna de preço — e também no <code>th</code> do preço, porque o título
+precisa seguir o alinhamento do conteúdo abaixo dele. Título à esquerda com número à direita é um dos
+desalinhamentos que mais aparecem em tabela de quem está começando.</p>
+
+<pre class="term">.text-right {
+  text-align: right;
+}
+.tabular-nums {
+  --tw-numeric-spacing: tabular-nums;
+  font-variant-numeric: var(--tw-ordinal, ) var(--tw-slashed-zero, ) var(--tw-numeric-figure, ) var(--tw-numeric-spacing, ) var(--tw-numeric-fraction, );
+}</pre>
+
+<p>A segunda regra parece um monstro e é mais simples do que parece: o Tailwind monta a propriedade
+juntando quatro ou cinco variáveis vazias, cada uma ligada a uma classe diferente (ordinal, zero
+cortado, fração). Você usa uma, as outras ficam vazias. O efeito prático é o que importa:
+<code>tabular-nums</code> alinha os dígitos, e a coluna de preço para de tremer.</p>
+
+<h2>5. Cabeçalho, linhas e a borda certa</h2>
+
+<p>Sem ajuda, o cabeçalho da tabela é só negrito. Numa tabela de cardápio, ele precisa se distinguir
+do dado: fundo levemente cinza, texto menor e em caixa alta, e uma borda embaixo separando o título
+do conteúdo. Tudo isso são classes comuns, aplicadas no <code>tr</code> do <code>thead</code> ou em
+cada <code>th</code>.</p>
+
+<pre class="file" data-file="cardapio.html">&lt;thead&gt;
+  &lt;tr class="border-b border-stone-300 bg-stone-100 text-left text-xs uppercase tracking-wide text-stone-600"&gt;
+    &lt;th class="px-4 py-3" scope="col"&gt;Pão&lt;/th&gt;
+    &lt;th class="px-4 py-3" scope="col"&gt;Peso&lt;/th&gt;
+    &lt;th class="px-4 py-3 text-right" scope="col"&gt;Preço&lt;/th&gt;
+  &lt;/tr&gt;
+&lt;/thead&gt;</pre>
+
+<p>Como <code>text-align</code>, <code>font-size</code> e <code>color</code> são propriedades que os
+filhos herdam, colocar essas classes no <code>tr</code> vale para todos os <code>th</code> dentro
+dele. É a mesma lógica de pintar um cartão inteiro pondo a cor no pai. E note o
+<code>text-right</code> no último <code>th</code>: ele sobrescreve o <code>text-left</code> herdado,
+porque está mais perto do elemento.</p>
+
+<p>Para as linhas, o padrão que funciona em quase toda tabela é uma borda embaixo de cada
+<code>tr</code> do corpo, <code>border-b border-stone-200</code>, e a última linha sem borda — senão
+ela dobra a borda de baixo do invólucro e fica grossa. A classe que resolve é
+<code>last:border-0</code>, que você já viu na aula de
+<a href="primeiro-e-ultimo.html">first e last</a>.</p>
+
+<p>Se quiser listras alternadas, existe <code>odd:</code> e <code>even:</code>, ensinado na aula de
+<a href="odd-even.html">odd e even</a>. Vale um aviso: listra e borda juntas costumam brigar. Escolha uma das duas. Tabela de
+cardápio costuma ficar melhor com borda fina e sem listra; tabela de números, com listra e sem
+borda.</p>
+
+<p>Este é o resumo das classes que ficam no topo e nas linhas, com o motivo de cada uma:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Peça</th><th>Classes</th><th>Por que</th></tr>
+<tr><td>linha do cabeçalho</td><td><code>bg-stone-100 text-xs uppercase tracking-wide text-stone-600</code></td><td>fundo leve e texto menor: parece título, não dado</td></tr>
+<tr><td>alinhamento herdado</td><td><code>text-left</code> no <code>tr</code></td><td>vence o centro padrão do <code>th</code> e vale para todos os filhos</td></tr>
+<tr><td>borda do cabeçalho</td><td><code>border-b border-stone-300</code></td><td>separa título do conteúdo com um fio mais firme</td></tr>
+<tr><td>linhas do corpo</td><td><code>border-b border-stone-200</code></td><td>guia o olho na horizontal, sem fechar a grade</td></tr>
+<tr><td>última linha</td><td><code>last:border-0</code></td><td>evita a borda dobrada no pé da tabela</td></tr>
+</table>
+</div>
+
+<p>Uma observação sobre <code>uppercase</code>: ele deixa o texto em caixa alta, e caixa alta é
+ótima para título curto de tabela e péssima para frase. "Preço" fica bem; "Preço por quilo do pão
+francês" vira um grito. Se o cabeçalho tiver mais de duas palavras, dispense o
+<code>uppercase</code> e deixe só <code>text-xs font-medium</code>.</p>
+
+<h2>6. No celular: o invólucro que rola</h2>
+
+<p>Chegou a hora de resolver o problema que trouxe a Ana até aqui. Uma tabela não pode ser mais
+larga que a tela. Se for, ela empurra a página toda e nasce aquela barra de rolagem horizontal que
+ninguém entende. A solução é simples e é a mesma há vinte anos: envolver a tabela num
+<code>div</code> com <code>overflow-x-auto</code>. O <code>div</code> rola; a página não.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|overflow-x=auto;;conta:table=1;;texto:Pão de queijo">
+  <p class="try-task">A tabela tem largura mínima de 384 px e, numa tela estreita, empurra a página
+  inteira. Envolva-a num <code>div</code> com <code>overflow-x-auto</code> para que só a tabela role
+  de lado.</p>
+  <pre class="html" data-largura="360">&lt;div class="max-w-sm border border-stone-200"&gt;
+  &lt;table id="alvo" class="w-full min-w-96 text-left text-sm"&gt;
+    &lt;tr class="bg-stone-100"&gt;
+      &lt;th class="px-4 py-3" scope="col"&gt;Pão&lt;/th&gt;
+      &lt;th class="px-4 py-3" scope="col"&gt;Preço&lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class="px-4 py-3"&gt;Pão de queijo&lt;/td&gt;
+      &lt;td class="px-4 py-3"&gt;R$ 12,00&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+width: 384px
+font-size: 14px
+line-height: 20px
+text-align: left
+min-width: 384px
+</pre>
+  <pre class="solucao">&lt;div class="max-w-sm border border-stone-200"&gt;
+  &lt;div id="alvo" class="overflow-x-auto"&gt;
+    &lt;table class="w-full min-w-96 text-left text-sm"&gt;
+      &lt;tr class="bg-stone-100"&gt;
+        &lt;th class="px-4 py-3" scope="col"&gt;Pão&lt;/th&gt;
+        &lt;th class="px-4 py-3" scope="col"&gt;Preço&lt;/th&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td class="px-4 py-3"&gt;Pão de queijo&lt;/td&gt;
+        &lt;td class="px-4 py-3"&gt;R$ 12,00&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Esta caixa usa uma prévia de 360 px, do tamanho de um celular, para você ver o problema
+acontecer. Antes, a tabela vaza do cartão. Depois, o <code>div</code> mostra uma barra de rolagem
+fina e a tabela se move dentro dele. O painel mostra <code>overflow-x: auto</code> no elemento com
+<code>id="alvo"</code>, que agora é o invólucro.</p>
+
+<p>O <code>min-w-96</code> merece explicação: ele é 24 rem, ou 384 px, a largura mínima abaixo da
+qual a tabela se recusa a encolher. Sem ele, a tabela se espremeria e quebraria o texto em pedacinhos
+em vez de rolar. Com ele, cada célula mantém a largura e o dedo desliza. A regra completa é:
+<strong>invólucro que rola + tabela com largura mínima</strong>. Só o invólucro, sem mínimo, não
+adianta, porque a tabela nunca vai passar da largura disponível.</p>
+
+<p>Se você quiser cantos arredondados na tabela, arredonde o invólucro e recorte o excesso:
+<code>rounded-xl border border-stone-200 overflow-hidden</code>. Mas atenção — <code>overflow-hidden</code>
+recorta também a sombra e o anel de foco. Se a tabela tiver linhas clicáveis com foco visível,
+prefira arredondar só o cabeçalho e a última linha, com <code>rounded-t-xl</code> e
+<code>rounded-b-xl</code>.</p>
+
+<h2>7. Larguras, texto comprido e legenda</h2>
+
+<p>Alguns ajustes finais separam uma tabela que funciona de uma tabela bonita. O primeiro é a
+largura: <code>w-full</code> na tabela faz ela usar o espaço do pai, e aí as colunas se dividem
+conforme o conteúdo. Se uma coluna precisa de mais espaço — a de nome de pão, por exemplo —, você
+pode dar <code>w-1/2</code> no <code>th</code> dessa coluna; o navegador respeita como sugestão.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Onde vai</th><th>Para que serve</th></tr>
+<tr><td><code>w-full</code></td><td><code>table</code></td><td>ocupa a largura disponível</td></tr>
+<tr><td><code>min-w-96</code></td><td><code>table</code></td><td>não encolhe abaixo de 384 px</td></tr>
+<tr><td><code>whitespace-nowrap</code></td><td><code>th</code> e <code>td</code></td><td>impede o texto de quebrar, mantendo a coluna numa linha</td></tr>
+<tr><td><code>text-left</code></td><td><code>tr</code> ou <code>table</code></td><td>alinha o cabeçalho à esquerda, herdado pelas células</td></tr>
+<tr><td><code>tabular-nums</code></td><td>célula de número</td><td>dígitos de largura fixa, casas decimais alinhadas</td></tr>
+<tr><td><code>overflow-x-auto</code></td><td>invólucro <code>div</code></td><td>faz só a tabela rolar de lado</td></tr>
+</table>
+</div>
+
+<p>O segundo ajuste é o texto comprido. Nome de pão com 40 letras ou observação de encomenda longa
+transformam a tabela num desastre, porque a célula estica e espreme as vizinhas. Duas saídas:
+<code>whitespace-nowrap</code> na célula, que mantém tudo numa linha e manda a tabela rolar; ou
+<code>truncate</code> com uma largura máxima, que corta com reticências. Para tabela de cardápio, a
+primeira é melhor: cortar o nome do produto é pior que rolar dois dedos.</p>
+
+<p>O terceiro é o <code>caption</code>, a legenda da tabela. Ele fica dentro do <code>table</code>,
+antes do <code>thead</code>, e é lido pelo leitor de tela como título da grade. Por padrão, o
+navegador o desenha no topo e centralizado; com <code>caption-bottom</code> ele vai para baixo, e com
+<code>text-left text-xs text-stone-500</code> fica discreto, como uma nota de rodapé. Uma frase curta
+ali — "Preços de hoje, atualizados às 7h" — resolve a dúvida que todo cliente tem.</p>
+
+<p>O quarto ajuste é o estado vazio. Toda tabela de cardápio vai ter um dia sem aquele pão, e a
+tentação é escrever "não temos" em todas as células. Faça diferente: mantenha a linha e ponha um
+traço no meio, com <code>text-stone-400</code>, e uma frase na legenda dizendo que o traço significa
+"esgotado hoje". Célula vazia é lida pelo leitor de tela como nada, e o cliente que só vê a tela
+interpreta como erro de carregamento. Um traço é curto, visível e não mente.</p>
+
+<h2>8. A tabela dentro de um cartão</h2>
+
+<p>Na padaria, a tabela de preços aparece dentro de um cartão, com título e tudo. Montar isso é
+combinar o que já foi visto: um <code>div</code> branco com <code>rounded-xl border border-stone-200
+bg-white</code> e a tabela dentro. O detalhe é que o canto arredondado do cartão e a borda reta da
+tabela brigam: a tabela vaza pelos cantos.</p>
+
+<pre class="file" data-file="cardapio.html">&lt;div class="overflow-hidden rounded-xl border border-stone-200 bg-white"&gt;
+  &lt;table class="w-full text-left text-sm"&gt;
+    &lt;caption class="caption-bottom px-4 py-3 text-xs text-stone-500"&gt;
+      Preços de hoje, atualizados às 7h
+    &lt;/caption&gt;
+    &lt;thead&gt;
+      &lt;tr class="bg-stone-100 text-xs uppercase text-stone-600"&gt;
+        &lt;th class="px-4 py-3" scope="col"&gt;Pão&lt;/th&gt;
+        &lt;th class="px-4 py-3 text-right" scope="col"&gt;Preço&lt;/th&gt;
+      &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+      &lt;tr class="border-t border-stone-200"&gt;
+        &lt;td class="px-4 py-3"&gt;Francês&lt;/td&gt;
+        &lt;td class="px-4 py-3 text-right tabular-nums"&gt;R$ 0,90&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/tbody&gt;
+  &lt;/table&gt;
+&lt;/div&gt;</pre>
+
+<p>Três decisões estão nesse pedaço. O <code>overflow-hidden</code> no cartão recorta a tabela nos
+cantos e faz o fundo cinza do cabeçalho seguir o arredondamento. As bordas das linhas passaram a
+<code>border-t</code>, porque a primeira linha não precisa de borda em cima — já existe a borda do
+cartão. E a legenda ganhou <code>px-4 py-3</code>, para não encostar nas bordas do cartão quando
+desce para o pé.</p>
+
+<p>Se quiser a tabela "solta", sem cartão, não ponha borda em nada além das linhas. Tabela com
+moldura completa em volta, mais borda em cada linha, mais borda em cada célula, vira uma grade de
+planilha — e planilha passa a impressão de formulário interno, não de cardápio. A regra que a Ana
+adotou: só linhas horizontais, uma borda mais forte no cabeçalho, nada de linha vertical.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a tabela de horários que virou lista no celular</h3>
+<p>A tabela de horários tinha sete colunas — uma por dia — e no celular ficou impossível: rolar de
+lado para ver sábado é pior que não ver. A solução foi trocar de formato na tela pequena: a mesma
+informação virou uma lista de cartões, um por dia, com <code>md:hidden</code> na lista e
+<code>hidden md:block</code> na tabela. As duas versões escrevem os mesmos dados; o CSS só escolhe
+qual mostrar. Quando a tabela tem mais de quatro colunas, essa troca costuma ser melhor que a barra
+de rolagem.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o preço que pulava de linha</h3>
+<p>Um dos preços, "R$ 1.240,00", era maior que a coluna e quebrava em duas linhas — a linha da
+tabela ficava com o dobro da altura e o alinhamento se perdia. A correção foi
+<code>whitespace-nowrap</code> na célula de preço, mais <code>tabular-nums</code>. A lição: em
+tabela, a célula de número nunca deve quebrar. Se ela quebra, o problema é largura de coluna, e não
+tamanho de fonte.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o cabeçalho que ninguém lia</h3>
+<p>A Ana pintou o cabeçalho com <code>bg-amber-100</code> e texto <code>amber-900</code>, achando que
+ficaria com a cara da marca. Ficou — e o cabeçalho passou a competir com os botões da página, que
+usavam a mesma cor. O cliente rolava a tabela e não entendia onde era o título. A correção foi
+dessaturar: <code>bg-stone-100 text-stone-600</code>, com a borda embaixo fazendo o trabalho de
+separação. Cabeçalho de tabela é estrutura, não decoração: ele precisa se distinguir do dado, e não
+chamar mais atenção que o conteúdo.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. Onde vai o <code>px-4</code> que dá respiro às
+células?</p>
+<label><input type="radio" name="t1"> no <code>table</code>, uma vez só</label>
+<label><input type="radio" name="t1"> no <code>tbody</code>, para valer em todas as linhas</label>
+<label><input type="radio" name="t1"> em cada <code>th</code> e em cada <code>td</code></label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">2. Como fazer a tabela rolar de lado sem arrastar a
+página junto no celular?</p>
+<label><input type="radio" name="t2"> <code>overflow-x-auto</code> no <code>table</code></label>
+<label><input type="radio" name="t2"> um <code>div</code> em volta com <code>overflow-x-auto</code></label>
+<label><input type="radio" name="t2"> <code>text-xs</code> em todas as células para caber</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que <code>tabular-nums</code> faz numa coluna
+de preço?</p>
+<label><input type="radio" name="t3"> deixa todos os dígitos com a mesma largura, alinhando as casas</label>
+<label><input type="radio" name="t3"> pinta os números de cinza</label>
+<label><input type="radio" name="t3"> transforma o texto em número e permite somar</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a coluna de preço do cardápio</h2>
+<p>Deixe os preços alinhados à direita, para as casas decimais ficarem uma sobre a outra. Qual classe
+faz esse alinhamento?</p>
+<div class="ex-code">&lt;td class="px-4 py-3 <input aria-label="resposta 1" data-answer="text-right" placeholder="..."> tabular-nums"&gt;R$ 12,00&lt;/td&gt;</div>
+<p class="ex-dica">Dica: é a mesma classe que você usaria num parágrafo para empurrar o texto para a
+margem direita. Existe a versão para o centro e a versão para a esquerda, com nomes igualmente
+óbvios.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Tabela é a tag certa para dado tabular, e a estrutura é sempre a mesma: <code>table</code> com
+<code>thead</code> e <code>tbody</code>, linhas <code>tr</code>, células de cabeçalho
+<code>th</code> com <code>scope="col"</code> e células de dado <code>td</code>. O Tailwind não tem
+classe específica de tabela: usa as mesmas de qualquer caixa. O respiro vai em cada célula, com
+<code>px-4 py-3</code>; alinhamento e números vão com <code>text-right</code> e
+<code>tabular-nums</code>; o cabeçalho se distingue com fundo claro, texto menor e uma borda embaixo.</p>
+
+<p>No celular, a regra é invólucro que rola mais largura mínima: <code>div</code> com
+<code>overflow-x-auto</code> em volta e <code>min-w-96</code> na tabela. E quando a tabela tem muitas
+colunas, a resposta madura não é espremer: é mostrar uma lista de cartões na tela pequena e a tabela
+na grande.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Estrutura: <code>table &gt; thead + tbody &gt; tr &gt; th/td</code>; legenda no
+<code>caption</code>.</li>
+<li><code>scope="col"</code> no <code>th</code> melhora o anúncio do leitor de tela.</li>
+<li>Respiro vai em cada célula: <code>px-4 py-3</code>.</li>
+<li>Preço à direita com <code>text-right</code> e <code>tabular-nums</code>, inclusive no
+<code>th</code>.</li>
+<li>Cabeçalho: <code>bg-stone-100 text-xs uppercase text-stone-600</code> mais
+<code>border-b</code>.</li>
+<li>Linhas: <code>border-b border-stone-200</code> e <code>last:border-0</code> na última.</li>
+<li>Celular: invólucro <code>overflow-x-auto</code> + <code>min-w-96</code> na tabela.</li>
+<li><code>whitespace-nowrap</code> impede o número ou o nome de quebrar em três linhas.</li>
+<li>Não misture listra (<code>odd:</code>) com borda em todas as linhas.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

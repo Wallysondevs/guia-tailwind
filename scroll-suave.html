@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rolagem Suave | Guia Tailwind</title>
+<meta name="description" content="Rolagem suave com scroll-smooth: onde pôr a classe, por que o título some atrás da barra fixa e como compensar com scroll-mt e scroll-pt.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Rolagem <span class="hl">Suave</span></h1>
+<p class="intro">A Ana pôs no topo do site um link “Encomendas” que leva para a seção lá embaixo. Ao
+clicar, a página deu um salto seco: o conteúdo passou voando e ela perdeu a noção de onde estava. Pior:
+o título “Encomendas” parou escondido atrás da barra que fica fixa no alto. Nesta aula ela resolve as
+duas coisas — o salto e o esconderijo — com duas famílias de classes que quase ninguém nota até
+precisar: <code>scroll-smooth</code> e <code>scroll-mt-…</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que a rolagem suave muda — e o que ela não muda.</li>
+  <li>Em qual elemento a classe <code>scroll-smooth</code> precisa ficar.</li>
+  <li>Por que colocar a classe no lugar errado é o erro mais comum.</li>
+  <li>Como compensar a barra fixa com <code>scroll-mt-…</code> no destino da âncora.</li>
+  <li>A diferença entre <code>scroll-mt</code> (no alvo) e <code>scroll-pt</code> (no container).</li>
+  <li>Como desligar a suavidade para quem pediu menos movimento.</li>
+  <li>Quando a rolagem suave atrapalha em vez de ajudar.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o salto que assusta</h2>
+
+<p>O site da padaria tem uma barra fixa no topo com a marca e três links: “Pães”, “Encomendas” e
+“Onde estamos”. Cada link aponta para uma seção da mesma página, usando aquele recurso antigo do HTML
+chamado âncora: o link tem <code>href="#encomendas"</code> e a seção tem
+<code>id="encomendas"</code>. Funciona desde 1995 e continua funcionando.</p>
+
+<p>O problema é o jeito. O navegador trata um clique de âncora como uma ordem de “vá para este ponto”,
+e o padrão é ir na hora: a página salta, o conteúdo vira um borrão por um instante e a pessoa chega
+sem saber se desceu ou se mudou de página. Em distâncias longas, o susto é maior. A Ana viu isso e
+quis o deslize macio que os sites grandes têm.</p>
+
+<p>O segundo problema é mais silencioso. A barra do topo é fixa, então ela cobre os primeiros pixels
+da seção de destino. O título “Encomendas” para exatamente embaixo dela — a pessoa clica em
+“Encomendas” e chega numa seção sem título visível, com a barra por cima. Parece que o link errou o
+alvo. Não errou: o navegador colocou a seção no topo da janela, sem saber que ali já mora outra coisa.</p>
+
+<p>A boa notícia é que os dois consertos são classes, não código. Uma cuida do <em>como</em> a rolagem
+acontece; a outra cuida do <em>onde</em> ela para. E, como quase tudo nesta parte do guia, elas
+funcionam melhor acompanhadas de uma variante de acessibilidade.</p>
+
+<h2>2. O que a rolagem suave muda (e o que não muda)</h2>
+
+<p>A classe <code>scroll-smooth</code> escreve uma propriedade do CSS chamada
+<code>scroll-behavior</code> com o valor <code>smooth</code>. Traduzindo: “quando alguém mandar rolar
+até um ponto, vá deslizando em vez de saltar”. Quem decide a duração e a curva desse deslize é o
+navegador; você não configura. Em geral, ele leva alguns décimos de segundo e usa uma curva suave.</p>
+
+<p>Aqui vem a confusão número um. A rolagem suave <strong>não</strong> muda a roda do mouse nem o
+arrasto do dedo. Esses já são suaves por natureza, controlados pelo sistema e pelo hardware. O que a
+classe afeta são as rolagens <em>programadas</em>: o clique numa âncora, o botão “voltar ao topo”, o
+código que chama uma rolagem até certo elemento. Se você escrever <code>scroll-smooth</code> e girar a
+roda, não vai notar diferença — e não é bug.</p>
+
+<p>Isso importa porque muita gente testa do jeito errado. A conferência certa é clicar num link de
+âncora e observar. Nas caixas abaixo, os links existem justamente para isso: clique e veja a página
+deslizar em vez de pular.</p>
+
+<p>Uma segunda confusão: existe um <code>behavior: "smooth"</code> que se passa em JavaScript para
+uma rolagem específica. O <code>scroll-smooth</code> do Tailwind é a versão global, aplicada ao
+elemento que rola e valendo para todas as rolagens programadas dentro dele. Os dois conversam: a
+preferência passada no código ganha do CSS, quando existe.</p>
+
+<h2>3. Onde a classe vai: no elemento que rola</h2>
+
+<p>Este é o detalhe que decide se a coisa funciona. A propriedade pertence ao <strong>elemento que
+rola</strong>, não ao conteúdo, não ao link e não ao alvo. Na maioria das páginas, quem rola é o
+próprio documento, representado pela tag <code>html</code>. Então a classe vai nela, no topo do
+arquivo:</p>
+
+<pre class="file" data-file="index.html">&lt;html lang="pt-BR" class="scroll-smooth"&gt;</pre>
+
+<p>Sim, uma classe na tag <code>html</code>, que ninguém vê. É o lugar certo e o único que funciona
+para a página inteira. Se você colocar no <code>body</code>, pode até funcionar em alguns navegadores,
+mas o padrão é o <code>html</code> — e o Tailwind não muda isso. Já vi gente colocar
+<code>scroll-smooth</code> no <code>&lt;main&gt;</code>, no <code>&lt;div class="content"&gt;</code> e
+até no link, sempre com o mesmo resultado: nada.</p>
+
+<p>Quando a rolagem acontece dentro de uma caixa com <code>overflow-y-auto</code> — um painel, uma
+lista, um menu —, quem rola é a caixa. Aí a classe vai nela, junto com as classes de altura e de
+transbordo:</p>
+
+<pre class="file" data-file="painel.html">&lt;div class="h-64 scroll-smooth overflow-y-auto"&gt;…&lt;/div&gt;</pre>
+
+<p>E existe o caso de vários containers aninhados. A regra é simples: a classe vale para o elemento
+que tem uma barra de rolagem própria. Se um container rola e o filho não, a classe vai no pai. Se os
+dois rolam, cada um precisa da sua.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Quem rola</th><th>Onde vai a classe</th><th>Exemplo</th></tr>
+<tr><td>a página inteira</td><td>na tag <code>html</code></td><td><code>&lt;html class="scroll-smooth"&gt;</code></td></tr>
+<tr><td>um painel com altura fixa</td><td>no próprio painel</td><td><code>h-64 overflow-y-auto scroll-smooth</code></td></tr>
+<tr><td>uma área de código</td><td>no <code>pre</code> ou na caixa dele</td><td><code>max-h-40 overflow-auto scroll-smooth</code></td></tr>
+<tr><td>o destino de uma âncora</td><td>no alvo, com <code>scroll-mt-…</code></td><td><code>&lt;section id="encomendas" class="scroll-mt-24"&gt;</code></td></tr>
+</table>
+</div>
+
+<dl class="anatomy">
+<dt>âncora</dt>
+<dd>Um ponto de destino dentro da página: a seção tem <code>id="encomendas"</code> e o link aponta
+para <code>#encomendas</code>.</dd>
+<dt>rolagem programada</dt>
+<dd>Qualquer rolagem que não vem da mão do visitante: clique em âncora, botão “voltar ao topo”,
+chamada no código. É nela que o <code>scroll-smooth</code> age.</dd>
+<dt>scroll-behavior</dt>
+<dd>A propriedade do CSS que escolhe entre saltar (<code>auto</code>) e deslizar
+(<code>smooth</code>).</dd>
+<dt>scroll-margin</dt>
+<dd>A folga que o navegador respeita antes do alvo. Não ocupa espaço no layout como a margem
+comum.</dd>
+<dt>barra fixa</dt>
+<dd>A barra que fica no topo enquanto o conteúdo passa por baixo. É ela que esconde o título e
+obriga a usar a folga.</dd>
+</dl>
+
+<p>Repare que a terceira coluna repete classes que você já conhece. A rolagem suave não é um recurso
+isolado: ela se soma ao <code>overflow</code>, à altura e ao espaçamento. É por isso que ela aparece
+aqui, depois das aulas de tamanho e de transbordo — sem eles, não há o que rolar.</p>
+
+<h2>4. A primeira missão: suavizar um painel</h2>
+
+<p>Na caixa abaixo há um painel de 160 px de altura com a lista do dia e dois links de âncora: um
+leva ao fim da lista, o outro volta ao topo. Clique em um deles antes de mexer: o conteúdo salta
+dentro do painel. A missão é fazer esse salto virar deslize.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|scroll-behavior=smooth;;rule:scroll-behavior: smooth">
+  <p class="try-task">Faça o painel rolar suavemente quando alguém clicar nos links de âncora.
+  Acrescente a classe no elemento que rola.</p>
+  <pre class="html">&lt;div class="rounded-lg border border-amber-200 bg-white"&gt;
+  &lt;p class="border-b border-amber-100 p-2 text-sm"&gt;
+    &lt;a href="#fim" class="font-semibold text-amber-800 underline"&gt;Ir para o fim&lt;/a&gt;
+  &lt;/p&gt;
+  &lt;div id="alvo" class="h-40 overflow-y-auto p-4 text-sm text-amber-900"&gt;
+    &lt;p&gt;Pão francês — 6h e 16h&lt;/p&gt;
+    &lt;p&gt;Pão de queijo — o dia inteiro&lt;/p&gt;
+    &lt;p&gt;Broa de milho — 7h&lt;/p&gt;
+    &lt;p&gt;Rosca doce — 8h&lt;/p&gt;
+    &lt;p&gt;Baguete — 11h e 17h&lt;/p&gt;
+    &lt;p&gt;Pão integral — 7h e 15h&lt;/p&gt;
+    &lt;p id="fim" class="font-semibold"&gt;Fim da lista — encomendas até as 18h.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+height: 160px
+padding: 16px
+color: oklch(0.414 0.112 45.904)
+font-size: 14px
+line-height: 20px
+overflow-y: auto
+</pre>
+  <pre class="solucao">&lt;div class="rounded-lg border border-amber-200 bg-white"&gt;
+  &lt;p class="border-b border-amber-100 p-2 text-sm"&gt;
+    &lt;a href="#fim" class="font-semibold text-amber-800 underline"&gt;Ir para o fim&lt;/a&gt;
+  &lt;/p&gt;
+  &lt;div id="alvo" class="h-40 scroll-smooth overflow-y-auto p-4 text-sm text-amber-900"&gt;
+    &lt;p&gt;Pão francês — 6h e 16h&lt;/p&gt;
+    &lt;p&gt;Pão de queijo — o dia inteiro&lt;/p&gt;
+    &lt;p&gt;Broa de milho — 7h&lt;/p&gt;
+    &lt;p&gt;Rosca doce — 8h&lt;/p&gt;
+    &lt;p&gt;Baguete — 11h e 17h&lt;/p&gt;
+    &lt;p&gt;Pão integral — 7h e 15h&lt;/p&gt;
+    &lt;p id="fim" class="font-semibold"&gt;Fim da lista — encomendas até as 18h.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>scroll-behavior</code> porque a propriedade aparece no CSS computado do
+elemento. Antes da missão, ela vale <code>auto</code>, que é o padrão do navegador: salto. Depois,
+vale <code>smooth</code>. Essa é uma das raras propriedades que o painel consegue conferir sem
+truque, porque não depende de estado nem de media query.</p>
+
+<p>Se o deslize não aparecer, verifique dois pontos. Primeiro: a classe está no elemento que tem
+<code>overflow-y-auto</code> e altura limitada? Segundo: o link aponta para um <code>id</code> que
+existe dentro desse painel? Um <code>href</code> errado — <code>#fimm</code>, com dois “m” — não rola
+nada, e você acha que a suavidade falhou.</p>
+
+<h2>5. O título escondido atrás da barra</h2>
+
+<p>Agora o segundo problema da Ana. Quando a página inteira rola e existe uma barra fixa no topo, o
+navegador coloca o alvo da âncora na borda de cima da janela — exatamente onde a barra está. O título
+aparece por baixo dela e o visitante vê uma seção decapitada.</p>
+
+<p>A solução é dizer ao navegador: “pare um pouco antes do alvo”. Essa folga se chama
+<code>scroll-margin</code> e o Tailwind a expõe em <code>scroll-mt-…</code>, com o <code>t</code> de
+topo. O valor é o mesmo da escala de sempre: <code>scroll-mt-24</code> vale 24 × 4 px = 96 px. Se a
+sua barra tem 64 px de altura, <code>scroll-mt-16</code> (64 px) é o mínimo; meio degrau a mais
+respiro é melhor que meio a menos.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|scroll-margin-top=40px;;rule:scroll-margin-top: calc(var(--spacing) * 10)">
+  <p class="try-task">O painel tem uma barra fixa de 36 px no topo. Ao clicar no link “Retirada”, o
+  título precisa parar logo abaixo da barra, com 40 px de folga. Acrescente a classe no título.</p>
+  <pre class="html">&lt;div class="rounded-lg border border-amber-200 bg-white text-sm"&gt;
+  &lt;p class="border-b border-amber-100 p-2"&gt;
+    &lt;a href="#alvo" class="font-semibold text-amber-800 underline"&gt;Ir para a retirada&lt;/a&gt;
+  &lt;/p&gt;
+  &lt;div class="h-40 scroll-smooth overflow-y-auto"&gt;
+    &lt;div class="sticky top-0 bg-amber-900 p-2 text-amber-50"&gt;Padaria — barra fixa&lt;/div&gt;
+    &lt;p class="p-4 text-amber-900"&gt;O forno acende às 4h e a primeira fornada sai às 6h.&lt;/p&gt;
+    &lt;p class="p-4 text-amber-900"&gt;As encomendas para o mesmo dia fecham às 15h.&lt;/p&gt;
+    &lt;h3 id="alvo" class="p-4 text-base font-bold text-amber-900"&gt;Retirada na loja&lt;/h3&gt;
+    &lt;p class="p-4 text-amber-900"&gt;Traga a sacola; o balcão fica ao lado do caixa.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+color: oklch(0.414 0.112 45.904)
+font-size: 16px
+font-weight: 700
+line-height: 24px
+</pre>
+  <pre class="solucao">&lt;div class="rounded-lg border border-amber-200 bg-white text-sm"&gt;
+  &lt;p class="border-b border-amber-100 p-2"&gt;
+    &lt;a href="#alvo" class="font-semibold text-amber-800 underline"&gt;Ir para a retirada&lt;/a&gt;
+  &lt;/p&gt;
+  &lt;div class="h-40 scroll-smooth overflow-y-auto"&gt;
+    &lt;div class="sticky top-0 bg-amber-900 p-2 text-amber-50"&gt;Padaria — barra fixa&lt;/div&gt;
+    &lt;p class="p-4 text-amber-900"&gt;O forno acende às 4h e a primeira fornada sai às 6h.&lt;/p&gt;
+    &lt;p class="p-4 text-amber-900"&gt;As encomendas para o mesmo dia fecham às 15h.&lt;/p&gt;
+    &lt;h3 id="alvo" class="scroll-mt-10 p-4 text-base font-bold text-amber-900"&gt;Retirada na loja&lt;/h3&gt;
+    &lt;p class="p-4 text-amber-900"&gt;Traga a sacola; o balcão fica ao lado do caixa.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Clique no link e compare: sem a classe, o título para embaixo da barra escura; com ela, sobra um
+respiro de 40 px e o título aparece inteiro. O painel confirma: <code>scroll-margin-top: 40px</code>,
+que é o resultado de <code>calc(var(--spacing) * 10)</code>.</p>
+
+<p>O <code>scroll-margin</code> é uma margem que só existe para efeito de rolagem. Ela não afasta o
+título dos vizinhos, não muda o espaçamento da seção e não aparece no layout. É como uma área de
+estacionamento invisível em volta do alvo: o navegador considera, o olho não vê. Isso a diferencia de
+<code>mt-10</code>, que empurraria tudo de verdade.</p>
+
+<h2>6. scroll-mt no alvo, scroll-pt no container</h2>
+
+<p>Existe uma segunda maneira de dar a mesma folga, e a escolha entre elas vale entender. O
+<code>scroll-mt-…</code> fica no <em>alvo</em> e vale para aquele alvo. O <code>scroll-pt-…</code> fica
+no <em>container que rola</em> e vale para todos os alvos dentro dele. É a diferença entre forrar cada
+prato e forrar a mesa.</p>
+
+<pre class="term">.scroll-smooth {
+  scroll-behavior: smooth;
+}
+.scroll-mt-24 {
+  scroll-margin-top: calc(var(--spacing) * 24);
+}
+.scroll-pt-6 {
+  scroll-padding-top: calc(var(--spacing) * 6);
+}</pre>
+
+<p>Na prática: se a página tem uma barra fixa e vinte seções com âncora, o <code>scroll-pt-24</code>
+no <code>html</code> resolve todas de uma vez. Se só uma seção tem esse problema — porque é a única
+com uma barra local por cima —, o <code>scroll-mt-…</code> naquela seção é mais preciso. E há um caso
+em que o <code>scroll-mt</code> é obrigatório: quando o container rolável é uma caixa pequena e você
+quer folgas diferentes para alvos diferentes.</p>
+
+<p>Uma armadilha: <code>scroll-pt</code> no <code>html</code> não funciona se quem rola for outro
+elemento. De novo, a pergunta é sempre “quem tem a barra de rolagem?”. Colocar as duas classes e
+testar é mais rápido que discutir: o DevTools mostra qual das duas tem efeito.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Vai no</th><th>Vale para</th><th>Valor em px</th></tr>
+<tr><td><code>scroll-mt-16</code></td><td>alvo</td><td>aquele alvo</td><td>64 px</td></tr>
+<tr><td><code>scroll-mt-20</code></td><td>alvo</td><td>aquele alvo</td><td>80 px</td></tr>
+<tr><td><code>scroll-mt-24</code></td><td>alvo</td><td>aquele alvo</td><td>96 px</td></tr>
+<tr><td><code>scroll-mt-32</code></td><td>alvo</td><td>aquele alvo</td><td>128 px</td></tr>
+<tr><td><code>scroll-pt-6</code></td><td>container</td><td>todos os alvos dentro</td><td>24 px</td></tr>
+</table>
+</div>
+
+<p>Medir a barra é fácil: clique com o botão direito, inspecione e leia a altura na aba
+<em>Computed</em>. Some uns 8 px de respiro e escolha o degrau da escala mais próximo para cima. Não
+existe “valor certo” universal: barra de 56 px com <code>scroll-mt-16</code> fica com 8 px de sobra;
+com <code>scroll-mt-24</code> fica com 40, mais confortável.</p>
+
+<h2>7. A terceira missão: respeitar quem pediu menos movimento</h2>
+
+<p>Rolagem suave é movimento — e movimento pode incomodar. Aquele deslize de dois segundos numa página
+longa é exatamente o tipo de coisa que faz uma pessoa com sensibilidade vestibular passar mal. O
+sistema operacional oferece a opção “reduzir movimento”, e o CSS a recebe pela media query
+<code>prefers-reduced-motion</code>.</p>
+
+<p>A variante <code>motion-reduce:</code> vale quando a pessoa pediu menos movimento. A classe que
+desfaz a suavidade é <code>scroll-auto</code>, o oposto de <code>scroll-smooth</code>. Juntas, elas
+dizem: “deslize para quem gosta, salte para quem pediu sossego”.</p>
+
+<div class="trytailwind" data-goal="rule:@media (prefers-reduced-motion: reduce);;rule:scroll-behavior: auto">
+  <p class="try-task">O painel já rola suavemente. Acrescente a variante que volta ao salto seco para
+  quem configurou o sistema pedindo menos movimento.</p>
+  <pre class="html">&lt;div class="rounded-lg border border-amber-200 bg-white"&gt;
+  &lt;p class="border-b border-amber-100 p-2 text-sm"&gt;
+    &lt;a href="#fim" class="font-semibold text-amber-800 underline"&gt;Ir para o fim&lt;/a&gt;
+  &lt;/p&gt;
+  &lt;div id="alvo" class="h-40 scroll-smooth overflow-y-auto p-4 text-sm text-amber-900"&gt;
+    &lt;p&gt;Pão francês — 6h e 16h&lt;/p&gt;
+    &lt;p&gt;Pão de queijo — o dia inteiro&lt;/p&gt;
+    &lt;p&gt;Broa de milho — 7h&lt;/p&gt;
+    &lt;p&gt;Rosca doce — 8h&lt;/p&gt;
+    &lt;p&gt;Baguete — 11h e 17h&lt;/p&gt;
+    &lt;p id="fim" class="font-semibold"&gt;Fim da lista — encomendas até as 18h.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+height: 160px
+padding: 16px
+color: oklch(0.414 0.112 45.904)
+font-size: 14px
+line-height: 20px
+overflow-y: auto
+scroll-behavior: smooth
+</pre>
+  <pre class="solucao">&lt;div class="rounded-lg border border-amber-200 bg-white"&gt;
+  &lt;p class="border-b border-amber-100 p-2 text-sm"&gt;
+    &lt;a href="#fim" class="font-semibold text-amber-800 underline"&gt;Ir para o fim&lt;/a&gt;
+  &lt;/p&gt;
+  &lt;div id="alvo" class="h-40 scroll-smooth motion-reduce:scroll-auto overflow-y-auto p-4 text-sm text-amber-900"&gt;
+    &lt;p&gt;Pão francês — 6h e 16h&lt;/p&gt;
+    &lt;p&gt;Pão de queijo — o dia inteiro&lt;/p&gt;
+    &lt;p&gt;Broa de milho — 7h&lt;/p&gt;
+    &lt;p&gt;Rosca doce — 8h&lt;/p&gt;
+    &lt;p&gt;Baguete — 11h e 17h&lt;/p&gt;
+    &lt;p id="fim" class="font-semibold"&gt;Fim da lista — encomendas até as 18h.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS gerado é o de sempre, com a casca da media query:</p>
+
+<pre class="term">@media (prefers-reduced-motion: reduce) {
+  .motion-reduce\:scroll-auto {
+    scroll-behavior: auto;
+  }
+}</pre>
+
+<p>Não há nada de especial nessa variante. Ela é a mesma ideia que aparece nas aulas de animação e de
+transição: o site não deve impor movimento a quem pediu para não receber. E, como sempre, a
+conferência visual é chata — você precisa ligar a opção no sistema para ver. Por isso a meta desta
+caixa olha o CSS gerado.</p>
+
+<p>Um detalhe que vale saber: alguns navegadores já desligam a rolagem suave por conta própria quando
+a pessoa pede menos movimento, e outros não. Confiar nisso é loteria. A variante custa uma classe e
+resolve em todos.</p>
+
+<h2>8. Quando a rolagem suave atrapalha</h2>
+
+<p>Sim, existe esse caso. O navegador escolhe a duração da rolagem suave de acordo com a distância —
+quanto mais longe, mais tempo. Numa página de três telas, o deslize fica agradável. Numa página de
+quinze, pode chegar a mais de um segundo, e a pessoa que clicou em “Encomendas” fica esperando. Não há
+como configurar a duração por CSS: ou você aceita, ou abre mão da suavidade naquela rolagem e usa
+JavaScript com opções.</p>
+
+<p>Outro caso: rolagem suave dentro de uma caixa pequena, como uma lista de 160 px. A distância é
+curta, e o deslize fica quase instantâneo — vale pela consistência, não pelo espetáculo. Já em
+carrosséis e listas horizontais, a suavidade pode dar a sensação de “derrapagem”, principalmente com
+toque. Nesses casos, muitas equipes deixam apenas a rolagem nativa, que já é suave no celular.</p>
+
+<p>E há o caso do botão “voltar ao topo” numa página muito longa. Um deslize de dez segundos é
+tortura. A prática é a mesma dos sites grandes: se a distância for enorme, o botão nem usa rolagem
+suave; ele leva direto ao topo, ou a um ponto intermediário. A suavidade é um tempero, não uma regra
+de casa.</p>
+
+<div class="cenario">
+<h3>Cenário 1: a classe no lugar errado</h3>
+<p>A Ana colocou <code>scroll-smooth</code> no <code>&lt;main&gt;</code>, clicou no link e nada mudou.
+O <code>main</code> não tem barra de rolagem própria; quem rola é o <code>html</code>. A classe
+precisa estar no elemento que rola. O teste rápido: no DevTools, selecione o elemento e procure
+<code>scroll-behavior</code> na aba <em>Computed</em>. Se estiver <code>auto</code> no elemento que
+rola, a classe está no lugar errado.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o padding que empurrou tudo</h3>
+<p>Para o título não ficar embaixo da barra, ela acrescentou <code>pt-24</code> na seção. O título
+deixou de sumir, mas a seção ganhou 96 px de espaço em cima para sempre — inclusive quando ninguém
+clica em link nenhum. O espaçamento da página inteira mudou. O <code>scroll-mt-24</code> faz a mesma
+folga só na hora da rolagem, sem tocar no layout. É a diferença entre consertar o sintoma e consertar
+a causa.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a âncora que muda o histórico</h3>
+<p>Ela notou que, depois de clicar em “Encomendas”, o botão “voltar” do navegador a levava para o topo
+em vez de sair da página. Isso é comportamento normal de âncora: o navegador registra o salto no
+histórico. Não é defeito do Tailwind nem da rolagem suave. Se a página precisa que o link não altere o
+histórico, isso é decisão de JavaScript — e, para o visitante, o voltar-ao-topo é até útil.</p>
+</div>
+
+<h2>9. Onde isso entra no projeto</h2>
+
+<p>A classe <code>scroll-smooth</code> é uma daquelas que se coloca uma vez e se esquece. No site da
+padaria, ela foi para o <code>html</code> do layout comum — o arquivo que todas as páginas compartilham
+—, junto com <code>scroll-pt-24</code> para compensar a barra fixa. Pronto: todos os links de âncora do
+site passaram a deslizar, e todas as seções passaram a parar abaixo da barra.</p>
+
+<p>Se você usa um framework com componente de layout, o lugar é o mesmo: a tag <code>html</code> que
+envolve tudo. E se o seu site tem uma barra cuja altura muda conforme o tamanho da tela, o
+<code>scroll-pt</code> pode ganhar variantes: <code>scroll-pt-16 md:scroll-pt-24</code>. A lógica é a
+de sempre — mobile first, degrau por degrau.</p>
+
+<p>Vale lembrar que a rolagem suave é um dos poucos recursos desta parte do guia que mexe em algo que
+o visitante nem vê: ele só sente. Por isso, testar com o teclado e com o dedo é obrigatório. Clique no
+link, aperte Tab, navegue com as setas e veja se o foco acompanha a rolagem. Em muitos navegadores,
+sim: o foco vai junto e a pessoa continua de onde parou.</p>
+
+<p>E, para fechar a parte prática, um lembrete de que rolagem é transbordo: se o conteúdo não estoura
+a altura, não há o que rolar, e a classe não tem o que suavizar. As aulas de
+<a href="overflow.html">overflow</a> e de <a href="w-e-h.html">largura e altura</a> são as parceiras
+naturais desta.</p>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Em que elemento vai o <code>scroll-smooth</code>
+para a página inteira?</p>
+<label><input type="radio" name="q1"> na tag <code>body</code>, sempre</label>
+<label><input type="radio" name="q1"> na tag <code>html</code>, que é quem rola</label>
+<label><input type="radio" name="q1"> no primeiro link de âncora da página</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que <code>scroll-mt-24</code> faz?</p>
+<label><input type="radio" name="q2"> dá 96 px de espaço em cima da seção, no layout</label>
+<label><input type="radio" name="q2"> aumenta a velocidade da rolagem</label>
+<label><input type="radio" name="q2"> faz a rolagem parar 96 px antes do alvo</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que usar <code>motion-reduce:scroll-auto</code>?</p>
+<label><input type="radio" name="q3"> para quem pediu menos movimento receber o salto seco, sem deslize</label>
+<label><input type="radio" name="q3"> para a rolagem funcionar no celular</label>
+<label><input type="radio" name="q3"> para o link de âncora não mudar o histórico</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a barra de 64 px</h2>
+<p>O site usa uma barra fixa de 64 px no topo e a seção de encomendas precisa parar logo abaixo dela.
+Complete a classe do destino:</p>
+<div class="ex-code">&lt;section id="encomendas" class="<input aria-label="resposta 1" data-answer="scroll-mt-16" placeholder="...">"&gt;Encomendas&lt;/section&gt;</div>
+<p class="ex-dica">Dica: 64 px são 16 degraus da escala. Não use <code>mt-16</code>: esse empurraria a
+seção de verdade, em vez de só mudar o ponto de parada da rolagem.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Rolagem suave é uma propriedade do elemento que rola: <code>scroll-behavior: smooth</code>, escrita
+pela classe <code>scroll-smooth</code>. Na página inteira, ela mora no <code>html</code>; num painel,
+no próprio painel que tem altura e <code>overflow</code>. Ela muda as rolagens programadas — clique em
+âncora, botão de voltar ao topo, chamada de código —, e não a roda do mouse.</p>
+
+<p>Quando existe barra fixa, o alvo precisa de folga: <code>scroll-mt-…</code> no alvo ou
+<code>scroll-pt-…</code> no container. A folga só vale na hora da rolagem, sem alterar o layout. E o
+par de acessibilidade é <code>motion-reduce:scroll-auto</code>, para quem pediu menos movimento
+receber o salto em vez do deslize.</p>
+
+<p>A sequência de diagnóstico, quando não funciona: quem rola? a classe está nesse elemento? o
+<code>id</code> do alvo existe? o <code>href</code> está certo? Quatro perguntas, quase sempre uma
+resposta.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>scroll-smooth</code> = <code>scroll-behavior: smooth</code>, no elemento que rola.</li>
+<li>Página inteira rola no <code>html</code>; painel rola nele mesmo.</li>
+<li>A classe não muda a roda do mouse; ela age em âncoras e rolagens programadas.</li>
+<li><code>scroll-mt-…</code> no alvo dá folga para a barra fixa, sem mexer no layout.</li>
+<li><code>scroll-pt-…</code> no container faz o mesmo para todos os alvos.</li>
+<li>A folga deve ser igual ou maior que a altura da barra fixa.</li>
+<li>Não use <code>pt-…</code> para isso: o espaço fica para sempre.</li>
+<li><code>motion-reduce:scroll-auto</code> devolve o salto para quem pediu menos movimento.</li>
+<li>O navegador escolhe a duração; distâncias longas ficam lentas e não há ajuste por CSS.</li>
+<li>Sem conteúdo que transborde, não há rolagem para suavizar.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

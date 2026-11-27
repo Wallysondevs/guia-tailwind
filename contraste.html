@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contraste e Leitura | Guia Tailwind</title>
+<meta name="description" content="Contraste de verdade, com números: por que 4,5 para 1 é o mínimo, quais tons da paleta passam, como medir o par e como o tema escuro muda a conta.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Contraste e <span class="hl">Leitura</span></h1>
+<p class="intro">A dona Cida, freguesa da padaria desde a inauguração, pediu o cartaz do pão do dia
+porque não estava conseguindo ler o horário no site. A Ana olhou a página no notebook e leu sem
+esforço. No celular, na porta da loja, com sol batendo na tela, aquele cinza clarinho sumia. Nesta
+aula a Ana aprende a medir o contraste com números em vez de opinião: existe uma conta por trás, ela
+está publicada num padrão que o mundo inteiro usa, e o Tailwind tem os tons que passam e os que não
+passam.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é a razão de contraste e por que ela vai de 1:1 a 21:1.</li>
+  <li>Os três limites que importam: 4,5:1, 3:1 e 7:1, e quando cada um vale.</li>
+  <li>Quais tons da paleta passam no branco e quais reprovam, com números.</li>
+  <li>Por que o contraste é do par (tinta e fundo) e não de uma cor sozinha.</li>
+  <li>O que muda em texto grande e o que é "grande" para o padrão.</li>
+  <li>Como pintar botão e selo sem cair no branco sobre âmbar.</li>
+  <li>O que a conta vira quando o fundo é escuro — e por que ela é diferente.</li>
+  <li>Contraste não é só cor: tamanho, peso, entrelinha e não depender de cor sozinha.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o cinza que sumiu no sol</h2>
+
+<p>O cartão da vitrine tinha três linhas: o nome do pão em quase-preto, o preço em quase-preto e o
+horário em cinza claro. No monitor da Ana, o cinza claro era elegante: dava a sensação de informação
+secundária, daquelas que não precisam competir com o preço. Na rua, o cinza claro deixou de ser
+elegante e passou a ser nada.</p>
+
+<p>O que aconteceu não é frescura de quem enxerga bem: o olho precisa de diferença de claridade para
+encontrar a forma das letras. Quando a diferença é pequena, você até consegue ler — gastando esforço.
+Por dois segundos, numa tela boa, parece que está tudo bem. Por trinta segundos, com sol, numa tela
+barata, e a pessoa desiste. A dona Cida desistiu e ligou para perguntar o horário, que estava escrito
+bem ali.</p>
+
+<pre class="file" data-file="index.html">&lt;p class="text-stone-900"&gt;Pão de queijo — R$ 6&lt;/p&gt;
+&lt;p class="text-stone-400"&gt;saído do forno às 6h&lt;/p&gt;</pre>
+
+<p>Repare no detalhe que engana: a classe existe, o texto está lá, o HTML está certo. Não há erro
+nenhum para o navegador reclamar. O problema é de <strong>acessibilidade</strong> — a página só
+funciona para quem tem o olho e a tela nas melhores condições. E é um problema que se resolve com uma
+troca de tom, se você souber qual trocar. Esta aula ensina a saber.</p>
+
+<h2>2. O que é a razão de contraste</h2>
+
+<p>Contraste é a diferença de claridade entre duas cores. Não é diferença de matiz (vermelho contra
+verde) nem de saturação (vivo contra apagado): é claridade, a quantidade de luz que aquela cor
+devolve. Duas cores bem diferentes em matiz podem ter claridade quase igual e, para o olho, se
+misturarem.</p>
+
+<p>A medida usada no mundo inteiro compara a claridade relativa das duas cores e devolve uma razão.
+Preto absoluto contra branco absoluto dá 21 para 1 — o máximo possível. Uma cor contra ela mesma dá 1
+para 1. Todo par de cores do universo cai entre esses dois extremos, e a conta mistura as claridades
+com pesos diferentes para vermelho, verde e azul, porque o olho humano não é igualmente sensível aos
+três.</p>
+
+<dl class="anatomy">
+<dt>razão de contraste</dt>
+<dd>O número que resume a diferença de claridade de um par, escrito como <code>4,5:1</code>. Quanto
+maior, mais fácil de ler.</dd>
+<dt>luminância</dt>
+<dd>A claridade de uma cor, de 0 (preto) a 1 (branco). É o que a conta mede antes de comparar.</dd>
+<dt>WCAG</dt>
+<dd>O padrão internacional de acessibilidade da web. É de onde saem os números de contraste que todo
+site deveria seguir.</dd>
+<dt>nível AA</dt>
+<dd>O nível exigido pela maioria das leis e políticas. Pede 4,5:1 para texto normal e 3:1 para texto
+grande.</dd>
+<dt>texto grande</dt>
+<dd>No padrão: a partir de 24 px, ou de 18,66 px em negrito. Só nesse caso 3:1 basta.</dd>
+<dt>contraste não textual</dt>
+<dd>A regra de 3:1 para o que não é letra: borda de campo, ícone que carrega informação, foco de
+teclado.</dd>
+</dl>
+
+<p>Você não vai calcular isso na mão. Existem conferidores de contraste gratuitos na web, e o
+navegador mostra a cor computada no inspetor. O que vale a pena é <em>saber a ordem de grandeza</em>,
+porque é isso que faz você suspeitar do cinza <code>400</code> antes de publicar. Uma vez que você
+memoriza que <code>stone-400</code> no branco dá 2,59, o número deixa de ser mistério e passa a ser
+ferramenta.</p>
+
+<h2>3. Os três limites que importam</h2>
+
+<p>O padrão de acessibilidade não pede "bastante contraste". Ele pede números, e são três:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Razão</th><th>Para quê</th><th>Onde se aplica</th></tr>
+<tr><td>4,5:1 ou mais</td><td>texto normal</td><td>tudo abaixo de 24 px: parágrafo, preço, etiqueta, rodapé</td></tr>
+<tr><td>3:1 ou mais</td><td>texto grande e elementos de interface</td><td>título de 24 px, borda de campo, ícone com informação, anel de foco</td></tr>
+<tr><td>7:1 ou mais</td><td>conforto real (nível AAA)</td><td>texto longo, público idoso, leitura em pé no balcão</td></tr>
+</table>
+</div>
+
+<p>O 4,5 é mínimo, não meta. Ele foi escolhido para que uma pessoa com visão típica leia sem esforço
+em condições típicas. Se o seu público lê no celular, na rua, com sol, o 7 é o número que dá preguiça
+zero. Para a padaria, que atende gente de todas as idades e muita gente de mais idade, mirar em 7 nos
+textos que importam (horário, preço, endereço) não é exagero: é cortesia.</p>
+
+<p>E o 3 existe por dois motivos diferentes. O primeiro é tipográfico: letra grande tem traço grosso,
+e traço grosso sobrevive com menos diferença de claridade. O segundo é funcional: a borda de um campo
+não precisa ser lida, precisa ser <em>vista</em>. Um campo com borda de 1,49:1 (é o que dá
+<code>border-stone-300</code> no branco) praticamente não tem contorno para quem tem baixa visão. Com
+<code>border-stone-500</code>, que está em 4,81, o campo aparece.</p>
+
+<p>Uma confusão comum: achar que 4,5 vale para tudo e o 3 é "para quem quer menos trabalho". Não é.
+O padrão é uma escada: você primeiro decide o que é aquele texto (normal, grande, interface) e só
+depois olha o número que se aplica. Um rodapé de 12 px com 3:1 está errado; um título de 30 px com 3:1
+está certo.</p>
+
+<h2>4. Os tons da paleta, com números</h2>
+
+<p>Agora a parte prática. A paleta do Tailwind tem onze tons por família, do 50 (quase branco) ao 950
+(quase preto). O número é, grosseiramente, a claridade: quanto maior o número, mais escuro. Sobre
+fundo branco, a régua fica assim para a família <code>stone</code>:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Tinta</th><th>Sobre branco</th><th>Serve para</th></tr>
+<tr><td><code>text-stone-400</code></td><td>2,59:1</td><td>nada que precise ser lido — reprova até como texto grande</td></tr>
+<tr><td><code>text-stone-500</code></td><td>4,81:1</td><td>texto normal, no limite; evite em corpo de texto</td></tr>
+<tr><td><code>text-stone-600</code></td><td>7,64:1</td><td>texto de apoio e rodapé, com folga</td></tr>
+<tr><td><code>text-stone-700</code></td><td>10,28:1</td><td>texto principal confortável</td></tr>
+<tr><td><code>text-stone-900</code></td><td>16,04:1</td><td>título e texto principal</td></tr>
+</table>
+</div>
+
+<p>A leitura dessa tabela muda o jeito de escrever HTML. O cinza <code>400</code> que a Ana escolheu,
+tão bonitinho no monitor, está abaixo até do mínimo para texto grande: ele não é "suave", é ilegível na
+rua. O <code>500</code> passa raspando (4,81 contra 4,5) e é aceitável para uma data ou uma legenda
+curta; para o horário do pão, que é a informação que a cliente quer, o <code>700</code> é o tom
+honesto.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-white);;rule:color: var(--color-stone-700)">
+  <p class="try-task">A linha do horário está em <code>text-stone-400</code> (2,59:1) e reprova.
+  Troque para <code>text-stone-700</code>, que dá 10,28:1, e rode para ver a diferença de peso na
+  tela.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-white p-4"&gt;
+  &lt;p class="text-stone-900"&gt;Pão de queijo — R$ 6&lt;/p&gt;
+  &lt;p class="text-stone-400"&gt;saído do forno às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-white p-4"&gt;
+  &lt;p class="text-stone-900"&gt;Pão de queijo — R$ 6&lt;/p&gt;
+  &lt;p class="text-stone-700"&gt;saído do forno às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Antes de rodar, chute um número para cada linha do cartão. O preço em <code>stone-900</code> está em
+16:1; a linha de apoio em <code>stone-700</code>, em 10,28. Os dois passam com muita folga. O que
+interessava não era "clarear o texto de apoio", era continuar lendo — e a hierarquia visual que a Ana
+queria se consegue com tamanho e posição, não apagando a letra até ela desaparecer.</p>
+
+<h2>5. O contraste é do par, não da cor</h2>
+
+<p>Existe uma armadilha que pega quem já decorou os números do branco: o fundo nem sempre é branco. O
+contraste é uma propriedade de duas cores juntas, e mudar o fundo muda o veredito sem que você toque
+no texto. <code>text-stone-500</code> no branco dá 4,81 e passa; o mesmo <code>stone-500</code> num
+fundo <code>stone-100</code> cai para 4,41 e reprova. A cor do texto é a mesma, o veredito é o
+oposto.</p>
+
+<pre class="term">.text-stone-500 {
+  color: var(--color-stone-500);
+}
+.bg-stone-100 {
+  background-color: var(--color-stone-100);
+}</pre>
+
+<p>O CSS acima não mostra contraste nenhum, e é justamente por isso que ele engana: as duas regras são
+inocentes separadas. Só o par decide. É por isso que quem escolhe cor por cor acaba com páginas
+irregulares, e quem escolhe <em>par</em> por <em>par</em> — como na aula de cores semânticas — acaba
+com páginas coerentes. Cada papel precisa de um par medido, não de uma cor bonita.</p>
+
+<p>A consequência prática é simples de aplicar: quando você cria um componente novo, meça o par inteiro
+uma vez e guarde. "Selo de promoção: âmbar 100 com âmbar 900, 8,17:1" é uma frase que resolve o
+problema para sempre. "Âmbar 900" sozinho não resolve nada, porque não diz sobre o que ele está.</p>
+
+<h2>6. Texto grande tem regra própria</h2>
+
+<p>A escada do 3:1 existe por um motivo físico: letra grande tem traço grosso, e traço grosso mantém a
+forma mesmo com pouca diferença de claridade. O padrão define "grande" com precisão: a partir de
+24 px, ou de 18,66 px quando o texto está em negrito. Abaixo disso, é texto normal e vale 4,5.</p>
+
+<p>Traduzindo para as classes do Tailwind, que você já viu em
+<a href="tamanho-do-texto.html">tamanho do texto</a>: <code>text-2xl</code> é 24 px e entra na regra do
+3:1; <code>text-xl</code> é 20 px e <em>não</em> entra, mesmo em negrito. Esse detalhe é onde os sites
+escorregam: o título de seção em 20 px negrito parece grande e está tecnicamente pequeno. Se você
+quer usar um tom mais claro no título, use <code>text-2xl</code> para cima, ou escureça o tom.</p>
+
+<p>Há um segundo motivo para não exagerar: a regra do texto grande é um alívio, não um convite. Um
+título de 24 px com 3:1 passa no padrão e ainda assim fica sofrível de ler em pé no balcão. Para o
+título grande e curto, o tom médio funciona; para a frase longa, o tom escuro.</p>
+
+<h2>7. Cor de fundo: o branco sobre âmbar</h2>
+
+<p>Quando a cor vira fundo, a conta se inverte: agora é a tinta clara que precisa de contraste com o
+bloco colorido. E aqui aparece o erro mais comum dos botões: branco sobre âmbar. A combinação parece
+alegre, combina com padaria, e reprova sem dó.</p>
+
+<pre class="term">.bg-amber-500 {
+  background-color: var(--color-amber-500);
+}
+.text-white {
+  color: var(--color-white);
+}</pre>
+
+<p>Branco sobre <code>amber-500</code> dá 2,15:1. Sobre <code>amber-600</code>, 3,19:1 — ainda abaixo
+de 4,5, se o botão tiver letra pequena. O âmbar é uma cor clara por natureza; texto claro em cima dele
+nunca vai funcionar. Duas saídas: escurecer o fundo até o <code>amber-700</code> (aí o branco passa) ou
+inverter o par, com fundo claro e tinta escura — que é o que os selos fazem.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-amber-100);;rule:color: var(--color-amber-900)">
+  <p class="try-task">O selo está com <code>bg-amber-500</code> e <code>text-white</code>: 2,15:1.
+  Inverta o par, usando fundo <code>bg-amber-100</code> e tinta <code>text-amber-900</code> — 8,17:1 —
+  e compare a leitura.</p>
+  <pre class="html">&lt;span id="alvo" class="bg-amber-500 p-2 rounded text-white font-medium"&gt;Pão quentinho&lt;/span&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: oklch(0.769 0.188 70.08)
+color: rgb(255, 255, 255)
+font-weight: 500
+border-radius: 4px
+</pre>
+  <pre class="solucao">&lt;span id="alvo" class="bg-amber-100 p-2 rounded text-amber-900 font-medium"&gt;Pão quentinho&lt;/span&gt;</pre>
+</div>
+
+<p>O selo invertido não é só mais legível: ele ocupa menos atenção visual, e isso é bom. Selo é
+informação de apoio; quem precisa gritar é o botão de encomendar. Guiando pela conta, você acaba
+descobrindo uma hierarquia que combina com a função — o botão escuro com texto branco (5,37:1 no
+<code>emerald-700</code>) chama mais que o selo claro. A acessibilidade não deixa a página feia; ela
+costuma deixá-la mais organizada.</p>
+
+<p>Vale um aviso sobre as cores da marca. Uma marca pode ser laranja, amarela ou verde-limão, e essas
+cores simplesmente não sustentam texto branco. A saída profissional não é escurecer a marca na
+identidade visual: é usar a marca em detalhes (borda, ícone, faixa) e reservar um tom escuro da mesma
+família para os botões. Marca e legibilidade são decisões diferentes, e a segunda não pode perder.</p>
+
+<h2>8. No escuro a conta muda de lado</h2>
+
+<p>No tema escuro, o cinza médio deixa de ser "claro demais" e passa a ser "escuro demais". A escala
+se inverte: o que funciona sobre branco costuma falhar sobre quase-preto. <code>stone-500</code> sobre
+<code>stone-900</code> dá 3,64:1 — reprova para texto normal. O mesmo <code>stone-400</code> que
+reprovava no branco (2,59) passa melhor no escuro (6,76).</p>
+
+<p>A regra de bolso que economiza muita conferência: no escuro, suba dois degraus da escala em relação
+ao que você usaria no claro. Se o texto de apoio era <code>stone-600</code> no claro, no escuro ele
+vira <code>stone-400</code>; se o principal era <code>stone-900</code>, no escuro ele vira
+<code>stone-100</code>. E a tinta pura branca sobre quase-preto (<code>stone-100</code> sobre
+<code>stone-900</code>, 16:1) costuma ser forte demais: cansa em texto longo, por causa do halo que a
+letra branca cria no fundo escuro. Muita gente usa <code>stone-200</code> ou <code>stone-300</code>
+para o corpo de texto e guarda o branco para o título.</p>
+
+<div class="trytailwind" data-goal="rule:color: var(--color-stone-300)" data-tema="escuro">
+  <p class="try-task">Esta prévia está no tema escuro. A linha de apoio está em
+  <code>text-stone-500</code> sobre <code>bg-stone-900</code>: 3,64:1, abaixo do mínimo. Troque para
+  <code>text-stone-300</code>, que dá 11,75:1, e rode.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-stone-900 p-4 rounded-xl"&gt;
+  &lt;p class="text-stone-100"&gt;Pão de queijo — R$ 6&lt;/p&gt;
+  &lt;p class="text-stone-500"&gt;saído do forno às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.216 0.006 56.043)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-stone-900 p-4 rounded-xl"&gt;
+  &lt;p class="text-stone-100"&gt;Pão de queijo — R$ 6&lt;/p&gt;
+  &lt;p class="text-stone-300"&gt;saído do forno às 6h&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Repare que no escuro a hierarquia se constrói com três degraus claros — <code>stone-100</code>,
+<code>stone-300</code>, <code>stone-400</code> — e não com o cinza médio. Quem tenta manter a mesma
+paleta do claro no escuro fica com texto apagado e a impressão de que "o tema escuro não funciona no
+meu site". Funciona; só a escada é outra.</p>
+
+<p>A borda também muda. Uma borda <code>stone-200</code> no branco dá 1,26:1 — invisível de propósito,
+porque ela é só um carinho visual. No escuro, a mesma lógica pede <code>stone-700</code> sobre
+<code>stone-900</code> (1,70:1) ou <code>stone-600</code> (2,29:1). Se a borda for a única coisa que
+diz "aqui é um campo de formulário", aí ela entra na regra dos 3:1 e precisa escurecer mais ou ganhar
+um fundo próprio que a destaque.</p>
+
+<h2>9. Contraste não é só cor</h2>
+
+<p>A conta resolve a maior parte do problema, mas não todo. Três coisas trabalham junto com a cor e são
+baratas de ajustar. A primeira é o <strong>tamanho</strong>: 16 px de texto de apoio lê melhor que 12 px
+escuro, e o padrão não proíbe corpo pequeno — só cobra mais contraste quando ele é pequeno. A segunda
+é o <strong>peso</strong>: <code>font-medium</code> num texto claro já ajuda a forma da letra. A
+terceira é a <strong>entrelinha</strong> e o espaço entre letras: texto apertado cansa mesmo com
+contraste alto.</p>
+
+<p>E tem a regra que resolve o caso mais difícil: nunca use cor como o único sinal de uma informação.
+Se "esgotado" é só a diferença entre verde e vermelho, quem não distingue os dois (cerca de uma em cada
+doze pessoas, em alguma medida) perde a informação. O conserto é barato: escreva a palavra, ponha um
+ícone, mude a forma. A cor continua bonita e vira reforço, não veículo único.</p>
+
+<div class="cenario">
+<h3>Cenário 1: o texto em cima da foto</h3>
+<p>A Ana pôs o nome do pão direto sobre a foto do balcão. Em partes claras da imagem, o texto
+desaparecia. A solução não é escolher outra foto: é criar uma camada escura entre os dois — um
+<code>bg-stone-950/60</code> (preto com 60% de opacidade) no container, ou um degradê na parte de
+baixo. A partir daí o par deixa de ser "texto contra foto" e passa a ser "texto contra uma cor
+conhecida", que é uma coisa que você consegue medir.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o link que se confunde com o texto</h3>
+<p>Ela usou <code>text-sky-600</code> nos links e o resultado ficou fraco: 4,02:1 no branco, abaixo do
+mínimo. O <code>text-sky-700</code> já dá 5,85:1 e resolve. E ficou melhor ainda quando o link passou a
+ter sublinhado: cor mais sublinhado não é redundância, é garantia — quem não vê a diferença de cor vê o
+traço embaixo. Em site de padaria, com endereço e telefone, link sublinhado é o padrão mais seguro.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o campo de formulário invisível</h3>
+<p>No formulário de encomenda, os campos tinham <code>border-stone-200</code> sobre fundo branco:
+1,26:1. No monitor dela dava para achar; no celular, o formulário parecia três linhas de texto soltas.
+Ela trocou por <code>border-stone-400</code> (2,59:1, ainda abaixo do 3) e depois por
+<code>border-stone-500</code> (4,81:1), com <code>ring</code> no foco. O campo passou a existir
+visualmente, e a taxa de gente que preenchia errado caiu — a mesma informação, agora com forma.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual é o contraste mínimo para um texto de 16 px?</p>
+<label><input type="radio" name="q1"> 3:1, porque todo texto deveria ser legível</label>
+<label><input type="radio" name="q1"> 4,5:1</label>
+<label><input type="radio" name="q1"> 7:1, sem exceção</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. <code>text-stone-500</code> passa no branco (4,81) e
+reprova no <code>stone-100</code> (4,41). Por quê?</p>
+<label><input type="radio" name="q2"> porque a paleta do Tailwind muda de tone conforme o fundo</label>
+<label><input type="radio" name="q2"> porque o navegador recalcula o cinza no fundo claro</label>
+<label><input type="radio" name="q2"> porque contraste é do par: mudar o fundo muda o resultado</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. No tema escuro, o que costuma acontecer com o tom do
+texto de apoio?</p>
+<label><input type="radio" name="q3"> ele precisa ser mais claro, uns dois degraus acima</label>
+<label><input type="radio" name="q3"> ele continua o mesmo, porque a cor não muda</label>
+<label><input type="radio" name="q3"> ele precisa ficar mais escuro para não brilhar</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o preço que se lê na rua</h2>
+<p>O preço do pão está em <code>text-stone-500</code>, que passa raspando. Suba dois degraus na escala
+para dar folga de leitura ao ar livre. Complete a classe:</p>
+<div class="ex-code">&lt;p class="<input aria-label="resposta 1" data-answer="text-stone-700" placeholder="..."> text-2xl"&gt;R$ 6&lt;/p&gt;</div>
+<p class="ex-dica">Dica: <code>stone-500</code> dá 4,81:1. Cada degrau escurece; o 700 chega a 10,28:1
+e continua sendo um cinza, não um preto.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Contraste é diferença de claridade entre duas cores, medida numa razão de 1:1 a 21:1. Os números que
+importam são três: 4,5:1 para texto normal, 3:1 para texto grande (24 px, ou 18,66 px em negrito) e
+para elementos de interface, e 7:1 quando você quer conforto de verdade. O contraste pertence ao par —
+tinta e fundo —, então a mesma classe pode passar num fundo e reprovar no outro.</p>
+
+<p>Na prática, a paleta obedece: sobre branco, <code>stone-400</code> reprova, <code>stone-500</code>
+passa raspando, <code>600</code> e <code>700</code> dão folga. Cor de fundo inverte a conta, e branco
+sobre âmbar nunca passa. No escuro, a escada se desloca: suba dois degraus e use bordas mais claras.
+E, por fim, contraste não é só cor: tamanho, peso, entrelinha e um segundo sinal (palavra, ícone,
+sublinhado) fazem a página funcionar para quem lê com sol na tela ou com pouca visão — como a dona
+Cida.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Contraste é claridade, não matiz: duas cores diferentes podem se misturar.</li>
+<li>4,5:1 texto normal · 3:1 texto grande e interface · 7:1 conforto.</li>
+<li>"Grande" é 24 px, ou 18,66 px em negrito. <code>text-xl</code> não conta.</li>
+<li>Sobre branco: <code>stone-400</code> 2,59 · <code>500</code> 4,81 · <code>600</code> 7,64 · <code>700</code> 10,28.</li>
+<li>O veredito é do par: o mesmo cinza muda de nota quando o fundo muda.</li>
+<li>Branco sobre <code>amber-500</code> dá 2,15 — inverta o par em vez de insistir.</li>
+<li>Botão escuro com texto branco (<code>emerald-700</code>, 5,37) chama mais que selo claro.</li>
+<li>No escuro, suba dois degraus: <code>stone-500</code> em <code>stone-900</code> reprova com 3,64.</li>
+<li>Borda de campo precisa de 3:1 para ser vista; <code>stone-200</code> é invisível de propósito.</li>
+<li>Nunca use cor como único sinal: escreva a palavra, ponha ícone, sublinhe o link.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Camadas com z | Guia Tailwind</title>
+<meta name="description" content="Camadas com z no Tailwind: o eixo z, por que o selo some atrás da foto, quando o z-index depende do relative e como fechar uma camada com isolate.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Camadas com <span class="hl">z</span></h1>
+<p class="intro">A Ana montou o cartão do pão integral na página da padaria. Ficou bonito: a foto num
+tom de âmbar, o nome do pão embaixo, e um selinho “Novo” no canto. Só que o selo sumiu. Ele está no
+HTML, ela conferiu duas vezes; está lá, com o texto certo e a cor certa. O que aconteceu foi uma
+disputa silenciosa: os dois elementos ocupam o mesmo pedaço de tela, e o navegador escolheu quem fica
+na frente sem perguntar a ninguém. Nesta aula a Ana aprende a escolher — com <code>z-10</code>,
+<code>z-50</code>, <code>-z-10</code> e <code>isolate</code> — e a entender por que, em certos casos,
+um número bem alto não resolve nada.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é o eixo z e o que a propriedade <code>z-index</code> faz.</li>
+  <li>Por que <code>z-10</code> sozinho, em alguns elementos, não muda nada.</li>
+  <li>O par <code>relative</code> + <code>absolute</code> que segura o selo no canto do cartão.</li>
+  <li>A escala do z: <code>z-0</code>, <code>z-10</code>, <code>z-20</code>, <code>z-50</code> e o
+  <code>z-auto</code>.</li>
+  <li>Como jogar uma decoração para trás com <code>-z-10</code> — e por que ela às vezes desaparece.</li>
+  <li>O que é contexto de empilhamento: a “caixa fechada” de camadas.</li>
+  <li>Como fechar uma camada de propósito com <code>isolate</code>.</li>
+  <li>Os motivos mais comuns de um z-index não pegar.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o selo que sumiu atrás da foto</h2>
+
+<p>A página da padaria tem um cartão de produto. A Ana escreveu o cartão com o selo primeiro e a foto
+depois. Em português, isso faz todo o sentido: “primeiro o selo, depois a foto”. Em HTML, essa ordem
+tem uma consequência que ninguém avisa: quando dois elementos ocupam o mesmo lugar na tela, o que vem
+depois no arquivo é desenhado por cima.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="relative h-40 w-64 overflow-hidden rounded-xl bg-amber-100"&gt;
+  &lt;span class="absolute top-2 left-2 rounded-full bg-amber-600 px-2 py-1 text-xs font-bold text-white"&gt;Novo&lt;/span&gt;
+  &lt;div class="absolute inset-0 bg-amber-300"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<p>Repare: não existe nada no código dizendo “o selo fica na frente”. O selo é
+<code>absolute</code>, com <code>top-2 left-2</code>, para ficar no cantinho. A foto é
+<code>absolute inset-0</code>, ou seja, colada nas quatro bordas do cartão. Os dois estão soltos na
+mesma área. O navegador desenha o selo, depois desenha a foto maior por cima, e o selo desaparece
+embaixo de um retângulo âmbar. Não é bug: é a regra padrão.</p>
+
+<p>Chamar isso de “camada” ajuda bastante. Imagine que cada elemento é uma folha de papel vegetal com
+um desenho. O navegador empilha as folhas na ordem do arquivo e mostra a pilha de cima. O
+<code>z-index</code> existe para você trocar a ordem dessas folhas sem mexer na ordem do papel. É uma
+propriedade do CSS; no Tailwind, ela vira a classe <code>z-</code> mais um número.</p>
+
+<p>Vale guardar uma coisa desde já: quem começa costuma achar que o problema é a cor, a borda ou o
+tamanho do selo. Não é. O selo está perfeito; ele só foi desenhado antes da foto. Toda aula de
+camadas começa com essa confusão entre “não aparece” e “está atrás”.</p>
+
+<h2>2. O eixo z: a terceira dimensão da tela</h2>
+
+<p>A tela é plana, mas o navegador pensa em três eixos. O eixo x corre para a direita, o eixo y corre
+para baixo, e o eixo z sai da tela na direção de quem olha. Quanto maior o número no eixo z, mais
+perto dos seus olhos o elemento está. É por isso que a propriedade se chama <code>z-index</code>:
+índice do eixo z.</p>
+
+<p>Em CSS, o valor pode ser um número inteiro positivo, negativo ou a palavra <code>auto</code>. O
+padrão é <code>auto</code>, que quer dizer “não tenho opinião, use a ordem do HTML”. A partir do
+momento em que você escreve um número, o elemento entra na fila do eixo z, e o desenho passa a
+obedecer a esse número: <code>10</code> fica na frente de <code>5</code>; <code>50</code> fica na
+frente de <code>10</code>; <code>-10</code> fica atrás de tudo o que não é negativo.</p>
+
+<p>Isso explica por que os números do Tailwind vão de 10 em 10: falta espaço entre eles para você
+enfiar uma camada no meio sem renumerar o resto. Se o selo está em <code>z-10</code> e o aviso de
+frete grátis precisa ficar acima dele, o aviso usa <code>z-20</code> — não precisa virar
+<code>z-11</code>. E se um dia aparecer uma camada entre os dois, <code>z-15</code> resolvido com
+<code>z-[15]</code>, um valor avulso entre colchetes.</p>
+
+<p>Existe um detalhe que separa quem já sofreu de quem ainda vai sofrer: <code>z-index</code> não é
+um número absoluto, comparável entre a página inteira. Ele é comparado <em>dentro de um grupo</em>.
+Na seção 7 a gente abre esse grupo e vê o que tem dentro; por ora, fique com a ideia de camadas dentro
+de camadas, como caixas de papelão com folhas dentro.</p>
+
+<dl class="anatomy">
+<dt>camada</dt>
+<dd>A folha da pilha. Cada elemento que ocupa a tela é desenhado numa ordem, e essa ordem é a
+camada.</dd>
+<dt>z-index</dt>
+<dd>A propriedade do CSS que diz a posição no eixo z. No Tailwind, vira a classe <code>z-</code> mais
+um degrau: <code>z-10</code>, <code>z-20</code>, <code>z-50</code>.</dd>
+<dt>posicionado</dt>
+<dd>Elemento com <code>relative</code>, <code>absolute</code>, <code>fixed</code> ou
+<code>sticky</code>. Sem isso, o <code>z-index</code> é ignorado.</dd>
+<dt>contexto de empilhamento</dt>
+<dd>Uma pilha própria, fechada. Quem está dentro só compete entre si; quem está fora compara o pacote
+inteiro.</dd>
+<dt>isolate</dt>
+<dd>A classe que abre um contexto de empilhamento de propósito, sem mudar o desenho:
+<code>isolation: isolate</code>.</dd>
+</dl>
+
+<h2>3. Antes do z, o position</h2>
+
+<p>Nem todo elemento aceita um <code>z-index</code>. A regra do CSS é: o número só vale para elemento
+posicionado — <code>relative</code>, <code>absolute</code>, <code>fixed</code> ou
+<code>sticky</code> — ou para filho direto de um <em>flex</em> ou <em>grid</em>. Em um
+<code>&lt;div&gt;</code> comum, que é <code>static</code>, o navegador lê o
+<code>z-index: 10</code> e descarta, sem aviso nenhum. O painel das caixas mostra o valor porque ele
+está lá no CSS computado, mas nada muda no desenho.</p>
+
+<p>É por isso que a dupla que aparece em todo lugar é <code>relative</code> com <code>z-10</code>. O
+<code>relative</code> não move nada sozinho: ele só declara “este elemento agora é posicionado” e,
+de quebra, vira a âncora para os filhos <code>absolute</code>. No cartão da Ana, o
+<code>relative</code> no cartão é o que faz o selo ficar no canto <em>do cartão</em> em vez de
+flutuar no canto da página.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="relative ..."&gt;
+  &lt;span class="absolute top-2 left-2 z-10 ..."&gt;Novo&lt;/span&gt;
+  &lt;div class="absolute inset-0 ..."&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<p>Leia em voz alta: “cartão posicionado; selo posicionado em relação ao cartão; selo na camada 10”.
+Cada pedaço tem uma função. O <code>absolute</code> tira o elemento do fluxo e o posiciona contra o
+ancestral posicionado mais próximo; o <code>relative</code> no pai é o que dá esse ancestral. Sem
+<code>relative</code> no pai, o selo escapa para a página inteira e aparece no canto da janela — um
+clássico que já rendeu muita tarde perdida.</p>
+
+<p>O assunto do posicionamento tem aula própria, com <code>top</code>, <code>right</code>,
+<code>bottom</code>, <code>left</code> e <code>inset</code> explicados um por um. Se você ainda não
+passou por ela, não se preocupe: para esta aula basta saber que <code>absolute</code> precisa de um
+pai <code>relative</code> e que o <code>z-</code> só funciona em quem é posicionado.</p>
+
+<h2>4. A escala do z</h2>
+
+<p>O Tailwind oferece degraus fixos, e você escolhe o degrau, não o número solto. Os que aparecem no
+dia a dia são poucos. Antes da tabela, vale colocar a mão na massa: o selo do cartão da Ana está no
+lugar certo, mas atrás da foto. A missão é dar a ele a camada 10.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|z-index=10;;rule:z-index: 10">
+  <p class="try-task">O selo “Novo” está atrás da foto. Ponha o selo na camada 10 e clique em Rodar:
+  o painel deve mostrar <code>z-index: 10</code>.</p>
+  <pre class="html">&lt;div class="relative mx-auto h-40 w-64 overflow-hidden rounded-xl bg-amber-100"&gt;
+  &lt;div id="alvo" class="absolute top-2 left-2"&gt;
+    &lt;span class="rounded-full bg-amber-600 px-2 py-1 text-xs font-bold text-white"&gt;Novo&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="absolute inset-0 bg-amber-300"&gt;&lt;/div&gt;
+  &lt;p class="absolute bottom-3 left-3 text-sm font-semibold text-amber-900"&gt;Pão integral&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+position: absolute
+left: 8px
+top: 8px
+</pre>
+  <pre class="solucao">&lt;div class="relative mx-auto h-40 w-64 overflow-hidden rounded-xl bg-amber-100"&gt;
+  &lt;div id="alvo" class="absolute top-2 left-2 z-10"&gt;
+    &lt;span class="rounded-full bg-amber-600 px-2 py-1 text-xs font-bold text-white"&gt;Novo&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="absolute inset-0 bg-amber-300"&gt;&lt;/div&gt;
+  &lt;p class="absolute bottom-3 left-3 text-sm font-semibold text-amber-900"&gt;Pão integral&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Antes de rodar, o painel mostra três linhas: a posição e os dois deslocamentos do selo. Depois do
+<code>z-10</code>, aparece uma quarta, <code>z-index: 10</code>. Nada mais mudou — nem tamanho, nem cor,
+nem lugar. O selo só passou a ser desenhado por cima da foto. Repare também que o
+<code>id="alvo"</code> está no invólucro que posiciona o selo, e não no texto: é o invólucro que ocupa
+a camada, e é ele que o painel descreve.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor</th><th>Quando usar</th></tr>
+<tr><td><code>z-0</code></td><td>0</td><td>fechar uma camada no nível do texto, sem subir</td></tr>
+<tr><td><code>z-10</code></td><td>10</td><td>selo, etiqueta, elemento que precisa vir à frente</td></tr>
+<tr><td><code>z-20</code></td><td>20</td><td>barra que passa por cima do conteúdo</td></tr>
+<tr><td><code>z-30</code></td><td>30</td><td>menu aberto, aviso flutuante</td></tr>
+<tr><td><code>z-40</code></td><td>40</td><td>máscara escura de um modal</td></tr>
+<tr><td><code>z-50</code></td><td>50</td><td>o que precisa ficar acima de tudo na página</td></tr>
+<tr><td><code>z-auto</code></td><td>auto</td><td>voltar ao padrão: vale a ordem do HTML</td></tr>
+<tr><td><code>-z-10</code></td><td>−10</td><td>decoração atrás do conteúdo</td></tr>
+</table>
+</div>
+
+<p>Duas observações sobre a tabela. A primeira: <code>z-50</code> não é “o máximo”, é só um degrau
+alto o bastante para quase todo caso. Se você virar a página inteira num festival de
+<code>z-[9999]</code>, o problema não era o número — era a falta de organização das camadas, que a
+seção 8 resolve melhor. A segunda: os valores são negativos de propósito em <code>-z-10</code>, e
+isso tem consequências que a próxima seção mostra na prática.</p>
+
+<h2>5. O z negativo e a decoração</h2>
+
+<p>Agora a Ana quer um círculo decorativo atrás do título “Oferta do dia”. A ideia é simples: o
+círculo é enfeite, então tem que ficar atrás do texto. A classe para isso é <code>-z-10</code>, com o
+sinal de menos antes do <code>z</code>. O CSS gerado é curioso:</p>
+
+<pre class="term">.z-10 {
+  z-index: 10;
+}
+.-z-10 {
+  z-index: calc(10 * -1);
+}
+.isolate {
+  isolation: isolate;
+}</pre>
+
+<p>O Tailwind não escreve <code>-10</code> direto: ele escreve a conta. É o mesmo padrão da escala de
+espaçamento, em que <code>p-4</code> vira <code>calc(var(--spacing) * 4)</code>. O navegador resolve
+<code>calc(10 * -1)</code> e chega em <code>−10</code>. Você não precisa fazer essa conta; precisa
+saber que o sinal de menos existe e que ele joga o elemento para trás do conteúdo normal.</p>
+
+<p>Só que “para trás do conteúdo” tem um porém. Um elemento com z negativo é desenhado atrás do
+conteúdo do pai, mas a posição exata depende de o pai ser ou não uma camada fechada. Se o pai tem
+fundo e não é uma camada, o círculo pode sumir atrás desse fundo. A caixa abaixo mostra o problema e
+a solução de verdade, que quase ninguém acerta na primeira tentativa.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|z-index=-10;;css:.cartao|isolation=isolate;;rule:z-index: calc(10 * -1)">
+  <p class="try-task">O círculo cobre o título. Ponha <code>-z-10</code> no círculo e
+  <code>isolate</code> no cartão: sem o <code>isolate</code>, o círculo some atrás do fundo âmbar do
+  cartão.</p>
+  <pre class="html">&lt;div class="cartao relative mx-auto h-32 w-64 rounded-xl bg-amber-100 p-4"&gt;
+  &lt;p class="relative text-lg font-bold text-amber-900"&gt;Oferta do dia&lt;/p&gt;
+  &lt;div id="alvo" class="absolute top-2 left-2"&gt;
+    &lt;div class="h-20 w-20 rounded-full bg-amber-300"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+position: absolute
+left: 8px
+top: 8px
+</pre>
+  <pre class="solucao">&lt;div class="cartao relative isolate mx-auto h-32 w-64 rounded-xl bg-amber-100 p-4"&gt;
+  &lt;p class="relative text-lg font-bold text-amber-900"&gt;Oferta do dia&lt;/p&gt;
+  &lt;div id="alvo" class="absolute top-2 left-2 -z-10"&gt;
+    &lt;div class="h-20 w-20 rounded-full bg-amber-300"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Faça o teste em duas etapas, porque a segunda é a que ensina. Primeiro, escreva só
+<code>-z-10</code> no círculo e rode: o círculo desaparece por completo. Ele está lá, no painel
+aparece <code>z-index: -10</code>, mas o fundo <code>bg-amber-100</code> do cartão é desenhado na
+frente dele. Agora acrescente <code>isolate</code> no cartão: o círculo volta, atrás do título e na
+frente do fundo. Essa é a diferença entre “jogar para trás” e “jogar para trás dentro de uma caixa
+fechada”.</p>
+
+<p>Guarde a receita, porque ela é curta: decoração atrás do conteúdo pede duas coisas — o
+<code>-z-10</code> no enfeite e o <code>isolate</code> (ou um <code>relative</code> com
+<code>z-0</code>) no pai. Sem a segunda, o enfeite pode sumir atrás do fundo do cartão. A seção 8
+volta ao <code>isolate</code> com calma.</p>
+
+<h2>6. Quando o z não faz nada</h2>
+
+<p>A frase que mais aparece nas dúvidas de quem está começando é “coloquei z-50 e não aconteceu
+nada”. Existem três causas principais, e todas aparecem na tabela abaixo. Antes dela, um aviso que
+economiza tempo: o painel das caixas e a aba <em>Computed</em> do navegador mostram o valor aplicado,
+não o valor que você queria. Se o painel diz <code>z-index: 50</code> e o desenho não mudou, o
+problema está na pilha — em quem é o pai, em quem é irmão, em qual caixa o elemento está.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que você vê</th><th>Causa provável</th><th>O que fazer</th></tr>
+<tr><td>o número aparece no painel e nada muda</td><td>o elemento não é posicionado</td><td>acrescente <code>relative</code></td></tr>
+<tr><td>o selo sai do cartão e some</td><td><code>overflow-hidden</code> no cartão recorta o que passa da borda</td><td>mova o selo para dentro ou tire o <code>overflow-hidden</code></td></tr>
+<tr><td><code>z-50</code> perde para um <code>z-10</code></td><td>o elemento está dentro de uma camada fechada pelo pai</td><td>tire do pai o que fecha a camada, ou reorganize</td></tr>
+<tr><td>dois elementos com o mesmo z</td><td>empate: vale a ordem do HTML</td><td>use degraus diferentes</td></tr>
+<tr><td>o elemento com z negativo desaparece</td><td>foi desenhado atrás do fundo do pai</td><td><code>isolate</code> no pai</td></tr>
+</table>
+</div>
+
+<p>A segunda linha merece um comentário, porque não é sobre camada nenhuma. O
+<code>overflow-hidden</code> corta tudo o que passa da borda do elemento — inclusive um filho com
+<code>z-50</code>. Não adianta subir o número: o recorte acontece depois do desenho. Quando o selo
+precisa sair para fora do cartão, a solução é tirar o <code>overflow-hidden</code> do cartão (e
+arredondar a imagem por dentro) ou aceitar o selo dentro da área. O assunto tem aula própria em
+<a href="overflow.html">Overflow</a>.</p>
+
+<p>A quarta linha é uma armadilha silenciosa: dois elementos com o mesmo valor de z não brigam, eles
+empatam. No empate, o navegador usa a ordem do HTML, como se nenhum dos dois tivesse número. Isso
+explica a sensação de “mudei a classe e nada aconteceu” quando você troca <code>z-10</code> por
+<code>z-10</code> em outro elemento e espera ver diferença. A regra prática é simples: cada camada que
+importa ganha um número diferente, e o número conta uma história — 10 é o conteúdo que sobe, 20 é o
+que passa por cima dele, 50 é o que manda em tudo.</p>
+
+<h2>7. Contexto de empilhamento: o pacote fechado</h2>
+
+<p>Aqui está o conceito que resolve a maioria dos mistérios. Alguns elementos não participam da pilha
+da página: eles criam uma pilha própria, fechada, e todos os filhos passam a competir só entre si. É o
+<strong>contexto de empilhamento</strong>. Por fora, o pacote inteiro ocupa uma posição só, como uma
+caixa de papelão na prateleira. Por dentro, as folhas continuam empilhadas.</p>
+
+<p>O que fecha um pacote? Coisas que você talvez já use sem saber: <code>opacity</code> menor que 1,
+<code>transform</code>, <code>filter</code>, <code>isolation: isolate</code>, <code>position: fixed</code>
+ou <code>sticky</code>, e qualquer elemento posicionado com <code>z-index</code> diferente de
+<code>auto</code>. O CSS gerado mostra os três primeiros:</p>
+
+<pre class="term">.isolate {
+  isolation: isolate;
+}
+.relative {
+  position: relative;
+}
+.opacity-90 {
+  opacity: 90%;
+}</pre>
+
+<p>Veja o efeito prático. A Ana colocou <code>opacity-90</code> no cartão para deixá-lo “mais
+leve”. O cartão virou um pacote. O selo dentro dele tem <code>z-50</code>, um número altíssimo, mas
+esse <code>50</code> agora só vale lá dentro. O título da seção, que está fora e tem
+<code>z-10</code>, compara com o pacote do cartão — e o pacote está no nível 0. Resultado: o selo
+perde para um <code>z-10</code> que está fora, e a Ana jura que o CSS está errado.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="opacity-90"&gt;                       &lt;!-- fecha uma camada --&gt;
+  &lt;span class="absolute z-50"&gt;Novo&lt;/span&gt;       &lt;!-- vale só aqui dentro --&gt;
+&lt;/div&gt;
+&lt;h2 class="relative z-10"&gt;...&lt;/h2&gt;              &lt;!-- está fora: ganha --&gt;</pre>
+
+<p>Não existe número que conserte isso. É por isso que a pergunta certa nunca é “qual z eu uso?”, e
+sim “quem é o pai desse elemento?”. Se o filho precisa aparecer acima de algo que está fora do pai,
+nenhum <code>z-50</code> resolve: o filho teria que sair do pai, ou o pai teria que subir. Ajustar o
+<code>z</code> do pai é o caminho — e é aí que a escala de 10 em 10 ajuda, porque sobra degrau para
+ajustar o pacote inteiro sem renumerar o conteúdo.</p>
+
+<h2>8. isolate: fechar a camada de propósito</h2>
+
+<p>Se <code>opacity</code>, <code>transform</code> e <code>filter</code> fecham um pacote sem
+querer, o <code>isolate</code> fecha de propósito — e sem efeito colateral visual. Ele só diz:
+“daqui para dentro, as camadas são minhas”. Serve para duas coisas: fazer o <code>-z-10</code>
+funcionar como decoração (como você viu na seção 5) e impedir que um componente com
+<code>z-50</code> fure a página inteira.</p>
+
+<p>Pense num cartão de produto que aparece dez vezes na vitrine. Cada um tem um selo com
+<code>z-10</code> e uma faixa de preço com <code>z-20</code>. Se esses números competirem com o
+cabeçalho da página, o primeiro cartão que passar por baixo do cabeçalho vai ganhar a briga por
+acidente. Com <code>isolate</code> no cartão, cada cartão tem a sua pilha interna e o cabeçalho
+conversa com o pacote, não com o selo. É organização, não truque.</p>
+
+<div class="trytailwind" data-goal="css:.cartao|isolation=isolate;;css:.foto|z-index=10;;css:#faixa|z-index=20;;css:#alvo|z-index=30">
+  <p class="try-task">Monte a pilha do cartão: <code>isolate</code> no cartão, <code>z-10</code> na
+  foto, <code>z-20</code> na faixa de preço e <code>z-30</code> no selo. Hoje a faixa está atrás da
+  foto.</p>
+  <pre class="html">&lt;div class="cartao relative mx-auto h-44 w-64 overflow-hidden rounded-xl bg-amber-100"&gt;
+  &lt;div id="faixa" class="absolute bottom-0 left-0 right-0 bg-amber-700 p-2 text-center text-xs font-bold text-white"&gt;Pão do dia: R$ 8&lt;/div&gt;
+  &lt;div class="foto absolute inset-0 bg-amber-300"&gt;&lt;/div&gt;
+  &lt;div id="alvo" class="absolute top-2 right-2"&gt;
+    &lt;span class="rounded-full bg-amber-900 px-2 py-1 text-xs font-bold text-white"&gt;Novo&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+position: absolute
+right: 8px
+top: 8px
+</pre>
+  <pre class="solucao">&lt;div class="cartao relative isolate mx-auto h-44 w-64 overflow-hidden rounded-xl bg-amber-100"&gt;
+  &lt;div id="faixa" class="absolute bottom-0 left-0 right-0 z-20 bg-amber-700 p-2 text-center text-xs font-bold text-white"&gt;Pão do dia: R$ 8&lt;/div&gt;
+  &lt;div class="foto absolute inset-0 z-10 bg-amber-300"&gt;&lt;/div&gt;
+  &lt;div id="alvo" class="absolute top-2 right-2 z-30"&gt;
+    &lt;span class="rounded-full bg-amber-900 px-2 py-1 text-xs font-bold text-white"&gt;Novo&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o cartão conta a história certa: a foto na base, a faixa de preço por cima dela e
+o selo por cima de tudo. E o painel mostra o selo com <code>z-index: 30</code>, o maior dos três. Se
+você trocar os números, o desenho muda na hora: é a prova de que a ordem do HTML deixou de mandar e a
+sua intenção passou a mandar.</p>
+
+<p>Repare também que o <code>isolate</code> não mudou nada de visível por si. Ele é uma declaração de
+intenção. Quando você abre um componente e vê <code>isolate</code> no topo, sabe que ali dentro as
+camadas não vazam. É o equivalente a fechar a porta do quarto para a bagunça não espalhar pela casa.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o cabeçalho que some quando o banner aparece</h3>
+<p>A Ana trocou o banner da padaria e o cabeçalho passou a ficar atrás dele ao rolar a página. O
+cabeçalho era <code>sticky top-0</code> sem <code>z</code>; o banner ganhou <code>relative</code> e um
+fundo mais forte, e passou a ser desenhado depois. A correção é uma classe: <code>z-50</code> no
+cabeçalho. E a lição que fica é maior que a classe: elemento que fica por cima do conteúdo — cabeçalho
+grudado, barra de aviso, botão flutuante — precisa de um número alto combinado com o time, não
+inventado a cada arquivo.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o selo que insiste em desaparecer</h3>
+<p>Ela subiu o selo para <code>z-50</code> e nada. O problema não era camada: o cartão tinha
+<code>overflow-hidden</code> para arredondar a foto, e o selo estava posicionado em
+<code>-top-2</code>, para fora da área do cartão. O recorte cortava o selo antes de qualquer
+comparação de z. A solução foi mover o selo para dentro (<code>top-2 right-2</code>) e deixar o
+<code>overflow-hidden</code> cuidando dos cantos. Quando o elemento “não aparece”, vale perguntar
+primeiro se ele está sendo cortado, e só depois se está atrás.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o modal atrás da máscara escura</h3>
+<p>O modal da Ana tinha máscara com <code>z-40</code> e caixa com <code>z-50</code>, e mesmo assim a
+caixa aparecia atrás da máscara. Motivo: a caixa estava dentro do mesmo contêiner da máscara, e esse
+contêiner tinha <code>transform</code> — que fecha uma camada. Dentro do pacote, <code>50</code> e
+<code>40</code> ainda se comparam… mas o pacote inteiro estava abaixo de outro irmão. O conserto foi
+tirar o <code>transform</code> do contêiner e isolar a máscara e a caixa em dois ramos separados. Em
+caso de modal, o mais seguro é manter máscara e caixa como irmãos, no fim do <code>body</code>.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Você escreveu <code>z-50</code> num
+<code>&lt;div&gt;</code> comum, sem classe de posição, e nada mudou. Por quê?</p>
+<label><input type="radio" name="q1"> porque <code>z-50</code> só existe em telas grandes</label>
+<label><input type="radio" name="q1"> porque o <code>z-index</code> só vale em elemento posicionado (ou filho direto de flex/grid)</label>
+<label><input type="radio" name="q1"> porque <code>z-50</code> é menor que o padrão do navegador</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O selo tem <code>z-50</code>, mas continua atrás de
+um título com <code>z-10</code>. Qual é a explicação mais provável?</p>
+<label><input type="radio" name="q2"> o Tailwind limita o z a 10 em páginas com título</label>
+<label><input type="radio" name="q2"> o <code>z-50</code> está escrito no elemento errado</label>
+<label><input type="radio" name="q2"> o pai do selo fecha uma camada (por exemplo, com <code>opacity-90</code>), e o 50 vale só lá dentro</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Qual classe coloca um círculo decorativo atrás do
+texto?</p>
+<label><input type="radio" name="q3"> <code>-z-10</code></label>
+<label><input type="radio" name="q3"> <code>z-10</code></label>
+<label><input type="radio" name="q3"> <code>z-auto</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o selo no canto do cartão</h2>
+<p>Complete as duas classes que faltam para o selo ficar no canto do cartão e na camada 20 — o cartão
+já tem <code>relative</code>.</p>
+<div class="ex-code">&lt;span class="<input aria-label="resposta 1" data-answer="absolute" placeholder="..."> top-2 right-2 <input aria-label="resposta 2" data-answer="z-20" placeholder="..."> rounded-full bg-amber-600 px-2 py-1 text-xs text-white"&gt;Novo&lt;/span&gt;</div>
+<p class="ex-dica">Dica: uma classe tira o selo do fluxo e o posiciona contra o cartão; a outra escolhe
+o degrau da camada. Se você usar <code>z-30</code>, o selo também aparece na frente — mas o pedido é
+o degrau 20.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O navegador desenha a página em camadas, e a regra padrão é a ordem do HTML: quem vem depois fica
+na frente. O <code>z-index</code> troca essa ordem por um número, e no Tailwind isso vira a classe
+<code>z-</code> mais o degrau: <code>z-10</code>, <code>z-20</code>, <code>z-50</code>. O número só
+vale em elemento posicionado, daí o par <code>relative</code> com <code>z-10</code> aparecer em todo
+lugar. Para jogar decoração atrás do conteúdo existe o <code>-z-10</code>, que o Tailwind escreve como
+<code>calc(10 * -1)</code>.</p>
+
+<p>E existe a parte que ninguém conta: cada elemento posicionado com z, cada <code>opacity</code>,
+cada <code>transform</code> fecha uma camada nova, e os filhos passam a competir só entre si. Por isso
+um <code>z-50</code> pode perder para um <code>z-10</code>: eles não estão na mesma pilha. O
+<code>isolate</code> fecha essa camada de propósito, o que serve tanto para a decoração aparecer
+quanto para um componente não vazar pela página. Quando um z não pegar, olhe para o pai antes de subir
+o número.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Camada é a ordem de desenho: o eixo z sai da tela na sua direção.</li>
+<li>Sem posição (<code>relative</code>, <code>absolute</code>, <code>fixed</code>, <code>sticky</code>)
+o <code>z-index</code> é ignorado.</li>
+<li>Escala curta: <code>z-0</code>, <code>z-10</code>, <code>z-20</code>, <code>z-30</code>,
+<code>z-40</code>, <code>z-50</code>, <code>z-auto</code> e os negativos.</li>
+<li><code>z-10</code> vem antes de <code>z-20</code> na pilha; empate resolve pela ordem do HTML.</li>
+<li><code>-z-10</code> é <code>calc(10 * -1)</code>: decoração atrás do conteúdo.</li>
+<li>Z negativo pede <code>isolate</code> no pai, senão o enfeite some atrás do fundo.</li>
+<li><code>opacity</code>, <code>transform</code>, <code>filter</code> e <code>isolate</code> fecham
+uma camada nova.</li>
+<li>Dentro de uma camada fechada, o z do filho não compete com quem está fora.</li>
+<li><code>overflow-hidden</code> corta o filho mesmo com <code>z-50</code>.</li>
+<li>Número alto não conserta pilha errada: primeiro ache o pai, depois o degrau.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

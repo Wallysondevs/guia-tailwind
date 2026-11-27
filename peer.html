@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O peer | Guia Tailwind</title>
+<meta name="description" content="O peer no Tailwind: usar um checkbox ou campo como referência para estilizar o irmão seguinte, com peer-checked, peer-focus e peer-placeholder-shown.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>O <span class="hl">peer</span></h1>
+<p class="intro">Na lista de encomendas da padaria, a Ana quer que a linha “Pago na entrega” fique riscada
+quando a cliente marcar a caixinha. Parece fácil, e não é: quem muda de estado é a caixinha, mas quem
+precisa mudar de aparência é o texto ao lado. O <code>hover</code> não serve (não tem mouse no meio), o
+<code>group</code> também não (o grupo observa o pai, e aqui o texto e a caixinha são irmãos). Nesta aula
+ela conhece o <code>peer</code>, o irmão que serve de referência, e descobre que a ordem das linhas no
+HTML passa a importar.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que a classe <code>peer</code> marca e por que ela vai no elemento que muda de estado.</li>
+  <li>Por que o texto observado tem de vir <em>depois</em> do <code>peer</code> no HTML.</li>
+  <li>Como ler o seletor com <code>~</code> que o Tailwind gera.</li>
+  <li>As variantes <code>peer-checked</code>, <code>peer-focus</code> e
+  <code>peer-placeholder-shown</code>.</li>
+  <li>A diferença entre <code>peer</code> e <code>group</code>, e quando cada um resolve.</li>
+  <li>Como mostrar um campo escondido só quando a caixinha é marcada.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a caixinha muda, o texto não</h2>
+
+<p>A tela é uma encomenda de pão: nome, horário de retirada e uma caixinha com o rótulo “Pago na
+entrega”. Quando a atendente marca a caixinha, o combinado está feito — e a Ana quer que o texto do
+rótulo fique riscado e mais claro, para a linha parecer “resolvida”. É um sinal pequeno, mas é o tipo de
+detalhe que faz uma tela de trabalho parecer cuidadosa.</p>
+
+<p>Ela tentou o que já sabia. Primeiro, <code>hover:</code> no <code>&lt;span&gt;</code> do texto:
+funciona quando o mouse passa no texto, o que não tem nada a ver com a caixinha. Depois,
+<code>peer-checked:</code> no próprio <code>&lt;input&gt;</code>: a caixinha mudou (o navegador já muda
+sozinho quando você marca), o texto ficou igual. Depois, <code>group</code> na
+<code>&lt;div&gt;</code> que envolve tudo e <code>group-hover:</code> no texto: funcionou com o mouse, o
+que não serve — o que a atendente faz é marcar a caixinha, e o mouse pode estar em outro canto da
+tela.</p>
+
+<p>O erro de raciocínio era achar que a classe no texto poderia “olhar para cima” e perguntar pelo
+estado da caixinha. O CSS clássico não faz isso — ele desce, não sobe. Mas existe uma relação que ele
+sabe seguir: a de irmãos. Se os dois elementos estiverem dentro do mesmo pai, um do lado do outro, o CSS
+consegue dizer “quando o primeiro estiver marcado, mude o segundo”. É essa a relação que o
+<code>peer</code> usa.</p>
+
+<h2>2. A regra dos irmãos</h2>
+
+<p>Chamamos de <strong>irmãos</strong> dois ou mais elementos que estão dentro do mesmo pai, no mesmo
+nível. No HTML abaixo, o <code>&lt;input&gt;</code> e o <code>&lt;span&gt;</code> são irmãos: os dois
+estão dentro do <code>&lt;label&gt;</code>. Já o <code>&lt;label&gt;</code> é pai dos dois, e não é
+irmão de ninguém aqui.</p>
+
+<pre class="file" data-file="index.html">&lt;label class="flex items-center gap-2"&gt;
+  &lt;input type="checkbox"&gt;
+  &lt;span&gt;Pago na entrega&lt;/span&gt;
+&lt;/label&gt;</pre>
+
+<p>O CSS tem um seletor para essa relação, chamado de <em>irmão seguinte</em>, escrito com o sinal
+<code>~</code>. Ele quer dizer “todo elemento que vem depois deste, dentro do mesmo pai”. É um seletor
+direcional: só olha para a frente. Um elemento nunca alcança o irmão que está acima dele. Essa direção é
+a razão de o <code>peer</code> ter uma ordem obrigatória, e é o motivo número um de o efeito “não
+funcionar” para quem está começando.</p>
+
+<p>O Tailwind embrulha esse seletor em duas classes: uma marca, <code>peer</code>, que você põe no
+elemento observado (a caixinha, o campo); e uma variante, <code>peer-…</code>, que você põe no irmão que
+deve mudar. A marca não tem estilo nenhum, como o <code>group</code>: ela só existe para o seletor
+encontrar o elemento. Sem a marca, a variante não tem a quem se referir e não gera CSS.</p>
+
+<dl class="anatomy">
+<dt>peer</dt>
+<dd>A marca no elemento observado — a caixinha, o campo. Não desenha nada; só diz “me use como
+referência”.</dd>
+<dt>irmão</dt>
+<dd>Elemento que está dentro do mesmo pai, no mesmo nível. É a única relação que o <code>peer</code>
+enxerga.</dd>
+<dt>~</dt>
+<dd>O seletor de irmão seguinte: pega todo elemento que vem depois, dentro do mesmo pai.</dd>
+<dt>:checked</dt>
+<dd>O estado “marcado”, de uma caixinha ou de um botão de rádio. Quem liga é o clique do usuário.</dd>
+<dt>marcador</dt>
+<dd>O nome que se dá a classes como <code>peer</code> e <code>group</code>: elas não pintam, só marcam
+um ponto da árvore para outros seletores usarem.</dd>
+</dl>
+
+<p>Uma consequência que surpreende: o <code>peer</code> não funciona “de longe”. Se a caixinha está
+dentro de uma <code>&lt;div&gt;</code> e o texto está fora dela, eles não são irmãos e a variante não
+casa. Também não funciona com o elemento antes dele. E, por fim, não funciona para <em>pai</em>: subir na
+árvore é outra conversa, que o <code>group</code> resolve quando o estado é de mouse ou de foco no
+conjunto.</p>
+
+<h2>3. peer-checked na prática</h2>
+
+<p>Chega de teoria. Na caixa abaixo, a caixinha e o texto são irmãos dentro do
+<code>&lt;label&gt;</code>, e o cartão em volta tem fundo e respiro. A missão tem duas partes: pôr
+<code>peer</code> no <code>&lt;input&gt;</code> e <code>peer-checked:line-through</code> no
+<code>&lt;span&gt;</code>. Depois de rodar, marque a caixinha na prévia com o mouse: o texto ganha o
+risco.</p>
+
+<div class="trytailwind" data-goal="conta:.peer=1;;rule::where(.peer):checked ~ .peer-checked\:line-through)">
+  <p class="try-task">Faça o texto ficar riscado quando a caixinha estiver marcada:
+  <code>peer</code> no <code>&lt;input&gt;</code> e <code>peer-checked:line-through</code> no
+  <code>&lt;span&gt;</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl bg-amber-50 p-4"&gt;
+  &lt;label class="flex items-start gap-3"&gt;
+    &lt;input type="checkbox" class="mt-1"&gt;
+    &lt;span class="text-stone-800"&gt;Pago na entrega&lt;/span&gt;
+  &lt;/label&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-xl bg-amber-50 p-4"&gt;
+  &lt;label class="flex items-start gap-3"&gt;
+    &lt;input type="checkbox" class="peer mt-1"&gt;
+    &lt;span class="text-stone-800 peer-checked:line-through"&gt;Pago na entrega&lt;/span&gt;
+  &lt;/label&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Repare que a caixinha não precisa de estilo nenhum: quem muda é o texto ao lado. E repare também que
+o painel desta vez não mostra nada de novo depois de rodar a solução — ele descreve o cartão, no estado
+de repouso, e no repouso a caixinha está vazia. A prova está na prévia: marque, desmarque, marque de
+novo. O risco vai e volta sozinho, porque o navegador liga e desliga o estado <code>:checked</code> sem
+que você escreva nada.</p>
+
+<p>Um detalhe que ajuda a testar: clique no <em>texto</em>, não na caixinha. Como os dois estão dentro
+do mesmo <code>&lt;label&gt;</code>, o navegador entende que o clique no texto é um clique na caixinha.
+Esse comportamento é do HTML, não do Tailwind, e é uma das razões de o rótulo existir. Se você separar o
+texto do <code>&lt;label&gt;</code> sem cuidado, o clique no texto deixa de funcionar — e o leitor
+acha que o site quebrou.</p>
+
+<h2>4. O CSS que o Tailwind gera</h2>
+
+<p>O seletor gerado mostra a relação de irmãos na cara. Para a solução da caixa acima, o Tailwind
+escreve:</p>
+
+<pre class="term">:is(:where(.peer):checked ~ .peer-checked\:line-through) {
+  text-decoration-line: line-through;
+}</pre>
+
+<p>Traduzindo de trás para a frente: “todo elemento com a classe
+<code>peer-checked:line-through</code> que venha depois, como irmão, de um elemento com a classe
+<code>peer</code> em estado <code>:checked</code> ganha o risco no texto”. O <code>~</code> é o pulo do
+gato: ele exige que os dois estejam no mesmo pai e que a caixinha venha antes. Se você inverter a ordem
+no HTML, o seletor deixa de casar — não porque a classe está errada, mas porque não existe irmão
+anterior para alcançar.</p>
+
+<p>O <code>:is()</code> e o <code>:where()</code> já apareceram na aula de <code>group-hover</code> e
+fazem o mesmo papel aqui: embrulham o seletor para controlar a especificidade, o peso da regra. Na
+prática, isso quer dizer que uma classe comum escrita no mesmo elemento ainda ganha da variante, e que
+você consegue sobrescrever o efeito com pouco esforço quando precisar. Não é preciso decorar; é preciso
+saber que existe.</p>
+
+<p>Vale notar o que <em>não</em> aparece no CSS: nada de JavaScript, nada de estado guardado, nada de
+classe trocada no HTML. O que muda quando você marca a caixinha é só o estado do próprio
+<code>&lt;input&gt;</code>, e o navegador reavalia os seletores sozinho. É por isso que esse tipo de
+efeito é tão leve — e por isso ele para de funcionar quando o elemento observado não é um controle de
+formulário de verdade.</p>
+
+<h2>5. As outras variantes do peer</h2>
+
+<p><code>peer-checked</code> é a mais usada, mas não é a única. Toda variante de estado que existe para
+campos de formulário tem uma versão <code>peer-</code>. A tabela abaixo é a lista curta do que você vai
+encontrar em projetos reais — e o estado que cada uma observa no irmão marcado.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Variante</th><th>Vale quando o peer está…</th><th>Uso típico</th></tr>
+<tr><td><code>peer-checked:</code></td><td>marcado (caixinha ou rádio)</td><td>riscar item concluído, mostrar campo extra</td></tr>
+<tr><td><code>peer-focus:</code></td><td>com o cursor dentro</td><td>acender a dica embaixo do campo</td></tr>
+<tr><td><code>peer-placeholder-shown:</code></td><td>vazio, mostrando o placeholder</td><td>dica de formato enquanto ninguém digitou</td></tr>
+<tr><td><code>peer-invalid:</code></td><td>com valor inválido</td><td>mensagem de erro depois do envio</td></tr>
+<tr><td><code>peer-required:</code></td><td>marcado como obrigatório</td><td>asterisco ou aviso “campo obrigatório”</td></tr>
+<tr><td><code>peer-disabled:</code></td><td>desabilitado</td><td>apagar o rótulo de um campo travado</td></tr>
+</table>
+</div>
+
+<p>Duas delas merecem uma explicação extra, porque o nome engana.
+<code>peer-placeholder-shown</code> não olha só “está vazio”: ele exige que o campo mostre o
+<em>placeholder</em>, aquele texto cinza de exemplo. Se o campo não tem o atributo
+<code>placeholder</code>, a variante nunca vale — e você fica procurando o erro no lugar errado.
+Já <code>peer-invalid</code> depende das regras de validação do próprio navegador: um
+<code>type="email"</code> com texto sem arroba é inválido; um campo de texto comum quase nunca é.</p>
+
+<p>Também dá para ter mais de um peer na mesma tela, com nome, do mesmo jeito que os grupos:
+<code>peer/termos</code> no primeiro e <code>peer-checked/termos:</code> no texto que escuta só ele. É
+um recurso para quando dois formulários se cruzam no mesmo bloco — raro no começo, útil quando chega. Na
+dúvida, um peer por bloco resolve 95% dos casos.</p>
+
+<h2>6. O peer que já vale no repouso</h2>
+
+<p>Existe uma variante de peer que funciona antes de qualquer clique, e ela é ótima para ensinar: o
+campo vazio já mostra o placeholder, então <code>peer-placeholder-shown</code> casa desde o primeiro
+desenho da página. É o caso da dica de formato embaixo do telefone. A Ana quer que a dica fique âmbar
+enquanto o campo está vazio e volte ao cinza quando a pessoa começar a digitar.</p>
+
+<p>Na caixa abaixo, o campo tem um placeholder e a dica tem uma cor de repouso
+(<code>text-stone-500</code>). A missão é pôr <code>peer</code> no campo e
+<code>peer-placeholder-shown:text-amber-700</code> na dica. Como o campo já nasce vazio, o efeito
+aparece na hora — inclusive no painel, que vai trocar o cinza pelo âmbar. É a única caixa da aula em que
+você vê a variante funcionando sem tocar em nada.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|color=oklch(0.555 0.163 48.998);;rule:.peer-placeholder-shown\:text-amber-700)">
+  <p class="try-task">Deixe a dica âmbar enquanto o campo estiver vazio: <code>peer</code> no
+  <code>&lt;input&gt;</code> e <code>peer-placeholder-shown:text-amber-700</code> no parágrafo da
+  dica.</p>
+  <pre class="html">&lt;div class="rounded-xl bg-amber-50 p-4"&gt;
+  &lt;label for="fone" class="text-sm font-medium text-stone-800"&gt;Telefone&lt;/label&gt;
+  &lt;input id="fone" type="tel" placeholder="(11) 99999-0000" class="mt-1 w-full rounded-md border border-amber-300 bg-white p-2"&gt;
+  &lt;p id="alvo" class="mt-1 text-sm text-stone-500"&gt;Digite o DDD também&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+color: oklch(0.553 0.013 58.071)
+font-size: 14px
+line-height: 20px
+margin-top: 4px
+</pre>
+  <pre class="solucao">&lt;div class="rounded-xl bg-amber-50 p-4"&gt;
+  &lt;label for="fone" class="text-sm font-medium text-stone-800"&gt;Telefone&lt;/label&gt;
+  &lt;input id="fone" type="tel" placeholder="(11) 99999-0000" class="peer mt-1 w-full rounded-md border border-amber-300 bg-white p-2"&gt;
+  &lt;p id="alvo" class="mt-1 text-sm text-stone-500 peer-placeholder-shown:text-amber-700"&gt;Digite o DDD também&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, experimente digitar na prévia. No instante em que a primeira letra entra, o
+placeholder desaparece, a variante deixa de casar e a dica volta ao cinza. Não há nada sendo “desfeito”:
+o que havia era uma condição, e a condição deixou de ser verdadeira. Esse vai e vem é a alma do CSS por
+estado, e é o que faz o padrão ser tão confiável.</p>
+
+<p>O CSS gerado é o mesmo desenho de antes, com outro estado no meio:</p>
+
+<pre class="term">:is(:where(.peer):placeholder-shown ~ .peer-placeholder-shown\:text-amber-700) {
+  color: var(--color-amber-700);
+}</pre>
+
+<p>Uma armadilha específica desta variante: se você digitar e depois apagar tudo, a dica volta a ficar
+âmbar — o campo está de novo mostrando o placeholder. Isso é o comportamento correto, mas assusta quem
+espera que a cor “fique” depois do primeiro uso. Se a ideia é marcar “você ainda não preencheu”, o
+caminho é outro: validação no envio, ou <code>peer-invalid</code> com <code>required</code>.</p>
+
+<h2>7. A ordem do HTML é a regra</h2>
+
+<p>Agora o tropeço mais comum, que já apareceu de lado duas vezes: o <code>peer</code> precisa vir
+<strong>antes</strong> do elemento que reage. Se a caixinha estiver depois do texto, o seletor
+<code>~</code> não tem para onde olhar — ele só anda para a frente. O texto fica sem efeito e você jura
+que a classe está certa. Ela está: a ordem é que não está.</p>
+
+<pre class="file" data-file="index.html">&lt;!-- não funciona: o texto vem antes da caixinha --&gt;
+&lt;span class="peer-checked:line-through"&gt;Pago na entrega&lt;/span&gt;
+&lt;input type="checkbox" class="peer"&gt;
+
+&lt;!-- funciona: a caixinha vem primeiro --&gt;
+&lt;input type="checkbox" class="peer"&gt;
+&lt;span class="peer-checked:line-through"&gt;Pago na entrega&lt;/span&gt;</pre>
+
+<p>Como diagnosticar sem adivinhar? Abra o inspetor do navegador, selecione o texto que deveria mudar e
+procure a regra do <code>peer-checked</code> na aba de estilos. Se ela não estiver lá, o CSS não foi
+gerado (classe errada ou ausente). Se estiver riscada, o seletor não casou — e aí a causa é o estado
+(desmarcado) ou a posição (irmão errado). Essa leitura de “a regra existe? então o problema é o
+seletor; não existe? então o problema é a classe” economiza muito tempo.</p>
+
+<p>Existe ainda um caso em que a ordem está certa e o efeito não vem: quando o <code>peer</code> e o
+alvo não são irmãos. Um erro clássico é embrulhar o <code>&lt;input&gt;</code> numa
+<code>&lt;div&gt;</code> “só para alinhar” e deixar o texto fora. Aí o pai do input é a
+<code>&lt;div&gt;</code> e o texto está em outro nível; não há irmandade. Se precisar de um embrulho,
+embrulhe os dois — ou não embrulhe nenhum.</p>
+
+<p>E tem a limitação de fundo, que vale para todo o guia: o <code>peer</code> observa um elemento por
+vez. Se o texto precisa reagir a duas caixinhas ao mesmo tempo (“pago” e “entregue”), o CSS sozinho não
+dá conta: você precisaria de <code>:has()</code> ou de JavaScript. Nesses casos, a solução honesta é
+mudar o desenho da tela — uma caixinha só, com três estados — em vez de forçar o seletor.</p>
+
+<h2>8. peer ou group?</h2>
+
+<p>As duas classes marcam um elemento para que outros mudem, e é fácil confundi-las. A diferença é
+geométrica: o <code>group</code> marca um <strong>pai</strong> e é observado por qualquer descendente; o
+<code>peer</code> marca um <strong>irmão anterior</strong> e é observado pelos irmãos que vêm depois. Uma
+olha para dentro, a outra olha para o lado.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Situação</th><th>Quem resolve</th><th>Por quê</th></tr>
+<tr><td>Cartão inteiro reage ao mouse</td><td><code>group</code> + <code>group-hover:</code></td><td>o cartão é pai dos elementos que mudam</td></tr>
+<tr><td>Caixinha marcada risca o texto ao lado</td><td><code>peer</code> + <code>peer-checked:</code></td><td>os dois são irmãos, e a caixinha vem antes</td></tr>
+<tr><td>Campo em foco acende a dica abaixo</td><td><code>peer</code> + <code>peer-focus:</code></td><td>dica e campo são irmãos</td></tr>
+<tr><td>Botão dentro do cartão muda no hover</td><td><code>group</code> + <code>group-hover:</code></td><td>o botão está dentro do cartão, não ao lado</td></tr>
+<tr><td>Duas seções distantes reagindo juntas</td><td>nem um, nem outro</td><td>não há parentesco: precisa de JavaScript</td></tr>
+</table>
+</div>
+
+<p>O teste rápido é este: desenhe a árvore do HTML numa folha. Se o elemento que muda está
+<em>dentro</em> do que muda de estado, é <code>group</code>. Se está <em>ao lado</em> e depois, é
+<code>peer</code>. Se está em outro galho, nenhum dos dois serve. Parece bobo, mas resolve a escolha em
+dez segundos e evita a tentativa e erro.</p>
+
+<p>A caixa seguinte junta o <code>peer</code> com o que você já sabe de <code>hidden</code>. A caixinha
+“Quero receber em casa” vai revelar o endereço de entrega — um campo que só faz sentido para quem
+escolheu entrega. O endereço começa escondido; a missão é fazê-lo aparecer quando a caixinha for marcada.
+O <code>peer</code> já está no input; falta a variante no bloco do endereço.</p>
+
+<div class="trytailwind" data-goal="rule:.peer-checked\:block)">
+  <p class="try-task">O endereço está escondido. Faça o bloco aparecer quando a caixinha estiver
+  marcada: acrescente <code>peer-checked:block</code> à <code>&lt;div&gt;</code> do endereço e marque a
+  caixinha na prévia.</p>
+  <pre class="html">&lt;div class="rounded-xl bg-amber-50 p-4"&gt;
+  &lt;label class="flex items-center gap-2 text-sm font-medium text-stone-800"&gt;
+    &lt;input type="checkbox" class="peer"&gt;
+    &lt;span&gt;Quero receber em casa&lt;/span&gt;
+  &lt;/label&gt;
+  &lt;div id="alvo" class="hidden mt-3 rounded-md bg-white p-3 text-sm"&gt;Rua das Flores, 120 — Centro&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: none
+padding: 12px
+background-color: rgb(255, 255, 255)
+font-size: 14px
+line-height: 20px
+border-radius: 6px
+margin-top: 12px
+</pre>
+  <pre class="solucao">&lt;div class="rounded-xl bg-amber-50 p-4"&gt;
+  &lt;label class="flex items-center gap-2 text-sm font-medium text-stone-800"&gt;
+    &lt;input type="checkbox" class="peer"&gt;
+    &lt;span&gt;Quero receber em casa&lt;/span&gt;
+  &lt;/label&gt;
+  &lt;div id="alvo" class="hidden mt-3 rounded-md bg-white p-3 text-sm peer-checked:block"&gt;Rua das Flores, 120 — Centro&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel observa o bloco do endereço, e a primeira linha é <code>display: none</code> — a prova de
+que ele está fora do desenho. Depois de rodar a solução e marcar a caixinha, o bloco aparece na prévia.
+Este é um padrão que você vai reusar muito: <code>hidden</code> como estado inicial,
+<code>peer-checked:block</code> como gatilho. O assunto <code>hidden</code> tem aula própria; aqui ele
+aparece só como o par natural do <code>peer-checked</code>.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o rádio de “retirada ou entrega”</h3>
+<p>A Ana trocou a caixinha por dois botões de rádio: “Retirar na loja” e “Receber em casa”. O
+<code>peer-checked</code> funciona igual, mas com um detalhe: cada rádio tem o seu próprio estado, e o
+navegador desmarca o outro sozinho. Para mostrar o campo de endereço só no segundo caso, o
+<code>peer</code> vai no rádio da entrega e o endereço vem depois dele no HTML — se o endereço estiver
+antes, nada acontece. Foi o mesmo tropeço da seção 7, agora com rádio.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o campo de busca com dica que não saía</h3>
+<p>Ela escreveu <code>peer-placeholder-shown:text-stone-400</code> na dica de um campo de busca e a dica
+ficou sempre escura. O campo tinha o atributo <code>placeholder</code>? Não tinha: o texto de exemplo
+estava escrito à mão, em outro lugar. Sem <code>placeholder</code> no input, a variante nunca casa.
+Acrescentar o atributo resolveu — e, de quebra, o campo ficou mais claro para quem usa leitor de
+tela.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o texto riscado que não voltava</h3>
+<p>Numa lista de tarefas do dia, ela usou <code>peer-checked:line-through</code> em cada item, com um
+<code>peer</code> por linha. Funcionou — até alguém desmarcar a caixinha e o texto continuar riscado.
+A causa não era o Tailwind: outra regra de outro arquivo pintava o texto com <code>!important</code>.
+A lição é a de sempre: quando a variante “não desfaz”, procure uma regra mais forte, não uma classe
+faltando.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. Onde vai a classe <code>peer</code>?</p>
+<label><input type="radio" name="q1"> no elemento que muda de estado: a caixinha, o campo</label>
+<label><input type="radio" name="q1"> no texto que deve mudar de aparência</label>
+<label><input type="radio" name="q1"> no pai que envolve os dois</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que <code>peer-checked:</code> não funciona se o
+texto vem antes da caixinha no HTML?</p>
+<label><input type="radio" name="q2"> porque o Tailwind só lê a primeira linha do arquivo</label>
+<label><input type="radio" name="q2"> porque o texto precisa de um <code>id</code> para ser encontrado</label>
+<label><input type="radio" name="q2"> porque o seletor <code>~</code> só alcança irmãos que vêm depois</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Qual a diferença entre <code>peer</code> e
+<code>group</code>?</p>
+<label><input type="radio" name="q3"> <code>peer</code> é para mouse e <code>group</code> é para toque</label>
+<label><input type="radio" name="q3"> <code>peer</code> marca um irmão anterior; <code>group</code> marca um pai</label>
+<label><input type="radio" name="q3"> os dois fazem a mesma coisa, só mudam o nome</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a tarefa do dia</h2>
+<p>Na lista de tarefas da padaria, cada item tem a sua caixinha e o seu texto. Complete a classe do texto
+para que ele fique riscado quando a caixinha for marcada:</p>
+<div class="ex-code">&lt;label&gt;
+  &lt;input type="checkbox" class="peer"&gt;
+  &lt;span class="<input aria-label="resposta 1" data-answer="peer-checked:line-through" placeholder="...">"&gt;Conferir o forno&lt;/span&gt;
+&lt;/label&gt;</div>
+<p class="ex-dica">Dica: são três pedaços — o marcador <code>peer</code>, o estado <code>checked</code> e
+a utilidade. Tudo ligado por hífen, e os dois-pontos antes da utilidade.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O <code>peer</code> é a marca que você põe no elemento que muda de estado — caixinha, rádio, campo — e
+as variantes <code>peer-…</code> vão nos irmãos que vêm depois dele. O CSS gerado usa
+<code>:is(:where(.peer):estado ~ .peer-…)</code>, com o <code>~</code> garantindo a relação de irmandade e
+a direção. Se o alvo não for irmão, ou vier antes, nada acontece.</p>
+
+<p>As variantes mais úteis são <code>peer-checked</code> (marcado), <code>peer-focus</code> (com o
+cursor dentro) e <code>peer-placeholder-shown</code> (campo vazio mostrando o exemplo). Todas funcionam
+sem JavaScript, porque o navegador cuida do estado sozinho — mas todas dependem de um controle de
+formulário de verdade. E, quando o que muda é o conjunto e não o irmão, a ferramenta certa é o
+<code>group</code>.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>peer</code> vai no elemento observado; <code>peer-…:</code> no irmão que reage.</li>
+<li>O alvo tem de vir <strong>depois</strong> do peer, no mesmo pai.</li>
+<li>O seletor gerado é <code>:is(:where(.peer):estado ~ .peer-…)</code>; o <code>~</code> é o “irmão
+seguinte”.</li>
+<li>A marca <code>peer</code> não gera CSS sozinha.</li>
+<li><code>peer-checked:</code> vale para caixinha e rádio marcados.</li>
+<li><code>peer-focus:</code> vale com o cursor dentro do campo.</li>
+<li><code>peer-placeholder-shown:</code> exige o atributo <code>placeholder</code> no campo.</li>
+<li><code>peer-invalid:</code> depende da validação do navegador.</li>
+<li>Pai e filhos: <code>group</code>. Irmãos: <code>peer</code>. Outro galho: JavaScript.</li>
+<li><code>hidden</code> + <code>peer-checked:block</code> revela um bloco quando a caixinha é marcada.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

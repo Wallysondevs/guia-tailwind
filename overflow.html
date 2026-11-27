@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overflow | Guia Tailwind</title>
+<meta name="description" content="Overflow no Tailwind: cortar a foto no círculo, fazer a lista rolar e impedir que a tabela estoure a página, com hidden, auto, x, y e o min-w-0.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Overflow</span></h1>
+<p class="intro">A Ana abriu o site da padaria no celular e viu a tabela de preços sair pela direita,
+empurrando a página inteira: dava para arrastar a tela de lado, o que é sempre sinal de problema. No
+notebook, a foto do pão tinha canto arredondado, mas os cantos quadrados da imagem continuavam
+aparecendo por cima do círculo. Os dois casos têm a mesma causa e o mesmo remédio: o conteúdo é maior
+que a caixa, e ninguém disse ao navegador o que fazer com o que sobra. Essa sobra se chama
+<em>overflow</em>, e é o assunto desta aula.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é transbordo e por que ele aparece mesmo quando você não pediu.</li>
+  <li>As cinco escolhas: <code>overflow-visible</code>, <code>hidden</code>, <code>clip</code>,
+  <code>auto</code> e <code>scroll</code>.</li>
+  <li>Por que <code>rounded-full</code> sozinho não corta a imagem.</li>
+  <li>Como fazer uma caixa rolar com <code>overflow-y-auto</code> e uma altura.</li>
+  <li>Como impedir que uma tabela larga estoure a página com <code>overflow-x-auto</code>.</li>
+  <li>O <code>min-w-0</code> que salva o overflow dentro de flex e grid.</li>
+  <li>Quando cortar é errado: sombra, menu e anel de foco que somem.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a tabela que empurrou a página</h2>
+
+<p>A tabela de preços da padaria tem quatro colunas: produto, peso, preço e horário da fornada. No
+notebook, cabe. No celular, não: quatro colunas em 375 px de largura dão 90 px cada, e “Pão de queijo
+grande” não cabe em 90 px. O navegador, sem instrução, faz o que sempre faz: aumenta a largura da
+página até caber tudo. O resultado é aquela barra de rolagem horizontal na janela inteira, em que o
+cabeçalho e o rodapé saem de lugar junto.</p>
+
+<p>O mesmo aconteceu com a foto. A Ana queria o pão dentro de um círculo e escreveu
+<code>rounded-full</code> na caixa. O canto ficou redondo, mas a imagem continuou quadrada por cima,
+com as pontas aparecendo. <code>border-radius</code> arredonda a caixa; não recorta o conteúdo. Quem
+recorta é outra propriedade, e é ela que veremos primeiro.</p>
+
+<p>A ideia central é simples e vale para os dois casos: todo elemento é uma caixa com tamanho. Quando
+o conteúdo é maior que a caixa, alguma coisa tem de acontecer — e por padrão o navegador escolhe
+“deixe vazar”. Vazar é <code>overflow: visible</code>, o valor inicial da propriedade. Você nunca
+escreveu isso; é o comportamento de fábrica.</p>
+
+<p>Entender esse padrão resolve metade dos layouts quebrados que você vai encontrar. A caixa não
+cresce para caber: se ela tem altura ou largura definidas, o conteúdo passa por cima dos vizinhos, ou
+para fora da tela. A outra metade é decidir, caixa por caixa, se o excesso deve ser cortado, escondido
+ou transformado em rolagem.</p>
+
+<h2>2. O que é transbordo, exatamente</h2>
+
+<p>Um elemento comum — um <code>div</code> sem altura definida — cresce junto com o conteúdo. Nada
+transborda, porque não há limite. O transbordo nasce quando você impõe um limite: uma altura fixa
+(<code>h-32</code>), uma altura máxima (<code>max-h-40</code>), uma largura com
+<code>overflow</code> herdado de um pai apertado, ou uma célula de grid que não pode crescer.</p>
+
+<p>É por isso que a pergunta “por que meu overflow não funciona?” quase sempre tem a mesma resposta:
+porque a caixa não tem limite. Se você escrever <code>overflow-y-auto</code> num <code>div</code> sem
+altura, ele cresce para caber o conteúdo e nunca precisa rolar. A barra não aparece porque não há o
+que rolar. O <code>overflow</code> não cria o limite: ele reage a ele.</p>
+
+<p>Vale conhecer também o efeito colateral mais útil: uma caixa com <code>overflow</code> diferente de
+<code>visible</code> vira uma “área de rolagem” — um contexto próprio, com barra e posição de
+rolagem. Isso muda o comportamento de elementos posicionados dentro dela, e é a razão de alguns menus
+“sumirem” quando você aplica <code>overflow-hidden</code> no cartão. Voltamos a esse ponto na seção 8.</p>
+
+<p>Por último, um detalhe de vocabulário: no CSS, <code>overflow</code> é a propriedade que junta os
+dois eixos. <code>overflow-x</code> cuida da horizontal, <code>overflow-y</code> da vertical. O
+Tailwind expõe as três: <code>overflow-hidden</code>, <code>overflow-x-hidden</code>,
+<code>overflow-y-hidden</code>. Usar a versão de eixo é mais preciso e evita cortar o que não devia.</p>
+
+<h2>3. As cinco escolhas</h2>
+
+<p>São cinco valores, cada um com uma intenção. A tabela é o coração da aula; o resto é aplicar cada
+um no lugar certo.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que faz</th><th>Quando usar</th></tr>
+<tr><td><code>overflow-visible</code></td><td>deixa vazar, e o conteúdo aparece por cima dos vizinhos</td><td>é o padrão; útil quando você quer sombra ou selo para fora</td></tr>
+<tr><td><code>overflow-hidden</code></td><td>corta o excesso e não mostra barra</td><td>recortar imagem no círculo, esconder excesso decorativo</td></tr>
+<tr><td><code>overflow-clip</code></td><td>corta como o <code>hidden</code>, mas sem virar área de rolagem</td><td>quando você só quer cortar, sem criar contexto de rolagem</td></tr>
+<tr><td><code>overflow-auto</code></td><td>mostra barra só se precisar</td><td>listas e painéis que podem ou não passar do limite</td></tr>
+<tr><td><code>overflow-scroll</code></td><td>mostra barra sempre</td><td>quando a presença da barra avisa que há mais conteúdo</td></tr>
+</table>
+</div>
+
+<p>A diferença entre <code>auto</code> e <code>scroll</code> é sutil e prática. Com
+<code>auto</code>, a barra aparece apenas quando o conteúdo passa do limite; num dia em que a lista
+está curta, o espaço fica limpo. Com <code>scroll</code>, a barra está lá sempre — e no celular, onde
+a barra é sobreposta e invisível até você tocar, o resultado visual é o mesmo. Muitas equipes usam
+<code>auto</code> por padrão e <code>scroll</code> quando querem sinalizar “aqui rola”.</p>
+
+<p>Já <code>hidden</code> e <code>clip</code> parecem iguais e não são. O <code>hidden</code> cria uma
+área de rolagem que o visitante não consegue arrastar, mas que o código pode mover; o
+<code>clip</code> corta e pronto, sem área de rolagem nenhuma. Na prática, <code>hidden</code> resolve
+99% dos casos e é o que todo mundo conhece; <code>clip</code> é a escolha quando um menu posicionado
+dentro do elemento precisa funcionar — porque <code>hidden</code> o cortaria.</p>
+
+<dl class="anatomy">
+<dt>transbordo</dt>
+<dd>O que sobra do conteúdo quando ele é maior que a caixa. O padrão é vazar.</dd>
+<dt>overflow</dt>
+<dd>A propriedade que decide o destino dessa sobra: mostrar, cortar ou rolar.</dd>
+<dt>eixo</dt>
+<dd>A direção do transbordo. <code>overflow-x</code> é a horizontal, <code>overflow-y</code> a
+vertical.</dd>
+<dt>área de rolagem</dt>
+<dd>A caixa que ganha barra e posição de rolagem própria. Surge com <code>auto</code>,
+<code>scroll</code> e <code>hidden</code>.</dd>
+<dt>min-w-0</dt>
+<dd>A classe que libera um filho de flex ou grid para encolher abaixo do conteúdo. Sem ela, o
+<code>overflow-x-auto</code> não tem efeito.</dd>
+</dl>
+
+<h2>4. A primeira missão: cortar a foto no círculo</h2>
+
+<p>O caso mais comum de <code>overflow-hidden</code> é a foto redonda. A receita tem três partes:
+<code>size-24</code> para o tamanho, <code>rounded-full</code> para o canto e
+<code>overflow-hidden</code> para o conteúdo respeitar o canto. Sem a terceira, o canto é redondo mas
+o conteúdo continua quadrado.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|overflow=hidden;;rule:overflow: hidden">
+  <p class="try-task">A “foto” abaixo é maior que a caixa e mostra os cantos por cima do círculo.
+  Recorte o conteúdo para ele respeitar o canto arredondado.</p>
+  <pre class="html">&lt;div id="alvo" class="size-24 rounded-full bg-amber-200"&gt;
+  &lt;div class="size-32 -m-4 bg-amber-400 text-center text-sm text-amber-900"&gt;foto do pão&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+width: 96px
+height: 96px
+background-color: oklch(0.924 0.12 95.746)
+border-radius: 3.35544e+07px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="size-24 overflow-hidden rounded-full bg-amber-200"&gt;
+  &lt;div class="size-32 -m-4 bg-amber-400 text-center text-sm text-amber-900"&gt;foto do pão&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Rode a caixa e compare a prévia com o HTML que você digitou. Antes, o quadrado âmbar claro maior
+aparece inteiro, com as pontas para fora do círculo. Depois, só a parte de dentro do círculo é
+desenhada. O conteúdo não foi apagado — ele continua lá, inteiro, apenas recortado. Se você inspecionar
+o elemento no DevTools, vai encontrar o filho do mesmo tamanho de antes.</p>
+
+<p>Essa distinção importa: cortar não é remover. Uma imagem recortada continua sendo baixada, continua
+pesando e continua sendo lida por leitores de tela. Se a intenção é esconder do visitante, o caminho é
+outro (as aulas de <a href="esconder-mostrar.html">esconder e mostrar</a> tratam disso). O
+<code>overflow-hidden</code> é uma tesoura, não uma gaveta.</p>
+
+<p>E cuidado com o efeito colateral: numa caixa com <code>overflow-hidden</code>, a sombra de um filho
+também é recortada. No cartão da padaria, a foto ficou linda e o selo “novo”, posicionado no canto,
+sumiu pela metade. A solução foi tirar o selo de dentro da caixa recortada e posicioná-lo no cartão
+que envolve tudo. Guarde essa: ela volta na seção 8.</p>
+
+<h2>5. A caixa que rola: altura mais overflow-y-auto</h2>
+
+<p>O segundo uso é a lista longa dentro de um espaço curto. A receita é a mesma dupla: um limite de
+altura e uma instrução de rolagem. O limite pode ser <code>h-40</code>, <code>max-h-64</code> ou até
+um <code>h-full</code> dentro de um pai com altura. O que não pode é não ter limite.</p>
+
+<p>No painel da padaria, a lista de pães do dia tem dez itens e o espaço reservado é de 128 px. A Ana
+escreveu <code>h-32</code> e <code>overflow-y-auto</code>, nessa ordem de raciocínio: primeiro o
+tamanho, depois o destino do excesso. A barra aparece discreta, e o conteúdo continua acessível.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|overflow-y=auto;;rule:overflow-y: auto">
+  <p class="try-task">A caixa tem altura de 128 px e oito itens, mas o conteúdo vaza para fora. Faça a
+  rolagem aparecer só no eixo vertical.</p>
+  <pre class="html">&lt;div id="alvo" class="h-32 rounded-lg border border-amber-200 bg-white p-3 text-sm text-amber-900"&gt;
+  &lt;p&gt;Pão francês — 6h e 16h&lt;/p&gt;
+  &lt;p&gt;Pão de queijo — o dia inteiro&lt;/p&gt;
+  &lt;p&gt;Broa de milho — 7h&lt;/p&gt;
+  &lt;p&gt;Rosca doce — 8h&lt;/p&gt;
+  &lt;p&gt;Baguete — 11h e 17h&lt;/p&gt;
+  &lt;p&gt;Pão integral — 7h e 15h&lt;/p&gt;
+  &lt;p&gt;Sonho de creme — 9h&lt;/p&gt;
+  &lt;p&gt;Croissant — 8h e 14h&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+height: 128px
+padding: 12px
+background-color: rgb(255, 255, 255)
+color: oklch(0.414 0.112 45.904)
+font-size: 14px
+line-height: 20px
+border-radius: 8px
+border-width: 1px
+border-color: oklch(0.924 0.12 95.746)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="h-32 overflow-y-auto rounded-lg border border-amber-200 bg-white p-3 text-sm text-amber-900"&gt;
+  &lt;p&gt;Pão francês — 6h e 16h&lt;/p&gt;
+  &lt;p&gt;Pão de queijo — o dia inteiro&lt;/p&gt;
+  &lt;p&gt;Broa de milho — 7h&lt;/p&gt;
+  &lt;p&gt;Rosca doce — 8h&lt;/p&gt;
+  &lt;p&gt;Baguete — 11h e 17h&lt;/p&gt;
+  &lt;p&gt;Pão integral — 7h e 15h&lt;/p&gt;
+  &lt;p&gt;Sonho de creme — 9h&lt;/p&gt;
+  &lt;p&gt;Croissant — 8h e 14h&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Um cuidado de conforto: uma barra de rolagem dentro de outra é irritante. Se a página já rola e
+você coloca uma lista rolável no meio, o visitante precisa acertar qual das duas vai rolar. É aqui
+que entra o <code>overscroll-contain</code>, que impede a rolagem de “vazar” para a página quando a
+lista chega ao fim. A classe não muda nada visualmente; ela muda o comportamento no limite.</p>
+
+<p>Outro cuidado: no celular, barra de rolagem é praticamente invisível, e a lista parece simplesmente
+cortada. Se o conteúdo for essencial, deixe uma pista — um degradê no rodapé, um “ver mais”, ou um
+título que diga que a lista continua. O CSS resolve o transbordo; a comunicação é com você.</p>
+
+<h2>6. A tabela que estoura a página</h2>
+
+<p>Voltamos ao problema da Ana. A tabela não deve rolar sozinha: quem rola é a caixa em volta. A
+receita tem duas partes. Primeiro, um <code>div</code> com <code>overflow-x-auto</code> envolvendo a
+tabela. Segundo, a tabela com uma largura mínima que force a rolagem em vez de espremer as colunas:
+<code>min-w-[720px]</code> ou um <code>min-w-max</code>.</p>
+
+<p>Por que não aplicar <code>overflow-x-auto</code> direto na <code>table</code>? Porque a tabela
+precisa ser mais larga que a caixa para haver o que rolar; se ela mesma encolher, o conteúdo espreme
+em vez de rolar. O wrapper é quem recebe o limite; a tabela é quem mantém a largura.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|overflow-x=auto;;rule:overflow-x: auto">
+  <p class="try-task">A tabela de preços é mais larga que a prévia e está empurrando tudo. Dê rolagem
+  horizontal só à caixa que envolve a tabela.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-lg border border-amber-200 bg-white"&gt;
+  &lt;table class="min-w-[720px] text-left text-sm text-amber-900"&gt;
+    &lt;tr class="border-b border-amber-100"&gt;
+      &lt;th class="p-3"&gt;Produto&lt;/th&gt;&lt;th class="p-3"&gt;Peso&lt;/th&gt;&lt;th class="p-3"&gt;Preço&lt;/th&gt;&lt;th class="p-3"&gt;Fornada&lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;&lt;td class="p-3"&gt;Pão de queijo grande&lt;/td&gt;&lt;td class="p-3"&gt;500 g&lt;/td&gt;&lt;td class="p-3"&gt;R$ 24,00&lt;/td&gt;&lt;td class="p-3"&gt;6h e 16h&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td class="p-3"&gt;Broa de milho&lt;/td&gt;&lt;td class="p-3"&gt;600 g&lt;/td&gt;&lt;td class="p-3"&gt;R$ 18,00&lt;/td&gt;&lt;td class="p-3"&gt;7h&lt;/td&gt;&lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: rgb(255, 255, 255)
+border-radius: 8px
+border-width: 1px
+border-color: oklch(0.924 0.12 95.746)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="overflow-x-auto rounded-lg border border-amber-200 bg-white"&gt;
+  &lt;table class="min-w-[720px] text-left text-sm text-amber-900"&gt;
+    &lt;tr class="border-b border-amber-100"&gt;
+      &lt;th class="p-3"&gt;Produto&lt;/th&gt;&lt;th class="p-3"&gt;Peso&lt;/th&gt;&lt;th class="p-3"&gt;Preço&lt;/th&gt;&lt;th class="p-3"&gt;Fornada&lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;&lt;td class="p-3"&gt;Pão de queijo grande&lt;/td&gt;&lt;td class="p-3"&gt;500 g&lt;/td&gt;&lt;td class="p-3"&gt;R$ 24,00&lt;/td&gt;&lt;td class="p-3"&gt;6h e 16h&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td class="p-3"&gt;Broa de milho&lt;/td&gt;&lt;td class="p-3"&gt;600 g&lt;/td&gt;&lt;td class="p-3"&gt;R$ 18,00&lt;/td&gt;&lt;td class="p-3"&gt;7h&lt;/td&gt;&lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel marca <code>overflow-x: auto</code>. Na prévia, arraste a tabela para o lado: o cabeçalho da
+página não se move, só a tabela. É exatamente o que faltava no site da Ana. E note que a página do guia
+faz a mesma coisa nas tabelas de referência: todas ficam dentro de uma caixa com rolagem horizontal,
+pelo mesmo motivo.</p>
+
+<p>Se você preferir que a tabela nunca role — porque rolar tabela é chato no celular —, a alternativa é
+repensar o conteúdo: menos colunas, uma linha por produto em formato de cartão, ou a coluna menos
+importante escondida com <code>hidden md:table-cell</code>. O CSS resolve o transbordo, mas decisões
+de conteúdo resolvem melhor.</p>
+
+<p>Vale ver como o par do exemplo sai no CSS, porque ele mostra uma coisa curiosa: valores entre
+colchetes viram parte do nome da classe, e o CSS precisa escapar os colchetes com barra invertida.
+Você nunca digita essa barra; o compilador escreve.</p>
+
+<pre class="term">.overflow-x-auto {
+  overflow-x: auto;
+}
+.min-w-\[720px\] {
+  min-width: 720px;
+}</pre>
+
+<h2>7. O CSS gerado (e o min-w-0 que salva o dia)</h2>
+
+<p>Nenhuma das classes desta aula é complicada; todas apontam para uma propriedade com um valor. A
+saída do compilador é quase uma tradução:</p>
+
+<pre class="term">.overflow-hidden {
+  overflow: hidden;
+}
+.overflow-x-auto {
+  overflow-x: auto;
+}
+.overflow-y-auto {
+  overflow-y: auto;
+}
+.overflow-clip {
+  overflow: clip;
+}
+.min-w-0 {
+  min-width: 0px;
+}</pre>
+
+<p>A última linha é a que resolve o caso mais frustrante. Coloque o wrapper com
+<code>overflow-x-auto</code> dentro de um flex ou de um grid e a rolagem pode simplesmente não
+acontecer: o filho se recusa a encolher abaixo do conteúdo. Isso não é teimosia do Tailwind; é o CSS.
+Em flex e grid, o tamanho mínimo automático de um item é <code>auto</code>, o que quer dizer “nunca
+menor que o conteúdo”. O <code>min-w-0</code> troca esse mínimo por zero.</p>
+
+<p>E existe a versão vertical do problema: numa coluna de flex com <code>overflow-y-auto</code>, o
+painel cresce em vez de rolar porque o mínimo de altura também é automático. A cura é
+<code>min-h-0</code>. Essas duas classes têm nome de detalhe e são, na prática, o que faz o layout
+funcionar.</p>
+
+<p>Por fim, a diferença entre cortar e esconder. <code>overflow-hidden</code> não impede o leitor de
+tela de ler o conteúdo; <code>display: none</code> impede. Se o texto foi cortado por acidente, ele
+continua sendo anunciado — o que é bom para acessibilidade e péssimo como desculpa para esconder
+conteúdo. Corte é visual.</p>
+
+<h2>8. O que costuma dar errado</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o menu que sumiu dentro do cartão</h3>
+<p>A Ana pôs um menu de três opções dentro do cartão e aplicou <code>overflow-hidden</code> para
+arredondar a foto. O menu, que abre para fora do cartão, foi cortado na borda. O culpado não era o
+menu: era o recorte do pai. A cura foi mover o menu para fora da caixa recortada, ou usar
+<code>overflow-clip</code> no lugar — que corta a pintura sem criar a área de rolagem que prende o
+posicionado. Quando um elemento posicionado desaparece, procure um <code>overflow-hidden</code>
+ancestral.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a rolagem horizontal que não funciona</h3>
+<p>O wrapper tinha <code>overflow-x-auto</code>, a tabela era larga, e nada rolava. A razão: o wrapper
+era filho de um <code>flex</code> e estava encolhendo até o tamanho do conteúdo, em vez de respeitar o
+limite do pai. Faltava <code>min-w-0</code> no wrapper. O sintoma é sempre o mesmo: a página inteira
+rola de lado em vez de a caixa rolar. Se a barra horizontal aparece na janela, o problema está acima,
+no pai que não deixa o filho encolher.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a caixa que deveria rolar e só cresce</h3>
+<p>Ela aplicou <code>overflow-auto</code> numa lista sem altura, confiando que a classe faria a mágica.
+A lista cresceu e empurrou o rodapé para fora da tela. <code>overflow</code> não define tamanho; ele
+só decide o que fazer com o excesso. Sem <code>h-…</code> ou <code>max-h-…</code>, não existe excesso
+— e sem excesso, não existe rolagem. A ordem mental é sempre: primeiro o limite, depois o
+overflow.</p>
+</div>
+
+<p>Há ainda um quarto caso, mais silencioso: o <code>overflow-hidden</code> que corta o anel de foco
+do teclado. Você navega com Tab, o elemento recebe foco, o anel é desenhado fora da caixa e some. Para
+quem usa teclado, o site fica sem indicação de onde está. Se o recorte é necessário, aumente o
+respiro interno com <code>p-1</code> ou use <code>outline-offset</code> negativo. O anel de foco é
+assunto da aula de <a href="anel-e-foco.html">anel de foco</a>.</p>
+
+<h2>9. Cortar, rolar ou esconder: escolhendo com critério</h2>
+
+<p>Com as cinco opções na mão, a decisão fica mais fácil se você fizer duas perguntas. Primeira: o
+conteúdo precisa ser lido por inteiro? Se sim, cortar está fora — use rolagem ou repense o layout.
+Segunda: existe algo posicionado dentro da caixa (menu, selo, sombra)? Se sim, cortar vai cortar
+também esse algo.</p>
+
+<p>Para fotos e elementos decorativos, cortar é quase sempre a resposta certa: a imagem redonda, o
+cabeçalho com fundo que precisa respeitar o canto arredondado, o “hero” com altura fixa. Para listas e
+painéis, rolar. Para conteúdo que não deveria estar ali — um anúncio que passou do tamanho, um texto
+que não coube —, esconder com <code>hidden</code> ou <code>hidden md:block</code> é melhor que cortar
+pela metade.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Sintoma</th><th>Causa provável</th><th>O que fazer</th></tr>
+<tr><td>a página rola de lado no celular</td><td>algo mais largo que a tela, sem caixa de rolagem</td><td><code>overflow-x-auto</code> no wrapper certo, ou <code>min-w-0</code></td></tr>
+<tr><td>a caixa não rola</td><td>falta de altura ou de largura máxima</td><td><code>h-…</code>, <code>max-h-…</code> antes do overflow</td></tr>
+<tr><td>o menu some</td><td><code>overflow-hidden</code> num ancestral</td><td>mover o menu, ou trocar por <code>overflow-clip</code></td></tr>
+<tr><td>a imagem não respeita o círculo</td><td><code>rounded-full</code> sem recorte</td><td><code>overflow-hidden</code></td></tr>
+<tr><td>o anel de foco desaparece</td><td>recorte encostado na borda</td><td>respiro interno ou <code>outline-offset</code></td></tr>
+</table>
+</div>
+
+<p>Repare que três das cinco linhas apontam para a mesma solução: dar limite e destino ao excesso.
+É um padrão que se repete no guia inteiro — o Tailwind não adivinha a intenção; ele cobra uma decisão
+por propriedade. Quando algo parece “não funcionar”, quase sempre é uma decisão que ficou faltando.</p>
+
+<p>Vale lembrar também que rolagem é um recurso de leitura, não só de layout. Quem usa teclado precisa
+conseguir rolar a caixa com as setas: para isso, ela precisa ser focável, com
+<code>tabindex="0"</code>. Sem isso, a lista rolável é inalcançável para quem não usa mouse. É um
+detalhe de HTML que combina com o <code>overflow-y-auto</code> e que quase todo mundo esquece.</p>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Por que <code>rounded-full</code> não deixa a foto
+redonda?</p>
+<label><input type="radio" name="q1"> porque falta a classe <code>rounded-circle</code></label>
+<label><input type="radio" name="q1"> porque o canto arredonda a caixa, mas não recorta o conteúdo</label>
+<label><input type="radio" name="q1"> porque a imagem precisa de <code>object-cover</code> antes</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. O que uma caixa precisa ter para o
+<code>overflow-y-auto</code> rolar?</p>
+<label><input type="radio" name="q2"> uma sombra e uma borda</label>
+<label><input type="radio" name="q2"> a classe <code>scroll-smooth</code> junto</label>
+<label><input type="radio" name="q2"> um limite de altura, como <code>h-32</code> ou <code>max-h-40</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O <code>overflow-x-auto</code> está no wrapper, mas a
+página inteira rola de lado. O que provavelmente falta?</p>
+<label><input type="radio" name="q3"> <code>min-w-0</code> no wrapper, se ele estiver num flex ou grid</label>
+<label><input type="radio" name="q3"> trocar por <code>overflow-scroll</code></label>
+<label><input type="radio" name="q3"> tirar a borda da tabela</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o cabeçalho redondo</h2>
+<p>A capa da padaria tem fundo colorido e canto arredondado, mas o fundo escapa pelos cantos. Complete
+a classe que faz o conteúdo respeitar o arredondamento:</p>
+<div class="ex-code">&lt;div class="h-40 rounded-3xl <input aria-label="resposta 1" data-answer="overflow-hidden" placeholder="..."> bg-amber-100"&gt;Capa&lt;/div&gt;</div>
+<p class="ex-dica">Dica: é a classe que corta o que passa da caixa. <code>overflow-auto</code> criaria
+uma barra de rolagem; <code>overflow-visible</code> é o padrão que deixa vazar.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Transbordo é o que sobra quando o conteúdo é maior que a caixa, e o padrão do navegador é deixar
+vazar. O <code>overflow</code> decide o destino dessa sobra: <code>hidden</code> corta,
+<code>clip</code> corta sem criar área de rolagem, <code>auto</code> rola quando precisa,
+<code>scroll</code> mostra a barra sempre. As versões de eixo — <code>overflow-x-…</code>,
+<code>overflow-y-…</code> — são mais precisas e evitam cortes desnecessários.</p>
+
+<p>Duas condições andam juntas: limite e destino. Sem altura ou largura máxima, não há o que rolar;
+sem overflow, a caixa transborda para cima dos vizinhos. E, dentro de flex e grid, o
+<code>min-w-0</code> (ou <code>min-h-0</code>) é o que permite o filho encolher e o wrapper rolar, em
+vez de esticar a página inteira.</p>
+
+<p>Cortar tem custo: sombra, menu e anel de foco que desaparecem. Antes de aplicar
+<code>overflow-hidden</code>, pergunte o que mais vive dentro daquela caixa. E lembre que corte é
+visual — o conteúdo continua lá, para o bem e para o mal.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>O padrão é <code>overflow-visible</code>: o conteúdo vaza para fora da caixa.</li>
+<li><code>hidden</code> corta; <code>clip</code> corta sem criar área de rolagem.</li>
+<li><code>auto</code> mostra barra se precisar; <code>scroll</code> mostra sempre.</li>
+<li>Para rolar, a caixa precisa de limite: <code>h-…</code> ou <code>max-h-…</code>.</li>
+<li><code>rounded-full</code> não recorta: o par é <code>overflow-hidden</code>.</li>
+<li>Tabela larga: wrapper com <code>overflow-x-auto</code> e tabela com largura mínima.</li>
+<li>Em flex e grid, <code>min-w-0</code> libera o encolhimento; <code>min-h-0</code> na vertical.</li>
+<li><code>overflow-hidden</code> num ancestral corta menu, selo e sombra.</li>
+<li>O recorte também pode esconder o anel de foco do teclado.</li>
+<li><code>overscroll-contain</code> impede a rolagem de vazar para a página.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

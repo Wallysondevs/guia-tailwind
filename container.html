@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O container | Guia Tailwind</title>
+<meta name="description" content="O container do Tailwind na prática: o que ele faz sozinho, por que o texto não centraliza, quando usar mx-auto e quando trocar por max-w com uma coluna de leitura.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>O <span class="hl">container</span></h1>
+<p class="intro">A Ana abriu o site da padaria no monitor grande do balcão e levou um susto: o parágrafo
+que explicava o pão de fermentação natural ia de uma ponta à outra da tela. Para ler, ela precisava
+virar a cabeça, como quem acompanha uma partida de tênis. No notebook o texto parecia bom; no monitor
+largo, virou uma linha de duzentos caracteres. Nesta aula ela conhece a classe <code>container</code>,
+descobre o que ela faz e o que deixa de fazer, aprende a centralizar a coluna com
+<code>mx-auto</code> e vê por que a maioria dos projetos acaba preferindo <code>max-w-</code> com
+<code>mx-auto</code> no lugar do container.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que a classe <code>container</code> faz — e as duas coisas que ela não faz.</li>
+  <li>Por que a largura de leitura tem limite e como escolher esse limite.</li>
+  <li>Como ler o CSS gerado do container, com os máximos de cada breakpoint.</li>
+  <li>O papel do <code>mx-auto</code> e por que ele precisa de uma largura para funcionar.</li>
+  <li>A diferença entre <code>container</code> e <code>max-w-md</code> com <code>mx-auto</code>.</li>
+  <li>Como alinhar cabeçalho, conteúdo e rodapé na mesma coluna.</li>
+  <li>Quando o container atrapalha: banner de ponta a ponta e container dentro de container.</li>
+  <li>Por que a prévia estreita engana na hora de julgar uma coluna.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o texto que atravessa o monitor</h2>
+
+<p>O HTML da Ana era o mais inocente do mundo: um <code>&lt;main&gt;</code> com um
+<code>&lt;h1&gt;</code> e dois parágrafos. No notebook de 13 polegadas, o texto ocupava a tela com
+conforto. No monitor de 27 polegadas, cada linha ficava com mais de cem caracteres, e o olho perdia o
+começo da linha seguinte. O conteúdo não estava errado; só estava largo demais.</p>
+
+<p>Quem vem do mundo do papel acha estranho: mais espaço deveria ser melhor. Em leitura, não é. O
+movimento do olho ao voltar para a esquerda da linha seguinte custa tempo e atenção; quanto mais longa
+a linha, mais fácil pular uma linha inteira sem perceber. Por isso jornais, revistas e livros usam
+colunas: não é economia de papel, é fisiologia da leitura.</p>
+
+<p>Na web, a coluna se chama <em>container</em> — a caixa que segura o conteúdo e impede que ele se
+espalhe. O Tailwind tem uma classe com esse nome, e ela é uma das primeiras que a Ana vai usar em
+qualquer projeto. Só que ela não é mágica: faz uma coisa muito específica e deixa duas outras para
+você. A confusão entre o que ela faz e o que ela não faz é o motivo desta aula existir.</p>
+
+<h2>2. Largura de leitura: a conta dos caracteres</h2>
+
+<p>Existe uma medida clássica em tipografia: uma linha confortável tem entre 45 e 75 caracteres. Na
+web, a faixa que a maioria dos guias usa é de 60 a 75, e o número varia com o tamanho da fonte. Um
+parágrafo com fonte de 16 px e largura de 640 px costuma ficar dentro dessa faixa; o mesmo parágrafo
+com 1.400 px de largura fica com o dobro de caracteres por linha e cansa.</p>
+
+<p>O jeito prático de conferir sem contar caracteres é olhar a página e perguntar: “consigo ler três
+linhas sem me perder?”. Se a resposta for não, a coluna está larga. Outro teste honesto é diminuir a
+janela do navegador até o texto ficar bom — a largura em que ele fica confortável é, provavelmente, o
+máximo que você quer para o conteúdo.</p>
+
+<p>Vale separar dois tipos de conteúdo, porque eles têm necessidades diferentes. Texto corrido — o
+miolo do site — quer coluna estreita. Tabelas, galerias de fotos e painéis querem mais largura, porque
+o conteúdo é feito de blocos lado a lado. O Tailwind resolve isso com duas ferramentas: o
+<code>container</code>, que dá máximos progressivos, e o <code>max-w-</code>, que dá um máximo
+escolhido por você. A aula passa pelas duas.</p>
+
+<h2>3. O que a classe container faz</h2>
+
+<p><code>container</code> é uma classe só, sem número e sem sufixo. Ela aplica
+<code>width: 100%</code> e troca o <code>max-width</code> conforme a largura da janela, acompanhando os
+breakpoints do Tailwind. O CSS gerado é este, escrito pelo próprio Tailwind:</p>
+
+<pre class="term">.container {
+  width: 100%;
+  @media (width >= 40rem) {
+    max-width: 40rem;
+  }
+  @media (width >= 48rem) {
+    max-width: 48rem;
+  }
+  @media (width >= 64rem) {
+    max-width: 64rem;
+  }
+  @media (width >= 80rem) {
+    max-width: 80rem;
+  }
+  @media (width >= 96rem) {
+    max-width: 96rem;
+  }
+}</pre>
+
+<p>Leia como uma escada. Abaixo de 40 rem, o container é 100% da largura disponível. A partir de
+40 rem (640 px), ele para de crescer em 640 px e o que sobra vira margem. A partir de 48 rem, o teto
+sobe para 768 px. E assim por diante, até 96 rem. O resultado é uma coluna que acompanha a tela em
+degraus, em vez de esticar sem fim.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Quando a janela tem</th><th>O máximo do container</th><th>Em pixels</th></tr>
+<tr><td>menos de 640 px</td><td>nenhum: 100% da largura</td><td>—</td></tr>
+<tr><td>640 px ou mais</td><td><code>40rem</code></td><td>640 px</td></tr>
+<tr><td>768 px ou mais</td><td><code>48rem</code></td><td>768 px</td></tr>
+<tr><td>1.024 px ou mais</td><td><code>64rem</code></td><td>1.024 px</td></tr>
+<tr><td>1.280 px ou mais</td><td><code>80rem</code></td><td>1.280 px</td></tr>
+<tr><td>1.536 px ou mais</td><td><code>96rem</code></td><td>1.536 px</td></tr>
+</table>
+</div>
+
+<p>Repare que a escada é generosa: no monitor de 1.440 px do balcão da Ana, o container para em
+1.280 px. Ainda é largo para texto corrido — 1.280 px com fonte de 16 px dá mais de 120 caracteres por
+linha. Ou seja: o container resolve o “esticado”, mas não resolve sozinho o conforto de leitura. É por
+isso que tanta gente combina <code>container</code> com <code>max-w-*</code> no conteúdo, ou troca o
+container por um <code>max-w-*</code> de vez. A seção 6 mostra essa troca.</p>
+
+<dl class="anatomy">
+<dt>container</dt>
+<dd>A classe que dá <code>width: 100%</code> e um <code>max-width</code> por breakpoint. No Tailwind
+v4, sem opções e sem configuração.</dd>
+<dt>max-width</dt>
+<dd>O teto de largura: o elemento pode ser menor, nunca maior. É o que “para” a coluna.</dd>
+<dt>breakpoint</dt>
+<dd>Um tamanho de janela em que o CSS muda de regra. Os do Tailwind v4: 40, 48, 64, 80 e 96 rem.</dd>
+<dt>margin-inline</dt>
+<dd>A margem nos dois lados da linha. <code>mx-auto</code> aplica <code>auto</code> e reparte a
+sobra.</dd>
+<dt>coluna de leitura</dt>
+<dd>A faixa de largura em que o texto fica confortável: de 60 a 75 caracteres por linha.</dd>
+</dl>
+
+<h2>4. O container não centraliza nem dá respiro</h2>
+
+<p>Aqui está a parte que pega todo mundo. Diferente do que o nome sugere, o <code>container</code>
+não coloca a coluna no meio da tela e não afasta o texto das bordas. Ele só define largura e teto. Se
+a coluna tem 640 px e a janela tem 1.400 px, os 760 px que sobram ficam todos do lado direito, porque
+a margem automática não está lá. O texto fica encostado na esquerda, com um deserto à direita.</p>
+
+<p>Para centralizar existe <code>mx-auto</code>, que aplica <code>margin-inline: auto</code>: margem
+automática nos dois lados da linha (esquerda e direita, ou o que for “início” e “fim” no idioma). O
+navegador divide o espaço que sobra igualmente e a coluna vai para o meio. Sem <code>mx-auto</code>,
+não há centralização — e é por isso que a dupla clássica é <code>container mx-auto</code>.</p>
+
+<p>O respiro é o outro ponto. O container não tem padding: o texto pode encostar na borda da coluna e,
+em telas pequenas, na borda da tela. Em celular, isso é desconfortável e às vezes perigoso — texto
+colado na borda é difícil de ler. A correção é acrescentar um padding horizontal: <code>px-4</code>
+(16 px), <code>px-6</code> (24 px) ou <code>px-8</code> (32 px) em telas maiores. A caixa abaixo faz
+exatamente isso.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=16px;;rule:padding: calc(var(--spacing) * 4)">
+  <p class="try-task">O texto do container encosta nas laterais. Dê 16 px de respiro em todos os lados
+  com <code>p-4</code> e clique em Rodar.</p>
+  <pre class="html">&lt;div id="alvo" class="container mx-auto bg-amber-100 text-amber-900"&gt;
+  &lt;p&gt;Pão de fermentação natural, assado às 6h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+max-width: 640px
+background-color: oklch(0.962 0.059 95.617)
+color: oklch(0.414 0.112 45.904)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="container mx-auto bg-amber-100 p-4 text-amber-900"&gt;
+  &lt;p&gt;Pão de fermentação natural, assado às 6h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra o padding em uma linha, <code>padding: 16px</code>, e a cor de fundo em
+<code>oklch(...)</code>. O <code>mx-auto</code> não aparece ali, e isso não é falha do painel: nesta
+prévia, o teto do container é maior do que o espaço disponível, então não sobrou margem para
+distribuir. A centralização existe no CSS (o <code>margin-inline: auto</code> está lá), mas só tem
+efeito quando a janela é mais larga que o teto. Guarde essa observação: ela vale para toda conferência
+de layout.</p>
+
+<h2>5. mx-auto: o que centraliza de verdade</h2>
+
+<p><code>mx-auto</code> é uma margem automática, não uma varinha. Ela reparte o espaço que sobra entre
+os dois lados do elemento — e, para haver sobra, o elemento precisa ser menor que o espaço. Um
+<code>&lt;div&gt;</code> comum ocupa toda a largura disponível, então não sobra nada e o
+<code>mx-auto</code> fica sem trabalho. É por isso que “coloquei mx-auto e não centralizou” quase
+sempre quer dizer “faltou uma largura”.</p>
+
+<p>Essa largura pode vir de três lugares: do próprio <code>container</code>, de um
+<code>max-w-*</code> ou de um <code>w-*</code> fixo. O <code>max-w-*</code> é o mais usado, porque
+junta o melhor dos dois mundos: a coluna tem um teto e, abaixo dele, encolhe junto com a tela. É o
+mesmo comportamento do container, com um número escolhido por você em vez da escada dos breakpoints.
+O CSS das duas classes é curto e não esconde nada:</p>
+
+<pre class="term">.mx-auto {
+  margin-inline: auto;
+}
+.max-w-md {
+  max-width: var(--container-md);
+}
+.max-w-xl {
+  max-width: var(--container-xl);
+}</pre>
+
+<p>Cada classe aponta para uma variável da escala de containers do Tailwind. <code>--container-md</code>
+vale 28 rem, que em fonte padrão dá 448 px; <code>--container-xl</code> vale 36 rem, 576 px. Os nomes
+misturam duas coisas que confundem no começo: <code>max-w-md</code> usa a escala de
+<em>tamanhos de container</em> (xs, sm, md, lg, xl…) e não a escala de breakpoints (sm, md, lg…), ainda
+que os nomes se pareçam. A tabela da seção 6 lista os valores.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|max-width=448px;;rule:max-width: var(--container-md)">
+  <p class="try-task">A coluna tem <code>mx-auto</code> e ocupa a largura toda: não há sobra para
+  centralizar. Dê a ela um teto de 448 px com <code>max-w-md</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="mx-auto bg-amber-100 p-4 text-amber-900"&gt;
+  &lt;p&gt;Pão de fermentação natural, assado às 6h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+color: oklch(0.414 0.112 45.904)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="mx-auto max-w-md bg-amber-100 p-4 text-amber-900"&gt;
+  &lt;p&gt;Pão de fermentação natural, assado às 6h.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o bloco âmbar encolhe e vai para o meio. O painel mostra <code>width: 448px</code>
+(a largura que resultou) e <code>max-width: 448px</code> (o teto que você pediu), além da margem
+calculada dos dois lados. É a demonstração mais direta do que “coluna” significa: um bloco que aceita
+ser menor que a tela e se posiciona no centro do espaço que sobra.</p>
+
+<h2>6. Container ou max-w? A escolha do dia a dia</h2>
+
+<p>Com as duas ferramentas na mão, a pergunta é qual usar. A resposta curta: o container serve para
+layout de página em que você quer acompanhar os breakpoints; o <code>max-w-*</code> serve quando você
+sabe a largura que o conteúdo pede. Em projeto pequeno, o <code>max-w-*</code> costuma ganhar, porque
+tem menos surpresas: o mesmo número vale em qualquer tela, e a coluna não muda de tamanho no meio da
+leitura quando a janela cruza um breakpoint.</p>
+
+<p>Com o container, cada vez que a janela passa de 768 para 1.024 px, a coluna salta de 768 para
+1.024 px. O conteúdo “pula” de largura, o que às vezes é exatamente o que você quer (um painel que
+aproveita a tela) e às vezes não (um texto que muda de medida no meio da leitura). Com
+<code>max-w-3xl</code>, a coluna fica em 768 px e pronto.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Teto</th><th>Em pixels</th></tr>
+<tr><td><code>max-w-sm</code></td><td>24 rem</td><td>384 px</td></tr>
+<tr><td><code>max-w-md</code></td><td>28 rem</td><td>448 px</td></tr>
+<tr><td><code>max-w-lg</code></td><td>32 rem</td><td>512 px</td></tr>
+<tr><td><code>max-w-xl</code></td><td>36 rem</td><td>576 px</td></tr>
+<tr><td><code>max-w-2xl</code></td><td>42 rem</td><td>672 px</td></tr>
+<tr><td><code>max-w-3xl</code></td><td>48 rem</td><td>768 px</td></tr>
+<tr><td><code>max-w-4xl</code></td><td>56 rem</td><td>896 px</td></tr>
+<tr><td><code>max-w-5xl</code></td><td>64 rem</td><td>1.024 px</td></tr>
+</table>
+</div>
+
+<p>A caixa abaixo faz a troca na prática. A faixa do conteúdo está com <code>container</code>, e o
+texto fica largo demais; a missão é substituir por <code>max-w-xl mx-auto</code>. Repare que a troca
+não é só de classe: é de ideia. O container pergunta “qual é o breakpoint?”; o <code>max-w-xl</code>
+responde “o texto precisa de 576 px, e o resto é margem”.</p>
+
+<div class="trytailwind" data-goal="rule:max-width: var(--container-xl);;rule:margin-inline: auto;;css:#alvo|max-width=576px">
+  <p class="try-task">Troque o <code>container</code> por uma coluna fixa de 576 px: use
+  <code>max-w-xl</code> e <code>mx-auto</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="container bg-amber-100 p-4 text-amber-900"&gt;
+  &lt;p&gt;Pão de fermentação natural, assado às 6h, com farinha da moinho da cidade.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+max-width: 640px
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+color: oklch(0.414 0.112 45.904)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="mx-auto max-w-xl bg-amber-100 p-4 text-amber-900"&gt;
+  &lt;p&gt;Pão de fermentação natural, assado às 6h, com farinha do moinho da cidade.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Ao rodar a solução, o bloco fica visivelmente mais estreito e centralizado, e o painel mostra
+<code>max-width: 576px</code> junto com a margem automática calculada. Numa janela pequena, a coluna
+continua com 576 px de teto, mas encolhe se não houver espaço — o <code>max-width</code> é um teto, não
+uma promessa de tamanho.</p>
+
+<h2>7. A mesma coluna no cabeçalho, no conteúdo e no rodapé</h2>
+
+<p>Um site parece arrumado quando as peças se alinham numa coluna só. Se o cabeçalho usa
+<code>container mx-auto px-4</code> e o conteúdo usa <code>max-w-3xl mx-auto</code>, as bordas esquerdas
+não batem, e o olho percebe isso mesmo sem saber nomear. A regra prática: escolha uma coluna e use a
+mesma nos três lugares. No Tailwind, isso costuma virar uma linha repetida ou um punhado de classes
+copiadas.</p>
+
+<pre class="file" data-file="index.html">&lt;header class="container mx-auto px-4"&gt;...&lt;/header&gt;
+&lt;main class="container mx-auto px-4"&gt;...&lt;/main&gt;
+&lt;footer class="container mx-auto px-4"&gt;...&lt;/footer&gt;</pre>
+
+<p>Quando o site cresce, repetir a linha em todo lugar começa a incomodar. É aí que entram as
+ferramentas de componente do Tailwind, que têm aula própria no nível 3 — mas o problema que elas
+resolvem é este: uma coluna definida em um lugar só. Antes de aprender a ferramenta, vale viver o
+problema e copiar a linha algumas vezes. Você vai saber exatamente o que está pedindo depois.</p>
+
+<p>Duas armadilhas aparecem nessa fase. A primeira é o cabeçalho com fundo colorido: se você aplicar o
+<code>container</code> no <code>&lt;header&gt;</code> e também a cor de fundo, o fundo acompanha a
+coluna e não a tela — o que quase nunca é o desejado. A solução é ter uma faixa de fundo por fora e um
+container por dentro. A segunda é o rodapé com várias colunas de links: ele precisa de container, mas o
+conteúdo interno precisa de grid, e misturar as duas coisas no mesmo elemento gera confusão. Separe:
+faixa, container, grade.</p>
+
+<h2>8. Quando o container atrapalha</h2>
+
+<p>Existe um caso em que o container é um problema: quando você quer uma imagem ou um banner de ponta a
+ponta, encostando nas duas bordas da tela. Se o container envolve a seção inteira, a imagem fica
+limitada à coluna. A solução é inverter a ordem: a faixa colorida fica por fora, o container entra por
+dentro, só no texto.</p>
+
+<pre class="file" data-file="index.html">&lt;section class="bg-amber-100"&gt;
+  &lt;div class="container mx-auto px-4 py-12"&gt;...&lt;/div&gt;
+&lt;/section&gt;</pre>
+
+<p>Outra armadilha é empilhar containers. Um <code>container</code> dentro de outro não dobra a
+centralização: ele dobra a margem e o padding, e o conteúdo fica espremido no meio com um vão
+inexplicável dos dois lados. Se você viu um espaço estranho, suba na árvore do HTML e procure um
+segundo <code>container</code> ou um <code>mx-auto</code> repetido. A regra é simples: um container por
+faixa de conteúdo.</p>
+
+<p>Por último, uma confusão de nome que vale desfazer agora: o <code>container</code> do Tailwind não
+tem relação com as <em>container queries</em> do CSS, que no Tailwind aparecem com prefixo
+<code>@container</code> e as variantes <code>@md:</code>, <code>@lg:</code>. As container queries
+perguntam “qual é a largura da caixa em que estou?”, e não “qual é a largura da janela?”. É um assunto
+do nível 3, muito útil para componentes que mudam de forma dentro de colunas diferentes. Só não
+misture os dois nomes na cabeça.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: no monitor a coluna não centraliza, no notebook sim</h3>
+<p>A Ana jurou que o <code>mx-auto</code> tinha parado de funcionar. No notebook, a coluna aparecia no
+meio; no monitor, colada à esquerda. A explicação é o teto: no notebook, a janela era menor que o
+máximo do container, então não sobrava espaço; no monitor, sobrava e a margem automática apareceu. O
+comportamento era o mesmo o tempo todo. Antes de acusar a classe, meça a janela e compare com a tabela
+da seção 3.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o texto com o dobro de respiro</h3>
+<p>Ela copiou o cabeçalho para o conteúdo e esqueceu de tirar o <code>container</code> do
+<code>&lt;main&gt;</code>, que já tinha um por fora. Resultado: duas margens automáticas e dois
+paddings, e o texto ficou com um vão de 48 px de cada lado. O conserto foi remover o container interno
+e deixar o padding só no de fora. Container dentro de container quase nunca é intencional; quando é, o
+segundo precisa de <code>px-0</code> para não somar.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o banner que não vai até a borda</h3>
+<p>O banner de aniversário da padaria tinha <code>bg-amber-600</code> e <code>container</code> no mesmo
+elemento. O fundo âmbar parou na coluna, e a tela ficou com duas faixas brancas dos lados. Ela queria
+fundo de ponta a ponta e texto alinhado com o resto. A correção foi separar em dois elementos: a seção
+com o fundo, e um <code>div</code> com <code>container mx-auto px-4</code> por dentro, só para o texto.
+Faixa e coluna são coisas diferentes.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que a classe <code>container</code> faz sozinha?</p>
+<label><input type="radio" name="q1"> centraliza o conteúdo e adiciona 16 px de padding</label>
+<label><input type="radio" name="q1"> aplica <code>width: 100%</code> e um <code>max-width</code> que muda por breakpoint</label>
+<label><input type="radio" name="q1"> transforma o elemento numa grade de 12 colunas</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Você escreveu <code>mx-auto</code> num
+<code>&lt;div&gt;</code> e nada centralizou. O que faltou?</p>
+<label><input type="radio" name="q2"> trocar <code>mx-auto</code> por <code>my-auto</code></label>
+<label><input type="radio" name="q2"> acrescentar <code>flex</code> ao elemento</label>
+<label><input type="radio" name="q2"> uma largura menor que o espaço disponível, como <code>max-w-md</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Qual é a diferença prática entre
+<code>container</code> e <code>max-w-3xl</code>?</p>
+<label><input type="radio" name="q3"> o container muda de teto a cada breakpoint; o <code>max-w-3xl</code> fica em 768 px</label>
+<label><input type="radio" name="q3"> o container centraliza sozinho; o <code>max-w-3xl</code> não aceita <code>mx-auto</code></label>
+<label><input type="radio" name="q3"> não há diferença: os dois têm o mesmo CSS</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a coluna do depoimento</h2>
+<p>Complete as duas classes para deixar o depoimento numa coluna de 448 px, centralizada.</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="max-w-md" placeholder="..."> <input aria-label="resposta 2" data-answer="mx-auto" placeholder="..."> bg-amber-100 p-6"&gt;...&lt;/div&gt;</div>
+<p class="ex-dica">Dica: a primeira classe escolhe o teto (28 rem = 448 px) e a segunda reparte o
+espaço que sobra. Sem a primeira, a segunda não tem o que repartir.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O <code>container</code> é uma coluna com teto que cresce em degraus: 100% da largura até 640 px,
+depois 640, 768, 1.024, 1.280 e 1.536 px conforme a janela. Ele não centraliza e não dá padding — para
+isso existem <code>mx-auto</code> e <code>px-4</code>. A dupla <code>container mx-auto px-4</code> é a
+receita mínima de uma página alinhada, e ela precisa aparecer igual no cabeçalho, no conteúdo e no
+rodapé para as bordas baterem.</p>
+
+<p>Quando você sabe a largura que o texto pede, <code>max-w-*</code> com <code>mx-auto</code> costuma
+ser mais previsível: o teto não muda no meio da leitura. E <code>mx-auto</code> só funciona quando
+sobra espaço, o que exige uma largura menor que a tela. Para banner de ponta a ponta, a ordem se
+inverte: a faixa fica por fora e o container entra por dentro. Com essas quatro ideias — teto,
+centralização, respiro e faixa — você monta qualquer página de largura honesta.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>container</code> = <code>width: 100%</code> + <code>max-width</code> por breakpoint.</li>
+<li>A escada: 640, 768, 1.024, 1.280 e 1.536 px.</li>
+<li>O container não centraliza: use <code>mx-auto</code>.</li>
+<li>O container não dá respiro: use <code>px-4</code> ou <code>px-6</code>.</li>
+<li><code>mx-auto</code> é <code>margin-inline: auto</code> e precisa de largura para agir.</li>
+<li>Texto confortável: 60 a 75 caracteres por linha; 640 px é um bom ponto de partida.</li>
+<li><code>max-w-md</code> = 448 px; <code>max-w-xl</code> = 576 px; <code>max-w-3xl</code> = 768 px.</li>
+<li>Um container por faixa de conteúdo; container dentro de container soma margens.</li>
+<li>Faixa colorida por fora, container por dentro — nunca os dois no mesmo elemento.</li>
+<li>A prévia estreita engana: julgue a coluna na largura real da janela.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>As Cores do Tailwind | Guia Tailwind</title>
+<meta name="description" content="A paleta do Tailwind explicada: as 26 famílias, os tons de 50 a 950, os prefixos bg, text e border, o que é oklch e como escolher um par com contraste.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>As Cores do <span class="hl">Tailwind</span></h1>
+<p class="intro">A Ana abriu a documentação de cores do Tailwind e levou um susto: uma grade com
+centenas de quadradinhos, nomes em inglês e números de 50 a 950. Ela fechou a aba e voltou para o
+cinza sem graça do cartão da padaria. O susto é justo, mas a paleta é mais organizada do que parece:
+são vinte e seis famílias com onze tons cada, e a única decisão difícil é escolher duas ou três.
+Nesta aula a Ana entende o mapa, aprende a ler os valores esquisitos que o navegador devolve e sai
+com um cartão de pão quentinho — sem abrir um seletor de cores.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>As três classes que pintam: <code>bg-</code>, <code>text-</code> e <code>border-</code>.</li>
+  <li>Por que as famílias têm nome de coisa (âmbar, pedra, esmeralda) em vez de código.</li>
+  <li>O que cada degrau de 50 a 950 faz na prática.</li>
+  <li>Como escolher um par de fundo e texto que dê para ler.</li>
+  <li>O que significa aquele <code>oklch(…)</code> no painel.</li>
+  <li>Branco, preto, transparente, a cor herdada e a barra da opacidade.</li>
+  <li>Quando a cor ajuda a entender e quando ela só faz barulho.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o cartão cinza e o catálogo enorme</h2>
+
+<p>O cartão de encomendas da Ana funcionava: título, texto, botão, tudo no lugar. Só que era cinza
+sobre branco, e a padaria é quente. Ela queria um cartão que lembrasse pão saindo do forno. Foi
+então que viu a página de cores do Tailwind e desistiu: uma grade de duzentos e oitenta e seis
+quadradinhos, cada um com um nome composto e um número.</p>
+
+<p>O erro dela não foi desistir da grade — foi achar que precisava escolher entre todos. Ninguém
+escolhe entre duzentos e oitenta e seis. Um site inteiro usa, com sorte, seis: um fundo claro, um
+texto escuro, uma cor de destaque, um tom médio para bordas e mais dois para estados. O resto do
+catálogo existe para quando um cliente pede "aquele verde mais fechado" e você tem onde procurar.</p>
+
+<p>Este parágrafo é o resumo da aula: a paleta não é um menu para percorrer inteiro, é um armário
+organizado por gaveta. Você abre a gaveta do âmbar porque a padaria é âmbar, e ignora as outras
+vinte e cinco.</p>
+
+<h2>2. As três classes que pintam</h2>
+
+<p>Toda cor do Tailwind entra por um prefixo que diz <em>onde</em> ela vai. O nome da cor vem depois.
+São três prefixos no começo, e é só com eles que você pinta 90% de qualquer página:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que pinta</th><th>Exemplo</th></tr>
+<tr><td><code>bg-</code></td><td>o fundo da caixa</td><td><code>bg-amber-100</code></td></tr>
+<tr><td><code>text-</code></td><td>a cor da letra</td><td><code>text-amber-900</code></td></tr>
+<tr><td><code>border-</code></td><td>a cor da borda (a borda precisa de espessura)</td><td><code>border-amber-200</code></td></tr>
+</table>
+</div>
+
+<p>Repare que o prefixo é a única coisa que muda entre as três. É a mesma cor em três lugares
+diferentes, e essa é a lógica do guia inteiro: uma classe, uma propriedade. Você não escolhe "a cor
+do cartão"; você escolhe a cor do fundo, a cor da letra e, se quiser, a cor da linha em volta.</p>
+
+<p>Tem uma armadilha de leitura aqui, e ela pega todo mundo uma vez: <code>text-</code> também serve
+para tamanho de texto. <code>text-amber-900</code> é cor porque depois do hífen vem o nome de uma
+família de cor; <code>text-lg</code> é tamanho porque vem um degrau da escala de letra. O Tailwind
+não confunde os dois, mas você vai confundir por algumas semanas. A pista é o formato: cor é sempre
+<em>nome + número</em>, tamanho é sempre <em>sigla ou número sozinho</em>.</p>
+
+<p>O CSS gerado para as três é igualzinho, mudando só a propriedade:</p>
+
+<pre class="term">.bg-amber-100 {
+  background-color: var(--color-amber-100);
+}
+
+.text-amber-900 {
+  color: var(--color-amber-900);
+}
+
+.border-amber-200 {
+  border-color: var(--color-amber-200);
+}</pre>
+
+<p>Isso explica por que a cor da borda não aparece se você nunca deu espessura à borda:
+<code>border-amber-200</code> só pinta uma linha que existe. Sem <code>border</code> ou
+<code>border-2</code>, a propriedade é aplicada a uma borda de largura zero e o resultado é
+invisível — um dos "não funciona" mais comuns do começo.</p>
+
+<h2>3. As famílias têm nome de coisa</h2>
+
+<p>As vinte e seis famílias se dividem em dois grupos. Nove são neutras — <code>slate</code>,
+<code>gray</code>, <code>zinc</code>, <code>neutral</code>, <code>stone</code>, <code>mauve</code>,
+<code>mist</code>, <code>olive</code> e <code>taupe</code> — e servem para fundos, textos e bordas do
+dia a dia. As outras dezessete têm cor de verdade: <code>red</code>,
+<code>orange</code>, <code>amber</code>, <code>yellow</code>, <code>lime</code>, <code>green</code>,
+<code>emerald</code>, <code>teal</code>, <code>cyan</code>, <code>sky</code>, <code>blue</code>,
+<code>indigo</code>, <code>violet</code>, <code>purple</code>, <code>fuchsia</code>,
+<code>pink</code> e <code>rose</code>.</p>
+
+<p>Esses nomes não são enfeite. Eles descrevem o matiz, e isso ajuda mais do que um código
+hexadecimal. Se você precisa de um verde de "aberto", <code>emerald</code> é mais vivo e
+<code>green</code> é mais puro; se precisa de um verde calmo para uma etiqueta, <code>teal</code>
+puxa para o azul. Com <code>#12a150</code> você não tem pista nenhuma; com <code>emerald</code> você
+tem uma palavra que dá para discutir com outra pessoa.</p>
+
+<p>Para a padaria, a escolha natural é <code>amber</code>, que é o amarelo-alaranjado do pão, e
+<code>stone</code>, que é o cinza quente da pedra — mais confortável que o <code>gray</code> puro,
+que tem um leve azulado. Duas famílias resolvem o site todo. Escolher a família é a decisão grande;
+escolher o tom é a decisão pequena, e vem agora.</p>
+
+<p>As nove neutras parecem iguais na grade e não são. <code>slate</code> e <code>gray</code> puxam
+para o azul; <code>zinc</code> é o mais equilibrado; <code>neutral</code> é cinza puro, sem
+temperatura; <code>stone</code> puxa para o bege. As quatro mais novas — <code>mauve</code>,
+<code>mist</code>, <code>olive</code> e <code>taupe</code> — têm temperatura ainda mais marcada: uma
+ponta de roxo, de azul-esverdeado, de verde e de marrom, respectivamente. A diferença é sutil em cada
+quadradinho e óbvia na página inteira: um site de padaria em <code>slate</code> parece uma loja de
+eletrônicos, e o mesmo site em <code>stone</code> ou <code>taupe</code> parece uma padaria. Escolha
+uma neutra por projeto e não misture.</p>
+
+<dl class="anatomy">
+<dt>família</dt>
+<dd>O grupo de cores com o mesmo matiz: <code>amber</code>, <code>stone</code>, <code>emerald</code>.
+São vinte e seis no total.</dd>
+<dt>tom</dt>
+<dd>O degrau dentro da família, de <code>50</code> a <code>950</code>. Quanto maior o número, mais
+escuro.</dd>
+<dt>paleta</dt>
+<dd>O conjunto de todas as famílias e tons que o Tailwind traz pronto, sem você declarar cor
+nenhuma.</dd>
+<dt>oklch</dt>
+<dd>O formato moderno de escrever cor, com claridade, croma e matiz. É o que o painel mostra no lugar
+do nome.</dd>
+<dt>opacidade</dt>
+<dd>A transparência da cor, escrita depois de uma barra: <code>bg-black/50</code> é preto pela
+metade.</dd>
+</dl>
+
+<h2>4. Os onze tons: 50 a 950</h2>
+
+<p>Cada família tem onze tons numerados. O número não é a quantidade de cor: é a posição na escada,
+do mais claro para o mais escuro. <code>50</code> é quase branco, <code>500</code> é a cor cheia,
+<code>950</code> é quase preto. Não existe <code>amber-1000</code> nem <code>amber-0</code>: a
+escada começa em 50 e termina em 950.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Degrau</th><th>Para que serve</th><th>Exemplo no cartão da padaria</th></tr>
+<tr><td><code>50</code></td><td>fundo de página, quase branco</td><td>o papel atrás do cartão</td></tr>
+<tr><td><code>100</code></td><td>fundo de cartão e etiqueta</td><td>o cartão em si</td></tr>
+<tr><td><code>200</code></td><td>borda suave, divisória</td><td>a linha em volta do cartão</td></tr>
+<tr><td><code>500</code></td><td>a cor cheia, para ícone e destaque</td><td>o ícone do pão</td></tr>
+<tr><td><code>600</code></td><td>botão e link</td><td>o botão "Encomendar"</td></tr>
+<tr><td><code>700</code></td><td>botão no mouse, texto sobre fundo claro</td><td>o botão quando o mouse passa</td></tr>
+<tr><td><code>900</code></td><td>título e texto principal</td><td>o nome do pão</td></tr>
+<tr><td><code>950</code></td><td>texto sobre fundo colorido forte</td><td>texto sobre o botão de destaque</td></tr>
+</table>
+</div>
+
+<p>A lógica é sempre a mesma: fundo claro pede texto escuro, fundo escuro pede texto claro. O par
+mais usado do guia é <code>bg-*-100</code> com <code>text-*-900</code>, e por um motivo prático: é
+quase impossível errar o contraste com essa distância. Quando você quiser um cartão mais discreto,
+desça um degrau no fundo (<code>50</code>) e mantenha o texto em <code>800</code> ou
+<code>900</code>. Quando quiser um cartão de destaque, suba o fundo para <code>600</code> e o texto
+para <code>white</code>.</p>
+
+<div class="trytailwind" data-goal="rule:background-color: var(--color-amber-100);;rule:color: var(--color-amber-900)">
+  <p class="try-task">O cartão está cinza. Pinte o fundo de âmbar claro — <code>bg-amber-100</code> —
+  e a letra de âmbar escuro — <code>text-amber-900</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl bg-stone-100 p-6 text-stone-800"&gt;Pão quentinho, saído do forno&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 24px
+background-color: oklch(0.97 0.001 106.424)
+color: oklch(0.268 0.007 34.298)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-xl bg-amber-100 p-6 text-amber-900"&gt;Pão quentinho, saído do forno&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra dois <code>oklch(…)</code> em vez das palavras âmbar. Guarde esse
+susto para a seção 6; por ora, o que importa é que a cor mudou e o texto continua legível. E repare
+que não há nenhum hexadecimal no seu HTML: você escreveu <code>amber-100</code>, e o valor exato
+mora na paleta, não na sua página. É por isso que trocar de família depois é só trocar a palavra —
+<code>bg-amber-100</code> vira <code>bg-rose-100</code> e nada mais quebra.</p>
+
+<h2>5. O par que funciona: contraste</h2>
+
+<p>Cor bonita e cor legível são coisas diferentes. O olho precisa de diferença de claridade entre o
+texto e o fundo; quando os dois tons são vizinhos na escada, a frase desaparece — e o pior é que ela
+desaparece no celular, no sol, na tela com brilho baixo, ou seja, na vida real. As regras de
+acessibilidade pedem um contraste mínimo de 4,5 para 1 em texto normal e 3 para 1 em texto grande.
+Você não precisa calcular isso de cabeça; precisa saber que <code>text-amber-400</code> sobre
+<code>bg-amber-100</code> está errado, e que <code>text-amber-900</code> sobre o mesmo fundo está
+certo.</p>
+
+<div class="trytailwind" data-goal="rule:color: var(--color-amber-900);;texto:Aberto agora">
+  <p class="try-task">O selo "Aberto agora" está com a letra em âmbar 400 sobre fundo âmbar 100:
+  quase invisível. Escureça a letra para <code>text-amber-900</code>.</p>
+  <pre class="html">&lt;span id="alvo" class="rounded-full bg-amber-100 px-3 py-1 text-amber-400"&gt;Aberto agora&lt;/span&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.962 0.059 95.617)
+color: oklch(0.828 0.189 84.429)
+border-radius: 3.35544e+07px
+padding-inline: 12px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;span id="alvo" class="rounded-full bg-amber-100 px-3 py-1 text-amber-900"&gt;Aberto agora&lt;/span&gt;</pre>
+</div>
+
+<p>Duas dicas que economizam tentativa e erro. A primeira: se o fundo é claro, use <code>700</code>
+ou <code>900</code> no texto; se o fundo é escuro, use <code>50</code> ou <code>white</code>. A
+segunda: quando quiser conferir de verdade, olhe a página com o celular no sol ou use um verificador
+de contraste do navegador, que mostra a razão calculada. A aula de
+<a href="contraste.html">Contraste e Leitura</a> entra nesse assunto com calma; aqui basta a regra do
+vizinho: dois degraus de distância nunca bastam.</p>
+
+<p>Vale lembrar que contraste não é só para quem tem problema de visão. Fundo e texto com claridades
+parecidas cansam qualquer leitor em uma página longa, e é a causa número um de "o site parece
+bonito mas eu não consigo ler". Cor de destaque, aliás, tem um limite: se tudo é colorido, nada é
+destaque. Use a cor cheia em uma coisa por tela — o botão principal, o preço, o selo de promoção — e
+deixe o resto no tom claro.</p>
+
+<h2>6. O que é oklch e por que o painel mostra isso</h2>
+
+<p>Agora o tal do <code>oklch</code>. Ele aparece em todo painel de CSS do guia e assusta porque tem
+parênteses, vírgulas e números com muitas casas. É só um jeito de escrever cor com três informações:
+claridade, croma e matiz. O CSS moderno prefere esse formato ao hexadecimal porque ele descreve a
+cor como o olho a vê, e não como o monitor a mistura.</p>
+
+<pre class="term">:root {
+  --color-amber-100: oklch(96.2% 0.059 95.617);
+  --color-amber-900: oklch(41.4% 0.112 45.904);
+}
+
+.bg-amber-100 {
+  background-color: var(--color-amber-100);
+}</pre>
+
+<p>Lendo o primeiro: 96,2% de claridade (quase branco), croma 0,059 (pouca saturação, um amarelo
+suave) e matiz 95,6 graus (o ângulo do amarelo). O segundo tem 41,4% de claridade — bem escuro — e
+matiz 45,9, que já puxa para o laranja. Ou seja: os dois são "âmbar", mas não são o mesmo âmbar. A
+escada de tons de uma família não é a mesma cor com mais ou menos tinta branca; é uma sequência
+desenhada para ficar harmônica.</p>
+
+<p>Se em algum lugar você vir <code>96.2%</code> e em outro <code>0.962</code>, não são valores
+diferentes: é o mesmo número escrito em porcentagem e em fração. O Tailwind usa a primeira forma no
+tema e o navegador devolve a segunda no painel.</p>
+
+<p>Você não precisa calcular nada disso. Precisa de duas coisas: saber que o número entre parênteses
+não é erro, e saber que a variável <code>--color-*</code> é o lugar onde a cor de verdade mora. Isso
+importa na próxima aula, quando a cor da padaria não estiver na paleta. Por enquanto, leia
+<code>oklch(0.962 0.059 95.617)</code> como "o âmbar 100" e siga em frente.</p>
+
+<h2>7. Branco, preto, transparente e a barra da opacidade</h2>
+
+<p>Além das famílias, existem quatro palavras que você vai usar tanto quanto elas.
+<code>bg-white</code> e <code>bg-black</code> são o branco e o preto puros, sem tom.
+<code>bg-transparent</code> não pinta nada — útil para um botão que só ganha fundo no mouse.
+<code>text-current</code> significa "use a cor que já está valendo aqui", o que mantém um ícone
+acompanhando a cor do texto sem você repetir a classe.</p>
+
+<p>E existe a barra, que é um dos recursos mais úteis e menos conhecidos: depois do nome da cor, uma
+barra e um número de 0 a 100 definem a opacidade. <code>bg-black/50</code> é preto com metade da
+força; <code>bg-white/80</code> é branco translúcido, aquele véu que deixa a foto aparecer atrás do
+texto.</p>
+
+<div class="trytailwind" data-goal="rule:color-mix(in oklab, var(--color-black) 50%, transparent);;texto:Encomendas">
+  <p class="try-task">O aviso está com fundo preto sólido e esconde a foto do pão. Deixe o preto pela
+  metade com <code>bg-black/50</code>.</p>
+  <pre class="html">&lt;div class="rounded-xl bg-amber-200 p-6"&gt;
+  &lt;div id="alvo" class="rounded-lg bg-black p-4 text-white"&gt;Encomendas até as 18h&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(0, 0, 0)
+color: rgb(255, 255, 255)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div class="rounded-xl bg-amber-200 p-6"&gt;
+  &lt;div id="alvo" class="rounded-lg bg-black/50 p-4 text-white"&gt;Encomendas até as 18h&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS gerado para essa classe é o único feio do dia: o Tailwind usa
+<code>color-mix(in oklab, var(--color-black) 50%, transparent)</code>, que quer dizer "misture preto
+com transparência meio a meio". O painel mostra o resultado como <code>oklab(0 0 0 / 0.5)</code>: os
+três zeros são o preto e o 0,5 é a metade. Mais uma vez, nada que você precise escrever à mão.</p>
+
+<h2>8. Cor com significado, não com enfeite</h2>
+
+<p>Uma padaria tem informação que pede cor: aberto, fechado, encomenda confirmada, produto esgotado.
+Quando a cor repete sempre o mesmo significado, o leitor aprende sem perceber. Verde para disponível,
+vermelho para esgotado, âmbar para "últimas unidades". Quando a cor é escolhida por gosto em cada
+tela, o leitor precisa ler tudo, e o site fica cansativo mesmo sendo bonito.</p>
+
+<p>A Ana adotou uma regra simples, e você pode adotar a mesma: <strong>uma cor de marca, uma cor de
+alerta, uma neutra</strong>. Âmbar é a marca (fundo de cartão, botão, ícone). Vermelho aparece só
+quando algo deu errado. Pedra é o resto. Três decisões, um site coerente — e nenhuma delas precisou
+de seletor de cores.</p>
+
+<p>Tem ainda a questão de quem não distingue cores. O daltonismo afeta cerca de um em cada doze homens e é raro
+entre mulheres, e o par vermelho/verde é justamente o mais confundido. Por isso a cor nunca deve
+ser o único sinal: o selo verde de "aberto" também diz "aberto" com todas as letras. Cor reforça a
+informação; não pode ser a informação.</p>
+
+<p>Existe uma vantagem prática em escolher cor por significado, e ela aparece quando o cliente pede
+"deixa o site mais moderno". Se as classes estão presas ao papel — fundo de cartão, texto principal,
+destaque — trocar a família de âmbar para terracota muda o humor do site inteiro de uma vez, sem
+tocar na estrutura. Se estão presas ao gosto de cada tela, a mudança vira uma caçada por trinta
+lugares diferentes. Anote a paleta do projeto em algum canto antes de começar: duas linhas de
+anotação economizam horas de "qual era mesmo o cinza do rodapé".</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o botão que some no fundo colorido</h3>
+<p>A Ana pintou a faixa de promoção com <code>bg-amber-500</code> e o botão com
+<code>bg-amber-100</code>. No monitor, dava para ver. No celular da cliente, virou uma faixa laranja
+com um retângulo quase invisível. A correção foi trocar o botão para <code>bg-stone-900</code> com
+<code>text-white</code>: contraste alto e uma cor neutra que não briga com a faixa. Botão dentro de
+área colorida pede contraste, não harmonia.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: cinco verdes diferentes na mesma página</h3>
+<p>Ela foi testando tons até gostar: <code>green-500</code> no primeiro selo, <code>emerald-400</code>
+no segundo, <code>lime-600</code> no terceiro. Cada um parecia certo sozinho; juntos, davam a
+impressão de site feito por três pessoas. A regra que resolveu: uma família por significado. Todo
+"aberto" é <code>emerald</code>, sempre no mesmo degrau. Se o tom não agrada, muda-se o degrau de
+todos de uma vez, não de um só.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o texto branco no amarelo</h3>
+<p>No botão principal, ela usou <code>bg-amber-400</code> com <code>text-white</code> porque "branco
+combina com tudo". Não combina: amarelo claro com branco tem contraste baixíssimo. A solução foi
+escurecer o fundo para <code>bg-amber-600</code> e manter o branco — ou manter o fundo claro e
+escurecer o texto para <code>text-amber-950</code>. As duas funcionam; escolher uma e repetir em
+todos os botões é o que faz o site parecer profissional.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que <code>text-amber-900</code> pinta?</p>
+<label><input type="radio" name="q1"> o fundo da caixa, no tom âmbar escuro</label>
+<label><input type="radio" name="q1"> a cor da letra, no tom âmbar escuro</label>
+<label><input type="radio" name="q1"> a borda, com 900 px de espessura</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual par tem mais chance de ser legível?</p>
+<label><input type="radio" name="q2"> <code>bg-amber-200</code> com <code>text-amber-300</code></label>
+<label><input type="radio" name="q2"> <code>bg-amber-500</code> com <code>text-amber-400</code></label>
+<label><input type="radio" name="q2"> <code>bg-amber-100</code> com <code>text-amber-900</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que o número depois da barra faz, em
+<code>bg-black/50</code>?</p>
+<label><input type="radio" name="q3"> define a opacidade: 50% de preto, o resto transparente</label>
+<label><input type="radio" name="q3"> divide a cor em 50 tons diferentes</label>
+<label><input type="radio" name="q3"> escolhe o tom 50 da família preta</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o selo da padaria</h2>
+<p>O selo "Aberto agora" precisa de fundo âmbar claro e letra âmbar escura. Depois responda: qual é a
+classe do fundo âmbar 100?</p>
+<div class="ex-code">&lt;span class="<input aria-label="resposta 1" data-answer="bg-amber-100" placeholder="..."> text-amber-900"&gt;Aberto agora&lt;/span&gt;</div>
+<p class="ex-dica">Dica: o prefixo do fundo é <code>bg-</code> e o degrau claro de cartão é o
+<code>100</code>. Se você escrever <code>bg-amber-50</code>, o selo fica quase branco: funciona, mas
+não é o pedido.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>A paleta tem vinte e seis famílias e onze tons por família, e você vai usar seis ou sete cores no
+site inteiro. As classes se dividem pelo prefixo: <code>bg-</code> pinta o fundo, <code>text-</code>
+pinta a letra, <code>border-</code> pinta a borda. O tom é uma posição numa escada de claridade:
+<code>50</code> quase branco, <code>500</code> a cor cheia, <code>900</code> escuro para texto,
+<code>950</code> quase preto.</p>
+
+<p>O par <code>bg-*-100</code> com <code>text-*-900</code> resolve a maioria dos cartões e é
+praticamente à prova de erro de contraste. O valor <code>oklch(…)</code> que o painel mostra é só a
+forma moderna de escrever cor — claridade, croma e matiz — e mora numa variável de tema, não no seu
+HTML. Para fechar, três palavras fora das famílias: <code>white</code>, <code>black</code> e
+<code>transparent</code>, mais a barra de opacidade, que transforma <code>bg-black</code> em
+<code>bg-black/50</code> sem nenhuma classe extra.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>26 famílias, 11 tons (50 a 950): 286 cores, das quais você usa umas seis.</li>
+<li><code>bg-</code> fundo, <code>text-</code> letra, <code>border-</code> borda.</li>
+<li><code>text-</code> também é tamanho: <code>text-amber-900</code> é cor, <code>text-lg</code> é tamanho.</li>
+<li>Fundo claro pede texto escuro; fundo escuro pede texto claro.</li>
+<li>Par seguro: <code>bg-*-100</code> + <code>text-*-900</code>.</li>
+<li>Nunca use tons vizinhos (400 sobre 100) para texto.</li>
+<li><code>oklch(96.2% 0.059 95.617)</code> é o âmbar 100 escrito de outro jeito.</li>
+<li><code>bg-transparent</code> não pinta; <code>text-current</code> herda a cor do texto.</li>
+<li><code>bg-black/50</code> é preto pela metade — a barra é opacidade.</li>
+<li>Uma cor de marca, uma de alerta, uma neutra: cor com significado, não com enfeite.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

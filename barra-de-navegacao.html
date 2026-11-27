@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Barra de Navegação | Guia Tailwind</title>
+<meta name="description" content="Barra de navegação no Tailwind: marca e links alinhados com flex, link da página atual, barra que fica no topo com sticky, fundo translúcido e menu no celular.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Barra de <span class="hl">Navegação</span></h1>
+
+<p class="intro">O site da Ana tem três páginas — o cardápio, a história da padaria e o formulário de
+encomenda — e até agora não há como ir de uma para outra. Ela quer uma faixa no topo, com o nome da
+padaria à esquerda e os três links à direita, que continue visível quando o visitante rola a página
+de preços. No celular, os três links não cabem. Nesta aula ela monta essa barra do zero: alinhamento,
+link da página atual, a barra que gruda no topo e o que fazer com o menu na tela pequena.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>As três partes de qualquer barra: marca, navegação e ação.</li>
+  <li>Como alinhar marca e links com <code>flex</code> e <code>justify-between</code>.</li>
+  <li>O miolo com largura máxima, centralizado e com respiro.</li>
+  <li>Os links, o <code>gap</code> entre eles e o estado de página atual.</li>
+  <li>Como grudar a barra no topo com <code>sticky top-0</code> e o <code>z-50</code>.</li>
+  <li>Fundo translúcido e <code>backdrop-blur</code> sem perder a leitura.</li>
+  <li>Esconder os links no celular com <code>hidden md:flex</code>.</li>
+  <li>Por que a barra precisa de <code>header</code> e <code>nav</code>, e não só de
+  <code>div</code>.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o site com três páginas e nenhum caminho</h2>
+
+<p>A primeira versão da barra da Ana era uma linha de texto no alto da página, feita de links
+separados por barras verticais:</p>
+
+<pre class="file" data-file="index.html">&lt;div&gt;
+  &lt;a href="index.html"&gt;Padaria&lt;/a&gt; | &lt;a href="#"&gt;Cardápio&lt;/a&gt; | &lt;a href="#"&gt;Encomenda&lt;/a&gt;
+&lt;/div&gt;</pre>
+
+<p>Não é errado, e durante anos a web inteira foi assim. Mas três coisas incomodam. A primeira é que
+nada se alinha: a marca é um link como os outros, então não existe hierarquia — o nome da padaria
+tem o mesmo peso de "Encomenda". A segunda é que, quando o visitante rola a página de preços, a barra
+vai embora e ele fica sem caminho de volta. A terceira é que, no celular, a linha simplesmente
+quebra no meio de um link.</p>
+
+<p>Uma barra de navegação resolve os três problemas de uma vez. Ela é dividida em partes que você
+reconhece em qualquer site: a <strong>marca</strong>, à esquerda; a <strong>navegação</strong>, com
+os links; e, quando existe, uma <strong>ação</strong> à direita — "Encomendar", "Entrar", um botão de
+destaque. Saber essas três partes antes de escrever a primeira classe evita a maior parte do
+trabalho.</p>
+
+<h2>2. header, nav e a marca</h2>
+
+<p>A barra é feita de três tags que dizem o que cada pedaço significa. O Tailwind não muda nada
+nelas; ele só veste:</p>
+
+<dl class="anatomy">
+<dt>header</dt>
+<dd>A faixa do topo da página. É a tag que anuncia "aqui começa a página" para o leitor de tela e
+para os robôs de busca.</dd>
+<dt>nav</dt>
+<dd>O bloco de navegação. Marca um conjunto de links que levam a outras páginas — e não a qualquer
+link, como um link dentro de um texto.</dd>
+<dt>marca</dt>
+<dd>O nome da padaria, geralmente um link para a página inicial. Não existe tag de marca: é um
+<code>a</code> com texto e, às vezes, um quadradinho colorido antes.</dd>
+<dt>aria-current</dt>
+<dd>Atributo que marca qual link é a página em que o visitante está. O leitor de tela anuncia "página
+atual".</dd>
+<dt>barra fixa</dt>
+<dd>A barra que continua visível quando a página rola. Se faz com <code>sticky top-0</code> — não
+com posição fixa.</dd>
+</dl>
+
+<pre class="file" data-file="index.html">&lt;header&gt;
+  &lt;a href="index.html"&gt;Padaria da Ana&lt;/a&gt;
+  &lt;nav&gt;
+    &lt;a href="#"&gt;Cardápio&lt;/a&gt;
+    &lt;a href="#"&gt;A padaria&lt;/a&gt;
+    &lt;a href="#"&gt;Encomenda&lt;/a&gt;
+  &lt;/nav&gt;
+&lt;/header&gt;</pre>
+
+<p>Sem nenhuma classe, essa estrutura aparece empilhada: marca em cima, links embaixo, cada um numa
+linha, e todos sublinhados em azul. É o visual padrão do HTML. A partir daqui, é só composição.</p>
+
+<h2>3. Marca à esquerda, links à direita</h2>
+
+<p>O alinhamento da barra é um caso clássico de flex: dois filhos, um empurrado para cada ponta, os
+dois alinhados pelo meio. A diferença é que a barra quase sempre tem um miolo com largura máxima, e
+esse miolo é que recebe o flex — não o <code>header</code>. Assim a faixa colorida ocupa a tela
+inteira e o conteúdo fica centralizado, como em qualquer site grande.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=flex;;css:#alvo|justify-content=space-between;;css:#alvo|align-items=center;;css:#alvo|max-width=1024px">
+  <p class="try-task">A marca e os links estão empilhados. Deixe os dois na mesma linha, com a marca
+  à esquerda, os links à direita, alinhados pelo meio e com largura máxima de 1024 px.</p>
+  <pre class="html" data-file="index.html">&lt;header class="border-b border-stone-200 bg-white"&gt;
+  &lt;div id="alvo" class="px-4 py-3"&gt;
+    &lt;a class="font-semibold text-amber-800" href="index.html"&gt;Padaria da Ana&lt;/a&gt;
+    &lt;nav class="flex gap-6 text-sm text-stone-600"&gt;
+      &lt;a href="#"&gt;Cardápio&lt;/a&gt;
+      &lt;a href="#"&gt;Encomenda&lt;/a&gt;
+    &lt;/nav&gt;
+  &lt;/div&gt;
+&lt;/header&gt;</pre>
+  <pre class="out">
+padding-inline: 16px
+padding-block: 12px
+</pre>
+  <pre class="solucao">&lt;header class="border-b border-stone-200 bg-white"&gt;
+  &lt;div id="alvo" class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3"&gt;
+    &lt;a class="font-semibold text-amber-800" href="index.html"&gt;Padaria da Ana&lt;/a&gt;
+    &lt;nav class="flex gap-6 text-sm text-stone-600"&gt;
+      &lt;a href="#"&gt;Cardápio&lt;/a&gt;
+      &lt;a href="#"&gt;Encomenda&lt;/a&gt;
+    &lt;/nav&gt;
+  &lt;/div&gt;
+&lt;/header&gt;</pre>
+</div>
+
+<p>Quatro classes fazem o alinhamento: <code>flex</code> põe os dois filhos lado a lado,
+<code>items-center</code> alinha pela linha do meio, <code>justify-between</code> empurra um para cada
+ponta e <code>gap-4</code> garante que eles nunca se encostem. O <code>gap</code> parece redundante
+com <code>justify-between</code> e não é: numa tela estreita, os dois blocos se aproximam até
+encostar, e o <code>gap</code> é o limite mínimo.</p>
+
+<p>As outras três classes cuidam do miolo. <code>max-w-5xl</code> limita a largura a 1024 px, para o
+conteúdo não se esticar numa tela grande. <code>mx-auto</code> centraliza o bloco de largura limitada
+— margem automática dos dois lados. E <code>px-4 py-3</code> dá o respiro.</p>
+
+<pre class="term">.mx-auto {
+  margin-inline: auto;
+}
+.max-w-5xl {
+  max-width: var(--container-5xl);
+}
+.justify-between {
+  justify-content: space-between;
+}</pre>
+
+<p>Repare que o <code>mx-auto</code> só funciona porque existe um <code>max-width</code>: um bloco que
+ocupa 100% da largura não tem folga para centralizar. É a dupla clássica de qualquer página
+centralizada, e vale para a barra, para o rodapé e para o conteúdo.</p>
+
+<h2>4. Os links e a página atual</h2>
+
+<p>Os links dentro do <code>nav</code> precisam de três decisões: espaçamento, cor e estado. O
+espaçamento vem do <code>gap-6</code> no pai — 24 px entre um link e outro, sem margem em ninguém.
+A cor vem de <code>text-sm text-stone-600</code>: 14 px e um cinza que não briga com a marca. E o
+estado de mouse vem de <code>hover:text-amber-700</code>, para o link responder.</p>
+
+<p>O terceiro estado é o mais importante e o mais esquecido: onde o visitante está agora. Se ele está
+no cardápio, o link "Cardápio" precisa parecer diferente — cor mais forte, peso maior, e uma linha
+embaixo, se o desenho pedir. É o que evita a sensação de estar perdido.</p>
+
+<pre class="file" data-file="index.html">&lt;nav class="flex gap-6 text-sm font-medium"&gt;
+  &lt;a class="text-amber-800 underline underline-offset-8" href="#" aria-current="page"&gt;Cardápio&lt;/a&gt;
+  &lt;a class="text-stone-600 hover:text-amber-700" href="#"&gt;A padaria&lt;/a&gt;
+  &lt;a class="text-stone-600 hover:text-amber-700" href="#"&gt;Encomenda&lt;/a&gt;
+&lt;/nav&gt;</pre>
+
+<p>Três detalhes nesse pedaço. As classes de cor e estado ficam <em>em cada link</em>, não no
+<code>nav</code>, porque cada um tem um estado diferente. O <code>underline-offset-8</code> afasta a
+linha do texto, e é o que faz o sublinhado de link ativo parecer proposital em vez de esquecido. E o
+<code>aria-current="page"</code> repete em texto o que a cor já diz — quem não vê a cor precisa
+saber também.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Estado do link</th><th>Classes</th><th>Como fica</th></tr>
+<tr><td>normal</td><td><code>text-stone-600</code></td><td>cinza discreto, para não competir com a marca</td></tr>
+<tr><td>mouse em cima</td><td><code>hover:text-amber-700</code></td><td>escurece para o âmbar da marca</td></tr>
+<tr><td>página atual</td><td><code>text-amber-800 underline underline-offset-8</code></td><td>cor forte e linha embaixo, com <code>aria-current="page"</code></td></tr>
+<tr><td>desativado</td><td><code>pointer-events-none text-stone-400</code></td><td>para link que ainda não existe</td></tr>
+</table>
+</div>
+
+<p>Se a sua barra tiver um botão à direita — "Encomendar", por exemplo —, ele entra como terceiro
+filho do miolo, e o <code>justify-between</code> passa a distribuir três blocos: marca na esquerda,
+links no meio, botão na direita. Funciona, mas fica frágil quando um dos links tem texto comprido. A
+alternativa mais estável é agrupar: um <code>div class="flex items-center gap-6"</code> com os links
+e o botão juntos, e o <code>justify-between</code> só separa marca e grupo. Agrupar primeiro,
+distribuir depois — a mesma ideia da aula de <a href="listas.html">listas de itens</a>.</p>
+
+<h2>5. A barra que fica no topo</h2>
+
+<p>Agora o pedido central da Ana: a barra precisa continuar ali quando a página rola. Existem duas
+propriedades CSS que fazem isso, e elas são bem diferentes. <code>fixed</code> tira o elemento do
+fluxo e o prende na janela — o que faz o conteúdo de baixo subir e ficar escondido atrás da barra,
+exigindo compensação. <code>sticky</code> é mais gentil: o elemento continua no lugar dele até a
+página rolar o suficiente, e então gruda no topo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|position=sticky;;css:#alvo|top=0px;;rule:position: sticky;;rule:--tw-backdrop-blur: blur(8px)">
+  <p class="try-task">Ao rolar a página, a barra some e o visitante perde o caminho de volta. Grude a
+  barra no topo com <code>sticky top-0</code>, ponha fundo branco com 90% de opacidade e desfoque o
+  que passa atrás dela.</p>
+  <pre class="html" data-file="index.html">&lt;header id="alvo" class="border-b border-stone-200 bg-white"&gt;
+  &lt;div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3"&gt;
+    &lt;a class="font-semibold text-amber-800" href="index.html"&gt;Padaria da Ana&lt;/a&gt;
+    &lt;nav class="flex gap-6 text-sm text-stone-600"&gt;
+      &lt;a href="#"&gt;Cardápio&lt;/a&gt;
+    &lt;/nav&gt;
+  &lt;/div&gt;
+&lt;/header&gt;
+&lt;p class="p-4 text-sm text-stone-500"&gt;Role a prévia para ver a barra parar no topo.&lt;/p&gt;
+&lt;p class="h-40 p-4 text-sm text-stone-500"&gt;Conteúdo da página&lt;/p&gt;</pre>
+  <pre class="out">
+background-color: rgb(255, 255, 255)
+border-bottom-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+</pre>
+  <pre class="solucao">&lt;header id="alvo" class="sticky top-0 z-50 border-b border-stone-200 bg-white/90 backdrop-blur"&gt;
+  &lt;div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3"&gt;
+    &lt;a class="font-semibold text-amber-800" href="index.html"&gt;Padaria da Ana&lt;/a&gt;
+    &lt;nav class="flex gap-6 text-sm text-stone-600"&gt;
+      &lt;a href="#"&gt;Cardápio&lt;/a&gt;
+    &lt;/nav&gt;
+  &lt;/div&gt;
+&lt;/header&gt;
+&lt;p class="p-4 text-sm text-stone-500"&gt;Role a prévia para ver a barra parar no topo.&lt;/p&gt;
+&lt;p class="h-40 p-4 text-sm text-stone-500"&gt;Conteúdo da página&lt;/p&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra uma linha para cada classe, e cada uma tem um trabalho.
+<code>position: sticky</code> liga o modo. <code>top: 0px</code> diz onde ele gruda — sem essa
+coordenada, o sticky não faz nada, porque não sabe em relação a que ponto parar.
+<code>z-index: 50</code> garante que a barra fique na frente do conteúdo que passa por baixo. E as
+outras duas, o fundo translúcido e o <code>backdrop-filter: blur(8px)</code>, são o truque visual que
+quase todo site moderno usa.</p>
+
+<pre class="term">.sticky {
+  position: sticky;
+}
+.top-0 {
+  top: calc(var(--spacing) * 0);
+}
+.z-50 {
+  z-index: 50;
+}
+.backdrop-blur {
+  --tw-backdrop-blur: blur(8px);
+  backdrop-filter: var(--tw-backdrop-blur,);
+}</pre>
+
+<p>O <code>bg-white/90</code> merece atenção porque é uma sintaxe que confunde. A barra é a cor
+branca com 90% de opacidade — ou seja, 10% de transparência. Quando o conteúdo de baixo passa, ele
+aparece levemente através da barra, e o <code>backdrop-blur</code> borra esse resto. O resultado é
+uma barra que parece sólida sem ser opaca. Sem o desfoque, texto passando atrás a 10% de opacidade
+vira sujeira; com ele, vira profundidade.</p>
+
+<p>Se você puser <code>bg-white</code> puro, tudo funciona e nada quebra — só fica mais sem graça. E
+se puser opacidade baixa demais, como <code>bg-white/50</code>, o texto que rola atrás concorre com
+os links e a barra perde legibilidade. A faixa segura fica entre 80% e 95%.</p>
+
+<h2>6. No celular: esconder, não espremer</h2>
+
+<p>Três links de 14 px, com 24 px entre eles, mais a marca, somam uns 340 px. Numa tela de 375 px
+isso passa. Numa de 320 px, mais ainda. A tentação é diminuir a fonte ou o espaço — o que resolve
+por dois minutos e volta no próximo link que a Ana acrescentar. A solução de verdade é outra: no
+celular, os links somem e um botão aparece; a partir de uma largura, os links voltam e o botão
+some.</p>
+
+<p>Essa troca é o coração do jeito responsivo do Tailwind. <code>hidden</code> esconde;
+<code>md:flex</code> devolve o <code>display: flex</code> a partir de 768 px. Como a regra do
+<code>md:</code> vem depois no CSS, ela vence no breakpoint.</p>
+
+<div class="trytailwind" data-largura="375" data-goal="css:#alvo|display=none;;rule:@media (width &gt;= 48rem);;largura:375">
+  <p class="try-task">Nesta prévia de 375 px, os links apertam a marca. Esconda a navegação no
+  celular e mostre-a a partir de 768 px: troque <code>flex</code> por <code>hidden md:flex</code>.</p>
+  <pre class="html" data-file="index.html">&lt;div class="flex items-center justify-between gap-4 px-4 py-3"&gt;
+  &lt;a class="font-semibold text-amber-800" href="index.html"&gt;Padaria da Ana&lt;/a&gt;
+  &lt;nav id="alvo" class="flex gap-6 text-sm text-stone-600"&gt;
+    &lt;a href="#"&gt;Cardápio&lt;/a&gt;
+    &lt;a href="#"&gt;A padaria&lt;/a&gt;
+    &lt;a href="#"&gt;Encomenda&lt;/a&gt;
+  &lt;/nav&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+gap: 24px
+color: oklch(0.444 0.011 73.639)
+font-size: 14px
+line-height: 20px
+</pre>
+  <pre class="solucao">&lt;div class="flex items-center justify-between gap-4 px-4 py-3"&gt;
+  &lt;a class="font-semibold text-amber-800" href="index.html"&gt;Padaria da Ana&lt;/a&gt;
+  &lt;nav id="alvo" class="hidden gap-6 text-sm text-stone-600 md:flex"&gt;
+    &lt;a href="#"&gt;Cardápio&lt;/a&gt;
+    &lt;a href="#"&gt;A padaria&lt;/a&gt;
+    &lt;a href="#"&gt;Encomenda&lt;/a&gt;
+  &lt;/nav&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>display: none</code>, porque a prévia tem 375 px de largura e o
+<code>md:</code> só vale a partir de 768. O CSS gerado, esse sim, mostra as duas regras:</p>
+
+<pre class="term">.hidden {
+  display: none;
+}
+@media (width &gt;= 48rem) {
+  .md\:flex {
+    display: flex;
+  }
+}</pre>
+
+<p>Leia a segunda regra como uma condição: "a partir de 48 rem de largura, quem tem
+<code>md:flex</code> vira flex". Quarenta e oito rem são 768 px, o ponto de virada padrão do
+Tailwind. E repare na ordem: <code>hidden</code> vem primeiro, a condição vem depois, então no
+desktop a condição vence. Se você inverter a ordem mental — pensar que a classe que você escreveu
+por último ganha —, vai errar; o que manda é a ordem no CSS gerado, e o Tailwind já organiza as
+variantes depois das classes comuns.</p>
+
+<p>Falta o botão. No celular, esconder os links sem oferecer caminho é pior que espremê-los. O
+caminho é um botão quadrado com três riscos, que abre uma lista. Esse botão é
+<code>md:hidden</code> — o contrário dos links —, e o menu que ele abre é o assunto das aulas de
+modal e de menu suspenso. Por hoje, basta a marcação certa:</p>
+
+<pre class="file" data-file="index.html">&lt;button type="button" class="rounded-lg border border-stone-300 p-2 md:hidden"
+  aria-label="Abrir menu" aria-expanded="false"&gt;
+  &lt;span class="block h-0.5 w-5 bg-stone-700"&gt;&lt;/span&gt;
+  &lt;span class="mt-1 block h-0.5 w-5 bg-stone-700"&gt;&lt;/span&gt;
+  &lt;span class="mt-1 block h-0.5 w-5 bg-stone-700"&gt;&lt;/span&gt;
+&lt;/button&gt;</pre>
+
+<p>Os três <code>span</code> são os riscos: 20 px de largura, 2 px de altura, fundo escuro, um embaixo
+do outro com <code>mt-1</code>. O <code>aria-label</code> dá nome ao botão, porque ele não tem texto.
+E o <code>aria-expanded="false"</code> diz ao leitor de tela se o menu está aberto — o JavaScript
+troca para <code>true</code> quando abre. Quem monta a troca de conteúdo por clique é a aula de
+<a href="abas.html">abas</a>. Botão sem essas duas informações é um quadrado mudo.</p>
+
+<h2>7. Fundo, borda e altura: os detalhes que somam</h2>
+
+<p>Com a estrutura pronta, o que separa uma barra amadora de uma barra profissional são três
+detalhes pequenos. O primeiro é a borda embaixo: <code>border-b border-stone-200</code>. Ela resolve
+o caso em que a barra branca encosta numa página branca e some — sem ela, a barra só existe quando
+há conteúdo colorido atrás. O segundo é a altura. Uma barra confortável fica entre 56 e 72 px; com
+<code>py-3</code> e texto de 14 px, você chega em 48 px, que é o mínimo aceitável. Se quiser mais,
+<code>py-4</code>.</p>
+
+<p>O terceiro é o <code>z-50</code>, e ele merece uma explicação porque é a origem de metade dos
+bugs de layout do mundo. Quando dois elementos se sobrepõem, quem aparece na frente? A resposta
+padrão é "o que vem depois no HTML". O <code>z-index</code> muda essa ordem — mas só funciona em
+elementos posicionados, e é por isso que ele anda junto do <code>sticky</code>. Sem
+<code>z-50</code>, a barra fixa pode ser coberta por uma imagem que vem depois dela no código, e o
+visitante vê a foto por cima do menu.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Onde vai</th><th>Para que serve</th></tr>
+<tr><td><code>mx-auto max-w-5xl</code></td><td>miolo</td><td>centraliza e limita a largura do conteúdo</td></tr>
+<tr><td><code>flex items-center justify-between gap-4</code></td><td>miolo</td><td>marca à esquerda, links à direita</td></tr>
+<tr><td><code>sticky top-0 z-50</code></td><td><code>header</code></td><td>gruda no topo e fica na frente do conteúdo</td></tr>
+<tr><td><code>bg-white/90 backdrop-blur</code></td><td><code>header</code></td><td>fundo quase sólido com desfoque do que passa atrás</td></tr>
+<tr><td><code>border-b border-stone-200</code></td><td><code>header</code></td><td>separa a barra da página, mesmo em fundo branco</td></tr>
+<tr><td><code>hidden md:flex</code></td><td><code>nav</code></td><td>esconde os links no celular e devolve no desktop</td></tr>
+</table>
+</div>
+
+<h2>8. O link que leva para o lugar certo</h2>
+
+<p>Uma barra de navegação só é boa se os links funcionam para todos. Três detalhes de HTML fazem a
+diferença e nenhum deles é classe. O primeiro: todo <code>href</code> precisa apontar para um arquivo
+que existe. Link para página inexistente é o erro mais comum de site em construção, e o visitante
+descobre pelo 404.</p>
+
+<p>O segundo: o texto do link precisa dizer para onde vai. "Clique aqui" e "saiba mais" não dizem
+nada quando lidos fora de contexto — e quem usa leitor de tela costuma navegar por uma lista de
+links, justamente fora de contexto. "Cardápio" e "Encomenda" dizem.</p>
+
+<p>O terceiro: a marca precisa ser um link para a página inicial, porque é isso que todo mundo
+espera. Um visitante perdido clica no nome da padaria. Se ele não for link, o visitante fica sem a
+saída mais óbvia que existe.</p>
+
+<pre class="file" data-file="index.html">&lt;a href="index.html" class="flex items-center gap-2 font-semibold text-amber-800"&gt;
+  &lt;span class="grid size-8 place-items-center rounded-lg bg-amber-100 text-sm"&gt;A&lt;/span&gt;
+  Padaria da Ana
+&lt;/a&gt;</pre>
+
+<p>Esse quadradinho de 32 px com a letra "A" é o embrião de um logotipo. Ele usa
+<code>grid place-items-center</code> para centralizar a letra, <code>rounded-lg</code> para o canto e
+<code>bg-amber-100 text-amber-800</code> para a cor. Quando a Ana tiver um desenho de verdade, é só
+trocar o <code>span</code> por uma imagem de 32 px — a barra não muda em nada.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a barra que cobria o título</h3>
+<p>Com <code>fixed</code>, a barra saiu do fluxo e o título da página ficou escondido atrás dela. A
+Ana tentou <code>mt-20</code> no conteúdo e resolveu — até a barra mudar de altura no celular e o
+número virar errado outra vez. A correção foi trocar por <code>sticky top-0</code>, que não tira o
+elemento do fluxo e por isso não exige compensação nenhuma. Regra prática: use
+<code>sticky</code>; só use <code>fixed</code> quando precisar de algo que fique preso mesmo fora do
+fluxo, como um botão flutuante de WhatsApp.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o menu que sumiu no tablet</h3>
+<p>No celular, os links estavam escondidos e o botão aparecia. No tablet de 800 px, os links
+voltavam — mas o botão continuava lá, ocupando espaço e sem fazer nada. O motivo: o botão tinha
+<code>md:hidden</code> e os links <code>md:flex</code>, mas o tablet estava em 768 px exatos e alguma
+regra de zoom mudava a conta. A correção foi testar nos três tamanhos de verdade, com o navegador em
+modo responsivo, em vez de confiar no número redondo. Breakpoint não é opinião: é medida.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a barra transparente demais</h3>
+<p>Empolgada com o efeito de vidro, a Ana usou <code>bg-white/50</code> e <code>backdrop-blur-lg</code>.
+No topo da página ficou lindo, porque não havia nada atrás. Ao rolar o cardápio, os preços passaram
+por baixo da barra e os links ficaram ilegíveis. Ela subiu para <code>bg-white/90</code> e manteve o
+desfoque: o efeito continua, o texto de trás vira mancha, os links voltam a se ler. Transparência em
+barra fixa é tempero, não prato.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. Qual dupla gruda a barra no topo sem tirar o
+elemento do fluxo?</p>
+<label><input type="radio" name="n1"> <code>sticky top-0</code></label>
+<label><input type="radio" name="n1"> <code>fixed top-0</code></label>
+<label><input type="radio" name="n1"> <code>absolute top-0</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Para a marca ficar à esquerda e os links à
+direita, no mesmo miolo, qual combinação resolve?</p>
+<label><input type="radio" name="n2"> <code>grid grid-cols-2</code> sem nada mais</label>
+<label><input type="radio" name="n2"> <code>text-left</code> e <code>text-right</code></label>
+<label><input type="radio" name="n2"> <code>flex items-center justify-between gap-4</code></label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. O que <code>hidden md:flex</code> faz no
+<code>nav</code>?</p>
+<label><input type="radio" name="n3"> esconde o menu em todas as larguras e mostra só no hover</label>
+<label><input type="radio" name="n3"> esconde no celular e devolve o flex a partir de 768 px</label>
+<label><input type="radio" name="n3"> diminui a fonte dos links no celular</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a barra que fica no topo</h2>
+<p>A barra precisa continuar visível quando o visitante rola o cardápio, sem sair do fluxo da
+página. Qual classe de posição faz isso?</p>
+<div class="ex-code">&lt;header class="<input aria-label="resposta 1" data-answer="sticky" placeholder="..."> top-0 z-50 border-b border-stone-200 bg-white/90"&gt;...&lt;/header&gt;</div>
+<p class="ex-dica">Dica: é uma palavra só, que em inglês quer dizer "grudento". Ela precisa de uma
+coordenada junto — <code>top-0</code> —, senão não sabe onde parar.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Barra de navegação é um <code>header</code> com um miolo dentro: <code>mx-auto max-w-5xl px-4
+py-3</code> para centralizar e dar respiro, e <code>flex items-center justify-between gap-4</code>
+para empurrar a marca e o <code>nav</code> para as pontas. Os links ficam em
+<code>text-sm text-stone-600</code> com <code>hover:text-amber-700</code>, e o da página atual ganha
+cor mais forte, sublinhado afastado e <code>aria-current="page"</code>.</p>
+
+<p>Para a barra ficar no topo, <code>sticky top-0 z-50</code>: sticky mantém o elemento no fluxo,
+<code>top-0</code> diz onde ele para e <code>z-50</code> garante que ele fique na frente. O fundo
+<code>bg-white/90 backdrop-blur</code> dá o efeito de vidro sem perder a leitura, e a borda
+<code>border-b border-stone-200</code> separa a barra de uma página branca.</p>
+
+<p>No celular, não esprema: esconda. <code>hidden md:flex</code> nos links, <code>md:hidden</code> no
+botão, e o menu de verdade fica para a aula de menu suspenso. E lembre que a barra é
+<code>header</code> com <code>nav</code> dentro, não <code>div</code> com <code>div</code>: a
+estrutura continua dizendo o que cada pedaço é.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Três partes: marca, navegação e ação. Agrupe antes de distribuir.</li>
+<li>Miolo: <code>mx-auto max-w-5xl px-4 py-3</code>.</li>
+<li>Alinhamento: <code>flex items-center justify-between gap-4</code>.</li>
+<li><code>mx-auto</code> só centraliza porque existe <code>max-w</code>.</li>
+<li>Link atual: cor forte, <code>underline underline-offset-8</code> e
+<code>aria-current="page"</code>.</li>
+<li>Barra no topo: <code>sticky top-0 z-50</code> — sticky, não fixed.</li>
+<li><code>bg-white/90 backdrop-blur</code> para o efeito de vidro; 80% a 95% de opacidade.</li>
+<li><code>hidden md:flex</code> nos links, <code>md:hidden</code> no botão do celular.</li>
+<li><code>z-index</code> só vale em elemento posicionado — por isso anda com <code>sticky</code>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
