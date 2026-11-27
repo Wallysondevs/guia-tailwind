@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Centralizar com m-auto | Guia Tailwind</title>
+<meta name="description" content="mx-auto e m-auto centralizam de verdade porque a margem automática divide o espaço que sobra: por que precisa de largura, quando usar max-w e como centralizar na vertical.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Centralizar com <span class="hl">m-auto</span></h1>
+<p class="intro">A Ana quer o cartão de destaque no meio da página e o texto do rodapé no meio da
+faixa. Ela tentou <code>text-center</code> e o texto centralizou, mas a caixa continuou encostada à
+esquerda. Tentou <code>mx-auto</code> e nada aconteceu — porque o cartão já ocupava a largura toda e
+não sobrava espaço nenhum para dividir. Nesta aula ela entende o que a palavra <code>auto</code> faz
+de fato: ela pega o espaço que sobra e divide. Sem espaço sobrando, não há mágica; com largura
+limitada, o centramento sai de graça.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que significa uma margem <code>auto</code> e por que ela centraliza.</li>
+  <li>A dupla que resolve 90% dos casos: <code>mx-auto</code> com <code>max-w-*</code>.</li>
+  <li>Por que <code>mx-auto</code> sozinho não faz nada num <code>div</code> comum.</li>
+  <li>A diferença entre centralizar o texto e centralizar a caixa.</li>
+  <li>Como centralizar na vertical — e por que isso exige flex.</li>
+  <li>O que <code>ml-auto</code> faz numa barra de navegação.</li>
+  <li>As larguras máximas prontas: <code>max-w-sm</code>, <code>max-w-md</code>, <code>max-w-lg</code>.</li>
+  <li>Os erros que fazem o centramento "não pegar": pai flex, elemento inline, largura fixa.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o cartão encostado à esquerda</h2>
+
+<p>A página inicial da padaria tem um cartão de destaque: o pão do dia, com nome, preço e uma frase
+sobre o fermento. A Ana queria ele no meio, com margens iguais dos dois lados. O HTML estava
+assim:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="p-6 bg-white"&gt;Pão do dia — R$ 18,00&lt;/div&gt;</pre>
+
+<p>O cartão ocupa a largura inteira disponível, porque um <code>div</code> é um elemento de bloco e
+bloco, por padrão, estica até onde pode. Ela então tentou <code>text-center</code>: o texto foi para
+o meio, mas o cartão continuou do mesmo tamanho, com o fundo branco indo de ponta a ponta. É que
+<code>text-center</code> centraliza o conteúdo, não a caixa.</p>
+
+<p>Depois ela lembrou de ter visto <code>mx-auto</code> em algum exemplo e colou a classe. Nada
+mudou. Isso é o que mais confunde nesse assunto: <code>mx-auto</code> está certo, mas está
+incompleto. A margem automática divide o espaço que sobra — e, num cartão que já ocupa 100% da
+largura, não sobra nada. Zero dividido por dois é zero.</p>
+
+<p>A solução tem duas partes: limitar a largura do cartão e pedir que as margens laterais dividam o
+que sobrou. <code>max-w-sm mx-auto</code>: a primeira classe diz "não passe de 384 px", a segunda diz
+"o resto do espaço, divida igualmente dos dois lados". Juntas, elas centralizam.</p>
+
+<h2>2. O que "auto" quer dizer numa margem</h2>
+
+<p>Margem aceita três tipos de valor: um número (<code>m-4</code>), zero (<code>m-0</code>) e a
+palavra <code>auto</code>. Os dois primeiros você já conhece. O terceiro é diferente de todos os
+outros valores do Tailwind: ele não é uma medida, é uma instrução de cálculo. "Auto" quer dizer
+<em>o que sobrar</em>.</p>
+
+<p>Imagine uma caixa de 300 px dentro de um espaço de 700 px. Sobram 400 px. Com
+<code>mx-auto</code> nas duas laterais, cada uma fica com 200 px, e a caixa aparece exatamente no
+meio. Se o espaço diminuir para 500 px, sobram 200 e cada lado fica com 100. A caixa continua
+centralizada sem você mexer em nada — é por isso que essa técnica sobrevive a mudanças de tela,
+enquanto uma margem fixa de 200 px deixaria o cartão torto no celular.</p>
+
+<dl class="anatomy">
+<dt>espaço livre</dt>
+<dd>O que sobra na largura do pai depois de descontar a largura do filho. É esse espaço que a
+margem automática divide.</dd>
+<dt>margem automática</dt>
+<dd>Uma margem que não tem medida própria: ela reclama todo o espaço livre disponível. As classes
+são <code>mx-auto</code>, <code>my-auto</code>, <code>mt-auto</code> e por aí.</dd>
+<dt>largura máxima</dt>
+<dd><code>max-w-*</code> limita o quanto a caixa pode crescer, sem fixar um tamanho. É o par natural
+da margem automática.</dd>
+<dt>elemento de bloco</dt>
+<dd>Quem ocupa a linha inteira e começa em linha nova: <code>div</code>, <code>p</code>,
+<code>section</code>. É o tipo que estica, e por isso o que mais precisa de limite.</dd>
+<dt>flex</dt>
+<dd>Um jeito de organizar os filhos em linha ou coluna. Só dentro dele a margem automática também
+divide o espaço vertical.</dd>
+</dl>
+
+<p>Uma consequência importante: <code>auto</code> não centraliza por si. Ele divide o que sobra
+<em>do lado em que foi aplicado</em>. Com <code>mx-auto</code>, divide na horizontal; com
+<code>my-auto</code>, na vertical — mas só onde a vertical tem espaço distribuível, e isso muda tudo
+nas próximas seções.</p>
+
+<p>Vale entender a diferença entre os lados. Quando só um lado é automático, não há divisão: aquele
+lado fica com todo o espaço livre e empurra a caixa para o outro canto. É por isso que
+<code>ml-auto</code> joga o elemento para a direita e <code>mr-auto</code> para a esquerda. Quando os
+dois lados são automáticos, o espaço é repartido e a caixa fica no meio. A mesma palavra
+<code>auto</code>, dois resultados que parecem opostos — e o que decide é a quantidade de lados que
+reclamam o espaço.</p>
+
+<h2>3. mx-auto: a receita do centramento</h2>
+
+<p>Vamos ao cartão. A largura máxima fica em <code>max-w-sm</code> (384 px) e o centramento em
+<code>mx-auto</code>. Duas classes, dois papéis.</p>
+
+<div class="trytailwind" data-goal="rule:margin-inline: auto;;rule:max-width: var(--container-sm)">
+  <p class="try-task">O cartão está com <code>max-w-sm</code>, mas grudado à esquerda. Acrescente
+  <code>mx-auto</code> para que o espaço que sobra seja dividido dos dois lados, e clique em
+  Rodar.</p>
+  <pre class="html">&lt;div class="bg-amber-100 p-4"&gt;
+  &lt;div id="alvo" class="max-w-sm bg-white p-4"&gt;Pão do dia — R$ 18,00&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+max-width: 384px
+padding: 16px
+background-color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;div class="bg-amber-100 p-4"&gt;
+  &lt;div id="alvo" class="max-w-sm mx-auto bg-white p-4"&gt;Pão do dia — R$ 18,00&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Ao rodar a solução, o painel ganha uma linha nova:
+<code>margin-inline: 172px</code> (o número muda com a largura da prévia). Esse valor em pixels é o
+próprio cálculo acontecendo: o navegador pegou o espaço livre, dividiu por dois e escreveu o
+resultado. Antes de rodar, o painel mostrava só a largura máxima, o padding e o fundo — sinal de que
+nenhuma margem estava sendo aplicada.</p>
+
+<p>Note que usamos <code>max-w-sm</code> e não <code>w-96</code>. A diferença aparece na tela
+pequena: com largura fixa, o cartão de 384 px estoura um celular de 375 px (ou encolhe o texto até
+ficar ilegível); com largura máxima, ele encolhe junto com a tela e o centramento continua
+funcionando, com margens menores. É a mesma lógica de "limite, não tamanho" que vale para imagens e
+colunas de texto.</p>
+
+<h2>4. Sem largura, não há o que dividir</h2>
+
+<p>Aqui está o motivo do "não funcionou" da Ana. Um <code>div</code> sem largura declarada já ocupa
+toda a largura do pai. Não sobra nada. A margem automática é aplicada, calcula zero e o resultado é
+indistinguível de não ter classe nenhuma.</p>
+
+<div class="trytailwind" data-goal="rule:margin-inline: auto;;rule:max-width: var(--container-md)">
+  <p class="try-task">O aviso já tem <code>mx-auto</code>, mas ocupa a largura toda e o centramento
+  não aparece. Dê a ele um limite de 448 px com <code>max-w-md</code>.</p>
+  <pre class="html">&lt;div class="bg-amber-100 p-4"&gt;
+  &lt;div id="alvo" class="mx-auto bg-white p-4"&gt;Encomendas até as 18h&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;div class="bg-amber-100 p-4"&gt;
+  &lt;div id="alvo" class="mx-auto max-w-md bg-white p-4"&gt;Encomendas até as 18h&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Essa caixa é o experimento que vale fazer ao contrário: tire o <code>max-w-md</code> e rode de
+novo. O painel perde a linha de <code>margin-inline</code> e volta a mostrar zero — ou melhor,
+volta a não mostrar margem nenhuma, porque o valor calculado ficou igual ao de uma caixa sem classe.
+É a demonstração mais limpa de que a margem automática depende de existir espaço livre.</p>
+
+<p>Existem três jeitos de criar esse espaço, e todos servem: <code>max-w-*</code> (o mais comum),
+uma largura fixa como <code>w-96</code>, ou uma fração como <code>w-1/2</code>. A diferença está no
+comportamento em telas pequenas: a fração acompanha o pai, a largura fixa não, e a máxima é o meio
+termo mais seguro. Para texto, a máxima ganha quase sempre, porque limita o comprimento da linha —
+linha longa demais cansa a vista.</p>
+
+<p>E a conta do espaço livre inclui o padding do pai. Se o pai tem <code>p-4</code>, os 16 px de
+cada lado já estão ocupados antes de qualquer divisão; a margem automática só reparte o que sobra
+<em>depois</em> disso. Isso explica um detalhe que parece bug: ao aumentar o padding do pai, o cartão
+centralizado continua no meio, mas com margens calculadas menores. Ele não se moveu — o espaço
+disponível é que encolheu dos dois lados igualmente.</p>
+
+<h2>5. O CSS gerado</h2>
+
+<p>Duas classes, duas regras curtas. Nada de cálculo mágico: o <code>auto</code> vai literalmente
+para o CSS, e quem resolve a conta é o navegador.</p>
+
+<pre class="term">.mx-auto {
+  margin-inline: auto;
+}
+.max-w-sm {
+  max-width: var(--container-sm);
+}</pre>
+
+<p><code>--container-sm</code> é a variável da escala de larguras do Tailwind, que vale 24 rem =
+384 px. Como todo o resto do guia, ela é uma variável para você poder mudar o tema inteiro num lugar
+só. O <code>margin-inline: auto</code> é o mesmo eixo que você viu na <a href="px-py.html">aula de
+px e py</a>, agora com o valor <code>auto</code> em vez de um número.</p>
+
+<p>Repare que não existe centralização no CSS. O navegador não "centraliza": ele distribui espaço
+livre igualmente entre as duas margens automáticas. O resultado é o mesmo, mas o mecanismo importa
+quando você sai do caso simples — por exemplo, quando só um dos lados tem margem automática, o que
+empurra a caixa toda para o outro lado.</p>
+
+<h2>6. Larguras máximas prontas</h2>
+
+<p>A escala de <code>max-w</code> é nomeada, não numerada, e vale decorar as quatro ou cinco que
+aparecem em todo projeto. Os valores são fixos em rem, o que quer dizer que acompanham o tamanho da
+fonte e não a largura da tela.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Largura máxima</th><th>Uso típico</th></tr>
+<tr><td><code>max-w-xs</code></td><td>320 px</td><td>cartão pequeno, menu lateral estreito</td></tr>
+<tr><td><code>max-w-sm</code></td><td>384 px</td><td>cartão de destaque, caixa de login</td></tr>
+<tr><td><code>max-w-md</code></td><td>448 px</td><td>formulário curto, aviso</td></tr>
+<tr><td><code>max-w-lg</code></td><td>512 px</td><td>conteúdo de artigo curto</td></tr>
+<tr><td><code>max-w-xl</code></td><td>576 px</td><td>coluna de texto confortável</td></tr>
+<tr><td><code>max-w-2xl</code></td><td>672 px</td><td>post de blog, texto longo</td></tr>
+<tr><td><code>max-w-3xl</code></td><td>768 px</td><td>página de leitura inteira</td></tr>
+</table>
+</div>
+
+<p>Um detalhe que economiza tentativa e erro: <code>max-w-*</code> não centraliza sozinha, e
+<code>mx-auto</code> não limita sozinha. Elas são um par. Quem escreve uma sem a outra passa
+exatamente pelas duas frustrações que a Ana passou nesta aula — a caixa grande demais e o centramento
+invisível.</p>
+
+<p>Se você quer centralizar o texto <em>dentro</em> da caixa limitada, aí entra
+<code>text-center</code>, e as três classes convivem bem:
+<code>max-w-md mx-auto text-center</code>. O erro é achar que <code>text-center</code> substitui as
+outras duas.</p>
+
+<h2>7. Centralizar na vertical: só com flex</h2>
+
+<p>Agora a parte que decepciona: <code>m-auto</code> num bloco comum <em>não</em> centraliza na
+vertical. Se você puser <code>my-auto</code> num cartão dentro de uma seção, a margem vertical
+automática vira zero. Isso não é limitação do Tailwind: no fluxo normal da página, o navegador não
+distribui espaço vertical sobrando — a altura de um bloco é sempre a soma do conteúdo.</p>
+
+<p>Quem distribui espaço nos dois eixos é o flex (e o grid). Num pai <code>flex</code> com altura
+definida, a margem automática no filho divide o espaço livre na vertical também, e o resultado é
+centralização de verdade, nos dois sentidos, com uma classe só.</p>
+
+<div class="trytailwind" data-goal="rule:margin: auto;;texto:Forno a lenha">
+  <p class="try-task">A faixa âmbar é um pai flex com 160 px de altura, e o selo está no canto. Use
+  <code>m-auto</code> no selo para centralizá-lo na horizontal e na vertical de uma vez.</p>
+  <pre class="html">&lt;div class="flex h-40 bg-amber-100 p-2"&gt;
+  &lt;div id="alvo" class="bg-white p-4"&gt;Forno a lenha&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;div class="flex h-40 bg-amber-100 p-2"&gt;
+  &lt;div id="alvo" class="m-auto bg-white p-4"&gt;Forno a lenha&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Rode e compare: o selo sai do canto e fica no meio da faixa — mesmo espaço em cima e embaixo,
+mesmo espaço à esquerda e à direita. O painel mostra a margem já resolvida em pixels, em dois valores
+separados por espaço: o primeiro é a vertical, o segundo é a horizontal. Eles quase nunca são iguais,
+e isso é normal — cada eixo tem a sua quantidade de espaço livre para dividir. O que precisa ser igual
+é o par de cada eixo.</p>
+
+<pre class="term">.m-auto {
+  margin: auto;
+}
+.my-auto {
+  margin-block: auto;
+}</pre>
+
+<p>O grid se comporta igual: num pai <code>grid</code>, a margem automática do filho também
+distribui o espaço que sobra nos dois eixos. A diferença é que no grid o espaço costuma ser dividido
+pelas colunas e linhas, e o <code>m-auto</code> fica com o papel de ajuste fino dentro da célula. Se
+o pai é uma grade de duas colunas e você quer a caixa no meio da célula, é ele que resolve.</p>
+
+<p>Para uma tela de "em breve" ou um aviso de página inteira, o par mais comum é
+<code>min-h-screen</code> no pai com <code>flex</code>, e o conteúdo centralizado com
+<code>m-auto</code>. O <code>min-h-screen</code> garante que o pai tenha pelo menos a altura da
+janela, e aí a vertical tem espaço de sobra para dividir, mesmo quando o conteúdo é curto.</p>
+
+<p>Duas observações práticas. A primeira: sem altura no pai, não há espaço vertical para dividir, e
+o <code>m-auto</code> centraliza só na horizontal. A altura pode vir de <code>h-40</code>,
+<code>h-screen</code> ou de um conteúdo alto. A segunda: em flex, existe um caminho mais explícito,
+com <code>items-center</code> e <code>justify-center</code> no pai. Os dois funcionam; a margem
+automática tem a vantagem de agir num filho só, sem mexer no alinhamento dos outros.</p>
+
+<h2>8. Os outros "auto" e o que não centraliza</h2>
+
+<p>A margem automática tem usos que não são centralizar. O mais comum é empurrar um item para o
+outro lado numa barra: numa fileira flex com três links, <code>ml-auto</code> no último empurra ele
+para a direita, colado na borda. É o truque padrão de "logo à esquerda, menu à direita" — uma classe,
+sem posicionamento absoluto e sem números mágicos.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que faz</th><th>Quando serve</th></tr>
+<tr><td><code>mx-auto</code></td><td>divide o espaço livre das laterais</td><td>centralizar caixa com largura limitada</td></tr>
+<tr><td><code>my-auto</code></td><td>divide o espaço livre vertical (só em flex/grid)</td><td>centralizar na altura de uma faixa</td></tr>
+<tr><td><code>m-auto</code></td><td>os dois eixos de uma vez</td><td>centralizar tudo dentro de um pai flex</td></tr>
+<tr><td><code>ml-auto</code></td><td>empurra a caixa para a direita</td><td>menu à direita numa barra flex</td></tr>
+<tr><td><code>mr-auto</code></td><td>empurra a caixa para a esquerda</td><td>título à esquerda, botão à direita</td></tr>
+<tr><td><code>text-center</code></td><td>centraliza o texto dentro da caixa</td><td>título, preço, rodapé</td></tr>
+</table>
+</div>
+
+<p>E agora a lista dos "não centraliza", para você reconhecer o sintoma em dez segundos. Um: a caixa
+não tem largura limitada — não há espaço livre. Dois: o elemento é inline (um <code>span</code> ou
+um <code>a</code>), e margem automática horizontal não tem efeito em inline; resolva com
+<code>block</code> ou <code>inline-block</code>. Três: o pai é flex e você usou
+<code>mx-auto</code> esperando vertical; ali quem cuida do eixo vertical é
+<code>items-center</code>. Quatro: a largura está fixada com <code>w-full</code>, que é 100% do pai
+e não deixa sobra nenhuma.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a coluna de texto impossível de ler</h3>
+<p>O "sobre nós" da padaria ocupava a tela inteira e cada linha ficava com 200 caracteres — cansativo
+e feio. A Ana pôs <code>max-w-2xl mx-auto</code> no bloco: 672 px de largura máxima, centralizado.
+Num monitor grande, a leitura ficou confortável; no celular, o bloco encolheu com a tela e continuou
+centralizado. Nenhuma media query foi necessária.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o formulário que "pulou" para a esquerda no flex</h3>
+<p>Ela colocou a caixa de login dentro de um pai <code>flex</code> e o <code>mx-auto</code> parou de
+funcionar como antes: o formulário ficou alinhado ao topo, e não no meio da altura. O motivo é que
+no flex o eixo principal passou a ser horizontal, e o vertical é controlado por
+<code>items-center</code>. A correção foi <code>items-center justify-center</code> no pai — ou
+<code>m-auto</code> na caixa, que resolve os dois eixos de uma vez.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o botão que continuou colado</h3>
+<p>Um botão com <code>mx-auto</code> não saía do canto. O botão é inline-block por natureza e, além
+disso, encolhe para caber no texto — não sobra espaço. O conserto foi <code>block mx-auto</code>: o
+<code>block</code> faz ele virar caixa de largura própria e o <code>mx-auto</code> passa a ter o que
+dividir. Como o botão não tem largura declarada, ele fica do tamanho do texto, centralizado. Para
+ocupar a largura toda, seria <code>w-full</code> e o centramento deixaria de fazer sentido.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Por que <code>mx-auto</code> sozinho não centraliza
+um <code>div</code> comum?</p>
+<label><input type="radio" name="q1"> porque a classe só funciona com flex</label>
+<label><input type="radio" name="q1"> porque o div já ocupa a largura toda e não sobra espaço</label>
+<label><input type="radio" name="q1"> porque a margem automática precisa de um número junto</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual dupla centraliza uma caixa na horizontal?</p>
+<label><input type="radio" name="q2"> <code>w-full</code> e <code>text-center</code></label>
+<label><input type="radio" name="q2"> <code>ml-4</code> e <code>mr-4</code></label>
+<label><input type="radio" name="q2"> <code>max-w-md</code> e <code>mx-auto</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que o <code>m-auto</code> faz num pai flex com
+altura definida?</p>
+<label><input type="radio" name="q3"> centraliza o filho na horizontal e na vertical</label>
+<label><input type="radio" name="q3"> estica o filho até preencher o pai</label>
+<label><input type="radio" name="q3"> não faz nada, porque auto só vale na horizontal</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o cartão de login</h2>
+<p>A caixa de login precisa de 384 px de largura máxima e de ficar centralizada na página. Complete
+as duas classes:</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="max-w-sm" placeholder="..."> <input aria-label="resposta 2" data-answer="mx-auto" placeholder="..."> bg-white p-6"&gt;Entrar&lt;/div&gt;</div>
+<p class="ex-dica">Dica: primeiro limite a largura (o degrau de 384 px), depois peça a divisão do
+espaço que sobra. Se você inverter a ordem, o resultado é o mesmo — o que não pode é esquecer uma
+das duas.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Uma margem <code>auto</code> não é uma medida: é uma instrução para pegar o espaço que sobra e
+dividi-lo. Por isso o centramento horizontal é <code>mx-auto</code> acompanhado de uma largura
+limitada — <code>max-w-sm</code>, <code>max-w-md</code>, uma fração ou uma largura fixa. Sem sobra,
+a margem calcula zero e nada muda na tela, e é aí que a maioria das pessoas conclui, errado, que a
+classe "não funciona".</p>
+
+<p>Na vertical, o fluxo normal não distribui espaço: <code>my-auto</code> só centraliza dentro de um
+pai flex ou grid que tenha altura. E <code>ml-auto</code>/<code>mr-auto</code> são outra história
+útil: empurram a caixa para o lado oposto, o que resolve barras de navegação com uma classe só.
+Centralizar texto é outra tarefa, do <code>text-center</code> — e as três coisas convivem.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>auto</code> significa "o espaço que sobra"; com dois lados automáticos, ele divide igual.</li>
+<li><code>mx-auto</code> só centraliza se a caixa tiver largura menor que o pai.</li>
+<li>A dupla de ouro: <code>max-w-*</code> + <code>mx-auto</code>.</li>
+<li>Prefira largura máxima a largura fixa: acompanha a tela sem media query.</li>
+<li><code>max-w-sm</code> = 384 px, <code>max-w-md</code> = 448 px, <code>max-w-lg</code> = 512 px.</li>
+<li><code>my-auto</code> e <code>m-auto</code> só centralizam na vertical dentro de flex ou grid.</li>
+<li><code>ml-auto</code> empurra para a direita; <code>mr-auto</code>, para a esquerda.</li>
+<li><code>text-center</code> centraliza o texto, não a caixa.</li>
+<li>Elemento inline ignora margem automática horizontal; use <code>block</code>.</li>
+<li><code>w-full</code> mata o centramento: não deixa espaço para dividir.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

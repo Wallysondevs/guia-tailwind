@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tamanhos Relativos | Guia Tailwind</title>
+<meta name="description" content="w-1/2, w-full, w-fit e h-full medem em relação a alguém: ao pai, à janela ou ao conteúdo. Veja qual referência cada classe usa e por que h-full às vezes não faz nada.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Tamanhos <span class="hl">Relativos</span></h1>
+<p class="intro">A Ana já sabe dar 96 px a um logo e 48 px a um botão. O problema começa quando a
+medida certa depende de outra coisa: a ficha que deve ocupar metade do cartão, o selo que deve
+abraçar o próprio texto, a coluna que deve ter a altura da faixa. Nenhuma dessas medidas tem um
+número fixo — são relativas, e cada uma se refere a algo diferente. Nesta aula ela aprende a
+perguntar "relativo a quê?" antes de escolher a classe, e descobre por que o <code>h-full</code> às
+vezes parece não funcionar.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>As três referências do tamanho relativo: o pai, a janela e o conteúdo.</li>
+  <li>As frações prontas: <code>w-1/2</code>, <code>w-1/3</code>, <code>w-2/3</code>, <code>w-3/4</code>.</li>
+  <li>Por que <code>w-full</code> não é "a largura da tela" e o que o padding do pai faz com ela.</li>
+  <li><code>w-fit</code>: o tamanho que abraça o conteúdo.</li>
+  <li>A cadeia de alturas que faz o <code>h-full</code> funcionar — ou não.</li>
+  <li><code>w-screen</code>, <code>h-screen</code> e os primos <code>dvh</code> e <code>dvw</code>.</li>
+  <li><code>w-min</code> e <code>w-max</code>: os extremos do conteúdo.</li>
+  <li>Quando preferir uma fração e quando preferir um degrau fixo.</li>
+</ul>
+</div>
+
+<h2>1. A cena: metade do cartão e a altura da faixa</h2>
+
+<p>Três pedidos chegaram no mesmo dia. O primeiro: a ficha do pão deve ocupar <strong>metade</strong>
+da largura do cartão, para caber outra ficha ao lado. O segundo: o selo "novo" deve ter só a largura
+do texto, sem esticar até a borda. O terceiro: a coluna branca dentro da faixa âmbar deve ter a
+<strong>mesma altura</strong> da faixa.</p>
+
+<p>Os três começam com a mesma pergunta e terminam em classes diferentes, porque cada um se refere a
+uma coisa distinta. A ficha é uma fração do pai. O selo é o tamanho do próprio conteúdo. A coluna é
+uma porcentagem da altura do pai — e essa é a que dá dor de cabeça, porque porcentagem de altura só
+funciona quando o pai tem altura.</p>
+
+<p>Na <a href="w-e-h.html">aula anterior</a> todas as medidas eram degraus: <code>w-64</code> são
+256 px, sempre, não importa onde esteja. Aqui, nenhuma das classes tem um valor fixo: <code>w-1/2</code> é metade de alguma
+coisa, <code>h-full</code> é a altura de alguma coisa. E "alguma coisa" é a palavra que decide o
+resultado — por isso a primeira pergunta é sempre "relativo a quê?".</p>
+
+<h2>2. Relativo a quê? As três referências</h2>
+
+<p>Existem três referências possíveis, e todas aparecem no dia a dia. A primeira é o elemento pai: a
+caixa onde o seu elemento está dentro. A segunda é a janela do navegador, o tal <em>viewport</em>. A
+terceira é o próprio conteúdo: o texto que você escreveu, a imagem que carregou. Cada classe de
+tamanho relativo escolhe uma dessas três e faz a conta a partir dela.</p>
+
+<dl class="anatomy">
+<dt>pai</dt>
+<dd>O elemento que contém o seu. É a referência de <code>w-full</code>, <code>w-1/2</code> e
+<code>h-full</code>.</dd>
+<dt>viewport</dt>
+<dd>A área visível do navegador, sem as barras do sistema. É a referência de
+<code>w-screen</code> e <code>h-screen</code>.</dd>
+<dt>conteúdo</dt>
+<dd>O que está dentro do elemento: o texto, a imagem. É a referência de <code>w-fit</code>,
+<code>w-min</code> e <code>w-max</code>.</dd>
+<dt>porcentagem</dt>
+<dd>Uma fração do tamanho do pai, resolvida pelo navegador na hora de desenhar. <code>w-1/2</code>
+vira 50% e, na tela, um número em pixels.</dd>
+<dt>cadeia de alturas</dt>
+<dd>A sequência pai → filho que precisa ter altura em cada nível para que uma altura em porcentagem
+funcione.</dd>
+</dl>
+
+<p>Uma consequência que vale desde já: tamanho relativo é mais resistente a mudanças de tela, mas
+menos previsível de escrever. O navegador calcula na hora, e o resultado depende do que está em
+volta. Quando algo sai errado, o painel mostra o valor final em pixels — e é por ele que você
+descobre qual foi a referência usada.</p>
+
+<h2>3. Frações: metade, um terço, dois terços</h2>
+
+<p>O Tailwind traz as frações mais usadas como classes prontas. <code>w-1/2</code> é metade,
+<code>w-1/3</code> é um terço, <code>w-2/3</code> são dois terços, <code>w-1/4</code> é um quarto,
+<code>w-3/4</code> são três quartos. Existe até <code>w-5/6</code>, para quando você quer quase
+tudo.</p>
+
+<div class="trytailwind" data-goal="rule:width: calc(1 / 2 * 100%)">
+  <p class="try-task">A ficha do pão ocupa a largura toda do cartão. Dê a ela metade da largura com
+  <code>w-1/2</code> e clique em Rodar.</p>
+  <pre class="html">&lt;div class="bg-amber-100 p-4"&gt;
+  &lt;div id="alvo" class="bg-white p-2"&gt;Pão francês — R$ 0,90&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;div class="bg-amber-100 p-4"&gt;
+  &lt;div id="alvo" class="w-1/2 bg-white p-2"&gt;Pão francês — R$ 0,90&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra o resultado da conta em pixels — nesta prévia, algo perto de 360 px, e sempre a
+metade do cartão. Repare que ele não mostra "50%": o navegador resolveu a porcentagem e entregou o
+número final. É
+assim que porcentagem funciona em qualquer navegador, e é por isso que ela acompanha a tela sem
+media query: mudou a largura do pai, a metade muda junto.</p>
+
+<pre class="term">.w-1\/2 {
+  width: calc(1 / 2 * 100%);
+}
+.w-2\/3 {
+  width: calc(2 / 3 * 100%);
+}</pre>
+
+<p>A barra invertida antes da barra não é enfeite nem erro de digitação: em CSS, <code>/</code> não
+pode aparecer solto num nome de classe, então o Tailwind escapa com <code>\</code>. No seu HTML a
+classe continua sendo <code>w-1/2</code>, com a barra normal. Só no CSS gerado aparece a versão
+escapada.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Fração</th><th>Em uma caixa de 600 px</th><th>Uso típico</th></tr>
+<tr><td><code>w-1/4</code></td><td>25%</td><td>150 px</td><td>quatro miniaturas na linha</td></tr>
+<tr><td><code>w-1/3</code></td><td>33,3%</td><td>200 px</td><td>três cartões lado a lado</td></tr>
+<tr><td><code>w-1/2</code></td><td>50%</td><td>300 px</td><td>duas fichas, dois preços</td></tr>
+<tr><td><code>w-2/3</code></td><td>66,6%</td><td>400 px</td><td>coluna principal com lateral</td></tr>
+<tr><td><code>w-3/4</code></td><td>75%</td><td>450 px</td><td>texto largo, imagem de apoio</td></tr>
+<tr><td><code>w-full</code></td><td>100%</td><td>600 px</td><td>ocupa tudo o que o pai oferece</td></tr>
+</table>
+</div>
+
+<p>Duas frações na mesma linha somam 100% e ficam coladas: <code>w-1/2</code> + <code>w-1/2</code> sem
+nenhum espaço entre elas. Se você quer um vão, precisa descontar — e aí a conta de fração começa a
+atrapalhar. Para linhas com espaçamento, o caminho moderno é o pai flex ou grid com
+<code>gap-4</code> e os filhos dividindo o resto com <code>flex-1</code> ou
+<code>grid-cols-2</code>. Fração é ótima para uma peça só dentro de um pai conhecido; para dividir
+uma linha inteira, flex e grid fazem melhor.</p>
+
+<h2>4. 100% de quê? O padding do pai entra na conta</h2>
+
+<p>Porcentagem é sempre porcentagem do <strong>conteúdo</strong> do pai, não da caixa inteira. Se o
+pai tem 400 px de largura e 24 px de padding de cada lado, o conteúdo dele tem 352 px — e
+<code>w-1/2</code> do filho são 176 px, não 200. O padding do filho, por sua vez, não entra nessa
+conta: ele sai de dentro dos 176 px.</p>
+
+<p>É por isso que <code>w-full</code> às vezes parece "passar da borda". Se o pai não tem padding e o
+filho tem <code>w-full</code> mais <code>px-6</code>, o filho continua com 100% do pai — o padding
+cabe dentro. Agora, se você somar uma largura fixa com padding, aí sim estoura: <code>w-96</code> com
+<code>px-6</code> ocupa 384 px de largura total, e o texto fica com 336 px. Como o Tailwind liga
+<code>border-box</code> em tudo, o padding nunca aumenta a largura total — ele só aperta o conteúdo.</p>
+
+<p>Uma frase para guardar: <strong>porcentagem olha para fora, padding olha para dentro</strong>. A
+largura percentual é calculada a partir do espaço que o pai oferece; o padding consome parte desse
+espaço, por dentro. Entender essa direção resolve a maior parte dos "por que a conta não bate".</p>
+
+<p>Vale notar uma assimetria entre os dois eixos, que explica muita confusão. Largura percentual
+funciona em quase qualquer situação, porque o pai sempre tem uma largura — ele herda a do avô, que
+herda a da página, que vem da janela. Altura percentual não tem essa corrente automática: a altura de
+um bloco nasce do conteúdo, e um pai sem altura declarada não oferece base nenhuma. É por isso que
+<code>w-full</code> quase nunca decepciona e <code>h-full</code> quase sempre pede uma explicação.</p>
+
+<h2>5. w-fit: o tamanho que abraça o conteúdo</h2>
+
+<p>Alguns elementos não têm tamanho próprio: eles esticam porque são blocos. Um selo "novo" num
+<code>div</code> vai ocupar a largura toda, mesmo tendo quatro letras. Para pedir "só o necessário
+para o texto", existe <code>w-fit</code> — também chamado de <em>fit-content</em>.</p>
+
+<div class="trytailwind" data-goal="rule:width: fit-content">
+  <p class="try-task">O selo "Novo" está esticando até a borda da faixa. Faça ele abraçar o próprio
+  texto com <code>w-fit</code>.</p>
+  <pre class="html">&lt;div class="bg-amber-100 p-4"&gt;
+  &lt;div id="alvo" class="bg-amber-400 px-3 py-1"&gt;Novo&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.828 0.189 84.429)
+padding-inline: 12px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;div class="bg-amber-100 p-4"&gt;
+  &lt;div id="alvo" class="w-fit bg-amber-400 px-3 py-1"&gt;Novo&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel passa a mostrar uma largura pequena, em pixels: o texto mais o padding de 12 px de cada
+lado. Repare que o padding continua contando — <code>w-fit</code> abraça o conteúdo <em>e</em> o
+padding, porque os dois fazem parte da caixa. É por isso que o selo não fica do tamanho exato das
+letras: fica do tamanho das letras mais o respiro que você pediu.</p>
+
+<p>Três variações úteis da mesma ideia: <code>w-max</code> usa a largura do maior pedaço de conteúdo
+sem quebrar linha; <code>w-min</code> usa a menor largura possível, quebrando em várias linhas; e
+<code>w-auto</code> volta ao padrão do elemento. Na prática, <code>w-fit</code> é o que você usa em
+selos e botões, e <code>w-max</code> aparece em menus que não devem quebrar o texto em duas linhas.</p>
+
+<h2>6. h-full: a cadeia de alturas</h2>
+
+<p>Agora o pedido mais teimoso: a coluna branca deve ter a altura da faixa âmbar. O caminho natural é
+<code>h-full</code>, que quer dizer 100% da altura do pai. Mas existe uma condição: o pai precisa ter
+altura definida. Se o pai tem <code>h-40</code>, existe um número para tirar 100%; se o pai tem
+altura automática (a do conteúdo), <code>100%</code> de nada é nada, e a classe não faz efeito.</p>
+
+<div class="trytailwind" data-goal="rule:height: 100%">
+  <p class="try-task">A faixa âmbar tem 160 px de altura, mas a coluna branca tem só a altura do
+  texto. Dê a ela <code>h-full</code> para ocupar a faixa inteira.</p>
+  <pre class="html">&lt;div class="h-40 bg-amber-100 p-2"&gt;
+  &lt;div id="alvo" class="bg-white p-2"&gt;Forno a lenha&lt;/div&gt;
+  &lt;div class="bg-white p-2"&gt;Massa madre&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;div class="h-40 bg-amber-100 p-2"&gt;
+  &lt;div id="alvo" class="h-full bg-white p-2"&gt;Forno a lenha&lt;/div&gt;
+  &lt;div class="bg-white p-2"&gt;Massa madre&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Essa é a caixa que ensina pelo contrário: rode a solução e o painel mostra 144 px de altura — os
+160 px da faixa, menos os 8 px de padding de cima e de baixo. Agora apague o <code>h-40</code> do pai
+e rode de novo: o painel cai para a altura do texto, algo em torno de 40 px. A classe
+<code>h-full</code> continua no HTML nas duas situações; o que muda é a base do cálculo. É a
+demonstração mais direta de que a conferência boa é no desenho, não na lista de classes.</p>
+
+<p>A cadeia pode ter vários níveis: para um filho ter <code>h-full</code>, o pai precisa de altura; se
+esse pai também usa <code>h-full</code>, o avô precisa de altura, e assim por diante até alguém com
+um valor de verdade (<code>h-40</code>, <code>h-screen</code> ou uma altura definida no CSS). Quando
+o <code>h-full</code> não pega, suba a escada do HTML até achar o primeiro elemento sem altura — é
+ali que a corrente está quebrada.</p>
+
+<p>Um detalhe que confunde: um elemento com <code>h-full</code> e irmãos na mesma faixa fica com 100%
+da altura do pai e pode empurrar os outros para fora, criando rolagem. Se a intenção é "ocupar o que
+sobrar, sem passar", o caminho é flex com <code>h-40</code> no pai e <code>flex-1</code> nos filhos —
+mas isso é assunto da aula de <a href="flexbox.html">flexbox</a>.</p>
+
+<h2>7. A janela: screen, dvh e dvw</h2>
+
+<p>Quando a referência é a janela do navegador, as classes trocam o <code>%</code> pela unidade
+<code>vh</code> (altura da janela) e <code>vw</code> (largura da janela). <code>h-screen</code> é
+100vh, <code>min-h-screen</code> é "pelo menos a tela inteira", <code>w-screen</code> é 100vw. São as
+classes das capas de página inteira e das seções que precisam preencher a tela.</p>
+
+<pre class="term">.h-full {
+  height: 100%;
+}
+.h-screen {
+  height: 100vh;
+}
+.h-dvh {
+  height: 100dvh;
+}</pre>
+
+<p>Existe um motivo para haver três versões quase iguais. O <code>vh</code> antigo mede a janela como
+se as barras do navegador não existissem; no celular, quando a barra de endereço aparece e some
+durante a rolagem, a conta muda e o conteúdo "pula". O <code>dvh</code> (de <em>dynamic viewport
+height</em>) usa a altura visível de verdade, que se ajusta à barra. Para capas de página inteira no
+celular, <code>min-h-dvh</code> é a escolha mais moderna e mais estável.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Referência</th><th>Equivale a</th><th>Cuidado</th></tr>
+<tr><td><code>w-full</code></td><td>largura do conteúdo do pai</td><td>100%</td><td>não é a largura da tela</td></tr>
+<tr><td><code>w-1/2</code></td><td>largura do conteúdo do pai</td><td>50%</td><td>duas metades colam sem gap</td></tr>
+<tr><td><code>w-fit</code></td><td>o próprio conteúdo</td><td>fit-content</td><td>inclui o padding</td></tr>
+<tr><td><code>w-screen</code></td><td>a janela</td><td>100vw</td><td>pode incluir a barra de rolagem e gerar rolagem lateral</td></tr>
+<tr><td><code>h-screen</code></td><td>a janela</td><td>100vh</td><td>no celular, ignora a barra que aparece e some</td></tr>
+<tr><td><code>min-h-dvh</code></td><td>a janela visível</td><td>100dvh</td><td>o mais estável para capa de tela cheia</td></tr>
+<tr><td><code>h-full</code></td><td>altura do pai</td><td>100%</td><td>só funciona se o pai tiver altura</td></tr>
+</table>
+</div>
+
+<p>Sobre o <code>w-screen</code>, vale um aviso que o guia repete porque dói: 100vw inclui a largura da
+barra de rolagem. Numa página que rola na vertical, isso pode criar alguns pixels de rolagem
+horizontal — o suficiente para o layout "tremer" no celular. Quando a intenção é ocupar a largura
+toda, <code>w-full</code> quase sempre resolve sem esse efeito colateral.</p>
+
+<h2>8. Fração ou degrau?</h2>
+
+<p>Com duas famílias de tamanho na mão, a decisão fica mais fácil do que parece. Degrau fixo
+(<code>w-24</code>, <code>h-12</code>) é para peças cujo tamanho é uma decisão de desenho: logo,
+avatar, ícone, botão. Relativo (<code>w-1/2</code>, <code>w-full</code>, <code>h-full</code>) é para
+peças cujo tamanho é consequência do lugar: colunas, fichas, imagens de capa, faixas.</p>
+
+<p>Há um teste simples: se você consegue dizer o tamanho em pixels sem olhar a tela, use degrau; se
+precisa saber o tamanho do pai para responder, use relativo. E há o caso em que os dois se combinam
+melhor do que qualquer um sozinho: <code>w-full max-w-md</code> — acompanha a tela até um limite
+confortável de leitura. Essa dupla aparece em formulário, artigo e qualquer coisa com texto longo.</p>
+
+<p>Existe ainda um atalho que junta os dois eixos: <code>size-full</code>, que é
+<code>width: 100%</code> e <code>height: 100%</code> numa classe só. Ele é útil para um elemento que
+deve preencher o pai inteiro, como uma camada de sobreposição ou um link que cobre o cartão todo. Mas
+atenção: ele herda a exigência do <code>h-full</code> — se o pai não tem altura, metade do atalho não
+faz nada. Atalho não cria a base que falta.</p>
+
+<p>O terceiro caso é o das imagens. Uma imagem de capa quer <code>w-full</code> com uma altura fixa
+(<code>h-48</code>) e <code>object-cover</code> para não distorcer. Uma miniatura quer
+<code>size-16</code>, quadrada e previsível. A mesma página costuma ter os dois, e não há
+incoerência nisso: são papéis diferentes.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: as duas metades que não cabiam</h3>
+<p>A Ana pôs dois cartões com <code>w-1/2</code> dentro de um pai sem flex e sem gap. As duas metades
+somam 100% e ficam coladas — não havia espaço entre elas, e o padding dos cartões comeu o texto. Se
+ela tivesse usado <code>flex gap-4</code> no pai com <code>flex-1</code> nos filhos, o vão sairia do
+espaço disponível automaticamente, sem conta de fração. Para dividir uma linha inteira, flex ganha;
+fração é para uma peça só.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a coluna que crescia com o texto</h3>
+<p>O painel lateral do site tinha <code>h-full</code> e ficava com a altura do próprio conteúdo. O
+motivo era o pai: uma seção sem altura declarada. Trocar por <code>min-h-screen</code> no pai resolveu
+na hora, porque aí existia um número para o 100% usar como base. Antes de mexer na classe do filho,
+vale procurar o primeiro ancestral sem altura — quase sempre é ali que está o problema.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o selo que esticava sozinho</h3>
+<p>Um selo "a partir de R$ 10" aparecia ocupando a largura toda do cartão, com o texto perdido à
+esquerda. A causa é que o selo era um <code>div</code>, que por natureza estica. Com
+<code>w-fit</code> ele passou a abraçar o conteúdo, e o <code>px-3</code> que já estava lá ganhou
+sentido: virou o respiro interno do selo. Esse é o padrão de etiqueta que você vê em todo site de
+comércio.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. <code>w-1/2</code> é metade de quê?</p>
+<label><input type="radio" name="q1"> da largura da tela, sempre</label>
+<label><input type="radio" name="q1"> da largura do conteúdo do pai</label>
+<label><input type="radio" name="q1"> de 500 px fixos</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Um <code>h-full</code> parece não fazer nada. Qual
+é a causa mais provável?</p>
+<label><input type="radio" name="q2"> falta um <code>w-full</code> junto</label>
+<label><input type="radio" name="q2"> a altura em porcentagem só funciona em flex</label>
+<label><input type="radio" name="q2"> o pai não tem altura definida para servir de base</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Qual classe faz o elemento ter só a largura do
+próprio conteúdo?</p>
+<label><input type="radio" name="q3"> <code>w-fit</code></label>
+<label><input type="radio" name="q3"> <code>w-full</code></label>
+<label><input type="radio" name="q3"> <code>w-screen</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a ficha em três colunas</h2>
+<p>A ficha de produto deve ocupar um terço da largura do cartão. Complete a classe:</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="w-1/3" placeholder="..."> bg-white p-2"&gt;Pão de queijo&lt;/div&gt;</div>
+<p class="ex-dica">Dica: a fração é escrita com barra, sem espaços: numerador, barra, denominador. Se
+você escrever <code>w-1-3</code>, não existe e nada acontece. Na dúvida, <code>w-1/2</code> é metade
+e <code>w-1/4</code> é um quarto.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Tamanho relativo sempre se refere a alguém: ao pai (<code>w-full</code>, <code>w-1/2</code>,
+<code>h-full</code>), à janela (<code>w-screen</code>, <code>h-screen</code>, <code>min-h-dvh</code>)
+ou ao próprio conteúdo (<code>w-fit</code>, <code>w-min</code>, <code>w-max</code>). A pergunta
+"relativo a quê?" resolve a escolha da classe; o painel, com o valor em pixels, confirma qual
+referência o navegador usou.</p>
+
+<p>A regra mais valiosa da aula é a da cadeia de alturas: <code>h-full</code> só funciona quando o pai
+tem altura. E a segunda é a convivência com os degraus fixos: peças pequenas em degraus, peças
+grandes em proporção, e as duas coisas juntas quando o assunto é texto
+(<code>w-full max-w-md</code>).</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Relativo a quê? Pai, janela ou conteúdo — cada classe escolhe um.</li>
+<li><code>w-1/2</code> = 50% do pai; as frações prontas vão até <code>w-5/6</code>.</li>
+<li>Porcentagem considera o conteúdo do pai (sem o padding dele); o padding do filho sai de dentro.</li>
+<li><code>w-fit</code> abraça o conteúdo e o padding; <code>w-max</code> evita quebra de linha.</li>
+<li><code>h-full</code> exige pai com altura — senão o 100% não tem base.</li>
+<li><code>h-screen</code> = 100vh; <code>min-h-dvh</code> é mais estável no celular.</li>
+<li><code>w-screen</code> pode incluir a barra de rolagem; prefira <code>w-full</code>.</li>
+<li>Degrau fixo para peças de desenho; proporção para peças de layout.</li>
+<li><code>w-full max-w-md</code> é a dupla certa para texto longo.</li>
+<li>Quando o filho não obedece, procure o ancestral sem altura ou sem largura.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

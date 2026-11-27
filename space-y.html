@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O space-y | Guia Tailwind</title>
+<meta name="description" content="space-y-4 dá espaço entre os filhos de uma lista com uma classe só, sem sobra no topo nem na base: o que o Tailwind gera, onde colocar e quando ele perde para uma margem.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>O <span class="hl">space-y</span></h1>
+<p class="intro">A Ana tem uma lista de preços no site da padaria: três linhas, uma embaixo da
+outra. Ela quer espaço entre elas e não quer reinventar a roda em cada linha. A solução que ela
+aprendeu até aqui é dar margem em cada item — funciona, mas sobra espaço no fim da lista e a
+contabilidade vira chata quando aparece um quarto item. Nesta aula ela conhece o <code>space-y</code>:
+uma classe no pai que espaça todos os filhos entre si, sem tocar em cima nem embaixo. É a primeira
+classe do guia que age nos outros elementos, e é justamente por isso que ela confunde.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O problema que o <code>space-y</code> resolve e por que margem em cada item dá mais trabalho.</li>
+  <li>Como usar <code>space-y-4</code> e o valor de cada degrau da escala.</li>
+  <li>O que significa filhos diretos e por que a classe fica no pai.</li>
+  <li>Por que não sobra espaço acima do primeiro nem abaixo do último item.</li>
+  <li>O CSS que o Tailwind gera e o que é <code>margin-block-end</code>.</li>
+  <li>O primo horizontal, <code>space-x-*</code>, e a diferença para o <code>gap</code>.</li>
+  <li>Quando o <code>space-y</code> perde para uma margem posta no filho.</li>
+  <li>Como desfazer com <code>space-y-0</code> e o que fazer com um item escondido.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a lista de preços colada</h2>
+
+<p>O site da Ana tem um bloco com os preços do dia. O HTML é o mais honesto do mundo: um cartão com
+fundo âmbar, um título e três parágrafos.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="bg-amber-100 p-4"&gt;
+  &lt;p&gt;Pão francês — R$ 0,90&lt;/p&gt;
+  &lt;p&gt;Pão de queijo — R$ 3,50&lt;/p&gt;
+  &lt;p&gt;Café coado — R$ 2,00&lt;/p&gt;
+&lt;/div&gt;</pre>
+
+<p>Na tela, as três linhas aparecem coladas, com a altura de uma linha cada e nenhum ar entre elas.
+É o comportamento padrão: o Tailwind zera a margem dos parágrafos, e o navegador desenha um embaixo
+do outro sem espaço. A leitura fica corrida e o preço de um produto parece pertencer ao anterior.</p>
+
+<p>O reflexo natural, depois das aulas de espaçamento, é pôr <a href="p-e-m.html">margem</a> em
+cada linha: <code>mb-4</code> no primeiro, <code>mb-4</code> no segundo, <code>mb-4</code> no
+terceiro. Funciona.
+Mas repare no que sobra: o último parágrafo também ganha 16 px embaixo, e o cartão fica com um
+respiro extra que ninguém pediu. No dia em que a Ana acrescentar um quarto produto, ela precisa
+lembrar de copiar a classe — e no dia em que tirar o último, precisa limpar.</p>
+
+<p>Esse padrão — "espaço igual entre os itens de uma lista" — é tão comum que o Tailwind deu a ele
+uma classe própria. É o <code>space-y</code>: você diz uma vez, no pai, qual é o espaço entre as
+linhas, e ele cuida de todos os filhos de uma vez, sem sobra nas pontas.</p>
+
+<h2>2. O jeito trabalhoso, item por item</h2>
+
+<p>Vale ver o problema de perto, porque ele explica todas as decisões do <code>space-y</code>. Com
+margem em cada filho, existem três incômodos.</p>
+
+<p>O primeiro é a sobra. Margem no filho não sabe se ele é o primeiro ou o último: ela simplesmente
+existe. Então a lista de três itens fica com espaço entre os itens (bom) e mais um espaço depois do
+último (ruim), que desalinha o bloco em relação ao que vem abaixo.</p>
+
+<p>O segundo é a manutenção. Cada item novo exige lembrar da classe; cada item removido exige
+limpar. Isso parece pouco, mas num site com listas em cinco páginas vira uma fonte constante de
+"por que essa lista está diferente das outras?".</p>
+
+<p>O terceiro é o colapso de margens: se um filho tem <code>mb-4</code> e o de baixo tem
+<code>mt-2</code>, o vão não é 24 px, é 16. Você acaba com um espaçamento irregular no meio de uma
+lista que deveria ser regular — o pior tipo de erro, porque é difícil de ver e fácil de criar.</p>
+
+<p>A saída que o <code>space-y</code> propõe é outra: em vez de perguntar "quanto espaço tem embaixo
+de cada item?", perguntar "quanto espaço tem entre um item e o seguinte?". A resposta é uma só para
+a lista inteira, e é digitada uma vez, no elemento que contém os itens.</p>
+
+<h2>3. space-y-4: uma classe no pai</h2>
+
+<p>A classe é <code>space-y-</code> seguida de um número da escala de sempre: 4 = 16 px, 6 = 24 px,
+8 = 32 px. Ela vai no elemento que <em>contém</em> a lista, nunca nos itens.</p>
+
+<div class="trytailwind" data-goal="css:.linha|margin-bottom=16px;;conta:.linha=3">
+  <p class="try-task">As três linhas de preço estão com <code>space-y-1</code> (4 px), quase coladas.
+  Troque por <code>space-y-4</code> e clique em Rodar: são 16 px entre uma linha e a seguinte.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-100 p-4 space-y-1"&gt;
+  &lt;p class="linha"&gt;Pão francês — R$ 0,90&lt;/p&gt;
+  &lt;p class="linha"&gt;Pão de queijo — R$ 3,50&lt;/p&gt;
+  &lt;p class="linha"&gt;Café coado — R$ 2,00&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-amber-100 p-4 space-y-4"&gt;
+  &lt;p class="linha"&gt;Pão francês — R$ 0,90&lt;/p&gt;
+  &lt;p class="linha"&gt;Pão de queijo — R$ 3,50&lt;/p&gt;
+  &lt;p class="linha"&gt;Café coado — R$ 2,00&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Repare numa coisa curiosa do painel: ele mostra <code>padding: 16px</code> e a cor do fundo —
+as propriedades do cartão — e não as margens que o <code>space-y</code> criou. Isso não é falha: o
+painel descreve o elemento marcado com <code>id="alvo"</code>, e o <code>space-y</code> age nos
+filhos dele. É um bom lembrete de que essa classe trabalha um nível abaixo de onde você a escreve.
+Se você quiser ver o valor por dentro, use a aba <em>Computed</em> do navegador no primeiro
+parágrafo: <code>margin-bottom</code> de 16 px. O último parágrafo, curiosamente, tem zero.</p>
+
+<p>O efeito no desenho, porém, é visível: o cartão fica 24 px mais alto, porque três itens geram
+<strong>dois</strong> vãos — e cada vão passou de 4 para 16 px, ou seja, 12 px a mais em cada um.
+Essa conta é o coração da ideia: o espaço é entre os itens, não em cada item.</p>
+
+<h2>4. O que o Tailwind gera</h2>
+
+<p>O CSS do <code>space-y</code> não é uma propriedade mágica: ele usa margem nos filhos, com um
+seletor que alcança os irmãos. Com <code>space-y-4</code>, o Tailwind gera isto:</p>
+
+<pre class="term">:where(.space-y-4 > :not(:last-child)) {
+  --tw-space-y-reverse: 0;
+  margin-block-start: calc(calc(var(--spacing) * 4) * var(--tw-space-y-reverse));
+  margin-block-end: calc(calc(var(--spacing) * 4) * calc(1 - var(--tw-space-y-reverse)));
+}</pre>
+
+<p>Vale ler linha por linha, porque é a primeira vez que aparece um seletor com filhos no guia. O
+<code>&gt;</code> significa "filho direto": só vale para quem está dentro do elemento com
+<code>space-y-4</code>, um nível abaixo. O <code>:not(:last-child)</code> significa "todos menos o
+último". Juntas, as duas partes dizem: cada filho direto que não seja o último recebe a margem.</p>
+
+<dl class="anatomy">
+<dt>filho direto</dt>
+<dd>Um elemento que está um nível abaixo de outro. No <code>&gt;</code> do seletor, é o único tipo
+de filho que o <code>space-y</code> alcança.</dd>
+<dt>irmão</dt>
+<dd>Um elemento que divide o mesmo pai com outro. É a relação que o <code>space-y</code> organiza:
+espaço entre irmãos, não dentro de um deles.</dd>
+<dt>:not(:last-child)</dt>
+<dd>"Todos menos o último". É a peça que evita a sobra embaixo do último item da lista.</dd>
+<dt>margin-block-end</dt>
+<dd>A margem do fim do eixo vertical — embaixo, em português. É a propriedade que o
+<code>space-y</code> usa de fato.</dd>
+<dt>--tw-space-y-reverse</dt>
+<dd>Uma variável que vale 0 e só serve para inverter o lado do espaço quando você pede. Com ela em
+0, a margem cai embaixo.</dd>
+</dl>
+
+<p>As duas linhas de margem parecem complicadas por causa de <code>--tw-space-y-reverse</code>, uma
+variável que vale 0 e serve para inverter o espaço quando você usa também a classe
+<code>space-y-reverse</code>. Com ela em 0, <code>margin-block-start</code> fica zerada e
+<code>margin-block-end</code> recebe os 16 px. Ou seja: a margem vai embaixo de cada item, menos do
+último. É a versão em CSS do que você faria à mão com <code>mb-4</code> em todos menos um.</p>
+
+<p>Duas consequências práticas caem direto desse seletor. A primeira: <strong>só filhos diretos</strong>
+contam. Se um parágrafo estiver dentro de uma <code>div</code> que está dentro do pai, ele não recebe
+nada, porque para o seletor ele é neto. A segunda: a margem é posta nos filhos, então o espaço entre
+o primeiro item e o topo do cartão continua sendo o padding do cartão — nada a ver com o
+<code>space-y</code>.</p>
+
+<h2>5. Só entre eles: nada no topo, nada na base</h2>
+
+<p>O detalhe que faz o <code>space-y</code> valer a pena é esse: ele não acrescenta espaço nas
+pontas. O primeiro item fica encostado no padding do pai, o último também, e o espaço aparece
+somente na relação entre um e o seguinte. Para quem desenha, é a diferença entre uma lista bem
+alinhada dentro do cartão e uma lista torta, com o último item mais longe da borda do que o primeiro.</p>
+
+<div class="trytailwind" data-goal="css:.aviso|margin-top=0px;;css:.aviso|margin-bottom=24px;;conta:.aviso=3">
+  <p class="try-task">O mural tem três avisos, cada um com <code>mt-2</code>. Troque os três
+  <code>mt-2</code> por um único <code>space-y-6</code> no cartão: 24 px entre os avisos, e nenhum
+  espaço sobrando no topo.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-100 p-4"&gt;
+  &lt;p class="aviso mt-2"&gt;Pão quentinho às 7h&lt;/p&gt;
+  &lt;p class="aviso mt-2"&gt;Bolo de fubá às 9h&lt;/p&gt;
+  &lt;p class="aviso mt-2"&gt;Café passado às 6h30&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-amber-100 p-4 space-y-6"&gt;
+  &lt;p class="aviso"&gt;Pão quentinho às 7h&lt;/p&gt;
+  &lt;p class="aviso"&gt;Bolo de fubá às 9h&lt;/p&gt;
+  &lt;p class="aviso"&gt;Café passado às 6h30&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Compare os dois lados da caixa. Antes, o primeiro aviso tinha 8 px de margem em cima, o que
+empurrava o texto para baixo e deixava o cartão com um ar desequilibrado: muito espaço em cima,
+pouco embaixo. Depois, a margem de cima é zero e a de baixo é 24 px em todos menos no último. O
+resultado é simétrico, e a única diferença visual entre o primeiro item e os outros é que ele está
+no topo.</p>
+
+<p>Note também que o <code>mt-2</code> saiu do HTML. Não é enfeite: se ficasse, ele ganharia do
+<code>space-y</code> (a explicação está na seção 8) e o primeiro item voltaria a ter margem em cima.
+Ao adotar <code>space-y</code>, a margem individual sai de cena — o espaçamento passa a ser uma
+decisão do pai.</p>
+
+<h2>6. Onde colocar a classe</h2>
+
+<p>Este é o erro número um com <code>space-y</code>: colocar a classe no filho em vez do pai. Como a
+classe age nos filhos de quem a carrega, um parágrafo com <code>space-y-4</code> e nenhum filho não
+faz absolutamente nada. E, como sempre, nada avisa.</p>
+
+<div class="trytailwind" data-goal="css:.item|margin-bottom=16px;;conta:.item=3">
+  <p class="try-task">Nada acontece porque o <code>space-y-4</code> está no primeiro item, e não no
+  cartão. Mova a classe para o elemento que contém os três itens.</p>
+  <pre class="html">&lt;div class="bg-amber-100 p-4"&gt;
+  &lt;p class="item space-y-4"&gt;Pão francês — R$ 0,90&lt;/p&gt;
+  &lt;p class="item"&gt;Pão de queijo — R$ 3,50&lt;/p&gt;
+  &lt;p class="item"&gt;Café coado — R$ 2,00&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div class="bg-amber-100 p-4 space-y-4"&gt;
+  &lt;p class="item"&gt;Pão francês — R$ 0,90&lt;/p&gt;
+  &lt;p class="item"&gt;Pão de queijo — R$ 3,50&lt;/p&gt;
+  &lt;p class="item"&gt;Café coado — R$ 2,00&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A regra prática é uma frase: <strong>a classe vai no elemento que embrulha a lista</strong>. Se
+você olhar o HTML e não conseguir dizer quem são os filhos, é sinal de que o <code>space-y</code>
+está no lugar errado.</p>
+
+<p>Há um caso parecido que engana: o pai tem um título e os itens, todos filhos diretos. Aí o
+<code>space-y</code> espaça o título em relação ao primeiro item também — o que muitas vezes é
+exatamente o que se quer, mas vale saber. Se o título precisa de outro valor, o caminho é separar
+em grupos: um bloco para o título e outro para os itens, cada um com o seu <code>space-y</code>.</p>
+
+<h2>7. A escala, os primos e o gap</h2>
+
+<p><code>space-y</code> usa a escala de espaço, igual a padding e margem: <code>space-y-1</code> são
+4 px, <code>space-y-2</code> são 8, <code>space-y-3</code> são 12, <code>space-y-4</code> são 16,
+<code>space-y-6</code> são 24, <code>space-y-8</code> são 32. Existe até <code>space-y-px</code>,
+de 1 px, para a linha fina entre duas seções.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Espaço entre os itens</th><th>Onde costuma servir</th></tr>
+<tr><td><code>space-y-1</code></td><td>4 px</td><td>linhas de uma tabela densa, endereço</td></tr>
+<tr><td><code>space-y-2</code></td><td>8 px</td><td>lista de itens curtos, menu</td></tr>
+<tr><td><code>space-y-4</code></td><td>16 px</td><td>o padrão para listas de texto</td></tr>
+<tr><td><code>space-y-6</code></td><td>24 px</td><td>cartões de uma página, seções curtas</td></tr>
+<tr><td><code>space-y-8</code></td><td>32 px</td><td>blocos grandes, grupos de seção</td></tr>
+<tr><td><code>space-y-0</code></td><td>0 px</td><td>desfazer um espaçamento herdado</td></tr>
+</table>
+</div>
+
+<p>O primo horizontal existe e chama-se <code>space-x</code>: ele espaça irmãos lado a lado, usando
+<code>margin-inline-end</code> em vez de <code>margin-block-end</code>. Funciona quando os itens correm
+dentro do texto — ou quando o pai é flex e a direção é linha. O CSS gerado é o mesmo desenho,
+com <code>--tw-space-x-reverse</code> no lugar de <code>--tw-space-y-reverse</code>:</p>
+
+<pre class="term">:where(.space-x-4 > :not(:last-child)) {
+  --tw-space-x-reverse: 0;
+  margin-inline-start: calc(calc(var(--spacing) * 4) * var(--tw-space-x-reverse));
+  margin-inline-end: calc(calc(var(--spacing) * 4) * calc(1 - var(--tw-space-x-reverse)));
+}</pre>
+
+<p>Para listas em fila, porém, existe uma ferramenta melhor quando o pai é flex ou grid: o
+<a href="gap.html"><code>gap</code></a>. Ele é uma propriedade de verdade, que o navegador entende como "espaço entre os
+itens", e por isso funciona em qualquer direção, inclusive quando a lista quebra em duas linhas. O
+<code>space-y</code> tem a vantagem de funcionar sem flex, em blocos comuns —
+justamente o caso da lista de preços da Ana.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Ferramenta</th><th>Onde vai</th><th>Ponto forte</th><th>Cuidado</th></tr>
+<tr><td><code>mb-4</code> em cada item</td><td>nos filhos</td><td>controle total, item por item</td><td>sobra no último e vira manutenção</td></tr>
+<tr><td><code>space-y-4</code></td><td>no pai</td><td>uma classe, sem sobra nas pontas</td><td>só filhos diretos; margem do filho ganha</td></tr>
+<tr><td><code>gap-4</code></td><td>no pai flex/grid</td><td>funciona nas duas direções</td><td>precisa de flex ou grid no pai</td></tr>
+</table>
+</div>
+
+<p>A escolha, na prática: bloco comum com filhos empilhados, <code>space-y</code>. Pai flex ou grid,
+<code>gap</code>. E se um único item precisa de um espaço diferente dos outros, margem nele — que é
+o assunto da próxima seção.</p>
+
+<h2>8. Quando o space-y perde</h2>
+
+<p>O seletor do <code>space-y</code> vem embrulhado em <code>:where()</code>, que tem uma
+particularidade: ele zera a força do seletor. Na prática, isso quer dizer que qualquer classe de
+margem escrita no próprio filho ganha a disputa. Se um item da lista tem <code>mb-8</code> e o pai
+tem <code>space-y-4</code>, o item fica com 32 px embaixo, e não com 16.</p>
+
+<p>Isso é útil quando você quer um item com espaço maior — o último aviso do mural, por exemplo. E é
+uma armadilha quando a margem sobrou de um componente colado. Se o <code>space-y</code> parece "não
+pegar" em um item só, procure uma classe <code>m*</code> nele: é ela que está mandando.</p>
+
+<p>O outro caso em que o <code>space-y</code> não funciona é o dos filhos que não são filhos
+diretos. Uma lista dentro de um item não é alcançada; o seletor olha só um nível abaixo. Se você
+precisa espaçar netos, ponha <code>space-y</code> no elemento intermediário — a classe é por
+container, e containers podem ser aninhados.</p>
+
+<p>Para desfazer um <code>space-y</code> que veio de um componente, a classe existe:
+<code>space-y-0</code>. Ela gera as mesmas regras com valor zero, e os itens voltam a ficar colados
+sem que você precise apagar nada do HTML. É o par do <code>m-0</code> que você viu na aula de padding
+e margin — zerar é uma decisão, não a ausência de decisão.</p>
+
+<p>Vale o mesmo aviso dos filhos inline: um <code>span</code> não aceita margem vertical na
+prática. O
+valor aparece no CSS computado, mas o espaço não aparece na tela. Os itens de uma lista espaçada por
+<code>space-y</code> devem ser elementos de bloco: <code>div</code>, <code>p</code>,
+<code>li</code>, <code>article</code>.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o item escondido que deixou um buraco</h3>
+<p>O mural da padaria tem quatro avisos e um deles aparece só quando há promoção. Quando o aviso
+está escondido com <code>hidden</code>, ele continua sendo filho — e o vão do vizinho acima dele
+continua lá, agora antes do primeiro item visível. A Ana resolveu movendo o <code>space-y</code>
+para um bloco interno que só existe quando há avisos, em vez de deixar o item vazio ocupando
+espaço.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a lista de duas colunas que ficou torta</h3>
+<p>No celular, a lista de preços é uma coluna e <code>space-y-2</code> funciona bem. Em telas
+grandes, ela vira duas colunas com <code>grid</code> — e aí o <code>space-y</code> espaça na
+vertical, mas as colunas ficam coladas de lado. O conserto é trocar por <code>gap-2</code> quando o
+pai é grid: uma propriedade só cuida das duas direções, inclusive quando a última linha tem menos
+itens.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o título que ganhou espaço dobrado</h3>
+<p>O cartão tinha um <code>h3</code> com <code>mb-4</code> e a lista logo abaixo com
+<code>space-y-4</code>. O resultado foi um vão de 16 px entre o título e o primeiro item — correto —
+mas o autor esperava que o <code>space-y</code> cuidasse de tudo e estranhou o espaço "extra". Não é
+extra: a margem do título é independente. Quem quiser um vão diferente entre título e lista usa o
+<code>space-y</code> no grupo errado, ou melhor, deixa o título de fora do bloco espaçado.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Onde vai a classe <code>space-y-4</code>?</p>
+<label><input type="radio" name="q1"> em cada item da lista</label>
+<label><input type="radio" name="q1"> no elemento que contém os itens</label>
+<label><input type="radio" name="q1"> no último item, para fechar a lista</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Uma lista com três itens e <code>space-y-4</code>
+fica com quantos vãos de 16 px?</p>
+<label><input type="radio" name="q2"> três vãos, um por item</label>
+<label><input type="radio" name="q2"> nenhum, porque o space-y só age no pai</label>
+<label><input type="radio" name="q2"> dois vãos, porque o espaço é entre os itens</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Um item da lista tem <code>mb-8</code> e o pai
+tem <code>space-y-4</code>. Com quanto espaço esse item fica embaixo?</p>
+<label><input type="radio" name="q3"> 32 px, porque a margem do filho ganha do space-y</label>
+<label><input type="radio" name="q3"> 48 px, porque as duas se somam</label>
+<label><input type="radio" name="q3"> 16 px, porque o space-y sempre vence</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o menu do rodapé</h2>
+<p>O rodapé do site tem três links empilhados e precisa de 12 px entre eles. Complete a classe que
+vai no container:</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="space-y-3" placeholder="...">"&gt;<br>&lt;a href="#"&gt;Quem somos&lt;/a&gt;<br>&lt;a href="#"&gt;Encomendas&lt;/a&gt;<br>&lt;a href="#"&gt;Onde estamos&lt;/a&gt;<br>&lt;/div&gt;</div>
+<p class="ex-dica">Dica: 12 px é o terceiro degrau (3 × 4). Se você escrever
+<code>space-y-4</code>, os links ficam com 16 px — funciona, mas não é o pedido.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p><code>space-y</code> é uma classe de pai: ela espaça os filhos diretos entre si, colocando margem
+embaixo de todos menos do último. Por isso não sobra espaço nem no topo nem na base, e por isso três
+itens geram dois vãos. O seletor gerado é <code>:where(.space-y-N &gt; :not(:last-child))</code>,
+que alcança apenas um nível abaixo e tem força zero — qualquer margem escrita no filho ganha dele.</p>
+
+<p>Use <code>space-y</code> para listas empilhadas em blocos comuns, <code>gap</code> quando o pai é
+flex ou grid, e margem individual quando um item precisa de um valor diferente. E lembre-se de tirar
+os <code>mt-*</code>/<code>mb-*</code> dos filhos ao adotar <code>space-y</code>: os dois juntos
+disputam o mesmo espaço, e você fica sem saber quem ganhou.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>space-y-4</code> = 16 px entre os filhos; a escala é a de sempre (1=4, 2=8, 3=12, 4=16, 6=24, 8=32).</li>
+<li>A classe vai no pai, nunca no item.</li>
+<li>Só filhos diretos recebem o espaço; netos não.</li>
+<li>Nada é acrescentado acima do primeiro nem abaixo do último.</li>
+<li>Três itens geram dois vãos, não três.</li>
+<li>O CSS usa <code>margin-block-end</code> em <code>:not(:last-child)</code>, com <code>--tw-space-y-reverse</code>.</li>
+<li><code>space-x-*</code> é o primo horizontal, com <code>margin-inline-end</code>.</li>
+<li>Uma margem no filho ganha do <code>space-y</code> (o seletor é <code>:where</code>, força zero).</li>
+<li><code>gap</code> é melhor quando o pai é flex ou grid: cobre as duas direções.</li>
+<li>Filhos precisam ser de bloco; <code>span</code> inline ignora margem vertical.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

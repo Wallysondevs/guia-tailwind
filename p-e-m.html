@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Padding e Margin | Guia Tailwind</title>
+<meta name="description" content="Padding é o espaço por dentro da caixa e margin é o espaço por fora: como escolher entre p-4 e m-4, o que cada um empurra e por que duas margens viram uma só.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Padding e <span class="hl">Margin</span></h1>
+<p class="intro">A Ana colou o cartão do pão na parede da página e o preço da coxinha no preço do bolo. Duas
+reclamações parecidas, dois problemas diferentes: um é o texto encostando na borda da própria
+caixa, o outro é uma caixa encostando na de baixo. Nesta aula ela aprende que existem duas
+distâncias — a de dentro (<code>padding</code>) e a de fora (<code>margin</code>) — que quase
+sempre são confundidas, e que a diferença aparece na hora em que você pinta o fundo da caixa.
+Não tem mistério: são duas abreviações e uma regra de ouro para nunca mais errar qual usar.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é <code>padding</code> (espaço por dentro) e o que muda quando você usa.</li>
+  <li>O que é <code>margin</code> (espaço por fora) e quem ela empurra.</li>
+  <li>Como o fundo colorido revela a diferença entre as duas num piscar de olhos.</li>
+  <li>A anatomia da caixa: conteúdo, padding, borda e margem.</li>
+  <li>A escala <code>p-*</code> e <code>m-*</code>: de 1 a 8, e o que cada degrau vale.</li>
+  <li>Quando o colapso de margens transforma 24 + 16 em 24.</li>
+  <li>Por que o padding aumenta a área de clique de um botão e a margem não.</li>
+  <li>Como zerar espaçamento com <code>p-0</code> e <code>m-0</code>.</li>
+</ul>
+</div>
+
+<h2>1. A cena: dois problemas que parecem um só</h2>
+
+<p>A Ana montou o cartão de destaque da padaria com três linhas: o nome do pão, o preço e uma
+frase curta. O HTML que ela escreveu foi este:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="cartao"&gt;Pão de fermentação natural — R$ 18,00&lt;/div&gt;
+&lt;div class="cartao"&gt;Coxinha de frango — R$ 7,00&lt;/div&gt;</pre>
+
+<p>Na tela, apareceu uma faixa de texto atrás da outra, sem respiro nenhum: as letras encostam na
+borda invisível da caixa e a segunda caixa encosta na primeira. A Ana olhou aquilo e pensou "falta
+espaço". Certo — mas falta espaço <em>em dois lugares diferentes</em>, e o remédio de um não serve
+para o outro.</p>
+
+<p>A primeira distância é a que separa o texto da borda da própria caixa. Chama-se
+<strong>padding</strong>. A segunda é a que separa uma caixa da caixa vizinha. Chama-se
+<strong>margin</strong>. Em português, dá para pensar assim: padding é o forro da moldura, margin é
+a distância entre dois quadros pendurados na mesma parede. Você não pendura o quadro mais longe da
+moldura para ele respirar por dentro — e não engorda a moldura para afastar dois quadros.</p>
+
+<p>Por que tanta gente troca as duas? Porque, com o fundo transparente, elas parecem iguais: em
+ambos os casos o texto fica mais longe de alguma coisa. O fundo colorido é o que denuncia a
+diferença. Quando você pinta a caixa, o padding fica pintado junto (ele está dentro) e a margem
+continua do lado de fora, mostrando a cor do que estiver atrás.</p>
+
+<h2>2. Dentro e fora: a diferença em uma frase</h2>
+
+<p>Guarde esta frase, porque ela resolve 90% das dúvidas: <strong>padding fica dentro do fundo,
+margin fica fora dele</strong>. Todo o resto — colapso, área de clique, largura, alinhamento —
+decorre disso.</p>
+
+<p>Um jeito prático de descobrir qual dos dois você quer: pergunte "se eu pintar esta caixa de
+amarelo, a área que eu quero colorir é esta?". Se a resposta for sim, é padding. Se você quer
+apenas que a caixa fique mais longe das vizinhas, sem pintar nada novo, é margin. A pergunta do
+fundo resolve a dúvida mais rápido do que qualquer definição.</p>
+
+<p>Há uma consequência importante, que aparece em todo site: o padding participa da caixa, então
+ele conta na hora de medir a largura. Com o <code>box-sizing: border-box</code> que o Tailwind já
+deixa ligado, uma caixa de 300 px com 24 px de padding por lado continua com 300 px de largura
+total — o texto é que fica com 252 px. A margem não entra nessa conta: ela é espaço extra, somado
+por fora, que empurra o que vem depois.</p>
+
+<p>E há outra: o padding aceita clique. Num botão, aumentar o padding aumenta a área que responde
+ao mouse e ao dedo. A margem não responde a clique nenhum; ela é vazio puro. Se um botão está
+difícil de acertar no celular, o ajuste é de padding.</p>
+
+<h2>3. Padding: o respiro que leva o fundo junto</h2>
+
+<p>Vamos ao cartão. A classe de padding é a letra <code>p</code> seguida de um número da escala.
+<code>p-1</code> dá 4 px, <code>p-4</code> dá 16 px, <code>p-6</code> dá 24 px. O número não é
+pixel: é um passo da escala de 0,25 rem, aquela mesma que você viu na primeira aula. É por isso que
+as aulas repetem tanto a tabelinha 1 = 4, 2 = 8, 4 = 16 — ela vale para padding, margem, largura,
+altura e gap.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=24px;;rule:padding: calc(var(--spacing) * 6)">
+  <p class="try-task">O cartão do pão está com <code>p-1</code>, só 4 px de respiro. Dê a ele 24 px
+  de espaço por dentro, mantendo o fundo âmbar, e clique em Rodar.</p>
+  <pre class="html">&lt;div id="alvo" class="p-1 bg-amber-100"&gt;Pão de fermentação natural — R$ 18,00&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 4px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-6 bg-amber-100"&gt;Pão de fermentação natural — R$ 18,00&lt;/div&gt;</pre>
+</div>
+
+<p>Repare no painel: ele mostra <code>padding: 24px</code>. E repare no desenho da prévia — o fundo
+âmbar cresceu junto com o espaço. Esse é o sinal de que o espaço é interno. Se você tivesse usado
+margem, o texto também ficaria mais longe da borda, mas o âmbar não cresceria: apareceria um vazio
+branco em volta de um bloco âmbar que continuaria do mesmo tamanho.</p>
+
+<p>O CSS que o Tailwind gera é curto e previsível:</p>
+
+<pre class="term">.p-6 {
+  padding: calc(var(--spacing) * 6);
+}</pre>
+
+<p><code>--spacing</code> vale 0,25 rem, então a conta é 6 × 0,25 = 1,5 rem = 24 px. O Tailwind
+escreve a multiplicação em vez do número final por um motivo prático: se você mudar a escala no
+tema, todas as classes acompanham. Para quem está começando, o que importa é a leitura: o 6 ali é
+o mesmo 6 do <code>p-6</code>, e o resultado é 24 px.</p>
+
+<p>Existe também <code>p-0</code>, que zera o padding. Ele parece inútil — o navegador já começa
+com padding zero — mas serve quando você reaproveita um componente pronto que vinha com respiro e
+quer tirá-lo. Zero é uma decisão, e às vezes é a decisão certa.</p>
+
+<p>O <code>m-0</code> é o gêmeo do lado de fora: zera a margem. Funciona igual, e aparece nas mesmas
+situações — quase sempre para anular uma margem que veio de fora, de um componente colado ou de uma
+classe que você não controla. É a diferença entre "não tem margem" e "a margem foi decididamente
+zerada", e o CSS registra as duas coisas de formas diferentes.</p>
+
+<h2>4. Margin: o espaço que empurra os vizinhos</h2>
+
+<p>A margem usa a mesma escala, com a letra <code>m</code>: <code>m-4</code> são 16 px,
+<code>m-8</code> são 32 px. A diferença é onde esses pixels aparecem: do lado de fora, afastando
+a caixa do que está em volta. Com um fundo colorido no pai, dá para ver o vazio.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|margin=32px;;rule:margin: calc(var(--spacing) * 8)">
+  <p class="try-task">O cartão branco está com <code>m-1</code>. Afaste-o da borda âmbar usando
+  <code>m-8</code> (32 px) e clique em Rodar. Observe que o cartão NÃO muda de tamanho.</p>
+  <pre class="html">&lt;div class="bg-amber-100 p-2"&gt;
+  &lt;div id="alvo" class="m-1 bg-white p-4"&gt;Cartão do dia&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+margin: 4px
+padding: 16px
+background-color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;div class="bg-amber-100 p-2"&gt;
+  &lt;div id="alvo" class="m-8 bg-white p-4"&gt;Cartão do dia&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>margin: 32px</code> e o cartão branco continua do mesmo tamanho, só que
+mais longe das bordas. Se você trocasse o <code>m-8</code> por <code>p-8</code> no cartão branco, o
+resultado visual seria parecido — mas o branco cresceria, e o âmbar apareceria só nos 8 px do
+padding do pai. Essa é a prova dos nove do fundo: mudou o tamanho do bloco colorido, era padding;
+mudou só a distância, era margem.</p>
+
+<p>A margem tem um comportamento que o padding não tem e que assusta no começo: <strong>margens
+vizinhas se fundem</strong>. Dois blocos, um com 24 px embaixo e outro com 16 px em cima, ficam a
+24 px um do outro — e não a 40. O navegador pega a maior das duas. Padding nunca faz isso: dois
+paddings de 24 e 16 somam 40 px de espaço entre os textos, porque cada um está dentro da sua caixa.
+A gente volta a esse assunto na seção 7, porque é ali que nasce a maioria dos "por que esse espaço
+não muda?".</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor</th><th>O que ela afeta</th></tr>
+<tr><td><code>p-1</code> / <code>m-1</code></td><td>4 px</td><td>padding por dentro / margem por fora</td></tr>
+<tr><td><code>p-2</code> / <code>m-2</code></td><td>8 px</td><td>etiqueta pequena, respiro mínimo</td></tr>
+<tr><td><code>p-3</code> / <code>m-3</code></td><td>12 px</td><td>campo compacto, aviso curto</td></tr>
+<tr><td><code>p-4</code> / <code>m-4</code></td><td>16 px</td><td>o padrão de cartão e de bloco</td></tr>
+<tr><td><code>p-6</code> / <code>m-6</code></td><td>24 px</td><td>cartão grande, seção interna</td></tr>
+<tr><td><code>p-8</code> / <code>m-8</code></td><td>32 px</td><td>área de destaque, capa</td></tr>
+</table>
+</div>
+
+<p>As duas letras aceitam os mesmos números porque vêm da mesma escala. Isso é conveniente: quando
+você aprende que 4 = 16 px, aprendeu para padding, margem, largura, altura e gap de uma vez. A
+escala vai de 0 a 96, o que dá 384 px no último degrau — muito mais do que qualquer espaçamento
+razoável. Use meia dúzia de degraus e o desenho fica coerente.</p>
+
+<h2>5. A caixa por dentro</h2>
+
+<p>Para não errar mais, vale conhecer o desenho que o navegador usa para toda tag. Ele tem quatro
+camadas, sempre na mesma ordem, de dentro para fora:</p>
+
+<dl class="anatomy">
+<dt>conteúdo</dt>
+<dd>O texto, a imagem ou os elementos filhos. É a parte que não dá para colorir de outra cor: ela
+é o que a caixa guarda.</dd>
+<dt>padding</dt>
+<dd>A camada de espaço entre o conteúdo e a borda. Recebe a cor do fundo da caixa e responde a
+clique. É o forro da moldura.</dd>
+<dt>borda</dt>
+<dd>A linha que fecha a caixa. Fica entre o padding e a margem; tem cor e espessura próprias (o
+assunto da aula de bordas).</dd>
+<dt>margin</dt>
+<dd>O espaço externo, sempre transparente. Não recebe fundo, não recebe clique, e serve para
+afastar esta caixa das outras.</dd>
+<dt>box-sizing</dt>
+<dd>A regra que decide se a largura declarada inclui padding e borda. O Tailwind liga
+<code>border-box</code> em tudo: largura é largura total.</dd>
+</dl>
+
+<p>Com esse desenho na cabeça, o resto vira leitura. Fundo colorido e espaço aparecendo juntos?
+Padding. Fundo intacto e um vazio em volta? Margem. Borda colada no texto? Falta padding. Duas
+caixas grudadas? Falta margem (ou gap, numa lista — assunto da aula de <a href="space-y.html">space-y</a>).</p>
+
+<p>O <code>box-sizing</code> merece uma frase extra, porque é a origem de um susto clássico. Antes,
+a largura de uma caixa contava só o conteúdo: 300 px + 24 px de padding de cada lado davam 348 px
+na tela, e o layout estourava. Com <code>border-box</code>, os 300 px são o total e o padding sai
+de dentro. É por isso que, no Tailwind, aumentar o padding de um cartão não faz ele ficar mais largo
+— faz o texto ficar mais estreito.</p>
+
+<h2>6. Quando é padding e quando é margin</h2>
+
+<p>Na prática, a escolha segue três perguntas. A primeira é a do fundo: quero que a cor cubra esse
+espaço? Se sim, padding. A segunda é a do clique: quero que esse espaço responda ao mouse? Se sim,
+padding. A terceira é a da companhia: esse espaço pertence à caixa ou à relação entre as caixas?
+Se pertence à relação, é margem.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Situação</th><th>Escolha</th><th>Por quê</th></tr>
+<tr><td>Texto encostando na borda do cartão</td><td><code>p-4</code></td><td>o respiro é dentro do fundo</td></tr>
+<tr><td>Botão pequeno demais para o dedo</td><td><code>px-4 py-2</code></td><td>padding aumenta a área de clique</td></tr>
+<tr><td>Dois cartões colados um no outro</td><td><code>mb-4</code> no de cima</td><td>a distância é entre caixas</td></tr>
+<tr><td>Seção colada na barra do topo</td><td><code>mt-8</code></td><td>afasta blocos, sem pintar nada</td></tr>
+<tr><td>Texto encostando na lateral da tela</td><td><code>px-6</code> no pai</td><td>o respiro lateral é interno</td></tr>
+<tr><td>Lista com espaçamento igual entre linhas</td><td><code>space-y-4</code></td><td>uma classe no pai, sem sobra nas pontas</td></tr>
+</table>
+</div>
+
+<p>Uma armadilha comum: usar margem para "dar respiro" a um cartão que tem fundo colorido. A Ana
+fez isso na primeira versão do site e o resultado foi uma moldura âmbar com o texto encostado na
+borda — porque ela afastou o cartão dos vizinhos sem afastar o texto da borda. São dois espaços
+independentes, e é normal precisar dos dois ao mesmo tempo: <code>p-4</code> para o texto respirar
+por dentro e <code>mb-4</code> para o cartão não encostar no próximo.</p>
+
+<p>E quando você precisa dos dois, não existe atalho que una tudo: são duas classes, cada uma
+cuidando de uma propriedade. O Tailwind é explícito assim de propósito. Um catálogo de "cartão com
+respiro e distância" daria menos digitação e muito mais dor de cabeça na hora de ajustar um caso
+diferente.</p>
+
+<h2>7. O colapso de margens: quando 24 + 16 = 24</h2>
+
+<p>Agora o comportamento que mais confunde. Duas caixas empilhadas, a de cima com 24 px de margem
+embaixo e a de baixo com 16 px de margem em cima. Você espera 40 px de distância. O navegador
+entrega 24. Isso não é bug: as margens verticais <em>se fundem</em>, e vale a maior.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="mb-6 bg-white p-4"&gt;Pão do dia&lt;/div&gt;
+&lt;div class="mt-4 bg-white p-4"&gt;Bolo do dia&lt;/div&gt;</pre>
+
+<pre class="term">.mb-6 {
+  margin-bottom: calc(var(--spacing) * 6);
+}
+.mt-4 {
+  margin-top: calc(var(--spacing) * 4);
+}</pre>
+
+<p>Com esse HTML, o vazio entre os dois blocos tem 24 px, não 40. Repare que o CSS gerado é
+inocente: ele só declara 24 px embaixo de um e 16 px em cima do outro. Quem decide fundir as duas é
+o navegador, na hora de desenhar — e ele fica com a maior. O mesmo acontece entre o pai e o
+primeiro filho: se o pai não tem padding nem borda, o <code>mt-6</code> do primeiro filho "vaza"
+para fora e empurra o pai inteiro. É a causa número um do "coloquei margem e o espaço apareceu no
+lugar errado".</p>
+
+<p>Existem três saídas, e as três são honestas. A primeira é usar só um lado da margem: em listas,
+escolher sempre <code>mb-*</code> (embaixo) e nunca <code>mt-*</code> elimina a fusão, porque só
+uma das caixas tem margem. A segunda é pôr padding no pai, que cria uma barreira e impede o vazamento.
+A terceira é não usar margem entre irmãos: <code>space-y-*</code> ou <code>gap</code> resolvem o
+espaçamento de lista sem essa contabilidade.</p>
+
+<p>Padding não colapsa nunca. É uma das razões de ele ser mais previsível: dois paddings de 24 e
+16 somam 40 px de espaço entre os textos, porque cada um está preso dentro da sua caixa, sem
+contato com o vizinho. Previsibilidade, aqui, vale mais do que economia de classes.</p>
+
+<h2>8. Os dois no mesmo elemento</h2>
+
+<p>Nada impede — e é comum — usar padding e margem na mesma tag. O botão de encomenda da padaria
+é o exemplo perfeito: precisa de espaço por dentro para o dedo acertar e de espaço por fora para não
+encostar na frase de cima.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=16px;;css:#alvo|margin-bottom=24px;;rule:padding: calc(var(--spacing) * 4)">
+  <p class="try-task">Deixe o aviso com 16 px de respiro por dentro e 24 px de distância até o bloco
+  de baixo. As classes: <code>p-4</code> e <code>mb-6</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="p-1 mb-1 bg-white"&gt;Encomendas até as 18h&lt;/div&gt;
+&lt;div class="bg-amber-100 p-2"&gt;Retirada a partir das 7h&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 4px
+background-color: rgb(255, 255, 255)
+margin-bottom: 4px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4 mb-6 bg-white"&gt;Encomendas até as 18h&lt;/div&gt;
+&lt;div class="bg-amber-100 p-2"&gt;Retirada a partir das 7h&lt;/div&gt;</pre>
+</div>
+
+<p>O painel vai mostrar duas linhas, <code>padding: 16px</code> e <code>margin-bottom: 24px</code>.
+Cada linha corresponde a uma classe, e as duas convivem sem briga porque mexem em propriedades
+diferentes: <code>padding</code> e <code>margin-bottom</code>. É o mesmo princípio da primeira
+aula — uma classe, uma propriedade.</p>
+
+<p>Se você quisesse afastar o aviso de todos os lados, usaria <code>m-4</code> em vez de
+<code>mb-6</code>. E se quisesse só de um lado, existem os atalhos: <code>mt-*</code> em cima,
+<code>mb-*</code> embaixo, <code>ml-*</code> à esquerda, <code>mr-*</code> à direita,
+<code>ms-*</code> e <code>me-*</code> nas bordas de início e fim da linha (que em português
+continuam sendo esquerda e direita). Esses atalhos são o assunto da próxima aula, junto com os
+eixos <a href="px-py.html">px e py</a>.</p>
+
+<p>Um último detalhe que economiza café: o Tailwind já zera a margem padrão de tudo. Aquele
+<code>&lt;p&gt;</code> que vinha com 16 px em cima e embaixo no HTML puro não vem mais. Se você
+comparar com um exemplo antigo de CSS e o espaçamento não bater, é provável que o exemplo esteja
+contando com a margem do navegador que o Tailwind removeu.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o cartão que ficou "gordo" no celular</h3>
+<p>A Ana deu <code>p-8</code> ao cartão de destaque, 32 px de cada lado. No monitor, elegante. No
+celular, a tela tem 375 px, o cartão ocupa quase tudo e sobram 311 px para o texto — cabe pouca
+coisa por linha. A solução não é escolher um número médio que fica ruim nos dois: é usar o prefixo
+de breakpoint, <code>p-4 md:p-8</code>. O respiro acompanha a tela. A lição geral é que padding é
+uma decisão por tamanho de tela, porque ele come largura útil.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: margem que sumiu no primeiro bloco</h3>
+<p>Ela pôs <code>mt-8</code> no título da seção para afastá-lo da barra do topo e nada aconteceu. O
+título era o primeiro filho do bloco de conteúdo, que não tinha padding nem borda: a margem vazou
+para o pai e o navegador a descartou contra a borda da página. A saída foi dar padding no pai
+(<code>pt-8</code>, ou um <code>p-6</code> geral) em vez de margem no filho. Margem no primeiro
+filho é sempre suspeita; padding no pai é sempre previsível.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o botão que não clicava no celular</h3>
+<p>Um botão pequeno, com o texto "Pedir", era difícil de acertar com o dedo. A Ana tentou
+<code>m-4</code> e o botão só se afastou dos vizinhos: continuou do mesmo tamanho. O conserto foi
+<code>px-6 py-3</code>, que deixou o alvo com uns 44 px de altura — o mínimo confortável para o
+dedo. Regra prática: para aumentar a área de toque, padding. Margem só muda de lugar.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O cartão tem fundo âmbar e o texto está encostando
+na borda. Qual classe resolve?</p>
+<label><input type="radio" name="q1"> <code>m-4</code>, porque afasta o texto das bordas</label>
+<label><input type="radio" name="q1"> <code>p-4</code>, porque o espaço fica dentro do fundo</label>
+<label><input type="radio" name="q1"> <code>w-4</code>, porque aumenta a caixa em 16 px</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Duas caixas empilhadas: a de cima tem
+<code>mb-6</code> e a de baixo tem <code>mt-4</code>. Qual é o vão entre elas?</p>
+<label><input type="radio" name="q2"> 40 px, porque as duas margens somam</label>
+<label><input type="radio" name="q2"> 8 px, porque a menor vence</label>
+<label><input type="radio" name="q2"> 24 px, porque as margens se fundem e vale a maior</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O botão precisa ser mais fácil de acertar com o
+dedo. O que muda de fato a área de clique?</p>
+<label><input type="radio" name="q3"> <code>px-6 py-3</code>, que engorda a caixa por dentro</label>
+<label><input type="radio" name="q3"> <code>m-6</code>, que aproxima o botão do dedo</label>
+<label><input type="radio" name="q3"> nada, porque a área de clique é sempre igual</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o cartão da encomenda</h2>
+<p>Deixe o cartão com 24 px de respiro por dentro e com 16 px de distância até o bloco de baixo.
+Preencha as duas classes que faltam:</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="p-6" placeholder="..."> <input aria-label="resposta 2" data-answer="mb-4" placeholder="..."> bg-white"&gt;Encomendas até as 18h&lt;/div&gt;</div>
+<p class="ex-dica">Dica: o respiro interno usa a letra <code>p</code> e o de baixo usa <code>mb</code>.
+24 px é o sexto degrau (6 × 4), e 16 px é o quarto. Se você escrever <code>p-4</code>, o cartão
+funciona, mas fica com 16 px por dentro — não é o pedido.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Padding é o espaço por dentro da caixa: ele recebe a cor do fundo, conta na largura total (porque
+o Tailwind liga <code>border-box</code>) e responde a clique. Margin é o espaço por fora: transparente,
+não clicável, e serve para afastar caixas. As duas usam a mesma escala de 0,25 rem, então
+<code>p-4</code> e <code>m-4</code> valem 16 px cada uma — a diferença é onde esses 16 px aparecem.</p>
+
+<p>A pergunta que resolve a dúvida é "eu quero que o fundo cubra esse espaço?". Se sim, padding. A
+segunda pergunta é "esse espaço pertence à caixa ou à relação entre as caixas?". Se pertence à
+relação, margem. E lembre-se do comportamento que não aparece em nenhum outro lugar: margens
+verticais vizinhas se fundem, e vale a maior; padding nunca colapsa. Se o espaço não muda como você
+esperava, olhe a margem do primeiro filho — é a causa mais comum.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>p</code> é padding, o espaço por dentro; <code>m</code> é margin, o espaço por fora.</li>
+<li>O fundo colorido é o teste: ele cobre o padding e não cobre a margem.</li>
+<li>Escala: 1=4, 2=8, 3=12, 4=16, 6=24, 8=32 px.</li>
+<li>Padding responde a clique; margem não responde a nada.</li>
+<li>Com <code>border-box</code>, padding sai de dentro da largura declarada.</li>
+<li>Margens verticais se fundem: 24 + 16 viram 24, não 40.</li>
+<li>Margem do primeiro filho vaza para o pai; padding no pai é mais previsível.</li>
+<li>Escolha um lado só (normalmente <code>mb</code>) para não brigar com o colapso.</li>
+<li>Uma propriedade, uma classe: <code>p-4 mb-6</code> convivem sem briga.</li>
+<li>O Tailwind já zera as margens padrão do navegador — não conte com elas.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

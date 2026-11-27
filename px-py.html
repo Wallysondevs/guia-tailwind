@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Os Eixos px e py | Guia Tailwind</title>
+<meta name="description" content="px e py separam o espaço horizontal do vertical: como montar um botão com px-4 py-2, o que cada eixo faz, quem vence quando dois atalhos se encontram e o que é ps e pe.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Os Eixos <span class="hl">px</span> e <span class="hl">py</span></h1>
+<p class="intro">A Ana achou o botão de encomenda feio: o texto quase toca as laterais, mas sobra
+espaço em cima. Ela tentou aumentar o <code>p-2</code> para <code>p-6</code> e o botão ficou enorme
+— resolveu a lateral e estragou a altura. O problema é que <code>p-*</code> mexe nos quatro lados
+ao mesmo tempo, e quase nunca é isso que a gente quer. Nesta aula a Ana descobre que o respiro tem
+dois eixos: <code>px</code> cuida das laterais, <code>py</code> cuida do topo e da base, e os dois
+se combinam sem brigar.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que existem dois eixos: o inline (as laterais) e o block (cima e baixo).</li>
+  <li>O que <code>px-6</code> e <code>py-2</code> fazem, um de cada vez.</li>
+  <li>O botão clássico <code>px-4 py-2</code> e por que ele é o padrão de mercado.</li>
+  <li>Os atalhos de um lado só: <code>pt</code>, <code>pr</code>, <code>pb</code>, <code>pl</code>.</li>
+  <li>O que são <code>ps</code> e <code>pe</code> e quando eles importam de verdade.</li>
+  <li>Os mesmos eixos na margem: <code>mx</code> e <code>my</code>.</li>
+  <li>Quem vence quando você escreve <code>p-4 px-6</code> no mesmo elemento.</li>
+  <li>Como ler o painel quando ele mostra <code>padding-inline</code> em vez de <code>padding-left</code>.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o botão quadrado demais</h2>
+
+<p>O site da padaria tem um botão no topo da página: "Fazer encomenda". A Ana escreveu assim:</p>
+
+<pre class="file" data-file="index.html">&lt;button class="p-2 bg-amber-400"&gt;Fazer encomenda&lt;/button&gt;</pre>
+
+<p>O resultado é um botão pequeno e apertado. O texto tem 14 letras e encosta nas laterais; em cima
+e embaixo sobram os mesmos 8 px, que parecem pouco para a altura, mas são exatamente o suficiente
+para o dedo errar o alvo no celular. O reflexo é aumentar o número: <code>p-6</code>. Aí o botão
+cresce em tudo — 24 px nas laterais (bom) e 24 px em cima e embaixo (demais), virando um bloco
+desengonçado.</p>
+
+<p>O que ela queria era diferente em cada direção: mais espaço nas laterais, quase nada a mais na
+altura. E é aí que entram as classes de eixo. Em vez de uma classe que mexe nos quatro lados,
+existem duas que dividem o trabalho: <code>px-*</code> para as laterais e <code>py-*</code> para
+cima e baixo. Com <code>px-6 py-2</code>, o botão fica largo e baixo — exatamente o desenho de um
+botão.</p>
+
+<p>Vale entender por que a divisão é essa e não "horizontal/vertical" no sentido leigo, porque o
+Tailwind usa um vocabulário que vai aparecer em toda a documentação: os eixos são
+<strong>inline</strong> e <strong>block</strong>. A gente chega lá na próxima seção, com calma.</p>
+
+<h2>2. Quatro lados, dois eixos</h2>
+
+<p>Toda caixa tem quatro lados, mas eles formam dois pares que se comportam de maneira parecida. O
+par das laterais acompanha a linha de texto: se o texto corre da esquerda para a direita, as laterais
+são esquerda e direita. O par de cima e baixo acompanha o empilhamento das linhas: cada linha nova
+fica abaixo da anterior. O CSS chama o primeiro de <strong>inline</strong> e o segundo de
+<strong>block</strong> — nomes que vêm do jeito como o texto se organiza, e não da tela.</p>
+
+<dl class="anatomy">
+<dt>eixo inline</dt>
+<dd>O sentido em que a frase corre. Em português, da esquerda para a direita. <code>px-*</code> e
+<code>mx-*</code> agem nas duas pontas desse eixo.</dd>
+<dt>eixo block</dt>
+<dd>O sentido em que as linhas descem. <code>py-*</code> e <code>my-*</code> agem no topo e na
+base.</dd>
+<dt>lado inicial</dt>
+<dd>Onde o texto começa. Em português, à esquerda; em árabe, à direita. <code>ps-*</code> age ali.</dd>
+<dt>lado final</dt>
+<dd>Onde o texto termina. Em português, à direita. <code>pe-*</code> age ali.</dd>
+<dt>atalho</dt>
+<dd>Uma classe que cobre dois lados de uma vez, para você não repetir a mesma medida duas vezes.</dd>
+</dl>
+
+<p>Por que isso importa na prática? Porque um site em português e o mesmo site em árabe precisam de
+espaços diferentes nos lados. Se você usar <code>pl-4</code> (padding-left), o respiro fica sempre à
+esquerda, mesmo quando a frase começa à direita. Com <code>ps-4</code> (padding-inline-start), o
+respiro acompanha o começo da escrita. Para o site da Ana, os dois dão no mesmo; mas o Tailwind
+gerou <code>px-4</code> como <code>padding-inline</code> justamente por essa razão, e é isso que
+você vai ver no painel.</p>
+
+<p>Então guarde a tradução: <code>px</code> é padding-inline, as duas laterais. <code>py</code> é
+padding-block, topo e base. Nada de "x de horizontal" decorado sem sentido — x é o eixo em que a
+linha anda, y é o eixo em que as linhas descem. A imagem mental é a de um gráfico.</p>
+
+<h2>3. px: o respiro das laterais</h2>
+
+<p>Vamos ao botão. <code>px-6</code> quer dizer 24 px de padding nas duas laterais e nada em cima
+nem embaixo. Como a escala é a mesma de sempre, o 6 vale 6 × 0,25 rem = 1,5 rem = 24 px.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding-left=24px;;css:#alvo|padding-top=8px;;rule:padding-inline: calc(var(--spacing) * 6)">
+  <p class="try-task">O botão está com <code>px-2 py-2</code>, apertado. Dê 24 px às laterais e
+  mantenha 8 px em cima e embaixo: troque o <code>px-2</code> por <code>px-6</code> e clique em
+  Rodar.</p>
+  <pre class="html">&lt;button id="alvo" class="bg-amber-400 px-2 py-2"&gt;Fazer encomenda&lt;/button&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.828 0.189 84.429)
+padding-inline: 8px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="bg-amber-400 px-6 py-2"&gt;Fazer encomenda&lt;/button&gt;</pre>
+</div>
+
+<p>O painel mostra duas linhas: <code>padding-inline: 24px</code> e <code>padding-block: 8px</code>.
+Essa é a assinatura do <code>px</code>: ele aparece como <code>padding-inline</code>, e não como
+<code>padding-left</code> e <code>padding-right</code>. O valor é o mesmo; a forma de escrever é que
+mudou. Se você abrir a aba <em>Computed</em> do navegador, vai encontrar as duas medidas separadas,
+<code>padding-left: 24px</code> e <code>padding-right: 24px</code>, porque o navegador resolve o
+eixo nas duas pontas.</p>
+
+<pre class="term">.px-6 {
+  padding-inline: calc(var(--spacing) * 6);
+}
+.py-2 {
+  padding-block: calc(var(--spacing) * 2);
+}</pre>
+
+<p>Repare que o CSS não tem "esquerda" nem "direita" em lugar nenhum. Ele fala de inline e block. É
+por isso que a mesma classe funciona num site em árabe: o navegador sabe onde a escrita começa
+naquele idioma e coloca o espaço do lado certo.</p>
+
+<p>O <code>px</code> é a classe que mais aparece em botões e etiquetas, por um motivo simples: é a
+lateral que faz o texto parecer "caber" no botão. Um botão com padding lateral pequeno parece
+apertado mesmo quando tem altura de sobra; um botão com 24 px nas laterais parece confortável mesmo
+sendo baixo.</p>
+
+<h2>4. py: o respiro de cima e de baixo</h2>
+
+<p>Agora a faixa de horário, aquela listra fina que a Ana pôs logo abaixo do nome da padaria.
+Escrita com <code>p-4</code>, ela tem 16 px em todos os lados. Só que o texto é curto e centralizado:
+as 16 px laterais sobram, e as 16 px de altura deixam a faixa com uma cara de "apertada em cima".</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding-top=32px;;css:#alvo|padding-left=16px;;rule:padding-block: calc(var(--spacing) * 8)">
+  <p class="try-task">Deixe a faixa com 16 px nas laterais e 32 px em cima e embaixo: troque o
+  <code>p-4</code> por <code>px-4 py-8</code> e clique em Rodar.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-100 p-4"&gt;Horário: 7h às 19h, de terça a domingo&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-amber-100 px-4 py-8"&gt;Horário: 7h às 19h, de terça a domingo&lt;/div&gt;</pre>
+</div>
+
+<p>O painel confirma: <code>padding-block: 32px</code> e <code>padding-inline: 16px</code>. A faixa
+cresceu na vertical e ficou igual na horizontal. Esse é o gesto mais comum de ajuste fino num site:
+manter a lateral e mexer só na altura, ou o contrário.</p>
+
+<p>O <code>py</code> tem um uso que surpreende quem começa: ele também é o que dá altura a botões e
+etiquetas. Um botão sem <code>py</code> tem a altura só do texto (uns 24 px) e é difícil de acertar
+com o dedo. Com <code>py-2</code>, sobe para 40 px; com <code>py-3</code>, chega a 48 px — acima dos
+44 px que se costuma recomendar como alvo confortável para o toque. Por isso o par <code>px-4 py-2</code> virou
+receita de bolo: ele resolve largura e altura de uma vez, com um número de cada lado.</p>
+
+<p>Cuidado com uma confusão: <code>py</code> não mexe no espaço <em>entre as linhas</em> de um
+parágrafo. Ele dá espaço acima da primeira linha e abaixo da última. Para mudar o espaço entre
+linhas existe outra classe, de entrelinha, que é assunto de outra aula. Se o seu texto de três
+linhas continua com as linhas grudadas, o problema não é <code>py</code>.</p>
+
+<h2>5. A tabela dos atalhos</h2>
+
+<p>Com dois eixos e quatro lados, o Tailwind oferece um atalho para cada combinação. Vale colar esta
+tabela na parede até decorar — ela vale para <code>p</code> (padding) e, trocando a letra por
+<code>m</code>, também para margem:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Lados</th><th>Quando usar</th></tr>
+<tr><td><code>p-4</code></td><td>os quatro</td><td>cartão inteiro, valor igual em tudo</td></tr>
+<tr><td><code>px-4</code></td><td>esquerda e direita</td><td>botões e etiquetas; texto que precisa caber</td></tr>
+<tr><td><code>py-4</code></td><td>topo e base</td><td>faixas, cabeçalhos, altura de botão</td></tr>
+<tr><td><code>pt-8</code></td><td>só o topo</td><td>afastar do menu, começar uma seção com ar</td></tr>
+<tr><td><code>pb-2</code></td><td>só a base</td><td>fechar um bloco sem exagerar embaixo</td></tr>
+<tr><td><code>pl-4</code> / <code>pr-4</code></td><td>esquerda / direita</td><td>ícone colado no texto, espaço pontual</td></tr>
+<tr><td><code>ps-4</code> / <code>pe-4</code></td><td>início / fim da linha</td><td>o mesmo, mas acompanhando o idioma</td></tr>
+</table>
+</div>
+
+<p>Duas observações que economizam tempo. A primeira: não existe <code>p-x-4</code> nem
+<code>pxy-4</code>. O atalho é uma letra de direção colada no número, com hífen só entre a classe e o
+valor. Escrever <code>p-x-4</code> não gera CSS nenhum e o espaço não aparece — sem aviso, como
+sempre. A segunda: os atalhos de um lado só (<code>pt</code>, <code>pb</code>, <code>pl</code>,
+<code>pr</code>) usam nomes físicos, e os que acompanham o idioma são <code>ps</code> e
+<code>pe</code>. Os dois funcionam; a diferença aparece só em site traduzido.</p>
+
+<p>Se você precisa de três lados diferentes, não existe atalho: use duas ou três classes. Por
+exemplo, um cartão com topo maior que a base e laterais médias fica
+<code>px-4 pt-6 pb-4</code>. Não é elegante de ler, mas é explícito — e o CSS gerado é exatamente o
+que você escreveu.</p>
+
+<h2>6. A margem tem os mesmos eixos</h2>
+
+<p>Tudo o que vale para <code>p</code> vale para <code>m</code>, trocando a letra:
+<code>mx-*</code> afasta as laterais, <code>my-*</code> afasta topo e base, <code>mt</code>,
+<code>mb</code>, <code>ml</code>, <code>mr</code>, <code>ms</code> e <code>me</code> fazem o mesmo
+que os equivalentes de padding, só que por fora. É a mesma escala, os mesmos números, o mesmo
+significado de eixo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|margin-top=24px;;css:#alvo|margin-bottom=24px;;rule:margin-block: calc(var(--spacing) * 6)">
+  <p class="try-task">O cartão branco está com <code>my-1</code> e encosta nos vizinhos. Dê 24 px de
+  distância em cima e embaixo — só na vertical: troque por <code>my-6</code> e clique em Rodar.</p>
+  <pre class="html">&lt;div class="bg-amber-100 p-2"&gt;
+  &lt;div id="alvo" class="bg-white p-2 my-1"&gt;Pão do dia&lt;/div&gt;
+  &lt;div class="bg-white p-2"&gt;Bolo do dia&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: rgb(255, 255, 255)
+margin-block: 4px
+</pre>
+  <pre class="solucao">&lt;div class="bg-amber-100 p-2"&gt;
+  &lt;div id="alvo" class="bg-white p-2 my-6"&gt;Pão do dia&lt;/div&gt;
+  &lt;div class="bg-white p-2"&gt;Bolo do dia&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra <code>margin-block: 24px</code>. Repare que o cartão não cresceu: quem cresceu foi
+o vazio em volta. É a diferença entre padding e margem que você viu na <a href="p-e-m.html">aula
+anterior</a>, agora aplicada a um eixo só. E aqui vale aquele aviso: a margem de baixo do primeiro
+cartão e a margem de cima do segundo se fundem, e o vão final é o maior dos dois — 24 px, porque o
+segundo não tem margem em cima.</p>
+
+<pre class="term">.mx-4 {
+  margin-inline: calc(var(--spacing) * 4);
+}
+.my-6 {
+  margin-block: calc(var(--spacing) * 6);
+}</pre>
+
+<p>O mesmo desenho de antes, com a letra trocada: inline para as laterais, block para a altura.
+<code>mx-4</code> é o jeito curto de dizer "afaste 16 px dos dois lados"; <code>mt-8</code> é o jeito
+de dizer "afaste 32 px só de cima". Nos dois casos o vazio é transparente e não responde a clique —
+se o que você quer é pintar a área, o caminho é <code>px</code>/<code>py</code>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Se você escreveu</th><th>O navegador entende</th><th>Quanto vale</th></tr>
+<tr><td><code>px-4</code></td><td><code>padding-inline: 1rem</code></td><td>16 px nas laterais</td></tr>
+<tr><td><code>py-2</code></td><td><code>padding-block: 0.5rem</code></td><td>8 px em cima e embaixo</td></tr>
+<tr><td><code>p-4 px-6</code></td><td><code>padding: 16px 24px</code></td><td>16 px na altura, 24 px na lateral</td></tr>
+<tr><td><code>pt-8 px-4</code></td><td><code>padding-top</code> + <code>padding-inline</code></td><td>32 px em cima, 16 px nas laterais</td></tr>
+<tr><td><code>mx-4</code></td><td><code>margin-inline: 1rem</code></td><td>16 px de cada lado, por fora</td></tr>
+<tr><td><code>my-auto</code></td><td><code>margin-block: auto</code></td><td>centraliza no eixo vertical (em flex)</td></tr>
+</table>
+</div>
+
+<p>A quarta linha da tabela é a resposta para a dúvida mais comum desta aula: sim, você pode
+combinar <code>p-4</code> com <code>px-6</code> no mesmo elemento. A regra é que o eixo mais
+específico vence no lado que ele cobre. <code>p-4</code> diz "16 px nos quatro lados";
+<code>px-6</code> diz "24 px nas laterais". Resultado: 24 px nas laterais, 16 px em cima e embaixo.</p>
+
+<h2>7. Quando dois atalhos se encontram</h2>
+
+<p>Na primeira aula você aprendeu que a ordem das classes no HTML não muda o resultado, e que duas
+classes da mesma propriedade brigam. Aqui a notícia é melhor: <code>p-4</code> e <code>px-6</code>
+não brigam, porque não escrevem a mesma propriedade. Uma escreve <code>padding</code>, a outra
+escreve <code>padding-inline</code>. O navegador aplica as duas, e o lado que aparece nos dois
+lugares fica com o valor do eixo mais específico.</p>
+
+<p>Teste mental: <code>class="p-4 px-6"</code> e <code>class="px-6 p-4"</code> desenham igual. O
+Tailwind ordena as regras dele por tipo, não pela sua escrita. Isso é uma boa notícia para quem
+copia e cola classes de exemplos diferentes: a combinação é estável, não vira loteria.</p>
+
+<p>Onde a briga existe de verdade é entre duas classes do mesmo eixo: <code>px-4</code> e
+<code>px-6</code> no mesmo elemento. Aí vale a que o Tailwind colocou por último no CSS gerado, e
+você não tem controle sobre isso pela ordem do HTML. A regra prática é óbvia: uma medida por lado.
+Se precisa variar por tamanho de tela, use o prefixo (<code>px-4 md:px-6</code>), que é uma decisão
+diferente e previsível.</p>
+
+<p>E há o caso da herança de componente: você colou um botão pronto com <code>p-4</code> e quer só
+apertar as laterais. Acrescente <code>px-2</code> e pronto — a lateral obedece, a altura continua. É
+o jeito mais limpo de ajustar sem reescrever o componente inteiro.</p>
+
+<h2>8. ps e pe: o lado que segue o idioma</h2>
+
+<p>Falta explicar por que existem <code>ps</code> e <code>pe</code> quando já existem
+<code>pl</code> e <code>pr</code>. A resposta está no que a palavra "esquerda" significa: nada, do
+ponto de vista do navegador. O navegador não sabe onde fica a esquerda; ele sabe onde a escrita
+começa e onde termina. Em português, começa à esquerda. Em árabe e hebraico, começa à direita.</p>
+
+<p>Quando você escreve <code>pl-4</code>, diz "4 px à esquerda, sempre". Quando escreve
+<code>ps-4</code>, diz "4 px no começo da linha, onde quer que ele esteja". Para o site da Ana, que
+é só em português, os dois dão no mesmo. Para quem traduz o site depois, <code>ps</code> e
+<code>pe</code> continuam certos sem tocar no código.</p>
+
+<p>A recomendação prática: use <code>px</code> e <code>py</code> sempre que os dois lados forem
+iguais, porque é mais curto; use <code>ps</code> e <code>pe</code> quando só um lado precisa de
+respiro — o caso clássico é um ícone antes do texto, que precisa de espaço à direita dele, e um
+item de menu com recuo no começo. Reserve <code>pl</code> e <code>pr</code> para quando você
+realmente quer falar de esquerda física, como um selo que fica sempre no canto.</p>
+
+<p>No CSS gerado, a diferença é visível: <code>ps-4</code> vira
+<code>padding-inline-start</code> e <code>pl-4</code> vira <code>padding-left</code>. Os dois
+funcionam em qualquer navegador atual. O que muda é a intenção que fica registrada no código.</p>
+
+<p>Um caso concreto em que a diferença salva o desenho: a lista de produtos da padaria tem um recuo
+no começo de cada linha, para o texto não colar na borda do cartão. Se o recuo for
+<code>pl-3</code> e um dia o site ganhar uma versão em árabe, o texto passa a começar à direita e o
+recuo fica do lado errado — colado no começo, sobrando no fim. Com <code>ps-3</code>, o recuo
+acompanha. É um detalhe que parece exagero até o dia em que aparece.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o botão que ficou alto demais no celular</h3>
+<p>A Ana usou <code>p-4</code> no botão "Pedir pelo WhatsApp". No desktop ficou ótimo; no celular,
+com o texto em duas linhas, o botão virou um retângulo enorme. Ela trocou por
+<code>px-4 py-2</code>: as laterais continuam confortáveis e a altura acompanha o texto. Quando o
+conteúdo pode crescer (texto que quebra linha), <code>py</code> pequeno com <code>px</code> médio é
+quase sempre a resposta.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o ícone colado no texto</h3>
+<p>Ela pôs um emoji de pão antes do nome do produto e os dois ficaram grudados. A solução foi
+<code>pe-2</code> no ícone — 8 px no fim da linha daquele elemento, empurrando o texto. Se ela
+tivesse usado <code>px-2</code>, o mesmo espaço apareceria também do lado esquerdo, desalinhando o
+ícone em relação à borda do cartão. Um lado só é uma decisão de alinhamento, e é aí que os atalhos
+de um lado salvam o desenho.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a faixa do rodapé com espaço sobrando em cima</h3>
+<p>O rodapé tem três linhas de texto e um <code>py-8</code>. Entre as linhas, o espaço continua
+pequeno — porque <code>py</code> age no bloco inteiro, não entre linhas. A Ana queria ar entre as
+linhas e mexeu em <code>py</code> por meia hora. O conserto era outro: espaçamento entre os
+elementos (<a href="space-y.html">space-y</a>) ou entrelinha. Antes de aumentar um número, vale
+perguntar <em>qual</em> espaço está faltando — de dentro, de fora, entre linhas ou entre blocos.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que <code>px-6</code> faz?</p>
+<label><input type="radio" name="q1"> deixa 24 px em cima e embaixo</label>
+<label><input type="radio" name="q1"> deixa 24 px nas duas laterais</label>
+<label><input type="radio" name="q1"> deixa 6 px nos quatro lados</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Num elemento com <code>class="p-4 px-6"</code>,
+quanto fica o padding em cima?</p>
+<label><input type="radio" name="q2"> 24 px, porque veio depois</label>
+<label><input type="radio" name="q2"> 32 px, porque as duas somam</label>
+<label><input type="radio" name="q2"> 16 px, porque <code>px</code> só mexe nas laterais</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Qual é a vantagem de <code>ps-4</code> sobre
+<code>pl-4</code>?</p>
+<label><input type="radio" name="q3"> o espaço acompanha o começo da escrita, em qualquer idioma</label>
+<label><input type="radio" name="q3"> ele vale 4 px a mais</label>
+<label><input type="radio" name="q3"> nenhuma, são sinônimos em todos os casos</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o botão do rodapé</h2>
+<p>O botão do rodapé precisa de 16 px nas laterais e 12 px em cima e embaixo. Complete as duas
+classes do eixo:</p>
+<div class="ex-code">&lt;button class="<input aria-label="resposta 1" data-answer="px-4" placeholder="..."> <input aria-label="resposta 2" data-answer="py-3" placeholder="..."> bg-amber-400"&gt;Pedir pelo WhatsApp&lt;/button&gt;</div>
+<p class="ex-dica">Dica: lateral é <code>x</code>, altura é <code>y</code>. 16 px é o quarto degrau
+e 12 px é o terceiro. Se você escrever <code>p-4</code>, o botão fica com 16 px nos quatro lados —
+funciona, mas não é o pedido.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O espaçamento tem dois eixos: inline (as laterais, por onde a linha de texto corre) e block (topo
+e base, por onde as linhas descem). <code>px-*</code> e <code>py-*</code> cobrem um eixo cada, com
+a mesma escala de 0,25 rem: <code>px-6</code> são 24 px nas laterais, <code>py-2</code> são 8 px em
+cima e embaixo. Os atalhos de um lado só completam o kit: <code>pt</code>, <code>pb</code>,
+<code>pl</code>, <code>pr</code> para lados físicos; <code>ps</code> e <code>pe</code> para o começo
+e o fim da escrita.</p>
+
+<p>A combinação que você vai digitar mil vezes é <code>px-4 py-2</code>: largura confortável para o
+texto e altura suficiente para o dedo. E a combinação de eixos é segura: <code>p-4 px-6</code> dá
+24 px nas laterais e 16 px na altura, na ordem que você escrever, porque as classes mexem em
+propriedades diferentes. Onde há briga é entre duas classes do mesmo eixo — e a solução é não
+repetir.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>px</code> = padding-inline = as duas laterais; <code>py</code> = padding-block = topo e base.</li>
+<li><code>px-6</code> são 24 px; <code>py-2</code> são 8 px.</li>
+<li>Botão clássico: <code>px-4 py-2</code>; altura confortável no dedo pede <code>py-3</code>.</li>
+<li>Um lado só: <code>pt</code>, <code>pb</code>, <code>pl</code>, <code>pr</code> (físicos).</li>
+<li>Começo e fim da escrita: <code>ps</code> e <code>pe</code> (acompanham o idioma).</li>
+<li>Margem tem os mesmos eixos: <code>mx</code>, <code>my</code>, <code>mt</code>, <code>mb</code>…</li>
+<li><code>p-4 px-6</code> não briga: o eixo mais específico vence no lado que ele cobre.</li>
+<li>Duas classes do mesmo eixo brigam, e a ordem no HTML não decide nada.</li>
+<li>O painel mostra <code>padding-inline</code>; a aba <em>Computed</em> mostra
+<code>padding-left</code> e <code>padding-right</code>.</li>
+<li><code>py</code> não muda o espaço entre as linhas de um parágrafo.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

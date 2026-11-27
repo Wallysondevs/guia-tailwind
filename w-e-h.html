@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Largura e Altura | Guia Tailwind</title>
+<meta name="description" content="w-64 não são 64 pixels: a largura e a altura no Tailwind usam a mesma escala do espaçamento, com w-full para ocupar o pai e size para o quadrado em uma classe.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Largura e <span class="hl">Altura</span></h1>
+<p class="intro">A Ana queria um quadrado para o logo e um botão que ocupasse a largura do cartão. O
+logo saiu com 40 px, do tamanho de uma unha, e o botão ficou do tamanho do texto, perdido no meio do
+branco. Ela tentou <code>w-40</code> pensando em 40 px e o logo virou uma parede de 160 px. Nesta
+aula ela aprende o que <code>w-</code> e <code>h-</code> medem de verdade, por que o número não é
+pixel, quando usar <code>w-full</code> e como fazer um quadrado perfeito sem repetir a medida duas
+vezes.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que o navegador decide sozinho sobre largura e altura, antes de você escrever classe.</li>
+  <li>O que <code>w-*</code> e <code>h-*</code> medem e por que o número não é pixel.</li>
+  <li>A conta ao contrário: transformar pixels em classe dividindo por 4.</li>
+  <li><code>w-full</code>, <code>h-auto</code> e <code>w-auto</code>: quando o tamanho vem do pai ou do conteúdo.</li>
+  <li>O atalho <code>size-*</code> para quadrados.</li>
+  <li>Por que altura é mais teimosa que largura e o que fazer quando o texto vaza.</li>
+  <li>A diferença entre <code>w-full</code> e <code>w-screen</code>.</li>
+  <li>Como conferir o tamanho real no painel e na aba <em>Computed</em>.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o logo que virou parede</h2>
+
+<p>A padaria tem um logo simples: um círculo âmbar com a letra P. A Ana queria ele com 96 px de lado,
+para caber no cabeçalho sem empurrar o nome. Ela escreveu <code>w-40</code> pensando "40 é um
+número redondo, deve dar uns 40 px". O logo apareceu com 160 px e comeu metade da barra.</p>
+
+<p>O mesmo dia rendeu o segundo problema: o botão "Pedir pelo WhatsApp" ficava do tamanho do texto,
+flutuando no meio do cartão. Ela queria ele ocupando a largura toda. Tentou <code>w-96</code> e o
+botão ficou com 384 px — largo demais em qualquer tela pequena, e nem um pouco "do tamanho do cartão".</p>
+
+<p>Os dois problemas têm a mesma raiz: ela estava pensando em pixels, e o Tailwind pensa em degraus.
+Os degraus são os mesmos do padding e da margem — 0,25 rem cada — e é por isso que
+<code>w-64</code> dá 256 px. Uma vez que a ficha cai, tudo fica previsível: você escolhe o degrau pela
+medida que quer, e o Tailwind multiplica por 4 para você.</p>
+
+<h2>2. O que o navegador já decide</h2>
+
+<p>Antes de qualquer classe, dois comportamentos explicam metade das surpresas. O primeiro: um
+elemento de bloco (<code>div</code>, <code>p</code>, <code>section</code>) já ocupa 100% da largura
+disponível do pai. Largura, para bloco, é o padrão "esticar". O segundo: a altura de um bloco é
+sempre o que o conteúdo precisa. Se há uma linha de texto, a caixa tem a altura da linha; se há
+cinco, tem cinco.</p>
+
+<p>É por isso que largura e altura se comportam de maneiras diferentes na prática. Largura costuma
+ser um problema de "preciso que fique menor", e altura um problema de "preciso que fique maior".
+Quem começa tende a achar que os dois são simétricos e se frustra: <code>w-40</code> sempre aparece
+no painel, <code>h-40</code> também — mas os efeitos na tela são bem diferentes.</p>
+
+<p>Tem um terceiro detalhe, que vale desde já: altura em elemento inline (um <code>span</code>, um
+<code>a</code>) simplesmente não pega. O valor aparece no CSS, mas o desenho ignora. Se a sua altura
+não funciona, o primeiro suspeito é o <code>display</code> do elemento — o segundo é a falta de um
+pai com altura definida, assunto da aula de tamanhos relativos.</p>
+
+<dl class="anatomy">
+<dt>largura</dt>
+<dd>A medida horizontal da caixa, do lado esquerdo ao direito. Vem da classe <code>w-*</code>, de
+uma porcentagem ou do padrão do elemento.</dd>
+<dt>altura</dt>
+<dd>A medida vertical. Vem da classe <code>h-*</code>, do conteúdo ou de um pai com altura
+definida.</dd>
+<dt>bloco</dt>
+<dd>Elemento que ocupa a linha inteira e estica na largura: <code>div</code>, <code>p</code>,
+<code>section</code>. É o comportamento padrão no HTML.</dd>
+<dt>inline</dt>
+<dd>Elemento que corre dentro do texto e encolhe até o conteúdo: <code>span</code>, <code>a</code>.
+Ignora largura e altura definidas.</dd>
+<dt>conteúdo</dt>
+<dd>O que está dentro da caixa. É ele que decide a altura quando você não define nenhuma.</dd>
+</dl>
+
+<p>Um jeito de guardar essa diferença: largura é uma decisão de relação (quanto espaço do pai eu
+ocupo), altura é uma decisão de conteúdo (quanto espaço o meu texto pede). Quando você inverte as
+duas — largura pelo conteúdo, altura pela relação — o layout costuma ficar imprevisível.</p>
+
+<h2>3. w-*: largura na mesma escala do espaço</h2>
+
+<p>A letra <code>w</code> vem de <em>width</em>, largura. <code>w-4</code> são 16 px,
+<code>w-10</code> são 40 px, <code>w-24</code> são 96 px, <code>w-64</code> são 256 px. A escala é
+contínua e vai longe: <code>w-96</code> são 384 px. Não é coincidência que <code>p-24</code> e
+<code>w-24</code> valham a mesma coisa — são o mesmo multiplicador.</p>
+
+<div class="trytailwind" data-goal="rule:width: calc(var(--spacing) * 24);;rule:height: calc(var(--spacing) * 24)">
+  <p class="try-task">O logo está com <code>w-10</code>, quarentinha pixels. Deixe um quadrado de
+  96 px de lado: <code>w-24</code> e <code>h-24</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="w-10 bg-amber-200 p-2"&gt;P&lt;/div&gt;</pre>
+  <pre class="out">
+width: 40px
+padding: 8px
+background-color: oklch(0.924 0.12 95.746)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="w-24 h-24 bg-amber-200 p-2"&gt;P&lt;/div&gt;</pre>
+</div>
+
+<p>Rode a solução e o painel passa a mostrar <code>width: 96px</code> e
+<code>height: 96px</code>: o navegador já converteu o degrau em pixels para você. Antes de rodar, ele
+mostra os 40 px do <code>w-10</code> mais o padding e o fundo — a comparação entre os dois estados é
+o jeito mais rápido de confirmar que a classe pegou. Repare que usamos as duas classes — largura e altura. O Tailwind não tem
+uma classe "quadrado de 96" na escala principal, mas tem o atalho <code>size-24</code>, que faz
+exatamente as duas de uma vez. Guarde o nome: a gente volta nele na seção 7.</p>
+
+<pre class="term">.w-24 {
+  width: calc(var(--spacing) * 24);
+}
+.h-24 {
+  height: calc(var(--spacing) * 24);
+}</pre>
+
+<p>O CSS gerado não tem 96 em lugar nenhum: tem o degrau 24 e a variável de espaçamento. Quem faz a
+conta é o navegador, na hora de desenhar. É a mesma mecânica do padding — e é por isso que a escala
+de espaço e a de tamanho são a mesma coisa no Tailwind, mesmo sendo assuntos diferentes na sua
+cabeça.</p>
+
+<p>E o padding que já estava ali? Ele continua valendo, e continua saindo de dentro: com
+<code>border-box</code>, o padding não aumenta a largura de 96 px, ele come o espaço interno. Se o
+conteúdo for grande demais, ele vaza — o que nos leva ao assunto da seção 8.</p>
+
+<h2>4. h-*: altura na mesma escala</h2>
+
+<p>A letra <code>h</code> vem de <em>height</em>, altura. Mesma escala, mesma lógica:
+<code>h-1</code> são 4 px, <code>h-8</code> são 32 px, <code>h-12</code> são 48 px,
+<code>h-24</code> são 96 px, <code>h-40</code> são 160 px, <code>h-64</code> são 256 px. Altura fixa
+é útil em barras, faixas, selos e áreas de imagem — e é uma fonte de problema quando o conteúdo é
+imprevisível.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Medida</th><th>Onde costuma servir</th></tr>
+<tr><td><code>w-1</code> / <code>h-1</code></td><td>4 px</td><td>linha fina, separador, detalhe</td></tr>
+<tr><td><code>w-8</code> / <code>h-8</code></td><td>32 px</td><td>ícone, etiqueta pequena</td></tr>
+<tr><td><code>w-12</code> / <code>h-12</code></td><td>48 px</td><td>avatar, botão de altura confortável</td></tr>
+<tr><td><code>w-24</code> / <code>h-24</code></td><td>96 px</td><td>logo, selo grande, miniatura</td></tr>
+<tr><td><code>w-40</code> / <code>h-40</code></td><td>160 px</td><td>faixa de destaque, imagem média</td></tr>
+<tr><td><code>w-64</code> / <code>h-64</code></td><td>256 px</td><td>cartão de produto, capa</td></tr>
+<tr><td><code>w-96</code></td><td>384 px</td><td>coluna larga, imagem de destaque</td></tr>
+</table>
+</div>
+
+<p>A tabela para em 96, mas a escala continua: <code>w-100</code> são 400 px e <code>w-360</code>
+são 1440 px. Na prática, porém, você raramente passa de 96 — porque uma caixa de 384 px fixos não
+cabe num celular de 375 e vira rolagem lateral. Acima desse tamanho, a resposta quase sempre é uma
+medida relativa, que é o assunto da próxima aula: degraus para peças pequenas, proporções para peças
+grandes.</p>
+
+<h2>5. A conta ao contrário: de pixels para classe</h2>
+
+<p>O caminho de volta é onde a maioria trava. Você tem uma medida em pixels — 256 px, digamos — e
+quer a classe. Divida por 4: 256 ÷ 4 = 64, então <code>w-64</code>. Para 160 px: 160 ÷ 4 = 40,
+<code>h-40</code>. Para 96: 96 ÷ 4 = 24, <code>w-24</code>. A tabela mental é essa divisão, e ela
+funciona porque cada degrau vale exatamente 4 px.</p>
+
+<div class="trytailwind" data-goal="rule:width: calc(var(--spacing) * 64);;rule:height: calc(var(--spacing) * 40)">
+  <p class="try-task">A ficha do produto precisa de 256 px de largura e 160 px de altura. Divida por
+  4 e escreva <code>w-64</code> e <code>h-40</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="w-full bg-white p-4"&gt;Pão de fermentação natural&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="w-64 h-40 bg-white p-4"&gt;Pão de fermentação natural&lt;/div&gt;</pre>
+</div>
+
+<p>Antes, a ficha ocupava a largura toda — o comportamento padrão do bloco — e a altura vinha do
+texto. Depois, ela tem as duas medidas fixas: rode a solução e o painel confirma os dois valores, 256
+e 160 px.</p>
+
+<p>Duas armadilhas dessa conta. A primeira é dividir por 4 mas usar o número errado: 320 px ÷ 4 = 80,
+<code>w-80</code>, e não <code>w-32</code>. A segunda é esquecer que a medida vale em rem: se o
+visitante muda o tamanho de fonte do navegador para 20 px, <code>w-64</code> passa a valer 320 px,
+porque 64 × 0,25 rem × 20 = 320. Nada quebra, mas o layout fica proporcionalmente maior — que é
+exatamente o que a pessoa queria ao aumentar a fonte.</p>
+
+<p>No projeto da Ana, longe das caixas do guia, a conferência é a mesma: botão direito no
+elemento, <em>Inspecionar</em>, aba <em>Computed</em>, e lá está <code>width: 256px</code> para o
+<code>w-64</code>. É o mesmo número que o painel mostra aqui, com a diferença de que no navegador
+você pode mexer na classe ao vivo e ver o valor mudar. Perder dois minutos nessa aba economiza meia
+hora de tentativa e erro.</p>
+
+<p>Para não fazer conta a cada classe, vale decorar meia dúzia de pontos de referência. A largura de
+um cartão confortável costuma ser 320 px (<code>w-80</code>); o tamanho de uma coluna de texto, 384
+px (<code>w-96</code>); um ícone, 24 px (<code>w-6</code>). Com quatro ou cinco referências na
+cabeça, você estima o resto de olho e confere no painel, que devolve o valor em pixels na hora.</p>
+
+<h2>6. w-full: ocupar o espaço do pai</h2>
+
+<p>Nem tudo tem medida fixa. <code>w-full</code> quer dizer 100% da largura do pai, e é a resposta
+certa para botões, imagens e campos de formulário que devem acompanhar o cartão. Em um
+<code>div</code>, que já estica por natureza, ela é invisível; em um botão, que por padrão encolhe
+até o texto, ela muda tudo.</p>
+
+<div class="trytailwind" data-goal="rule:width: 100%;;rule:height: calc(var(--spacing) * 12)">
+  <p class="try-task">Faça o botão ocupar a largura do cartão e ter 48 px de altura:
+  <code>w-full</code> e <code>h-12</code>.</p>
+  <pre class="html">&lt;div class="bg-amber-100 p-4"&gt;
+  &lt;button id="alvo" class="bg-amber-400 px-4 py-2"&gt;Pedir pelo WhatsApp&lt;/button&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.828 0.189 84.429)
+padding-inline: 16px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;div class="bg-amber-100 p-4"&gt;
+  &lt;button id="alvo" class="w-full h-12 bg-amber-400 px-4 py-2"&gt;Pedir pelo WhatsApp&lt;/button&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Rode a solução e o painel mostra <code>width: 760px</code> (o valor real, que muda com a largura
+da prévia) e <code>height: 48px</code> — a altura fixa. É uma boa lição de leitura: <code>w-full</code> é uma
+regra de relação, e o painel mostra o resultado em pixels; <code>h-12</code> é um valor absoluto, e o
+painel mostra 48 px.</p>
+
+<pre class="term">.w-full {
+  width: 100%;
+}
+.w-screen {
+  width: 100vw;
+}</pre>
+
+<p>Duas classes que se combinam bem: <code>w-full</code> com <code>max-w-md</code>. A primeira diz
+"ocupe tudo o que o pai tem", a segunda diz "mas não passe de 448 px". O resultado é uma caixa que
+acompanha a tela em celular e para de crescer no monitor — o padrão de qualquer formulário bem
+resolvido. Uma sem a outra não resolve: só <code>w-full</code> estica demais em tela grande, e só
+<code>max-w-md</code> deixa a caixa menor que o pai mesmo quando há espaço.</p>
+
+<p>Junto com <code>w-full</code> existem os irmãos <code>w-auto</code> (volta ao padrão: o conteúdo
+decide) e <code>w-screen</code> (100% da largura da janela, incluindo a barra de rolagem). Em uma
+página com layout normal, <code>w-full</code> é quase sempre o que você quer; <code>w-screen</code>
+aparece em faixas que devem sangrar de ponta a ponta, e costuma criar rolagem horizontal quando há
+padding — o teste de 375 px do guia existe justamente por causa disso.</p>
+
+<h2>7. size-*: o quadrado em uma classe</h2>
+
+<p>Avatar, ícone, miniatura: muita coisa é quadrada. Para esses casos o Tailwind tem
+<code>size-*</code>, que aplica largura e altura de uma vez, na mesma escala. <code>size-10</code>
+são 40 px de lado, <code>size-12</code> são 48, <code>size-24</code> são 96. É o mesmo que escrever
+<code>w-10 h-10</code>, com metade das palavras.</p>
+
+<p>Vale usar também quando o formato precisa ser garantido: uma imagem de perfil com
+<code>size-12</code> não vira retângulo quando o conteúdo muda. E vale preferir <code>size-*</code> a
+<code>w-full</code> em avatares, porque <code>w-full</code> esticaria a caixa com o pai e a altura
+não acompanharia — o resultado seria uma elipse.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Largura</th><th>Altura</th><th>Quando usar</th></tr>
+<tr><td><code>w-64 h-40</code></td><td>256 px</td><td>160 px</td><td>cartão com proporção fixa</td></tr>
+<tr><td><code>size-24</code></td><td>96 px</td><td>96 px</td><td>logo, avatar quadrado, ícone grande</td></tr>
+<tr><td><code>w-full</code></td><td>100% do pai</td><td>o que o conteúdo pedir</td><td>botão, campo, imagem de capa</td></tr>
+<tr><td><code>w-full h-12</code></td><td>100% do pai</td><td>48 px</td><td>botão de largura total e altura fixa</td></tr>
+<tr><td><code>h-auto</code></td><td>o padrão do bloco</td><td>o conteúdo decide</td><td>desfazer uma altura herdada</td></tr>
+<tr><td><code>w-screen</code></td><td>100% da janela</td><td>o conteúdo decide</td><td>faixa que ocupa a tela inteira</td></tr>
+</table>
+</div>
+
+<p>Uma confusão comum: <code>size-*</code> não deixa o elemento redondo. Ele só iguala largura e
+altura. Para o círculo do logo, ainda falta <code>rounded-full</code> — que é assunto da aula de
+arredondamento. Antes de culpar a classe, confira se você pediu as duas coisas.</p>
+
+<p>Em barras montadas com flex, o avatar com <code>size-12</code> pode aparecer espremido quando a
+linha fica cheia: o flex encolhe os filhos para caber. O conserto é <code>shrink-0</code> no avatar,
+que proíbe o encolhimento, ou <code>min-w-12</code>, que garante o piso. Na dúvida, se um elemento
+quadrado virou retângulo dentro de uma fileira, o problema não é o <code>size</code>: é o
+encolhimento do flex.</p>
+
+<h2>8. Quando o texto vaza da altura</h2>
+
+<p>Altura fixa é uma promessa: "esta caixa tem 96 px". Se o conteúdo pedir mais, o navegador não
+cresce a caixa — ele deixa o texto sair por baixo, ou corta, dependendo do <code>overflow</code>. Num
+site em português isso acontece bastante, porque uma frase que cabe em duas linhas no monitor pode
+precisar de quatro no celular.</p>
+
+<p>A regra prática: use altura fixa em caixas cujo conteúdo você controla (ícone, avatar, selo,
+faixa com uma linha de texto). Para caixas com texto de tamanho imprevisível, prefira
+<code>min-h-*</code> — que garante um mínimo sem proibir crescer — ou nenhuma altura, deixando o
+conteúdo mandar. O <code>min-h-*</code> e o <code>max-h-*</code> são o assunto da próxima aula de
+mínimos e máximos; aqui basta saber que existem e que são a saída elegante.</p>
+
+<p>Se o texto está vazando e você não quer mudar a altura, existem duas saídas rápidas:
+<code>overflow-hidden</code>, que corta (e pode esconder informação), e <code>overflow-auto</code>,
+que cria barra de rolagem dentro da caixa. As duas têm uso legítimo — nenhuma das duas é um bom
+primeiro recurso para conteúdo que deveria apenas caber.</p>
+
+<p>Imagens merecem uma frase à parte, porque são o caso clássico de "mudei a altura e a foto
+amassou". Uma <code>img</code> com <code>w-full h-40</code> estica para preencher as duas medidas e
+distorce o que está desenhado. O conserto é <code>object-cover</code>, que preenche a caixa cortando
+o excesso sem deformar — o mesmo efeito de uma capa de revista. Sem ele, altura fixa em imagem é
+sinônimo de foto achatada.</p>
+
+<p>E há o caso oposto: a caixa com altura fixa que fica com o texto colado no topo, sobrando um vazio
+embaixo. Isso não é problema de altura, é de alinhamento do conteúdo: o conserto é centralizar com
+flex (<code>items-center</code>) ou ajustar o padding vertical. Altura certa com conteúdo no lugar
+errado continua parecendo errado.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o botão de 384 px no celular</h3>
+<p>A Ana usou <code>w-96</code> num botão e ele ficou ótimo no monitor. No celular de 375 px, o botão
+passou da borda e a página ganhou rolagem horizontal — o problema que o teste de 375 px pega. A troca
+foi para <code>w-full</code>: 100% do cartão, que já tem padding nas laterais. Medida relativa para
+peças grandes, medida em degraus para peças pequenas: essa é a regra que ela passou a seguir.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a altura que não fazia nada</h3>
+<p>Ela deu <code>h-24</code> a um <code>span</code> que fazia o papel de etiqueta e nada aconteceu. O
+span é inline: altura não se aplica. O conserto foi <code>inline-block</code>, que transforma o span
+numa caixinha que aceita largura, altura e padding vertical. É o mesmo motivo pelo qual
+<code>w-24</code> também não funcionava ali.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o logo redondo que virou bola de rugby</h3>
+<p>O logo tinha <code>w-24</code> e <code>rounded-full</code>, sem altura. Como a altura vinha do
+conteúdo, a "bola" saiu oval. O conserto foi <code>size-24</code>, que garante os dois lados iguais —
+e aí sim o <code>rounded-full</code> desenha um círculo. Sempre que um arredondamento total parecer
+errado, verifique se a caixa é quadrada antes de mexer no raio.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Quantos pixels tem <code>w-64</code>?</p>
+<label><input type="radio" name="q1"> 64 px, porque o número é a medida</label>
+<label><input type="radio" name="q1"> 256 px, porque cada degrau vale 4 px</label>
+<label><input type="radio" name="q1"> 640 px, porque o número é multiplicado por 10</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Um botão precisa ocupar a largura do cartão. Qual
+classe resolve?</p>
+<label><input type="radio" name="q2"> <code>w-96</code></label>
+<label><input type="radio" name="q2"> <code>h-12</code></label>
+<label><input type="radio" name="q2"> <code>w-full</code></label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Qual é a vantagem de <code>size-12</code> sobre
+<code>w-12</code>?</p>
+<label><input type="radio" name="q3"> ela define largura e altura iguais de uma vez</label>
+<label><input type="radio" name="q3"> ela deixa o elemento redondo</label>
+<label><input type="radio" name="q3"> ela vale 48 px na largura e 12 px na altura</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a miniatura do produto</h2>
+<p>A miniatura precisa ser um quadrado de 80 px de lado. Complete as duas classes (sem usar
+<code>size-*</code>, para treinar a conta):</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="w-20" placeholder="..."> <input aria-label="resposta 2" data-answer="h-20" placeholder="..."> bg-amber-200"&gt;Pão&lt;/div&gt;</div>
+<p class="ex-dica">Dica: 80 ÷ 4 = 20, então o degrau é 20. Se você escrever <code>w-80</code>, a
+miniatura fica com 320 px — cinco vezes maior do que o pedido.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Largura e altura no Tailwind usam a mesma escala do espaçamento: o número é o degrau, e cada
+degrau vale 4 px. <code>w-24</code> e <code>h-24</code> dão 96 px; <code>w-64</code> dá 256 px;
+<code>h-12</code> dá 48 px. Para ir de pixels para classe, divida por 4. Para quadrados, use
+<code>size-*</code>. Para acompanhar o pai, use <code>w-full</code>.</p>
+
+<p>Vale lembrar o que o navegador já faz sozinho: bloco ocupa a largura toda e a altura vem do
+conteúdo. Por isso <code>w-full</code> é invisível em <code>div</code> e transformador em
+<code>button</code>. E por isso altura fixa pede conteúdo previsível — quando o texto pode crescer,
+<code>min-h-*</code> é a escolha mais segura.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>w-*</code> é largura, <code>h-*</code> é altura; o número é o degrau de 4 px.</li>
+<li>De pixels para classe: divida por 4 (256 px → <code>w-64</code>).</li>
+<li>Bloco já ocupa 100% de largura; a altura padrão é a do conteúdo.</li>
+<li><code>w-full</code> = 100% do pai; <code>w-screen</code> = 100% da janela (cuidado com rolagem).</li>
+<li><code>size-24</code> = 96 × 96 px, o quadrado em uma classe (não arredonda).</li>
+<li>Altura não pega em elemento inline: use <code>inline-block</code> ou <code>block</code>.</li>
+<li>Altura fixa corta ou vaza quando o texto cresce; prefira <code>min-h-*</code> nesses casos.</li>
+<li>Medidas em degraus para peças pequenas; relativas para peças grandes.</li>
+<li>O painel mostra o valor em pixels: é a conferência mais rápida que existe.</li>
+<li>A medida é em rem: se a fonte base muda, a caixa acompanha.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
