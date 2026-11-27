@@ -1,0 +1,12 @@
+{
+  "name": "guia-tailwind",
+  "private": true,
+  "description": "Guia Tailwind CSS — aulas com o compilador de verdade no navegador",
+  "scripts": {
+    "empacotar": "node tools/empacotar.js --gerar",
+    "testar": "node tools/testar-missoes.js --todas --completo -q && node tools/verificar-saidas.js --todas -q && node tools/testar-navegador.js --todas"
+  },
+  "devDependencies": {
+    "@tailwindcss/browser": "4.3.5"
+  }
+}

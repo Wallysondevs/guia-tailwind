@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>avaliar — banco de provas das caixas do Guia Tailwind</title>
+<style>body{font:14px/1.5 system-ui,sans-serif;margin:0;padding:8px}iframe{border:0}</style>
+</head>
+<body>
+<p>Página interna do testador: compila o HTML do leitor com o Tailwind de verdade, sem abrir as 144 páginas.</p>
+<script src="../assets/tailwindsim.js"></script>
+<script>
+  window.__avaliadorPronto = false;
+  (function esperar() {
+    if (typeof window.__tailwindAvaliar === "function") { window.__avaliadorPronto = true; return; }
+    setTimeout(esperar, 40);
+  })();
+</script>
+</body>
+</html>
