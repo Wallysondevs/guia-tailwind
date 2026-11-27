@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direção e Quebra | Guia Tailwind</title>
+<meta name="description" content="Direção e quebra no flex do Tailwind: flex-col para empilhar, md:flex-row para o monitor, flex-wrap para os selos e o que muda no eixo principal.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Direção e <span class="hl">Quebra</span></h1>
+<p class="intro">Depois de descobrir que <code>flex</code> coloca os filhos numa fila, a Ana teve dois
+problemas novos. O primeiro: no celular, o preço e o botão lado a lado ficaram espremidos, com o
+botão do tamanho de uma unha. O segundo: os selos de "vegano", "sem açúcar" e "assado hoje" não
+cabiam na largura do cartão e saíram pela borda. A fila do flex é sempre na mesma direção e nunca
+quebra sozinha — e é isso que ela vai mudar agora. Nesta aula ela aprende a virar o eixo com
+<code>flex-col</code>, a inverter a ordem sem tocar no HTML com os <code>-reverse</code> e a deixar
+os itens descerem para a linha de baixo com <code>flex-wrap</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é eixo principal e por que a direção muda tudo.</li>
+  <li><code>flex-row</code> e <code>flex-col</code>: fila horizontal e fila vertical.</li>
+  <li>A combinação <code>flex-col md:flex-row</code> que resolve celular e monitor.</li>
+  <li>Por que <code>flex-row</code> e <code>flex-nowrap</code> às vezes não mudam nada no painel.</li>
+  <li><code>flex-row-reverse</code> e <code>flex-col-reverse</code>, e o cuidado com a ordem de
+  leitura.</li>
+  <li><code>flex-wrap</code> e <code>flex-wrap-reverse</code>: quando o item não cabe.</li>
+  <li>Como escolher entre deixar encolher e deixar quebrar a linha.</li>
+</ul>
+</div>
+
+<h2>1. A cena: dois problemas, um eixo</h2>
+
+<p>O cartão da Ana já tinha o <code>flex</code> no lugar certo, e no monitor o preço e o botão ficaram
+lado a lado, como ela queria. No celular, a mesma fila virou um aperto: o preço ocupando metade da
+tela e o botão encolhido, com o texto "Encomendar" quebrado em duas linhas dentro dele. O flex fez
+o que prometia — manteve tudo numa fila —, e a fila era o problema.</p>
+
+<p>No segundo cartão, os selos: "vegano", "sem açúcar", "assado hoje", "integral". Todos numa fila
+horizontal, cada um com fundo e respiro, e o conjunto saiu pela direita do cartão. O navegador não
+tem para onde mandar o que não cabe, porque o flex, por padrão, não quebra linha. Ele prefere
+espremer. Quando não dá mais para espremer, o conteúdo vaza.</p>
+
+<p>Os dois casos têm a mesma origem: a fila do flex é uma <em>linha única</em>, sempre na mesma
+direção. Mudar a direção resolve o primeiro; permitir a quebra resolve o segundo. E existe uma
+terceira possibilidade, que é a combinação das duas coisas com a tela: empilhar no celular e
+enfileirar no monitor. É o que a Ana vai usar na versão final.</p>
+
+<h2>2. O eixo principal: a fila tem direção</h2>
+
+<p>O flexbox é organizado em torno de um eixo, chamado <em>eixo principal</em>. Por padrão ele é
+horizontal, da esquerda para a direita: os itens entram em fila, um depois do outro, como palavras
+numa linha de texto. A propriedade que escolhe esse eixo é o <code>flex-direction</code>, e no
+Tailwind ela tem quatro classes.</p>
+
+<p>Quando você vira o eixo para vertical, tudo muda de significado. O que era "começo da fila" passa
+a ser "topo". O que era largura passa a ser altura. O espaçamento entre itens que era horizontal
+passa a ser vertical. É por isso que entender o eixo vale mais do que decorar classe: metade das
+propriedades do flexbox fala em "começo" e "fim" do eixo principal, e não em "esquerda" e
+"direita".</p>
+
+<p>Existe também o eixo transversal, perpendicular ao principal. No flex horizontal, é a vertical — a
+altura dos itens. No flex vertical, é a horizontal — a largura. O <code>align-items</code>, por
+exemplo, sempre age no transversal, e por isso parece fazer coisas diferentes conforme a direção.
+Isso vai importar na aula de alinhamento; aqui, basta guardar que os dois eixos trocam de papel
+quando a direção troca.</p>
+
+<dl class="anatomy">
+<dt>eixo principal</dt>
+<dd>A direção em que os itens se enfileiram. Horizontal por padrão, vertical com
+<code>flex-col</code>.</dd>
+<dt>eixo transversal</dt>
+<dd>A direção perpendicular à fila. É onde o <code>align-items</code> trabalha.</dd>
+<dt>flex-direction</dt>
+<dd>A propriedade que escolhe o eixo: <code>row</code>, <code>row-reverse</code>,
+<code>column</code> ou <code>column-reverse</code>.</dd>
+<dt>flex-wrap</dt>
+<dd>A propriedade que decide se os itens podem descer para outra linha quando não couberem.</dd>
+<dt>ordem visual</dt>
+<dd>A ordem em que os itens aparecem na tela. Com <code>-reverse</code>, ela deixa de coincidir com a
+ordem do HTML.</dd>
+</dl>
+
+<h2>3. Empilhar: flex-col</h2>
+
+<p>O caso do celular pede uma fila vertical. A classe é <code>flex-col</code> — de
+<em>column</em>, coluna — e ela não muda o <code>display</code>: o pai continua sendo flex. Muda o
+eixo. Os itens param de entrar um ao lado do outro e passam a entrar um embaixo do outro, ocupando a
+largura do container.</p>
+
+<div class="trytailwind" data-largura="420" data-goal="css:#alvo|flex-direction=column;;rule:flex-direction: column">
+  <p class="try-task">Na tela estreita, o preço e o botão ficam espremidos na mesma linha. Empilhe os
+  dois, para que o botão fique logo abaixo do preço.</p>
+  <pre class="html">&lt;div id="alvo" class="flex bg-amber-50 p-4"&gt;
+  &lt;p class="text-lg font-bold"&gt;R$ 12,00&lt;/p&gt;
+  &lt;a href="#" class="bg-amber-600 px-4 py-2 text-white"&gt;Encomendar&lt;/a&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex flex-col bg-amber-50 p-4"&gt;
+  &lt;p class="text-lg font-bold"&gt;R$ 12,00&lt;/p&gt;
+  &lt;a href="#" class="bg-amber-600 px-4 py-2 text-white"&gt;Encomendar&lt;/a&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>flex-direction: column</code> ao lado do <code>display: flex</code>. O CSS
+gerado é uma linha, como sempre:</p>
+
+<pre class="term">.flex-col {
+  flex-direction: column;
+}
+.flex-col-reverse {
+  flex-direction: column-reverse;
+}</pre>
+
+<p>Um detalhe que surpreende: com <code>flex-col</code>, os itens continuam esticados — só que agora
+o esticamento é na largura, não na altura. O <code>align-items: stretch</code> que já vinha de fábrica
+age no eixo transversal, e o transversal virou a horizontal. Por isso o botão ocupa a largura toda do
+cartão quando você empilha, mesmo sem ter classe de largura nenhuma. É o padrão agindo de novo, e
+saber disso evita a caçada à classe que "deixou o botão largo".</p>
+
+<h2>4. A combinação que resolve celular e monitor</h2>
+
+<p>Empilhar no celular e enfileirar no monitor não é escolha entre duas classes: é a mesma classe com
+um prefixo de tamanho de tela. O Tailwind permite dizer "assim no celular, assado a partir de tal
+largura":</p>
+
+<pre class="file" data-file="cardapio.html">&lt;div class="flex flex-col bg-amber-50 p-4 md:flex-row"&gt;
+  &lt;p class="text-lg font-bold"&gt;R$ 12,00&lt;/p&gt;
+  &lt;a href="#" class="bg-amber-600 px-4 py-2 text-white"&gt;Encomendar&lt;/a&gt;
+&lt;/div&gt;</pre>
+
+<p>Leia da esquerda para a direita: no celular, <code>flex-col</code>, itens empilhados. A partir de
+768 px de largura, o <code>md:flex-row</code> entra em cena e devolve o eixo horizontal. O prefixo
+<code>md:</code> é um dos cinco breakpoints do Tailwind, e o assunto tem aula própria mais adiante
+neste nível. Aqui, o que importa é a ideia: direção de fila é uma decisão por tamanho de tela, e a
+classe com prefixo é como se escreve essa decisão.</p>
+
+<p>Existe uma razão de ordem nessa combinação, e ela é a regra do mobile first: você escreve primeiro
+o que vale para a tela pequena, sem prefixo, e depois corrige para cima. Se você fizer o contrário —
+<code>flex-row md:flex-col</code> —, o resultado é o mesmo em duas telas, mas o raciocínio fica de
+cabeça para baixo e o próximo ajuste vira adivinhação. Comece pequeno, cresça com prefixo.</p>
+
+<p>Essa combinação é a que a Ana escolheu para o cartão. No celular, o preço grande em cima e o botão
+embaixo, com largura total — fácil de tocar com o dedo. No monitor, os dois na mesma linha. Um HTML,
+duas apresentações, nenhuma duplicação de conteúdo.</p>
+
+<h2>5. Por que flex-row e flex-nowrap às vezes não mudam nada</h2>
+
+<p>Chegamos a uma das classes que mais confundem: <code>flex-row</code>. Ela escreve
+<code>flex-direction: row</code>, que é exatamente o valor que o flex já aplica por padrão. Aplicar
+<code>flex-row</code> num container que nunca teve direção definida não muda nada — e o painel das
+caixas não mostra a propriedade, porque nada mudou. O mesmo vale para <code>flex-nowrap</code>.</p>
+
+<p>Isso não quer dizer que essas classes sejam inúteis. Elas existem para desfazer: quando você tem
+<code>flex-col</code> num componente e quer a versão horizontal, precisa de
+<code>flex-row</code> explícito. E, principalmente, para os prefixos:
+<code>md:flex-row</code> só funciona porque <code>flex-row</code> existe. A tabela abaixo mostra as
+seis classes de direção e quebra, com o que cada uma escreve:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>CSS gerado</th><th>O que faz</th><th>Onde serve</th></tr>
+<tr><td><code>flex-row</code></td><td>flex-direction: row</td><td>fila horizontal (o padrão)</td><td>voltar à horizontal num componente</td></tr>
+<tr><td><code>flex-row-reverse</code></td><td>flex-direction: row-reverse</td><td>fila horizontal da direita para a esquerda</td><td>ícone à direita do texto</td></tr>
+<tr><td><code>flex-col</code></td><td>flex-direction: column</td><td>fila vertical, de cima para baixo</td><td>empilhar no celular, formulário</td></tr>
+<tr><td><code>flex-col-reverse</code></td><td>flex-direction: column-reverse</td><td>fila vertical de baixo para cima</td><td>inverter duas linhas sem tocar no HTML</td></tr>
+<tr><td><code>flex-wrap</code></td><td>flex-wrap: wrap</td><td>desce para outra linha quando não cabe</td><td>selos, etiquetas, lista de tags</td></tr>
+<tr><td><code>flex-wrap-reverse</code></td><td>flex-wrap: wrap-reverse</td><td>desce para outra linha, empilhando para cima</td><td>caso raro, rodapé invertido</td></tr>
+<tr><td><code>flex-nowrap</code></td><td>flex-wrap: nowrap</td><td>nunca desce; encolhe ou vaza (o padrão)</td><td>desfazer o wrap num filho</td></tr>
+</table>
+</div>
+
+<p>Repare que <code>flex-row</code> e <code>flex-nowrap</code> são as duas linhas que não mudam nada num
+container limpo. Elas são a definição do ponto de partida — e o ponto de partida é o que a próxima
+seção inverte.</p>
+
+<h2>6. De trás para frente: os reverse</h2>
+
+<p>As classes terminadas em <code>-reverse</code> fazem o que o nome diz: invertem a ordem de entrada
+dos itens. Com <code>flex-row-reverse</code>, o primeiro item do HTML passa a aparecer na direita.
+Com <code>flex-col-reverse</code>, o primeiro item aparece embaixo. O HTML não muda; só a ordem
+visual.</p>
+
+<p>Um uso legítimo de <code>flex-row-reverse</code>, e o que eu recomendo sem ressalva: pôr o ícone
+à direita do texto num botão. Muitos desenhos pedem esse espelhamento, e a alternativa — duplicar o
+HTML — é pior. Como o botão inteiro é um alvo de clique só, a ordem do teclado não atrapalha
+ninguém:</p>
+
+<pre class="file" data-file="botao.html">&lt;a href="#" class="inline-flex flex-row-reverse items-center gap-2 bg-amber-600 px-4 py-2 text-white"&gt;
+  &lt;span aria-hidden="true"&gt;seta&lt;/span&gt;
+  Encomendar
+&lt;/a&gt;</pre>
+
+<p>Repare que a seta vem antes no HTML e aparece depois na tela. Se o elemento fosse um grupo de
+links separados, o mesmo truque viraria um problema de acessibilidade — é a diferença entre inverter
+um componente e inverter uma lista de ações.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|flex-direction=column-reverse">
+  <p class="try-task">O HTML começa pelo nome e termina na data. No comprovante, a cliente quer a data
+  em cima e o nome embaixo — e o HTML não pode mudar. Inverta a fila.</p>
+  <pre class="html">&lt;div id="alvo" class="flex flex-col bg-amber-50 p-4"&gt;
+  &lt;p class="font-bold"&gt;Maria Souza&lt;/p&gt;
+  &lt;p class="text-sm"&gt;Encomenda para sábado, 7h&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+padding: 16px
+flex-direction: column
+background-color: oklch(0.987 0.022 95.277)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex flex-col-reverse bg-amber-50 p-4"&gt;
+  &lt;p class="font-bold"&gt;Maria Souza&lt;/p&gt;
+  &lt;p class="text-sm"&gt;Encomenda para sábado, 7h&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>flex-direction: column-reverse</code>. A prévia mostra o nome embaixo e a data
+em cima — e o HTML continua na ordem original. É útil quando o conteúdo vem de um sistema que você
+não controla, ou quando a ordem semântica é uma e a visual é outra.</p>
+
+<p>Só que aqui mora um perigo real, e ele não é visual. A ordem do teclado e a ordem de leitura do
+leitor de tela seguem o HTML, não o CSS. Num comprovante de texto, tanto faz. Num container com
+links e botões, o usuário que navega com Tab vai pular do primeiro link (que está à direita) para o
+segundo (que está à esquerda), na contramão do que os olhos veem. Por isso a regra é: use
+<code>-reverse</code> para inverter conteúdo sem interação, como duas linhas de texto, ou quando a
+ordem do HTML já é a ordem certa e o desenho é que precisa ser espelhado. Se houver botões, prefira
+mudar o HTML.</p>
+
+<h2>7. Quebrar em linhas: flex-wrap</h2>
+
+<p>Voltemos ao padrão. O flex não quebra porque o valor inicial é <code>nowrap</code>: todos os itens
+numa linha só. Quando não cabem, duas coisas podem acontecer. O item pode <em>encolher</em>, porque
+todo item flex tem <code>flex-shrink: 1</code> por padrão — é o que aconteceu com o botão no celular,
+que ficou do tamanho de uma unha. Ou o item pode <em>vazar</em>, quando o conteúdo dele tem um
+tamanho mínimo que o impede de encolher — é o caso dos selos, que não encolhem porque o texto dentro
+deles não encolhe.</p>
+
+<p><code>flex-wrap</code> muda a regra: em vez de apertar, o navegador começa uma nova linha. Os itens
+que não couberem descem, mantendo o tamanho natural. O container ganha altura, o que é exatamente o
+que você quer numa lista de selos ou numa galeria de miniaturas.</p>
+
+<pre class="term">.flex-wrap {
+  flex-wrap: wrap;
+}
+.flex-wrap-reverse {
+  flex-wrap: wrap-reverse;
+}</pre>
+
+<p>Existe ainda <code>flex-wrap-reverse</code>, que quebra as linhas na direção contrária do eixo
+transversal: as novas linhas vão para <em>cima</em> da primeira. Na prática, o efeito é parecido com o
+de uma lista construída de baixo para cima, e o uso é raro. Vale conhecer para não se assustar quando
+vir num projeto alheio.</p>
+
+<p>Um cuidado que combina com a aula anterior: com <code>flex-wrap</code>, o alinhamento entre linhas
+passa a importar, e é o <code>align-content</code> que cuida dele (o <code>items-center</code> alinha
+dentro de cada linha). Se as linhas ficarem com espaços estranhos entre si, o problema está no
+alinhamento de conteúdo, não no wrap. Para o cartão da Ana, o padrão funciona.</p>
+
+<div class="trytailwind" data-largura="420" data-goal="css:#alvo|flex-wrap=wrap;;conta:#alvo &gt; span=8">
+  <p class="try-task">Os oito selos do cartão saem pela borda direita. Faça os que não couberem
+  descerem para a linha de baixo.</p>
+  <pre class="html">&lt;div id="alvo" class="flex gap-2 bg-amber-50 p-4"&gt;
+  &lt;span class="bg-amber-200 px-2 py-1"&gt;vegano&lt;/span&gt;
+  &lt;span class="bg-amber-200 px-2 py-1"&gt;sem açúcar&lt;/span&gt;
+  &lt;span class="bg-amber-200 px-2 py-1"&gt;integral&lt;/span&gt;
+  &lt;span class="bg-amber-200 px-2 py-1"&gt;assado hoje&lt;/span&gt;
+  &lt;span class="bg-amber-200 px-2 py-1"&gt;sem lactose&lt;/span&gt;
+  &lt;span class="bg-amber-200 px-2 py-1"&gt;artesanal&lt;/span&gt;
+  &lt;span class="bg-amber-200 px-2 py-1"&gt;forno a lenha&lt;/span&gt;
+  &lt;span class="bg-amber-200 px-2 py-1"&gt;encomenda&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+padding: 16px
+gap: 8px
+background-color: oklch(0.987 0.022 95.277)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex flex-wrap gap-2 bg-amber-50 p-4"&gt;
+  &lt;span class="bg-amber-200 px-2 py-1"&gt;vegano&lt;/span&gt;
+  &lt;span class="bg-amber-200 px-2 py-1"&gt;sem açúcar&lt;/span&gt;
+  &lt;span class="bg-amber-200 px-2 py-1"&gt;integral&lt;/span&gt;
+  &lt;span class="bg-amber-200 px-2 py-1"&gt;assado hoje&lt;/span&gt;
+  &lt;span class="bg-amber-200 px-2 py-1"&gt;sem lactose&lt;/span&gt;
+  &lt;span class="bg-amber-200 px-2 py-1"&gt;artesanal&lt;/span&gt;
+  &lt;span class="bg-amber-200 px-2 py-1"&gt;forno a lenha&lt;/span&gt;
+  &lt;span class="bg-amber-200 px-2 py-1"&gt;encomenda&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>flex-wrap: wrap</code>, e a prévia mostra os selos em duas ou três linhas,
+todos inteiros. O <code>gap-2</code> do exemplo cuida do espaço entre eles — horizontal e vertical,
+inclusive entre as linhas — e tem aula própria; ele já está ali para o exemplo não ficar com os selos
+grudados.</p>
+
+<h2>8. Encolher ou quebrar?</h2>
+
+<p>Com as duas ferramentas na mão, a pergunta é qual usar. A diferença é de intenção: encolher diz
+"esses itens cabem, só precisam se ajustar"; quebrar diz "esses itens têm tamanho próprio e podem
+ocupar mais linhas". A tabela abaixo resume as decisões do dia a dia:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Situação</th><th>Escolha</th><th>Por quê</th></tr>
+<tr><td>preço e botão em cartão estreito</td><td><code>flex-col</code></td><td>cada um na sua linha, sem espremer</td></tr>
+<tr><td>mesmo cartão no monitor</td><td><code>md:flex-row</code></td><td>sobra espaço para os dois lado a lado</td></tr>
+<tr><td>selos, tags, filtros</td><td><code>flex-wrap</code></td><td>tamanho próprio, quantidade variável</td></tr>
+<tr><td>ícone à direita do texto</td><td><code>flex-row-reverse</code></td><td>inverte sem mexer no HTML</td></tr>
+<tr><td>duas linhas de texto invertidas</td><td><code>flex-col-reverse</code></td><td>ordem visual diferente da semântica</td></tr>
+<tr><td>barra de navegação</td><td><code>flex</code> (padrão)</td><td>poucos itens, sempre na mesma linha</td></tr>
+</table>
+</div>
+
+<p>Repare que quase toda decisão de direção tem um "no celular" e um "no monitor". Isso não é
+coincidência: a fila horizontal precisa de largura, e a vertical não. Quando o espaço aperta, virar o
+eixo é a manobra mais barata — mais barata que reduzir fonte, mais barata que esconder elemento, mais
+barata que reescrever o componente.</p>
+
+<p>E a quebra fica reservada para conteúdo de quantidade imprevisível: selos, tags, categorias,
+miniaturas. Você não sabe quantos vão existir, então não pode contar com uma linha só. Nesse caso,
+<code>flex-wrap</code> mais <code>gap</code> resolvem de uma vez, e o layout continua honesto quando
+chegam mais três itens.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o cabeçalho que virou torre no celular</h3>
+<p>No monitor, logo, busca e menu ficavam numa linha só. No celular, o mesmo <code>flex</code> espremia
+os três, e o campo de busca virava um traço. A solução foi <code>flex-col md:flex-row</code>: no
+celular, cada peça na sua linha, com a busca ocupando a largura toda; no monitor, a fila de
+volta. Nada de conteúdo duplicado, nada de tela separada — só a direção mudando com o espaço
+disponível.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: os selos que saíam do cartão</h3>
+<p>Quatro selos, quatro larguras diferentes, e o último sempre saía pela borda. A Ana tentou diminuir
+a fonte, depois tentou encurtar os textos, e o problema voltava quando aparecia um selo novo. Com
+<code>flex-wrap gap-2</code>, os selos passaram a ocupar quantas linhas fossem necessárias. O cartão
+cresceu em altura, o que é aceitável; o conteúdo ficou legível, o que é obrigatório.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o preço que ficou embaixo do botão</h3>
+<p>Na tentativa de inverter a ordem, ela usou <code>flex-col-reverse</code> num cartão com dois links e
+percebeu que a navegação por Tab ficou ao contrário do que os olhos viam: o foco pulava para o link de
+baixo primeiro. Em texto puro, o reverse é inofensivo; com elementos clicáveis, ele atrapalha. A
+solução foi reordenar o HTML e voltar ao <code>flex-col</code> simples. O CSS sabe inverter; o
+teclado, não.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Qual classe empilha os itens de um container
+flex?</p>
+<label><input type="radio" name="q1"> <code>flex-wrap</code></label>
+<label><input type="radio" name="q1"> <code>flex-col</code></label>
+<label><input type="radio" name="q1"> <code>flex-row</code></label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Para que serve <code>flex-wrap</code>?</p>
+<label><input type="radio" name="q2"> para inverter a ordem dos itens na fila</label>
+<label><input type="radio" name="q2"> para centralizar os itens na vertical</label>
+<label><input type="radio" name="q2"> para os itens que não couberem descerem para outra linha</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que <code>flex-row</code> num container que
+nunca teve direção definida não muda nada?</p>
+<label><input type="radio" name="q3"> porque <code>row</code> já é a direção padrão do flex</label>
+<label><input type="radio" name="q3"> porque a classe está escrita errado</label>
+<label><input type="radio" name="q3"> porque falta o <code>flex-wrap</code> junto</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o cartão no celular</h2>
+<p>Complete a classe que faz o container empilhar os filhos na vertical:</p>
+<div class="ex-code">&lt;div class="flex <input aria-label="resposta 1" data-answer="flex-col" placeholder="..."> bg-amber-50 p-4"&gt;</div>
+<p class="ex-dica">Dica: o nome vem de <em>column</em>, coluna. Só <code>col</code> não existe no
+Tailwind — a classe inteira é <code>flex-col</code>.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>A fila do flex tem um eixo, e o eixo tem direção. <code>flex-row</code> é a horizontal, o padrão;
+<code>flex-col</code> é a vertical, que empilha os itens e é a saída para telas estreitas. Os
+<code>-reverse</code> invertem a ordem visual sem tocar no HTML, com um custo: a ordem do teclado
+continua sendo a do HTML. <code>flex-wrap</code> deixa os itens descerem para outra linha quando não
+cabem, em vez de serem espremidos; é a classe certa para selos e tags, cuja quantidade você não
+controla.</p>
+
+<p>A combinação mais útil do capítulo não é uma classe, é um par: <code>flex-col md:flex-row</code>.
+Empilha no celular, enfileira no monitor, com o mesmo HTML. E lembre que <code>flex-row</code> e
+<code>flex-nowrap</code> parecem não fazer nada num container limpo porque são exatamente o padrão —
+elas existem para desfazer e para serem usadas com prefixo.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>O flex organiza os itens num eixo; a direção escolhe qual.</li>
+<li><code>flex-row</code> = horizontal (padrão); <code>flex-col</code> = vertical.</li>
+<li><code>flex-col</code> estica os itens na largura, por causa do <code>align-items: stretch</code>.</li>
+<li><code>flex-col md:flex-row</code>: empilha no celular, enfileira no monitor.</li>
+<li><code>flex-row-reverse</code> e <code>flex-col-reverse</code> invertem só a ordem visual.</li>
+<li>O teclado e o leitor de tela seguem o HTML, não o reverse.</li>
+<li><code>flex-wrap</code> desce para outra linha; <code>flex-wrap-reverse</code> empilha para
+cima.</li>
+<li>Sem <code>flex-wrap</code>, os itens encolhem ou vazam — é o padrão <code>nowrap</code>.</li>
+<li>Selos e tags pedem <code>flex-wrap</code> mais <code>gap</code>.</li>
+<li><code>flex-row</code> e <code>flex-nowrap</code> não mudam um container limpo: já são o padrão.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

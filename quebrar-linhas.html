@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quebrar e Cortar Texto | Guia Tailwind</title>
+<meta name="description" content="Quebrar e cortar texto no Tailwind: whitespace-nowrap, break-words, truncate e line-clamp-2 no cartão da Ana, com o CSS que cada classe gera.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Quebrar e Cortar <span class="hl">Texto</span></h1>
+<p class="intro">O cartão do pão de fermentação natural ficou lindo no monitor da Ana e um desastre no
+celular. O nome comprido vazou para fora da caixa, a descrição empurrou o botão para baixo e o preço
+se partiu no meio, deixando um "R$" órfão no fim da linha. O culpado não é o Tailwind nem o tamanho
+da tela: é o jeito como o navegador decide onde uma linha pode terminar. Nesta aula a Ana aprende a
+mandar o navegador não quebrar (<code>whitespace-nowrap</code>), a permitir que palavras enormes
+quebrem (<code>break-words</code>) e a cortar o texto com reticências, em uma linha com
+<code>truncate</code> ou em duas com <code>line-clamp-2</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Onde o navegador pode quebrar uma linha — e onde ele não pode.</li>
+  <li>As classes <code>whitespace-normal</code>, <code>whitespace-nowrap</code> e
+  <code>whitespace-pre-line</code>.</li>
+  <li>Como fazer uma palavra comprida caber: <code>break-words</code> e <code>break-all</code>.</li>
+  <li>Como cortar com reticências: <code>truncate</code>, <code>text-ellipsis</code> e
+  <code>line-clamp-2</code>.</li>
+  <li>Por que o corte só funciona quando existe uma largura máxima.</li>
+  <li>O que <code>text-balance</code> e <code>text-pretty</code> fazem nos títulos.</li>
+  <li>Como escolher entre quebrar, cortar e deixar vazar.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o cartão que estoura no celular</h2>
+
+<p>O cartão da Ana tinha nome, descrição e preço. No monitor, sobrava espaço e tudo cabia numa linha.
+No celular, a tela ficou com 375 px e o texto teve que se virar:</p>
+
+<pre class="file" data-file="cardapio.html">&lt;div class="w-56"&gt;
+  &lt;h3&gt;Pão de fermentação natural com castanhas do Pará&lt;/h3&gt;
+  &lt;p&gt;R$ 12,00 o quilo&lt;/p&gt;
+&lt;/div&gt;</pre>
+
+<p>Três coisas deram errado de uma vez. O nome comprido vazou para a direita, por cima do que estava
+ao lado. A descrição mudou de altura e empurrou o botão. E o preço quebrou entre o "R$" e o número,
+que é a pior quebra possível: qualquer pessoa lê "R$" e espera o valor na mesma linha. São três
+problemas diferentes, com três soluções diferentes, e todas passam pela mesma pergunta: onde este
+texto pode ser quebrado?</p>
+
+<p>Vale entender o mecanismo antes das classes. O navegador não quebra onde quer: ele quebra nos
+pontos que o texto oferece. Espaço é um ponto de quebra. Hífen é outro. Uma barra também, em muitos
+casos. Um ponto final, às vezes. O que não é ponto de quebra é o meio de uma palavra: "fermentação"
+não pode virar "fermenta" numa linha e "ção" na outra, porque o navegador não sabe se você vai
+gostar.</p>
+
+<p>Com texto em português, isso quase sempre funciona bem, porque temos palavras curtas e muitos
+espaços. O problema aparece em três situações: palavras realmente longas (URLs, códigos, nomes
+científicos), caixas muito estreitas (cartão de celular, barra lateral) e trechos que você quer
+manter juntos (preço e unidade, número e moeda, data e hora). É aí que as classes desta aula
+entram.</p>
+
+<h2>2. O que é estouro, e por que ele acontece</h2>
+
+<p>Quando um texto não tem onde quebrar, ele não encolhe: ele transborda. Esse transbordo tem nome,
+<em>overflow</em>, e é uma das causas mais comuns de barra de rolagem horizontal indesejada — aquela
+que faz o site inteiro "andar" para o lado no celular e estraga a experiência de quem lê. O culpado
+costuma ser um único elemento: um nome comprido, uma URL colada, um número de pedido.</p>
+
+<p>O navegador tenta ser razoável. Se uma palavra não couber na linha, ele a coloca na linha seguinte
+inteira. Se ela não couber nem na linha vazia, ele a deixa vazar. Não há erro, não há aviso no
+console: o texto simplesmente passa por cima do que estiver ao lado, ou é cortado pelo
+<code>overflow</code> do contêiner. Para quem está começando, o sintoma parece mágica; para quem
+entendeu a regra, é só a consequência de não haver ponto de quebra.</p>
+
+<dl class="anatomy">
+<dt>ponto de quebra</dt>
+<dd>O lugar onde o navegador tem permissão de terminar uma linha. Espaço e hífen são os principais;
+o meio de uma palavra não é.</dd>
+<dt>overflow</dt>
+<dd>O que acontece quando o conteúdo é maior que a caixa. Pode vazar para fora ou ser cortado, e é
+a caixa que decide.</dd>
+<dt>overflow-wrap</dt>
+<dd>A propriedade que autoriza quebrar dentro de uma palavra quando ela não couber. No Tailwind é
+<code>break-words</code>.</dd>
+<dt>text-overflow</dt>
+<dd>O que aparece no lugar do texto cortado. Com <code>ellipsis</code>, aparecem as reticências.</dd>
+<dt>line-clamp</dt>
+<dd>O limite de linhas de um bloco de texto, com reticências na última. No Tailwind,
+<code>line-clamp-2</code>.</dd>
+</dl>
+
+<h2>3. Não quebrar: whitespace-nowrap</h2>
+
+<p>A primeira ferramenta é a mais simples: dizer "não quebre aqui". A família
+<code>whitespace-*</code> controla como o navegador trata os espaços em branco e as quebras do texto.
+A tabela mostra os valores que existem:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>CSS gerado</th><th>O que faz</th><th>Onde serve</th></tr>
+<tr><td><code>whitespace-normal</code></td><td>white-space: normal</td><td>quebra nos espaços, como sempre</td><td>texto comum</td></tr>
+<tr><td><code>whitespace-nowrap</code></td><td>white-space: nowrap</td><td>nunca quebra; o texto passa da borda</td><td>preço, data, nome curto de etiqueta</td></tr>
+<tr><td><code>whitespace-pre-line</code></td><td>white-space: pre-line</td><td>mantém os Enter do texto e quebra nos espaços</td><td>endereço, bilhete, letra de música</td></tr>
+<tr><td><code>whitespace-pre-wrap</code></td><td>white-space: pre-wrap</td><td>mantém Enter e espaços, e ainda quebra</td><td>recibo, bloco formatado</td></tr>
+<tr><td><code>whitespace-pre</code></td><td>white-space: pre</td><td>mantém tudo, sem quebrar nunca</td><td>código, ASCII art</td></tr>
+<tr><td><code>whitespace-break-spaces</code></td><td>white-space: break-spaces</td><td>como pre-wrap, contando os espaços do fim</td><td>caso raro, texto alinhado à mão</td></tr>
+</table>
+</div>
+
+<p>Para o dia a dia, três bastam. <code>whitespace-normal</code> é o padrão e não precisa ser
+escrito. <code>whitespace-nowrap</code> é o "mantenha junto", e é o que resolve o preço partido.
+<code>whitespace-pre-line</code> é o que respeita os Enter que o cliente digitou num campo de
+endereço — sem ela, o endereço em quatro linhas vira um parágrafo corrido, porque o HTML trata
+quebra de linha como espaço.</p>
+
+<div class="trytailwind" data-largura="420" data-goal="css:#alvo|white-space=nowrap;;rule:white-space: nowrap">
+  <p class="try-task">No cartão estreito, o preço se parte entre "R$" e o número. Mantenha o trecho
+  inteiro numa linha só, sem mexer no resto do texto.</p>
+  <pre class="html">&lt;div class="w-52 bg-amber-50 p-3"&gt;
+  &lt;p&gt;Pão de queijo, assado na hora, &lt;span id="alvo" class="bg-amber-100 px-1"&gt;R$ 12,00 o quilo&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.962 0.059 95.617)
+padding-inline: 4px
+</pre>
+  <pre class="solucao">&lt;div class="w-52 bg-amber-50 p-3"&gt;
+  &lt;p&gt;Pão de queijo, assado na hora, &lt;span id="alvo" class="whitespace-nowrap bg-amber-100 px-1"&gt;R$ 12,00 o quilo&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>white-space: nowrap</code>, e a prévia mostra o efeito real: o trecho não se
+parte mais. Repare que a classe foi no <code>span</code>, não no parágrafo — é o trecho que precisa
+ficar junto, não a frase inteira. Se você aplicar no parágrafo todo, o texto deixa de quebrar em
+qualquer ponto e vaza da caixa; em caixa estreita, isso é pior do que o problema original.</p>
+
+<p>A regra prática: <code>whitespace-nowrap</code> em pedaços pequenos que fazem sentido juntos —
+valor com unidade, data com hora, "de" com o nome da cidade. Nunca em parágrafo, nunca em título
+longo. Quando o trecho não couber de jeito nenhum, a solução não é forçar: é cortar com reticências,
+que é o assunto das próximas seções.</p>
+
+<h2>4. Quebrar palavras compridas: break-words</h2>
+
+<p>O contrário do problema anterior: a palavra é tão longa que não cabe numa linha vazia. O caso
+clássico é a URL de um link, um código de pedido tipo
+<code>ENCOMENDA-2024-11-27-FERMENTACAO-NATURAL</code> ou um e-mail comprido. O navegador não vê ponto
+de quebra e o texto vaza. A classe <code>break-words</code> autoriza o navegador a quebrar dentro da
+palavra, mas só se não houver alternativa:</p>
+
+<pre class="term">.break-words {
+  overflow-wrap: break-word;
+}</pre>
+
+<p>A sutileza está no "só se não houver alternativa". Com <code>overflow-wrap: break-word</code>, o
+navegador primeiro tenta colocar a palavra na linha seguinte, inteira, como sempre. Só quando ela não
+cabe nem sozinha é que ele a parte. Isso mantém o texto normal bonito e resolve o caso extremo — é a
+escolha certa para descrição, nome de produto e qualquer texto que possa receber um endereço
+eletrônico colado.</p>
+
+<p>Existe um irmão mais agressivo, <code>break-all</code>, que corresponde a
+<code>word-break: break-all</code>. Ele quebra a palavra em qualquer ponto, mesmo que ela coubesse na
+linha seguinte, e o resultado é feio em texto comum: "fermenta-ção" pode virar "fermentaç" numa
+linha e "ão" na outra. O uso legítimo é raro — blocos de código, sequências longas de dígitos,
+tabelas com nomes técnicos. Para o site da padaria, <code>break-words</code> é o que você quer.</p>
+
+<p>Tem ainda <code>break-keep</code>, que corresponde a <code>word-break: keep-all</code>. Ele existe
+para chinês, japonês e coreano, onde as palavras não são separadas por espaço e o navegador precisa de
+regras próprias. Em português, praticamente não muda nada. Se você vir essa classe num projeto
+traduzido, já sabe de onde ela veio.</p>
+
+<h2>5. Cortar em uma linha: truncate</h2>
+
+<p>Agora o corte. Quando o texto é longo demais e não há espaço para ele, uma saída elegante é cortar
+e avisar que cortou, com reticências. A classe mais usada para isso é <code>truncate</code>, e ela
+faz três coisas de uma vez:</p>
+
+<pre class="term">.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}</pre>
+
+<p>Lendo de baixo para cima: <code>white-space: nowrap</code> impede qualquer quebra, então o texto
+fica numa linha só, do tamanho que for. <code>overflow: hidden</code> corta o que passar da caixa. E
+<code>text-overflow: ellipsis</code> troca o corte por três pontinhos. Nenhuma das três funciona
+sozinha: sem <code>overflow</code>, o texto vaza; sem <code>nowrap</code>, ele quebra em vez de
+cortar; sem <code>ellipsis</code>, ele é cortado no meio de uma letra, sem aviso.</p>
+
+<div class="trytailwind" data-largura="420" data-goal="css:#alvo|text-overflow=ellipsis;;css:#alvo|white-space=nowrap">
+  <p class="try-task">A descrição longa está sendo cortada a seco, no meio de uma palavra. Troque o
+  corte por reticências, numa linha só.</p>
+  <pre class="html">&lt;div class="w-56 bg-amber-50 p-2"&gt;
+  &lt;p id="alvo" class="overflow-hidden"&gt;Pão de fermentação natural com castanhas do Pará&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+overflow: hidden
+</pre>
+  <pre class="solucao">&lt;div class="w-56 bg-amber-50 p-2"&gt;
+  &lt;p id="alvo" class="truncate"&gt;Pão de fermentação natural com castanhas do Pará&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra as três propriedades que a classe reúne: <code>overflow: hidden</code>,
+<code>text-overflow: ellipsis</code> e <code>white-space: nowrap</code>. É uma das poucas classes do
+Tailwind que junta três propriedades em vez de uma, e por isso vale saber o que tem dentro: quando o
+corte não aparece, você já sabe qual das três está faltando.</p>
+
+<p>E aqui vem o detalhe que faz <code>truncate</code> "não funcionar" para muita gente: ele precisa de
+um limite de largura. Num elemento que ocupa a largura toda de uma página, o texto tem espaço de
+sobra e nunca é cortado. O limite vem de fora — uma classe de largura no elemento
+(<code>w-56</code>), no pai, ou uma coluna de grid. Sem limite, não há corte; é como pedir
+reticências para um texto que cabe.</p>
+
+<h2>6. Cortar em duas linhas: line-clamp</h2>
+
+<p>Uma linha só é pouco para uma descrição de produto. O caso real da Ana é: mostrar duas linhas e
+reticências, para que todos os cartões da vitrine tenham a mesma altura. Isso é
+<code>line-clamp-2</code>:</p>
+
+<div class="trytailwind" data-largura="420" data-goal="css:#alvo|-webkit-line-clamp=2;;rule:-webkit-line-clamp: 2">
+  <p class="try-task">Limite a descrição do cartão a duas linhas, com reticências no fim. Os cartões
+  da vitrine precisam ficar da mesma altura.</p>
+  <pre class="html">&lt;div class="w-64 bg-amber-50 p-2"&gt;
+  &lt;p id="alvo" class="text-sm"&gt;A nossa história começou em 1998, com um forno a lenha e uma receita de família que atravessou três gerações de padeiros.&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+font-size: 14px
+line-height: 20px
+</pre>
+  <pre class="solucao">&lt;div class="w-64 bg-amber-50 p-2"&gt;
+  &lt;p id="alvo" class="line-clamp-2 text-sm"&gt;A nossa história começou em 1998, com um forno a lenha e uma receita de família que atravessou três gerações de padeiros.&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS gerado explica o nome esquisito:</p>
+
+<pre class="term">.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}</pre>
+
+<p>O <code>display: -webkit-box</code> é um modo antigo de layout que o navegador ainda aceita e que
+tem uma habilidade rara: contar linhas e cortar depois da segunda. Não é um recurso novo e bonito, é
+um acordo histórico que todos os navegadores cumprem — por isso o CSS tem prefixo e nome de
+coisa velha. Para você, é só <code>line-clamp-2</code>; para o navegador, é essa gambiarra
+consagrada.</p>
+
+<p>Duas coisas importantes sobre o texto cortado. A primeira: ele continua no HTML. O leitor de tela
+lê a descrição inteira, o buscador indexa tudo, e o texto aparece completo se a tela crescer. O corte
+é visual, não é remoção. A segunda: o número pode ser qualquer um — <code>line-clamp-3</code>,
+<code>line-clamp-4</code> —, e <code>line-clamp-none</code> desfaz. E <code>line-clamp-1</code>
+também existe, cortando em uma linha — mas, para uma linha, o <code>truncate</code> é mais direto e não
+depende do modo antigo.</p>
+
+<h2>7. Quebrar, cortar ou deixar vazar?</h2>
+
+<p>Com as ferramentas na mão, a decisão fica mais fácil. A tabela abaixo é a que a Ana colou no
+caderno e serve para quase todo cartão:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que você quer</th><th>Classe</th><th>Cuidado</th></tr>
+<tr><td>Manter um trecho numa linha só</td><td><code>whitespace-nowrap</code></td><td>se não couber, vaza; use em trechos curtos</td></tr>
+<tr><td>Deixar uma palavra enorme quebrar</td><td><code>break-words</code></td><td>não resolve se não houver largura definida</td></tr>
+<tr><td>Cortar em uma linha com reticências</td><td><code>truncate</code></td><td>precisa de largura limitada</td></tr>
+<tr><td>Cortar em duas linhas com reticências</td><td><code>line-clamp-2</code></td><td>precisa de largura limitada</td></tr>
+<tr><td>Respeitar os Enter do texto</td><td><code>whitespace-pre-line</code></td><td>não use em texto corrido</td></tr>
+<tr><td>Evitar que a última palavra fique sozinha</td><td><code>text-pretty</code></td><td>efeito sutil, só em título curto</td></tr>
+</table>
+</div>
+
+<p>A ordem em que eu testo as coisas é sempre esta: primeiro vejo se o problema é de largura (a caixa
+é estreita demais para o conteúdo?), depois se é de quebra (falta ponto de quebra?), depois se é de
+corte. Trocar a ordem custa tempo: não adianta aplicar <code>truncate</code> num cartão que não tem
+largura definida, e não adianta definir largura se a palavra longa continua vazando.</p>
+
+<p>Duas classes completam o kit e são quase invisíveis. <code>text-balance</code> manda o navegador
+distribuir as palavras do título em linhas de tamanho parecido, em vez de deixar uma linha cheia e
+outra com uma palavra; é o que faz "Pão quentinho toda manhã" ficar equilibrado em duas linhas.
+<code>text-pretty</code> faz o contrário de forma suave: evita que a última linha fique com uma
+palavra só, a chamada "linha viúva". Ambas funcionam melhor em título curto — em texto longo, o
+navegador ignora por conta própria, para não gastar processamento.</p>
+
+<h2>8. Os erros que custam tempo</h2>
+
+<p>Estes são os que aparecem toda semana em quem está começando:</p>
+
+<ul>
+<li><strong>Aplicar <code>truncate</code> sem largura.</strong> O texto tem a página inteira para
+caber, então não é cortado e a classe parece inútil. Dê uma largura ao elemento ou ao pai.</li>
+<li><strong>Usar <code>whitespace-nowrap</code> em parágrafo.</strong> O texto vira uma linha
+gigante que vaza da tela e cria rolagem horizontal. Em parágrafo, o padrão é o certo.</li>
+<li><strong>Usar <code>break-all</code> em texto comum.</strong> As palavras se partem no meio mesmo
+quando caberiam na linha seguinte, e a leitura fica truncada. Prefira
+<code>break-words</code>.</li>
+<li><strong>Esquecer que largura em porcentagem depende do pai.</strong> <code>w-1/2</code> num pai
+que já está estreito dá uma caixa minúscula, e o corte aparece cedo demais. Confira os dois
+níveis.</li>
+<li><strong>Confundir corte com remoção.</strong> O texto cortado continua no HTML e no leitor de
+tela. Se a informação não pode ser escondida, não a esconda atrás de reticências: reescreva mais
+curto.</li>
+<li><strong>Esperar reticências num elemento em linha.</strong> O corte precisa de uma caixa com
+largura; num <code>span</code> que acompanha o texto, não há o que cortar.</li>
+</ul>
+
+<p>E um aviso que vale para tudo nesta aula: no celular, teste com o texto mais longo que o sistema
+permite, não com o texto bonito que você escolheu para a demonstração. Nome de produto com quatro
+palavras, e-mail de trinta caracteres, endereço com complemento. É nesse texto que as classes desta
+aula provam o seu valor — e é sempre ele que chega no banco de dados de produção.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a vitrine com cartões de alturas diferentes</h3>
+<p>Na vitrine, um pão tinha descrição de uma linha e outro de quatro, e os botões ficavam em alturas
+diferentes, como degraus. A solução foi fixar a altura da descrição com
+<code>line-clamp-2</code> em todos os cartões. Duas linhas sempre, com reticências quando passa. A
+vitrine ficou alinhada e o texto completo continuou acessível para quem usa leitor de tela.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o e-mail que estoura o rodapé</h3>
+<p>O rodapé tinha <code>contato@padariadobairro.test</code> e, no celular, o endereço vazava para
+fora da coluna, criando rolagem horizontal na página inteira. O teste do guia reprova exatamente
+isso. <code>break-words</code> no parágrafo resolveu: o e-mail quebrou em duas linhas, num ponto
+qualquer, e o site voltou a caber na tela. Em texto que pode conter endereço, é a primeira classe a
+tentar.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o preço que quebrou no meio</h3>
+<p>O cartão tinha <code>R$ 12,00 o quilo</code> e, no espaço apertado, o navegador quebrou entre o
+cifrão e o número. Parece detalhe, mas muda a leitura: quem bate o olho vê "R$" e perde o valor. O
+conserto foi <code>whitespace-nowrap</code> no trecho do preço, e não no cartão. O resto do texto
+continua quebrando normalmente, e a informação que precisa andar junta anda junta.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. O que <code>truncate</code> faz?</p>
+<label><input type="radio" name="q1"> apaga o texto que não couber</label>
+<label><input type="radio" name="q1"> quebra o texto em várias linhas curtas</label>
+<label><input type="radio" name="q1"> corta em uma linha, com reticências, o texto que passar da largura</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">2. Você aplicou <code>truncate</code> e o texto não
+foi cortado. Qual é a causa mais provável?</p>
+<label><input type="radio" name="q2"> a classe só funciona em títulos</label>
+<label><input type="radio" name="q2"> falta um limite de largura no elemento ou no pai</label>
+<label><input type="radio" name="q2"> falta o <code>break-all</code> junto</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Para manter <code>R$ 12,00 o quilo</code> numa
+linha só, qual classe?</p>
+<label><input type="radio" name="q3"> <code>whitespace-nowrap</code></label>
+<label><input type="radio" name="q3"> <code>whitespace-pre</code></label>
+<label><input type="radio" name="q3"> <code>break-words</code></label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a descrição do cartão</h2>
+<p>A Ana quer que a descrição ocupe no máximo duas linhas, com reticências. Complete a classe:</p>
+<div class="ex-code">&lt;p class="<input aria-label="resposta 1" data-answer="line-clamp-2" placeholder="..."> text-sm"&gt;A nossa história...&lt;/p&gt;</div>
+<p class="ex-dica">Dica: o nome vem do inglês <em>line</em> (linha) e <em>clamp</em> (prender). O
+número depois do hífen é a quantidade de linhas permitidas.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O navegador só quebra linha onde o texto oferece um ponto de quebra: espaço, hífen, barra. Palavra
+comprida sem esses pontos vaza da caixa e cria rolagem horizontal. Para controlar isso, o Tailwind
+tem três famílias. <code>whitespace-nowrap</code> proíbe a quebra num trecho — bom para preço e data,
+ruim para parágrafo. <code>break-words</code> autoriza quebrar dentro de uma palavra, mas só quando
+ela não couber sozinha. E o corte com reticências vem em duas versões:
+<code>truncate</code>, que é <code>overflow</code> mais <code>ellipsis</code> mais
+<code>nowrap</code>, para uma linha; e <code>line-clamp-2</code>, para duas ou mais.</p>
+
+<p>As duas de corte dependem de largura limitada para funcionar — sem limite, não há o que cortar. O
+texto cortado continua no HTML, acessível para leitor de tela e buscador; o corte é visual. E os
+títulos ganham um acabamento com <code>text-balance</code>, que distribui as palavras em linhas
+parecidas, e <code>text-pretty</code>, que evita a última palavra sozinha na linha.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>O navegador quebra em espaços e hífens; o meio da palavra não é ponto de quebra.</li>
+<li><code>whitespace-nowrap</code> mantém o trecho junto — em pedaço curto, nunca no parágrafo.</li>
+<li><code>whitespace-pre-line</code> respeita os Enter do texto, bom para endereço.</li>
+<li><code>break-words</code> = <code>overflow-wrap: break-word</code>; quebra só quando não há
+alternativa.</li>
+<li><code>break-all</code> quebra em qualquer ponto e estraga texto comum.</li>
+<li><code>truncate</code> = <code>overflow: hidden</code> + <code>text-overflow: ellipsis</code> +
+<code>white-space: nowrap</code>.</li>
+<li><code>line-clamp-2</code> usa <code>display: -webkit-box</code> e <code>-webkit-line-clamp</code>.</li>
+<li>Sem largura limitada, nenhuma das duas corta.</li>
+<li>O texto cortado continua no HTML: o corte é visual, não remoção.</li>
+<li><code>text-balance</code> equilibra linhas de título; <code>text-pretty</code> evita a viúva.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

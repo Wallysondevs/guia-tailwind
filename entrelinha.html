@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entrelinha e Espaçamento | Guia Tailwind</title>
+<meta name="description" content="Entrelinha na prática: o que leading-tight, leading-relaxed e leading-6 fazem no texto da Ana, o atalho text-base/7 e o tracking das etiquetas.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Entrelinha e <span class="hl">Espaçamento</span></h1>
+<p class="intro">A Ana escreveu a história da padaria para a página inicial: algumas frases sobre o forno
+a lenha, o pai que acendia às cinco da manhã e o pão de fermentação natural. No papel ficou bonito.
+Na tela, virou um bloco compacto que ninguém tem vontade de ler. O texto está certo, as palavras
+estão certas — o que está errado é a distância entre uma linha e a outra. Nesta aula ela aprende a
+dar ar entre as linhas com <code>leading-relaxed</code>, descobre por que o número <code>6</code> em
+<code>leading-6</code> é uma medida fixa e o nome <code>relaxed</code> não é, e ainda abre o espaço
+entre as letras das etiquetas com <code>tracking</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é entrelinha e por que o texto sem ar cansa quem lê.</li>
+  <li>O que <code>leading-tight</code>, <code>leading-normal</code>, <code>leading-relaxed</code> e
+  <code>leading-loose</code> fazem de verdade.</li>
+  <li>A diferença entre a entrelinha com nome (relativa) e a com número (fixa em pixels).</li>
+  <li>O atalho <code>text-base/7</code>, que junta tamanho da letra e entrelinha numa classe só.</li>
+  <li>Como separar letras com <code>tracking-wide</code> e <code>tracking-widest</code>.</li>
+  <li>Que a entrelinha é herdada e que o painel mostra o valor em pixels, não em múltiplo.</li>
+  <li>Os erros que deixam o texto ilegível: linha colada, letra grande com linha pequena.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o parágrafo que virou um bloco</h2>
+
+<p>A Ana montou o texto no editor e colou no site. Ficou assim:</p>
+
+<pre class="file" data-file="index.html">&lt;p class="bg-amber-50 p-4"&gt;A nossa história começou em 1998, com um forno a lenha e uma receita de
+família. O meu pai acendia o forno às cinco da manhã e o cheiro de pão quentinho acordava a rua
+inteira. Hoje somos três padeiros, dois ajudantes e a mesma receita.&lt;/p&gt;</pre>
+
+<p>Nada está errado nesse HTML: tem fundo, tem respiro de 16 px (<code>p-4</code>) e tem texto. O que
+incomoda é outra coisa. As linhas estão próximas demais, e cada linha tem quase oitenta letras de
+largura. São dois problemas diferentes, e o segundo quase ninguém percebe no começo.</p>
+
+<p>Quando a gente lê, o olho não desliza numa linha reta: ele salta. Termina a linha da direita,
+volta para a esquerda, encontra a linha seguinte e continua. Se as linhas estão coladas, esse retorno
+acontece no lugar errado e o olho recomeça uma linha acima ou abaixo. Se a linha é longa demais, ele
+se perde no meio do caminho de volta. Livro de bolso usa duas decisões para resolver isso: entrelinha
+generosa e coluna estreita.</p>
+
+<p>Esta aula trata da primeira: a distância entre as linhas, que em português se chama
+<strong>entrelinha</strong>. A segunda é largura de texto, e o Tailwind resolve com uma classe só
+(<code>max-w-prose</code>), que a gente usa no fim da aula junto com a entrelinha. Por enquanto,
+guarde a imagem do olho pulando: toda vez que você olhar um texto e achar que ele "cansa", tente
+descobrir qual dos dois está errado.</p>
+
+<h2>2. O que é entrelinha, afinal</h2>
+
+<p>Entrelinha é a altura de cada linha de texto. Repare bem: altura da linha, não altura da letra.
+Uma letra de 16 px pode morar numa linha de 24 px, e os 8 px que sobram se distribuem acima e abaixo
+das letras. É esse resto que dá o ar. Aumentar a entrelinha não aumenta a letra — só afasta as
+linhas umas das outras.</p>
+
+<p>No CSS, quem guarda essa medida é a propriedade <code>line-height</code>. Ela aceita três tipos de
+valor: em pixels (<code>24px</code>), em <code>rem</code> (<code>1.5rem</code>) ou como um número
+puro, sem unidade (<code>1.5</code>). O número puro é o mais usado no Tailwind, e o motivo é
+prático: ele é um multiplicador do tamanho da letra. Se a letra é 16 px, 1,5 dá 24 px. Se a letra
+crescer para 20 px, 1,5 dá 30 px automaticamente.</p>
+
+<pre class="term">font-size: 16px;   line-height: 1.5;   --> 24px por linha
+font-size: 20px;   line-height: 1.5;   --> 30px por linha</pre>
+
+<p>Como o número puro não tem unidade, ele acompanha a letra. Já o valor em pixels não acompanha
+nada: <code>line-height: 24px</code> serão 24 px para letra de 12 ou de 30. Guarde essa diferença,
+porque é exatamente a diferença entre a entrelinha com nome e a entrelinha com número no Tailwind,
+e é a origem de metade dos títulos com linha encavalada que você vai ver por aí.</p>
+
+<p>Uma coisa que surpreende quem começa: o texto sem classe nenhuma já tem entrelinha. O navegador
+aplica um valor chamado <code>normal</code>, e o Tailwind, no CSS de base que ele próprio injeta,
+fixa 1,5 na raiz da página. Ou seja, um parágrafo comum já sai com 24 px por linha num corpo de
+16 px. A nossa conversa não é sobre criar entrelinha do zero — é sobre ajustar uma medida que já
+existe, e saber quando ela está errada para o tipo de texto.</p>
+
+<dl class="anatomy">
+<dt>entrelinha</dt>
+<dd>A distância de uma linha de texto até a seguinte, medida de base a base. Em português é o termo
+de gráfica; em inglês, <em>leading</em>.</dd>
+<dt>corpo</dt>
+<dd>O tamanho da letra. No Tailwind, <code>text-base</code> é corpo de 16 px, o padrão do navegador.</dd>
+<dt>line-height</dt>
+<dd>A propriedade do CSS que guarda a altura da linha. Aceita pixels, <code>rem</code> ou um número
+puro, que é multiplicado pelo corpo.</dd>
+<dt>múltiplo</dt>
+<dd>O número puro sem unidade, como <code>1.5</code>. Ele acompanha o corpo: se a letra cresce, a
+linha cresce na mesma proporção.</dd>
+<dt>caixa da linha</dt>
+<dd>A faixa invisível que cada linha ocupa. Ela é sempre mais alta que a letra, e a sobra é o ar que
+a entrelinha distribui.</dd>
+</dl>
+
+<h2>3. A escala com nome: leading-tight, relaxed, loose</h2>
+
+<p>O Tailwind dá nome às entrelinhas que aparecem nos projetos. A palavra é <code>leading</code> —
+em inglês tipográfico, o chumbo que separava as linhas na prensa — e o sufixo diz quanto. São seis
+nomes, e a tabela abaixo mostra o múltiplo e o resultado num texto de 16 px:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Múltiplo</th><th>Em texto de 16 px</th><th>Onde costuma servir</th></tr>
+<tr><td><code>leading-none</code></td><td>1</td><td>16 px</td><td>uma linha só, número grande</td></tr>
+<tr><td><code>leading-tight</code></td><td>1,25</td><td>20 px</td><td>título de duas ou três linhas</td></tr>
+<tr><td><code>leading-snug</code></td><td>1,375</td><td>22 px</td><td>subtítulo, texto curto de cartão</td></tr>
+<tr><td><code>leading-normal</code></td><td>1,5</td><td>24 px</td><td>o padrão; quase sempre já é isso</td></tr>
+<tr><td><code>leading-relaxed</code></td><td>1,625</td><td>26 px</td><td>parágrafo de leitura</td></tr>
+<tr><td><code>leading-loose</code></td><td>2</td><td>32 px</td><td>texto muito aberto, capa, citação</td></tr>
+</table>
+</div>
+
+<p>Esses seis nomes cobrem quase tudo o que um site de padaria precisa. O texto corrido pede
+<code>leading-relaxed</code>; o título pede <code>leading-tight</code>; uma linha gigante de preço
+pede <code>leading-none</code>. Repare que <code>leading-normal</code> é 1,5, o mesmo valor que já
+está lá por herança: aplicá-lo não muda nada visível. O painel das caixas chega a esconder essa
+propriedade, porque ele mostra só o que a classe mudou.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|line-height=26px;;rule:line-height: var(--leading-relaxed)">
+  <p class="try-task">O parágrafo da história está com a entrelinha apertada. Troque a classe pela
+  entrelinha de leitura confortável, de 26 px, e clique em Rodar.</p>
+  <pre class="html">&lt;p id="alvo" class="bg-amber-50 p-4 leading-tight"&gt;A nossa história começou em 1998, com um forno a lenha e uma receita de família que atravessou três gerações.&lt;/p&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+line-height: 20px
+</pre>
+  <pre class="solucao">&lt;p id="alvo" class="bg-amber-50 p-4 leading-relaxed"&gt;A nossa história começou em 1998, com um forno a lenha e uma receita de família que atravessou três gerações.&lt;/p&gt;</pre>
+</div>
+
+<p>Antes, o painel mostrava <code>line-height: 20px</code>; depois, 26 px. Parece pouco, mas é a
+diferença entre quatro linhas apertadas e quatro linhas respirando. O CSS que o Tailwind gera para
+essa classe é curto e vale ler uma vez na vida:</p>
+
+<pre class="term">.leading-relaxed {
+  --tw-leading: var(--leading-relaxed);
+  line-height: var(--leading-relaxed);
+}</pre>
+
+<p>Repare que ele não escreve 1,625: aponta para uma variável. Essa variável mora no tema do
+Tailwind, junto com as cores e os tamanhos de letra, e guarda o número. Para nós, hoje, isso quer
+dizer uma coisa boa: se amanhã você quiser que "relaxed" seja 1,7 em todo o site, muda-se a variável
+num lugar só e todas as classes acompanham. O nível 3 mostra como. Por ora, basta ler a classe como
+uma frase: <em>use a entrelinha relaxada</em>.</p>
+
+<h2>4. Números: leading-6, leading-10 e o caso invisível</h2>
+
+<p>Além dos nomes, o Tailwind aceita um número. <code>leading-6</code> quer dizer 6 × 0,25 rem, ou
+seja, 1,5 rem, ou seja, 24 px. <code>leading-10</code> dá 40 px. A escala é a mesma do espaçamento
+das margens e do respiro interno, por isso é fácil lembrar: cada degrau vale 4 px.</p>
+
+<p>Só que existe uma pegadinha, e ela vem da seção anterior. A entrelinha com nome é um
+<strong>múltiplo</strong> do tamanho da letra; a entrelinha com número é uma <strong>medida
+fixa</strong>. <code>leading-relaxed</code> numa letra de 12 px vira 19,5 px; <code>leading-6</code>
+dá 24 px, sempre, não importa o tamanho da letra. Em um texto cujo tamanho muda conforme a tela, o
+número fixo pode deixar as linhas apertadas de um lado e soltas demais do outro.</p>
+
+<p>Agora o caso que confunde: às vezes você aplica <code>leading-6</code> e nada acontece. Não é
+erro de digitação. Como o padrão já é 1,5, e 1,5 de 16 px é exatamente 24 px, você aplicou o mesmo
+valor que já estava lá. O painel fica vazio nessa propriedade — e isso é informação, não falha:
+quando o valor pedido é igual ao que o elemento já tinha, não há diferença para mostrar.</p>
+
+<p>Então quando o número ajuda? Quando você quer alinhar o texto a uma grade vertical. Um título de
+40 px com <code>leading-10</code> ocupa exatamente 40 px de altura, e encaixa no ritmo de 4 px do
+resto da página. Nesse caso o número não é preguiça, é decisão: você quer a altura da linha igual a
+um degrau da escala, mesmo que a letra mude um pouco depois. E quando você precisa de um valor que
+não está na escala, os colchetes resolvem: <code>leading-[1.7]</code> dá 27,2 px num corpo de 16.
+Use com um motivo que você consiga explicar em uma frase.</p>
+
+<h2>5. A entrelinha certa para cada tipo de texto</h2>
+
+<p>Não existe um número certo universal, mas existem faixas que funcionam. Elas vêm de séculos de
+tipografia e continuam valendo na tela:</p>
+
+<ul>
+<li><strong>Corpo de texto:</strong> 1,5 a 1,75. Em 16 px, isso é de 24 a 28 px. É o caso do
+parágrafo da história da Ana: <code>leading-relaxed</code>.</li>
+<li><strong>Títulos:</strong> 1,1 a 1,25. Quanto maior a letra, mais apertada a entrelinha pode ser,
+porque o olho já reconhece a palavra inteira de longe. <code>leading-tight</code> resolve.</li>
+<li><strong>Microtexto:</strong> etiqueta, legenda, texto de botão. 1,2 a 1,4, e normalmente já vem
+embutido no tamanho pequeno.</li>
+<li><strong>Números e valores:</strong> entrelinha fixa, para que as linhas de uma lista de preços
+fiquem na mesma altura mesmo quando um item quebra em duas linhas.</li>
+</ul>
+
+<p>Tem um segundo fator, e ele anda de mãos dadas com a entrelinha: a largura da linha. Quanto mais
+longa a linha, mais entrelinha ela pede — o olho faz um caminho maior de volta e precisa de mais
+espaço para não pular a linha. Uma linha de 60 letras fica confortável com 1,5. Uma linha de 100
+letras precisa de 1,7 ou mais. É por isso que texto de jornal, em coluna estreita, pode ser mais
+apertado que texto de site em tela larga.</p>
+
+<p>A medida da largura é em caracteres: de 45 a 75, sendo 66 o ponto doce. O Tailwind tem uma classe
+para isso, <code>max-w-prose</code>, que vale <code>65ch</code> — a largura de 65 zeros, uma boa
+aproximação de 65 letras. Ela não tem nada a ver com entrelinha,
+mas é a parceira natural dela. Se você fizer só uma coisa depois desta aula, faça esta: parágrafo de
+leitura com <code>leading-relaxed max-w-prose</code>. A largura para de crescer junto com o monitor
+e a entrelinha ganha sentido.</p>
+
+<h2>6. Tamanho e entrelinha numa classe só: a barra</h2>
+
+<p>Quem já usou Tailwind sabe que <code>text-lg</code> não muda só o tamanho da letra: ele já traz
+uma entrelinha embutida, proporcional ao tamanho. Isso é ótimo no geral e um pouco confuso quando
+você quer um valor específico, porque aí precisa lembrar se a entrelinha veio do tamanho ou de outra
+classe. O Tailwind tem um atalho para escrever os dois juntos, com uma barra:</p>
+
+<pre class="file" data-file="index.html">&lt;p class="text-base/7"&gt;A nossa história...&lt;/p&gt;
+
+text-base  --&gt; letra de 16 px
+/7         --&gt; entrelinha de 7 degraus = 28 px</pre>
+
+<p>O número depois da barra usa a escala de espaçamento, a mesma do <code>p-4</code> e do
+<code>leading-6</code>. Então <code>text-base/7</code> é "letra de 16 px, linha de 28 px", e
+<code>text-lg/8</code> é "letra de 18 px, linha de 32 px". A vantagem é que a decisão fica escrita
+num lugar só, na mesma classe, e ninguém precisa procurar em outra linha do HTML o que define a
+altura.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|line-height=28px;;rule:line-height: calc(var(--spacing) * 7)">
+  <p class="try-task">Este parágrafo está com a barra em 5 (20 px de entrelinha). Deixe a letra em
+  16 px e a linha em 28 px, mudando o número depois da barra.</p>
+  <pre class="html">&lt;p id="alvo" class="bg-amber-50 p-4 text-base/5"&gt;Pão de fermentação natural, assado em forno a lenha todas as manhãs, do jeito que o meu pai fazia.&lt;/p&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+line-height: 20px
+</pre>
+  <pre class="solucao">&lt;p id="alvo" class="bg-amber-50 p-4 text-base/7"&gt;Pão de fermentação natural, assado em forno a lenha todas as manhãs, do jeito que o meu pai fazia.&lt;/p&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>line-height: 28px</code>. Se você abrir as regras geradas
+(com o botão de CSS da caixa, ou com <code>node tools/tw.js</code> no seu projeto), vai ver que a
+classe virou duas propriedades: <code>font-size</code> e <code>line-height</code>. É por isso que ela
+se chama atalho.</p>
+
+<p>Um cuidado que economiza meia hora de dúvida: não use a barra e uma classe
+<code>leading-*</code> no mesmo elemento. As duas escrevem a mesma propriedade, e aí vale a última
+regra que o Tailwind gerou — não a última que você digitou. Escolha um dos dois caminhos e siga com
+ele. E lembre que a barra usa a escala de espaçamento: para 27,2 px, o caminho é
+<code>leading-[1.7]</code> e não a barra.</p>
+
+<h2>7. Espaço entre letras: o tracking</h2>
+
+<p>Entrelinha é a distância entre linhas. Existe também a distância entre letras, com nome próprio:
+<em>tracking</em>, ou no CSS, <code>letter-spacing</code>. As letras minúsculas foram desenhadas
+para ficar juntas — o "ão" de pão só funciona se o a e o o estiverem na distância certa. Já um texto
+todo em maiúsculas tem outro ritmo: as letras têm larguras parecidas e o conjunto fica denso. A
+tradição tipográfica manda abrir um pouco o espaço nesse caso, e é aí que o <code>tracking</code>
+entra.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|letter-spacing=1.2px;;rule:letter-spacing: var(--tracking-widest)">
+  <p class="try-task">A etiqueta está em caixa alta e com as letras apertadas. Abra o espaço entre
+  elas para o valor mais largo da escala e clique em Rodar.</p>
+  <pre class="html">&lt;p id="alvo" class="bg-amber-100 p-2 text-xs uppercase tracking-tight"&gt;encomendas para o fim de semana&lt;/p&gt;</pre>
+  <pre class="out">
+padding: 8px
+background-color: oklch(0.962 0.059 95.617)
+font-size: 12px
+line-height: 16px
+letter-spacing: -0.3px
+text-transform: uppercase
+</pre>
+  <pre class="solucao">&lt;p id="alvo" class="bg-amber-100 p-2 text-xs uppercase tracking-widest"&gt;encomendas para o fim de semana&lt;/p&gt;</pre>
+</div>
+
+<p>A tabela abaixo tem os valores que existem, o quanto eles valem em relação ao tamanho da letra e o
+resultado num texto de 16 px. Repare que o <code>em</code> aparece de novo: assim como a entrelinha
+com nome, o tracking é relativo, então ele acompanha o tamanho da letra.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor</th><th>Em texto de 16 px</th><th>Onde costuma servir</th></tr>
+<tr><td><code>tracking-tighter</code></td><td>-0,05 em</td><td>-0,8 px</td><td>título gigante, número de capa</td></tr>
+<tr><td><code>tracking-tight</code></td><td>-0,025 em</td><td>-0,4 px</td><td>título grande</td></tr>
+<tr><td><code>tracking-normal</code></td><td>0</td><td>0 px</td><td>texto corrido, o padrão</td></tr>
+<tr><td><code>tracking-wide</code></td><td>0,025 em</td><td>0,4 px</td><td>botão e etiqueta em caixa alta</td></tr>
+<tr><td><code>tracking-wider</code></td><td>0,05 em</td><td>0,8 px</td><td>sobretítulo, legenda</td></tr>
+<tr><td><code>tracking-widest</code></td><td>0,1 em</td><td>1,6 px</td><td>etiqueta curta, nome de seção</td></tr>
+</table>
+</div>
+
+<p>O CSS gerado segue a mesma ideia da entrelinha: a classe aponta para uma variável do tema.</p>
+
+<pre class="term">.tracking-widest {
+  --tw-tracking: var(--tracking-widest);
+  letter-spacing: var(--tracking-widest);
+}</pre>
+
+<p>A regra prática é curta. Caixa alta pequena pede tracking aberto, entre
+<code>tracking-wide</code> e <code>tracking-widest</code>. Título grande pede tracking apertado,
+<code>tracking-tight</code>, porque letra grande tem espaço sobrando entre as formas. Texto corrido
+pede <code>tracking-normal</code>, ou seja, nada: mexer no espaço entre letras de um parágrafo longo
+atrapalha a leitura, porque o olho reconhece a palavra pela silhueta, e a silhueta muda. Se você
+usar tracking em tudo, o texto todo fica com cara de logotipo.</p>
+
+<h2>8. Os erros que estragam o texto</h2>
+
+<p>Estes são os que aparecem toda semana em projeto de quem está começando. Vale conhecer antes de
+cometer:</p>
+
+<ul>
+<li><strong><code>leading-none</code> em texto de duas linhas.</strong> O valor 1 é menor que a
+altura das letras com acento e descendentes (o rabinho do g, do p, do ç). As linhas se encostam e, em
+caixa alta com acento, chegam a se sobrepor. <code>leading-none</code> só combina com uma linha
+única, quase sempre um número grande.</li>
+<li><strong>Letra grande com linha pequena.</strong> <code>text-3xl leading-6</code> é letra de 30 px
+numa linha de 24 px: a linha fica menor que a letra, e o texto se atropela. Se você usar número
+fixo, confira se ele é maior que o tamanho da letra.</li>
+<li><strong>Esquecer que a entrelinha é herdada.</strong> Aplicar <code>leading-relaxed</code> num
+<code>div</code> vale para todos os parágrafos dentro dele. Isso é atalho, não bug — mas se um filho
+tiver a própria classe, a do filho vence, e o resultado pode ficar misturado sem você entender
+por quê.</li>
+<li><strong>Duas classes de entrelinha no mesmo elemento.</strong> <code>leading-tight
+leading-loose</code> não é "mais ou menos": é uma briga, e vence a regra que o Tailwind escreveu por
+último no CSS. Uma propriedade, uma classe.</li>
+<li><strong>Confiar no que o painel não mostra.</strong> Se você aplicou <code>leading-normal</code>
+e nada apareceu, é porque 1,5 já era o valor. O silêncio do painel é uma resposta, não um
+defeito.</li>
+</ul>
+
+<p>Tem um detalhe do painel que vale entender de uma vez: ele mostra <code>line-height: 26px</code>,
+e não <code>1.625</code>. Isso não é invenção do guia — é o que o navegador devolve quando pergunta
+"qual é a altura da linha deste elemento?". Como ele já sabe o tamanho da letra, ele resolve a
+multiplicação e entrega o resultado em pixels. Se você mudar o tamanho da letra, o número em pixels
+muda junto, e a classe continua a mesma. Por isso a conta é sempre: múltiplo × tamanho da letra.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o texto fica bom no monitor e ruim no celular</h3>
+<p>A Ana escolheu <code>leading-relaxed</code> e ficou satisfeita no notebook. No celular, o mesmo
+parágrafo ocupa a largura toda e vira uma coluna de 30 caracteres com 26 px de linha: parece uma
+lista de frases soltas, com ar demais. Não é a entrelinha que está errada, é a combinação. A solução
+é deixar a entrelinha mudar com a tela, com <code>leading-snug md:leading-relaxed</code>: mais
+apertada no celular, mais aberta no monitor. O prefixo <code>md:</code> é o assunto da aula de
+breakpoints; a ideia, aqui, é que entrelinha é decisão por tamanho de tela.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o título de duas linhas com as letras se tocando</h3>
+<p>Ela usou <code>leading-none</code> no título "Pão quentinho toda manhã" porque viu num site
+grande. No monitor, o título quebrou em duas linhas e a segunda encostou na primeira; o acento de
+"manhã" quase tocou no "P" de "Pão". O erro não foi a classe, foi o contexto: <code>leading-none</code>
+funciona para uma linha, e título de site quebra em duas ou três. A troca é para
+<code>leading-tight</code>, que dá 1,25 e mantém o conjunto compacto sem colar.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a etiqueta de promoção parece apertada</h3>
+<p>A etiqueta "ÚLTIMAS UNIDADES" em caixa alta, 12 px, ficou densa como um selo. O problema não era
+o tamanho da letra: era o espaço entre elas. Com <code>tracking-wide</code> o conjunto abre e passa a
+ser lido como etiqueta, não como palavra grudada. O detalhe é que o tracking precisa de ar em volta
+para funcionar: um <code>px-3 py-1</code> na etiqueta completa o serviço. Espaçamento entre letras
+sem respiro interno é trocar seis por meia dúzia.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que a classe <code>leading-relaxed</code> faz?</p>
+<label><input type="radio" name="q1"> aumenta o espaço entre as letras de um parágrafo</label>
+<label><input type="radio" name="q1"> aumenta a altura de cada linha, afastando uma linha da outra</label>
+<label><input type="radio" name="q1"> aumenta o espaço por fora do parágrafo</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual é a diferença entre <code>leading-6</code> e
+<code>leading-relaxed</code>?</p>
+<label><input type="radio" name="q2"> nenhuma: os dois dão 24 px</label>
+<label><input type="radio" name="q2"> <code>leading-6</code> é relativo e <code>leading-relaxed</code> é fixo</label>
+<label><input type="radio" name="q2"> <code>leading-6</code> é uma medida fixa de 24 px; <code>leading-relaxed</code> é 1,625 vezes o tamanho da letra</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Por que aplicar <code>leading-normal</code> num
+parágrafo pode não mudar nada na tela?</p>
+<label><input type="radio" name="q3"> porque 1,5 já é a entrelinha que o texto herda por padrão</label>
+<label><input type="radio" name="q3"> porque <code>leading-normal</code> não existe no Tailwind</label>
+<label><input type="radio" name="q3"> porque a classe só funciona em títulos</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o parágrafo da história</h2>
+<p>A Ana quer o parágrafo da história com letra de 16 px e linha de 28 px, usando uma classe só.
+Complete o número que falta depois da barra:</p>
+<div class="ex-code">&lt;p class="text-base/<input aria-label="resposta 1" data-answer="7" placeholder="...">"&gt;A nossa história...&lt;/p&gt;</div>
+<p class="ex-dica">Dica: cada degrau depois da barra vale 4 px. Para chegar a 28 px, você precisa de
+sete degraus. Se escrever 5, a linha fica em 20 px e o texto volta a parecer apertado.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Entrelinha é a altura da linha, não da letra: um texto de 16 px com entrelinha 24 px tem 8 px de
+ar distribuídos acima e abaixo das letras. No CSS a propriedade é <code>line-height</code>, e o
+Tailwind a expõe de dois jeitos. Com nome — <code>leading-tight</code>, <code>leading-snug</code>,
+<code>leading-normal</code>, <code>leading-relaxed</code>, <code>leading-loose</code> — o valor é um
+múltiplo do tamanho da letra, então acompanha qualquer mudança de corpo. Com número —
+<code>leading-6</code>, <code>leading-10</code> — o valor é fixo em pixels e serve para alinhar o
+texto a uma grade vertical.</p>
+
+<p>Para texto de leitura, <code>leading-relaxed</code> com <code>max-w-prose</code> resolve a
+maioria dos casos; para título, <code>leading-tight</code>; para uma linha só, <code>leading-none</code>.
+O atalho <code>text-base/7</code> escreve tamanho e entrelinha juntos, e a barra usa a escala de
+4 px. O espaço entre letras tem nome próprio, <code>tracking</code>: abra em caixa alta pequena,
+aperte em título grande e deixe o texto corrido em paz. E lembre que o painel mostra pixels porque é
+o que o navegador calcula — a conta é sempre múltiplo × tamanho da letra.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Entrelinha = altura da linha; o padrão já vem em 1,5 (24 px num corpo de 16).</li>
+<li><code>leading-tight</code> 1,25 · <code>leading-snug</code> 1,375 · <code>leading-normal</code> 1,5
+· <code>leading-relaxed</code> 1,625 · <code>leading-loose</code> 2.</li>
+<li>Nome = múltiplo do tamanho da letra; número = medida fixa (4 px por degrau).</li>
+<li><code>leading-6</code> vale 24 px e pode não mudar nada, porque 24 px já era o padrão.</li>
+<li><code>text-base/7</code> = letra de 16 px com linha de 28 px.</li>
+<li>Não misture a barra com <code>leading-*</code> no mesmo elemento.</li>
+<li><code>tracking-wide</code> e <code>tracking-widest</code> abrem o espaço entre letras; use em
+caixa alta curta.</li>
+<li>Texto de leitura: 1,5 a 1,75 de entrelinha e 45 a 75 caracteres por linha.</li>
+<li>Linha longa pede mais entrelinha; linha curta pede menos.</li>
+<li>O painel mostra só o que mudou — e mostra <code>26px</code> no lugar de <code>1.625</code>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

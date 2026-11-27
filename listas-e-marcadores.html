@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Listas e Marcadores | Guia Tailwind</title>
+<meta name="description" content="Listas no Tailwind: list-disc, list-decimal, list-none, list-inside e como pintar o marcador com marker: na receita e no menu da padaria da Ana.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Listas e <span class="hl">Marcadores</span></h1>
+<p class="intro">A Ana publicou a receita do pão de queijo e, quando abriu o site, encontrou os
+ingredientes em três linhas soltas: sem bolinha, sem número e sem recuo, como se fosse um parágrafo
+quebrado no meio. Ela jura que escreveu uma lista de verdade, com <code>&lt;ul&gt;</code> e
+<code>&lt;li&gt;</code>, e escreveu mesmo. O problema é que o Tailwind apaga os marcadores de
+propósito, no CSS de base, para que o site não carregue o estilo de lista de cada navegador. Nesta
+aula ela aprende a devolver as bolinhas com <code>list-disc</code>, a numerar os passos com
+<code>list-decimal</code>, a escolher entre marcador por dentro e por fora, e até a pintar o
+marcador de âmbar.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que a lista aparece sem marcador nenhum no Tailwind.</li>
+  <li>A diferença entre <code>&lt;ul&gt;</code> e <code>&lt;ol&gt;</code>, e por que ela importa.</li>
+  <li>As classes <code>list-disc</code>, <code>list-decimal</code> e <code>list-none</code>.</li>
+  <li>Por que o marcador precisa de <code>pl-5</code> para aparecer.</li>
+  <li>A diferença entre <code>list-outside</code> e <code>list-inside</code> quando o item quebra
+  em duas linhas.</li>
+  <li>Como pintar o marcador com <code>marker:text-amber-700</code>.</li>
+  <li>O que fazer com listas dentro de listas e com o espaço entre os itens.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a receita sem marcador</h2>
+
+<p>O HTML que a Ana escreveu está correto. Ele é assim:</p>
+
+<pre class="file" data-file="receita.html">&lt;h2&gt;Pão de queijo&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;500 g de polvilho azedo&lt;/li&gt;
+  &lt;li&gt;250 ml de leite&lt;/li&gt;
+  &lt;li&gt;100 g de queijo minas curado&lt;/li&gt;
+&lt;/ul&gt;</pre>
+
+<p>No navegador, os três ingredientes aparecem um embaixo do outro, sem bolinha e sem recuo,
+encostados na margem esquerda. Parece um parágrafo que alguém quebrou em três linhas. A reação
+natural é achar que errou a tag, que faltou um atributo, que o site está quebrado. Não está: o
+Tailwind fez isso de propósito, e entender por quê vale mais do que decorar a solução.</p>
+
+<p>Antes de seguir, uma pergunta que quase ninguém faz: por que existem duas tags de lista? Porque a
+lista carrega um significado, não só uma aparência. <code>&lt;ul&gt;</code> é a lista <em>não
+ordenada</em>: a ordem dos ingredientes não muda a receita, então tanto faz se o queijo vem antes do
+leite. <code>&lt;ol&gt;</code> é a lista <em>ordenada</em>: os passos do preparo têm ordem, e trocar
+dois deles estraga o pão. O navegador desenha bolinha numa e número na outra, mas o desenho é
+consequência — o que está gravado na página é a intenção. Leitor de tela anuncia "lista com três
+itens" e, na ordenada, "item um de três". Quem não vê a bolinha ouve a contagem.</p>
+
+<p>É por isso que trocar <code>&lt;ul&gt;</code> por <code>&lt;ol&gt;</code> só para ganhar números é
+uma armadilha: funciona na tela e mente para quem usa leitor de tela. A regra é simples e vai servir
+para o resto do guia: a tag diz o que a coisa é, a classe diz como ela parece. Se os passos têm
+ordem, use <code>&lt;ol&gt;</code>. Se não têm, <code>&lt;ul&gt;</code>. A aparência é decisão
+separada, e é justamente o que o Tailwind entrega.</p>
+
+<h2>2. Por que a lista perdeu o marcador</h2>
+
+<p>Todo navegador vem com um estilo de fábrica: parágrafo com margem, título grande e em negrito,
+lista com bolinha e recuo. Esse estilo é diferente de navegador para navegador em detalhes, e o
+Tailwind resolve a diferença de um jeito radical: no CSS de base dele — o chamado
+<em>preflight</em> —, ele zera as listas. É mais ou menos isto:</p>
+
+<pre class="term">ol, ul, menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}</pre>
+
+<p>Três propriedades, um efeito: sem marcador, sem margem, sem recuo. A razão é a mesma que faz o
+Tailwind existir. Em vez de você brigar com o estilo de fábrica — "por que essa bolinha está 40 px
+para dentro no Firefox e 38 no Chrome?" —, ele começa do zero e deixa você escolher. O custo é esse
+susto inicial: a lista que funcionava sozinha agora precisa de uma classe.</p>
+
+<p>Repare que a terceira propriedade é a que mais confunde. Sem <code>padding</code>, o marcador
+posicionado por fora é desenhado fora da caixa de texto: ele fica pendurado para fora do cartão e,
+se algum elemento acima corta o transbordo, desaparece de vez. Isso explica um sintoma
+clássico: você aplica <code>list-disc</code>, o painel mostra <code>list-style-type: disc</code>, e
+mesmo assim não aparece bolinha nenhuma. Não é a classe que falhou; é a falta de espaço à
+esquerda.</p>
+
+<dl class="anatomy">
+<dt>marcador</dt>
+<dd>O sinal desenhado antes de cada item: bolinha, número, letra. Em inglês, <em>marker</em>.</dd>
+<dt>list-style-type</dt>
+<dd>A propriedade que escolhe a forma do marcador — <code>disc</code>, <code>decimal</code>,
+<code>none</code>. É o que <code>list-disc</code> e <code>list-decimal</code> mudam.</dd>
+<dt>list-style-position</dt>
+<dd>Se o marcador fica fora da área do texto (<code>outside</code>) ou dentro dela
+(<code>inside</code>).</dd>
+<dt>preflight</dt>
+<dd>O CSS de base que o Tailwind injeta antes de tudo, para igualar o ponto de partida entre
+navegadores. É ele que apaga as listas.</dd>
+<dt>::marker</dt>
+<dd>O pedaço do navegador que desenha o marcador. Aceita cor, tamanho e peso da fonte — não aceita
+forma.</dd>
+</dl>
+
+<p>Aproveite para reparar em como o preflight é conservador. Ele não muda a cor do texto, não mexe na
+fonte, não impõe largura. Mexe só no que atrapalha a consistência entre navegadores: listas, margens
+de título, bordas de campo de formulário. Saber que esse CSS existe evita horas de depuração — e é
+por isso que o painel das caixas, às vezes, mostra uma propriedade que você não pediu.</p>
+
+<h2>3. As classes que devolvem o marcador</h2>
+
+<p>Devolver a bolinha é uma classe. O Tailwind tem um conjunto pequeno de utilidades para lista, e a
+mais usada é <code>list-disc</code>. A tabela abaixo é a lista completa do que existe pronto:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>CSS gerado</th><th>Marcador</th><th>Onde serve</th></tr>
+<tr><td><code>list-disc</code></td><td>list-style-type: disc</td><td>bolinha cheia</td><td>ingredientes, características, avisos</td></tr>
+<tr><td><code>list-decimal</code></td><td>list-style-type: decimal</td><td>1, 2, 3</td><td>passos de receita, instruções</td></tr>
+<tr><td><code>list-none</code></td><td>list-style-type: none</td><td>nenhum</td><td>menu, lista de cartões</td></tr>
+<tr><td><code>list-inside</code></td><td>list-style-position: inside</td><td>(posição)</td><td>lista curta em cartão estreito</td></tr>
+<tr><td><code>list-outside</code></td><td>list-style-position: outside</td><td>(posição)</td><td>o padrão; listas de conteúdo</td></tr>
+<tr><td><code>list-image-none</code></td><td>list-style-image: none</td><td>nenhuma imagem</td><td>quando um estilo antigo põe figura</td></tr>
+</table>
+</div>
+
+<p>Para marcadores que não estão na lista — letras, algarismos romanos, grego —, existe a sintaxe de
+colchetes: <code>list-[lower-alpha]</code> desenha a, b, c; <code>list-[upper-roman]</code> desenha I,
+II, III. Não é preciso decorar: o nome entre colchetes é o valor do CSS, e o CSS aceita
+<code>lower-alpha</code>, <code>upper-alpha</code>, <code>lower-roman</code> e mais alguns. Para o
+site da padaria, bolinha e número bastam, e é o que a gente usa agora.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|list-style-type=disc;;rule:list-style-type: disc">
+  <p class="try-task">Os ingredientes estão sem marcador. Devolva as bolinhas, mantendo o recuo que
+  já existe na lista.</p>
+  <pre class="html">&lt;ul id="alvo" class="pl-5"&gt;
+  &lt;li&gt;500 g de polvilho azedo&lt;/li&gt;
+  &lt;li&gt;250 ml de leite&lt;/li&gt;
+  &lt;li&gt;100 g de queijo minas curado&lt;/li&gt;
+&lt;/ul&gt;</pre>
+  <pre class="out">
+padding-left: 20px
+</pre>
+  <pre class="solucao">&lt;ul id="alvo" class="list-disc pl-5"&gt;
+  &lt;li&gt;500 g de polvilho azedo&lt;/li&gt;
+  &lt;li&gt;250 ml de leite&lt;/li&gt;
+  &lt;li&gt;100 g de queijo minas curado&lt;/li&gt;
+&lt;/ul&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra duas linhas: <code>list-style-type: disc</code> e <code>padding-left: 20px</code>.
+A primeira é a bolinha, a segunda é o recuo que dá espaço para ela. O CSS gerado segue a mesma lógica
+das outras classes utilitárias: uma propriedade, um valor.</p>
+
+<pre class="term">.list-disc {
+  list-style-type: disc;
+}
+.list-decimal {
+  list-style-type: decimal;
+}</pre>
+
+<p>Se você já tinha visto uma lista com marcador em outro projeto e o marcador era um quadradinho,
+saiba que é só outra classe (<code>list-[square]</code>). O Tailwind não tem uma classe para cada
+forma porque as formas são poucas e o CSS já as conhece; os colchetes fazem a ponte.</p>
+
+<h2>4. Marcador por fora e o respiro de que ele precisa</h2>
+
+<p>Existe uma decisão escondida em toda lista: o marcador fica por fora da caixa de texto, à
+esquerda, ou por dentro, junto com a primeira linha? A escolha padrão do CSS é por fora, e é a
+melhor para lista de conteúdo, porque o texto forma uma coluna alinhada e o marcador fica pendurado
+na margem. O preço dessa escolha é que alguém precisa dar o espaço: é o
+<code>padding-left</code>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Aspecto</th><th><code>list-outside</code> (padrão)</th><th><code>list-inside</code></th></tr>
+<tr><td>Onde o marcador fica</td><td>fora da área do texto, na margem</td><td>dentro da área, antes da primeira palavra</td></tr>
+<tr><td>Item que quebra em duas linhas</td><td>a segunda linha alinha com a primeira letra</td><td>a segunda linha começa embaixo do marcador</td></tr>
+<tr><td>Precisa de recuo</td><td>sim, <code>pl-5</code> ou mais</td><td>não, o marcador usa o próprio espaço</td></tr>
+<tr><td>Melhor para</td><td>ingredientes, características, textos longos</td><td>listas curtas, cartões estreitos, menus</td></tr>
+</table>
+</div>
+
+<p>Na prática, você quase sempre escreve <code>list-disc pl-5</code> e segue em frente. O valor
+<code>pl-5</code> é 20 px; para itens com texto comprido, <code>pl-6</code> (24 px) deixa a bolinha
+menos colada. E não se preocupe em calibrar pixel: o que importa é que o marcador tenha ar para
+existir sem encostar na borda do cartão.</p>
+
+<h2>5. Listas numeradas: quando a ordem importa</h2>
+
+<p>Agora o preparo. Os passos têm ordem, então a tag certa é <code>&lt;ol&gt;</code>. Mas a tag
+sozinha não desenha nada, porque o preflight zerou o estilo dela também. É a classe que faz o
+número:</p>
+
+<div class="trytailwind" data-goal="css:#alvo|list-style-type=decimal;;rule:list-style-type: decimal">
+  <p class="try-task">Os passos do preparo estão sem número. Numere a lista, para que a ordem fique
+  clara para quem vai assar.</p>
+  <pre class="html">&lt;ol id="alvo" class="pl-5"&gt;
+  &lt;li&gt;Ferva o leite com o óleo&lt;/li&gt;
+  &lt;li&gt;Escalde o polvilho e deixe esfriar&lt;/li&gt;
+  &lt;li&gt;Misture o queijo e modele as bolinhas&lt;/li&gt;
+&lt;/ol&gt;</pre>
+  <pre class="out">
+padding-left: 20px
+</pre>
+  <pre class="solucao">&lt;ol id="alvo" class="list-decimal pl-5"&gt;
+  &lt;li&gt;Ferva o leite com o óleo&lt;/li&gt;
+  &lt;li&gt;Escalde o polvilho e deixe esfriar&lt;/li&gt;
+  &lt;li&gt;Misture o queijo e modele as bolinhas&lt;/li&gt;
+&lt;/ol&gt;</pre>
+</div>
+
+<p>Duas coisas para observar. A primeira: o número saiu da classe, não da tag. Se você puser
+<code>list-disc</code> num <code>&lt;ol&gt;</code>, ele desenha bolinha — e o HTML continua dizendo
+"lista ordenada", o que é uma contradição silenciosa. A segunda: se você precisar começar a
+numeração em outro ponto, isso é atributo do HTML, não classe: <code>&lt;ol start="4"&gt;</code>
+começa no 4. O Tailwind não tem utilidade para isso, e não precisa ter.</p>
+
+<p>Uma ressalva sobre listas numeradas na web: o número é desenhado pelo navegador e não é copiado
+junto com o texto. Se a Ana quiser que a cliente copie a receita e cole no WhatsApp com os números,
+o caminho é escrever os números no próprio texto ou usar uma tabela — e é por isso que tanta receita
+de site grande tem "1." digitado à mão. Para leitura na tela, <code>list-decimal</code> é o certo;
+para conteúdo que vai ser copiado, pense duas vezes.</p>
+
+<h2>6. Pintar e ajustar o marcador</h2>
+
+<p>O marcador é desenhado por um pedaço do navegador que tem nome próprio: o pseudo-elemento
+<code>::marker</code>. Ele aceita poucas coisas — cor, tamanho e peso da fonte, basicamente —, mas
+isso já dá um efeito elegante. No Tailwind, o atalho é a variante <code>marker:</code> aplicada a uma
+classe de cor:</p>
+
+<div class="trytailwind" data-goal="css:#alvo|list-style-position=inside;;rule:color: var(--color-amber-700)">
+  <p class="try-task">A lista de avisos é curta e fica num cartão estreito. Traga o marcador para
+  dentro da linha e pinte-o de âmbar escuro.</p>
+  <pre class="html">&lt;ul id="alvo" class="list-disc pl-5"&gt;
+  &lt;li&gt;Encomendas com 24 horas de antecedência&lt;/li&gt;
+  &lt;li&gt;Retirada na loja até as 18h&lt;/li&gt;
+  &lt;li&gt;Pão quentinho às 7h, 11h e 16h&lt;/li&gt;
+&lt;/ul&gt;</pre>
+  <pre class="out">
+list-style-type: disc
+padding-left: 20px
+</pre>
+  <pre class="solucao">&lt;ul id="alvo" class="list-disc list-inside marker:text-amber-700"&gt;
+  &lt;li&gt;Encomendas com 24 horas de antecedência&lt;/li&gt;
+  &lt;li&gt;Retirada na loja até as 18h&lt;/li&gt;
+  &lt;li&gt;Pão quentinho às 7h, 11h e 16h&lt;/li&gt;
+&lt;/ul&gt;</pre>
+</div>
+
+<p>O CSS gerado para essa cor de marcador é curioso e vale ler com calma:</p>
+
+<pre class="term">.marker\:text-amber-700::marker {
+  color: var(--color-amber-700);
+}</pre>
+
+<p>Aquele monte de barra invertida no seletor é só o escape dos dois-pontos. O Tailwind escreve a
+classe com dois-pontos no nome (<code>marker:text-amber-700</code>), e no CSS o dois-pontos precisa
+ser escapado para não ser confundido com pseudo-elemento. Resultado: a regra atinge o
+<code>::marker</code> de qualquer item daquela lista. O painel das caixas, aliás, não mostra a cor do
+marcador, porque ele descreve o elemento e não o pseudo-elemento — é um dos casos em que a meta da
+caixa confere o CSS gerado, e não o CSS computado.</p>
+
+<p>O que dá para mudar no marcador: cor, tamanho e peso. O que não dá: a forma. Para trocar a bolinha
+por um traço, um coração ou um ícone, o caminho é outro — <code>list-none</code> para apagar o
+marcador e um <code>before:</code> no item para desenhar o que você quiser. É assunto de uma aula
+avançada, e para o site da padaria a bolinha âmbar resolve com elegância. Uma dica de bom gosto:
+deixe o marcador com a mesma cor da marca, e não do texto. O olho registra a cor repetida na margem
+esquerda como identidade.</p>
+
+<h2>7. Listas dentro de listas</h2>
+
+<p>Receita que tem subitens — a cobertura, o recheio — precisa de lista dentro de item de lista. A
+armadilha é que cada <code>&lt;ul&gt;</code> recomeça do zero no preflight: a lista de fora tem
+bolinha, e a de dentro aparece sem nada, porque a regra de base vale para todas. Então o recuo e o
+marcador se repetem na lista de dentro:</p>
+
+<pre class="file" data-file="receita.html">&lt;ul class="list-disc pl-5"&gt;
+  &lt;li&gt;Massa
+    &lt;ul class="mt-1 list-[circle] pl-5"&gt;
+      &lt;li&gt;500 g de polvilho&lt;/li&gt;
+      &lt;li&gt;250 ml de leite&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Recheio&lt;/li&gt;
+&lt;/ul&gt;</pre>
+
+<p>Repare no <code>list-[circle]</code>: a lista de dentro usa bolinha vazada, o que dá uma pista
+visual de hierarquia sem precisar de cor diferente. E repare no <code>mt-1</code>, que separa a lista
+interna do texto "Massa" — sem ele, o primeiro subitem encosta na palavra. Não passe de dois níveis:
+lista dentro de lista dentro de lista já é difícil de ler no celular, e a maioria dos leitores
+desiste antes do terceiro marcador.</p>
+
+<p>Existe ainda a lista de definições, com <code>&lt;dl&gt;</code>, <code>&lt;dt&gt;</code> e
+<code>&lt;dd&gt;</code>, que a Ana usa para os horários: o termo é o dia, a definição é o horário.
+Ela não tem marcador nenhum por natureza — é um par de termo e explicação —, e o preflight não muda
+isso. Se você vir uma lista de horários com bolinha, é porque alguém usou <code>&lt;ul&gt;</code>
+onde cabia <code>&lt;dl&gt;</code>. O Tailwind não tem classes para <code>&lt;dl&gt;</code>: o
+espaçamento entre os pares vem de <code>space-y-2</code> ou de margem nos <code>&lt;dd&gt;</code>.</p>
+
+<h2>8. O espaço entre os itens</h2>
+
+<p>Com o marcador resolvido, o próximo incômodo é o aperto: os itens ficam colados, porque o preflight
+também zerou a margem. Há três caminhos, e eles não são equivalentes:</p>
+
+<ul>
+<li><strong>Entrelinha maior no item.</strong> <code>leading-relaxed</code> na lista aumenta a altura
+de cada linha, o que separa os itens de uma linha só e também as linhas dos itens compridos. É o
+caminho mais barato e o mais coerente quando o texto é longo.</li>
+<li><strong>Espaço no pai.</strong> <code>space-y-2</code> na <code>&lt;ul&gt;</code> dá 8 px entre
+um item e o seguinte, sem tocar em cada <code>&lt;li&gt;</code>. Como a classe age nos filhos, o
+painel da caixa pode não mostrar nada — a conferência ali é visual. Essa classe tem aula própria,
+porque ela é mais esperta do que parece.</li>
+<li><strong>Margem em cada item.</strong> <code>mb-2</code> em cada <code>&lt;li&gt;</code> funciona e
+é o que muita gente faz, mas repete a mesma decisão em cada linha e deixa o último item com margem
+sobrando embaixo. Serve para caso pontual, não para padrão.</li>
+</ul>
+
+<p>Para a receita da Ana, a escolha foi <code>list-disc pl-5 space-y-2</code> na lista e mais nada nos
+itens: o marcador, o recuo e o espaço resolvidos em três classes, num lugar só. A regra geral que
+sobra desta seção é a mesma do resto do guia — decisão de conjunto vai no pai; decisão de exceção vai
+no filho.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o menu do site com bolinhas</h3>
+<p>A Ana copiou a lista de links do rodapé e esqueceu que ela era uma <code>&lt;ul&gt;</code>. Com
+<code>list-disc pl-5</code> herdado do CSS da seção, os links apareceram com bolinha, o que num menu
+é ruído puro. A correção foi <code>list-none p-0</code>, devolvendo a lista ao estado neutro, e
+depois o layout cuidou do resto. Menu é o caso clássico de lista que não deve parecer lista: o
+significado continua lá para o leitor de tela, a aparência não.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: a bolinha colada na palavra</h3>
+<p>Ela aplicou <code>list-disc</code> sem <code>pl-5</code> e as bolinhas ficaram fora da área visível
+do cartão, cortadas pela borda. Parecia que a classe não funcionava. O painel, porém, mostrava
+<code>list-style-type: disc</code> — a prova de que o marcador existia, só não tinha onde ser
+desenhado. Com o recuo, tudo voltou ao lugar. Marcador por fora sempre precisa de espaço à
+esquerda.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: item comprido com o marcador no meio</h3>
+<p>Na lista de avisos, com <code>list-inside</code>, o segundo item quebrou em duas linhas e a
+segunda linha começou embaixo da bolinha, desalinhada do texto. Em lista curta de cartão estreito,
+isso passa; em lista de conteúdo, incomoda. A troca para <code>list-outside</code> com
+<code>pl-5</code> devolveu a coluna: a bolinha fica pendurada e o texto forma um bloco reto. É a
+diferença entre uma lista que parece etiqueta e uma lista que parece índice.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Por que a lista aparece sem bolinha no
+Tailwind?</p>
+<label><input type="radio" name="q1"> porque o navegador não desenha bolinha em listas sem
+<code>&lt;ol&gt;</code></label>
+<label><input type="radio" name="q1"> porque o CSS de base do Tailwind zera o estilo das listas</label>
+<label><input type="radio" name="q1"> porque falta um arquivo de configuração do Tailwind</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual é a diferença entre <code>&lt;ul&gt;</code> e
+<code>&lt;ol&gt;</code>?</p>
+<label><input type="radio" name="q2"> <code>&lt;ul&gt;</code> desenha bolinha e <code>&lt;ol&gt;</code>
+desenha número, sempre</label>
+<label><input type="radio" name="q2"> <code>&lt;ol&gt;</code> é a lista mais nova e substitui a
+outra</label>
+<label><input type="radio" name="q2"> <code>&lt;ul&gt;</code> é para itens sem ordem e
+<code>&lt;ol&gt;</code> para itens com ordem</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Você aplicou <code>list-disc</code> e as bolinhas
+não aparecem. Qual é a causa mais provável?</p>
+<label><input type="radio" name="q3"> falta o recuo (<code>pl-5</code>) para o marcador ter onde ser
+desenhado</label>
+<label><input type="radio" name="q3"> a classe <code>list-disc</code> só funciona em
+<code>&lt;ol&gt;</code></label>
+<label><input type="radio" name="q3"> o navegador precisa ser reiniciado</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a lista de ingredientes</h2>
+<p>Complete a classe que devolve as bolinhas para a lista de ingredientes:</p>
+<div class="ex-code">&lt;ul class="<input aria-label="resposta 1" data-answer="list-disc" placeholder="..."> pl-5"&gt;</div>
+<p class="ex-dica">Dica: é o nome do formato do marcador em inglês — disco, a bolinha cheia. Sem o
+prefixo <code>list-</code>, a palavra não faz nada.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Lista no Tailwind começa sem marcador porque o CSS de base zera <code>list-style</code>, a margem
+e o recuo. Quem devolve é a classe: <code>list-disc</code> para bolinha, <code>list-decimal</code>
+para número, <code>list-none</code> para nenhum. O marcador por fora — o padrão — precisa de
+<code>pl-5</code> para ter espaço; o por dentro, <code>list-inside</code>, dispensa o recuo mas
+desalinha o texto quando o item quebra em duas linhas.</p>
+
+<p>A tag continua dizendo o que a lista é: <code>&lt;ul&gt;</code> quando a ordem não importa,
+<code>&lt;ol&gt;</code> quando importa. A classe decide a aparência, e as duas coisas não precisam
+andar juntas. Para pintar o marcador, <code>marker:text-amber-700</code> alcança o
+<code>::marker</code>; para trocar a forma, o caminho é outro. E o espaço entre os itens é decisão do
+pai — <code>space-y-2</code> —, não de cada filho.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>O preflight do Tailwind zera <code>list-style</code>, <code>margin</code> e <code>padding</code>
+das listas.</li>
+<li><code>list-disc</code> = bolinha; <code>list-decimal</code> = 1, 2, 3;
+<code>list-none</code> = sem marcador.</li>
+<li>Marcador por fora precisa de <code>pl-5</code>; sem recuo, ele some.</li>
+<li><code>list-inside</code> traz o marcador para a linha, mas a segunda linha fica embaixo
+dele.</li>
+<li><code>list-[lower-alpha]</code> e <code>list-[circle]</code> usam os valores do CSS nos
+colchetes.</li>
+<li><code>marker:text-amber-700</code> pinta o marcador; a regra gerada mexe no
+<code>::marker</code>.</li>
+<li>Cada <code>&lt;ul&gt;</code> recomeça do zero: lista aninhada precisa da própria classe.</li>
+<li><code>&lt;ul&gt;</code> sem ordem, <code>&lt;ol&gt;</code> com ordem, <code>&lt;dl&gt;</code> para
+termo e definição.</li>
+<li>Espaço entre itens: <code>space-y-2</code> no pai.</li>
+<li>Menu é lista com <code>list-none</code>: o significado fica, a bolinha sai.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

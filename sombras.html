@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sombras | Guia Tailwind</title>
+<meta name="description" content="Sombras no Tailwind: os quatro números do box-shadow, a escala de shadow-xs a shadow-2xl, como colorir a sombra, a sombra interna e por que ela some no fundo escuro.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Sombras: a <span class="hl">profundidade</span> do cartão</h1>
+<p class="intro">A Ana achou o site da padaria bonito, mas disse uma frase que define esta aula: "está
+tudo no mesmo plano". Os cartões têm borda, os cantos são redondos, e ainda assim a página parece um
+adesivo colado no vidro. Falta a sensação de que uma coisa está por cima da outra — a mesma sensação
+da sacola de papel apoiada no balcão, que projeta uma mancha cinza embaixo. Nesta aula a Ana aprende a
+desenhar essa mancha com o Tailwind, a escolher a altura certa, a tingir a sombra com a cor da marca e
+a entender por que ela desaparece no tema escuro.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Como ler os quatro números de um <code>box-shadow</code> e o que é desfoque.</li>
+  <li>A escala de <code>shadow-2xs</code> a <code>shadow-2xl</code> e quando usar cada degrau.</li>
+  <li>Por que o Tailwind v4 escreve cinco camadas de sombra na mesma propriedade.</li>
+  <li>Como dar cor à sombra com <code>shadow-amber-900/20</code>.</li>
+  <li>A sombra interna, com <code>inset-shadow-sm</code>, e a diferença de sensação.</li>
+  <li>O que a sombra faz com o canto arredondado e com o <code>overflow-hidden</code>.</li>
+  <li>Por que sombra escura some em fundo escuro e o que usar no lugar.</li>
+</ul>
+</div>
+
+<h2>1. A cena: tudo no mesmo plano</h2>
+
+<p>O cartão de encomenda da padaria tem fundo branco, borda cinza-clara e canto arredondado. Está
+correto e está chapado. O problema não é o código, é a física: no mundo real, nada que está apoiado
+sobre uma superfície fica sem sombra. O copo na mesa, o papel no balcão, o pão na forma — todos
+projetam uma mancha mais escura do lado oposto à luz. Quando essa mancha não existe, o cérebro de quem
+olha conclui que o objeto está colado no fundo, e não apoiado sobre ele.</p>
+
+<p>É por isso que sombra é a ferramenta da profundidade. Ela não decora: ela responde "este elemento
+está em cima". E, como toda resposta de física, tem direção. A luz vem de cima na convenção da
+maioria das interfaces, então a sombra cai para baixo. Sombra para cima parece errada mesmo para quem
+nunca estudou desenho, e é a origem do efeito "pressionado" que a gente vai ver na seção 6.</p>
+
+<p>A Ana tentou resolver com borda mais grossa primeiro. Ficou pior: borda em tudo transforma a
+página em grade de formulário, cada peça competindo com as outras. Sombra é mais discreta porque é
+difusa — ela não tem começo nem fim nítidos. A regra que o guia vai repetir: borda separa, sombra
+eleva. Quando você quer as duas coisas, uma delas tem que ser fraca.</p>
+
+<h2>2. O que são aqueles quatro números</h2>
+
+<p>Em CSS puro, sombra é a propriedade <code>box-shadow</code>, e ela aceita uma lista de valores com
+significado fixo: deslocamento horizontal, deslocamento vertical, desfoque, espalhamento e cor.</p>
+
+<pre class="term">box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+/*           |  |   |     |
+             |  |   |     +-- espalhamento: encolhe (-3) ou cresce
+             |  |   +-------- desfoque: quanto a borda da sombra se borra
+             |  +------------ deslocamento vertical: para baixo
+             +--------------- deslocamento horizontal: nenhum */</pre>
+
+<p>Ler esses números em voz alta ajuda. O primeiro zero quer dizer "a sombra não vai para o lado". O
+10 px quer dizer "ela cai 10 px para baixo". O 15 px é o desfoque: a sombra não tem borda, ela vai
+sumindo ao longo de 15 px. E o -3 px é o espalhamento negativo, que encolhe a mancha antes de borrar
+— é o truque que deixa a sombra parecendo natural em vez de um retângulo cinza.</p>
+
+<p>A cor, no Tailwind, vem em <code>rgb(0 0 0 / 0.1)</code>: preto com 10% de opacidade. Sombra de
+interface quase nunca é preto sólido — é preto translúcido, porque sombra de verdade é luz que faltou,
+e não tinta. Um valor entre 5% e 25% cobre praticamente todos os casos. Acima disso a sombra vira
+sujeira; abaixo, ninguém vê.</p>
+
+<dl class="anatomy">
+<dt>box-shadow</dt>
+<dd>A propriedade do CSS que desenha sombra em volta da caixa do elemento. Aceita uma ou várias
+sombras separadas por vírgula.</dd>
+<dt>deslocamento</dt>
+<dd>Os dois primeiros números: para onde a sombra anda em relação ao elemento. Positivo em Y é para
+baixo.</dd>
+<dt>desfoque</dt>
+<dd>O terceiro número. Quanto maior, mais a sombra se dissolve na borda. Zero dá uma sombra de borda
+dura.</dd>
+<dt>espalhamento</dt>
+<dd>O quarto número. Positivo engorda a sombra, negativo encolhe antes de borrar.</dd>
+<dt>sombra interna</dt>
+<dd>A que é desenhada por dentro da caixa, como se a superfície estivesse afundada. No Tailwind v4,
+família <code>inset-shadow-*</code>.</dd>
+<dt>elevação</dt>
+<dd>Nome que se dá à combinação de sombra e posição: quanto mais "alto" o elemento parece, maior e
+mais difusa a sombra.</dd>
+</dl>
+
+<h2>3. A escala do shadow</h2>
+
+<p>Como no espaço e no arredondamento, o Tailwind entrega uma escala pronta em vez de números soltos.
+Cada degrau combina deslocamento, desfoque e opacidade para simular uma altura:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Desenho</th><th>Onde costuma servir</th></tr>
+<tr><td><code>shadow-2xs</code></td><td>1 px para baixo, quase sem desfoque</td><td>fio de separação, etiqueta</td></tr>
+<tr><td><code>shadow-xs</code></td><td>1 px, desfoque de 2 px</td><td>campo de formulário, botão discreto</td></tr>
+<tr><td><code>shadow-sm</code></td><td>1 px, desfoque 3 px, duas camadas</td><td>cartão apoiado no fundo</td></tr>
+<tr><td><code>shadow-md</code></td><td>4 px, desfoque 6 px</td><td>cartão em destaque, dropdown</td></tr>
+<tr><td><code>shadow-lg</code></td><td>10 px, desfoque 15 px</td><td>modal, painel flutuante</td></tr>
+<tr><td><code>shadow-xl</code></td><td>20 px, desfoque 25 px</td><td>camada bem acima da página</td></tr>
+<tr><td><code>shadow-2xl</code></td><td>25 px, desfoque 50 px, 25% de opacidade</td><td>destaque de herói, imagem grande</td></tr>
+</table>
+</div>
+
+<p>Repare que os degraus do meio usam duas sombras somadas: uma justa, para o contato com a
+superfície, e outra larga, para o espalhamento da luz. Isso é o que separa uma sombra desenhada à mão
+de uma sombra "de verdade". Quem está começando costuma usar um valor só, com desfoque grande, e o
+resultado fica com cara de adesivo.</p>
+
+<p>Existe também <code>shadow-none</code>, que vale conhecer pelo que ele faz de verdade: não apaga a
+propriedade, escreve uma sombra transparente. Parece detalhe e é o que permite anular a sombra de um
+componente sem quebrar o anel de foco que estiver no mesmo elemento. Nesta versão, <code>shadow</code>
+sem sufixo ainda funciona e equivale a <code>shadow-sm</code> — mas prefira o nome com sufixo, porque
+é o que os exemplos novos usam.</p>
+
+<div class="trytailwind" data-goal="rule:--tw-shadow: 0 10px 15px -3px;;texto:Pão quentinho às 7h">
+  <p class="try-task">O cartão está com <code>shadow-sm</code> e continua chapado. Suba para
+  <code>shadow-lg</code>, que é o degrau de painel flutuante.</p>
+  <pre class="html" data-saida="css">&lt;div id="alvo" class="rounded-xl bg-white p-4 shadow-sm"&gt;Pão quentinho às 7h&lt;/div&gt;</pre>
+  <pre class="out">
+.rounded-xl {
+  border-radius: var(--radius-xl);
+}
+.bg-white {
+  background-color: var(--color-white);
+}
+.p-4 {
+  padding: calc(var(--spacing) * 4);
+}
+.shadow-sm {
+  --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-xl bg-white p-4 shadow-lg"&gt;Pão quentinho às 7h&lt;/div&gt;</pre>
+</div>
+
+<p>Esta caixa mostra o CSS gerado, e não o valor computado, porque aqui o texto gerado é mais
+instrutivo: você vê a sombra declarada como o Tailwind a escreveu. No degrau <code>shadow-lg</code>
+aparecem dois pares de números, um com 15 px de desfoque e outro com 6 px, com deslocamentos
+diferentes. A soma dos dois é o que dá a sensação de peso.</p>
+
+<h2>4. As cinco camadas da sombra</h2>
+
+<p>Se você rodar a solução e olhar com atenção o CSS gerado, vai notar que a propriedade
+<code>box-shadow</code> não repete os números. Ela lista cinco variáveis:</p>
+
+<pre class="term">.shadow-lg {
+  --tw-shadow: 0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.1)),
+               0 4px 6px -4px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
+              var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+              var(--tw-shadow);
+}</pre>
+
+<p>Por que tanta variável? Porque a mesma propriedade <code>box-shadow</code> é usada por quatro
+ferramentas diferentes: sombra normal, sombra interna, anel e anel com afastamento. Se cada uma
+escrevesse a propriedade inteira, a última venceria e as outras sumiriam — você teria que escolher
+entre sombra e anel. Com as variáveis, todas convivem: cada classe mexe só na sua variável, e a
+propriedade final soma as cinco camadas.</p>
+
+<p>Isso explica um comportamento que parece mágico. Um botão com <code>shadow-md</code> e
+<code>ring-2</code> mostra as duas coisas ao mesmo tempo, e no tema escuro você pode trocar só uma
+delas. Também explica por que o painel das caixas mostra um <code>box-shadow</code> gigante com valores
+transparentes: são as camadas que existem mas não estão em uso, com <code>rgba(0, 0, 0, 0)</code>.
+Cinco camadas, quatro invisíveis — e isso é normal.</p>
+
+<p>Para quem vem de tutorial antigo, dois avisos de nomenclatura. Na versão 3, <code>shadow-sm</code>
+era a sombra que hoje se chama <code>shadow-xs</code>, e <code>shadow</code> era a que hoje se chama
+<code>shadow-sm</code>: a escala inteira desceu um degrau e ganhou nomes com sufixo. E a sombra interna,
+que antes se chamava <code>shadow-inner</code>, hoje é a família <code>inset-shadow-*</code>. O nome
+antigo ainda funciona nesta versão, mas é código em extinção.</p>
+
+<h2>5. Sombra com a cor da marca</h2>
+
+<p>Sombra preta é o padrão e funciona porque simula luz neutra. Mas em uma padaria, a luz da vitrine é
+quente: uma sombra levemente âmbar parece mais natural do que uma cinza. No Tailwind, a cor da sombra
+é uma classe separada, com o mesmo esquema de família, tom e opacidade da paleta:
+<code>shadow-amber-900/20</code> quer dizer âmbar 900 com 20% de opacidade.</p>
+
+<p>A classe de cor precisa da classe de sombra junto — <code>shadow-lg shadow-amber-900/20</code>. Sozinha,
+ela não desenha nada: o que ela faz é trocar a cor usada pelas sombras que já existem. É a mesma lógica
+da cor de borda, e a mesma pegadinha de esquecimento. A opacidade na barra é obrigatória na prática:
+sem ela, a cor entra cheia e a sombra vira uma mancha marrom.</p>
+
+<div class="trytailwind" data-goal="rule:--tw-shadow-color: color-mix(in srgb, oklch(41.4% 0.112 45.904) 20%, transparent);;texto:Pão quentinho às 7h">
+  <p class="try-task">A sombra do cartão é preta e fria. Dê a ela o âmbar da marca, com 20% de
+  opacidade: acrescente <code>shadow-amber-900/20</code> ao cartão.</p>
+  <pre class="html" data-saida="css">&lt;div id="alvo" class="rounded-xl bg-white p-4 shadow-lg"&gt;Pão quentinho às 7h&lt;/div&gt;</pre>
+  <pre class="out">
+.rounded-xl {
+  border-radius: var(--radius-xl);
+}
+.bg-white {
+  background-color: var(--color-white);
+}
+.p-4 {
+  padding: calc(var(--spacing) * 4);
+}
+.shadow-lg {
+  --tw-shadow: 0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 4px 6px -4px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-xl bg-white p-4 shadow-lg shadow-amber-900/20"&gt;Pão quentinho às 7h&lt;/div&gt;</pre>
+</div>
+
+<p>O CSS gerado mostra o mecanismo: a classe de cor não toca no <code>box-shadow</code>, ela define
+<code>--tw-shadow-color</code>, e cada camada de sombra lê essa variável no lugar do preto padrão. Como
+o navegador mistura 20% da cor com transparência, o resultado é uma sombra âmbar bem clara — e o
+fallback com <code>color-mix</code> em <code>srgb</code> existe para navegador antigo não ficar sem
+sombra nenhuma.</p>
+
+<p>Duas orientações práticas. Primeira: escolha um tom bem escuro da família (800, 900) e uma
+opacidade baixa (15% a 25%). Sombra com o tom da marca em 300 fica pastel e parece erro de
+renderização. Segunda: use sombra colorida em um elemento por tela. Se todos os cartões da página
+tiverem sombra âmbar forte, o efeito deixa de ser "luz da vitrine" e vira "site com filtro".</p>
+
+<h2>6. Sombra interna: o afundado</h2>
+
+<p>Toda sombra que vimos até aqui é desenhada por fora da caixa. Existe a versão oposta: a sombra
+interna, que fica dentro do elemento e dá a sensação de superfície afundada. No Tailwind v4 ela é uma
+família própria, <code>inset-shadow-2xs</code> e <code>inset-shadow-xs</code>, com valores pequenos
+porque o efeito é sutil por natureza.</p>
+
+<div class="trytailwind" data-goal="rule:--tw-inset-shadow: inset 0 2px 4px;;css:#alvo|padding=16px">
+  <p class="try-task">O campo de observação da encomenda está chapado. Dê a ele o afundado do
+  <code>inset-shadow-sm</code>, que faz o topo parecer mais fundo.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-lg bg-amber-50 p-4"&gt;Observação: sem açúcar&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+border-radius: 8px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-lg bg-amber-50 p-4 inset-shadow-sm"&gt;Observação: sem açúcar&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar a solução, o painel mostra o <code>box-shadow</code> com a palavra
+<code>inset</code> no primeiro valor. É a mesma propriedade de antes, com uma palavra a mais dizendo
+"por dentro". E, como a sombra interna é mais escura em cima, ela funciona como a sombra que o dedo faz
+ao apertar: a luz de cima encontra a parede que desce.</p>
+
+<p>Onde usar: campo de formulário, área de texto, botão pressionado, faixa de "arraste o arquivo aqui".
+Onde não usar: cartão, modal, menu — tudo que deve parecer acima da página. Misturar as duas
+sensações no mesmo componente é o jeito mais rápido de deixar o desenho confuso. Um cartão com sombra
+externa e um campo com sombra interna dentro dele é o uso correto: o objeto está apoiado, e a
+superfície dele é côncava onde se escreve.</p>
+
+<h2>7. Sombra, canto e recorte</h2>
+
+<p>A sombra acompanha o formato do elemento, inclusive o canto arredondado. Não há nada a fazer: um
+cartão <code>rounded-xl</code> com <code>shadow-lg</code> projeta uma sombra de canto redondo, porque a
+sombra é gerada a partir da borda da caixa. É uma das poucas coisas do CSS que simplesmente funciona.</p>
+
+<p>O que não funciona é a combinação com <code>overflow-hidden</code>. Essa classe recorta tudo o que
+passa da caixa, e a sombra passa — então ela é cortada. O sintoma clássico: você põe
+<code>overflow-hidden</code> no cartão para a imagem respeitar o canto arredondado, e a sombra do
+cartão desaparece. A solução é colocar o recorte em um filho, ou a sombra em um elemento de fora. Não
+existe classe que diga "recorte o conteúdo mas não a sombra".</p>
+
+<p>Outra interação que vale saber: sombra não ocupa espaço. Diferente da borda, que empurra o
+conteúdo, a sombra é desenhada por cima do que estiver em volta e não muda o layout. Isso é ótimo para
+efeito de hover — o cartão ganha <code>shadow-lg</code> no mouse e nada se mexe — e péssimo para quem
+espera que ela impeça o texto do vizinho de encostar. Sombra não separa; ela sugere.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Recurso</th><th>Ocupa espaço?</th><th>Segue o canto?</th><th>Serve para</th></tr>
+<tr><td><code>border</code></td><td>sim, come de dentro</td><td>sim</td><td>delimitar o componente</td></tr>
+<tr><td><code>shadow-*</code></td><td>não</td><td>sim</td><td>dizer que está acima da página</td></tr>
+<tr><td><code>inset-shadow-*</code></td><td>não</td><td>sim</td><td>dizer que está afundado</td></tr>
+<tr><td><code>ring-*</code></td><td>não</td><td>sim, com afastamento opcional</td><td>marcar foco e estado</td></tr>
+<tr><td><code>outline-*</code></td><td>não</td><td>sim, na maioria dos navegadores</td><td>marcar foco com contraste garantido</td></tr>
+</table>
+</div>
+
+<p>Essa tabela é o mapa das próximas duas aulas. A diferença essencial entre sombra e anel é a
+intenção: sombra sugere altura e pode ser sutil; anel e contorno marcam estado e precisam ser visíveis
+em qualquer fundo. Guarde a coluna do meio — "ocupa espaço?" — porque é ela que decide se o layout vai
+tremer quando o elemento mudar de estado.</p>
+
+<h2>8. Quando a sombra não aparece</h2>
+
+<p>Quatro motivos explicam quase todos os casos de "coloquei a sombra e não vi nada". O primeiro é
+fundo claro sobre fundo claro com sombra muito fraca: <code>shadow-2xs</code> em um cartão branco sobre
+página branca é quase invisível, e não é bug. Suba um degrau.</p>
+
+<p>O segundo é o tema escuro. Sombra preta em fundo preto não existe — falta contraste para a mancha
+aparecer. No escuro, a convenção muda: o que dá profundidade é a borda clara ou o anel, não a sombra.
+Se você mantém a mesma sombra nos dois temas, ela simplesmente some, e o cartão volta a ficar chapado.
+Isso é assunto das aulas de tema escuro; aqui fica o aviso para você não achar que quebrou alguma
+coisa.</p>
+
+<p>O terceiro é o <code>overflow-hidden</code> que acabamos de ver, às vezes aplicado lá em cima, em um
+container que você nem lembra que existe. O quarto é sombra em elemento sem caixa visível: um
+<code>span</code> de texto, por exemplo, projeta sombra em volta da área do texto, e o resultado parece
+sujeira em vez de profundidade. Sombra quer caixa com fundo.</p>
+
+<p>E existe a armadilha de performance, que só aparece em página grande: cada sombra com desfoque é
+uma operação cara para o navegador, e dezenas delas em uma lista longa fazem a rolagem engasgar em
+celular modesto. Se a lista tem cinquenta cartões, prefira <code>shadow-xs</code> ou borda, e deixe a
+sombra grande para o que realmente flutua.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o cartão igual ao fundo</h3>
+<p>A Ana usou <code>shadow-sm</code> nos doze cartões do cardápio e não viu diferença. O motivo é que
+o fundo da página também é claro, e <code>shadow-sm</code> tem 10% de preto em um desfoque de 3 px:
+existe, mas some. Duas saídas honestas: subir para <code>shadow-md</code> e escurecer um pouco o fundo
+da página, ou desistir da sombra e usar <code>divide-y</code>. Sombra precisa de contraste dos dois
+lados para acontecer.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o menu que perdeu a sombra ao ser recortado</h3>
+<p>O menu suspenso tinha <code>shadow-xl</code> e uma lista longa. Para a lista não estourar a tela,
+ela pôs <code>overflow-hidden</code> no container do menu — e a sombra desapareceu. O recorte corta a
+sombra porque a sombra passa da caixa. A correção foi recortar só o conteúdo rolável, com
+<code>overflow-hidden</code> em um filho interno, deixando o container de fora livre para projetar.
+Esse é o encaixe que mais aparece quando se monta menu, modal e cartão com imagem.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: sombra em tudo, página pesada</h3>
+<p>Empolgada, ela pôs <code>shadow-lg</code> em cada seção, cada cartão e cada botão. O resultado
+perdeu hierarquia: se tudo flutua, nada flutua. A correção foi escolher um nível só para o que está
+realmente acima — o modal e o menu — e deixar cartões com <code>shadow-sm</code> e botões com
+<code>shadow-xs</code>. Sombra é uma escala de altura; usar sempre o mesmo degrau é o mesmo que não ter
+escala.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que o terceiro número de um
+<code>box-shadow</code> controla?</p>
+<label><input type="radio" name="s1"> a opacidade da sombra</label>
+<label><input type="radio" name="s1"> o deslocamento vertical</label>
+<label><input type="radio" name="s1"> o desfoque, que dissolve a borda da sombra</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. <code>shadow-lg</code> e <code>ring-2</code> no
+mesmo botão: o que acontece?</p>
+<label><input type="radio" name="s2"> os dois aparecem, porque cada um ocupa uma camada de variável
+dentro do <code>box-shadow</code></label>
+<label><input type="radio" name="s2"> só o anel aparece, porque ele é declarado depois</label>
+<label><input type="radio" name="s2"> o navegador escolhe o de maior desfoque</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">3. Por que a sombra some no tema escuro?</p>
+<label><input type="radio" name="s3"> porque o Tailwind remove sombras quando o tema é escuro</label>
+<label><input type="radio" name="s3"> porque o <code>shadow-lg</code> vira <code>shadow-none</code>
+automaticamente</label>
+<label><input type="radio" name="s3"> porque sombra preta sobre fundo escuro não tem contraste para
+aparecer</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o painel da encomenda</h2>
+<p>O painel de encomenda precisa parecer que está acima da página. Complete a classe que dá a elevação
+de um painel flutuante:</p>
+<div class="ex-code">&lt;div class="rounded-xl bg-white p-4 <input aria-label="resposta 1" data-answer="shadow-lg" placeholder="...">"&gt;Encomenda de aniversário&lt;/div&gt;</div>
+<p class="ex-dica">Dica: é o degrau de 15 px de desfoque, entre o <code>shadow-md</code> e o
+<code>shadow-xl</code>. Se você escrever <code>shadow-sm</code>, o cartão fica apoiado no fundo, que é
+menos do que o pedido.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Sombra no Tailwind é uma escala de elevação: <code>shadow-2xs</code> para um fio,
+<code>shadow-sm</code> para cartão apoiado, <code>shadow-md</code> para destaque,
+<code>shadow-lg</code> para o que flutua, <code>shadow-2xl</code> para o exagero proposital. Cada
+degrau combina deslocamento para baixo, desfoque e uma opacidade de preto entre 5% e 25%, e os
+menores somam duas camadas para ficar naturais.</p>
+
+<p>A cor é uma classe à parte (<code>shadow-amber-900/20</code>), que só funciona junto de uma classe
+de sombra. A versão interna, <code>inset-shadow-*</code>, faz o oposto: afunda a superfície. E a
+sombra não ocupa espaço, acompanha o canto arredondado, desaparece quando alguém põe
+<code>overflow-hidden</code> no mesmo elemento e perde o efeito no tema escuro.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>box-shadow</code> = deslocamento X, deslocamento Y, desfoque, espalhamento, cor.</li>
+<li>Escala: <code>shadow-2xs</code>, <code>xs</code>, <code>sm</code>, <code>md</code>,
+<code>lg</code>, <code>xl</code>, <code>2xl</code>.</li>
+<li>No v4 a escala desceu um degrau em relação ao v3 e ganhou nomes com sufixo.</li>
+<li><code>shadow-none</code> escreve uma sombra transparente, não apaga a propriedade.</li>
+<li>Cor da sombra é classe separada: <code>shadow-lg shadow-amber-900/20</code>.</li>
+<li>Sombra interna: <code>inset-shadow-2xs</code> e <code>inset-shadow-xs</code>; o antigo era
+<code>shadow-inner</code>.</li>
+<li>A sombra segue o canto arredondado sem configuração.</li>
+<li><code>overflow-hidden</code> recorta a sombra; recorte em um filho quando precisar dos dois.</li>
+<li>Sombra não ocupa espaço: ótima no hover, inútil para separar vizinhos.</li>
+<li>No tema escuro, profundidade vem de borda e anel, não de sombra preta.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

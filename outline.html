@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Outline | Guia Tailwind</title>
+<meta name="description" content="Outline no Tailwind: o contorno que não ocupa espaço, a diferença para o ring e para a borda, outline-offset, foco visível com focus-visible e o outline-hidden do v4.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Outline</span>: o contorno por fora da caixa</h1>
+<p class="intro">A Ana tinha um botão laranja no site da padaria e um incômodo: ao navegar com o
+teclado, aparecia um contorno azul grosso em volta dele. "Isso não combina com nada", ela pensou, e
+escreveu <code>outline-none</code>. Pronto: o azul sumiu — e o botão ficou invisível para quem usa
+teclado. Nesta aula ela descobre que o contorno do navegador não é um defeito de estilo: é uma
+ferramenta antiga e muito bem resolvida, que o Tailwind permite pintar, afastar e engrossar. O
+resultado é uma marca de foco bonita e que sobrevive até no modo de alto contraste.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que o CSS chama de <code>outline</code> e por que ele não ocupa espaço.</li>
+  <li>A escala: <code>outline</code>, <code>outline-2</code>, <code>outline-4</code>, <code>outline-8</code>.</li>
+  <li>As cores e os estilos de contorno, de sólido a duplo.</li>
+  <li>Quando e como afastar o contorno com <code>outline-offset-2</code>.</li>
+  <li><code>outline-none</code> contra <code>outline-hidden</code>: a diferença que o v4 trouxe.</li>
+  <li>A receita do foco com <code>focus-visible:</code> e contorno.</li>
+  <li>Por que o contorno é a marca mais resistente no alto contraste — e o anel não.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o contorno azul que a Ana quis apagar</h2>
+
+<p>O botão de encomenda da padaria é âmbar, arredondado, com texto escuro. Funciona no mouse. No
+teclado, quando o foco chega nele, aparece um contorno azul fino, desenhado por fora da borda. É o
+marcador de foco nativo do Chrome, e ele existe desde os primeiros navegadores gráficos.</p>
+
+<p>A primeira reação de quem começa é apagar. A segunda é descobrir que apagar quebrou o site para uma
+parte das pessoas — justamente a parte que mais depende do teclado. A reação certa é a terceira:
+entender o que aquela marca é, para que serve e como trocar por uma versão com a cara da marca.</p>
+
+<p>O contorno tem uma vantagem que nenhuma outra ferramenta tem: ele é desenhado pelo mecanismo mais
+antigo e mais respeitado do navegador, aquele que continua funcionando quando o sistema entra em modo
+de alto contraste, quando a página desliga imagens ou quando o navegador decide que o usuário precisa
+de foco garantido. Anel é desenho moderno; contorno é garantia. Saber usar os dois é o que separa um
+site bonito de um site bonito e utilizável.</p>
+
+<h2>2. O que é o outline</h2>
+
+<p>No CSS, <code>outline</code> é uma linha desenhada por fora da borda do elemento. Três
+características a definem. Primeira: ela não é desenhada por dentro, então não come o conteúdo.
+Segunda: ela não ocupa espaço no layout — o vizinho continua no mesmo lugar, exatamente como acontece
+com a sombra. Terceira: ela pode ser deslocada para longe da caixa com
+<code>outline-offset</code>, o que cria um vão entre o elemento e a linha.</p>
+
+<p>Em CSS puro, o contorno é escrito como a borda, com espessura, estilo e cor:
+<code>outline: 2px solid #b45309</code>. No Tailwind, cada pedaço é uma classe, e a espessura sozinha
+já liga o estilo sólido:</p>
+
+<pre class="term">.outline-2 {
+  outline-style: var(--tw-outline-style);
+  outline-width: 2px;
+}
+/* --tw-outline-style vale solid por padrão */</pre>
+
+<p>O <code>outline</code> sem número vale 1 px, como <code>border</code> sem número. E o estilo pode
+ser trocado com <code>outline-dashed</code>, <code>outline-dotted</code> ou
+<code>outline-double</code> — os mesmos nomes da borda, o que ajuda a memorizar. A diferença é que o
+contorno não tem "lado": ele existe em volta inteira, ou não existe. Isso é uma limitação do próprio
+CSS, não do Tailwind.</p>
+
+<dl class="anatomy">
+<dt>outline</dt>
+<dd>Linha desenhada por fora da caixa, sem ocupar espaço no layout. No Tailwind a espessura vem por
+número: <code>outline-2</code>.</dd>
+<dt>outline-offset</dt>
+<dd>O vão entre a borda do elemento e o contorno. Positivo afasta; negativo aproxima e coloca o
+contorno por dentro.</dd>
+<dt>outline-style</dt>
+<dd>O traço do contorno: sólido, tracejado, pontilhado, duplo ou nenhum.</dd>
+<dt>marca de foco</dt>
+<dd>O desenho que mostra onde está o foco do teclado. Pode ser contorno, anel ou os dois.</dd>
+<dt>alto contraste</dt>
+<dd>Modo em que o sistema força cores para garantir leitura. O navegador desenha contornos com cores
+do sistema, mas ignora sombras.</dd>
+<dt>outline-hidden</dt>
+<dd>A classe do v4 que combina "sem contorno" com uma marca invisível que reaparece no alto
+contraste.</dd>
+</dl>
+
+<h2>3. Espessura, cor e estilo</h2>
+
+<p>A escala de espessura é a mesma da borda, em pixels redondos: 1, 2, 4 e 8, com
+<code>outline-0</code> para apagar. Contorno de 2 px é o padrão de foco da maioria dos guias de
+acessibilidade; 1 px é discreto demais em tela com muita informação, e 4 px já é destaque.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que faz</th><th>Onde costuma servir</th></tr>
+<tr><td><code>outline</code></td><td>contorno de 1 px, sólido</td><td>marca fina em elemento grande</td></tr>
+<tr><td><code>outline-2</code></td><td>contorno de 2 px</td><td>foco padrão de botão e campo</td></tr>
+<tr><td><code>outline-4</code></td><td>contorno de 4 px</td><td>foco em fundo escuro ou elemento pequeno</td></tr>
+<tr><td><code>outline-offset-2</code></td><td>afasta 2 px da borda</td><td>quando o contorno encosta no desenho</td></tr>
+<tr><td><code>outline-amber-500</code></td><td>pinta o contorno</td><td>marca da casa no foco</td></tr>
+<tr><td><code>outline-dashed</code></td><td>contorno tracejado</td><td>área de soltar arquivo, cupom</td></tr>
+<tr><td><code>outline-none</code></td><td>sem contorno</td><td>só quando há outra marca no lugar</td></tr>
+<tr><td><code>outline-hidden</code></td><td>sem contorno, com marca no alto contraste</td><td>a escolha segura para apagar</td></tr>
+</table>
+</div>
+
+<p>A cor segue a paleta de sempre, com o mesmo esquema de família e tom. E aqui há um detalhe que
+separa o contorno do anel: sem classe de cor, o contorno herda a cor do texto
+(<code>currentcolor</code>) — mas, no foco nativo, o navegador usa a cor de destaque do sistema. Ou
+seja: o azul que a Ana viu não veio do seu CSS, veio do navegador. Quando você declara
+<code>outline-amber-600</code>, o azul desaparece e a marca passa a ser sua.</p>
+
+<p>O estilo tracejado merece um comentário. Ele existe e funciona, mas é uma péssima escolha para
+marca de foco: traço interrompido tem menos área visível e se confunde com a borda tracejada de campo
+obrigatório. Deixe o tracejado para convites de ação ("arraste o arquivo aqui") e use contorno sólido
+no foco. Estilo é vocabulário: cada um tem um lugar.</p>
+
+<p>Uma distinção que parece detalhe e não é: <code>outline-0</code> e <code>outline-none</code> chegam
+ao mesmo resultado visual por caminhos diferentes. O primeiro zera a espessura e mantém o estilo
+declarado; o segundo zera o estilo, o que faz o contorno desaparecer em qualquer espessura. Quem está
+anulando o contorno de um componente deve usar <code>outline-0</code> quando quiser apenas tirar a
+linha visível, e <code>outline-hidden</code> quando quiser tirar a linha e manter a garantia do alto
+contraste. <code>outline-none</code> fica para o caso em que você já declarou uma marca própria com
+<code>focus-visible:</code> e quer o nativo fora do caminho.</p>
+
+<h2>4. O foco do navegador e a escolha certa</h2>
+
+<p>Toda vez que você aperta Tab, o navegador desenha o contorno nativo no elemento focado. É um
+comportamento embutido, e é por isso que esquecer o foco é quase impossível — esquecer é apagar. A
+classe <code>outline-none</code> faz exatamente isso, e é a armadilha número um de quem está começando:
+o site fica bonito e o teclado fica cego.</p>
+
+<p>No Tailwind v4 existe uma classe melhor para essa intenção: <code>outline-hidden</code>. Ela apaga o
+contorno no modo normal, mas deixa preparada uma marca invisível que reaparece quando o sistema entra
+em alto contraste. O CSS gerado mostra o truque:</p>
+
+<pre class="term">.outline-hidden {
+  --tw-outline-style: none;
+  outline-style: none;
+  @media (forced-colors: active) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}</pre>
+
+<p>Em modo de alto contraste, o navegador troca cores por cores do sistema — inclusive a palavra
+"transparent", que passa a ser desenhada com a cor de destaque. Resultado: o contorno invisível vira
+visível justamente para quem precisa dele. Se você usar <code>outline-none</code>, essa mágica não
+acontece.</p>
+
+<div class="trytailwind" data-goal="rule:.focus-visible\:outline-2:focus-visible;;rule:outline-color: var(--color-amber-600)">
+  <p class="try-task">O botão está sem marca de foco. Troque <code>outline-none</code> por uma marca
+  própria, que só aparece no teclado: <code>focus-visible:outline-2
+  focus-visible:outline-offset-2 focus-visible:outline-amber-600</code>.</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-lg bg-amber-400 px-4 py-2 text-amber-950 outline-none"&gt;Encomendar&lt;/button&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.828 0.189 84.429)
+color: oklch(0.279 0.077 45.635)
+border-radius: 8px
+padding-inline: 16px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-amber-400 px-4 py-2 text-amber-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"&gt;Encomendar&lt;/button&gt;</pre>
+</div>
+
+<p>Repare no painel antes de rodar: não há linha de contorno. O <code>outline-none</code> deixou o
+estilo igual ao padrão do elemento, que também não tem contorno, então não há mudança para mostrar. É
+a mesma lógica do <code>rounded-none</code> da aula de arredondamento: o painel fala do que mudou.
+Depois da solução, as classes de foco também não aparecem ali — elas só valem no estado de foco. Para
+conferir, use o botão Verificar, que procura a regra condicionada no CSS gerado.</p>
+
+<p>Para ver funcionando na prévia, clique dentro do quadro e aperte Tab até o botão. Como a marca usa
+<code>focus-visible:</code>, o clique com o mouse não a mostra — só o teclado. Isso é intencional:
+quem clicou já sabe onde está.</p>
+
+<h2>5. Afastando o contorno</h2>
+
+<p>Um contorno de 2 px colado em um botão de fundo forte parece que o botão engordou: as duas linhas
+— a borda invisível da caixa e o contorno — ficam a zero pixel de distância. O afastamento resolve:
+<code>outline-offset-2</code> empurra o contorno 2 px para fora, criando um respiro que separa a marca
+do objeto.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|outline-offset=2px">
+  <p class="try-task">O contorno está colado no botão e some no meio do desenho. Afaste 2 px com
+  <code>outline-offset-2</code>.</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-lg bg-amber-400 px-4 py-2 text-amber-950 outline-2 outline-amber-600"&gt;Encomendar&lt;/button&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.828 0.189 84.429)
+color: oklch(0.279 0.077 45.635)
+border-radius: 8px
+outline-style: solid
+outline-width: 2px
+outline-color: oklch(0.666 0.179 58.318)
+padding-inline: 16px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-amber-400 px-4 py-2 text-amber-950 outline-2 outline-amber-600 outline-offset-2"&gt;Encomendar&lt;/button&gt;</pre>
+</div>
+
+<p>O afastamento também aceita valor negativo, escrito com o sinal antes do nome:
+<code>-outline-offset-2</code>. Ele puxa o contorno para dentro e é útil quando o elemento está colado
+na borda do container, onde qualquer coisa para fora seria cortada. O efeito colateral é que o
+contorno interno come metade do padding visual, então elemento com pouco respiro fica apertado.</p>
+
+<p>Uma diferença importante em relação ao anel: o vão do <code>ring-offset</code> é preenchido com uma
+cor que você declara, criando um halo. O vão do <code>outline-offset</code> é vazio — é o fundo do
+elemento que aparece ali. Isso torna o contorno mais previsível em qualquer fundo: não há cor de vão
+para esquecer.</p>
+
+<h2>6. Contorno, anel e borda: quem é quem</h2>
+
+<p>As três ferramentas desenham linha em volta de uma caixa, e é por isso que a confusão é comum.
+A tabela abaixo é a que vale colar no monitor:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Recurso</th><th>Ocupa espaço?</th><th>Canto arredondado?</th><th>Sobrevive ao alto contraste?</th><th>Serve para</th></tr>
+<tr><td><code>border</code></td><td>sim, come de dentro</td><td>segue</td><td>sim</td><td>fazer parte do componente</td></tr>
+<tr><td><code>ring-*</code></td><td>não</td><td>segue</td><td>não (é sombra)</td><td>marca de foco com a cor da marca</td></tr>
+<tr><td><code>outline-*</code></td><td>não</td><td>segue, nos navegadores atuais</td><td>sim</td><td>garantir que o foco sempre apareça</td></tr>
+</table>
+</div>
+
+<p>O critério de escolha é simples. Se a linha precisa existir sempre e delimitar o componente, é
+borda. Se é uma marca de estado que deve combinar com a identidade visual, é anel. Se é uma garantia
+que precisa funcionar em qualquer condição — alto contraste, navegador antigo, leitor de tela com
+navegação por foco —, é contorno.</p>
+
+<p>Nada impede combinar: um botão pode ter <code>ring-2</code> no hover e
+<code>focus-visible:outline-2</code> no foco, ou os dois no foco, com o contorno por fora e o anel por
+dentro. O que não pode é o botão ficar sem nenhuma das duas coisas.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|outline-width=2px;;css:#alvo|outline-offset=2px">
+  <p class="try-task">Este botão usa anel, que desaparece no modo de alto contraste. Troque para
+  contorno: tire <code>ring-2 ring-amber-400</code> e ponha <code>outline-2 outline-amber-500
+  outline-offset-2</code>.</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-lg bg-amber-400 px-4 py-2 text-amber-950 ring-2 ring-amber-400"&gt;Encomendar&lt;/button&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.828 0.189 84.429)
+color: oklch(0.279 0.077 45.635)
+border-radius: 8px
+box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.828 0.189 84.429) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px
+padding-inline: 16px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-amber-400 px-4 py-2 text-amber-950 outline-2 outline-amber-500 outline-offset-2"&gt;Encomendar&lt;/button&gt;</pre>
+</div>
+
+<p>Compare os dois painéis. Antes, o anel aparecia escondido dentro de uma linha de
+<code>box-shadow</code> com quatro camadas transparentes. Depois, o contorno aparece como três
+propriedades próprias: estilo, espessura e afastamento. Essa é a tradução técnica da diferença entre
+as duas marcas — e a razão de o contorno ser o mais robusto.</p>
+
+<h2>7. Alto contraste e o detalhe que salva o site</h2>
+
+<p>O modo de alto contraste é um recurso do sistema operacional para quem tem baixa visão. Ele
+substitui as cores da página por uma paleta de poucos tons de alto contraste e mantém as bordas. No
+Windows, o modo forçado de cores faz isso em qualquer navegador. E é ali que a escolha da marca de
+foco deixa de ser estética.</p>
+
+<p>Sombra não é desenhada nesse modo. Anel é sombra. Portanto um site cujo único marcador de foco é o
+anel fica sem marca nenhuma para quem usa alto contraste. Contorno, ao contrário, é desenhado com a
+cor de destaque do sistema — e por isso é a marca que nunca falha. Se você só puder escolher uma
+técnica para o foco do site inteiro, escolha contorno.</p>
+
+<p>É para esse cenário que existe o <code>outline-hidden</code>. Ele parece contraditório — apaga o
+contorno — mas dentro do bloco de alto contraste ele escreve um contorno transparente de 2 px, que o
+sistema transforma em contorno visível. Use <code>outline-hidden</code> quando precisar apagar o foco
+nativo para pôr uma marca própria; use <code>outline-none</code> só quando a marca própria já for um
+contorno declarado com <code>focus-visible:</code>.</p>
+
+<p>Não é preciso trocar a configuração do computador para testar. No Chrome e no Edge, as ferramentas
+de desenvolvedor têm uma opção de emular o modo de cores forçadas, na aba de renderização; o Firefox
+segue a configuração de alto contraste do sistema operacional. Ligar essa emulação é o teste mais
+direto que existe: a página fica com poucas cores, e você vê na hora se a marca de foco continua ali.
+Se ela desaparecer, a culpa é do anel — e a correção é acrescentar o contorno.</p>
+
+<p>Vale dizer que o contorno também tem limites. Ele é uma linha em volta de uma caixa e não sabe
+nada sobre o conteúdo: em um elemento com forma irregular, como um ícone desenhado, o contorno
+acompanha a caixa e não a silhueta. E o afastamento é só uma distância; não existe "contorno só à
+direita". Para desenhos complexos, a marca de foco costuma ser uma combinação: contorno na caixa mais
+uma mudança de cor de fundo ou de sombra que acompanha o estado.</p>
+
+<h2>8. Na prática: a receita do foco do site</h2>
+
+<p>Juntando tudo, a receita que a Ana adotou na padaria tem três linhas e vale para todo elemento
+interativo: botão, link, campo, item de menu.</p>
+
+<pre class="file" data-file="index.html">&lt;a href="/encomendas" class="rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"&gt;Encomendar&lt;/a&gt;</pre>
+
+<p>Três decisões estão embutidas ali. <code>focus-visible:</code> em vez de <code>focus:</code>,
+porque o anel ou contorno não precisa aparecer no clique. <code>outline-2</code> em vez de
+<code>outline</code>, porque 1 px se perde em tela de celular. E <code>outline-offset-2</code>, porque
+o contorno colado no elemento parece parte dele e não marca de estado.</p>
+
+<p>Os erros mais comuns têm conserto rápido. Marca dupla: você pôs contorno próprio e esqueceu de
+apagar o nativo — some com <code>outline-hidden</code> e declare o seu. Cor fraca: contorno âmbar 300
+em fundo branco não passa no critério de contraste; use 600 ou 700. Contorno invisível: o elemento
+está dentro de um container com <code>overflow-hidden</code>, que recorta o que passa da caixa; nesse
+caso use <code>-outline-offset-2</code> para desenhar por dentro.</p>
+
+<p>E um teste que vale ouro: navegue a sua página inteira só com Tab. Se em algum momento você não
+souber onde está, aquele elemento está sem marca. É o teste mais rápido de acessibilidade que existe —
+mais rápido que qualquer ferramenta automática, e ele pega exatamente o problema que o usuário de
+teclado sente.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o link do rodapé sem marca nenhuma</h3>
+<p>A Ana apagou o contorno de todos os links "porque ficava feio" e esqueceu de pôr algo no lugar. No
+rodapé, com seis links colados, navegar por Tab virou adivinhação. A correção foi uma classe só, no
+container: <code>focus-visible:outline-2 focus-visible:outline-offset-2</code> aplicada em cada link.
+Vinte minutos de trabalho e um site utilizável. A lição: apagar é decisão, e toda decisão de apagar
+precisa de substituto no mesmo commit.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o contorno cortado no item de lista</h3>
+<p>Em uma lista com <code>overflow-hidden</code> e cantos arredondados, o contorno dos itens era
+cortado em cima e embaixo. O contorno é desenhado por fora da caixa, então o recorte o pega. A saída
+foi <code>-outline-offset-2</code>, que desenha o contorno por dentro e nunca é cortado — com o custo
+de encostar no texto. Alternativa: trocar o recorte por cantos arredondados só no primeiro e no último
+item, deixando o contorno livre.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a marca que sumiu no alto contraste</h3>
+<p>O site estava perfeito, e uma cliente que usa alto contraste reclamou que não via onde estava o
+foco. O marcador era <code>ring-2</code> — uma sombra, que o modo forçado de cores não desenha. A
+correção foi acrescentar <code>focus-visible:outline-2</code> junto do anel. No modo normal, o anel
+domina; no alto contraste, o contorno aparece. As duas marcas convivem sem brigar porque uma é sombra
+e a outra é contorno.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="1"><p class="mc-q">1. O que o contorno faz com o layout?</p>
+<label><input type="radio" name="o1"> nada: ele é desenhado por fora e não ocupa espaço</label>
+<label><input type="radio" name="o1"> empurra o conteúdo para dentro, como a borda</label>
+<label><input type="radio" name="o1"> aumenta a largura do elemento na medida do offset</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual é a diferença entre <code>outline-none</code> e
+<code>outline-hidden</code>?</p>
+<label><input type="radio" name="o2"> nenhuma, são sinônimos</label>
+<label><input type="radio" name="o2"> <code>outline-hidden</code> só tira o contorno do foco</label>
+<label><input type="radio" name="o2"> <code>outline-hidden</code> também deixa uma marca que aparece
+no modo de alto contraste</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Por que o anel não serve como única marca de foco em
+um site que precisa de acessibilidade?</p>
+<label><input type="radio" name="o3"> porque ele ocupa espaço e muda o layout</label>
+<label><input type="radio" name="o3"> porque ele é uma sombra, e o modo de alto contraste não desenha
+sombras</label>
+<label><input type="radio" name="o3"> porque o navegador remove anéis automaticamente</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o contorno do botão</h2>
+<p>O botão já tem contorno de 2 px âmbar, colado na borda. Complete com a classe que afasta esse
+contorno 2 px:</p>
+<div class="ex-code">&lt;button class="rounded-lg outline-2 outline-amber-600 <input aria-label="resposta 1" data-answer="outline-offset-2" placeholder="...">"&gt;Encomendar&lt;/button&gt;</div>
+<p class="ex-dica">Dica: é a propriedade que cria o vão entre a caixa e o contorno. Sem ela, o
+contorno encosta no botão e parece que ele engordou.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Contorno é a linha desenhada por fora da caixa, sem ocupar espaço no layout, que aceita afastamento
+com <code>outline-offset</code> e estilos como tracejado e duplo. No Tailwind, a espessura vem por
+número (<code>outline</code> = 1 px, <code>outline-2</code>, <code>outline-4</code>) e a cor pela
+paleta. No foco, a receita é <code>focus-visible:outline-2 focus-visible:outline-offset-2</code> com
+uma cor declarada.</p>
+
+<p>Comparado ao anel, o contorno é menos elegante e mais confiável: ele é o único que sobrevive ao
+modo de alto contraste, porque não é sombra. <code>outline-none</code> apaga sem deixar rastro;
+<code>outline-hidden</code> apaga e mantém uma marca preparada para esse modo. E a regra que fecha o
+assunto: nunca apague o foco sem pôr outra marca no lugar.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>outline</code> é desenhado por fora, não ocupa espaço e não tem lados.</li>
+<li>Espessura: <code>outline</code> 1 px, <code>outline-2</code>, <code>outline-4</code>,
+<code>outline-8</code>; <code>outline-0</code> zera.</li>
+<li><code>outline-offset-2</code> afasta; <code>-outline-offset-2</code> desenha por dentro.</li>
+<li>Estilos: <code>outline-dashed</code>, <code>outline-dotted</code>, <code>outline-double</code>.</li>
+<li>O azul do foco nativo vem do navegador, não do seu CSS.</li>
+<li><code>outline-none</code> apaga; <code>outline-hidden</code> apaga e guarda marca para o alto
+contraste.</li>
+<li><code>focus-visible:</code> mostra a marca só para quem chega pelo teclado.</li>
+<li>Borda ocupa espaço, anel é sombra, contorno é garantia: cada um tem seu papel.</li>
+<li>Alto contraste ignora sombra; por isso anel sozinho não basta.</li>
+<li>Teste final de qualquer página: navegue só com Tab e veja se sempre sabe onde está.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

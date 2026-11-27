@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Divisores | Guia Tailwind</title>
+<meta name="description" content="Divisores no Tailwind: separar itens de uma lista com divide-y, colunas com divide-x, o divisor solto do hr e por que a borda em cada filho deixa um fio sobrando.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Divisores: a linha entre uma coisa e <span class="hl">outra</span></h1>
+<p class="intro">A Ana resolveu a reclamação da cliente e pôs borda em cada pão do cardápio. Deu
+errado de um jeito novo: entre dois itens apareceram duas linhas coladas, e no fim da lista sobrou um
+fio solto, sem nada embaixo. Ela passou meia hora apagando borda de um lado e do outro até desistir.
+O problema não era a borda — era o lugar onde ela estava. Nesta aula a Ana aprende que a linha entre
+duas coisas não pertence a nenhuma das duas: pertence ao espaço do meio. E que o Tailwind tem uma
+classe só para isso.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A diferença entre moldura (borda) e separação (divisor).</li>
+  <li>Como o <code>divide-y</code> desenha as linhas de uma lista com uma classe no pai.</li>
+  <li>Espessura, cor e estilo do divisor: <code>divide-y-2</code>, <code>divide-amber-200</code>, <code>divide-dashed</code>.</li>
+  <li>Como separar colunas com <code>divide-x</code> e quando ele não é a ferramenta certa.</li>
+  <li>O divisor solto com <code>&lt;hr&gt;</code>, que todo navegador já conhece.</li>
+  <li>Por que o fio sobra no fim da lista e como evitar.</li>
+  <li>Divisor contra <code>gap</code> e <code>space-y</code>: qual escolher.</li>
+</ul>
+</div>
+
+<h2>1. A cena: três linhas onde devia ter uma</h2>
+
+<p>O cardápio da padaria tem doze itens, cada um com nome, descrição curta e preço. A Ana escreveu
+cada item como uma linha e, para separar, colocou uma borda embaixo de cada uma:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="border-b border-stone-200 py-2"&gt;Pão francês · R$ 0,90&lt;/div&gt;
+&lt;div class="border-b border-stone-200 py-2"&gt;Pão de queijo · R$ 1,50&lt;/div&gt;
+&lt;div class="border-b border-stone-200 py-2"&gt;Broa de milho · R$ 2,00&lt;/div&gt;</pre>
+
+<p>Na tela, o resultado tem dois defeitos. O primeiro: o último item também desenha a linha, e ali
+embaixo não tem nada. Fica um fio órfão, pendurado no fim da lista. O segundo: se você trocar a borda
+de baixo por uma borda completa, para o item ficar "fechado", entre dois itens aparecem a borda de
+baixo do primeiro e a borda de cima do segundo, encostadas. Duas linhas de 1 px sem vão nenhum entre
+elas o olho lê como uma linha grossa e borrada.</p>
+
+<p>Nada disso é culpa do Tailwind. É uma pergunta de desenho que o HTML não responde sozinho: a linha
+entre dois itens pertence ao primeiro, ao segundo, ou ao espaço entre eles? Se pertence a um dos
+itens, você vai ter trabalho para acertar as pontas — e vai precisar de uma regra extra para o
+primeiro e para o último. Se pertence ao espaço, alguém precisa saber quantos itens existem, e quem
+sabe isso é o pai da lista, não os filhos.</p>
+
+<h2>2. Moldura e separação são coisas diferentes</h2>
+
+<p>A aula de bordas ensinou a moldura: a linha que fecha um elemento e diz "isto é uma coisa só". Um
+cartão com borda em volta é uma moldura. Agora o assunto é outro: a linha que fica <em>entre</em>
+duas coisas, para o olho não colar uma na outra. Ela não fecha nada; ela divide.</p>
+
+<p>A diferença parece filosófica e tem consequência prática imediata. A moldura é desenhada pelo
+elemento e acompanha o arredondamento, a sombra e o tamanho dele. A separação não tem dono: se você
+colocar a linha em cada item, os itens das pontas ganham uma linha que não devia existir; se colocar
+só no meio, precisa saber qual é o meio. Em uma lista de dois itens, o meio é um. Em uma lista de
+doze, o meio são onze posições — e é aí que a conta começa a doer.</p>
+
+<p>Existe ainda uma terceira categoria, que confunde muita gente: o espaço. Dois cartões com
+<code>gap-4</code> entre eles estão separados por 16 px de nada, e essa separação às vezes basta. A
+linha é para quando o vazio não é suficiente — em fundo claro, item de preço, lista longa, tabela. O
+vazio organiza; a linha afirma. Escolher entre os dois é decisão de desenho, não de código.</p>
+
+<dl class="anatomy">
+<dt>divisor</dt>
+<dd>A linha que separa dois itens vizinhos. Fica no espaço entre eles, não em volta deles.</dd>
+<dt>moldura</dt>
+<dd>A borda que fecha um elemento por inteiro. É o assunto da aula de bordas.</dd>
+<dt>divide-y</dt>
+<dd>A classe que manda o pai desenhar uma linha embaixo de cada filho, menos no último.</dd>
+<dt>filho direto</dt>
+<dd>O elemento que está imediatamente dentro do pai. Neto não conta para <code>divide</code>.</dd>
+<dt>:not(:last-child)</dt>
+<dd>O seletor do CSS que significa "todos, menos o último". É a razão de o fio não sobrar no fim.</dd>
+<dt>hr</dt>
+<dd>A tag de linha horizontal do HTML, que já existe desde os anos 1990 e serve para uma quebra
+temática solta.</dd>
+</dl>
+
+<h2>3. O jeito manual e o fio que sobra</h2>
+
+<p>O jeito manual é o que a Ana fez: <code>border-b</code> em cada filho. Ele tem uma correção
+conhecida, que é apagar a borda do último item. O Tailwind tem uma variante para isso,
+<code>last:</code>, que aplica a classe só quando o elemento é o último filho:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="border-b border-stone-200 last:border-b-0 py-2"&gt;Pão francês · R$ 0,90&lt;/div&gt;</pre>
+
+<p>Funciona. Mas repare no que você precisou fazer: escrever duas classes de borda no mesmo elemento,
+uma anulando a outra, repetidas em doze linhas. E o preço não para aí: se o desenho pedir moldura
+completa em cada item, você ainda vai precisar decidir o que fazer com as linhas do meio, que se
+encostam e engrossam. Duas variantes, duas classes, doze repetições — e a cor da linha repetida em
+cada uma delas.</p>
+
+<p>Isso não é errado, é caro. Toda vez que alguém adicionar um item no meio, nada quebra; mas toda vez
+que alguém mudar a cor da linha, tem doze lugares para mudar. E é justamente esse tipo de repetição
+que o Tailwind foi feito para evitar: se a informação é do pai ("separe os filhos"), a classe deve
+morar no pai.</p>
+
+<h2>4. O divide-y: uma classe no pai</h2>
+
+<p>O <code>divide-y</code> é isso. Você escreve no elemento que contém a lista, e ele desenha uma
+linha entre cada par de filhos. Não é uma linha em volta, não é uma linha no último: é a linha do
+meio, na quantidade certa, sem você contar nada.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-bottom-width=0px;;rule:border-bottom-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)))">
+  <p class="try-task">Tire a borda de cada item e deixe o pai desenhar os divisores: ponha
+  <code>divide-y divide-stone-200</code> no <code>&lt;ul&gt;</code> e apague os
+  <code>border-b border-stone-200</code> dos três itens. O último item não deve ter linha nenhuma.</p>
+  <pre class="html">&lt;ul class="rounded-xl bg-white p-2"&gt;
+  &lt;li class="border-b border-stone-200 px-3 py-2"&gt;Pão francês · R$ 0,90&lt;/li&gt;
+  &lt;li class="border-b border-stone-200 px-3 py-2"&gt;Pão de queijo · R$ 1,50&lt;/li&gt;
+  &lt;li id="alvo" class="border-b border-stone-200 px-3 py-2"&gt;Broa de milho · R$ 2,00&lt;/li&gt;
+&lt;/ul&gt;</pre>
+  <pre class="out">
+border-bottom-width: 1px
+border-color: oklch(0.923 0.003 48.717)
+padding-inline: 12px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;ul class="divide-y divide-stone-200 rounded-xl bg-white p-2"&gt;
+  &lt;li class="px-3 py-2"&gt;Pão francês · R$ 0,90&lt;/li&gt;
+  &lt;li class="px-3 py-2"&gt;Pão de queijo · R$ 1,50&lt;/li&gt;
+  &lt;li id="alvo" class="px-3 py-2"&gt;Broa de milho · R$ 2,00&lt;/li&gt;
+&lt;/ul&gt;</pre>
+</div>
+
+<p>A meta desta caixa tem dois passos e o segundo é o mais importante. O primeiro confere que o
+último item ficou sem borda; o segundo procura, no CSS gerado, a regra do <code>divide-y</code>. Sem
+esse segundo passo, a missão seria cumprida por qualquer coisa que apagasse a borda — inclusive apagar
+tudo e deixar a lista sem divisor nenhum. Uma meta boa não aceita o atalho que estraga o pedido.</p>
+
+<p>O CSS que o Tailwind gera para essa classe revela o truque:</p>
+
+<pre class="term">:where(.divide-y > :not(:last-child)) {
+  --tw-divide-y-reverse: 0;
+  border-bottom-style: var(--tw-border-style);
+  border-bottom-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
+}</pre>
+
+<p>Duas coisas importantes nesse trecho. Primeiro: o seletor não é "todos os filhos", é "todos os
+filhos menos o último" — é daí que vem a ausência do fio no fim, e é por isso que você não precisa de
+<code>last:</code> nenhum. Segundo: é uma borda de verdade, desenhada embaixo de cada filho (menos o
+último). Isso explica um comportamento que assusta: o divisor ocupa 1 px de espaço, então uma lista
+com três itens separados por dois divisores fica 2 px mais alta do que seria sem eles.</p>
+
+<h2>5. Cor, espessura e estilo do divisor</h2>
+
+<p>As classes de <code>divide</code> seguem o mesmo vocabulário da borda, com um detalhe de sintaxe:
+a espessura entra na mesma classe do eixo, como <code>divide-y-2</code>, e não em uma classe separada.
+A cor vem depois, no mesmo esquema de família e tom da paleta.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que faz</th><th>Onde costuma servir</th></tr>
+<tr><td><code>divide-y</code></td><td>linha entre linhas empilhadas, 1 px</td><td>lista, menu, cardápio</td></tr>
+<tr><td><code>divide-x</code></td><td>linha entre colunas lado a lado, 1 px</td><td>duas informações na mesma faixa</td></tr>
+<tr><td><code>divide-y-2</code></td><td>o mesmo, com 2 px</td><td>lista de destaque</td></tr>
+<tr><td><code>divide-amber-200</code></td><td>pinta o divisor</td><td>separar combinando com a marca</td></tr>
+<tr><td><code>divide-dashed</code></td><td>divisor tracejado</td><td>cupom, lembrete, "recorte aqui"</td></tr>
+<tr><td><code>divide-dotted</code></td><td>divisor pontilhado</td><td>lista leve, rodapé de tabela</td></tr>
+<tr><td><code>divide-y-reverse</code></td><td>inverte o lado da linha</td><td>quando o desenho precisa da linha em cima</td></tr>
+</table>
+</div>
+
+<p>A cor padrão do divisor, como a da borda, é a cor do texto do elemento — <code>currentcolor</code>
+—, então vale declarar: <code>divide-stone-200</code> em uma lista comum,
+<code>divide-amber-200</code> quando a separação deve conversar com a marca. Sem isso, você vai
+descobrir que a linha ficou escura e vai culpar o Tailwind outra vez.</p>
+
+<p>Sobre o estilo, um aviso que economiza tempo: <code>divide-dashed</code> aplica o tracejado nos dois
+lados da regra (em cima e embaixo), mas só um deles tem espessura. O resultado é o tracejado onde a
+linha existe, sem risco de aparecer um traço extra. E vale a mesma regra da borda: tracejado em 1 px
+quase não se distingue de cheio. Se a intenção é "isto é um cupom", use 2 px.</p>
+
+<h2>6. Divide-x: separar colunas</h2>
+
+<p>Quando as informações estão lado a lado em vez de empilhadas, o eixo muda: <code>divide-x</code>.
+Ele funciona igual, com uma diferença de seletor — a linha vai no fim da linha de escrita de cada
+filho, menos o último. Em português, isso é a borda da direita.</p>
+
+<div class="trytailwind" data-goal="css:#alvo &gt; div|border-inline-end-width=1px;;rule:border-color: var(--color-amber-300)">
+  <p class="try-task">As duas informações já estão lado a lado, mas nada as separa. Ponha
+  <code>divide-x divide-amber-300</code> no container.</p>
+  <pre class="html">&lt;div id="alvo" class="flex text-center"&gt;
+  &lt;div class="flex-1 p-3"&gt;Abre 6h&lt;/div&gt;
+  &lt;div class="flex-1 p-3"&gt;Fecha 20h&lt;/div&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+display: flex
+text-align: center
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex divide-x divide-amber-300 text-center"&gt;
+  &lt;div class="flex-1 p-3"&gt;Abre 6h&lt;/div&gt;
+  &lt;div class="flex-1 p-3"&gt;Fecha 20h&lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Repare no painel: ele mostra o que mudou no container — virou <code>flex</code>, centralizou o
+texto — e não mostra linha nenhuma. Não é falha. O painel descreve um elemento, o que está marcado
+com <code>id="alvo"</code>, e o divisor não é propriedade do container: é uma borda em cada filho.
+Quem confere o divisor é o botão Verificar, que olha o CSS computado do primeiro filho e encontra os
+2 px de borda. Sempre que a classe age nos filhos — <code>divide</code>, <code>space-y</code>,
+<code>gap</code> —, o painel do pai não tem o que contar. É a limitação mais útil de conhecer.</p>
+
+<p>O CSS gerado do <code>divide-x</code> deixa claro que a linha é lógica, não física: ele escreve
+<code>border-inline-end-width</code>, que significa "a borda do fim da linha de escrita". Em
+português, fim da linha é a direita; em um site em árabe, seria a esquerda. Se você quer a linha
+fisicamente à esquerda em qualquer idioma, aí sim use <code>border-l</code> no filho — mas essa é uma
+escolha de exceção, não o padrão.</p>
+
+<pre class="term">:where(.divide-x > :not(:last-child)) {
+  --tw-divide-x-reverse: 0;
+  border-inline-style: var(--tw-border-style);
+  border-inline-start-width: calc(1px * var(--tw-divide-x-reverse));
+  border-inline-end-width: calc(1px * calc(1 - var(--tw-divide-x-reverse)));
+}</pre>
+
+<p>E quando <code>divide-x</code> não serve? Quando as colunas têm espaçamento entre elas. Com
+<code>gap-4</code> e <code>divide-x</code>, a linha fica encostada no fim da coluna e o vão de 16 px
+aparece depois dela, o que parece linha fora de lugar. Para colunas separadas por ar, o vão já é a
+separação — dispensando a linha. Regra de bolso: <code>divide</code> para itens encostados,
+<code>gap</code> para itens afastados.</p>
+
+<h2>7. O divisor solto: hr</h2>
+
+<p>Existe um divisor que não separa filhos de nada: a linha entre duas seções inteiras da página, o
+"acabou este assunto, começa outro". Para esse caso o HTML tem uma tag própria, a
+<code>&lt;hr&gt;</code>, e o Tailwind já entrega ela com 1 px de linha e margem vertical zero — o que
+significa que, sem classe, ela aparece colada no conteúdo acima.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-top-width=2px;;rule:border-color: var(--color-amber-400)">
+  <p class="try-task">A linha entre o cardápio e o endereço está fina e apagada. Deixe com 2 px e
+  âmbar 400: acrescente <code>border-t-2 border-amber-400</code> ao <code>&lt;hr&gt;</code>.</p>
+  <pre class="html">&lt;hr id="alvo" class="my-6 border-t-amber-200"&gt;</pre>
+  <pre class="out">
+border-top-color: oklch(0.924 0.12 95.746)
+margin-block: 24px
+</pre>
+  <pre class="solucao">&lt;hr id="alvo" class="my-6 border-t-2 border-amber-400"&gt;</pre>
+</div>
+
+<p>O painel mostra a margem (24 px, do <code>my-6</code>) e a cor, mas não mostra a espessura de 1 px
+que já existia: ela é o padrão da <code>&lt;hr&gt;</code>, então não é novidade. Esse é o mesmo
+raciocínio de sempre — o painel só fala do que mudou. Depois de rodar a solução, aparece a linha nova
+de 2 px.</p>
+
+<p>O <code>&lt;hr&gt;</code> tem duas vantagens sobre uma borda em um parágrafo. A primeira: ele é
+semântico, quer dizer "quebra temática", e leitor de tela entende que ali muda de assunto. A segunda:
+ele não depende de ter conteúdo em volta para existir. A desvantagem é que ele é uma linha só — se
+você precisar de uma linha por item, o caminho é <code>divide-y</code>, não uma pilha de
+<code>&lt;hr&gt;</code> entre os itens.</p>
+
+<h2>8. Divisor, gap ou space-y: como escolher</h2>
+
+<p>Existem três ferramentas para o mesmo problema aparente — "quero que estas coisas não pareçam
+grudadas". Elas não são intercambiáveis, e escolher a errada é a origem de metade dos layouts que
+parecem quase certos.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Ferramenta</th><th>O que cria</th><th>Quando é a certa</th><th>Quando não é</th></tr>
+<tr><td><code>gap-3</code></td><td>vão vazio entre itens</td><td>grade de cartões, botões lado a lado</td><td>lista de texto longa, onde o vazio não guia o olho</td></tr>
+<tr><td><code>space-y-3</code></td><td>margem entre itens empilhados</td><td>parágrafos, formulário, blocos</td><td>lista com linha entre itens</td></tr>
+<tr><td><code>divide-y</code></td><td>linha de 1 px entre itens</td><td>cardápio, tabela de preços, menu</td><td>cartões com sombra (a linha briga com a moldura)</td></tr>
+<tr><td><code>border-b</code> em cada filho</td><td>linha em cada item</td><td>quando o item precisa da linha mesmo sozinho</td><td>lista comum: sobra fio no fim e pode duplicar</td></tr>
+<tr><td><code>&lt;hr&gt;</code></td><td>linha solta</td><td>quebra entre seções</td><td>separar itens de uma lista</td></tr>
+</table>
+</div>
+
+<p>Três pegadinhas fecham o assunto. A primeira: <code>divide</code> só olha filhos diretos. Se cada
+item está dentro de um <code>&lt;li&gt;</code> e você pôs o <code>divide-y</code> no
+<code>&lt;ul&gt;</code>, funciona; se pôs em uma <code>div</code> que envolve tudo, não funciona,
+porque o filho direto é uma coisa só. A segunda: o "menos o último" conta elementos de verdade,
+inclusive os escondidos com <code>hidden</code> — uma lista em que o último item está escondido perde
+o divisor do penúltimo, e o fio que sobra aparece no lugar dele. A terceira: em grade com
+<code>gap</code>, o divisor vai parar no meio do vão, o que quase nunca é o que se quer.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a lista que ficou 17 px mais alta</h3>
+<p>A Ana trocou a borda manual pelo <code>divide-y</code> e a lista cresceu 17 px. Não é bug: são 17
+divisores de 1 px em 18 itens, cada um ocupando espaço de verdade. Em uma lista normal ninguém nota;
+em um painel com altura fixa, isso empurra o conteúdo e aparece a barra de rolagem. A saída é contar
+o divisor no orçamento de altura ou trocar por <code>gap</code> quando o vão vazio serve. Divisor não
+é grátis: ele ocupa espaço como qualquer borda.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o menu que perdeu o divisor do último item escondido</h3>
+<p>Ela escondeu o último item do menu no celular com <code>hidden</code>, e o penúltimo ficou com um
+fio sobrando embaixo. O seletor do Tailwind é "todos menos o último", e o elemento escondido continua
+sendo o último filho. A solução prática é reordenar o HTML para o item escondido ficar no meio, ou
+trocar <code>hidden</code> por não renderizar o item. É o tipo de detalhe que só aparece quando o
+layout muda de tamanho de tela — e que o teste de 375 px pega.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o divisor que virou uma moldura</h3>
+<p>Em um cartão de encomenda com fundo branco, cantos arredondados e sombra, ela acrescentou
+<code>divide-y</code> para separar os três campos. O resultado ficou pesado: a sombra já delimita o
+cartão, e a linha interna disputa atenção com ela. A correção foi trocar o divisor por
+<code>space-y-2</code> — separação por respiro, sem traço. Em componente com moldura, o vazio costuma
+bastar; a linha é para quando não há moldura nenhuma.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Onde mora a classe <code>divide-y</code>?</p>
+<label><input type="radio" name="d1"> em cada filho da lista</label>
+<label><input type="radio" name="d1"> no primeiro filho da lista</label>
+<label><input type="radio" name="d1"> no pai que contém os itens</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que o <code>divide-y</code> não deixa fio
+sobrando no fim da lista?</p>
+<label><input type="radio" name="d2"> porque ele desenha a linha no meio do vão entre os itens</label>
+<label><input type="radio" name="d2"> porque a última borda é apagada automaticamente por
+<code>last:</code></label>
+<label><input type="radio" name="d2"> porque o seletor gerado é "todos, menos o último filho"</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Duas colunas com <code>gap-4</code> entre elas:
+qual é a melhor separação?</p>
+<label><input type="radio" name="d3"> o vão vazio do <code>gap</code> já separa; a linha seria
+redundante</label>
+<label><input type="radio" name="d3"> <code>divide-x</code>, sempre</label>
+<label><input type="radio" name="d3"> <code>border-l</code> em todas as colunas</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o cardápio da padaria</h2>
+<p>O cardápio é uma lista com vários itens empilhados e precisa de uma linha de 1 px entre cada um,
+sem fio no fim. Complete a classe do pai:</p>
+<div class="ex-code">&lt;ul class="<input aria-label="resposta 1" data-answer="divide-y" placeholder="..."> divide-stone-200"&gt;…&lt;/ul&gt;</div>
+<p class="ex-dica">Dica: é o eixo vertical, o mesmo <code>y</code> do <code>py</code> e do
+<code>space-y</code>. Se você escrever <code>divide-x</code>, as linhas ficam em pé, entre colunas —
+não é o pedido para uma lista empilhada.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Divisor é a linha que separa, e a decisão inteligente é colocá-la no pai, não nos filhos.
+<code>divide-y</code> desenha uma borda embaixo de cada filho, menos no último; <code>divide-x</code>
+faz o mesmo no eixo horizontal, usando a borda do fim da linha de escrita. A espessura entra na
+própria classe do eixo (<code>divide-y-2</code>), a cor vem depois
+(<code>divide-stone-200</code>) e o estilo é o mesmo da borda
+(<code>divide-dashed</code>).</p>
+
+<p>O jeito manual — <code>border-b</code> em cada item — funciona, mas cobra o preço em repetição e
+deixa fio sobrando no fim. O <code>&lt;hr&gt;</code> é para a quebra de assunto entre seções, não
+para listas. E quando os itens estão afastados, o vão do <code>gap</code> já conta a história: nem
+toda separação precisa de traço.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>divide-y</code> no pai: linha entre itens empilhados, sem fio no fim.</li>
+<li><code>divide-x</code> no pai: linha entre colunas lado a lado.</li>
+<li>Espessura na mesma classe: <code>divide-y-2</code>, <code>divide-x-4</code>.</li>
+<li>Cor depois: <code>divide-stone-200</code>; sem cor, herda a cor do texto.</li>
+<li>Estilo: <code>divide-dashed</code>, <code>divide-dotted</code>; em 1 px quase não se nota.</li>
+<li>O divisor ocupa espaço: cada linha soma 1 px na altura (ou na largura) do conjunto.</li>
+<li>Só filhos diretos contam; neto não recebe divisor.</li>
+<li>O "menos o último" conta elemento escondido: <code>hidden</code> no fim engana o seletor.</li>
+<li><code>&lt;hr&gt;</code> já vem com 1 px de linha; use <code>border-t-2</code> e uma cor para
+ajustar.</li>
+<li>Itens encostados pedem <code>divide</code>; itens afastados pedem <code>gap</code>.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

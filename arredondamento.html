@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arredondamento | Guia Tailwind</title>
+<meta name="description" content="Arredondamento no Tailwind: o que é o raio de um canto, a escala do rounded, como arredondar um lado só, a pílula do rounded-full e por que a imagem escapa do canto.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Arredondamento: os cantos do <span class="hl">cartão</span></h1>
+<p class="intro">A Ana montou o cartão da promoção da padaria e ficou com um retângulo de cantos vivos,
+duros como uma planilha. O pão é quentinho, o cartão não. Ela já viu na internet que existe uma
+propriedade chamada <code>border-radius</code>, mas não quer decorar CSS: quer a classe do Tailwind
+que resolve isso em uma palavra. Nesta aula ela descobre a escala do <code>rounded</code>, aprende a
+arredondar um lado só, entende por que o <code>rounded-full</code> transforma etiqueta em pílula e
+descobre o motivo pelo qual a foto do pão insiste em não respeitar o canto do cartão.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é o raio de um canto e por que <code>12px</code> não é "12 px de canto".</li>
+  <li>A escala do <code>rounded</code>: de <code>rounded-xs</code> a <code>rounded-4xl</code>.</li>
+  <li>Como arredondar um lado ou um canto só, com <code>rounded-t</code>, <code>rounded-bl</code> e os lados lógicos <code>s</code> e <code>e</code>.</li>
+  <li>Pílula e círculo com <code>rounded-full</code>, e o número estranho que aparece no painel.</li>
+  <li>Por que a imagem ou o fundo do filho escapa do canto arredondado.</li>
+  <li>Como combinar arredondamento com borda sem o desenho ficar torto.</li>
+  <li>Quando usar um valor fora da escala, como <code>rounded-[18px]</code>.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o cartão de cantos vivos</h2>
+
+<p>A Ana tem uma padaria e uma promoção: pão quentinho saindo às 7h. Ela escreveu o aviso no site
+com o HTML mais simples possível e o resultado ficou assim:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="bg-amber-100 p-4"&gt;Pão quentinho às 7h&lt;/div&gt;</pre>
+
+<p>Funciona: fundo amarelo claro, texto escuro, respiro de 16 px. Mas o retângulo tem quatro cantos
+em ângulo reto, e ângulo reto tem um efeito psicológico curioso — parece formulário, parece boleto,
+parece coisa de banco. Tudo que é impresso na padaria (a sacola de papel, o cartãozinho de fidelidade,
+o adesivo da vitrine) tem canto arredondado. É o mesmo conteúdo com outra sensação.</p>
+
+<p>O canto arredondado não é enfeite gratuito. Ele aparece em quase todo componente moderno: botão,
+cartão, campo de formulário, etiqueta, foto de perfil. Quem começa costuma achar que é detalhe e
+depois descobre que é justamente o detalhe que separa "uma página feita no navegador" de "uma página
+feita por alguém". A boa notícia é que, no Tailwind, arredondar custa uma palavra.</p>
+
+<p>Antes de escrever a classe, vale entender o que o navegador faz. O CSS não tem uma propriedade
+chamada "canto". Tem <code>border-radius</code>, que significa "raio da borda". E raio, aqui, é raio
+de círculo mesmo, da geometria da escola: a distância do centro até a borda. O navegador desenha um
+quarto de círculo em cada canto e recorta o retângulo com ele. É por isso que o número não é o
+tamanho do canto que foi cortado: é o raio do círculo que fez o corte.</p>
+
+<h2>2. O que "raio" quer dizer na prática</h2>
+
+<p>Imagine um cartão de 200 px de largura por 100 px de altura. Se você escrever
+<code>border-radius: 12px</code>, o navegador vai em cada canto, imagina um círculo de 12 px de raio
+encostado nas duas bordas e apaga o pedacinho de fora. O resultado é um canto macio de 12 px. Se você
+escrever 40 px, o círculo é maior e o canto fica muito mais curvo — e, quando o raio passa da metade
+do lado menor, o navegador limita sozinho, senão os círculos se cruzariam.</p>
+
+<p>Esse limite automático explica um susto comum: um botão de 40 px de altura com
+<code>border-radius: 28px</code> não vira um botão de cantos grandes — vira uma pílula, porque 28 é
+mais que a metade de 40. O mesmo número, em um cartão de 200 px de altura, produz um canto discreto.
+Ou seja: o raio não é uma medida absoluta de "quanto arredondou", é uma medida relativa ao tamanho da
+caixa. Guarde isso, porque é a origem de metade dos cartões que ficam estranhos.</p>
+
+<p>Existe ainda a possibilidade de dois raios por canto, criando um canto elíptico:
+<code>border-radius: 20px 8px</code> quer dizer 20 px na horizontal e 8 px na vertical. O Tailwind
+permite chegar nisso com valor arbitrário, mas é raro precisar. O dia a dia usa um número só, e é
+exatamente o que a escala do Tailwind entrega.</p>
+
+<h2>3. A escala do rounded</h2>
+
+<p>A classe começa com <code>rounded</code> e termina com o degrau. Sem sufixo, <code>rounded</code>
+sozinho, vale 4 px. Com sufixo, cada nome aponta para um valor fixo da escala — e os valores são os
+mesmos em qualquer projeto Tailwind, o que faz o conjunto parecer coerente.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Raio</th><th>Onde costuma servir</th></tr>
+<tr><td><code>rounded-none</code></td><td>0</td><td>tabela, bloco de código, quando o canto reto é intencional</td></tr>
+<tr><td><code>rounded-xs</code></td><td>2 px</td><td>etiqueta minúscula, detalhe discreto</td></tr>
+<tr><td><code>rounded-sm</code></td><td>4 px</td><td>campo de formulário compacto</td></tr>
+<tr><td><code>rounded-md</code></td><td>6 px</td><td>botão pequeno, etiqueta</td></tr>
+<tr><td><code>rounded-lg</code></td><td>8 px</td><td>botão padrão</td></tr>
+<tr><td><code>rounded-xl</code></td><td>12 px</td><td>cartão padrão</td></tr>
+<tr><td><code>rounded-2xl</code></td><td>16 px</td><td>cartão grande, destaque</td></tr>
+<tr><td><code>rounded-3xl</code></td><td>24 px</td><td>bloco de capa, seção</td></tr>
+<tr><td><code>rounded-4xl</code></td><td>32 px</td><td>área de herói, imagem grande</td></tr>
+</table>
+</div>
+
+<p>Repare que os valores são múltiplos de 2 e crescem de forma irregular: 2, 4, 6, 8, 12, 16, 24, 32.
+Não é uma progressão matemática, é uma escolha de desenho. A escala existe para você não inventar
+números: pega o degrau que parece certo e segue. A regra prática é usar um degrau para cada família
+de peça — todos os botões com <code>rounded-lg</code>, todos os cartões com
+<code>rounded-xl</code>, todas as etiquetas com <code>rounded-full</code>.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-radius=16px">
+  <p class="try-task">O cartão da promoção está com <code>rounded-md</code>, que dá 6 px. Deixe o
+  canto com 16 px, que é o degrau <code>rounded-2xl</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-md bg-amber-100 p-4"&gt;Pão quentinho às 7h&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+border-radius: 6px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-2xl bg-amber-100 p-4"&gt;Pão quentinho às 7h&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra o valor já calculado em pixels, e não o nome do degrau. Isso é de propósito: nome
+de classe é o que você escreve, valor computado é o que o navegador aplicou. Quando os dois não
+batem, o problema está em algum lugar entre o seu dedo e o arquivo. O CSS que o Tailwind gerou para
+essa classe é curto e aponta para uma variável:</p>
+
+<pre class="term">.rounded-2xl {
+  border-radius: var(--radius-2xl);
+}
+/* e, no tema: --radius-2xl: 1rem */</pre>
+
+<p>Um rem é 16 px, então 1 rem = 16 px. Como o raio é escrito em <code>rem</code>, ele acompanha o
+tamanho de fonte do navegador: quem aumenta a letra para ler melhor vê os cantos crescerem na mesma
+proporção. É o mesmo raciocínio da escala de espaço da primeira aula, agora aplicado ao canto.</p>
+
+<h2>4. Pílulas, círculos e o rounded-full</h2>
+
+<p>Existe um degrau que não tem número: <code>rounded-full</code>. Ele não significa "bem
+arredondado", significa "raio infinito". Com raio infinito, o navegador sempre encontra o limite
+máximo permitido, e o resultado depende só da forma da caixa: em um quadrado, vira círculo; em um
+retângulo, vira pílula, aquele formato de comprimido com as pontas em semicírculo.</p>
+
+<p>É a classe mais usada do capítulo. Etiqueta de "novo", contador de notificação, foto de perfil,
+botão de pílula de filtro — tudo isso é <code>rounded-full</code>. E é também a classe que produz o
+valor mais esquisito do guia inteiro no painel: em vez de um número bonito, você vai ver algo como
+<code>3.35544e+07px</code>. Não é erro. O CSS gerado é este:</p>
+
+<pre class="term">.rounded-full {
+  border-radius: calc(infinity * 1px);
+}</pre>
+
+<p>O Tailwind escreve "infinito" e o navegador resolve a conta, chegando em um número gigantesco que
+na prática é maior do que qualquer caixa. O painel das caixas imprime esse número em notação
+científica, do jeito que o JavaScript mostra números grandes. Quando você vir isso, leia como
+"infinito" e siga em frente.</p>
+
+<div class="trytailwind" data-goal="rule:border-radius: calc(infinity * 1px);;texto:Novo">
+  <p class="try-task">A etiqueta "Novo" está com <code>rounded-md</code>. Transforme em pílula, que
+  é o formato de comprimido do <code>rounded-full</code>.</p>
+  <pre class="html">&lt;span id="alvo" class="rounded-md bg-amber-100 px-3 py-1"&gt;Novo&lt;/span&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.962 0.059 95.617)
+border-radius: 6px
+padding-inline: 12px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;span id="alvo" class="rounded-full bg-amber-100 px-3 py-1"&gt;Novo&lt;/span&gt;</pre>
+</div>
+
+<p>A meta desta caixa confere duas coisas: que o CSS gerado tem o raio infinito e que a etiqueta
+"Novo" continua na prévia. Parece redundante, mas não é — é o tipo de
+conferência que pega quem "resolveu" a missão mexendo em outro elemento. A missão pede um canto, não
+uma etiqueta nova. E é também o primeiro lugar em que você vê a notação científica aparecer numa
+meta: quando o valor computado é enorme, é assim que ele é escrito.</p>
+
+<p>Para um avatar redondo, o segredo é o elemento ser quadrado. Um quadrado de 48 px com
+<code>rounded-full</code> é um círculo perfeito:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="h-12 w-12 rounded-full bg-amber-200 text-center"&gt;A&lt;/div&gt;</pre>
+
+<p>Se a caixa for 48 por 32, o mesmo <code>rounded-full</code> devolve uma pílula, não um círculo. Não
+existe classe que force círculo em caixa retangular — existe caixa quadrada. É o tipo de detalhe que
+economiza meia hora de tentativa e erro.</p>
+
+<h2>5. Um lado de cada vez</h2>
+
+<p>Nem todo cartão quer os quatro cantos iguais. Um aviso que fica colado na lateral da página costuma
+arredondar só o lado de dentro. Uma aba de navegação arredonda em cima e deixa o pé reto, para encostar
+no conteúdo. Para isso, o Tailwind põe uma letra entre <code>rounded</code> e o degrau, dizendo qual
+lado muda.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>O que arredonda</th><th>Exemplo de uso</th></tr>
+<tr><td><code>rounded-t-xl</code></td><td>os dois cantos de cima</td><td>aba, cabeçalho de cartão</td></tr>
+<tr><td><code>rounded-r-xl</code></td><td>os dois cantos da direita</td><td>aviso colado à esquerda</td></tr>
+<tr><td><code>rounded-b-xl</code></td><td>os dois cantos de baixo</td><td>rodapé de cartão</td></tr>
+<tr><td><code>rounded-l-xl</code></td><td>os dois cantos da esquerda</td><td>etiqueta colada à direita</td></tr>
+<tr><td><code>rounded-tl-xl</code></td><td>só o canto superior esquerdo</td><td>detalhe de canto único</td></tr>
+<tr><td><code>rounded-se-xl</code></td><td>só o canto de cima, no fim da linha</td><td>canto em página da direita para a esquerda</td></tr>
+<tr><td><code>rounded-s-xl</code></td><td>os dois cantos do começo da linha</td><td>o mesmo que <code>rounded-l</code>, mas sem depender da direção</td></tr>
+<tr><td><code>rounded-e-xl</code></td><td>os dois cantos do fim da linha</td><td>o mesmo que <code>rounded-r</code>, à prova de idioma</td></tr>
+</table>
+</div>
+
+<p>As letras vêm do inglês: <code>t</code> de <em>top</em> (cima), <code>r</code> de
+<em>right</em> (direita), <code>b</code> de <em>bottom</em> (baixo), <code>l</code> de
+<em>left</em> (esquerda). Quando há duas letras de canto, a primeira é a vertical e a segunda é a
+horizontal: <code>rounded-tl</code> é topo mais esquerda, <code>rounded-br</code> é baixo mais
+direita. Ler em voz alta ajuda: "rounded top left" é literalmente "arredondado em cima à esquerda".</p>
+
+<p>As letras <code>s</code> e <code>e</code> são diferentes: <code>s</code> de <em>start</em>
+(começo) e <code>e</code> de <em>end</em> (fim). Em português, que se escreve da esquerda para a
+direita, começo é a esquerda — então <code>rounded-s-xl</code> desenha igual a
+<code>rounded-l-xl</code>. A diferença aparece em página de árabe ou hebraico, onde a linha começa à
+direita. Você não precisa escolher agora; saiba que as duas famílias existem e que a lógica é a
+mesma.</p>
+
+<dl class="anatomy">
+<dt>raio</dt>
+<dd>O número que define a curva do canto. É a distância do centro do círculo até a borda dele, não o
+tamanho do pedaço cortado.</dd>
+<dt>border-radius</dt>
+<dd>A propriedade do CSS que arredonda cantos. O Tailwind a escreve para você quando você usa
+<code>rounded</code>.</dd>
+<dt>degrau</dt>
+<dd>O sufixo da classe (<code>-md</code>, <code>-xl</code>, <code>-2xl</code>) que escolhe um valor
+da escala. Sem sufixo, <code>rounded</code> vale 4 px.</dd>
+<dt>lado físico</dt>
+<dd><code>t</code>, <code>r</code>, <code>b</code>, <code>l</code>: cima, direita, baixo, esquerda.
+Não mudam de significado em nenhum idioma.</dd>
+<dt>lado lógico</dt>
+<dd><code>s</code> e <code>e</code>: começo e fim da linha de escrita. Em português coincidem com
+esquerda e direita.</dd>
+<dt>pílula</dt>
+<dd>Retângulo com as pontas em semicírculo. É o que <code>rounded-full</code> faz em uma caixa mais
+larga do que alta.</dd>
+</dl>
+
+<div class="trytailwind" data-goal="css:#alvo|border-top-left-radius=16px;;css:#alvo|border-bottom-left-radius=0px">
+  <p class="try-task">Este é o cabeçalho de um cartão: só os cantos de cima devem ficar macios. Troque
+  <code>rounded-lg</code> por <code>rounded-t-2xl</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-lg border border-amber-200 bg-white p-4"&gt;Encomenda de aniversário&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+border-radius: 8px
+border-width: 1px
+border-color: oklch(0.924 0.12 95.746)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-t-2xl border border-amber-200 bg-white p-4"&gt;Encomenda de aniversário&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar a solução, o painel lista 16 px nos dois cantos de cima e não fala mais nada dos
+cantos de baixo. Não é omissão: eles voltaram a valer zero, que é o padrão de qualquer
+<code>div</code>, e o painel só mostra o que mudou. O silêncio ali é a informação de que o canto de
+baixo ficou reto.</p>
+
+<h2>6. O canto que some: imagem e fundo do filho</h2>
+
+<p>Aqui está a dúvida que mais aparece. A Ana aplicou <code>rounded-xl</code> no cartão, colocou uma
+foto de pão dentro e… a foto continuou com os cantos retos, estourando o arredondamento do pai. Por
+que? Porque <code>border-radius</code> recorta a borda e o fundo do próprio elemento, e nada além
+disso. O filho é desenhado por cima, no quadrado dele.</p>
+
+<p>A solução é mandar o pai cortar o que passa dele: <code>overflow-hidden</code>. Com essa classe, o
+conteúdo que sai da caixa é recortado — e aí a imagem herda o canto arredondado do pai porque
+simplesmente deixa de existir o pedaço que ficaria fora.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="overflow-hidden rounded-xl"&gt;
+  &lt;img src="pao.jpg" alt="Pão saindo do forno"&gt;
+&lt;/div&gt;</pre>
+
+<p>Existe um segundo caminho, mais direto: arredondar a própria imagem,
+<code>&lt;img class="rounded-xl"&gt;</code>. Funciona quando a imagem é o conteúdo. O
+<code>overflow-hidden</code> no pai é melhor quando há várias coisas dentro — imagem, faixa de preço,
+etiqueta — porque aí o recorte vale para o conjunto e você não precisa repetir a classe em cada peça.
+A pegadinha do <code>overflow-hidden</code> é que ele corta tudo, inclusive sombra que deveria
+aparecer fora e menu que deveria escapar; por isso ele é a última peça a entrar, não a primeira.</p>
+
+<p>O mesmo fenômeno acontece com fundo de filho. Um cartão <code>rounded-xl</code> com um cabeçalho
+colorido dentro, ambos com o mesmo raio, mostra um degrau no canto: o cabeçalho tem o raio dele, o
+cartão tem o raio dele, e os dois não coincidem. A correção é o cabeçalho arredondar só em cima, com
+<code>rounded-t-xl</code>, e o cartão nunca arredondar o que o filho já arredondou. Ou o
+<code>overflow-hidden</code> no pai resolve os dois de uma vez.</p>
+
+<h2>7. Arredondamento e borda juntos</h2>
+
+<p>Canto arredondado e borda combinam bem, desde que a borda seja contínua. Se você tem
+<code>border</code> de 1 px e <code>rounded-xl</code>, o navegador desenha a linha acompanhando a
+curva — é automático, não há nada a fazer. O problema aparece quando só um lado tem borda: um
+<code>border-t</code> em uma caixa arredondada desenha uma linha reta em cima e deixa os cantos de
+cima sem linha, o que fica visivelmente quebrado.</p>
+
+<p>A regra prática é: borda de um lado pede canto reto naquele lado. Cabeçalho com
+<code>border-b</code> e cartão com <code>rounded-lg</code>? O cabeçalho precisa de
+<code>rounded-t-lg</code> para a linha de baixo ficar reta e as pontas acompanharem o cartão. É
+trabalho de encaixe, e o painel das caixas ajuda: você vê o valor de cada canto separadamente e
+descobre qual deles está sobrando.</p>
+
+<p>Outro ponto de encaixe é o raio aninhado. Um cartão com raio de 16 px e 8 px de respiro interno
+pede que o filho tenha raio de 8 px, não de 16. O raciocínio: o raio de fora é a soma do raio de
+dentro com o respiro. Se o filho tiver o mesmo raio do pai, ele parece "mais redondo" que o pai e o
+conjunto fica desalinhado. É a conta que separa um cartão bonito de um cartão quase bonito, e ela
+aparece em qualquer projeto com cartão dentro de cartão.</p>
+
+<h2>8. Valores fora da escala</h2>
+
+<p>Às vezes o desenho pede um número que não está na tabela. O Tailwind aceita colchetes:
+<code>rounded-[18px]</code> aplica exatamente 18 px. Serve para casar com uma arte pronta, com um
+logotipo ou com um componente copiado de outro lugar. Use quando tiver um motivo que caiba em uma
+frase — "o designer mandou 18" é um motivo; "achei 18 mais bonito que 16" é uma decisão que vai te
+incomodar em três semanas.</p>
+
+<p>O contrário também existe: <code>rounded-none</code> zera o raio. Ele é útil quando você precisa
+anular um arredondamento herdado de um componente, ou quando o canto reto faz parte do desenho — uma
+tabela de dados, um bloco de código, um selo retrô. E há uma curiosidade que confunde: se o elemento
+já nasce com raio zero, o painel não mostra linha nenhuma para <code>rounded-none</code>, porque
+nada mudou em relação ao padrão. Nesse caso o painel vazio está certo, e o texto da aula anterior já
+avisava: ele só mostra o que a classe mudou.</p>
+
+<p>Uma terceira opção são os valores percentuais, como <code>rounded-[50%]</code>. Em uma caixa
+quadrada dá círculo, igual ao <code>rounded-full</code>. Em uma caixa retangular dá uma elipse, que
+quase nunca é o que se quer. O <code>rounded-full</code> é mais previsível porque o navegador resolve
+o limite por você; o percentual obedece à matemática da caixa e surpreende.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o botão que virou pílula sem querer</h3>
+<p>A Ana quis um botão de cantos macios e escreveu <code>rounded-3xl</code>, que é 24 px. O botão
+tinha 40 px de altura, então 24 passou da metade e o navegador transformou tudo em semicírculo. O
+resultado não ficou feio — ficou pílula, que é outro componente. A correção foi descer para
+<code>rounded-lg</code> (8 px), que dá a curva pretendida em um botão pequeno. A lição: o raio é
+relativo ao tamanho da caixa; antes de escolher o degrau, olhe a altura do elemento.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o cartão claro dentro do cartão escuro</h3>
+<p>Ela montou um cartão de fundo claro com <code>rounded-2xl</code> e colocou dentro um bloco de
+resumo com <code>rounded-2xl</code> também. O bloco de dentro ficou com o canto "mais fechado" que o
+de fora, e o desenho pareceu desalinhado — embora os dois tivessem o mesmo número. A razão é que o
+raio interno precisa descontar o respiro: com 16 px de raio externo e 8 px de respiro, o interno
+deveria ser 8. Isso é <code>rounded-lg</code> no filho, e o encaixe fica perfeito.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a foto que não obedece</h3>
+<p>A foto do pão dentro do cartão arredondado continuou com canto reto, e a Ana tentou aumentar o raio
+do cartão, achando que era pouco. Não era: o raio do pai não recorta o filho. Duas saídas —
+<code>overflow-hidden</code> no pai, que corta tudo o que passa, ou <code>rounded</code> na própria
+<code>img</code>. Ela escolheu a segunda, porque naquele cartão a imagem era o conteúdo e não havia
+nada mais para recortar. Em cartões com faixa colorida, o recorte no pai é melhor.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. O que <code>border-radius: 12px</code> faz?</p>
+<label><input type="radio" name="a1"> deixa 12 px de espaço entre o texto e a borda</label>
+<label><input type="radio" name="a1"> corta 12 px de cada canto em linha reta</label>
+<label><input type="radio" name="a1"> desenha em cada canto um quarto de círculo de 12 px de raio</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">2. Por que <code>rounded-full</code> em uma etiqueta
+larga produz uma pílula, e não um círculo?</p>
+<label><input type="radio" name="a2"> porque o Tailwind limita o raio a 24 px</label>
+<label><input type="radio" name="a2"> porque o raio é infinito e o navegador usa o máximo possível em cada canto</label>
+<label><input type="radio" name="a2"> porque a etiqueta é um elemento inline</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. A imagem não respeita o canto arredondado do cartão.
+Qual é a correção?</p>
+<label><input type="radio" name="a3"> <code>overflow-hidden</code> no cartão, ou <code>rounded</code> na própria imagem</label>
+<label><input type="radio" name="a3"> aumentar o raio do cartão até passar da metade</label>
+<label><input type="radio" name="a3"> trocar <code>rounded</code> por <code>border</code> na imagem</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o cartão da encomenda</h2>
+<p>No site da padaria, o cartão de encomenda precisa de canto de 16 px, fundo âmbar claro e respiro
+interno. Depois responda: qual é a classe que dá 16 px de raio?</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="rounded-2xl" placeholder="..."> bg-amber-100 p-4"&gt;Encomenda de aniversário&lt;/div&gt;</div>
+<p class="ex-dica">Dica: 16 px é o degrau depois do <code>rounded-xl</code> (12 px). Se você escrever
+<code>rounded-xl</code>, o cartão fica bonito — mas com 12 px, que não é o pedido.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Arredondar canto é usar <code>border-radius</code>, e no Tailwind isso vira uma palavra:
+<code>rounded</code> mais o degrau. O número é um raio de círculo, então ele é relativo ao tamanho da
+caixa — 24 px em um botão pequeno vira pílula, 24 px em um cartão grande vira canto discreto. A escala
+vai de <code>rounded-xs</code> (2 px) a <code>rounded-4xl</code> (32 px), com <code>rounded</code>
+sozinho valendo 4 px.</p>
+
+<p>Para arredondar um lado só, entra uma letra entre o nome e o degrau: <code>t</code>, <code>r</code>,
+<code>b</code>, <code>l</code> para cima, direita, baixo e esquerda; duas letras para um canto
+específico; <code>s</code> e <code>e</code> para começo e fim da linha. O <code>rounded-full</code>
+usa raio infinito e por isso muda de forma conforme a caixa: círculo no quadrado, pílula no
+retângulo. E o canto do pai não recorta o filho — para isso existe <code>overflow-hidden</code>, ou o
+arredondamento direto na imagem.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>rounded</code> = 4 px; <code>rounded-lg</code> = 8; <code>rounded-xl</code> = 12;
+<code>rounded-2xl</code> = 16; <code>rounded-3xl</code> = 24.</li>
+<li>O valor é um raio de círculo: quanto maior, mais macio o canto, até o limite da caixa.</li>
+<li>Raio maior que a metade da altura transforma o retângulo em pílula.</li>
+<li><code>rounded-t</code>, <code>-r</code>, <code>-b</code>, <code>-l</code> arredondam um lado;
+<code>-tl</code>, <code>-br</code> e companhia arredondam um canto.</li>
+<li><code>s</code> e <code>e</code> são começo e fim da linha; em português, esquerda e direita.</li>
+<li><code>rounded-full</code> = raio infinito; no painel aparece como um número em notação científica.</li>
+<li>Filho com imagem ou fundo escapa do canto do pai: use <code>overflow-hidden</code> no pai.</li>
+<li>Raio interno = raio externo − respiro, senão o encaixe fica torto.</li>
+<li><code>rounded-none</code> zera o raio; se ele já era zero, o painel fica vazio e está certo.</li>
+<li>Valor fora da escala: <code>rounded-[18px]</code>, com um motivo que caiba em uma frase.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alinhamento | Guia Tailwind</title>
+<meta name="description" content="Alinhamento de texto no Tailwind: text-center, text-right, text-left, text-justify e a diferença entre text-start e text-left na etiqueta da Ana.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Alinhamento</span></h1>
+<p class="intro">A Ana passou a manhã montando a etiqueta de preço do pão de queijo e o recibo das
+encomendas. Ficou tudo encostado à esquerda, como o navegador faz por conta própria: o preço no canto
+da etiqueta, os valores do recibo todos desencontrados, e o título do cartão puxado para um lado. Ela
+não quer mexer no tamanho da letra nem na cor — quer só decidir para onde cada linha olha. Nesta aula
+ela aprende as seis classes de alinhamento do Tailwind, entende por que alinhar o pai já resolve os
+filhos, e descobre quando o texto justificado ajuda e quando só atrapalha.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que <code>text-align</code> faz — e o que ele não faz.</li>
+  <li>As classes <code>text-left</code>, <code>text-center</code>, <code>text-right</code> e
+  <code>text-justify</code>.</li>
+  <li>A diferença entre <code>text-left</code> e <code>text-start</code>, e por que a segunda às
+  vezes não aparece no painel.</li>
+  <li>Que o alinhamento é herdado: alinhar o cartão alinha os parágrafos dentro dele.</li>
+  <li>Como desfazer a herança num filho só.</li>
+  <li>Quando alinhar valores à direita e por que <code>tabular-nums</code> ajuda nisso.</li>
+  <li>Os erros clássicos: centralizar parágrafo longo, centralizar tudo, confundir alinhamento
+  horizontal com vertical.</li>
+</ul>
+</div>
+
+<h2>1. A cena: a etiqueta e o recibo</h2>
+
+<p>A etiqueta da padaria é uma caixa com três pedaços de texto: o nome do pão, o preço e uma linha
+miúda com o peso. A Ana escreveu assim:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="bg-amber-50 p-4"&gt;
+  &lt;h3&gt;Pão de queijo&lt;/h3&gt;
+  &lt;p&gt;R$ 3,50&lt;/p&gt;
+  &lt;p&gt;por unidade, assado na hora&lt;/p&gt;
+&lt;/div&gt;</pre>
+
+<p>O resultado é o esperado: tudo encostado na margem esquerda. O navegador não tem opinião sobre
+onde o texto deve ficar; ele só segue a direção da escrita. Em português, escrevemos da esquerda para
+a direita, então o texto começa à esquerda e pronto. Quem decide o resto é você.</p>
+
+<p>Agora o recibo. A Ana imprimiu uma lista de encomendas para a cliente conferir, e os números
+ficaram assim:</p>
+
+<pre class="file" data-file="recibo.html">&lt;p&gt;Pão francês ......... R$ 9,00&lt;br&gt;
+Pão de queijo ....... R$ 17,50&lt;br&gt;
+Broa de milho ....... R$ 12,00&lt;/p&gt;</pre>
+
+<p>Esse ela até tentou resolver com pontinhos, o truque de padaria de antigamente. Mas os pontinhos
+não se alinham sozinhos, e a coluna de valores fica tremida. O alinhamento à direita resolve melhor:
+cada linha termina no mesmo lugar, e o olho compara as colunas de baixo para cima sem esforço. São
+duas necessidades diferentes, com classes diferentes, e é o que a gente vai ver agora.</p>
+
+<h2>2. O que o alinhamento faz — e o que ele não faz</h2>
+
+<p>Antes das classes, vale entender o alcance da propriedade. O CSS tem uma propriedade chamada
+<code>text-align</code>, e ela decide como o conteúdo <em>de texto</em> se distribui na largura
+disponível. Ela não move a caixa: não muda a posição do <code>div</code> na página, não aproxima a
+etiqueta da borda da tela, não centraliza a caixa no meio do monitor.</p>
+
+<p>Essa confusão é a mais comum de todas. Quando você coloca <code>text-center</code> num
+<code>div</code> que ocupa a largura toda, o texto vai para o centro daquele <code>div</code> — que
+já ocupava a largura toda. A caixa não se mexeu nem um pixel. Para centralizar a caixa em si, o
+caminho é outro (<code>mx-auto</code>, com uma largura definida), e isso é assunto da aula de
+centralização. Aqui, a pergunta é sempre: <em>onde as letras ficam dentro do espaço que já
+existe?</em></p>
+
+<p>Outro ponto: <code>text-align</code> afeta o conteúdo em linha, como texto, imagens pequenas e
+<code>span</code>s. Se um filho é uma caixa de bloco com largura própria, como um cartão, ele não se
+move com o alinhamento do pai — o texto dentro dele é que herda. É a diferença entre alinhar o
+conteúdo e reposicionar o objeto. Guarde essa distinção, porque ela explica metade dos "não
+funcionou" que você vai viver.</p>
+
+<dl class="anatomy">
+<dt>text-align</dt>
+<dd>A propriedade do CSS que decide onde o texto fica dentro da largura disponível. Aceita
+<code>left</code>, <code>center</code>, <code>right</code>, <code>start</code>, <code>end</code> e
+<code>justify</code>.</dd>
+<dt>conteúdo em linha</dt>
+<dd>O que flui junto com o texto: letras, imagens pequenas, <code>span</code>s. É só isso que o
+alinhamento move.</dd>
+<dt>herança</dt>
+<dd>O mecanismo pelo qual o filho recebe o valor do pai quando não tem classe própria. Alinhar o
+cartão alinha os parágrafos dentro dele.</dd>
+<dt>start e end</dt>
+<dd>Alinhamento lógico: começo e fim da linha, que dependem do idioma. Em português, começo é a
+esquerda.</dd>
+<dt>justificar</dt>
+<dd>Esticar os espaços entre as palavras para que toda linha termine na mesma borda. Só funciona bem
+em coluna larga.</dd>
+</dl>
+
+<h2>3. As seis classes de alinhamento</h2>
+
+<p>O Tailwind dá uma classe para cada valor de <code>text-align</code>. São seis, e três delas você
+vai usar todos os dias:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>CSS gerado</th><th>O que faz</th><th>Onde costuma servir</th></tr>
+<tr><td><code>text-left</code></td><td>text-align: left</td><td>encosta o texto à esquerda</td><td>nome, descrição, parágrafo, lista</td></tr>
+<tr><td><code>text-center</code></td><td>text-align: center</td><td>centraliza cada linha</td><td>preço de etiqueta, título de capa, botão</td></tr>
+<tr><td><code>text-right</code></td><td>text-align: right</td><td>encosta o texto à direita</td><td>valores, datas, totais de recibo</td></tr>
+<tr><td><code>text-start</code></td><td>text-align: start</td><td>começo da linha, seguindo o idioma</td><td>texto que precisa funcionar em qualquer idioma</td></tr>
+<tr><td><code>text-end</code></td><td>text-align: end</td><td>fim da linha, seguindo o idioma</td><td>idem, do outro lado</td></tr>
+<tr><td><code>text-justify</code></td><td>text-align: justify</td><td>estica as palavras até as duas bordas</td><td>texto longo em coluna estreita</td></tr>
+</table>
+</div>
+
+<p>As três primeiras são físicas: falam de esquerda e direita, e pronto. As duas do meio são
+lógicas: falam de <em>começo</em> e <em>fim</em> da linha. Em português as duas coisas coincidem —
+começo é a esquerda —, mas em árabe ou hebraico, que se escrevem da direita para a esquerda, o começo
+é a direita. Um site traduzido para árabe com <code>text-left</code> fica com o texto colado no lado
+errado; com <code>text-start</code>, fica certo nos dois idiomas. Para o site da padaria, tanto faz.
+Para um projeto internacional, é a escolha mais segura.</p>
+
+<p>Há uma consequência prática curiosa: o padrão do navegador já é <code>start</code>. Por isso
+<code>text-start</code> costuma "não fazer nada" — você aplicou o valor que já estava lá. O painel das
+caixas mostra isso na cara: ele fica sem a linha de <code>text-align</code>, porque nada mudou. Já
+<code>text-left</code> aparece, porque o valor calculado passa de <code>start</code> para
+<code>left</code>, mesmo que visualmente seja a mesma posição num texto em português.</p>
+
+<h2>4. Centralizar o preço</h2>
+
+<p>Primeiro caso: a etiqueta. O nome do pão fica à esquerda, porque é o que a pessoa procura; o preço
+fica no centro, porque é o que ela quer achar de longe. No Tailwind, é uma classe:</p>
+
+<div class="trytailwind" data-goal="css:#alvo|text-align=center">
+  <p class="try-task">O preço está encostado à esquerda. Centralize-o na etiqueta e clique em
+  Rodar.</p>
+  <pre class="html">&lt;p id="alvo" class="bg-amber-50 p-4 text-left"&gt;R$ 3,50&lt;/p&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+text-align: left
+</pre>
+  <pre class="solucao">&lt;p id="alvo" class="bg-amber-50 p-4 text-center"&gt;R$ 3,50&lt;/p&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra uma linha só: <code>text-align: center</code>. O CSS que o Tailwind gera é igual à
+propriedade, sem variável e sem conta — uma das poucas classes do guia em que o CSS gerado é
+literalmente o que você lê:</p>
+
+<pre class="term">.text-left {
+  text-align: left;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}</pre>
+
+<p>Simples assim. E repare que a caixa continuou do mesmo tamanho: o que mudou foi para onde as
+letras olham dentro dela. Se você quiser que a etiqueta inteira fique no centro da página, o alinhamento
+do texto não resolve — é a aula de <code>mx-auto</code> que trata disso. Aqui o trabalho é interno.</p>
+
+<h2>5. Herança: alinhar o pai, ajustar o filho</h2>
+
+<p><code>text-align</code> é uma propriedade herdada. Isso significa que, se você alinhar o cartão,
+todos os textos dentro dele recebem o mesmo alinhamento, sem precisar repetir a classe em cada
+parágrafo. É economia e é consistência ao mesmo tempo:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="bg-amber-50 p-4 text-center"&gt;
+  &lt;h3&gt;Pão quentinho toda manhã&lt;/h3&gt;
+  &lt;p&gt;Saímos às 5h, com o forno a lenha aceso&lt;/p&gt;
+&lt;/div&gt;</pre>
+
+<p>Nesse exemplo, título e parágrafo ficam centralizados. Se o resultado agradar, pronto: uma classe
+resolveu dois elementos. Se o título ficar bem no centro e o parágrafo, não — texto corrido
+centralizado é difícil de ler, porque cada linha começa num lugar diferente —, você desfaz só no
+filho:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="bg-amber-50 p-4 text-center"&gt;
+  &lt;h3&gt;Pão quentinho toda manhã&lt;/h3&gt;
+  &lt;p class="text-left"&gt;Saímos às 5h, com o forno a lenha aceso&lt;/p&gt;
+&lt;/div&gt;</pre>
+
+<p>Agora o cartão manda no centro, o título herda, e o parágrafo tem a própria opinião. Essa é a
+mecânica que vale para todo o guia: a classe mais próxima do texto vence. Você pode pensar nela como
+uma configuração que desce pela árvore do HTML — e cada elemento pode sobrescrever a configuração
+que recebeu.</p>
+
+<p>Um detalhe de leitura: o painel das caixas mostra o alinhamento de um elemento só, o
+<code>id="alvo"</code>. Se a sua mudança foi no filho e o alvo é o pai, o painel não muda nada e você
+pode achar que errou. Confira no navegador, ou mude o alvo, antes de sair trocando classe de
+lugar.</p>
+
+<h2>6. Valores à direita: o recibo</h2>
+
+<p>Segundo caso: os valores do recibo. Aqui o alinhamento vai no contêiner, para que todas as linhas
+terminem no mesmo ponto. É o mesmo mecanismo da herança, usado a favor:</p>
+
+<div class="trytailwind" data-goal="css:#alvo|text-align=right;;css:#alvo p|text-align=right">
+  <p class="try-task">Alinhe o bloco do recibo à direita, de uma vez, sem classe em cada linha.
+  Depois confira se os três valores terminaram no mesmo ponto.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-50 p-4"&gt;
+  &lt;p&gt;Pão francês — R$ 9,00&lt;/p&gt;
+  &lt;p&gt;Pão de queijo — R$ 17,50&lt;/p&gt;
+  &lt;p&gt;Broa de milho — R$ 12,00&lt;/p&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-amber-50 p-4 text-right"&gt;
+  &lt;p&gt;Pão francês — R$ 9,00&lt;/p&gt;
+  &lt;p&gt;Pão de queijo — R$ 17,50&lt;/p&gt;
+  &lt;p&gt;Broa de milho — R$ 12,00&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>A meta desta caixa confere duas coisas: o alinhamento do bloco e o do primeiro parágrafo dentro
+dele. Se o segundo passo passar, a herança funcionou. É uma forma de provar o que a gente explicou
+na seção anterior sem precisar acreditar na palavra do guia.</p>
+
+<p>Tem um refinamento que faz diferença em recibo e em tabela de preços: os algarismos. Na fonte
+padrão do sistema, o "1" é mais estreito que o "8", então os números não formam uma coluna reta
+mesmo alinhados à direita. A classe <code>tabular-nums</code> pede números de largura fixa — o "1"
+ocupa o mesmo espaço do "0" — e a coluna fica perfeitamente reta. Ela não alinha nada; ela só deixa
+os algarismos do mesmo tamanho. O efeito é sutil e é justamente o que separa um recibo amador de um
+recibo profissional.</p>
+
+<p>Vale juntar as duas: <code>text-right tabular-nums</code> no contêiner do recibo. E, se o recibo
+tiver ponto e vírgula no fim de cada linha, como nos talões antigos, você já entendeu que o
+alinhamento do bloco é o que faz a coluna existir.</p>
+
+<h2>7. Justificar: quando o texto vira jornal</h2>
+
+<p>Terceiro caso, e o mais mal-entendido: <code>text-justify</code>. Justificar quer dizer esticar os
+espaços entre as palavras para que todas as linhas comecem e terminem exatamente nas duas bordas. É o
+que jornal e livro fazem. O resultado é uma mancha de texto com bordas retas dos dois lados.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|text-align=justify;;rule:text-align: justify">
+  <p class="try-task">O bloco da história está com as bordas irregulares à direita. Justifique o
+  texto e clique em Rodar.</p>
+  <pre class="html">&lt;p id="alvo" class="max-w-md bg-amber-50 p-4 text-left"&gt;A nossa história começou em 1998, com um forno a lenha e uma receita de família. O meu pai acendia o forno às cinco da manhã e o cheiro de pão quentinho acordava a rua inteira.&lt;/p&gt;</pre>
+  <pre class="out">
+max-width: 448px
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+text-align: left
+</pre>
+  <pre class="solucao">&lt;p id="alvo" class="max-w-md bg-amber-50 p-4 text-justify"&gt;A nossa história começou em 1998, com um forno a lenha e uma receita de família. O meu pai acendia o forno às cinco da manhã e o cheiro de pão quentinho acordava a rua inteira.&lt;/p&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra uma linha: <code>text-align: justify</code>. A regra gerada é a mais curta do capítulo.</p>
+
+<pre class="term">.text-justify {
+  text-align: justify;
+}</pre>
+
+<p>Então por que não usar em tudo? Porque a conta é feita por linha, e o navegador só tem uma forma
+de esticar: aumentar os espaços entre as palavras. Quando a linha é estreita e tem poucas palavras,
+esses espaços ficam enormes e aparecem rios brancos descendo pelo parágrafo — os tipógrafos chamam
+isso de rio, e é feio de doer. Numa coluna larga com muitas palavras por linha, o espaço extra é
+diluído e o resultado fica bom.</p>
+
+<p>A recomendação prática: justifique texto longo, em coluna de 45 a 75 caracteres, de preferência
+com hifenização ligada (<code>hyphens-auto</code>, que o navegador resolve com um dicionário). Para
+parágrafo curto de cartão, para texto de site em uma coluna larga, e para o corpo do site da padaria,
+o alinhamento à esquerda continua sendo a escolha mais legível. Justificar é uma decisão de projeto
+gráfico, não um padrão a ser aplicado por reflexo.</p>
+
+<p>Dois detalhes técnicos que explicam o comportamento estranho do justificado. O primeiro: a última
+linha do parágrafo nunca é esticada. Ela fica à esquerda, curta, porque esticar uma linha incompleta
+daria um espaço absurdo entre duas palavras. O segundo: a hifenização depende do dicionário do
+idioma, então só funciona se a página declarar <code>lang="pt-BR"</code> — o que o guia já faz em
+todas as páginas. Sem isso, o navegador não sabe onde pode cortar "fermentação" e prefere empurrar a
+palavra inteira para a linha seguinte, aumentando os rios.</p>
+
+<h2>8. Os erros que aparecem sempre</h2>
+
+<p>Estes são os que mais custam tempo de quem está começando:</p>
+
+<ul>
+<li><strong>Centralizar parágrafo longo.</strong> Cada linha começa num ponto diferente, e o olho
+perde a referência de onde recomeçar. Centralize títulos, preços e chamadas curtas; deixe o texto
+corrido à esquerda.</li>
+<li><strong>Centralizar tudo.</strong> Um site inteiro no centro não tem hierarquia: se tudo se
+alinha igual, nada se destaca. O contraste entre um título centralizado e um bloco de texto à
+esquerda é o que cria ritmo.</li>
+<li><strong>Confundir horizontal com vertical.</strong> <code>text-center</code> não coloca um
+elemento no meio da altura da tela. Alinhamento vertical é assunto de flexbox
+(<code>items-center</code>), na aula de Alinhamento no Flex.</li>
+<li><strong>Aplicar no elemento errado.</strong> Se o texto está dentro de um <code>span</code> com
+largura do conteúdo, centralizar o <code>span</code> não muda nada visível: ele já é do tamanho do
+texto. O alinhamento precisa de espaço para acontecer.</li>
+<li><strong>Esperar que o botão mude.</strong> O navegador já centraliza o texto de
+<code>button</code> por padrão — então <code>text-center</code> ali não muda nada. E
+<code>text-left</code> só aparece se o botão for mais largo que o texto: num botão do tamanho do
+conteúdo, não há espaço para o alinhamento acontecer.</li>
+</ul>
+
+<p>E um lembrete que vale para as seis classes: alinhamento é barato de mudar e caro de errar. Se
+você precisar de <code>text-center</code> em cinco elementos seguidos, provavelmente a decisão é do
+contêiner, não dos cinco — aplique no pai e economize quatro classes.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<p>Antes dos casos, uma tabela de bolso. Ela resume as decisões do site da padaria e serve para
+qualquer projeto: cada parte da página tem um alinhamento natural, e fugir dele precisa de motivo.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Parte da página</th><th>Alinhamento</th><th>Por quê</th></tr>
+<tr><td>Nome do produto, descrição</td><td><code>text-left</code></td><td>o olho varre a margem esquerda em lista</td></tr>
+<tr><td>Preço dentro da etiqueta</td><td><code>text-center</code></td><td>o valor é o que se procura de longe</td></tr>
+<tr><td>Valores de recibo e tabela</td><td><code>text-right</code></td><td>as casas decimais formam coluna</td></tr>
+<tr><td>Título de capa, chamada curta</td><td><code>text-center</code></td><td>simetria; funciona até duas linhas</td></tr>
+<tr><td>Texto corrido de leitura</td><td><code>text-left</code></td><td>o recomeço da linha fica previsível</td></tr>
+<tr><td>História longa em coluna de livro</td><td><code>text-justify</code></td><td>bordas retas com espaço diluído</td></tr>
+</table>
+</div>
+
+<div class="cenario">
+<h3>Cenário 1: o preço centralizado, o nome torto</h3>
+<p>A Ana aplicou <code>text-center</code> no cartão inteiro e gostou do preço no meio. O nome do pão,
+que ela queria à esquerda, também foi para o centro, e a etiqueta perdeu a leitura rápida: o olho
+procura o nome na margem esquerda, como numa lista. A correção é a da seção 5: o cartão continua
+centralizado, e o <code>h3</code> do nome recebe <code>text-left</code>. Uma classe no filho devolve
+a hierarquia sem desmontar o resto.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: valores que não formam coluna</h3>
+<p>O recibo estava com <code>text-right</code>, mas os números continuavam tremidos, e ela achou que
+a classe não funcionava. O problema era a fonte: sem <code>tabular-nums</code>, cada algarismo tem
+sua própria largura, e a vírgula dança de linha para linha. Com a classe, o "1" passa a ocupar o
+mesmo espaço do "0" e a coluna fecha. É um ajuste de meio segundo com efeito de gráfica.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o texto justificado cheio de rios</h3>
+<p>Ela justificou a descrição do pão numa coluna de 200 px e o resultado ficou com buracos brancos
+entre as palavras: três ou quatro palavras por linha, cada uma empurrada para o canto. Justificar
+precisa de largura. A solução foi voltar para <code>text-left</code> na coluna estreita e reservar o
+<code>text-justify</code> para o bloco da história, que tem largura de leitura. Mesma classe, contexto
+diferente, resultado oposto.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. O que <code>text-center</code> faz num
+<code>div</code> que ocupa a largura toda?</p>
+<label><input type="radio" name="q1"> diminui a largura do <code>div</code> até o tamanho do texto</label>
+<label><input type="radio" name="q1"> move o <code>div</code> para o meio da página</label>
+<label><input type="radio" name="q1"> centraliza o texto dentro do <code>div</code>, que continua do mesmo tamanho</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">2. Por que <code>text-start</code> muitas vezes não
+muda nada na tela?</p>
+<label><input type="radio" name="q2"> porque a classe não existe no Tailwind</label>
+<label><input type="radio" name="q2"> porque <code>start</code> já é o alinhamento padrão do navegador</label>
+<label><input type="radio" name="q2"> porque só funciona dentro de tabelas</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O cartão tem <code>text-center</code> e você quer
+que só o parágrafo fique à esquerda. O que fazer?</p>
+<label><input type="radio" name="q3"> pôr <code>text-left</code> no parágrafo</label>
+<label><input type="radio" name="q3"> tirar o <code>text-center</code> do cartão e repetir <code>text-center</code> em cada outro filho</label>
+<label><input type="radio" name="q3"> pôr <code>text-right</code> no cartão</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o recibo da encomenda</h2>
+<p>Complete a classe que alinha os valores do recibo à direita:</p>
+<div class="ex-code">&lt;p class="<input aria-label="resposta 1" data-answer="text-right" placeholder="...">"&gt;Total: R$ 38,50&lt;/p&gt;</div>
+<p class="ex-dica">Dica: o nome da classe é a propriedade <code>text-align</code> sem o
+<code>-align</code>, mais o lado. Se escrever <code>right</code> sozinho, nada acontece: sem o
+prefixo <code>text-</code>, o Tailwind não reconhece a classe.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Alinhamento é decidir onde as letras ficam dentro do espaço que já existe. A propriedade é
+<code>text-align</code>, e o Tailwind dá uma classe por valor: <code>text-left</code>,
+<code>text-center</code>, <code>text-right</code>, <code>text-start</code>, <code>text-end</code> e
+<code>text-justify</code>. Nenhuma delas move a caixa; todas mexem no conteúdo em linha. Para
+centralizar a caixa, o caminho é outro.</p>
+
+<p>O alinhamento é herdado: aplicar no contêiner vale para os filhos, e a classe mais próxima do
+texto vence. É assim que o recibo inteiro vai para a direita com uma classe só, e é assim que o
+título continua centralizado enquanto o parágrafo volta para a esquerda. Centralize o curto, alinhe
+à esquerda o longo, à direita os valores — e justifique só quando a coluna for larga o bastante para
+diluir o espaço extra.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>text-align</code> alinha o texto dentro da caixa; não move a caixa.</li>
+<li>Seis classes: <code>text-left</code>, <code>text-center</code>, <code>text-right</code>,
+<code>text-start</code>, <code>text-end</code>, <code>text-justify</code>.</li>
+<li><code>start</code> já é o padrão do navegador — por isso <code>text-start</code> costuma não
+mudar nada.</li>
+<li>O alinhamento é herdado; alinhe o pai e sobrescreva no filho quando precisar.</li>
+<li><code>text-center</code> é para título, preço e chamada curta — não para parágrafo longo.</li>
+<li>Valores e datas pedem <code>text-right</code>, de preferência com <code>tabular-nums</code>.</li>
+<li>Justificar estica os espaços entre palavras; em coluna estreita cria rios brancos.</li>
+<li>Alinhamento vertical não é <code>text-align</code>: é <code>items-center</code>, no flex.</li>
+<li>Botão já vem com o texto centralizado pelo navegador.</li>
+<li>Uma classe no pai economiza quatro no filho — e mantém a decisão num lugar só.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

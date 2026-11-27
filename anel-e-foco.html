@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O ring de Foco | Guia Tailwind</title>
+<meta name="description" content="O anel de foco do Tailwind: por que ring-2 não é borda, a escala do ring, como usar focus:ring, o ring-offset afastado e o que fazer quando o foco do teclado some.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>O <span class="hl">ring</span> de Foco</h1>
+<p class="intro">A Ana preencheu o próprio formulário de encomenda usando só o teclado e levou um
+susto: ao apertar Tab, o cursor pulava de campo em campo e nada na tela dizia onde ele estava. Ela
+apertou Tab três vezes sem saber se estava no nome, no telefone ou no botão de enviar. Esse é o
+problema que o anel de foco resolve — a marca que mostra "você está aqui". Nesta aula a Ana aprende o
+que é o <code>ring</code> do Tailwind, por que ele não é uma borda, como ele se comporta no foco e
+por que remover o foco do teclado é uma das piores decisões que se pode tomar em um site.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é foco de teclado e por que ele precisa ser visível.</li>
+  <li>Por que o <code>ring</code> é uma camada de sombra e não ocupa espaço no layout.</li>
+  <li>A escala do anel: <code>ring</code>, <code>ring-2</code>, <code>ring-4</code>, <code>ring-8</code>.</li>
+  <li>Como aplicar o anel só no foco com <code>focus:ring-2</code>.</li>
+  <li>A diferença entre <code>focus:</code> e <code>focus-visible:</code>.</li>
+  <li>Como afastar o anel com <code>ring-offset-2</code> e como colocá-lo por dentro com <code>ring-inset</code>.</li>
+  <li>O que fazer quando o anel some: recorte, contraste e o erro do <code>outline-none</code>.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o Tab que ninguém vê</h2>
+
+<p>O formulário de encomenda da padaria tem quatro campos e um botão. Com o mouse, funciona: clicar,
+digitar, clicar no próximo. Com o teclado, a Ana apertou Tab e o foco andou — mas ela não viu. Sem
+marca visual, o foco existe e não aparece, o que é pior do que não existir, porque a pessoa pensa que
+o teclado está quebrado.</p>
+
+<p>Quem usa teclado não é só quem gosta de atalho. É quem tem dificuldade motora e não consegue
+apontar o mouse com precisão, é quem preenche formulário longo com as duas mãos no teclado, é quem usa
+leitor de tela. Para todas essas pessoas, a marca de foco é a única bússola da página. Por isso ela
+não é enfeite: é o indicador de posição, e é o primeiro item que um teste de acessibilidade confere.</p>
+
+<p>Só que a marca padrão do navegador é feia e some fácil. No Chrome, é um contorno azul fino que
+combina mal com quase todo site; em alguns navegadores, é um pontilhado que ninguém nota. A solução
+que muita gente encontra é desligar essa marca com <code>outline-none</code> — e é aí que o site fica
+inutilizável para quem navega por teclado. O Tailwind dá a ferramenta para fazer o contrário: apagar a
+marca nativa e colocar uma marca própria, mais bonita e mais visível. O <code>ring</code> é essa
+marca.</p>
+
+<h2>2. Foco é o cursor do teclado</h2>
+
+<p>O navegador mantém, o tempo todo, uma lista dos elementos que podem receber foco: links, campos,
+botões, qualquer coisa com <code>tabindex</code>. A tecla Tab percorre essa lista na ordem em que o
+HTML aparece. O elemento que está na vez recebe o "foco" e passa a receber as teclas digitadas. É por
+isso que, ao apertar Tab até o campo de telefone e digitar, os números vão para lá e não para o campo
+de nome.</p>
+
+<p>No CSS, esse estado tem nome: <code>:focus</code>. Qualquer classe do Tailwind pode ser aplicada só
+nesse estado, com o prefixo <code>focus:</code>. Existe ainda um estado mais refinado,
+<code>:focus-visible</code>, que o navegador decide sozinho: ele liga quando o foco veio do teclado e
+desliga quando veio do clique. O prefixo é <code>focus-visible:</code>.</p>
+
+<p>Por que os dois existem? Porque o comportamento desejado é diferente para cada caso. Quem clicou no
+campo com o mouse já sabe onde clicou; um anel forte ali pode parecer exagero. Quem chegou pelo teclado
+precisa da marca para se orientar. Em site bem feito, o anel aparece no teclado e é discreto no
+clique. Na dúvida, use <code>focus-visible:</code> — é a escolha que envelhece melhor.</p>
+
+<dl class="anatomy">
+<dt>foco</dt>
+<dd>O estado do elemento que vai receber o que você digita. No CSS, <code>:focus</code>.</dd>
+<dt>focus-visible</dt>
+<dd>O foco que veio do teclado, segundo o critério do navegador. No Tailwind,
+<code>focus-visible:</code>.</dd>
+<dt>ring</dt>
+<dd>O anel do Tailwind. É desenhado como uma camada de <code>box-shadow</code>, não como borda.</dd>
+<dt>afastamento (offset)</dt>
+<dd>O vão entre a borda do elemento e o anel, criado por <code>ring-offset</code>. O espaço usa uma
+cor de fundo declarada à parte.</dd>
+<dt>anel interno</dt>
+<dd>O anel desenhado por dentro da caixa, com <code>ring-inset</code>. Útil quando o elemento está
+colado em outro.</dd>
+<dt>currentcolor</dt>
+<dd>A cor do texto. É a cor padrão do anel quando você não escolhe uma.</dd>
+</dl>
+
+<h2>3. O anel não é uma borda</h2>
+
+<p>A primeira surpresa: <code>ring-2</code> não desenha borda. Ele acrescenta uma camada extra na
+propriedade <code>box-shadow</code>, aquela mesma das sombras — só que com deslocamento zero,
+espalhamento igual à espessura e sem desfoque. O resultado é uma linha dura em volta da caixa, que
+parece borda e se comporta diferente.</p>
+
+<pre class="term">.ring-2 {
+  --tw-ring-shadow: var(--tw-ring-inset, ) 0 0 0
+    calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
+              var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}</pre>
+
+<p>A diferença prática é o espaço. Borda empurra o conteúdo para dentro e muda o tamanho; anel é
+desenhado por cima e não muda nada. Um botão com <code>ring-4</code> continua com o mesmo tamanho de
+antes — o anel invade o vizinho, se houver. Isso é ótimo no foco (nada se mexe quando o foco entra e
+sai) e também é o motivo de o anel poder encostar em elementos ao lado.</p>
+
+<p>Outra diferença: o anel acompanha o canto arredondado, porque segue a forma da caixa. É por isso
+que ele fica elegante em botão de pílula e em campo com <code>rounded-lg</code>. E como ele é uma
+camada dentro de <code>box-shadow</code>, convive com a sombra do cartão: dá para ter sombra e anel no
+mesmo elemento, cada um na sua camada.</p>
+
+<div class="trytailwind" data-goal="rule:calc(2px + var(--tw-ring-offset-width));;texto:Pão do dia">
+  <p class="try-task">O cartão do pão do dia precisa se destacar dos outros. Dê a ele um anel de 2 px
+  âmbar 400: acrescente <code>ring-2 ring-amber-400</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="rounded-xl bg-white p-4"&gt;Pão do dia · R$ 1,20&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: rgb(255, 255, 255)
+border-radius: 12px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="rounded-xl bg-white p-4 ring-2 ring-amber-400"&gt;Pão do dia · R$ 1,20&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar a solução, o painel mostra uma linha de <code>box-shadow</code> gigante, com várias
+camadas transparentes e uma delas colorida. É ali que o anel mora. As camadas transparentes são as
+outras ferramentas que dividem a propriedade — sombra, sombra interna, anel interno, afastamento. Só a
+do anel está em uso, e é por isso que aparece uma cor no meio de tantos zeros.</p>
+
+<h2>4. A escala do anel</h2>
+
+<p>O anel é medido em pixels, como a borda, e tem uma escala curta. Um detalhe importante:
+no Tailwind v4, <code>ring</code> sozinho vale 1 px, e não os 3 px das versões antigas. Muita gente
+copia um exemplo de 2023 com <code>ring</code> esperando um anel grosso e recebe um fio.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Espessura</th><th>Onde costuma servir</th></tr>
+<tr><td><code>ring-0</code></td><td>0</td><td>apagar o anel de um componente</td></tr>
+<tr><td><code>ring</code></td><td>1 px</td><td>fio discreto, separação de cartão</td></tr>
+<tr><td><code>ring-2</code></td><td>2 px</td><td>o anel de foco padrão</td></tr>
+<tr><td><code>ring-4</code></td><td>4 px</td><td>foco em campo dentro de cartão</td></tr>
+<tr><td><code>ring-8</code></td><td>8 px</td><td>destaque grande, capa, avatar selecionado</td></tr>
+<tr><td><code>ring-amber-400</code></td><td>—</td><td>pinta o anel; sem cor, ele usa a cor do texto</td></tr>
+<tr><td><code>ring-inset</code></td><td>—</td><td>desenha o anel por dentro da caixa</td></tr>
+<tr><td><code>ring-offset-2</code></td><td>—</td><td>afasta o anel 2 px da borda</td></tr>
+</table>
+</div>
+
+<p>A cor padrão também mudou em relação ao passado. Antes, o anel sem cor saía azul; hoje ele sai na
+cor do texto (<code>currentcolor</code>). Em um botão de texto escuro, o anel sai escuro; em um botão
+de texto branco sobre fundo colorido, o anel sai branco e pode desaparecer. Regra prática: sempre
+declare a cor do anel, mesmo que seja a mesma do texto. É uma classe a mais e uma surpresa a menos.</p>
+
+<p>Os degraus <code>ring-3</code> também existem, e qualquer número inteiro funciona entre os citados.
+Ainda assim, prefira os degraus da tabela: um site com anéis de 2, 3 e 5 px em lugares diferentes
+parece feito por três pessoas. Escolha dois — o fino do dia a dia e o grosso do foco — e mantenha.</p>
+
+<h2>5. Anel no foco: a receita</h2>
+
+<p>Agora o uso principal. Você quer que o campo tenha anel só quando estiver em foco, e nenhum anel no
+resto do tempo. A receita tem duas classes e uma variante mais criteriosa:</p>
+
+<pre class="file" data-file="index.html">&lt;input class="rounded-lg border border-stone-300 p-2 focus:ring-2 focus:ring-amber-400"&gt;</pre>
+
+<p>A primeira diz "no foco, anel de 2 px"; a segunda, "no foco, anel âmbar". Sem a segunda, o anel
+sairia na cor do texto. E existe a variante mais criteriosa, <code>focus-visible:ring-2</code>, que só
+liga o anel quando o foco veio do teclado. Se você usar as duas no mesmo elemento, a de
+<code>focus-visible</code> ganha no teclado e a de <code>focus</code> cobre o clique — mas isso é
+refinamento; comece com uma.</p>
+
+<div class="trytailwind" data-goal="rule:.focus\:ring-2:focus;;rule:--tw-ring-color: var(--color-amber-400)">
+  <p class="try-task">O campo de nome não mostra nada quando recebe o foco. Dê a ele um anel de 2 px
+  âmbar só no foco: <code>focus:ring-2 focus:ring-amber-400</code>. Depois clique no campo, na prévia,
+  para ver.</p>
+  <pre class="html" data-saida="css">&lt;input id="alvo" class="rounded-lg border border-stone-300 p-2" placeholder="Seu nome"&gt;</pre>
+  <pre class="out">
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+.border {
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+}
+.border-stone-300 {
+  border-color: var(--color-stone-300);
+}
+.p-2 {
+  padding: calc(var(--spacing) * 2);
+}
+</pre>
+  <pre class="solucao">&lt;input id="alvo" class="rounded-lg border border-stone-300 p-2 focus:ring-2 focus:ring-amber-400" placeholder="Seu nome"&gt;</pre>
+</div>
+
+<p>Esta caixa mostra o CSS gerado de propósito: o anel do foco não existe no HTML em repouso, ele
+existe dentro de um bloco que só vale no estado de foco. Quando você rodar a solução, vai ver uma
+regra com o seletor terminando em <code>:focus</code> e, dentro dela, a linha que cria a camada do
+anel. É a prova de que o estilo está condicionado. E é por isso que a meta desta caixa procura essa
+regra, em vez de olhar o CSS computado do campo parado: parado, ele está sem anel.</p>
+
+<pre class="term">.focus\:ring-2:focus {
+  --tw-ring-shadow: var(--tw-ring-inset, ) 0 0 0
+    calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
+              var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}</pre>
+
+<p>Para ver funcionando na prévia: clique dentro da caixa de texto e depois clique no campo. O anel
+aparece. Se você usar <code>focus-visible:</code>, o clique não mostra nada e o Tab mostra — o que é o
+comportamento desejado em um site de verdade, mas exige teclado para conferir.</p>
+
+<h2>6. Anel afastado e anel interno</h2>
+
+<p>Quando o anel encosta na borda do elemento, ele pode parecer que o elemento engordou. Em um cartão
+com canto arredondado e fundo colorido, o anel de 2 px vira uma moldura colada. A solução é o
+afastamento: <code>ring-offset-2</code> cria um vão de 2 px entre a caixa e o anel, com a cor definida
+por <code>ring-offset-&lt;cor&gt;</code>.</p>
+
+<div class="trytailwind" data-goal="rule:--tw-ring-offset-width: 2px;;texto:Encomendar">
+  <p class="try-task">O anel do botão está colado e parece uma moldura. Afaste 2 px, com fundo branco
+  no vão: acrescente <code>ring-offset-2 ring-offset-white</code>.</p>
+  <pre class="html">&lt;button id="alvo" class="rounded-lg bg-amber-400 px-4 py-2 text-amber-950 ring-2 ring-amber-500"&gt;Encomendar&lt;/button&gt;</pre>
+  <pre class="out">
+background-color: oklch(0.828 0.189 84.429)
+color: oklch(0.279 0.077 45.635)
+border-radius: 8px
+box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.769 0.188 70.08) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px
+padding-inline: 16px
+padding-block: 8px
+</pre>
+  <pre class="solucao">&lt;button id="alvo" class="rounded-lg bg-amber-400 px-4 py-2 text-amber-950 ring-2 ring-amber-500 ring-offset-2 ring-offset-white"&gt;Encomendar&lt;/button&gt;</pre>
+</div>
+
+<p>Repare no que o afastamento faz com a geometria: o anel não fica mais largo, ele começa mais longe.
+O vão é preenchido por uma sombra de espalhamento igual ao offset, na cor do
+<code>ring-offset</code>. Se você esquecer a cor, o vão usa o valor padrão de fábrica e pode aparecer
+como uma faixa branca em um fundo escuro — o clássico "halo" em volta do botão.</p>
+
+<p>O contrário do afastamento é o <code>ring-inset</code>, que desenha o anel por dentro da caixa. Ele
+serve quando o elemento está encostado em outro e o anel para fora seria cortado: botão colado na
+borda de um cartão, item de lista com largura total, aba ativa. Com <code>ring-inset</code>, o anel
+ocupa o espaço do padding em vez de invadir o vizinho, e o desenho fica contido.</p>
+
+<h2>7. Anel, sombra e recorte</h2>
+
+<p>Como o anel é uma camada de <code>box-shadow</code>, ele convive com a sombra e com a borda sem
+briga. Um cartão pode ter <code>shadow-md</code> e <code>ring-1 ring-stone-200</code> ao mesmo tempo: a
+sombra dá a elevação, o anel dá o contorno fino que a sombra não desenha. Essa combinação é muito comum
+em cartão de produto — é mais elegante do que uma borda de 1 px, porque o anel se desenha por cima da
+sombra e não cria o "degrau" de duas linhas.</p>
+
+<p>O problema aparece com <code>overflow-hidden</code>, exatamente como aconteceu com a sombra. Se o
+elemento ou um ancestral recorta o que passa da caixa, o anel é cortado — e o foco fica invisível de
+novo, agora por outro motivo. Em listas com recorte, a saída é <code>ring-inset</code> ou garantir
+folga suficiente em volta do elemento.</p>
+
+<p>Outro cuidado: <code>ring-0</code> existe para apagar o anel, e apagar é legítimo quando você tem
+outra marca no lugar. O que não é legítimo é deixar o campo sem marca nenhuma. Se você remover o
+contorno nativo com <code>outline-none</code> e não puser nada, o site perde a bússola do teclado. Em
+navegador que força modo de alto contraste, o anel de sombra pode não aparecer; por isso a marca de
+foco feita com contorno (<code>outline</code>) é considerada a mais robusta, e é o assunto da próxima
+aula. Saber as duas é o que permite escolher.</p>
+
+<h2>8. Anel como estado</h2>
+
+<p>Além do foco, o anel é ótimo para marcar estado sem mexer no layout: item selecionado, campo com
+erro, cartão ativo, avatar escolhido. A vantagem sobre a borda é justamente não ocupar espaço — o item
+não muda de tamanho quando é selecionado, e a lista não treme.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Estado</th><th>Classes típicas</th><th>Cuidado</th></tr>
+<tr><td>Foco de teclado</td><td><code>focus-visible:ring-2 ring-amber-500</code></td><td>não pode faltar em campo, link ou botão</td></tr>
+<tr><td>Campo com erro</td><td><code>ring-2 ring-red-500</code></td><td>acompanhe de texto, não só de cor</td></tr>
+<tr><td>Item selecionado</td><td><code>ring-2 ring-amber-500 ring-offset-2</code></td><td>declare a cor do vão</td></tr>
+<tr><td>Cartão em destaque</td><td><code>ring-1 ring-stone-200</code></td><td>não use junto de borda de mesma cor</td></tr>
+<tr><td>Botão pressionado</td><td><code>ring-4 ring-amber-200</code></td><td>anel claro só funciona em fundo claro</td></tr>
+</table>
+</div>
+
+<p>A regra de contraste para marca de foco é mais dura que a do texto: o anel precisa se distinguir do
+fundo e do próprio elemento. Na prática, um anel de 2 px com 3:1 de contraste em relação às cores
+vizinhas já é visível para a maioria das pessoas. Âmbar 500 em fundo branco passa; âmbar 200 em fundo
+branco não passa.</p>
+
+<p>E o aviso que vale para todo estado: cor sozinha não é informação. Um campo com anel vermelho
+significa "tem erro" só para quem enxerga vermelho. O texto de ajuda embaixo do campo é que fecha o
+recado. Anel é reforço, não substituto.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o campo que ganhou dois contornos</h3>
+<p>A Ana pôs <code>focus:ring-2</code> e não apagou o contorno nativo do navegador. Resultado: anel
+âmbar por fora e contorno azul por dentro, dois desenhos brigando. A correção foi acrescentar
+<code>focus:outline-none</code> junto do anel. A ordem importa na intenção, não no HTML: primeiro
+garanta a marca nova, depois apague a antiga. Fazer o contrário é como trocar a fechadura antes de ter
+a chave.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o anel que sumiu na lista com rolagem</h3>
+<p>Em uma lista de produtos com <code>overflow-y-auto</code>, o item focado ficava com o anel cortado
+nos lados, porque o anel é desenhado por fora da caixa. A saída foi <code>ring-inset</code>, que
+desenha por dentro e nunca é cortado. Em compensação, o anel interno come metade do padding visual —
+em item com padding pequeno, ele encosta no texto. Nesse caso, aumente o padding do item antes de
+trocar de técnica.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: o anel branco no botão branco</h3>
+<p>Ela usou <code>focus:ring-2</code> sem cor no botão de fundo claro, e o anel saiu na cor do texto —
+quase branco, invisível. Como o padrão do v4 é <code>currentcolor</code>, o anel herda a cor da letra.
+A correção foi declarar <code>focus:ring-amber-600</code>, um tom escuro o suficiente para aparecer
+sobre o fundo claro. A lição: anel sem cor declarada é uma aposta, e aposta em acessibilidade não se
+faz.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="3"><p class="mc-q">1. O que o <code>ring-2</code> desenha, tecnicamente?</p>
+<label><input type="radio" name="r1"> uma borda de 2 px em volta da caixa</label>
+<label><input type="radio" name="r1"> um contorno nativo do navegador</label>
+<label><input type="radio" name="r1"> uma camada de <code>box-shadow</code> sem desfoque e sem
+deslocamento</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">2. O que acontece com o layout quando o anel aparece?</p>
+<label><input type="radio" name="r2"> nada: o anel é desenhado por cima e não ocupa espaço</label>
+<label><input type="radio" name="r2"> o conteúdo anda 2 px para dentro, como na borda</label>
+<label><input type="radio" name="r2"> o elemento cresce 4 px na largura</label>
+</div>
+
+<div class="mc" data-answer="2"><p class="mc-q">3. Qual é a cor padrão do anel no Tailwind v4?</p>
+<label><input type="radio" name="r3"> azul, herdado do navegador</label>
+<label><input type="radio" name="r3"> a cor do texto, por <code>currentcolor</code></label>
+<label><input type="radio" name="r3"> cinza 200, definido no tema</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o campo do telefone</h2>
+<p>O campo de telefone precisa de um anel de 2 px só quando recebe o foco. Complete a classe com o
+prefixo e o degrau:</p>
+<div class="ex-code">&lt;input class="rounded-lg border p-2 <input aria-label="resposta 1" data-answer="focus:ring-2" placeholder="...">"&gt;</div>
+<p class="ex-dica">Dica: o prefixo diz em que estado a classe vale, e o degrau diz a espessura. Se
+você escrever só <code>ring-2</code>, o anel fica ligado o tempo todo — o campo parecerá selecionado
+desde o início.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>O anel do Tailwind é uma camada de <code>box-shadow</code> com deslocamento zero: desenha um
+contorno de 2 px que acompanha o canto arredondado e não ocupa espaço no layout. No v4,
+<code>ring</code> sozinho vale 1 px e a cor padrão é <code>currentcolor</code>, então declare a cor.
+No foco, a receita é <code>focus:ring-2 focus:ring-amber-400</code>, com
+<code>focus-visible:</code> quando quiser o anel só para quem chega pelo teclado.</p>
+
+<p><code>ring-offset-2</code> afasta o anel e cria um vão que precisa de cor própria;
+<code>ring-inset</code> desenha por dentro e sobrevive a recortes. O anel convive com sombra e borda
+porque cada ferramenta usa a sua camada, e <code>ring-0</code> apaga o anel quando existe outra marca
+no lugar — nunca sem outra marca.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Foco é o cursor do teclado; sem marca visível, o site fica inutilizável no Tab.</li>
+<li><code>ring-2</code> é camada de <code>box-shadow</code>: não empurra nada, não muda o tamanho.</li>
+<li>Escala: <code>ring</code> 1 px, <code>ring-2</code>, <code>ring-4</code>, <code>ring-8</code>;
+<code>ring-0</code> apaga.</li>
+<li>Sem classe de cor, o anel usa a cor do texto.</li>
+<li><code>focus:ring-2 focus:ring-amber-400</code> é a receita do foco.</li>
+<li><code>focus-visible:</code> liga só no teclado; <code>focus:</code> liga no clique também.</li>
+<li><code>ring-offset-2</code> afasta; lembre da cor do vão com <code>ring-offset-white</code>.</li>
+<li><code>ring-inset</code> desenha por dentro e não é cortado por recorte.</li>
+<li>Anel e sombra convivem: são camadas diferentes da mesma propriedade.</li>
+<li>Nunca apague o foco sem pôr outra marca; anel é reforço, texto é informação.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

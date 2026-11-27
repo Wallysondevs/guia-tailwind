@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flexbox | Guia Tailwind</title>
+<meta name="description" content="Flexbox no Tailwind desde o começo: o que a classe flex faz, a diferença para inline-flex, container e itens, os padrões escondidos e os erros da Ana.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1><span class="hl">Flexbox</span></h1>
+<p class="intro">A Ana queria o preço e o botão "Encomendar" na mesma linha, um ao lado do outro, como
+numa etiqueta de loja. Escreveu o HTML, abriu no navegador e encontrou o preço numa linha e o botão
+na de baixo, ocupando a largura inteira do cartão. Ela tentou colocar a classe <code>flex</code> no
+botão, no preço, nos dois — e o layout só piorou. O motivo é simples e muda tudo: <code>flex</code>
+não é uma classe do elemento que você quer mover, é uma classe do <em>pai</em> que organiza os
+filhos. Nesta aula ela entende o que <code>flex</code> faz, o que ele não faz, e por que existem
+dois valores parecidos, <code>flex</code> e <code>inline-flex</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que os elementos ficam empilhados sem <code>flex</code>.</li>
+  <li>O que <code>display: flex</code> faz com o pai e com os filhos.</li>
+  <li>A diferença entre container e item — e por que a classe vai no pai.</li>
+  <li>Quando usar <code>flex</code> e quando usar <code>inline-flex</code>.</li>
+  <li>Os quatro padrões que o flex aplica sem você pedir: fila, sem quebra, encostado e esticado.</li>
+  <li>Como o flexbox se aninha: um container dentro de outro.</li>
+  <li>Os erros clássicos de quem começa, e o que cada um parece na tela.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o preço e o botão em linhas diferentes</h2>
+
+<p>O cartão da Ana é simples. Ele tem um preço e um link que parece botão:</p>
+
+<pre class="file" data-file="cardapio.html">&lt;div class="bg-amber-50 p-4"&gt;
+  &lt;p class="text-lg font-bold"&gt;R$ 12,00&lt;/p&gt;
+  &lt;a href="#" class="bg-amber-600 px-4 py-2 text-white"&gt;Encomendar&lt;/a&gt;
+&lt;/div&gt;</pre>
+
+<p>O resultado é o de sempre: o preço numa linha, o botão na linha de baixo, encostado à esquerda. A
+Ana queria os dois na mesma linha horizontal, com o botão logo depois do preço. E aí ela tentou o
+que quase todo mundo tenta primeiro: pôs <code>flex</code> no botão. Nada aconteceu. Pôs no preço.
+Nada. Pôs nos dois. O botão ficou estranho, com o texto espremido.</p>
+
+<p>Por que nada funcionou? Porque ela estava aplicando a classe nos filhos. O <code>flex</code> é uma
+propriedade de <em>display</em>, e display descreve como um elemento organiza o seu próprio conteúdo
+— os filhos dele. Se você põe <code>flex</code> no botão, o botão passa a organizar o que está
+<em>dentro</em> dele: o texto "Encomendar". O preço, que está fora, não se mexe. É como arrumar a
+prateleira de dentro de uma caixa achando que isso muda a posição das caixas no depósito.</p>
+
+<h2>2. Por que tudo fica empilhado por padrão</h2>
+
+<p>Antes de consertar, vale entender o estado natural. No HTML, cada elemento tem um jeito padrão de
+ocupar a página. Os elementos de <strong>bloco</strong> — <code>div</code>, <code>p</code>,
+<code>h1</code>, <code>section</code>, <code>ul</code> — começam numa linha nova e ocupam a largura
+toda disponível. Os elementos <strong>em linha</strong> — <code>span</code>, <code>a</code>,
+<code>strong</code>, <code>em</code> — ficam lado a lado com o texto e ocupam só o espaço do
+conteúdo.</p>
+
+<p>É por isso que o preço e o botão se empilharam: o preço está num <code>p</code>, que é bloco. Ele
+ocupa a linha inteira e empurra o que vem depois para baixo. O botão é um <code>a</code>, que em
+teoria é de linha — mas elemento de linha não sobe para a linha de um bloco que já terminou. Ele
+começa embaixo, e ocupa só o espaço do próprio conteúdo.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Valor de display</th><th>O elemento</th><th>Como os filhos ficam</th><th>Onde serve</th></tr>
+<tr><td><code>block</code></td><td>começa em linha nova e ocupa a largura toda</td><td>empilhados</td><td>parágrafo, cartão, seção</td></tr>
+<tr><td><code>inline</code></td><td>fica na linha do texto e ocupa só o conteúdo</td><td>seguem o texto</td><td>link no meio de uma frase</td></tr>
+<tr><td><code>inline-block</code></td><td>na linha do texto, mas aceita largura e altura</td><td>seguem o texto</td><td>botão antigo, selo pequeno</td></tr>
+<tr><td><code>flex</code></td><td>linha nova, largura toda</td><td>fila horizontal</td><td>barra, cartão com preço e botão</td></tr>
+<tr><td><code>inline-flex</code></td><td>na linha do texto, largura do conteúdo</td><td>fila horizontal</td><td>etiqueta, ícone com texto</td></tr>
+</table>
+</div>
+
+<p>Esse comportamento é o que o CSS chama de <em>fluxo normal</em>. Ele não é defeito: é a base de
+todo documento da web, e é o que faz um texto corrido funcionar. O flexbox não substitui o fluxo
+normal; ele cria uma exceção local, numa caixa que você escolhe. Dentro dela, as regras mudam: os
+filhos passam a ser organizados em fila, e você ganha controle sobre a ordem, o espaço e o
+alinhamento.</p>
+
+<dl class="anatomy">
+<dt>container flex</dt>
+<dd>O elemento que recebeu <code>flex</code>. Ele não muda de tamanho; muda o jeito de organizar os
+filhos diretos.</dd>
+<dt>item flex</dt>
+<dd>Cada filho direto do container. Recebe valores iniciais próprios — e é neles que estão as
+surpresas.</dd>
+<dt>eixo principal</dt>
+<dd>A direção em que os itens se enfileiram. No flex, começa como horizontal, da esquerda para a
+direita.</dd>
+<dt>eixo transversal</dt>
+<dd>A direção perpendicular ao principal. No flex horizontal, é a vertical — a altura dos itens.</dd>
+<dt>display</dt>
+<dd>A propriedade que diz como um elemento se comporta e organiza o conteúdo. Os valores do flexbox
+são <code>flex</code> e <code>inline-flex</code>.</dd>
+</dl>
+
+<h2>3. A classe flex, no pai</h2>
+
+<p>Com <code>flex</code> no <code>div</code> que envolve preço e botão, os dois viram itens de uma
+fila horizontal. É isso. Não há mágica, não há reposicionamento: o navegador para de tratar cada
+filho como bloco empilhado e passa a distribuir todos numa linha, da esquerda para a direita, com o
+tamanho do conteúdo.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=flex;;rule:display: flex">
+  <p class="try-task">Coloque o preço e o botão na mesma linha. A classe vai no elemento que envolve
+  os dois.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-50 p-4"&gt;
+  &lt;p class="text-lg font-bold"&gt;R$ 12,00&lt;/p&gt;
+  &lt;a href="#" class="bg-amber-600 px-4 py-2 text-white"&gt;Encomendar&lt;/a&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex bg-amber-50 p-4"&gt;
+  &lt;p class="text-lg font-bold"&gt;R$ 12,00&lt;/p&gt;
+  &lt;a href="#" class="bg-amber-600 px-4 py-2 text-white"&gt;Encomendar&lt;/a&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>display: flex</code> junto do respiro e do fundo que já
+estavam lá. O CSS gerado é igualmente curto:</p>
+
+<pre class="term">.flex {
+  display: flex;
+}
+.inline-flex {
+  display: inline-flex;
+}</pre>
+
+<p>É importante notar o que não aparece no painel. O flexbox tem um monte de propriedades — direção,
+quebra, distribuição, alinhamento, espaço entre itens — e nenhuma delas foi escrita por você. O
+navegador aplicou valores iniciais para todas. Entender esses valores é o que separa quem usa flex de
+quem briga com ele, e é o assunto da seção 6.</p>
+
+<h2>4. Container e itens: quem manda em quem</h2>
+
+<p>A relação do flexbox é sempre de pai para filhos diretos. O container decide a fila; os itens
+obedecem. Netos não participam: se um item tem filhos próprios, esses filhos continuam no fluxo
+normal, a menos que o próprio item vire um container flex. E é aí que está a beleza da coisa — o
+flexbox se aninha sem limite, e cada caixa cuida do seu pedaço.</p>
+
+<p>Na prática, isso significa que a classe <code>flex</code> tem dois papéis possíveis no mesmo
+elemento: se ele está dentro de outro container, ele é item; se ele tem <code>flex</code>, ele também
+é container dos seus filhos. As duas coisas ao mesmo tempo, sem conflito. Um cartão pode ser item de
+uma grade e container de um rodapé interno.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=flex;;conta:#alvo &gt; span.flex=0">
+  <p class="try-task">A Ana pôs <code>flex</code> em cada dia da semana, achando que assim ficariam
+  lado a lado. Ponha a classe onde ela funciona — no pai — e tire dos filhos.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-50 p-4"&gt;
+  &lt;span class="flex"&gt;Seg&lt;/span&gt;
+  &lt;span class="flex"&gt;Ter&lt;/span&gt;
+  &lt;span class="flex"&gt;Qua&lt;/span&gt;
+&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.987 0.022 95.277)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="flex bg-amber-50 p-4"&gt;
+  &lt;span&gt;Seg&lt;/span&gt;
+  &lt;span&gt;Ter&lt;/span&gt;
+  &lt;span&gt;Qua&lt;/span&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<p>Rode o HTML inicial e repare: o painel do alvo mostra apenas o respiro e o fundo, porque o
+<code>flex</code> está nos filhos e não no pai. É o diagnóstico exato do problema. Depois da solução,
+o painel mostra <code>display: flex</code>, e os três dias ficam numa fila. A meta desta caixa
+confere as duas coisas: que o pai virou flex e que nenhum filho ficou com a classe.</p>
+
+<p>Guarde esse reflexo, porque ele vale para o resto do guia: antes de procurar a classe certa,
+pergunte-se <em>quem é o pai</em>. Espaçamento entre itens, alinhamento, ordem e distribuição —
+tudo isso é decisão do container, não de cada filho.</p>
+
+<h2>5. flex e inline-flex: a diferença que aparece</h2>
+
+<p>Os dois valores fazem a mesma coisa por dentro: criam um container flex. A diferença está em como
+o container se comporta para fora. <code>flex</code> é bloco: ocupa a largura toda e começa em linha
+nova. <code>inline-flex</code> é em linha: ocupa só o espaço do conteúdo e convive com o texto ao
+redor, como um <code>span</code>.</p>
+
+<p>Essa diferença parece acadêmica até o dia em que você faz uma etiqueta. A Ana tinha a palavra
+"novo" numa pílula ao lado do nome do pão, e usou <code>flex</code>. A pílula tomou a linha inteira,
+empurrou o nome do pão para baixo e deixou um vazio enorme ao lado da palavra. Com
+<code>inline-flex</code>, a pílula encolhe até o conteúdo e fica na mesma linha do texto:</p>
+
+<div class="trytailwind" data-goal="css:#alvo|display=inline-flex">
+  <p class="try-task">A etiqueta "novo" está ocupando a linha inteira e empurrando o nome do pão para
+  baixo. Faça ela ocupar só o espaço do próprio texto.</p>
+  <pre class="html">&lt;p class="bg-amber-50 p-4"&gt;
+  &lt;span id="alvo" class="flex bg-amber-200 px-2 py-1"&gt;novo&lt;/span&gt;
+  Pão de queijo
+&lt;/p&gt;</pre>
+  <pre class="out">
+display: flex
+background-color: oklch(0.924 0.12 95.746)
+padding-inline: 8px
+padding-block: 4px
+</pre>
+  <pre class="solucao">&lt;p class="bg-amber-50 p-4"&gt;
+  &lt;span id="alvo" class="inline-flex bg-amber-200 px-2 py-1"&gt;novo&lt;/span&gt;
+  Pão de queijo
+&lt;/p&gt;</pre>
+</div>
+
+<p>Depois de rodar, o painel mostra <code>display: inline-flex</code>, e a prévia mostra o resultado: a pílula volta a
+ser pílula. Note que o <code>span</code> já era um elemento em linha antes de receber
+<code>flex</code>; foi a classe <code>flex</code> que o transformou em bloco. Quem tinha
+<code>span</code> e virou <code>div</code> sem trocar a tag foi o CSS.</p>
+
+<p>A regra de bolso: se o container precisa ocupar a largura toda e empilhar em relação aos vizinhos,
+<code>flex</code>. Se precisa conviver com texto ao lado, como etiqueta, ícone ou botão dentro de uma
+frase, <code>inline-flex</code>. Na dúvida, teste os dois e olhe a prévia: a diferença é imediata, e
+não há como errar olhando.</p>
+
+<h2>6. Os quatro padrões que vêm de graça</h2>
+
+<p>Quando você escreve <code>flex</code> e mais nada, o navegador aplica quatro decisões por você. Elas
+não aparecem no painel, porque o painel mostra o que as classes mudaram — e essas não foram
+mudadas. Se você inspecionar o container no navegador, é isto que ele mostra:</p>
+
+<pre class="term">.flex {
+  display: flex;
+  /* os valores iniciais, que você não escreveu: */
+  flex-direction: row;          /* fila horizontal  */
+  flex-wrap: nowrap;            /* sem quebra       */
+  justify-content: flex-start;  /* tudo à esquerda  */
+  align-items: stretch;         /* mesma altura     */
+  gap: 0;                       /* colados          */
+}</pre>
+
+<p>Vale entender cada um, porque cada um tem uma aula própria depois desta. A <strong>fila
+horizontal</strong> é o eixo principal: os itens entram na ordem do HTML, da esquerda para a direita.
+A <strong>falta de quebra</strong> significa que, se não couber, os itens não descem para a linha de
+baixo — eles encolhem, ou vazam. O <strong>alinhamento à esquerda</strong> é o inicial do
+<code>justify-content</code>, e o alinhamento vertical vem do <code>align-items</code>, que
+<em>estica</em> os itens para que todos tenham a altura do mais alto. E o <strong>espaço zero</strong>
+é o <code>gap</code>: sem ele, os itens se encostam.</p>
+
+<p>Esse último é a reclamação número um de quem começa: "o flex funcionou, mas os itens estão
+colados". Não é falha — é o padrão. O espaço entre itens tem uma aula inteira, com uma classe
+específica, e a solução não é margem em cada filho.</p>
+
+<p>O "esticar" é o padrão mais surpreendente dos quatro. Se um item tem fundo colorido e outro não,
+os dois ficam com a mesma altura, porque <code>align-items: stretch</code> estica todos até o mais
+alto. No cartão da Ana, isso é o que faz o botão e o preço ficarem com a mesma altura de caixa. Às
+vezes é exatamente o que você quer; às vezes não, e aí a resposta está na aula de Alinhamento no
+Flex, não no flexbox em si.</p>
+
+<h2>7. Lendo o que o navegador fez</h2>
+
+<p>Como em toda aula do guia, o hábito que sustenta o resto é conferir o resultado em vez de adivinhar.
+Aqui há um detalhe que engana: <code>display: flex</code> no painel não conta a história toda, porque
+o painel mostra só as propriedades que as classes do elemento escreveram. As outras quatro decisões
+estão lá no navegador, mas invisíveis para ele.</p>
+
+<p>Para ver tudo, o caminho é a aba do navegador. Inspecione o container, abra a seção
+<em>Layout</em> (no Chrome e no Edge) e ligue a marcação de flexbox: aparece uma etiqueta
+<code>flex</code> ao lado do elemento e uma sobreposição colorida na página mostrando o eixo
+principal, os itens e os espaços. No Firefox, o inspetor tem um painel <em>Flexbox</em> com a mesma
+ideia, e ele chega a listar os itens um por um. É a forma mais rápida de descobrir por que um item
+está maior que o outro.</p>
+
+<p>Existe também uma pista que não precisa de ferramenta nenhuma: se os filhos estão lado a lado numa
+fila, o pai é flex. Se estão empilhados, não é — ou o <code>flex</code> está no elemento errado. Essa
+leitura leva dois segundos e resolve a maioria dos casos antes de abrir o inspetor.</p>
+
+<h2>8. O que dá errado, e por quê</h2>
+
+<p>Estes são os tropeços que aparecem nas primeiras semanas. Todos têm a mesma raiz: a confusão entre
+container e item.</p>
+
+<ul>
+<li><strong><code>flex</code> no filho.</strong> O elemento passa a organizar o próprio conteúdo, e a
+posição dele na página não muda. O sintoma é "a classe não faz nada" — e ela está fazendo, só que
+num nível abaixo.</li>
+<li><strong>Esperar que o flex centralize sozinho.</strong> Sem <code>justify-content</code> e
+<code>align-items</code>, os itens ficam à esquerda e esticados. Centralizar é decisão explícita,
+com classe própria.</li>
+<li><strong>Achar que o flex resolve o espaço entre itens.</strong> Ele não distribui espaço por
+conta própria; o <code>gap</code> é que faz isso. Margem em cada filho funciona e é o caminho mais
+longo.</li>
+<li><strong>Itens que não encolhem.</strong> Todo item flex começa com <code>min-width: auto</code>,
+o que impede que ele fique menor que o conteúdo. Um texto comprido dentro de um item pode estourar o
+container mesmo com o flex ligado. O conserto costuma ser <code>min-w-0</code> no item, assunto da
+aula de crescimento.</li>
+<li><strong>Texto solto virando item.</strong> Se você escreve texto direto dentro do container, sem
+tag, ele vira um item anônimo. Funciona, mas perde controle — prefira envolver em
+<code>span</code>.</li>
+</ul>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>O que você vê</th><th>Causa provável</th><th>Conserto</th></tr>
+<tr><td>os filhos continuam empilhados</td><td>falta <code>flex</code> no pai</td><td>pôr <code>flex</code> no elemento que envolve todos</td></tr>
+<tr><td>"a classe não faz nada"</td><td><code>flex</code> foi para o filho</td><td>mover a classe para o pai</td></tr>
+<tr><td>a etiqueta ocupa a linha inteira</td><td><code>flex</code> em vez de <code>inline-flex</code></td><td>trocar para <code>inline-flex</code></td></tr>
+<tr><td>os itens estão encostados</td><td><code>gap</code> zero é o padrão</td><td><code>gap</code>, que tem aula própria</td></tr>
+<tr><td>um item estoura o container</td><td><code>min-width: auto</code> no item</td><td><code>min-w-0</code>, na aula de crescimento</td></tr>
+<tr><td>todos ficaram com a mesma altura</td><td><code>align-items: stretch</code> é o padrão</td><td><code>items-start</code>, na aula de alinhamento</td></tr>
+</table>
+</div>
+
+<p>E um alerta de expectativa: flexbox organiza <em>uma</em> direção por vez. Ele é ótimo para barras,
+cartões, ícones com texto e alinhamentos de uma linha. Para uma grade de verdade, com linhas e
+colunas, o caminho é o grid, que tem aula própria neste nível. Muita gente força flex onde grid seria
+mais simples, e o resultado é uma pilha de <code>w-1/3</code> que quebra na primeira tela
+menor.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a barra com o logo e os links</h3>
+<p>A Ana montou o cabeçalho do site com o nome da padaria e três links. Sem <code>flex</code>, cada
+um ficava numa linha, e o cabeçalho virava uma torre. Com <code>flex</code> no
+<code>header</code>, os quatro elementos entraram na mesma fila. Ainda ficaram encostados e à
+esquerda — o que resolve o "lado a lado", que era o problema daquela aula —, e a distribuição veio
+depois, com as classes de alinhamento. Cada problema no seu tempo.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o botão com ícone e texto</h3>
+<p>Ela quis um ícone de sacola ao lado da palavra "Encomendar", dentro do botão. Sem flex, o emoji
+e o texto ficavam em linhas diferentes quando o botão estreitava. Com <code>flex</code> no
+<code>a</code>, os dois viraram itens na mesma fila e pararam de se separar. Aqui o container é o
+próprio botão: o flex não mudou a posição do botão na página, só organizou o conteúdo dele — que é
+exatamente o que a classe faz.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: os cartões que esticaram sozinhos</h3>
+<p>Na vitrine, os cartões tinham alturas diferentes por causa do texto. Ao colocar <code>flex</code>
+no contêiner da vitrine, todos ficaram com a mesma altura — e ela não pediu isso. O culpado era
+<code>align-items: stretch</code>, o padrão. Funcionou a favor naquele caso, mas, quando um cartão
+precisa ser menor que o vizinho, é preciso mudar o alinhamento. Entender o padrão evita a surpresa de
+"o Tailwind mudou a altura sozinho".</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Onde vai a classe <code>flex</code> para deixar
+três irmãos lado a lado?</p>
+<label><input type="radio" name="q1"> em cada um dos três irmãos</label>
+<label><input type="radio" name="q1"> no elemento que envolve os três</label>
+<label><input type="radio" name="q1"> no <code>body</code> da página</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Qual é a diferença entre <code>flex</code> e
+<code>inline-flex</code>?</p>
+<label><input type="radio" name="q2"> <code>inline-flex</code> não organiza os filhos</label>
+<label><input type="radio" name="q2"> <code>inline-flex</code> só funciona dentro de tabelas</label>
+<label><input type="radio" name="q2"> <code>flex</code> ocupa a largura toda; <code>inline-flex</code>
+ocupa só o conteúdo e convive com o texto ao lado</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que acontece com os itens quando você escreve
+só <code>flex</code>?</p>
+<label><input type="radio" name="q3"> ficam numa fila, encostados e esticados à altura do mais
+alto</label>
+<label><input type="radio" name="q3"> ficam centralizados na horizontal e na vertical</label>
+<label><input type="radio" name="q3"> são distribuídos igualmente, com espaço automático entre
+eles</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: a etiqueta do pão</h2>
+<p>Complete a classe que faz o container ser uma fila horizontal:</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="flex" placeholder="..."> bg-amber-50 p-4"&gt;</div>
+<p class="ex-dica">Dica: a classe tem o mesmo nome do assunto da aula e não precisa de prefixo. Se
+você escrever <code>display-flex</code> ou <code>flexbox</code>, nada acontece: o Tailwind só conhece
+o nome exato.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Flexbox é um modo de organizar os filhos diretos de uma caixa. Quem recebe a classe é o pai:
+<code>flex</code> cria uma fila horizontal que ocupa a largura toda; <code>inline-flex</code> cria a
+mesma fila, mas o container ocupa só o conteúdo e convive com o texto ao lado. O CSS gerado é uma
+linha — <code>display: flex</code> —, e todo o resto são valores iniciais que o navegador aplica sem
+avisar: fila da esquerda para a direita, sem quebra, encostado à esquerda, esticado na altura e sem
+espaço entre itens.</p>
+
+<p>O erro mais comum é pôr a classe no filho: aí o elemento passa a organizar o próprio conteúdo e a
+posição dele na página não muda. Antes de escrever <code>flex</code>, pergunte quem é o pai. E cada
+decisão tem a sua aula: direção e quebra, alinhamento, espaço e crescimento — todas usam esse mesmo
+container como ponto de partida.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>flex</code> vai no pai, nunca no filho que você quer mover.</li>
+<li>O pai não muda de tamanho; ele muda o jeito de organizar os filhos.</li>
+<li><code>flex</code> = bloco, largura toda; <code>inline-flex</code> = em linha, só o conteúdo.</li>
+<li>Filhos diretos viram itens; netos só participam se o pai deles também for flex.</li>
+<li>Padrões de graça: fila, sem quebra, tudo à esquerda, altura esticada, espaço zero.</li>
+<li>O painel mostra só <code>display: flex</code>: o resto é padrão do navegador.</li>
+<li>Itens colados não é bug: falta o <code>gap</code>, que tem aula própria.</li>
+<li>Centralizar não vem de graça: é <code>justify-content</code> e <code>align-items</code>.</li>
+<li>Um elemento pode ser item de um flex e container de outro ao mesmo tempo.</li>
+<li>Para grade com linhas e colunas, o caminho é o grid.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

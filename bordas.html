@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bordas | Guia Tailwind</title>
+<meta name="description" content="Bordas no Tailwind: espessura, cor e estilo da linha, como desenhar um lado só, por que a borda herda a cor do texto e o que a borda faz com o tamanho da caixa.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>Bordas: a linha em volta do <span class="hl">cartão</span></h1>
+<p class="intro">A Ana terminou a lista de pães com preço e mandou o link para uma cliente. A resposta
+foi educada, mas seca: "não estou achando onde começa um pão e termina o outro". O problema não é o
+texto, é a falta de linha. Sem borda, dois cartões brancos sobre fundo branco viram um borrão só.
+Nesta aula a Ana aprende a desenhar essa linha: escolher a espessura, a cor e o estilo, colocar borda
+em um lado só e descobrir por que a borda dela estava saindo na cor errada — e por que o cartão
+"pulava" dois pixels quando o mouse passava.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que <code>border</code> sozinho faz e por que ele funciona sem dizer o estilo.</li>
+  <li>As espessuras: <code>border</code>, <code>border-2</code>, <code>border-4</code>, <code>border-8</code>.</li>
+  <li>Como pintar a borda e por que ela nasce com a cor do texto.</li>
+  <li>Borda em um lado só: <code>border-t</code>, <code>border-x</code>, <code>border-s</code>.</li>
+  <li>Linha cheia, tracejada, pontilhada e dupla.</li>
+  <li>O que a borda faz com o tamanho da caixa e como evitar o "pulo" no hover.</li>
+  <li>Como a borda se comporta quando o canto é arredondado.</li>
+</ul>
+</div>
+
+<h2>1. A cena: dois cartões que ninguém separa</h2>
+
+<p>A lista da padaria é simples: cada pão é uma caixa com nome, descrição e preço. A Ana escreveu as
+caixas com fundo branco, respiro interno e nada mais. No papel ficaria ótimo. Na tela, sobre um fundo
+branco, ficou um bloco de texto corrido com espaços estranhos.</p>
+
+<pre class="file" data-file="index.html">&lt;div class="bg-white p-4"&gt;
+  &lt;p class="font-semibold"&gt;Pão francês&lt;/p&gt;
+  &lt;p&gt;Casquinha fina, sai do forno às 6h. R$ 0,90&lt;/p&gt;
+&lt;/div&gt;</pre>
+
+<p>O que falta é contorno. Contorno dá começo e fim a cada peça, e o olho humano usa justamente isso
+para agrupar informação: o que está dentro da linha é uma coisa, o que está fora é outra. É por isso
+que borda não é enfeite — é estrutura. Um formulário com borda nos campos é mais fácil de preencher
+do que um formulário sem nada, mesmo que o texto seja idêntico.</p>
+
+<p>Em CSS puro, a borda é escrita com três informações de uma vez:
+<code>border: 1px solid #e5e5e5</code> — espessura, estilo e cor. No Tailwind, cada informação tem a
+sua classe, e você quase nunca precisa das três. Vamos por partes, começando pela mais confusa para
+quem está chegando: a borda que o navegador já tem e você não vê.</p>
+
+<h2>2. A borda invisível que já existe</h2>
+
+<p>Todo elemento nasce com <code>border-style: solid</code> e espessura zero. Quem faz isso é a
+camada de base do Tailwind (o "preflight"), que zera margens, paddings e espessuras para o desenho
+começar igual em qualquer navegador. O detalhe importante: como o estilo já vem definido como
+<code>solid</code>, uma classe de espessura basta para a linha aparecer. Não existe mais a
+obrigatoriedade de escrever <code>border-solid</code> que assustava na versão 3 do Tailwind.</p>
+
+<p>Por isso <code>border</code> sozinho já desenha uma linha de 1 px em volta do elemento:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="border p-4"&gt;Pão francês · R$ 0,90&lt;/div&gt;</pre>
+
+<p>Só que essa linha pode sair quase invisível, e não é bug: a cor padrão da borda é
+<code>currentcolor</code>, ou seja, a cor do texto do próprio elemento. Se o texto é cinza claro, a
+borda é cinza claro. Se você nunca definiu a cor do texto, ele está no tom padrão do navegador
+(quase preto), e a borda sai quase preta. É a origem da fama de "borda preta feia" que o Tailwind tem
+em exemplos antigos.</p>
+
+<dl class="anatomy">
+<dt>border-width</dt>
+<dd>A espessura da linha, em pixels. <code>border</code> = 1 px, <code>border-2</code> = 2 px, e
+assim por diante.</dd>
+<dt>border-style</dt>
+<dd>O traço: cheio, tracejado, pontilhado, duplo ou nenhum. Já nasce <code>solid</code>, por isso
+raramente você precisa escrever.</dd>
+<dt>border-color</dt>
+<dd>A cor da linha. Sem classe de cor, vale a cor do texto (<code>currentcolor</code>).</dd>
+<dt>currentcolor</dt>
+<dd>Palavra do CSS que significa "a cor do texto deste elemento". Muda sozinha quando você troca a
+cor da letra.</dd>
+<dt>preflight</dt>
+<dd>A camada de estilos de base do Tailwind, que zera margem, padding e espessura de borda antes de
+qualquer classe sua.</dd>
+<dt>borda fantasma</dt>
+<dd>Borda transparente usada só para reservar espaço, para o layout não pular quando a borda colorida
+aparece.</dd>
+</dl>
+
+<h2>3. Espessura: quantos pixels de linha</h2>
+
+<p>A escala de espessura é curta e em pixels redondos, não em <code>rem</code> — borda é uma linha
+fina, e linha fina não deve crescer quando alguém aumenta a letra. Sem sufixo, <code>border</code>
+vale 1 px. Os degraus usados no dia a dia:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Espessura</th><th>Onde costuma servir</th></tr>
+<tr><td><code>border-0</code></td><td>0</td><td>apagar a borda de um componente</td></tr>
+<tr><td><code>border</code></td><td>1 px</td><td>cartão, campo, divisor — o padrão</td></tr>
+<tr><td><code>border-2</code></td><td>2 px</td><td>destaque, campo ativo, botão secundário</td></tr>
+<tr><td><code>border-4</code></td><td>4 px</td><td>moldura forte, aviso</td></tr>
+<tr><td><code>border-8</code></td><td>8 px</td><td>bloco gráfico, moldura de foto</td></tr>
+<tr><td><code>border-[3px]</code></td><td>3 px</td><td>valor fora da escala, alinhado com uma arte</td></tr>
+</table>
+</div>
+
+<p>Existe uma razão prática para a escala parar em 8: acima disso a borda deixa de ser contorno e vira
+moldura, e moldura muda o desenho todo. Quem precisa de 10, 12 px está, na verdade, querendo uma
+tarja colorida — e para isso existem outras ferramentas, como um <code>div</code> com fundo ou uma
+borda em um lado só.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-width=2px">
+  <p class="try-task">A cliente reclamou que a linha quase não aparece. Deixe a borda com 2 px, sem
+  mexer na cor.</p>
+  <pre class="html">&lt;div id="alvo" class="border border-amber-300 p-4"&gt;Pão francês · R$ 0,90&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+border-width: 1px
+border-color: oklch(0.879 0.169 91.605)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="border-2 border-amber-300 p-4"&gt;Pão francês · R$ 0,90&lt;/div&gt;</pre>
+</div>
+
+<p>Repare no painel: a linha da espessura muda de 1 px para 2 px, e as outras continuam listadas com
+os mesmos valores. Ele mostra o que as classes do elemento mudaram, não o retrato completo: o
+<code>padding</code> aparece porque a classe <code>p-4</code> mudou o padding, e o
+<code>border-color</code> aparece porque a classe de cor está lá. O que nenhuma classe mexeu não entra
+na lista. A linha que o navegador desenha é uma caixa de 2 px de espessura que fica entre o padding e
+a margem, e é isso que o CSS gerado escreve:</p>
+
+<pre class="term">.border-2 {
+  border-style: var(--tw-border-style);
+  border-width: 2px;
+}
+/* --tw-border-style vale solid por padrão */</pre>
+
+<p>Vale saber que existe uma variável no meio do caminho. O Tailwind guarda o estilo em
+<code>--tw-border-style</code> justamente para que <code>border-dashed</code> e
+<code>border-solid</code> possam trocar o valor sem repetir a espessura em cada regra. Você não
+precisa mexer nela; só não se assuste ao vê-la no CSS gerado.</p>
+
+<h2>4. Cor: por que a borda saiu na cor errada</h2>
+
+<p>Agora o ponto que mais confunde. A Ana queria uma borda cinza clara e escreveu
+<code>border</code> no cartão. A borda saiu escura. Ela escreveu <code>text-stone-500</code> no mesmo
+elemento para deixar o texto cinza e — surpresa — a borda ficou cinza também. Não é coincidência: sem
+classe de cor de borda, o navegador usa <code>currentcolor</code>.</p>
+
+<p>A correção é explícita: <code>border-stone-200</code>, <code>border-amber-300</code>,
+<code>border-white</code>. As cores são as mesmas dezenove famílias do fundo e do texto, com os
+mesmos números de 50 a 950. Borda clara para separar sem gritar (100, 200), borda média para marcar
+(300, 400), borda escura para avisar (600, 700). E existe a classe <code>border-transparent</code>,
+que desenha uma linha invisível — inútil à primeira vista, essencial na seção 7.</p>
+
+<div class="trytailwind" data-goal="rule:border-color: var(--color-amber-400);;css:#alvo|border-color=oklch(0.828 0.189 84.429)">
+  <p class="try-task">A borda está em cinza-pedra e some no fundo. Pinte com o âmbar mais vivo:
+  troque <code>border-stone-300</code> por <code>border-amber-400</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="border-2 border-stone-300 p-4"&gt;Pão francês · R$ 0,90&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+border-width: 2px
+border-color: oklch(0.869 0.005 56.366)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="border-2 border-amber-400 p-4"&gt;Pão francês · R$ 0,90&lt;/div&gt;</pre>
+</div>
+
+<p>O painel mostra a cor em <code>oklch(...)</code>, que é como o Tailwind v4 escreve cor: claridade,
+saturação e ângulo do tom. Você não precisa calcular nada, mas vale reconhecer o formato, porque ele
+aparece em toda aula de cor. O CSS gerado, por sua vez, continua legível, apontando para a
+paleta:</p>
+
+<pre class="term">.border-amber-400 {
+  border-color: var(--color-amber-400);
+}</pre>
+
+<p>Se quiser uma borda mais suave sem trocar de tom, use a barra de opacidade:
+<code>border-amber-400/40</code> mistura 40% da cor com transparência. É o mesmo mecanismo do fundo e
+do texto, e é ótimo para não competir com o conteúdo. E se a intenção for que a borda acompanhe o
+texto sempre, existe <code>border-current</code>, que diz "use a cor da letra" de propósito — o
+oposto do acidente da Ana.</p>
+
+<h2>5. Um lado de cada vez</h2>
+
+<p>Muitos componentes não têm moldura completa. Uma linha embaixo separa dois itens de uma lista; uma
+linha à esquerda marca um aviso; uma linha em cima fecha o cabeçalho de uma tabela. Para isso, o
+Tailwind usa a mesma letra de lado que você já viu no arredondamento.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Onde desenha</th><th>Exemplo de uso</th></tr>
+<tr><td><code>border-t</code></td><td>só em cima</td><td>início de uma seção</td></tr>
+<tr><td><code>border-r</code></td><td>só à direita</td><td>divisão entre colunas</td></tr>
+<tr><td><code>border-b</code></td><td>só embaixo</td><td>item de lista, cabeçalho de tabela</td></tr>
+<tr><td><code>border-l</code></td><td>só à esquerda</td><td>aviso, citação, marcador</td></tr>
+<tr><td><code>border-x</code></td><td>esquerda e direita</td><td>faixa central de largura fixa</td></tr>
+<tr><td><code>border-y</code></td><td>em cima e embaixo</td><td>linha de tabela</td></tr>
+<tr><td><code>border-s-2</code></td><td>no começo da linha, 2 px</td><td>o mesmo que <code>border-l-2</code>, à prova de idioma</td></tr>
+<tr><td><code>border-e</code></td><td>no fim da linha</td><td>o mesmo que <code>border-r</code>, à prova de idioma</td></tr>
+</table>
+</div>
+
+<p>O sufixo de espessura vai depois da letra: <code>border-t-2</code>, <code>border-b-4</code>,
+<code>border-l-8</code>. E a cor também aceita o lado: <code>border-t-amber-400</code> pinta só a
+linha de cima, deixando as outras no que já eram. Essa combinação de lado com cor é o que permite o
+aviso com tarja: fundo âmbar claro, borda esquerda âmbar forte, três pixels.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|border-bottom-width=2px;;css:#alvo|border-bottom-style=dashed;;css:#alvo|border-top-width=0px">
+  <p class="try-task">O cartão precisa de uma linha só embaixo, tracejada e de 2 px. Troque a moldura
+  completa por <code>border-b-2 border-dashed</code> e mantenha a cor âmbar.</p>
+  <pre class="html">&lt;div id="alvo" class="border border-amber-200 p-4"&gt;Pão de queijo · R$ 1,50&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+border-width: 1px
+border-color: oklch(0.924 0.12 95.746)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="border-b-2 border-dashed border-amber-300 p-4"&gt;Pão de queijo · R$ 1,50&lt;/div&gt;</pre>
+</div>
+
+<p>A meta desta caixa confere três coisas, e a terceira é a mais interessante:
+<code>border-top-width</code> tem de voltar a zero. Sem isso, o leitor poderia cumprir "linha embaixo"
+mantendo a moldura em cima, e o pedido não era esse. É assim que uma meta bem escrita vira
+especificação: ela descreve o resultado inteiro, não só a parte que aparece.</p>
+
+<h2>6. Estilo: cheia, tracejada, pontilhada, dupla</h2>
+
+<p>O estilo é o traço. <code>border-solid</code> é o padrão e quase nunca é escrito;
+<code>border-dashed</code> dá o tracejado de cupom fiscal; <code>border-dotted</code> dá a linha de
+pontinhos, ótima para "arraste o arquivo aqui"; <code>border-double</code> desenha duas linhas finas
+e só funciona com 3 px ou mais de espessura, senão o navegador não tem espaço para as duas.</p>
+
+<p>Existe ainda <code>border-none</code>, que remove o traço. Ele é diferente de <code>border-0</code>
+na intenção, mas o efeito prático é parecido: <code>border-none</code> zera o estilo,
+<code>border-0</code> zera a espessura. Em ambos os casos o resultado é nenhuma linha. Prefira
+<code>border-0</code> quando estiver anulando uma borda de espessura, e <code>border-none</code>
+quando estiver anulando um estilo — é mais fácil de ler depois.</p>
+
+<p>Um aviso de acessibilidade, porque estilo de borda é usado como informação o tempo todo: linha
+tracejada costuma significar "isto é um campo obrigatório" ou "isto é um espaço para soltar arquivo".
+Se o significado existe, ele precisa existir também no texto, não só no traço. Quem não vê a cor nem
+o tracejado continua precisando da informação.</p>
+
+<p>Combinações úteis, todas de duas classes: <code>border-2 border-dashed</code> é o cupom e o
+canhoto de comanda; <code>border border-dotted</code> é a área de upload; <code>border-4
+border-double</code> é o selo de "feito à mão" que a Ana usa no cardápio; <code>border-2
+border-dashed border-amber-400</code> é o aviso de "últimas unidades". Repare que a espessura vem
+sempre antes do estilo na nossa escrita, mas isso é hábito: a ordem no HTML não muda nada. O que muda
+o resultado é a espessura ser suficiente para o estilo aparecer — <code>border-double</code> em 1 px
+vira uma linha só, e <code>border-dotted</code> em 1 px tem pontinhos que quase não se distinguem.</p>
+
+<h2>7. O que a borda faz com o tamanho da caixa</h2>
+
+<p>Aqui está o "pulo" que a Ana viu. O Tailwind usa <code>box-sizing: border-box</code> em tudo, o que
+significa que largura e altura incluem padding e borda. Consequência direta: quando você acrescenta
+uma borda de 2 px, a caixa continua com os mesmos 200 px de fora, mas o espaço útil de dentro diminui
+2 px de cada lado. O texto se reorganiza, uma linha a mais aparece, e o cartão parece que "cresceu"
+mesmo sem ter crescido.</p>
+
+<p>A pior versão disso é no <em>hover</em>: o cartão não tem borda em repouso e ganha
+<code>border-2</code> quando o mouse passa. O conteúdo anda 2 px de cada lado. Em um cartão sozinho,
+quase imperceptível; em uma grade de doze cartões, o layout inteiro treme. A solução é a borda
+fantasma — a mesma espessura desde o começo, transparente, trocando só a cor no evento:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="border-2 border-transparent hover:border-amber-400 p-4"&gt;Pão francês&lt;/div&gt;</pre>
+
+<p>Agora a caixa reserva 2 px de borda sempre. No hover, só a cor muda, e nada se mexe. Esse truque é
+metade do motivo pelo qual <code>border-transparent</code> existe. A outra metade é o caso do botão
+que tem borda em um estado e não no outro — mesmo problema, mesma cura.</p>
+
+<p>Existe uma alternativa que não ocupa espaço nenhum: o <code>outline</code> e o
+<code>ring</code> são desenhados por fora da caixa e não empurram nada. Eles têm aulas próprias mais
+adiante, e a regra de bolso é: borda é parte do componente (ocupa espaço, entra no cálculo de
+largura); anel e contorno são marcação (não ocupa, mas também não segura layout).</p>
+
+<h2>8. Borda e canto arredondado</h2>
+
+<p>Borda com canto arredondado funciona sozinha: o navegador desenha a linha acompanhando a curva.
+Você não escreve nada a mais, e é por isso que <code>border rounded-lg</code> já parece um componente
+de verdade. O que não funciona é a combinação de canto arredondado com borda de um lado só: uma linha
+em cima de um cartão com raio desenha reta e deixa os cantos de cima sem linha nenhuma.</p>
+
+<p>Quando o desenho pede as duas coisas, a saída é arredondar o mesmo lado que tem a linha. Um
+cabeçalho com <code>border-b</code> dentro de um cartão <code>rounded-lg</code> fica coerente com
+<code>rounded-t-lg</code> nele. E se o objetivo é uma tarja colorida em cima, o caminho mais simples
+nem é borda: é um filho com fundo e altura fixa. Borda de 4 px para imitar tarja é o tipo de gambiarra
+que funciona hoje e incomoda na semana que vem.</p>
+
+<p>Por último, um lembrete que vale para toda a aula: a borda é só a linha do elemento. Separar
+vizinhos é outro assunto, com classes próprias — duas caixas coladas precisam de uma decisão sobre
+quem desenha a linha do meio, e essa decisão tem uma aula inteira dedicada, a de divisores.</p>
+
+<p>Em grade, a borda pede um cuidado: com <code>gap-4</code> entre as
+células e <code>border</code> em todas, o desenho vira uma malha de quadrados soltos. Se o objetivo é
+uma tabela visual, sem espaço entre as células, o caminho é <code>gap-0</code> e uma decisão sobre as
+bordas — o mesmo problema da linha dupla, agora em duas direções. Quem está começando costuma tentar
+resolver com <code>-m-px</code> e números negativos; funciona, mas é o tipo de ajuste que ninguém
+entende seis meses depois.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: a linha dupla entre dois cartões</h3>
+<p>A Ana quis fechar cada item da lista de pães e pôs <code>border</code> em todos. Entre um item e o
+seguinte, a borda de baixo do primeiro encostou na borda de cima do segundo: duas linhas de 1 px sem
+vão nenhum, que o olho lê como uma linha grossa e borrada. Nas pontas da lista, sobraram duas linhas
+que não separam nada. Duas saídas: usar borda só de um lado, sempre o mesmo, ou deixar o container
+desenhar os divisores — que é o assunto da aula de divisores. O erro não é de Tailwind, é de
+combinatória: com doze itens, alguém precisa decidir quem desenha a linha do meio.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: o campo que muda de tamanho ao ser selecionado</h3>
+<p>No formulário de encomenda, o campo tinha <code>border</code> em repouso e ganhava
+<code>border-2</code> no foco. Ao clicar, o texto dentro andava 1 px e o rótulo parecia tremer. A
+correção foi nascer com <code>border-2</code> e trocar só a cor no foco — de cinza para âmbar. Duas
+linhas de classe, zero tremor. Sempre que um estado muda a espessura de uma borda, o layout paga a
+conta.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: a borda colorida que ninguém vê</h3>
+<p>Ela aplicou <code>border-amber-100</code> em um cartão com fundo âmbar claro. A borda existe,
+tecnicamente, e some porque o tom é o mesmo do fundo. Não é erro de código, é erro de contraste: a
+linha precisa de pelo menos um degrau de diferença para o olho registrá-la. Em fundo âmbar 100, use
+borda 200 ou 300. E se a intenção era marcar presença, talvez a borda não seja a ferramenta: uma
+sombra suave ou um fundo diferente resolvem melhor.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. Por que <code>border</code> sozinho já desenha uma
+linha, sem precisar de <code>border-solid</code>?</p>
+<label><input type="radio" name="b1"> porque o navegador escolhe o estilo sozinho quando há espessura</label>
+<label><input type="radio" name="b1"> porque a base do Tailwind já define o estilo como sólido</label>
+<label><input type="radio" name="b1"> porque <code>border</code> significa 1 px sólido em qualquer CSS</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. A borda saiu na mesma cor do texto, sem você pedir.
+Por quê?</p>
+<label><input type="radio" name="b2"> porque o Tailwind copia a cor do texto por padrão em toda borda</label>
+<label><input type="radio" name="b2"> porque faltou <code>border-solid</code> no elemento</label>
+<label><input type="radio" name="b2"> porque a cor padrão da borda é <code>currentcolor</code>, que é a cor do texto</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. O que a borda faz com o tamanho da caixa?</p>
+<label><input type="radio" name="b3"> nada: ela é desenhada por fora e não ocupa espaço</label>
+<label><input type="radio" name="b3"> ela come espaço de dentro da caixa, porque a largura inclui a borda</label>
+<label><input type="radio" name="b3"> ela aumenta a largura total na mesma medida da espessura</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o cartão do pão de queijo</h2>
+<p>Deixe o cartão com borda âmbar de 2 px e respiro interno. Depois responda: qual é a classe que dá
+essa espessura?</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="border-2" placeholder="..."> border-amber-300 p-4"&gt;Pão de queijo · R$ 1,50&lt;/div&gt;</div>
+<p class="ex-dica">Dica: a classe sem número vale 1 px. O degrau seguinte é o do pedido. Se você
+escrever só <code>border</code>, o cartão fica com uma linha fininha — funciona, mas não é o pedido.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Borda no Tailwind é uma classe de espessura (<code>border</code>, <code>border-2</code>,
+<code>border-4</code>), uma de cor (<code>border-amber-300</code>) e, quando o traço não é cheio, uma
+de estilo (<code>border-dashed</code>). O estilo já nasce sólido na base do Tailwind, então
+<code>border</code> sozinho resolve. A cor, quando você não diz nada, vem de
+<code>currentcolor</code> — motivos de sobra para declarar a cor sempre que a linha for importante.</p>
+
+<p>Para desenhar em um lado só, entra a letra do lado depois da palavra: <code>border-t</code>,
+<code>border-b</code>, <code>border-x</code>, <code>border-s</code>. E lembre que a espessura entra no
+cálculo do tamanho: para o layout não tremer quando a borda aparece, nasça com
+<code>border-transparent</code> e troque apenas a cor. Quando o desenho pede contorno que não ocupe
+espaço, a resposta é anel ou contorno, não borda.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li><code>border</code> = 1 px; <code>border-2</code> = 2; <code>border-4</code> = 4; <code>border-8</code> = 8.</li>
+<li>O estilo já vem <code>solid</code>; só troque quando quiser tracejado, pontilhado ou duplo.</li>
+<li>Sem classe de cor, a borda usa <code>currentcolor</code> — a cor do texto.</li>
+<li><code>border-amber-400/40</code> deixa a linha translúcida sem trocar o tom.</li>
+<li>Um lado: <code>border-t</code>, <code>-r</code>, <code>-b</code>, <code>-l</code>, e
+<code>-x</code>/<code>-y</code> para os pares; <code>s</code> e <code>e</code> para começo e fim.</li>
+<li>A espessura vem depois do lado: <code>border-t-2</code>, <code>border-b-4</code>.</li>
+<li>A borda ocupa espaço de dentro da caixa: aparece e o conteúdo anda.</li>
+<li><code>border-transparent</code> no estado de repouso evita o pulo no hover.</li>
+<li>Canto arredondado com borda completa fica bem; borda de um lado pede canto reto naquele lado.</li>
+<li>Duas bordas encostadas viram linha dupla: decida quem desenha a linha do meio.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
