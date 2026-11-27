@@ -1,194 +1,198 @@
 /* =========================================================
-   Guia Nginx — navegação e componentes
+   Guia Tailwind — navegação e componentes
    NIVEIS é a única fonte do menu lateral, do selo de nível e
    dos botões Anterior/Próximo. Para adicionar uma página,
    inclua-a aqui.
    ========================================================= */
 var NIVEIS = [
-  { id: 'n1', nome: 'Nível 1 · Fundamentos', curto: 'Iniciante', desc: 'Do zero: o que é um servidor web, o primeiro site no ar, sintaxe do config e virtual hosts', grupos: [
+  { id: 'n1', nome: 'Nível 1 · Fundamentos', curto: 'Iniciante', desc: 'Do zero: o que é o Tailwind, a primeira classe, espaçamento, cor, tipografia, flex, grid e o jeito responsivo', grupos: [
     { grupo: 'Começando', itens: [
       ['index.html', "Início"],
-      ['o-que-e-nginx.html', "O que é Nginx"],
+      ['o-que-e-tailwind.html', "O que é Tailwind"],
+      ['como-funciona.html', "Como Ele Funciona"],
+      ['primeira-classe.html', "A Primeira Classe"],
+      ['classes-utilitarias.html', "Classes Utilitárias"],
+      ['anatomia-de-uma-classe.html', "Anatomia de uma Classe"],
       ['instalando.html', "Instalando"],
-      ['primeiro-site.html', "O Primeiro Site"],
-      ['a-pasta-do-site.html', "A Pasta do Site"],
-      ['o-arquivo-de-config.html', "O Arquivo de Configuração"],
-      ['nginx-t.html', "O Teste do Config"],
-      ['recarregar.html', "Recarregar Sem Cair"],
+      ['seu-primeiro-cartao.html', "Seu Primeiro Cartão"],
     ] },
-    { grupo: 'Sintaxe', itens: [
-      ['sintaxe-basica.html', "Sintaxe Básica"],
-      ['comentarios.html', "Comentários"],
-      ['blocos-e-contextos.html', "Blocos e Contextos"],
-      ['include.html', "O include"],
-      ['variaveis.html', "Variáveis"],
-      ['aspas-e-espacos.html', "Aspas e Espaços"],
-      ['unidades.html', "Unidades e Tamanhos"],
+    { grupo: 'Espaçamento e Tamanho', itens: [
+      ['p-e-m.html', "Padding e Margin"],
+      ['px-py.html', "Os Eixos px e py"],
+      ['space-y.html', "O space-y"],
+      ['m-auto.html', "Centralizar com m-auto"],
+      ['w-e-h.html', "Largura e Altura"],
+      ['tamanhos-relativos.html', "Tamanhos Relativos"],
+      ['min-e-max.html', "Mínimos e Máximos"],
+      ['aspect-ratio.html', "Proporção com aspect"],
     ] },
-    { grupo: 'Servir Arquivos', itens: [
-      ['root.html', "O root"],
-      ['o-index.html', "O index"],
-      ['alias.html', "O alias"],
-      ['tipos-mime.html', "Tipos MIME"],
-      ['default-type.html', "default_type"],
-      ['charset.html', "O charset"],
-      ['location-prefixo.html', "Location por Prefixo"],
-      ['location-exato.html', "Location Exato"],
-      ['location-regex.html', "Location com Regex"],
-      ['location-caret.html', "O ^~ e a Ordem"],
+    { grupo: 'Cores e Tipografia', itens: [
+      ['cores.html', "As Cores do Tailwind"],
+      ['cores-da-marca.html', "Cores da Sua Marca"],
+      ['tamanho-do-texto.html', "Tamanho do Texto"],
+      ['peso-do-texto.html', "Peso e Estilo"],
+      ['entrelinha.html', "Entrelinha e Espaçamento"],
+      ['alinhamento-do-texto.html', "Alinhamento"],
+      ['listas-e-marcadores.html', "Listas e Marcadores"],
+      ['quebrar-linhas.html', "Quebrar e Cortar Texto"],
     ] },
-    { grupo: 'Pedido e Resposta', itens: [
-      ['pedido-http.html', "O Pedido HTTP"],
-      ['cabecalhos-resposta.html', "Cabeçalhos da Resposta"],
-      ['codigos-status.html', "Códigos de Status"],
-      ['erro-404.html', "O 404"],
-      ['error-page.html', "error_page"],
-      ['return.html', "O return"],
-      ['try-files.html', "try_files"],
-      ['uri-e-request-uri.html', "$uri e $request_uri"],
-      ['query-string.html', "Query String"],
-      ['cache-304.html', "O 304"],
+    { grupo: 'Layout: flex e grid', itens: [
+      ['flexbox.html', "Flexbox"],
+      ['direcao-e-quebra.html', "Direção e Quebra"],
+      ['alinhamento-flex.html', "Alinhamento no Flex"],
+      ['flex-grow.html', "flex-1 e Crescer"],
+      ['grid.html', "Grid"],
+      ['colunas-e-linhas.html', "Colunas e Linhas"],
+      ['gap.html', "O gap"],
+      ['posicionamento.html', "Posicionamento"],
+      ['camadas-z.html', "Camadas com z"],
+      ['container.html', "O container"],
     ] },
-    { grupo: 'Sites no Mesmo Servidor', itens: [
-      ['listen.html', "O listen"],
-      ['server-name.html', "server_name"],
-      ['dois-sites.html', "Dois Sites"],
-      ['default-server.html', "default_server"],
-      ['catch-all.html', "O Site Pegadinha"],
-      ['hosts-local.html', "O /etc/hosts"],
-      ['curl-host.html', "Testar com curl"],
-      ['server-name-curinga.html', "Curinga em server_name"],
-      ['server-name-regex.html', "Regex em server_name"],
+    { grupo: 'Estados e Responsivo', itens: [
+      ['hover.html', "O hover"],
+      ['focus.html', "O focus"],
+      ['active-e-disabled.html', "active e disabled"],
+      ['primeiro-e-ultimo.html', "first e last"],
+      ['odd-even.html', "odd e even"],
+      ['group-hover.html', "group-hover"],
+      ['peer.html', "O peer"],
+      ['breakpoints.html', "Os Breakpoints"],
+      ['mobile-first.html', "Mobile First"],
+      ['esconder-mostrar.html', "Esconder e Mostrar"],
     ] },
   ] },
-  { id: 'n2', nome: 'Nível 2 · Proxy, HTTPS e Desempenho', curto: 'Intermediário', desc: 'Proxy reverso, upstream, certificados, cache, compressão e segurança', grupos: [
-    { grupo: 'Proxy Reverso', itens: [
-      ['proxy-reverso.html', "O que é Proxy Reverso"],
-      ['proxy-pass.html', "proxy_pass"],
-      ['proxy-set-header.html', "proxy_set_header"],
-      ['x-forwarded-for.html', "X-Forwarded-For"],
-      ['x-forwarded-proto.html', "X-Forwarded-Proto"],
-      ['proxy-http-version.html', "proxy_http_version"],
-      ['websocket.html', "WebSocket"],
-      ['timeouts-proxy.html', "Os Timeouts"],
-      ['erros-502-504.html', "502 e 504"],
-      ['proxy-redirect.html', "proxy_redirect"],
+
+  { id: 'n2', nome: 'Nível 2 · Componentes e Efeitos', curto: 'Intermediário', desc: 'Bordas, sombras, botões, cards, formulários, layouts prontos, tema escuro e animações', grupos: [
+    { grupo: 'Bordas e Sombras', itens: [
+      ['arredondamento.html', "Arredondamento"],
+      ['bordas.html', "Bordas"],
+      ['divisores.html', "Divisores"],
+      ['sombras.html', "Sombras"],
+      ['anel-e-foco.html', "O ring de Foco"],
+      ['outline.html', "Outline"],
+      ['opacidade.html', "Opacidade"],
+      ['filtros.html', "Filtros"],
     ] },
-    { grupo: 'Upstream e Balanceamento', itens: [
-      ['upstream-bloco.html', "O Bloco upstream"],
-      ['varios-servidores.html', "Vários Servidores"],
-      ['peso.html', "O Peso"],
-      ['least-conn.html', "least_conn"],
-      ['ip-hash.html', "ip_hash"],
-      ['backup-e-down.html', "backup e down"],
-      ['keepalive-upstream.html', "keepalive no upstream"],
-      ['falhas-e-retry.html', "Falhas e Nova Tentativa"],
+    { grupo: 'Componentes', itens: [
+      ['botoes.html', "Botões"],
+      ['badges.html', "Etiquetas e Badges"],
+      ['cards.html', "Cards"],
+      ['alertas.html', "Alertas"],
+      ['campos-de-formulario.html', "Campos de Formulário"],
+      ['rotulos-e-ajuda.html', "Rótulos e Texto de Ajuda"],
+      ['tabelas.html', "Tabelas"],
+      ['listas.html', "Listas de Itens"],
+      ['barra-de-navegacao.html', "Barra de Navegação"],
+      ['abas.html', "Abas"],
+      ['modal.html', "Modal"],
+      ['dropdown.html', "Menu Suspenso"],
     ] },
-    { grupo: 'HTTPS', itens: [
-      ['o-que-e-tls.html', "O que é TLS"],
-      ['certificado.html', "O Certificado"],
-      ['lets-encrypt.html', "Let's Encrypt"],
-      ['ssl-certificate.html', "ssl_certificate"],
-      ['ssl-protocolos.html', "Protocolos e Cifras"],
-      ['redirect-https.html', "Redirecionar para HTTPS"],
-      ['hsts.html', "HSTS"],
-      ['ocsp-stapling.html', "OCSP Stapling"],
-      ['http2.html', "HTTP/2"],
-      ['renovacao.html', "Renovação"],
+    { grupo: 'Layouts Prontos', itens: [
+      ['layout-sidebar.html', "Página com Sidebar"],
+      ['layout-dashboard.html', "Dashboard"],
+      ['layout-landing.html', "Landing Page"],
+      ['layout-precos.html', "Tabela de Preços"],
+      ['layout-login.html', "Tela de Login"],
+      ['layout-blog.html', "Página de Blog"],
+      ['layout-galeria.html', "Galeria"],
+      ['layout-rodape.html', "Rodapé"],
     ] },
-    { grupo: 'Cache e Compressão', itens: [
-      ['gzip.html', "O gzip"],
-      ['gzip-types.html', "gzip_types"],
-      ['gzip-min-length.html', "gzip_min_length"],
-      ['gzip-static.html', "gzip_static"],
-      ['expires.html', "O expires"],
-      ['cache-control.html', "Cache-Control"],
-      ['proxy-cache.html', "proxy_cache"],
-      ['proxy-cache-valid.html', "proxy_cache_valid"],
+    { grupo: 'Tema Escuro', itens: [
+      ['dark-mode.html', "O dark:"],
+      ['dark-automatico.html', "Escuro Automático"],
+      ['variaveis-de-tema.html', "Variáveis de Tema"],
+      ['cores-semanticas.html', "Cores Semânticas"],
+      ['contraste.html', "Contraste e Leitura"],
+      ['tema-por-classe.html', "Tema por Classe"],
+      ['componentes-no-escuro.html', "Componentes no Escuro"],
+      ['imagens-no-escuro.html', "Imagens no Escuro"],
     ] },
-    { grupo: 'Segurança e Acesso', itens: [
-      ['allow-deny.html', "allow e deny"],
-      ['auth-basic.html', "auth_basic"],
-      ['htpasswd.html', "O htpasswd"],
-      ['internal.html', "O internal"],
-      ['client-max-body-size.html', "client_max_body_size"],
-      ['limit-req.html', "limit_req"],
-      ['limit-conn.html', "limit_conn"],
-      ['esconder-versao.html', "Esconder a Versão"],
-      ['cabecalhos-de-seguranca.html', "Cabeçalhos de Segurança"],
-      ['arquivos-ocultos.html', "Arquivos que Ninguém Vê"],
-      ['log-de-acesso.html', "O Log de Acesso"],
-      ['bloqueio-por-metodo.html', "Bloquear por Método"],
-    ] },
-  ] },
-  { id: 'n3', nome: 'Nível 3 · Produção', curto: 'Avançado', desc: 'Logs, desempenho, deploy e os casos que aparecem no trabalho de verdade', grupos: [
-    { grupo: 'Logs e Diagnóstico', itens: [
-      ['formatos-de-log.html', "Formatos de Log"],
-      ['log-format.html', "log_format"],
-      ['access-log.html', "access_log"],
-      ['error-log.html', "error_log"],
-      ['ler-com-grep.html', "Ler com grep e awk"],
-      ['logrotate.html', "O logrotate"],
-      ['depurar-502.html', "Depurar um 502"],
-      ['depurar-504.html', "Depurar um 504"],
-    ] },
-    { grupo: 'Desempenho', itens: [
-      ['worker-processes.html', "worker_processes"],
-      ['worker-connections.html', "worker_connections"],
-      ['sendfile.html', "sendfile"],
-      ['keepalive.html', "keepalive"],
-      ['buffers.html', "Buffers"],
-      ['open-file-cache.html', "open_file_cache"],
-      ['brotli-e-gzip.html', "Brotli e gzip"],
-      ['medir-carga.html', "Medir Carga"],
-    ] },
-    { grupo: 'Deploy', itens: [
-      ['systemd.html', "O Serviço do systemd"],
-      ['sites-enabled.html', "sites-enabled"],
-      ['app-node.html', "App Node Atrás do Nginx"],
-      ['app-python.html', "App Python Atrás do Nginx"],
-      ['reload-sem-cair.html', "Reload Sem Cair"],
-      ['rollback.html', "Voltar Atrás"],
-      ['docker-nginx.html', "Nginx no Docker"],
-      ['checklist-producao.html', "Checklist de Produção"],
-    ] },
-    { grupo: 'Casos do Dia a Dia', itens: [
-      ['spa.html', "Aplicação de Página Única"],
-      ['php-fastcgi.html', "PHP com fastcgi"],
-      ['cors.html', "CORS"],
-      ['subdominio.html', "Subdomínio"],
-      ['redirect-dominio.html', "Trocar de Domínio"],
-      ['manutencao.html', "Modo Manutenção"],
+    { grupo: 'Animações e Interação', itens: [
+      ['transicoes.html', "Transições"],
+      ['duracao-e-espera.html', "Duração e Espera"],
+      ['transformacoes.html', "Transformações"],
+      ['escala-e-rotacao.html', "Escala e Rotação"],
+      ['translate.html', "O translate"],
+      ['animacoes-prontas.html', "Animações Prontas"],
+      ['keyframes-proprios.html', "Keyframes Próprios"],
+      ['hover-cartao.html', "Efeito no Cartão"],
+      ['carregando.html', "Estado de Carregando"],
+      ['scroll-suave.html', "Rolagem Suave"],
+      ['overflow.html', "Overflow"],
+      ['cursor-e-selecao.html', "Cursor e Seleção"],
     ] },
   ] },
-  { id: 'pj', nome: 'Projetos', curto: 'Prática', desc: 'Dez projetos completos, do site parado ao servidor de uma empresa pequena', grupos: [
+
+  { id: 'n3', nome: 'Nível 3 · Tailwind de Verdade', curto: 'Avançado', desc: 'Instalar com npm, entender o CSS gerado, configurar com @theme e levar para a produção', grupos: [
+    { grupo: 'Instalação e Build', itens: [
+      ['instalando-com-npm.html', "Instalando com npm"],
+      ['tailwind-cli.html', "A CLI do Tailwind"],
+      ['o-css-de-entrada.html', "O CSS de Entrada"],
+      ['o-css-gerado.html', "O CSS Gerado"],
+      ['build-de-producao.html', "Build de Produção"],
+      ['watch.html', "O Modo watch"],
+      ['vite.html', "Com Vite"],
+      ['sem-build.html', "Sem Build"],
+    ] },
+    { grupo: '@theme e Configuração', itens: [
+      ['arroba-theme.html', "O @theme"],
+      ['cores-proprias.html', "Cores Próprias"],
+      ['fontes-proprias.html', "Fontes Próprias"],
+      ['espacamento-proprio.html', "Espaçamento Próprio"],
+      ['breakpoints-proprios.html', "Breakpoints Próprios"],
+      ['variaveis-css.html', "Variáveis CSS"],
+      ['custom-variant.html', "Custom Variants"],
+      ['plugins.html', "Plugins"],
+    ] },
+    { grupo: 'Integração e Produção', itens: [
+      ['classes-dinamicas.html', "Classes Dinâmicas"],
+      ['estilos-de-base.html', "Estilos de Base"],
+      ['estilos-de-componente.html', "Estilos de Componente"],
+      ['otimizacao.html', "Otimização"],
+      ['acessibilidade.html', "Acessibilidade"],
+      ['depuracao-de-css.html', "Depurar o CSS"],
+      ['imprimindo.html', "Estilo de Impressão"],
+      ['migrando-de-css.html', "Migrando de CSS Antigo"],
+    ] },
+    { grupo: 'Casos Reais', itens: [
+      ['caso-formulario.html', "Formulário de Contato"],
+      ['caso-tabela.html', "Tabela de Dados"],
+      ['caso-busca.html', "Campo de Busca"],
+      ['caso-vazio.html', "Estado Vazio"],
+      ['caso-erro.html', "Página de Erro"],
+      ['caso-checkout.html', "Tela de Checkout"],
+    ] },
+  ] },
+
+  { id: 'pj', nome: 'Projetos', curto: 'Projetos', desc: 'Dez páginas inteiras, do primeiro esboço ao acabamento, usando só o que os níveis 1 e 2 ensinaram', grupos: [
     { grupo: 'Projetos', itens: [
-      ['projeto-site-estatico.html', "Projeto: Site Estático"],
-      ['projeto-dois-dominios.html', "Projeto: Dois Domínios"],
-      ['projeto-proxy-api.html', "Projeto: Proxy de API"],
-      ['projeto-https.html', "Projeto: HTTPS Completo"],
-      ['projeto-spa.html', "Projeto: SPA"],
-      ['projeto-wordpress.html', "Projeto: WordPress"],
-      ['projeto-balanceamento.html', "Projeto: Balanceamento"],
-      ['projeto-cache-imagens.html', "Projeto: Cache de Imagens"],
-      ['projeto-rate-limit.html', "Projeto: Rate Limit"],
-      ['projeto-servidor-completo.html', "Projeto: Servidor Completo"],
+      ['projeto-cartao-de-visita.html', "Cartão de Visita"],
+      ['projeto-pagina-de-receita.html', "Página de Receita"],
+      ['projeto-landing.html', "Landing Page"],
+      ['projeto-dashboard.html', "Painel de Controle"],
+      ['projeto-blog.html', "Blog"],
+      ['projeto-loja.html', "Loja"],
+      ['projeto-login.html', "Login"],
+      ['projeto-portfolio.html', "Portfólio"],
+      ['projeto-documentacao.html', "Documentação"],
+      ['projeto-tema-escuro.html', "Tema Escuro"],
     ] },
   ] },
-  { id: 'ref', nome: 'Referência', curto: 'Consulta', desc: 'Tabelas para o dia a dia: diretivas, variáveis, status, erros e receitas', grupos: [
-    { grupo: 'Referência', itens: [
-      ['ref-glossario.html', "Glossário"],
-      ['ref-sintaxe.html', "Sintaxe do Config"],
-      ['ref-diretivas.html', "Diretivas Essenciais"],
-      ['ref-variaveis.html', "Variáveis"],
-      ['ref-status.html', "Códigos de Status"],
-      ['ref-erros-config.html', "Erros do nginx -t"],
+
+  { id: 'ref', nome: 'Referência', curto: 'Referência', desc: 'Consultas rápidas: escala de espaçamento, paleta, tipografia, flex, grid, estados e os erros mais comuns', grupos: [
+    { grupo: 'Consulta', itens: [
+      ['ref-espacamento.html', "Escala de Espaçamento"],
+      ['ref-cores.html', "Paleta de Cores"],
+      ['ref-tipografia.html', "Tipografia"],
+      ['ref-flex.html', "Flexbox"],
+      ['ref-grid.html', "Grid"],
+      ['ref-bordas-e-sombras.html', "Bordas e Sombras"],
+      ['ref-estados.html', "Estados e Variantes"],
+      ['ref-responsivo.html', "Responsivo"],
+      ['ref-animacoes.html', "Animações"],
+      ['ref-vs-css.html', "Tailwind x CSS"],
+      ['ref-comandos.html', "Comandos e build"],
       ['ref-erros-comuns.html', "Erros Comuns"],
-      ['ref-receitas.html', "Receitas Prontas"],
-      ['ref-comandos.html', "Comandos"],
-      ['ref-regex.html', "Expressões Regulares"],
-      ['ref-mime.html', "Tipos MIME"],
-      ['ref-exercicios.html', "Exercícios"],
     ] },
   ] },
 ];
@@ -228,7 +232,7 @@ var NIVEIS = [
   }).join("");
   var header = el("header", { "class": "topbar" },
     '<button class="icon-btn" id="menu-btn" aria-label="Abrir menu" aria-expanded="false">&#9776;</button>' +
-    '<a class="brand" href="index.html"><span class="brand-mark">N</span>Guia Nginx</a>' +
+    '<a class="brand" href="index.html"><span class="brand-mark">T</span>Guia Tailwind</a>' +
     '<nav class="top-links" aria-label="Níveis">' + links + "</nav>" +
     '<span class="spacer"></span>' +
     '<button class="icon-btn" id="theme-btn" aria-label="Alternar tema claro/escuro" title="Alternar tema"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg></button>');
@@ -311,7 +315,7 @@ var NIVEIS = [
   var content = document.querySelector(".content");
   if (content) {
     content.appendChild(el("footer", { "class": "site-footer" },
-      "Guia Nginx · As caixas rodam o motor do guia, conferido resposta por resposta contra o nginx 1.24 · Português, do zero."));
+      "Guia Tailwind · As caixas compilam o seu HTML com o Tailwind v4 de verdade · Português, do zero."));
   }
 
   /* ---------- Tema ---------- */
@@ -571,13 +575,13 @@ var NIVEIS = [
   var tries = document.querySelectorAll(".try, .trylogica");
   if (tries.length) {
     tries.forEach(function (t) {
-      if (!t.querySelector(".try-head")) t.insertBefore(el("p", { "class": "try-head" }, t.classList.contains("trylogica") ? "Experimente: edite o programa e clique em Rodar" : t.classList.contains("tryjshell") ? "Experimente no JShell" : t.classList.contains("tryscript") ? "Experimente: edite e rode o script" : "Experimente você mesmo"), t.firstChild);
+      if (!t.querySelector(".try-head")) t.insertBefore(el("p", { "class": "try-head" }, t.classList.contains("trylogica") ? "Experimente: edite o programa e clique em Rodar" : t.classList.contains("tryjshell") ? "Experimente no JShell" : t.classList.contains("tryscript") ? "Experimente: edite e rode o script" : t.classList.contains("trytailwind") ? "Experimente: edite o HTML e clique em Rodar" : "Experimente você mesmo"), t.firstChild);
     });
   }
   // o editor (assets/luasim.js): o Lua de verdade (lua.c oficial em WebAssembly), carregado no primeiro Rodar
   if (document.querySelector(".trylua")) body.appendChild(el("script", { src: "assets/luasim.js" }));
   // o interpretador do guia (assets/logicasim.js), carregado só quando a página tem a caixa
-  if (document.querySelector(".trynginx")) body.appendChild(el("script", { src: "assets/nginxsim.js" }));
+  if (document.querySelector(".trytailwind")) body.appendChild(el("script", { src: "assets/tailwindsim.js" }));
 
   /* ---------- Exercícios de completar ----------
      <div class="exercise"><div class="ex-code">ls <input data-answer="-a|-A"> ~</div></div> */

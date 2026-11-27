@@ -9,10 +9,10 @@
  *
  * Reprova (problema) quando:
  *   - o menu lateral não tem o número de links da NIVEIS (menu quebrado);
- *   - alguma caixa .trynginx não monta, ou o botão Rodar não desenha nada;
+ *   - alguma caixa .trytailwind não monta, ou o botão Rodar não desenha a prévia;
  *   - a página rola de lado a 375 px (o celular é o leitor mais comum);
  *   - aparece erro no console ou exceção na página;
- *   - o título da aba não termina em "| Guia Nginx".
+ *   - o título da aba não termina em "| Guia Tailwind".
  *
  * Sai com código 1 quando alguma página tem problema.
  */
@@ -98,10 +98,10 @@ async function testarPagina(pg, url, nomePag, esperado) {
     await dormir(120);
 
     const titulo = await pg.title();
-    if (!/\|\s*Guia Nginx\s*$/.test(titulo)) problemas.push("título da aba não termina em \"| Guia Nginx\": \"" + titulo + "\"");
+    if (!/\|\s*Guia Tailwind\s*$/.test(titulo)) problemas.push("título da aba não termina em \"| Guia Tailwind\": \"" + titulo + "\"");
 
     const info = await pg.evaluate(() => {
-      const caixas = document.querySelectorAll(".trynginx");
+      const caixas = document.querySelectorAll(".trytailwind");
       return {
         caixas: caixas.length,
         menu: document.querySelectorAll("#sidebar .nivel-lista a").length,
@@ -127,29 +127,31 @@ async function testarPagina(pg, url, nomePag, esperado) {
     let rodadas = 0, verificadas = 0, comMeta = 0;
     if (!rapido && info.caixas) {
       dentroDasCaixas = true;
-      // o motor (assets/nginx-engine.js) só carrega quando a página tem caixa de nginx
-      await pg.waitForFunction("window.__nginxPronto === true", { timeout: 30000 }).catch(() => {
-        problemas.push("o motor não carregou (window.__nginxPronto nunca ficou true)");
+      // o compilador (assets/tailwindsim.js + assets/tailwind-browser.js) só carrega com caixa na página
+      await pg.waitForFunction("window.__tailwindPronto === true", { timeout: 30000 }).catch(() => {
+        problemas.push("o motor não carregou (window.__tailwindPronto nunca ficou true)");
       });
-      comMeta = await pg.evaluate(() => document.querySelectorAll(".trynginx[data-goal]").length);
+      comMeta = await pg.evaluate(() => document.querySelectorAll(".trytailwind[data-goal]").length);
 
       const lerCaixa = (ix) => pg.evaluate((i) => {
-        const c = document.querySelectorAll(".trynginx")[i];
+        const c = document.querySelectorAll(".trytailwind")[i];
         if (!c) return null;
         const out = c.querySelector(".try-out");
         const st = c.querySelector(".try-status");
+        const ifr = c.querySelector(".try-vivo iframe");
         return {
           out: out ? out.innerText.trim() : "",
           altura: out ? Math.round(out.getBoundingClientRect().height) : 0,
           status: st ? st.innerText.trim() : "",
           falhou: !!(st && st.classList.contains("falhou")),
-          temPedido: !!c.querySelector(".try-pedido"),
-          temHost: !!c.querySelector(".try-host")
+          temIframe: !!ifr,
+          alturaIframe: ifr ? Math.round(ifr.getBoundingClientRect().height) : 0,
+          fonte: (() => { const f = c.querySelector("pre.html"); return f ? f.textContent.trim().length : 0; })()
         };
       }, ix);
 
       const clicar = (ix, seletor) => pg.evaluate(({ i, sel }) => {
-        const c = document.querySelectorAll(".trynginx")[i];
+        const c = document.querySelectorAll(".trytailwind")[i];
         const b = c && c.querySelector(sel);
         if (!b || b.hidden) return false;
         b.click();
@@ -169,17 +171,20 @@ async function testarPagina(pg, url, nomePag, esperado) {
       for (let i = 0; i < info.caixas; i++) {
         const c1 = await lerCaixa(i);
         if (!c1) { problemas.push("caixa " + (i + 1) + " sumiu do DOM"); continue; }
-        if (!c1.temPedido || !c1.temHost) problemas.push("caixa " + (i + 1) + ": faltam os campos de pedido/host");
+        if (!c1.fonte) problemas.push("caixa " + (i + 1) + ": o pre.html está vazio");
 
-        // 1) Rodar: a configuração inicial tem de produzir uma resposta (ou um erro de config) na tela
+        // 1) Rodar: o Tailwind compila o HTML e a prévia tem de aparecer com o CSS computado
         if (!await clicar(i, ".try-rodar")) { problemas.push("caixa " + (i + 1) + " sem botão Rodar"); continue; }
+        await esperar(i, "temIframe");
         const depoisDeRodar = await esperar(i, "out");
         rodadas++;
-        if (!depoisDeRodar || !depoisDeRodar.out) problemas.push("caixa " + (i + 1) + ": o Rodar não escreveu a resposta");
-        else if (depoisDeRodar.altura < 20) problemas.push("caixa " + (i + 1) + ": a saída ficou com " + depoisDeRodar.altura + " px de altura");
-        else if (!/^(HTTP\/|nginx:|erro de configura|\[emerg\])/i.test(depoisDeRodar.out.replace(/^\s+/, ""))) {
-          notas.push("caixa " + (i + 1) + ": saída fora do formato do curl -i (" + depoisDeRodar.out.replace(/\s+/g, " ").slice(0, 60) + ")");
+        if (!depoisDeRodar || !depoisDeRodar.out) problemas.push("caixa " + (i + 1) + ": o Rodar não escreveu o CSS computado do painel");
+        else if (depoisDeRodar.altura < 20) problemas.push("caixa " + (i + 1) + ": o painel ficou com " + depoisDeRodar.altura + " px de altura");
+        else if (!/^[a-z-]+: /m.test(depoisDeRodar.out) && depoisDeRodar.out.indexOf("{") === -1) {
+          notas.push("caixa " + (i + 1) + ": saída fora do formato esperado (" + depoisDeRodar.out.replace(/\s+/g, " ").slice(0, 60) + ")");
         }
+        if (!depoisDeRodar || !depoisDeRodar.temIframe) problemas.push("caixa " + (i + 1) + ": a prévia (iframe) não apareceu");
+        else if (depoisDeRodar.alturaIframe < 20) problemas.push("caixa " + (i + 1) + ": a prévia ficou com " + depoisDeRodar.alturaIframe + " px de altura");
 
         // 2) Ver solução + Verificar: prova que a missão é cumprível e que o conferidor responde
         const temSolucao = await clicar(i, ".try-solucao");
@@ -191,6 +196,7 @@ async function testarPagina(pg, url, nomePag, esperado) {
             const st = await esperar(i, "status");
             if (!st || !st.status) problemas.push("caixa " + (i + 1) + ": o Verificar não escreveu status");
             else if (st.falhou) problemas.push("caixa " + (i + 1) + ": a solução não passa na meta (" + st.status.replace(/\s+/g, " ").slice(0, 120) + ")");
+            else if (st.status.indexOf("isso") !== 0) problemas.push("caixa " + (i + 1) + ": o Verificar respondeu fora do padrão (" + st.status.slice(0, 80) + ")");
             else verificadas++;
           }
         }
@@ -198,12 +204,17 @@ async function testarPagina(pg, url, nomePag, esperado) {
         if (!await clicar(i, ".try-restaurar")) problemas.push("caixa " + (i + 1) + " sem botão Restaurar");
         else {
           const volta = await pg.evaluate((ix) => {
-            const c = document.querySelectorAll(".trynginx")[ix];
-            const s = c.querySelector("pre.script");
-            return { texto: s ? s.textContent.trim().slice(0, 40) : "", out: c.querySelector(".try-out").innerText.trim() };
+            const c = document.querySelectorAll(".trytailwind")[ix];
+            const f = c.querySelector("pre.html");
+            return {
+              texto: f ? f.textContent.trim().slice(0, 40) : "",
+              out: c.querySelector(".try-out").innerText.trim(),
+              iframe: !!c.querySelector(".try-vivo iframe")
+            };
           }, i);
-          if (!volta.texto) problemas.push("caixa " + (i + 1) + ": o Restaurar apagou o arquivo");
+          if (!volta.texto) problemas.push("caixa " + (i + 1) + ": o Restaurar apagou o HTML do editor");
           if (volta.out) problemas.push("caixa " + (i + 1) + ": o Restaurar deixou a saída antiga na tela");
+          if (volta.iframe) problemas.push("caixa " + (i + 1) + ": o Restaurar deixou a prévia na tela");
         }
       }
       dentroDasCaixas = false;
@@ -245,12 +256,7 @@ async function testarPagina(pg, url, nomePag, esperado) {
       await pg.evaluate(() => document.documentElement.removeAttribute("data-theme"));
     }
 
-    // a página pode pedir um erro de propósito: data-goal="erro:<trecho>"
-    const trechos = Array.from(new Set((await pg.evaluate(() => Array.from(document.querySelectorAll(".trynginx[data-goal]"))
-      .map((c) => c.getAttribute("data-goal").split(";;").map((p) => p.trim()).filter((p) => p.indexOf("erro:") === 0).map((p) => p.slice(5).trim()))
-      .flat().filter(Boolean)))));
-    const pretendido = (msg) => trechos.some((t) => msg.indexOf(t) !== -1);
-    erros.filter((e) => !pretendido(e)).slice(0, 6).forEach((e) => problemas.push(e));
+    erros.slice(0, 6).forEach((e) => problemas.push(e));
     notas.push("caixas=" + info.caixas + ", Rodar " + rodadas + ", Verificar " + verificadas + (comMeta ? "/" + comMeta : "") +
       ", menu=" + info.menu + "/" + esperado + ", 375 px " + (celular.rolagem > celular.janela + 1 ? "ROLANDO" : "ok"));
     return { problemas, notas, ms: Date.now() - t0 };

@@ -2,8 +2,8 @@
 /* provar-defeitos.js — prova que o testador REPROVA quando o guia tem defeito.
  *
  * Um testador que só diz "ok" não serve para nada. Este script pega a aula-modelo
- * (primeiro-site.html), injeta um defeito de cada vez numa cópia em tmp/defeitos/
- * e chama o testador de verdade. Se o testador NÃO reprovar, é o testador que está errado.
+ * (primeira-classe.html), injeta um defeito de cada vez numa cópia em tmp/defeitos/ e chama o
+ * testador de verdade. Se o testador NÃO reprovar, é o testador que está errado.
  *
  *   node tools/provar-defeitos.js            roda todos os defeitos
  *   node tools/provar-defeitos.js -v         mostra a saída do testador em cada caso
@@ -19,13 +19,21 @@ const cp = require("child_process");
 const N = require("./nucleo");
 
 const RAIZ = N.RAIZ;
-const MODELO = path.join(RAIZ, "primeiro-site.html");
+const MODELO = path.join(RAIZ, "primeira-classe.html");
 const PASTA = path.join(RAIZ, "tmp/defeitos");
 const verboso = process.argv.includes("-v") || process.argv.includes("--verboso");
 
-function semSimulado(html, de, para) {
-  if (html.indexOf(de) === -1) throw new Error("o defeito não casou com nada: " + de.slice(0, 60));
-  return html.split(de).join(para);
+const CAIXA = '<div class="trytailwind"';
+const PAGER = '<div class="pager"></div>';
+
+/* troca a meta de uma caixa, achando pelo começo do HTML dela */
+function comMeta(html, inicioDoHtml, novaMeta) {
+  const i = html.indexOf(inicioDoHtml);
+  if (i < 0) throw new Error("não achei o pre.html: " + inicioDoHtml.slice(0, 50));
+  const j = html.lastIndexOf("<div class=\"trytailwind\"", i);
+  const k = html.indexOf("data-goal=\"", j);
+  const fim = html.indexOf("\"", k + 11);
+  return html.slice(0, k) + 'data-goal="' + novaMeta + html.slice(fim);
 }
 
 const DEFEITOS = [
@@ -39,71 +47,73 @@ const DEFEITOS = [
     nome: "table.ref fora do .table-wrap",
     espera: /FORA de \.table-wrap/,
     html: (h) => h.replace('<div class="table-wrap">\n<table class="ref">', '<table class="ref">')
-                  .replace("</table>\n</div>", "</table>"),
+      .replace("</table>\n</div>", "</table>"),
     semSim: true
   },
   {
     nome: "sem <h2>Resumo</h2>",
     espera: /Resumo/,
-    html: (h) => h.replace("<h2>13. Resumo</h2>", "<h2>13. Fim</h2>"),
+    html: (h) => h.replace("<h2>11. Resumo</h2>", "<h2>11. Fim</h2>"),
     semSim: true
   },
   {
     nome: "meta fraca (inicial igual à solução)",
     espera: /INICIAL já cumpre a meta/,
     html: (h) => {
-      const m = h.match(/<pre class="script"[^>]*>([\s\S]*?)<\/pre>\s*<pre class="solucao"[^>]*>([\s\S]*?)<\/pre>/);
-      if (!m) throw new Error("não achei o par script/solucao");
+      const m = h.match(/<pre class="html"[^>]*>([\s\S]*?)<\/pre>\s*<pre class="out">[\s\S]*?<\/pre>\s*<pre class="solucao"[^>]*>([\s\S]*?)<\/pre>/);
+      if (!m) throw new Error("não achei o par html/solucao");
       return h.replace(m[0], m[0].replace(m[1], m[2]));
     }
   },
   {
     nome: "solução não cumpre a meta",
     espera: /SOLUÇÃO não cumpre/,
-    html: (h) => h.replace('data-goal="req:GET /precos.html;;status:200;;head:content-type=text/html"',
-                           'data-goal="req:GET /precos.html;;status:200;;head:content-type=text/plain"')
+    html: (h) => comMeta(h, '&lt;div id="alvo" class="p-1"&gt;',
+      "css:#alvo|padding=20px;;rule:padding: calc(var(--spacing) * 5)")
   },
   {
     nome: "passo de meta inventado",
     espera: /passo de meta desconhecido/,
-    html: (h) => h.replace('data-goal="req:GET /;;status:200;;outre:Preços"',
-                           'data-goal="req:GET /;;status:200;;console:log"')
+    html: (h) => comMeta(h, '&lt;div id="alvo" class="p-1"&gt;',
+      "css:#alvo|padding=16px;;console:log")
   },
   {
     nome: "menos de 3 caixas",
-    espera: /caixa\(s\) \.trynginx/,
+    espera: /caixa\(s\) \.trytailwind/,
     html: (h) => {
-      const i2 = h.indexOf('<div class="trynginx"', h.indexOf('<div class="trynginx"') + 10);
-      const i3 = h.indexOf('<div class="trynginx"', i2 + 10);
+      const i2 = h.indexOf(CAIXA, h.indexOf(CAIXA) + 10);
+      const i3 = h.indexOf(CAIXA, i2 + 10);
       if (i2 < 0 || i3 < 0) throw new Error("não achei as três caixas");
       return h.slice(0, i2) + h.slice(i3);
     },
     semSim: true
   },
   {
-    nome: "< sem escape dentro de pre.file",
+    nome: "< sem escape dentro de pre.html",
     espera: /sem escape dentro de/,
-    html: (h) => h.replace("root /var/www/html;", "root /var/www/html;<"),
+    html: (h) => h.replace('<pre class="html">&lt;div id="alvo" class="p-1"&gt;',
+      '<pre class="html"><div id="alvo" class="p-1">'),
     semSim: true
   },
   {
     nome: "link para página que não existe",
     espera: /NÃO existe no disco|não está na NIVEIS/,
-    html: (h) => h.replace('<h2>1. De onde vem a página que aparece</h2>',
-                           '<h2>1. De onde vem a página que aparece</h2>\n<p>Veja <a href="nao-existe-mesmo.html">como instalar</a>.</p>'),
+    html: (h) => h.replace("<h2>1. A cena: o pão encostado na borda</h2>",
+      '<h2>1. A cena: o pão encostado na borda</h2>\n<p>Veja <a href="nao-existe-mesmo.html">como instalar</a>.</p>'),
     semSim: true
   },
   {
     nome: "placeholder TODO",
     espera: /placeholder de rascunho/,
-    html: (h) => h.replace("<h2>1. De onde vem a página que aparece</h2>",
-                           "<h2>1. TODO De onde vem a página que aparece</h2>"),
+    html: (h) => h.replace("<h2>1. A cena: o pão encostado na borda</h2>",
+      "<h2>1. TODO A cena: o pão encostado na borda</h2>"),
     semSim: true
   },
   {
     nome: "dado da máquina real",
     espera: /dado da máquina real/,
-    html: (h) => h.replace("ana@notebook:~$ sudo nginx -t", "ana@notebook:/home/fulano/loja$ sudo nginx -t"),
+    html: (h) => h.replace("<h2>1. A cena: o pão encostado na borda</h2>",
+      "<h2>1. A cena: o pão encostado na borda</h2>\n<p>A pasta é /home/fulano/loja.</p>"),
     semSim: true
   },
   {
@@ -118,18 +128,18 @@ const DEFEITOS = [
     semSim: true
   },
   {
-    nome: "title sem | Guia Nginx",
-    espera: /\| Guia Nginx/,
-    html: (h) => h.replace(/\| Guia Nginx<\/title>/, "— Nginx</title>"),
+    nome: "title sem | Guia Tailwind",
+    espera: /\| Guia Tailwind/,
+    html: (h) => h.replace(/\| Guia Tailwind<\/title>/, "— Tailwind</title>"),
     semSim: true
   },
   {
     nome: "sem o segundo .pager",
     espera: /\.pager na página/,
     html: (h) => {
-      const i = h.lastIndexOf('<div class="pager"></div>');
+      const i = h.lastIndexOf(PAGER);
       if (i < 0) throw new Error("não achei os pagers");
-      return h.slice(0, i) + h.slice(i + '<div class="pager"></div>'.length);
+      return h.slice(0, i) + h.slice(i + PAGER.length);
     },
     semSim: true
   },
@@ -144,9 +154,8 @@ const DEFEITOS = [
     espera: /numerados/,
     aviso: true,
     html: (h) => {
-      const antes = h;
-      const novo = h.replace("<h2>2. Onde ficam as coisas no Ubuntu</h2>", "<h2>Onde ficam as coisas no Ubuntu</h2>");
-      if (novo === antes) throw new Error("não achei o h2 2");
+      const novo = h.replace("<h2>2. O que é uma classe no HTML</h2>", "<h2>O que é uma classe no HTML</h2>");
+      if (novo === h) throw new Error("não achei o h2 2");
       return novo;
     },
     semSim: true
@@ -172,7 +181,7 @@ function principal() {
   fs.mkdirSync(PASTA, { recursive: true });
 
   let passaram = 0;
-  console.log("provando " + DEFEITOS.length + " defeitos contra o testador (fonte: primeiro-site.html)\n");
+  console.log("provando " + DEFEITOS.length + " defeitos contra o testador (fonte: primeira-classe.html)\n");
 
   DEFEITOS.forEach((d, k) => {
     const nome = "d" + String(k + 1).padStart(2, "0") + "-" + d.nome.replace(/[^a-z0-9]+/gi, "-").toLowerCase().replace(/^-|-$/g, "");

@@ -962,128 +962,93 @@ figcaption { margin-top: 8px; font-size: .92rem; color: var(--muted); line-heigh
   .tp .ts-run > .ts-sp { display: none; }
 }
 
-/* ---------------- Guia MongoDB: editor .trymongosh (assets/mongoshsim.js) ---------------- */
-.trymongosh {
-  margin: 22px 0;
-  padding: 4px 18px 14px;
-  border: 2px dashed var(--accent);
-  border-radius: 10px;
-  min-width: 0;
-}
-.trymongosh .try-task { margin: 6px 0 10px; }
-.trymongosh .try-bar { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 8px; }
-.trymongosh .try-bar button {
-  font: inherit; font-size: .95rem; cursor: pointer;
-  padding: 6px 14px; border-radius: 6px; border: 1px solid var(--accent);
-  background: var(--accent); color: var(--accent-text); font-weight: 600;
-}
-.trymongosh .try-bar button.secondary { background: transparent; color: var(--accent); }
-.trymongosh .try-bar button:hover { filter: brightness(1.08); }
-.trymongosh pre.script, .trymongosh pre.solucao {
-  background: var(--out-bg); color: var(--out-text); border-radius: 8px;
-  padding: 12px 14px; overflow-x: auto; font: 14px/1.7 ui-monospace, SFMono-Regular, Menlo, monospace;
-  white-space: pre-wrap; overflow-wrap: anywhere;
-}
-.trymongosh pre.script { min-height: 54px; outline: none; border: 1px solid transparent; }
-.trymongosh pre.script:focus { border-color: var(--accent); }
-.trymongosh pre.solucao { display: none; margin-top: 8px; }
-.trymongosh .try-out {
-  background: #0b0f0c; color: #d7e6d9; border-radius: 8px; padding: 12px 14px;
-  font: 14px/1.7 ui-monospace, SFMono-Regular, Menlo, monospace;
-  white-space: pre-wrap; overflow-wrap: anywhere; max-height: 420px; overflow: auto;
-}
-.trymongosh .try-out .m-prompt { color: var(--accent); }
-.trymongosh .try-out .m-err { color: #ff9a8a; }
-.trymongosh .try-err { color: var(--bad); font: 13px/1.6 ui-monospace, monospace; margin-top: 6px; }
-.trymongosh .try-check.ok, .trymongosh .try-task.ok { outline: 2px solid var(--ok); }
-@media (max-width: 600px) { .trymongosh { padding: 4px 10px 12px; } }
-
 /* token longo (connection string, URL) dentro do exercício de completar */
 .ex-code { overflow-wrap: anywhere; }
 
-/* ---------------- Guia Svelte: editor .trysvelte (assets/sveltesim.js) ----------------
- * A caixa compila o componente com o compilador de verdade (assets/svelte-compiler.js),
- * monta com o runtime real (assets/svelte-motor.js) dentro de um iframe e mostra o HTML.
+/* ---------------- Guia Tailwind: a caixa .trytailwind (assets/tailwindsim.js) -------------
+ * A caixa compila o HTML do leitor com o Tailwind v4 de verdade (assets/tailwind-browser.js,
+ * a build oficial) dentro de um iframe e mostra o CSS computado no painel.
  */
-.trysvelte {
+.trytailwind {
   margin: 22px 0;
   padding: 4px 18px 14px;
   border: 2px dashed var(--accent);
   border-radius: 10px;
   min-width: 0;
 }
-.trysvelte .try-task { margin: 6px 0 10px; }
-.trysvelte .try-nome {
+.trytailwind .try-task { margin: 6px 0 10px; }
+.trytailwind .try-nome {
   margin: 6px 0 -4px;
   font: 12px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
   color: var(--muted);
   letter-spacing: .02em;
 }
-.trysvelte .try-bar { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 8px; align-items: center; }
-.trysvelte .try-bar button {
+.trytailwind .try-bar { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 8px; align-items: center; }
+.trytailwind .try-bar button {
   font: inherit; font-size: .95rem; cursor: pointer;
   padding: 6px 14px; border-radius: 6px; border: 1px solid var(--accent);
   background: var(--accent); color: var(--accent-text); font-weight: 600;
 }
-.trysvelte .try-bar button.secondary { background: transparent; color: var(--accent); }
-.trysvelte .try-bar button:hover { filter: brightness(1.08); }
-.trysvelte .try-bar button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.trysvelte .try-status { font-size: .92rem; overflow-wrap: anywhere; }
+.trytailwind .try-bar button.secondary { background: transparent; color: var(--accent); }
+.trytailwind .try-bar button:hover { filter: brightness(1.08); }
+.trytailwind .try-bar button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.trytailwind .try-status { font-size: .92rem; overflow-wrap: anywhere; margin: 8px 0 0; }
+.trytailwind .try-status.falhou { color: var(--bad); }
+.trytailwind .try-status.ok { color: var(--ok); }
+.trytailwind .try-largura { font-size: .85rem; color: var(--muted); margin-left: auto; }
 
-.trysvelte pre.script,
-.trysvelte pre.solucao {
+.trytailwind pre.html,
+.trytailwind pre.solucao {
   background: var(--out-bg); color: var(--out-text); border-radius: 8px;
   padding: 12px 14px; overflow-x: auto;
   font: 14px/1.7 ui-monospace, SFMono-Regular, Menlo, monospace;
   white-space: pre-wrap; overflow-wrap: anywhere;
   tab-size: 2;
 }
-.trysvelte pre.script { min-height: 54px; outline: none; border: 1px solid transparent; }
-.trysvelte pre.script:focus { border-color: var(--accent); }
-.trysvelte pre.script:empty::before {
-  content: "escreva aqui o seu componente…";
+.trytailwind pre.html { min-height: 54px; outline: none; border: 1px solid transparent; }
+.trytailwind pre.html:focus { border-color: var(--accent); }
+.trytailwind pre.html:empty::before {
+  content: "escreva aqui o seu HTML…";
   color: #9b9b9b;
 }
-.trysvelte pre.solucao { display: none; margin-top: 8px; }
+/* o pre.out do texto é o mesmo painel: o leitor vê o resultado antes de rodar */
+.trytailwind pre.out,
+.guia-saida {
+  background: #0b0f0c; color: #d7e6d9; border-radius: 8px; padding: 12px 14px;
+  font: 13px/1.65 ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  max-height: 320px; overflow: auto; margin: 8px 0 0;
+}
+.trytailwind pre.out .m-vazio { color: #8a9a8d; font-style: italic; }
+.trytailwind pre.solucao { display: none; margin-top: 8px; }
 
-/* o componente rodando de verdade */
-.trysvelte .try-vivo {
+/* a prévia rodando de verdade */
+.trytailwind .try-vivo {
   margin: 10px 0 6px;
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
   background: #fff;
 }
-html[data-theme="dark"] .trysvelte .try-vivo { background: #101014; }
-.trysvelte .try-vivo iframe {
+html[data-theme="dark"] .trytailwind .try-vivo { background: #101014; }
+.trytailwind .try-vivo iframe {
   display: block; width: 100%; border: 0; min-height: 90px; height: 90px;
   color-scheme: normal;
 }
-.trysvelte .try-vivo[hidden] { display: none; }
+.trytailwind .try-vivo[hidden] { display: none; }
 
-.trysvelte .try-out {
+.trytailwind .try-out {
   background: #0b0f0c; color: #d7e6d9; border-radius: 8px; padding: 12px 14px;
   font: 13px/1.65 ui-monospace, SFMono-Regular, Menlo, monospace;
   white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow: auto;
   min-height: 1.7em; margin: 8px 0 0;
 }
-.trysvelte .try-out .m-err { color: #ff9a8a; }
-.trysvelte .try-out .m-vazio { color: #8a9a8d; font-style: italic; }
-.trysvelte .try-out[hidden] { display: none; }
+.trytailwind .try-out .m-err { color: #ff9a8a; }
+.trytailwind .try-out .m-vazio { color: #8a9a8d; font-style: italic; }
+.trytailwind .try-out[hidden] { display: none; }
 
-/* ---------------- Guia Nginx: a caixa .trynginx usa as mesmas classes ---------------- */
-.trynginx pre.script:empty::before { content: "escreva aqui o nginx.conf…"; }
-.trynginx .try-bar label { font-size: .9rem; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
-.trynginx .try-bar input {
-  font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
-  padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border);
-  background: var(--bg); color: var(--text); min-width: 0; width: 13ch;
-}
-.trynginx .try-bar input.try-pedido { width: 18ch; }
-.trynginx .try-out.falhou { color: #ffb4a8; }
+.trytailwind .try-check.ok,
+.trytailwind .try-task.ok { outline: 2px solid var(--ok); }
+.trytailwind .try-check.falhou { outline: 2px solid var(--bad); }
 
-.trysvelte .try-check.ok,
-.trysvelte .try-task.ok { outline: 2px solid var(--ok); }
-.trysvelte .try-check.falhou { outline: 2px solid var(--bad); }
-
-@media (max-width: 600px) { .trysvelte { padding: 4px 10px 12px; } }
+@media (max-width: 600px) { .trytailwind { padding: 4px 10px 12px; } }

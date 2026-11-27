@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Primeira Classe | Guia Tailwind</title>
+<meta name="description" content="A primeira classe do Tailwind na prática: o que é uma classe no HTML, por que p-4 dá 16 px, como ler o CSS computado e o que fazer quando nada acontece.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script>(function(){try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+<div class="pager"></div>
+
+<h1>A Primeira <span class="hl">Classe</span></h1>
+<p class="intro">A Ana tem um cartão na tela e um problema bobo: o texto encosta na borda. Ela já sabe
+que existe um jeito de dar respiro, mas o CSS que ela viu por aí parece uma lista de regras com
+chaves e pontos e vírgulas, e ela não quer decorar nada disso agora. Nesta aula ela escreve a
+primeira classe do Tailwind — <code>p-4</code> — e descobre o que acontece por baixo: o navegador
+lê essa palavra, o Tailwind gera o CSS, e o espaço aparece. Sem instalar nada, sem arquivo de
+configuração, sem quebrar a cabeça.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é uma classe no HTML e onde ela mora (no atributo <code>class</code>).</li>
+  <li>O que <code>p-4</code> significa e por que ele vira 16 px.</li>
+  <li>Como ler o painel que mostra o CSS computado, sem decorar CSS.</li>
+  <li>A escala de espaço do Tailwind: 1, 2, 3, 4, 6, 8.</li>
+  <li>Como juntar duas ou três classes no mesmo elemento.</li>
+  <li>A diferença entre <code>class</code> e <code>style=""</code>, e quando cada um serve.</li>
+  <li>O que fazer quando a classe não faz nada: erro de digitação e classe que não existe.</li>
+</ul>
+</div>
+
+<h2>1. A cena: o pão encostado na borda</h2>
+
+<p>A Ana está montando a página de uma padaria. Ela escreveu o HTML mais simples do mundo: uma
+caixa e um texto dentro. Ficou assim:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="cartao"&gt;Pão quentinho&lt;/div&gt;</pre>
+
+<p>O navegador mostra a caixa colada no canto, e o texto colado na borda da caixa. Parece que falta
+ar. É sempre assim no começo: o navegador tem um jeito padrão de desenhar as coisas, e esse jeito
+não é bonito — é só o mais neutro possível, para não atrapalhar. Quem decide o desenho é você.</p>
+
+<p>Antes de qualquer coisa, vale entender o que aquela palavra <code>class</code> faz ali. Ela não é
+do Tailwind, é do HTML. Ela existe desde os anos 1990 e serve para dar um nome a um pedaço de
+conteúdo. Com um nome, você consegue dizer "tudo que se chama <code>cartao</code> recebe tal
+aparência". O Tailwind não inventou esse mecanismo — ele só entregou um catálogo enorme de nomes
+prontos.</p>
+
+<p>E é isso que muda o jogo para quem está começando: você não precisa inventar nome nenhum. Precisa
+escolher, no catálogo, a palavra que descreve o que quer. Quer espaço dentro? <code>p</code>, de
+<em>padding</em>. Quer fundo colorido? <code>bg</code>, de <em>background</em>. Quer texto maior?
+<code>text-lg</code>. As palavras são curtas, mas não são código secreto: são abreviações em
+inglês, e a gente vai traduzindo uma por uma.</p>
+
+<h2>2. O que é uma classe no HTML</h2>
+
+<p>Toda tag pode carregar um atributo chamado <code>class</code>. O valor é uma lista de nomes
+separados por espaço:</p>
+
+<pre class="file" data-file="index.html">&lt;div class="p-4 bg-amber-100"&gt;Pão quentinho&lt;/div&gt;</pre>
+
+<p>Aqui são dois nomes: <code>p-4</code> e <code>bg-amber-100</code>. Cada um será explicado em
+algum momento; por ora, guarde a mecânica: <strong>um elemento pode ter várias classes, e cada
+classe soma uma característica</strong>. É como uma etiqueta de características colada na caixa.
+Uma etiqueta diz "tem 16 px de respiro por dentro", a outra diz "tem fundo amarelo claro".</p>
+
+<p>Isso é diferente de outras linguagens que você talvez já tenha esbarrado. Não há cascata de
+herança para você controlar, não há arquivo separado para sincronizar: a etiqueta está ali, no
+mesmo lugar em que o conteúdo está. Quem lê o HTML entende a aparência sem abrir outro arquivo.
+Essa é a maior vantagem e também a maior reclamação — quando há muitas classes, a linha fica longa.
+A gente volta a esse assunto mais adiante; por enquanto, uma ou duas classes por elemento.</p>
+
+<dl class="anatomy">
+<dt>tag</dt>
+<dd>A peça do HTML: <code>&lt;div&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;button&gt;</code>.
+É o tipo da caixa.</dd>
+<dt>atributo</dt>
+<dd>Uma informação dentro da tag, no formato <code>nome="valor"</code>. <code>class</code> é um
+atributo; <code>id</code> também.</dd>
+<dt>classe</dt>
+<dd>Um nome que o CSS usa para achar o elemento. No Tailwind, cada classe é uma utilidade pronta —
+uma única característica visual.</dd>
+<dt>utilitária</dt>
+<dd>O nome que se dá a esse tipo de classe: ela faz uma coisa só, e faz bem. O oposto de uma classe
+"cartao" que junta dez coisas diferentes.</dd>
+</dl>
+
+<p>Uma última palavra sobre o <code>id</code>, que aparece nas caixas desta aula. O <code>id</code>
+é um nome único — só um elemento na página pode ter aquele nome. O Tailwind não usa
+<code>id</code> para nada; nós usamos só para dizer ao painel qual elemento ele deve descrever.
+Guarde: <code>id="alvo"</code> é a lupa do painel, não uma classe.</p>
+
+<h2>3. A primeira classe: p-4</h2>
+
+<p>Vamos ao respiro. A letra <code>p</code> vem de <em>padding</em>, o espaço entre o conteúdo e a
+borda de dentro da caixa. O número <code>4</code> é a posição na escala do Tailwind. Juntos,
+<code>p-4</code> quer dizer: 16 pixels de respiro em todos os lados.</p>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=16px;;rule:padding: calc(var(--spacing) * 4)">
+  <p class="try-task">O cartão está com <code>p-1</code>, que dá 4 px. Troque a classe para o respiro
+  de 16 px e clique em Rodar.</p>
+  <pre class="html">&lt;div id="alvo" class="p-1"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 4px
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>Repare no que o painel mostra depois de rodar: uma linha só, <code>padding: 4px</code> antes,
+<code>padding: 16px</code> depois. Não é o Tailwind falando bonito — é o navegador informando o
+valor que ele realmente aplicou. Toda a conferência do guia é feita assim, lendo o valor final, e
+não a beleza do código.</p>
+
+<p>Por que 4 vira 16 e não 4 pixels? Porque a escala do Tailwind não é em pixels crus: é um
+multiplicador. Cada passo vale 0,25 rem, e 1 rem é o tamanho de fonte padrão do navegador, que é
+16 px. Então <code>4 × 0,25 rem = 1 rem = 16 px</code>. O CSS gerado mostra isso na cara:</p>
+
+<pre class="term">.p-4 {
+  padding: calc(var(--spacing) * 4);
+}</pre>
+
+<p><code>--spacing</code> é uma variável que vale 0,25 rem. Ou seja: o Tailwind escreve a conta, e o
+navegador resolve. Se amanhã o tamanho de fonte base mudar, a proporção se mantém — é por isso que
+a escala é em <code>rem</code> e não em pixels fixos.</p>
+
+<h2>4. Lendo o que o navegador fez</h2>
+
+<p>Quem começa tende a olhar o código e adivinhar o resultado. O hábito que vale ouro é o contrário:
+mudar, rodar, ler o que o navegador respondeu. O painel das caixas faz isso por você, mas no seu
+projeto você faz à mão. O caminho é curto:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Lugar</th><th>O que abrir</th><th>O que olhar</th></tr>
+<tr><td>Chrome ou Edge</td><td>botão direito → <em>Inspecionar</em></td><td>aba <em>Computed</em>, seção <em>padding</em></td></tr>
+<tr><td>Firefox</td><td>botão direito → <em>Inspecionar</em></td><td>aba <em>Computed</em>, caixa do elemento</td></tr>
+<tr><td>Safari</td><td>menu <em>Desenvolvedor</em> → <em>Mostrar Web Inspector</em></td><td>aba <em>Computed</em></td></tr>
+<tr><td>Editor do guia</td><td>botão <em>Rodar</em> na caixa</td><td>a tabela logo abaixo da prévia</td></tr>
+</table>
+</div>
+
+<p>A aba <em>Computed</em> mostra o valor final de cada propriedade, já com as contas resolvidas: ali
+<code>p-4</code> aparece como <code>padding: 16px</code>. É a fonte da verdade. As abas
+<em>Styles</em> mostram as regras na ordem em que o navegador as aplicou, o que ajuda quando algo
+não está pegando.</p>
+
+<p>Existe um detalhe que confunde e vale desmistificar: o painel mostra só as propriedades que a
+classe <strong>mudou</strong>. Um <code>div</code> sem classe já é <code>display: block</code>, já
+tem <code>margin: 0</code>. Mostrar essas linhas seria ruído. Quando o Tailwind não muda nada, o
+painel fica vazio — e isso é informação: aquela classe não teve efeito.</p>
+
+<h2>5. A escala do espaço</h2>
+
+<p>A escala é curta e vale memorizar só o começo. Os passos que aparecem o tempo todo:</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Classe</th><th>Valor</th><th>Onde costuma servir</th></tr>
+<tr><td><code>p-1</code></td><td>4 px</td><td>respiro mínimo, etiqueta pequena</td></tr>
+<tr><td><code>p-2</code></td><td>8 px</td><td>botão pequeno, etiqueta</td></tr>
+<tr><td><code>p-3</code></td><td>12 px</td><td>campo de formulário compacto</td></tr>
+<tr><td><code>p-4</code></td><td>16 px</td><td>o padrão de cartão e botão</td></tr>
+<tr><td><code>p-6</code></td><td>24 px</td><td>cartão grande, seção interna</td></tr>
+<tr><td><code>p-8</code></td><td>32 px</td><td>área de destaque, capa</td></tr>
+</table>
+</div>
+
+<p>Não existe <code>p-5</code>? Existe — 20 px. E <code>p-7</code>? Também, 28 px. A escala é
+contínua de 0 a 96, e depois vai de 4 em 4 em valores maiores. O que acontece é que ninguém usa
+tudo: os projetos sérios usam meia dúzia de degraus, sempre os mesmos, e é essa repetição que faz o
+desenho parecer coerente. Se você usar 13, 17 e 21 px inventados, o resultado parece torto mesmo
+que cada peça esteja "certa".</p>
+
+<p>Há uma razão prática para a escala ser assim, e ela vale para todo o guia: quando duas pessoas
+escrevem a mesma tela em dias diferentes, elas chegam nos mesmos degraus e o resultado parece
+desenhado por uma pessoa só. Espaçamento é ritmo, e ritmo só existe quando se repete. Se você
+quiser um número fora da escala — 18 px, digamos —, o Tailwind aceita: <code>p-[18px]</code> com
+colchetes. Use com parcimônia, e sempre com um motivo que você consiga explicar em uma frase.</p>
+
+<p>A escala também tem atalhos por lado. <code>px-4</code> é só na horizontal (esquerda e direita),
+<code>py-2</code> só na vertical, <code>pt-8</code> só no topo, <code>pe-4</code> só no fim da linha
+(direita em português). Esses atalhos são o assunto de uma aula inteira, porque é ali que nasce a
+maioria dos layouts apertados.</p>
+
+<h2>6. Duas classes: cor e texto</h2>
+
+<p>Respiro resolvido, o cartão continua sem graça. Vamos pintar. A classe de fundo é
+<code>bg-</code> mais o nome da cor e o tom. <code>bg-amber-100</code> é o âmbar bem clarinho;
+<code>text-amber-900</code> é o mesmo âmbar, no tom escuro, para o texto. Essa lógica de nome — cor,
+número de 50 a 950 — vale para as dezenove famílias de cor do Tailwind.</p>
+
+<div class="trytailwind" data-goal="rule:color: var(--color-amber-900);;texto:Pão quentinho">
+  <p class="try-task">O fundo já está âmbar claro. Falta o texto escuro para dar contraste: acrescente
+  <code>text-amber-900</code> ao cartão.</p>
+  <pre class="html">&lt;div id="alvo" class="bg-amber-100 p-4"&gt;Pão quentinho&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="bg-amber-100 p-4 text-amber-900"&gt;Pão quentinho&lt;/div&gt;</pre>
+</div>
+
+<p>Quando rodar a solução, o painel vai mostrar três linhas: o respiro, o fundo em <code>oklch(...)</code> e a
+cor do texto em outro <code>oklch(...)</code>. Esse <code>oklch</code> é um jeito moderno de escrever
+cor, com três números: claridade, saturação e ângulo do tom. Você não precisa calcular nada — o
+Tailwind já traz a paleta pronta. Só não se assuste ao ver o valor: ele é o mesmo amarelo que você
+escolheu, escrito de outro jeito.</p>
+
+<p>O CSS que o Tailwind gera para essas duas classes é curto e legível: ele só aponta para as
+variáveis da paleta. Não há hexadecimal na sua página, e é por isso que trocar o tom depois é só
+trocar o número:</p>
+
+<pre class="term">.bg-amber-100 {
+  background-color: var(--color-amber-100);
+}
+.text-amber-900 {
+  color: var(--color-amber-900);
+}</pre>
+
+<p>Repare também que as classes se somam sem brigar: <code>p-4</code> cuida do espaço,
+<code>bg-amber-100</code> do fundo, <code>text-amber-900</code> da cor da letra. Cada uma mexe numa
+coisa. É por isso que a ordem em que você as escreve não importa — <code>class="p-4 bg-amber-100"</code>
+e <code>class="bg-amber-100 p-4"</code> desenham igual. A exceção são classes que disputam a mesma
+propriedade (dois <code>p-</code> no mesmo elemento); aí vale a que o Tailwind colocou por último no
+CSS, e não a que você escreveu por último. A gente evita essa briga não repetindo a propriedade.</p>
+
+<h2>7. Classe ou style=""?</h2>
+
+<p>Talvez você já tenha visto <code>style="padding: 16px"</code> em algum lugar. Funciona. Então por
+que aprender classes? A diferença não é de gosto, é de consequência:</p>
+
+<pre class="file" data-file="index.html">&lt;div style="padding:16px;background:#fef3c7"&gt;Pão&lt;/div&gt;
+&lt;div class="p-4 bg-amber-100"&gt;Pão&lt;/div&gt;</pre>
+
+<p>Os dois desenham parecido. Mas o primeiro não aceita variação responsiva, não aceita estado de
+foco, não combina com o tema escuro e não pode ser ajustado de um lugar só. O segundo aceita
+prefixos: <code>md:p-8</code> muda o respiro em telas grandes, <code>hover:bg-amber-200</code> muda
+no mouse, <code>dark:bg-amber-950</code> muda no escuro. Esses prefixos são a razão de existir do
+Tailwind, e eles só funcionam com classes.</p>
+
+<p>O <code>style=""</code> não é proibido: ele é a válvula de escape para valores que não estão na
+escala, como uma altura calculada em tempo de execução. Só não pode virar hábito, porque aí você
+perde justamente o que veio buscar.</p>
+
+<h2>8. Quando a classe não faz nada</h2>
+
+<p>Uma hora vai acontecer: você escreve a classe, salva, recarrega e nada muda. Na maioria das vezes
+é uma das três coisas abaixo.</p>
+
+<ul>
+<li><strong>Erro de digitação.</strong> <code>p-4</code> existe; <code>p4</code> não;
+<code>padding-4</code> não; <code>P-4</code> não (o Tailwind diferencia maiúsculas). O pior é que
+nada acontece e nenhum aviso aparece. Confira a classe letra por letra.</li>
+<li><strong>A classe não está no HTML.</strong> O Tailwind só gera o CSS das classes que encontra
+escritas no arquivo. Se a classe é montada por código, com pedaços juntos, ele não vê — e o CSS não
+existe. Escreva a classe inteira, sempre.</li>
+<li><strong>O arquivo não foi recompilado.</strong> No modo de desenvolvimento com npm, o CSS é
+gerado num arquivo separado: se o processo que gera não está rodando, o CSS fica velho. É o assunto
+do nível 3, mas fica a dica: se só a página nova não muda, olhe o processo de build.</li>
+</ul>
+
+<div class="trytailwind" data-goal="css:#alvo|padding=16px;;css:#alvo|border-radius=12px">
+  <p class="try-task">Deixe o botão com 16 px de respiro interno e cantos de 12 px — duas classes:
+  <code>p-4</code> e <code>rounded-xl</code>.</p>
+  <pre class="html">&lt;div id="alvo" class="p-4 bg-amber-100"&gt;Comprar pão&lt;/div&gt;</pre>
+  <pre class="out">
+padding: 16px
+background-color: oklch(0.962 0.059 95.617)
+</pre>
+  <pre class="solucao">&lt;div id="alvo" class="p-4 rounded-xl bg-amber-100"&gt;Comprar pão&lt;/div&gt;</pre>
+</div>
+
+<p>Se digitar <code>rounded-xl</code> com dois "l" ou com underline no lugar do hífen, o painel
+continua mostrando só o <code>padding</code>. Isso já é o diagnóstico: a classe de arredondamento
+não gerou nada. Na dúvida, compare o seu HTML com a solução, caractere por caractere — é o que a
+gente faz com mais frequência do que gostaria de admitir.</p>
+
+<h2>9. Cenários do dia a dia</h2>
+
+<div class="cenario">
+<h3>Cenário 1: o cartão parece certo no computador e apertado no celular</h3>
+<p>A Ana usou <code>p-6</code> no cartão, 24 px de respiro. No monitor, elegante. No celular, o
+cartão ocupa a largura toda e 24 px de cada lado comem metade do espaço útil do texto. A solução não
+é escolher um número médio que fica ruim nos dois: é usar o prefixo de breakpoint e deixar o
+respiro crescer com a tela — <code>p-4 md:p-6</code>. Você vai ver isso com calma na aula de
+responsivo; a semente é esta: espaçamento é uma decisão por tamanho de tela.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 2: dois espaçamentos brigando e o menor perdendo</h3>
+<p>Ela colou um componente pronto com <code>p-4</code> e, na mesma linha, acrescentou
+<code>p-6</code> para "aumentar um pouco". Resultado: o cartão ficou com 24 px, mas ninguém sabia
+por quê, e dias depois, ao trocar a ordem das classes, o espaçamento mudou sozinho. A regra prática
+é simples: uma propriedade, uma classe. Se precisa variar por tela, use o prefixo
+(<code>p-4 md:p-6</code>), não a repetição. Quando a repetição for inevitável, saiba que vence a
+última regra que o Tailwind gerou, e não a última que você escreveu.</p>
+</div>
+
+<div class="cenario">
+<h3>Cenário 3: "não aparece nada no painel"</h3>
+<p>O painel vazio assusta. Na maioria das vezes ele está dizendo a verdade: a classe não está
+gerando CSS nenhum — chute no nome, erro de digitação, ou um elemento que não é o
+<code>id="alvo"</code>. A segunda causa é olhar o elemento errado: o painel descreve o alvo, então
+se você mexeu no filho, ele não muda. E há o caso legítimo: a classe existe, mas o valor que ela
+aplica é exatamente o que o elemento já tinha. Aí não há diferença para mostrar, e o silêncio é a
+resposta certa.</p>
+</div>
+
+<h2>10. Fixando o que ficou</h2>
+
+<div class="mc" data-answer="2"><p class="mc-q">1. O que a classe <code>p-4</code> faz?</p>
+<label><input type="radio" name="q1"> deixa 4 px de espaço por fora do elemento</label>
+<label><input type="radio" name="q1"> deixa 16 px de espaço por dentro do elemento</label>
+<label><input type="radio" name="q1"> aumenta a fonte para 4 rem</label>
+</div>
+
+<div class="mc" data-answer="3"><p class="mc-q">2. Por que <code>p4</code>, sem hífen, não faz nada?</p>
+<label><input type="radio" name="q2"> porque o navegador só aceita classes com hífen</label>
+<label><input type="radio" name="q2"> porque falta um arquivo de configuração</label>
+<label><input type="radio" name="q2"> porque essa classe não existe no catálogo do Tailwind</label>
+</div>
+
+<div class="mc" data-answer="1"><p class="mc-q">3. Qual é a diferença prática entre
+<code>class="p-4"</code> e <code>style="padding:16px"</code>?</p>
+<label><input type="radio" name="q3"> a classe aceita variações como <code>md:p-8</code> e <code>dark:p-4</code></label>
+<label><input type="radio" name="q3"> o <code>style</code> é mais rápido e por isso é preferível</label>
+<label><input type="radio" name="q3"> não há diferença nenhuma, são sinônimos</label>
+</div>
+
+<div class="exercise">
+<h2>Exercício: o cartão da padaria</h2>
+<p>No seu arquivo, deixe o cartão com 24 px de respiro interno, fundo âmbar claro e texto âmbar
+escuro. Depois responda: qual é a classe do respiro?</p>
+<div class="ex-code">&lt;div class="<input aria-label="resposta 1" data-answer="p-6" placeholder="..."> bg-amber-100 text-amber-900"&gt;Pão quentinho&lt;/div&gt;</div>
+<p class="ex-dica">Dica: a escala é de 4 em 4 até 16; 24 px é o sexto degrau. Se você escrever
+<code>p-4</code>, o cartão fica com 16 px — funciona, mas não é o pedido.</p>
+</div>
+
+<h2>11. Resumo</h2>
+
+<p>Uma classe é um nome que você coloca no atributo <code>class</code> de uma tag, e o Tailwind
+transforma esse nome em CSS. <code>p-4</code> dá 16 px de respiro interno porque a escala é um
+multiplicador de 0,25 rem; o CSS gerado é literalmente
+<code>padding: calc(var(--spacing) * 4)</code>. Um elemento aceita várias classes, cada uma
+cuidando de uma propriedade, e a ordem em que você as escreve no HTML não altera o resultado.</p>
+
+<p>O hábito que sustenta todo o resto é conferir o CSS computado: o painel das caixas ou a aba
+<em>Computed</em> do navegador. É ali que você descobre que a classe não existe, que o nome está
+errado ou que o elemento observado é outro. E o <code>style=""</code> fica reservado para o valor
+fora da escala — a classe é o caminho normal, porque aceita breakpoint, estado e tema.</p>
+
+<div class="note">
+<h3>Para lembrar</h3>
+<ul>
+<li>Classe mora no atributo <code>class</code>, em nomes separados por espaço.</li>
+<li><code>p</code> é padding, o espaço por dentro; <code>m</code> é margin, o espaço por fora.</li>
+<li><code>p-4</code> = 16 px; a conta é <code>4 × 0,25 rem</code>, e 1 rem = 16 px.</li>
+<li>Escala curta: 1=4, 2=8, 3=12, 4=16, 6=24, 8=32 px.</li>
+<li><code>bg-</code> pinta o fundo, <code>text-</code> pinta a letra; o número vai de 50 a 950.</li>
+<li>Cada classe mexe em uma propriedade; a ordem no HTML não importa.</li>
+<li>Duas classes da mesma propriedade: vence a última que o Tailwind gerou.</li>
+<li>Classe inexistente ou digitada errado não avisa nada — confira letra por letra.</li>
+<li>O painel mostra só o que a classe mudou, e descreve o elemento com <code>id="alvo"</code>.</li>
+<li><code>style=""</code> é válvula de escape, não o caminho do dia a dia.</li>
+</ul>
+</div>
+
+<div class="pager"></div>
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

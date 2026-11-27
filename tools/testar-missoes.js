@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* testar-missoes.js — o conferidor de páginas do Guia Nginx.
+/* testar-missoes.js — o conferidor de páginas do Guia Tailwind.
  *
  *   node tools/testar-missoes.js pagina.html [outra.html …]
  *   node tools/testar-missoes.js --todas
@@ -8,16 +8,17 @@
  *   --tempo MS         limite por componente no navegador (padrão 6000)
  *
  * O que REPROVA (FALHA) em cada página:
- *   1. cabeçalho    doctype, lang="pt-BR", <title> terminando em "| Guia Svelte", meta description
+ *   1. cabeçalho    doctype, lang="pt-BR", <title> terminando em "| Guia Tailwind", meta description
  *                   de 100 a 180 caracteres, assets/style.css, script do tema, favicon
  *   2. estrutura    .layout > nav.sidebar#sidebar + main.main > .content, DOIS .pager, <h1> com .hl,
  *                   p.intro com "Ana", .note "Você vai aprender", assets/site.js antes de </body>
  *   3. conteúdo     por tipo de página (aula, projeto, referência, capa): nº de <h2>, dl.anatomy,
  *                   pre.term, div.cenario, table.ref DENTRO de .table-wrap, <h2>Resumo</h2>,
- *                   .mc, .exercise e caixas .trynginx, conforme o CONTRIBUINDO §2
- *   4. caixas       pre.script + pre.solucao, data-goal válido e .try-task
+ *                   .mc, .exercise e caixas .trytailwind, conforme o CONTRIBUINDO §2
+ *   4. caixas       pre.html + pre.solucao, data-goal válido, data-largura/theme e .try-task
  *   5. metas        o SCRIPT INICIAL falha a meta e a SOLUÇÃO cumpre — compilando e rodando de
- *                   verdade no Chromium (compilador svelte@5 real, via assets/sveltesim.js)
+ *                   verdade no Chromium (Tailwind v4 real, build oficial @tailwindcss/browser,
+ *                   via assets/tailwindsim.js)
  *   6. escape       < > & sem escape dentro de <pre>, fora pre.term (o terminal fica cru)
  *   7. links        todo *.html de href tem de existir no disco E estar na NIVEIS
  *   8. placeholders @@, PREENCHER, DESCREVER, ALT1, ERR1, lorem, TODO
@@ -36,11 +37,11 @@ const http = require("http");
 const N = require("./nucleo");
 
 const RAIZ = N.RAIZ;
-const CAIXA = "trynginx";
+const CAIXA = "trytailwind";
 const PALAVRAS_FALHA = 2500;
 const PALAVRAS_AVISO = 2800;
 const TEMPO_PADRAO = 6000;
-const MARCA = "| Guia Nginx";
+const MARCA = "| Guia Tailwind";
 
 /* ------------------------------------------------------------------ argumentos */
 const args = process.argv.slice(2);
@@ -156,7 +157,7 @@ async function testarPagina(arq, avaliador, nomeArq) {
   if (!titulo) fal(1, "falta o <title>");
   else {
     const t = N.normalizar(N.decodificarEntidades(src.slice(titulo.fimTag, titulo.fimEl ?? src.length)));
-    if (!new RegExp("\\|\\s*Guia Nginx$").test(t))
+    if (!new RegExp("\\|\\s*Guia Tailwind$").test(t))
       fal(nLinha(titulo.ini), 'o <title> tem de terminar em "' + MARCA + '" (está "' + N.curto(t, 70) + '")');
   }
   const desc = N.listar(tags, "meta", (at) => String(at["name"] || "").toLowerCase() === "description")[0];
@@ -255,23 +256,32 @@ async function testarPagina(arq, avaliador, nomeArq) {
   const caixas = N.listar(tags, "div", (at) => N.temClasse(at, CAIXA));
   const dados = caixas.map((cx) => {
     const dentro = (sel, filtro) => N.listar(tags, sel, filtro).filter((e) => N.dentroDe(cx, e.ini));
-    const scripts = dentro("pre", (at) => N.temClasse(at, "script"));
+    const htmls = dentro("pre", (at) => N.temClasse(at, "html"));
+    const outs = dentro("pre", (at) => N.temClasse(at, "out"));
     const solucoes = dentro("pre", (at) => N.temClasse(at, "solucao"));
     const task = dentro("p", (at) => N.temClasse(at, "try-task"));
-    return { cx, scripts, solucoes, task, linha: nLinha(cx.ini) };
+    return { cx, htmls, outs, solucoes, task, linha: nLinha(cx.ini) };
   });
   if (caixas.length < R.caixas) fal(caixas.length ? nLinha(caixas[0].ini) : 1, caixas.length + " caixa(s) ." + CAIXA + " (o tipo \"" + tipo + "\" pede " + R.caixas + ")");
   dados.forEach((d, k) => {
     const nome = "caixa " + (k + 1), L = d.linha;
-    if (d.scripts.length !== 1) fal(L, nome + ": " + d.scripts.length + " pre.script (é uma só)");
-    if (d.solucoes.length !== 1) fal(L, nome + ": " + d.solucoes.length + " pre.solucao (é uma só, escondida, com o código que cumpre a meta)");
+    if (d.htmls.length !== 1) fal(L, nome + ": " + d.htmls.length + " pre.html (é um só, o editor com o HTML da aula)");
+    if (d.outs.length > 1) fal(L, nome + ": " + d.outs.length + " pre.out (a caixa mostra uma saída só)");
+    if (d.solucoes.length !== 1) fal(L, nome + ": " + d.solucoes.length + " pre.solucao (é uma só, escondida, com o HTML que cumpre a meta)");
+    const largura = d.cx.at["data-largura"];
+    if (largura !== undefined) {
+      const n = parseInt(largura, 10);
+      if (!n || n < 240 || n > 1280) fal(L, nome + ": data-largura=\"" + largura + "\" (use de 240 a 1280 px)");
+    }
+    const tema = d.cx.at["data-tema"];
+    if (tema !== undefined && tema !== "escuro" && tema !== "claro") fal(L, nome + ": data-tema=\"" + tema + "\" (use escuro ou claro)");
     const goal = d.cx.at["data-goal"];
     if (goal === undefined) fal(L, nome + ": falta data-goal (sem meta o Verificar não confere nada)");
     else if (!String(goal).trim()) fal(L, nome + ": data-goal vazio");
     else N.validarMeta(goal).forEach((m) => fal(L, nome + ": " + m));
     if (!d.task.length) avi(L, nome + ": sem .try-task (o enunciado que o leitor lê)");
   });
-  if (nFalhas() === n0) ok(1, caixas.length + " caixa(s) ." + CAIXA + " com script, solução e data-goal válidos");
+  if (nFalhas() === n0) ok(1, caixas.length + " caixa(s) ." + CAIXA + " com pre.html, solução e data-goal válidos");
 
   /* ---------------------------------------------------------------- 5. metas */
   n0 = nFalhas();
@@ -281,22 +291,19 @@ async function testarPagina(arq, avaliador, nomeArq) {
     let rodou = 0;
     for (let k = 0; k < dados.length; k++) {
       const d = dados[k], nome = "caixa " + (k + 1), L = d.linha;
-      if (d.scripts.length !== 1 || d.solucoes.length !== 1) continue;
+      if (d.htmls.length !== 1 || d.solucoes.length !== 1) continue;
       const goal = d.cx.at["data-goal"];
       if (goal === undefined || !String(goal).trim()) continue;
       if (N.validarMeta(goal).length) continue;
       const ler = (el) => N.decodificarEntidades(src.slice(el.fimTag, el.fimEl ?? src.length)).replace(/^\n/, "").replace(/\s+$/, "");
-      const pedido = d.cx.at["data-pedido"] || null;
-      const host = d.cx.at["data-host"] || null;
-      const upstream = d.cx.at["data-upstream"] || null;
-      const ini = await avaliador(ler(d.scripts[0]), goal, tempo, pedido, host, upstream);
-      const sol = await avaliador(ler(d.solucoes[0]), goal, tempo, pedido, host, upstream);
+      const largura = d.cx.at["data-largura"] || null;
+      const escuro = d.cx.at["data-tema"] === "escuro";
+      const ini = await avaliador(ler(d.htmls[0]), goal, tempo, largura, escuro);
+      const sol = await avaliador(ler(d.solucoes[0]), goal, tempo, largura, escuro);
       if (ini.falhouNavegador || sol.falhouNavegador) { avi(1, "navegador falhou: " + ini.motivo); continue; }
       rodou++;
-      if (ini.ok) fal(L, nome + ': o código INICIAL já cumpre a meta "' + N.curto(goal, 70) + '" (a missão não pede nada)');
+      if (ini.ok) fal(L, nome + ': o HTML INICIAL já cumpre a meta "' + N.curto(goal, 70) + '" (a missão não pede nada)');
       if (!sol.ok) fal(L, nome + ': a SOLUÇÃO não cumpre a meta "' + N.curto(goal, 70) + '": ' + N.curto(sol.motivo || sol.erro || "", 140));
-      if (ini.ok && !sol.ok) { /* já reprovado */ }
-      if (N.metaEsperaErro(goal) && sol.erro && !/erro:/.test(goal)) avi(L, nome + ": a solução termina com erro: " + N.curto(sol.erro, 90));
       if (!ini.ok && sol.ok) ok(L, nome + ' (meta "' + N.curto(goal, 60) + '"): o inicial falha e a solução cumpre');
     }
     if (!caixas.length) avi(1, "nenhuma caixa para rodar as metas");
@@ -427,11 +434,11 @@ async function main() {
     pg.on("pageerror", () => {});
     await pg.goto("http://127.0.0.1:" + porta + "/tools/avaliar.html", { waitUntil: "networkidle2", timeout: 60000 });
     await pg.waitForFunction("window.__avaliadorPronto === true", { timeout: 30000 });
-    avaliador = async (config, meta, limite, pedido, host, upstream) => {
-      const r = await pg.evaluate(async (c, m, l, pe, ho, up) => {
+    avaliador = async (htmlFonte, meta, limite, largura, escuro) => {
+      const r = await pg.evaluate(async (h, m, l, lg, es) => {
         const comLimite = new Promise((ok) => setTimeout(() => ok({ ok: false, motivo: "não terminou em " + l + " ms", falhouNavegador: false }), l));
-        return Promise.race([window.__nginxAvaliar(c, m, pe, ho, up), comLimite]);
-      }, config, meta, limite || 8000, pedido || null, host || null, upstream || null);
+        return Promise.race([window.__tailwindAvaliar(h, m, lg, es), comLimite]);
+      }, htmlFonte, meta, limite || 8000, largura || null, !!escuro);
       return r;
     };
     pg.__porta = porta;

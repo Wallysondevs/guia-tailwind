@@ -53,9 +53,29 @@ function servidor() {
   });
 }
 
+/* puppeteer-core: do node_modules daqui, do PUPPETEER_CORE ou de um node_modules vizinho */
+function carregarPuppeteer() {
+  const tentativas = [process.env.PUPPETEER_CORE, "puppeteer-core"];
+  try {
+    const base = path.join(os.homedir());
+    fs.readdirSync(base).forEach((d) => {
+      if (d === "node_modules" || d[0] === ".") return;
+      tentativas.push(path.join(base, d, "node_modules/puppeteer-core"));
+    });
+  } catch (e) { /* sem home legível */ }
+  for (const t of tentativas) {
+    if (!t) continue;
+    try {
+      return require(t);
+    } catch (e) { /* tenta o próximo */ }
+  }
+  console.error("não achei puppeteer-core. Rode: npm i -D puppeteer-core (ou aponte PUPPETEER_CORE=/caminho)");
+  process.exit(2);
+}
+
 /* abre o navegador no banco de provas e devolve funções prontas */
 async function abrir() {
-  const pup = require("puppeteer-core");
+  const pup = carregarPuppeteer();
   const { servidor: s, porta } = await servidor();
   const navegador = await pup.launch({
     executablePath: acharChrome(),

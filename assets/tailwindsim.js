@@ -104,24 +104,84 @@
     return doc.querySelector("#alvo") || doc.body.firstElementChild || doc.body;
   }
 
-  /* o que as classes MUDARAM: compara com um div sem classe, no mesmo lugar da página */
+  /* o CSS gerado desta página, regra por regra (seletor + corpo), sem CSSOM */
+  function regrasDoTexto(doc) {
+    var texto = "";
+    Array.prototype.forEach.call(doc.querySelectorAll("style"), function (st) {
+      var t = st.textContent || "";
+      if (t.indexOf("tailwindcss v4") !== -1 && t.length > texto.length) texto = t;
+    });
+    if (!texto) return [];
+    var regras = [];
+    var bloco = null;
+    texto.split("\n").forEach(function (linha) {
+      var d = linha.trim();
+      if (bloco && d === "}") { regras.push(bloco); bloco = null; return; }
+      if (bloco) { if (d) bloco.corpo.push(d.replace(/;$/, "")); return; }
+      var sel = linha.match(/^\s*(\.[^{]+?)\s*\{\s*$/);
+      if (sel) bloco = { seletor: sel[1].trim(), corpo: [] };
+    });
+    return regras;
+  }
+
+  /* as propriedades que as classes DO ELEMENTO mandam o Tailwind gerar */
+  function propriedadesDasClasses(doc, el) {
+    var props = [];
+    var regras = regrasDoTexto(doc);
+    regras.forEach(function (r) {
+      var casa = r.seletor.split(",").some(function (sel) {
+        try { return el.matches(sel.trim()); } catch (e) { return false; }
+      });
+      if (!casa) return;
+      r.corpo.forEach(function (l) {
+        var i = l.indexOf(":");
+        if (i <= 0) return;
+        var p = l.slice(0, i).trim();
+        if (!p || p.indexOf("--") === 0 || props.indexOf(p) !== -1) return;
+        props.push(p);
+      });
+    });
+    /* ordem de leitura: primeiro o que o guia ensina, depois o resto em ordem alfabética */
+    var peso = function (p) { var i = PROPRIEDADES.indexOf(p); return i === -1 ? 1000 + p.charCodeAt(0) : i; };
+    props.sort(function (a, b) { return peso(a) - peso(b); });
+    return props;
+  }
+
+  /* o que as classes MUDARAM no elemento: compara com uma cópia sem classe, no mesmo lugar,
+   * e mostra só as propriedades que o Tailwind gerou para as classes dele (sem ruído de
+   * "display: block", largura do container ou altura do texto). */
   function tabela(doc) {
     var el = alvoDe(doc);
     var win = doc.defaultView;
-    var base = doc.createElement(el.tagName.toLowerCase());
+    var base = el.cloneNode(true);
+    base.removeAttribute("id");
+    base.removeAttribute("class");
     el.parentNode.insertBefore(base, el.nextSibling);
     var referencia = win.getComputedStyle(base);
     var atual = win.getComputedStyle(el);
     var linhas = [];
-    PROPRIEDADES.forEach(function (p) {
+
+    function adicionar(p) {
       var v = normalizar(atual.getPropertyValue(p));
       var b = normalizar(referencia.getPropertyValue(p));
-      if (!v) return;
-      if (v === b) return;
+      if (!v || v === b) return;
+      if (p === "border" && /^0px/.test(v)) return;          // borda de fábrica, sem largura
+      if (p === "outline" && v.indexOf(" none ") !== -1) return;
+      if (linhas.indexOf(p + ": " + v) !== -1) return;
       linhas.push(p + ": " + v);
-    });
+    }
+
+    var props = propriedadesDasClasses(doc, el);
+    props.forEach(adicionar);
+    if (!linhas.length) PROPRIEDADES.forEach(adicionar);   // utilidade que age no filho (space-y, divide…)
     base.parentNode.removeChild(base);
-    return linhas.join("\n");
+    /* "padding: 8px 24px" já conta a história toda: não repete padding-inline/block embaixo */
+    var temAtalho = function (p) { return linhas.some(function (l) { return l.indexOf(p + ": ") === 0; }); };
+    return linhas.filter(function (l) {
+      if (l.indexOf("padding-") === 0 && temAtalho("padding")) return false;
+      if (l.indexOf("margin-") === 0 && temAtalho("margin")) return false;
+      return true;
+    }).join("\n");
   }
 
   /* regras do CSS gerado que interessam ao trecho (as classes usadas nele).
@@ -371,7 +431,7 @@
 
   function iniciar() {
     var caixas = Array.prototype.slice.call(document.querySelectorAll(".trytailwind"));
-    caixas.forEach(function (c) { c.classList.add("trysvelte"); montarCaixa(c); });
+    caixas.forEach(montarCaixa);
     window.__tailwindPronto = true;
   }
 
